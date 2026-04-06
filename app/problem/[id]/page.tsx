@@ -12,6 +12,8 @@ import PhaseTransition from "@/components/mcq/PhaseTransition";
 import CodeCollector from "@/components/mcq/CodeCollector";
 import ProgressBar from "@/components/ui/ProgressBar";
 import Badge from "@/components/ui/Badge";
+import { resetProgress } from "@/lib/utils/storage";
+import { RotateCcw } from "lucide-react";
 
 export default function ProblemPage() {
   const params = useParams();
@@ -111,11 +113,18 @@ export default function ProblemPage() {
       <main className="max-w-4xl mx-auto px-4 pt-6 pb-20">
         <div className="flex items-center justify-between mb-4">
           <BackButton href="/" label="Problems" />
-          <div className="flex items-center gap-2">
-            <Badge variant={problem.difficulty}>{problem.difficulty}</Badge>
-            <span className="text-xs text-[var(--text-secondary)]">
-              {idx + 1} / {chain.length}
-            </span>
+          <div className="flex items-center gap-3">
+              <button
+                onClick={() => {
+                  resetProgress(problem.id);
+                  window.location.reload();
+                }}
+                className="flex items-center gap-1 text-xs text-[var(--text-secondary)] hover:text-red-400 transition-colors"
+              >
+                <RotateCcw className="w-3 h-3" />
+                Reset
+              </button>
+              <Badge variant={problem.difficulty}>{problem.difficulty}</Badge>
           </div>
         </div>
 

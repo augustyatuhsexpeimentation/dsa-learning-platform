@@ -4,6 +4,8 @@ import Card from "@/components/ui/Card";
 import Badge from "@/components/ui/Badge";
 import { Clock, CheckCircle2, PlayCircle, Circle } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { resetProgress } from "@/lib/utils/storage";
+import { RotateCcw } from "lucide-react";
 
 interface ProblemCardProps {
   problem: Problem;
@@ -42,6 +44,19 @@ export default function ProblemCard({ problem, progress }: ProblemCardProps) {
         <span className="mx-1">·</span>
         <span>{problem.mcqChain.length} questions</span>
       </div>
+      {status !== "not-started" && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            resetProgress(problem.id);
+            window.location.reload();
+          }}
+          className="mt-3 flex items-center gap-1 text-xs text-[var(--text-secondary)] hover:text-red-400 transition-colors"
+        >
+          <RotateCcw className="w-3 h-3" />
+          Reset progress
+        </button>
+      )}
     </Card>
   );
 }
