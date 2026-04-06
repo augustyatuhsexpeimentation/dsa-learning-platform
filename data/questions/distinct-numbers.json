@@ -1,0 +1,954 @@
+{
+  "id": "distinct-numbers-tutor",
+  "title": "Distinct Numbers",
+  "difficulty": "intermediate",
+  "tags": [
+    "sorting",
+    "two-pointer",
+    "binary-search"
+  ],
+  "estimatedMinutes": 35,
+  "language": "python",
+  "description": "You are given a list of n integers and must compute how many distinct values appear in it.\n\nInput:\n- First line: integer n, the number of values.\n- Second line: n integers x_1, x_2, ..., x_n.\n\nOutput:\n- Print a single integer: the number of distinct values.\n\nExample:\nInput:\n5\n2 3 2 2 3\nOutput:\n2",
+  "examples": [
+    {
+      "input": "5\n2 3 2 2 3\n",
+      "output": "2\n",
+      "explanation": "The values are {2,3}. There are 2 distinct values."
+    }
+  ],
+  "constraints": [
+    "1 ≤ n ≤ 2⋅10^5",
+    "1 ≤ x_i ≤ 10^9"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "For input:\n5\n2 3 2 2 3\nwhat is the number of distinct values?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Values are {2,3}. Count is 2. Extra duplicates don't increase distinct count.",
+      "wrongExplanations": {
+        "1": "3 would require 3 different numbers present.",
+        "3": "5 counts total numbers, not distinct values."
+      },
+      "hint": "List the unique numbers present.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "If n=4 and the list is:\n7 7 7 7\nHow many distinct values are there?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "All entries are the same value 7, so there is only 1 distinct value.",
+      "wrongExplanations": {
+        "3": "4 would be the total count, not distinct."
+      },
+      "hint": "Distinct means unique values ignoring duplicates.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "If n=5 and the list is:\n1 2 3 4 5\nHow many distinct values?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "All values are different, so the count equals n = 5.",
+      "wrongExplanations": {
+        "0": "1 would mean all values are identical.",
+        "3": "0 is impossible when n ≥ 1."
+      },
+      "hint": "Every number is unique here.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "Does the order of numbers affect the count of distinct values? For example, 1 2 1 2 vs 1 1 2 2.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "No, distinct count depends only on which values appear.",
+          "isCode": false
+        },
+        {
+          "label": "Yes, because earlier positions are weighted more.",
+          "isCode": false
+        },
+        {
+          "label": "Yes, because duplicates next to each other are ignored.",
+          "isCode": false
+        },
+        {
+          "label": "Sometimes; it depends on n being even or odd.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Distinct count is about unique values present, not positions. Both examples have {1,2}.",
+      "wrongExplanations": {
+        "1": "Positions do not change which values appear.",
+        "2": "Duplicates still count as the same value even if adjacent."
+      },
+      "hint": "Set of values is the same regardless of order.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Exploring Approaches",
+      "questionText": "Consider a naive plan: for each position i, scan all positions < i to check if the value already appeared. What is the time growth with n?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "About proportional to n",
+          "isCode": false
+        },
+        {
+          "label": "About proportional to n log n",
+          "isCode": false
+        },
+        {
+          "label": "About proportional to n^2",
+          "isCode": false
+        },
+        {
+          "label": "About constant time overall",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "For each i you scan up to i elements. This sums to ~ n(n-1)/2 = O(n^2).",
+      "wrongExplanations": {
+        "0": "You do more than a single pass.",
+        "1": "There's no logarithmic factor in simple nested scanning."
+      },
+      "hint": "Sum 1+2+...+(n-1).",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "With n up to 2⋅10^5, would the naive O(n^2) plan be safe within 1 second?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "No, it will likely time out.",
+          "isCode": false
+        },
+        {
+          "label": "Yes, it’s always fine.",
+          "isCode": false
+        },
+        {
+          "label": "Only if all numbers are identical.",
+          "isCode": false
+        },
+        {
+          "label": "Only if the numbers are small.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "n^2 with n=2e5 is far too large for 1s. We need near-linear or n log n.",
+      "wrongExplanations": {
+        "1": "2e10 operations is not safe in 1s.",
+        "3": "Magnitude of values doesn't reduce comparisons."
+      },
+      "hint": "2e5 × 2e5 = 4e10 > 1e9.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "What simple rearrangement makes equal values easy to count with one pass?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Place values in nondecreasing order so equal values become consecutive.",
+          "isCode": false
+        },
+        {
+          "label": "Reverse the list so the last becomes first.",
+          "isCode": false
+        },
+        {
+          "label": "Group by parity (even/odd).",
+          "isCode": false
+        },
+        {
+          "label": "Rotate the list by k positions.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Putting numbers in nondecreasing order groups duplicates contiguously. Then one scan suffices.",
+      "wrongExplanations": {
+        "1": "Reversing does not group equal values unless already grouped.",
+        "2": "Parity grouping ignores actual value equality."
+      },
+      "hint": "Think: equal values should sit next to each other.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Exploring Approaches",
+      "questionText": "After rearranging into nondecreasing order, which rule correctly counts distinct values in one pass?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Count the first item, then increase the count whenever current value differs from the previous value.",
+          "isCode": false
+        },
+        {
+          "label": "Increase the count for every item equal to the previous value.",
+          "isCode": false
+        },
+        {
+          "label": "Increase the count only when the current value is greater than the next value.",
+          "isCode": false
+        },
+        {
+          "label": "Skip the first item and count the rest.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The first unique value always counts, and each change to a new value adds one.",
+      "wrongExplanations": {
+        "1": "This counts duplicates, not distinct values.",
+        "3": "Skipping the first loses one distinct value."
+      },
+      "hint": "How many times does the value change as you scan?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "For the sorted list [2,2,3,3,3], how many distinct values are there?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Groups are [2,2] and [3,3,3] → 2 distinct values.",
+      "wrongExplanations": {
+        "1": "3 would require a third different value.",
+        "3": "5 is the total element count, not distinct."
+      },
+      "hint": "Count groups of equal values.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "For a sorted list with all values different (e.g., [1,2,3,4]), how many distinct values?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Depends on order",
+          "isCode": false
+        },
+        {
+          "label": "Equal to n",
+          "isCode": false
+        },
+        {
+          "label": "Always 1",
+          "isCode": false
+        },
+        {
+          "label": "Always 2",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "If all values differ, each forms its own group → count equals n.",
+      "wrongExplanations": {
+        "0": "Once sorted, order is fixed and every value is unique.",
+        "2": "Only true if n=1."
+      },
+      "hint": "Each element forms a new group.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "For sorted [2,2,3,4,4,4,10], scanning left to right and counting a new group on change, what is the distinct count?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        },
+        {
+          "label": "6",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Groups: [2,2], [3], [4,4,4], [10] → 4 groups.",
+      "wrongExplanations": {
+        "0": "You missed one of the groups.",
+        "2": "That would require an extra distinct value."
+      },
+      "hint": "Mark boundaries where the value changes.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "Initialization plan: Which is safer/easier to implement for all n ≥ 1 when scanning a sorted list?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Use count=0 and a special marker for 'no previous', then count when previous is missing or value changes.",
+          "isCode": false
+        },
+        {
+          "label": "Start count=1 and set previous to the first value, but still scan from the very first element.",
+          "isCode": false
+        },
+        {
+          "label": "Start count=0 and previous=first value, then scan from the second element.",
+          "isCode": false
+        },
+        {
+          "label": "Start count=n and subtract on duplicates.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "A marker for 'none yet' avoids index juggling and works for n=1 cleanly.",
+      "wrongExplanations": {
+        "1": "If you still scan from the first element, you'll double count the first.",
+        "2": "This can work but requires careful indexing; the marker approach is simpler."
+      },
+      "hint": "Minimize special cases around the first element.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "Does it matter if you sort ascending or descending for this counting method?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Either order works; equal values still become consecutive.",
+          "isCode": false
+        },
+        {
+          "label": "Only ascending works.",
+          "isCode": false
+        },
+        {
+          "label": "Only descending works.",
+          "isCode": false
+        },
+        {
+          "label": "Sorting is unnecessary.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Any consistent order makes equal values neighbors. Ascending is conventional.",
+      "wrongExplanations": {
+        "1": "Descending also groups equals.",
+        "3": "Without rearrangement, duplicates may be far apart."
+      },
+      "hint": "You just need duplicates to be adjacent.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Building the Idea",
+      "questionText": "For large n, which input reading plan best supports efficient tokenization for two lines of input?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Read all bytes at once and split into whitespace-separated tokens.",
+          "isCode": false
+        },
+        {
+          "label": "Call input() once and hope it includes both lines.",
+          "isCode": false
+        },
+        {
+          "label": "Read character by character and build numbers manually.",
+          "isCode": false
+        },
+        {
+          "label": "Read just the first line and infer the rest.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Reading all and splitting by whitespace reliably gets n and the n values.",
+      "wrongExplanations": {
+        "1": "input() once only reads one line; the values are on the next line.",
+        "2": "Character-by-character is needlessly complex and slow."
+      },
+      "hint": "Whitespace-splitting handles both lines easily.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Choose the import that supports fast tokenized reading via sys.stdin.buffer.read().",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys",
+          "isCode": true
+        },
+        {
+          "label": "from sys import stdin",
+          "isCode": true
+        },
+        {
+          "label": "import system",
+          "isCode": true
+        },
+        {
+          "label": "from io import sys",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need the sys module to access sys.stdin.buffer.",
+      "wrongExplanations": {
+        "1": "This imports stdin name, not the sys module object.",
+        "2": "There is no 'system' module for this purpose."
+      },
+      "hint": "We will reference sys.stdin.buffer directly.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys",
+      "codeLabel": "Import sys"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Read all input tokens efficiently.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "data = sys.stdin.buffer.read().split()",
+          "isCode": true
+        },
+        {
+          "label": "data = sys.stdin.buffer.readline().split()",
+          "isCode": true
+        },
+        {
+          "label": "data = sys.stdin.read().splitlines()",
+          "isCode": true
+        },
+        {
+          "label": "data = input().split()",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Reading all bytes then splitting by whitespace captures both lines into tokens.",
+      "wrongExplanations": {
+        "1": "Only reads the first line; you'll miss the list values.",
+        "2": "splitlines keeps lines, not individual tokens."
+      },
+      "hint": "We need all tokens from both lines in one list.",
+      "isCodeBuilding": true,
+      "codeSnippet": "data = sys.stdin.buffer.read().split()",
+      "codeLabel": "Read and split input"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Parse n and then exactly n integers from token list, guarding against any trailing tokens.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "n = int(data[0]); arr = list(map(int, data[1:1+n]))",
+          "isCode": true
+        },
+        {
+          "label": "n = int(data[1]); arr = list(map(int, data[2:2+n]))",
+          "isCode": true
+        },
+        {
+          "label": "n = int(data[0]); arr = list(map(int, data[1:n]))",
+          "isCode": true
+        },
+        {
+          "label": "n = int(data[0]); arr = list(map(int, data[1:]))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Tokens are [n, x1, ..., xn, ...]. data[1:1+n] slices exactly n values.",
+      "wrongExplanations": {
+        "3": "This would read all remaining tokens, not exactly n if extras exist.",
+        "1": "Off-by-one: n is at index 0, not 1."
+      },
+      "hint": "Slice from just after n up to just after the nth value.",
+      "isCodeBuilding": true,
+      "codeSnippet": "n = int(data[0]); arr = list(map(int, data[1:1+n]))",
+      "codeLabel": "Parse n and list"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Arrange values so equal ones become consecutive.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "arr.sort()",
+          "isCode": true
+        },
+        {
+          "label": "sorted_arr = sorted(arr)",
+          "isCode": true
+        },
+        {
+          "label": "arr = reversed(arr)",
+          "isCode": true
+        },
+        {
+          "label": "arr.reverse()",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "In-place sort is simple and matches later usage of arr.",
+      "wrongExplanations": {
+        "1": "Creates a new list but later code uses arr; not updating arr breaks the logic.",
+        "3": "Reverse keeps original order reversed, not sorted."
+      },
+      "hint": "We will scan arr itself afterward.",
+      "isCodeBuilding": true,
+      "codeSnippet": "arr.sort()",
+      "codeLabel": "Sort the list"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Initialize counters to begin scanning and counting changes safely.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "count = 0; prev = None",
+          "isCode": true
+        },
+        {
+          "label": "count = 1; prev = arr[0]",
+          "isCode": true
+        },
+        {
+          "label": "count = 0; prev = arr[0]",
+          "isCode": true
+        },
+        {
+          "label": "count = 1; prev = None",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Using a 'no previous' marker avoids double counting the first element.",
+      "wrongExplanations": {
+        "1": "Combined with counting the first in the loop, this double counts.",
+        "2": "prev starts as a real value; the first comparison is wrong."
+      },
+      "hint": "We want to count the first element exactly once without special indexing.",
+      "isCodeBuilding": true,
+      "codeSnippet": "count = 0; prev = None",
+      "codeLabel": "Init state"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Write the scan that increments count on the first element and whenever the value changes.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "for x in arr:\n    if prev is None or x != prev:\n        count += 1\n        prev = x",
+          "isCode": true
+        },
+        {
+          "label": "for x in arr:\n    if x == prev:\n        count += 1\n    prev = x",
+          "isCode": true
+        },
+        {
+          "label": "for x in arr[1:]:\n    if x != prev:\n        count += 1\n        prev = x",
+          "isCode": true
+        },
+        {
+          "label": "for i in range(1, len(arr)):\n    if arr[i] != arr[i-1]:\n        prev = arr[i]\n        count += 1",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "This counts the first via prev is None and increments on changes thereafter.",
+      "wrongExplanations": {
+        "1": "Counts duplicates instead of distinct values.",
+        "3": "Misses counting the first element."
+      },
+      "hint": "Use the 'no previous yet' marker to count the first element.",
+      "isCodeBuilding": true,
+      "codeSnippet": "for x in arr:\n    if prev is None or x != prev:\n        count += 1\n        prev = x",
+      "codeLabel": "Scan and count"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "Output the result as specified.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "print(count)",
+          "isCode": true
+        },
+        {
+          "label": "print(len(arr))",
+          "isCode": true
+        },
+        {
+          "label": "print(count, end=\"\")",
+          "isCode": true
+        },
+        {
+          "label": "sys.stdout.write(count)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Printing count with a newline matches the required output format.",
+      "wrongExplanations": {
+        "1": "len(arr) is the total number of values, not distinct.",
+        "3": "write expects a string, not an int."
+      },
+      "hint": "Print exactly the number of distinct values.",
+      "isCodeBuilding": true,
+      "codeSnippet": "print(count)",
+      "codeLabel": "Print answer"
+    },
+    {
+      "id": "q22",
+      "phase": "Verifying the Solution",
+      "questionText": "Trace on the sample: n=5; values 2 3 2 2 3. After sorting: [2,2,2,3,3]. How many times does the loop increment count?",
+      "diagram": "Sorted: [2,2,2,3,3]\nprev=None -> see 2 -> count=1, prev=2\nnext 2 -> prev=2 -> no inc\nnext 2 -> no inc\nsee 3 -> inc to 2, prev=3\nnext 3 -> no inc",
+      "options": [
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We count once for the first 2 and once for the first 3 → 2.",
+      "wrongExplanations": {
+        "1": "There are only two groups: 2s and 3s.",
+        "3": "5 would count every element, ignoring duplicates."
+      },
+      "hint": "Count only on first appearances of each group.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q23",
+      "phase": "Verifying the Solution",
+      "questionText": "Test: n=8; values 5 1 5 2 2 3 5 1. After sorting: [1,1,2,2,3,5,5,5]. What should be printed?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        },
+        {
+          "label": "6",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Groups are [1,1], [2,2], [3], [5,5,5] → 4 distinct values.",
+      "wrongExplanations": {
+        "0": "You missed one of the groups.",
+        "2": "Would require five different values present."
+      },
+      "hint": "Count the number of groups in the sorted list.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the overall time complexity of this approach?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n log n) due to rearranging, plus O(n) scan → O(n log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Rearranging dominates at O(n log n); the single pass is O(n).",
+      "wrongExplanations": {
+        "1": "You still need to rearrange, which costs more than linear.",
+        "3": "We avoided quadratic nested scans."
+      },
+      "hint": "Which step dominates: rearranging or scanning?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Analyzing Complexity",
+      "questionText": "What extra memory (beyond storing the input array) does this method use?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(1) extra space for a few variables",
+          "isCode": false
+        },
+        {
+          "label": "O(n) extra space",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n) extra space",
+          "isCode": false
+        },
+        {
+          "label": "O(log n) extra space",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We just keep a couple of scalars while scanning the array in place.",
+      "wrongExplanations": {
+        "1": "We are not creating an additional structure proportional to n."
+      },
+      "hint": "We reuse the same list and track only prev and count.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Analyzing Complexity",
+      "questionText": "Which edge cases are correctly handled without special branching?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "n=1; all numbers equal; all numbers distinct",
+          "isCode": false
+        },
+        {
+          "label": "Requires a special case when n=1",
+          "isCode": false
+        },
+        {
+          "label": "Fails when numbers are large (e.g., 10^9)",
+          "isCode": false
+        },
+        {
+          "label": "Fails if values are not in [0, 9]",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The initialization with a 'no previous' marker and scanning covers these uniformly.",
+      "wrongExplanations": {
+        "1": "The code counts the first element naturally; no special branch needed.",
+        "2": "We handle any int sizes within constraints."
+      },
+      "hint": "Think about how the first element is counted.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys",
+    "data = sys.stdin.buffer.read().split()",
+    "n = int(data[0]); arr = list(map(int, data[1:1+n]))",
+    "arr.sort()",
+    "count = 0; prev = None",
+    "for x in arr:\n    if prev is None or x != prev:\n        count += 1\n        prev = x",
+    "print(count)"
+  ],
+  "reasoningChain": [
+    {
+      "question": "q4",
+      "insight": "Distinct count depends only on unique values, not their order."
+    },
+    {
+      "question": "q5",
+      "insight": "Naive prior-element scanning is quadratic and too slow for large n."
+    },
+    {
+      "question": "q7",
+      "insight": "Rearranging into nondecreasing order groups equal values contiguously."
+    },
+    {
+      "question": "q8",
+      "insight": "Count the first value and each change to a new value in one pass."
+    },
+    {
+      "question": "q12",
+      "insight": "Use a 'no previous' marker to handle the first element cleanly."
+    },
+    {
+      "question": "q14",
+      "insight": "Read and split all tokens efficiently to handle large input."
+    },
+    {
+      "question": "q24",
+      "insight": "Overall complexity is dominated by rearranging step: O(n log n)."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1325,
+    "output_tokens": 14479,
+    "input_cost": 0.001656,
+    "output_cost": 0.14479,
+    "total_cost": 0.146446
+  }
+}

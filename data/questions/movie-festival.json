@@ -1,0 +1,1361 @@
+{
+  "id": "movie-festival-max-non-overlapping",
+  "title": "Movie Festival",
+  "difficulty": "intermediate",
+  "tags": [
+    "sorting",
+    "two-pointer",
+    "binary-search"
+  ],
+  "estimatedMinutes": 35,
+  "language": "python",
+  "description": "You are given n movies with their starting and ending times. You can only watch a movie entirely (from its start to its end) and you cannot watch overlapping movies. At the exact moment one movie ends, you may start another.\n\nInput:\n- First line: integer n, the number of movies.\n- Next n lines: two integers a and b per line, the start and end times of a movie.\n\nOutput:\n- One integer: the maximum number of movies you can watch entirely.",
+  "examples": [
+    {
+      "input": "3\n3 5\n4 9\n5 8\n",
+      "output": "2",
+      "explanation": "One optimal plan: watch [3,5] then [5,8]. You cannot also fit [4,9] because it overlaps with [3,5]."
+    }
+  ],
+  "constraints": [
+    "1 ≤ n ≤ 2 · 10^5",
+    "1 ≤ a < b ≤ 10^9"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "If you watch a movie [3,5] and another movie starts at time 5 as [5,7], can you watch both entirely?",
+      "diagram": "[3----5][5----7]",
+      "options": [
+        {
+          "label": "Yes, because the second starts exactly when the first ends.",
+          "isCode": false
+        },
+        {
+          "label": "No, because the start time must be strictly greater than the previous end.",
+          "isCode": false
+        },
+        {
+          "label": "Only if there is a gap between them (e.g., [5,7] replaced by [6,7]).",
+          "isCode": false
+        },
+        {
+          "label": "Depends on the specific values of n.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Adjacency with start == previous end is allowed since there is no overlap. Strictly greater is not required.",
+      "wrongExplanations": {
+        "1": "The problem allows starting right when the previous one ends.",
+        "2": "A gap is not required; equality at the boundary is fine."
+      },
+      "hint": "Think about overlap: does [3,5] overlap [5,7]?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "For movies [1,3] and [2,4], what is the maximum number of movies you can watch entirely?",
+      "diagram": "[1--3]\n   [2--4]",
+      "options": [
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "It depends on which one you start first.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "They overlap between time 2 and 3, so you can only pick one.",
+      "wrongExplanations": {
+        "0": "You cannot fully watch both due to overlap.",
+        "3": "Order doesn't help when intervals overlap."
+      },
+      "hint": "Check if their time ranges intersect.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "Given movies [1,2], [2,3], and [3,4], what is the maximum number you can watch entirely?",
+      "diagram": "[1-2][2-3][3-4]",
+      "options": [
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "You can chain them since each starts exactly when the previous ends.",
+      "wrongExplanations": {
+        "1": "No overlap, so you can take all three.",
+        "2": "Adjacency is allowed; you aren't forced to stop at one."
+      },
+      "hint": "Is [1,2] compatible with [2,3] and [3,4]?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "Are you allowed to watch only a part of a movie if that helps fit more movies?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, partial watching is allowed.",
+          "isCode": false
+        },
+        {
+          "label": "No, you must watch each chosen movie entirely.",
+          "isCode": false
+        },
+        {
+          "label": "Only if the partial part covers the end time.",
+          "isCode": false
+        },
+        {
+          "label": "Only if the partial part covers the start time.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "The problem requires watching movies entirely; partial watching is not allowed.",
+      "wrongExplanations": {
+        "0": "Partial watching contradicts the statement.",
+        "2": "Covering only ends or starts doesn't satisfy 'entirely'."
+      },
+      "hint": "Re-read the problem statement carefully for 'entirely'.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Exploring Approaches",
+      "questionText": "With up to n = 2·10^5 movies, is trying all subsets to find the maximum feasible?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, it’s feasible since 2^n is manageable.",
+          "isCode": false
+        },
+        {
+          "label": "No, checking all subsets is far too large.",
+          "isCode": false
+        },
+        {
+          "label": "Only if n ≤ 25.",
+          "isCode": false
+        },
+        {
+          "label": "It depends on the input times a and b.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Exploring all subsets is exponential and impossible for n up to 2·10^5.",
+      "wrongExplanations": {
+        "0": "2^n grows too fast; it's not manageable here."
+      },
+      "hint": "Estimate 2^200000 roughly.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "Consider always choosing the shortest-duration movie next. Does that always maximize the count?",
+      "diagram": "[1,10] (long)\n[2,3] (short)\n[3,4] (short)",
+      "options": [
+        {
+          "label": "Yes, shortest duration always gives maximum count.",
+          "isCode": false
+        },
+        {
+          "label": "No, shortest duration can block future choices badly.",
+          "isCode": false
+        },
+        {
+          "label": "It depends only on n, not on durations.",
+          "isCode": false
+        },
+        {
+          "label": "Only if all movies have distinct durations.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Picking the shortest next can be suboptimal due to overlap interactions.",
+      "wrongExplanations": {
+        "0": "Counterexamples exist where shortest-choice reduces future options."
+      },
+      "hint": "Try: choosing [2,3] then [3,4] vs taking a long one first.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "Which ordering is more promising to avoid blocking future picks?",
+      "diagram": "Movies: A(ends=3), B(ends=5), C(ends=2)",
+      "options": [
+        {
+          "label": "Sort by start times increasing.",
+          "isCode": false
+        },
+        {
+          "label": "Sort by end times increasing.",
+          "isCode": false
+        },
+        {
+          "label": "Sort by durations increasing.",
+          "isCode": false
+        },
+        {
+          "label": "Sort by start times decreasing.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Finishing earlier leaves more room for subsequent movies; ordering by end time helps.",
+      "wrongExplanations": {
+        "0": "Early starts can still run long and block future options.",
+        "3": "Late starts aren't inherently better for packing more."
+      },
+      "hint": "Which movies leave the earliest next free time?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Building the Idea",
+      "questionText": "After sorting by end time, what's the acceptance condition for the next movie relative to the last chosen movie’s end?",
+      "diagram": "last_end = E; candidate (a,b)",
+      "options": [
+        {
+          "label": "Accept if b ≥ last_end.",
+          "isCode": false
+        },
+        {
+          "label": "Accept if a ≥ last_end.",
+          "isCode": false
+        },
+        {
+          "label": "Accept if a > last_end.",
+          "isCode": false
+        },
+        {
+          "label": "Accept if b − a is minimal so far.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "We need the next movie to start at or after the last end: a ≥ last_end.",
+      "wrongExplanations": {
+        "0": "b ≥ last_end doesn't prevent overlap (start time matters).",
+        "2": "Strict > would reject perfectly adjacent movies."
+      },
+      "hint": "Overlap happens when start < last_end.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "What is a safe initial value for last_end before selecting any movie, given 1 ≤ a < b?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "last_end = 0",
+          "isCode": false
+        },
+        {
+          "label": "last_end = first movie’s start",
+          "isCode": false
+        },
+        {
+          "label": "last_end = first movie’s end",
+          "isCode": false
+        },
+        {
+          "label": "last_end = +∞",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Since a ≥ 1, last_end = 0 allows the first eligible movie to be accepted.",
+      "wrongExplanations": {
+        "1": "You haven't selected the first movie yet; using its start pre-assumes selection.",
+        "2": "Setting to the first end blocks starting movies unnecessarily."
+      },
+      "hint": "Pick a value that ensures the first candidate can be accepted if possible.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "Trace the plan on input: (3,5), (4,9), (5,8). Sorted by end: (3,5), (5,8), (4,9). With last_end=0 and a ≥ last_end, how many do we accept?",
+      "diagram": "Check (3,5)->accept; last_end=5\nCheck (5,8)->accept; last_end=8\nCheck (4,9)->reject",
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "Depends on n only.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "We accept (3,5) and (5,8); (4,9) starts before 8 so reject. Count = 2.",
+      "wrongExplanations": {
+        "0": "We accept two, not just the first.",
+        "3": "It depends on times, not just n."
+      },
+      "hint": "Update last_end after each acceptance.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "For movies (1,10), (2,3), (3,4), (4,5), after sorting by end, which set is selected with a ≥ last_end?",
+      "diagram": "Sorted: (2,3),(3,4),(4,5),(1,10)",
+      "options": [
+        {
+          "label": "Select (1,10) only.",
+          "isCode": false
+        },
+        {
+          "label": "Select (2,3), (3,4), (4,5).",
+          "isCode": false
+        },
+        {
+          "label": "Select (2,3), (1,10).",
+          "isCode": false
+        },
+        {
+          "label": "Select none.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Accept (2,3), then (3,4), then (4,5); (1,10) overlaps with earlier ones.",
+      "wrongExplanations": {
+        "0": "Taking (1,10) prevents any others; the count is smaller.",
+        "2": "After (2,3), (1,10) starts before last_end=3."
+      },
+      "hint": "Always compare start to current last_end.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "For movies (1,3), (2,3), (3,5), what maximum count do you get after sorting by end and applying a ≥ last_end?",
+      "diagram": "Sorted: (1,3),(2,3),(3,5)",
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "Depends on sort stability only.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Pick one of (1,3) or (2,3), then (3,5). Total = 2.",
+      "wrongExplanations": {
+        "2": "You cannot take both (1,3) and (2,3); they overlap.",
+        "4": "Stability doesn't change the count; any order with same ends yields same maximum."
+      },
+      "hint": "Check overlaps among those that end at 3.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Writing the Code",
+      "questionText": "Choose the best way to read all input tokens efficiently.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys",
+          "isCode": true
+        },
+        {
+          "label": "from collections import deque",
+          "isCode": true
+        },
+        {
+          "label": "import math",
+          "isCode": true
+        },
+        {
+          "label": "import bisect",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We’ll read from sys.stdin; no need for other modules here.",
+      "wrongExplanations": {
+        "3": "No need for this module to read input."
+      },
+      "hint": "Start with the standard input module.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys",
+      "codeLabel": "Import"
+    },
+    {
+      "id": "q14",
+      "phase": "Writing the Code",
+      "questionText": "Begin the program structure with a function.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def main():",
+          "isCode": true
+        },
+        {
+          "label": "def solve(n, movies):",
+          "isCode": true
+        },
+        {
+          "label": "def run():",
+          "isCode": true
+        },
+        {
+          "label": "def program():",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "A main function is a common simple entry point.",
+      "hint": "We’ll parse input and print from here.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def main():",
+      "codeLabel": "Main function"
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Read all input tokens as strings in one go and split.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    data = sys.stdin.read().strip().split()",
+          "isCode": true
+        },
+        {
+          "label": "    data = input().split()",
+          "isCode": true
+        },
+        {
+          "label": "    data = sys.stdin.readline().split()",
+          "isCode": true
+        },
+        {
+          "label": "    data = list(map(int, sys.stdin.read()))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Reading the whole input then splitting tokens is efficient and simple.",
+      "wrongExplanations": {
+        "1": "Repeated input() can be slower and problematic on large inputs.",
+        "3": "You must split on whitespace; reading characters directly as ints is invalid."
+      },
+      "hint": "Use sys.stdin for fast bulk read.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    data = sys.stdin.read().strip().split()",
+      "codeLabel": "Read tokens"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Handle the case where input might be empty to avoid errors.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    if not data:",
+          "isCode": true
+        },
+        {
+          "label": "    if data is None:",
+          "isCode": true
+        },
+        {
+          "label": "    if len(data) < 0:",
+          "isCode": true
+        },
+        {
+          "label": "    if data == [] and False:",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "A direct emptiness check is correct and simple.",
+      "hint": "Check for no tokens.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    if not data:",
+      "codeLabel": "Empty check"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "What should we do if there’s no data?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "        print(0)",
+          "isCode": true
+        },
+        {
+          "label": "        print()",
+          "isCode": true
+        },
+        {
+          "label": "        pass",
+          "isCode": true
+        },
+        {
+          "label": "        raise ValueError()",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Printing 0 is consistent with having no movies to watch.",
+      "hint": "Return a valid integer in this edge case.",
+      "isCodeBuilding": true,
+      "codeSnippet": "        print(0)",
+      "codeLabel": "Empty action"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Continue after printing for empty input.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "        return",
+          "isCode": true
+        },
+        {
+          "label": "        break",
+          "isCode": true
+        },
+        {
+          "label": "        continue",
+          "isCode": true
+        },
+        {
+          "label": "        exit(1)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Return exits main cleanly; no need for special exit codes.",
+      "hint": "Don’t proceed to parse tokens if none exist.",
+      "isCodeBuilding": true,
+      "codeSnippet": "        return",
+      "codeLabel": "Return"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Set up an iterator over tokens and read n.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    it = iter(data)",
+          "isCode": true
+        },
+        {
+          "label": "    n = int(next(it))",
+          "isCode": true
+        },
+        {
+          "label": "    it = data[0]",
+          "isCode": true
+        },
+        {
+          "label": "    n = int(data)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "First, create the iterator to consume tokens sequentially.",
+      "wrongExplanations": {
+        "2": "it should be an iterator, not a single token."
+      },
+      "hint": "We need a stream of tokens to call next() on.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    it = iter(data)",
+      "codeLabel": "Iterator"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Now consume the first token as n (the number of movies).",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    n = int(next(it))",
+          "isCode": true
+        },
+        {
+          "label": "    n = next(it)",
+          "isCode": true
+        },
+        {
+          "label": "    n = int(data[0])",
+          "isCode": true
+        },
+        {
+          "label": "    n = len(data)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Convert the next token to int for n.",
+      "wrongExplanations": {
+        "1": "We need an integer, not a string token.",
+        "3": "Total tokens are not equal to n."
+      },
+      "hint": "Use next(it) to move through tokens in order.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    n = int(next(it))",
+      "codeLabel": "Read n"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "Prepare a list to store movies as (a, b) pairs.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    movies = []",
+          "isCode": true
+        },
+        {
+          "label": "    movies = {}",
+          "isCode": true
+        },
+        {
+          "label": "    movies = set()",
+          "isCode": true
+        },
+        {
+          "label": "    movies = list(() )",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "A list of tuples fits naturally.",
+      "hint": "We’ll append (a,b) pairs.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    movies = []",
+      "codeLabel": "Movies list"
+    },
+    {
+      "id": "q22",
+      "phase": "Writing the Code",
+      "questionText": "Read n pairs (a, b) into the list.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    for _ in range(n):",
+          "isCode": true
+        },
+        {
+          "label": "    for _ in range(2*n):",
+          "isCode": true
+        },
+        {
+          "label": "    for a,b in range(n):",
+          "isCode": true
+        },
+        {
+          "label": "    while True:",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Loop n times to read n pairs.",
+      "wrongExplanations": {
+        "1": "We need n pairs, not 2n iterations.",
+        "3": "We have a known count; no need for an unbounded loop."
+      },
+      "hint": "We know exactly how many pairs follow.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    for _ in range(n):",
+      "codeLabel": "Loop over n"
+    },
+    {
+      "id": "q23",
+      "phase": "Writing the Code",
+      "questionText": "Inside the loop, read a and b correctly.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "        a = int(next(it)); b = int(next(it))",
+          "isCode": true
+        },
+        {
+          "label": "        a, b = map(int, next(it))",
+          "isCode": true
+        },
+        {
+          "label": "        a = int(data[_]); b = int(data[_+1])",
+          "isCode": true
+        },
+        {
+          "label": "        a = next(it); b = next(it)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Consume two tokens per movie and convert to integers.",
+      "wrongExplanations": {
+        "1": "next(it) returns a single token, not an iterable of two.",
+        "3": "We must convert to int; raw strings aren't suitable."
+      },
+      "hint": "Use next(it) twice to get a and b.",
+      "isCodeBuilding": true,
+      "codeSnippet": "        a = int(next(it)); b = int(next(it))",
+      "codeLabel": "Read a,b"
+    },
+    {
+      "id": "q24",
+      "phase": "Writing the Code",
+      "questionText": "Append the pair to the movies list.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "        movies.append((a, b))",
+          "isCode": true
+        },
+        {
+          "label": "        movies.add((a, b))",
+          "isCode": true
+        },
+        {
+          "label": "        movies[a] = b",
+          "isCode": true
+        },
+        {
+          "label": "        movies.append([a, b])",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Append a tuple for immutability and clear structure.",
+      "wrongExplanations": {
+        "1": "Lists have append, not add.",
+        "3": "Lists of lists could work, but tuples are typical here."
+      },
+      "hint": "Use the list’s append method.",
+      "isCodeBuilding": true,
+      "codeSnippet": "        movies.append((a, b))",
+      "codeLabel": "Append pair"
+    },
+    {
+      "id": "q25",
+      "phase": "Writing the Code",
+      "questionText": "Sort the movies to process them in the helpful order.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    movies.sort(key=lambda x: x[1])",
+          "isCode": true
+        },
+        {
+          "label": "    movies.sort(key=lambda x: x[0])",
+          "isCode": true
+        },
+        {
+          "label": "    movies.sort(reverse=True)",
+          "isCode": true
+        },
+        {
+          "label": "    movies = sorted(movies, key=lambda x: x[0], reverse=True)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Sort by end time to leave the earliest free time.",
+      "wrongExplanations": {
+        "1": "Sorting by start can block more future choices.",
+        "2": "Reverse sort isn't helpful here."
+      },
+      "hint": "We want earlier finishing movies first.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    movies.sort(key=lambda x: x[1])",
+      "codeLabel": "Sort by end"
+    },
+    {
+      "id": "q26",
+      "phase": "Writing the Code",
+      "questionText": "Initialize counters before scanning the sorted movies.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    count = 0",
+          "isCode": true
+        },
+        {
+          "label": "    last_end = 0",
+          "isCode": true
+        },
+        {
+          "label": "    count = 1",
+          "isCode": true
+        },
+        {
+          "label": "    last_end = -1",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Start count from 0; last_end initialization comes next.",
+      "wrongExplanations": {
+        "2": "We haven't accepted any movie yet."
+      },
+      "hint": "Begin with no movies selected.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    count = 0",
+      "codeLabel": "Init count"
+    },
+    {
+      "id": "q27",
+      "phase": "Writing the Code",
+      "questionText": "Set the initial last_end to allow accepting the first eligible movie.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    last_end = 0",
+          "isCode": true
+        },
+        {
+          "label": "    last_end = movies[0][0]",
+          "isCode": true
+        },
+        {
+          "label": "    last_end = movies[0][1]",
+          "isCode": true
+        },
+        {
+          "label": "    last_end = 10**18",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "With a ≥ 1, last_end = 0 lets the first valid movie be accepted.",
+      "wrongExplanations": {
+        "1": "Setting to first start pre-assumes a selection.",
+        "3": "Huge last_end blocks all movies."
+      },
+      "hint": "Pick a baseline before any selection.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    last_end = 0",
+      "codeLabel": "Init last_end"
+    },
+    {
+      "id": "q28",
+      "phase": "Writing the Code",
+      "questionText": "Iterate through sorted movies.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    for a, b in movies:",
+          "isCode": true
+        },
+        {
+          "label": "    for i in range(len(movies)):",
+          "isCode": true
+        },
+        {
+          "label": "    while movies:",
+          "isCode": true
+        },
+        {
+          "label": "    for a in movies:",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Unpack (a,b) directly for clarity.",
+      "wrongExplanations": {
+        "1": "You’d need indexing and unpacking; direct iteration is simpler."
+      },
+      "hint": "Loop with tuple unpacking.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    for a, b in movies:",
+      "codeLabel": "Loop movies"
+    },
+    {
+      "id": "q29",
+      "phase": "Writing the Code",
+      "questionText": "Apply the acceptance condition inside the loop.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "        if a >= last_end:",
+          "isCode": true
+        },
+        {
+          "label": "        if b >= last_end:",
+          "isCode": true
+        },
+        {
+          "label": "        if a > last_end:",
+          "isCode": true
+        },
+        {
+          "label": "        if b > last_end:",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Start must be at or after last_end; equality allows adjacency.",
+      "wrongExplanations": {
+        "2": "Strict > rejects adjacent movies that should be accepted."
+      },
+      "hint": "Compare start times to last_end.",
+      "isCodeBuilding": true,
+      "codeSnippet": "        if a >= last_end:",
+      "codeLabel": "Condition"
+    },
+    {
+      "id": "q30",
+      "phase": "Writing the Code",
+      "questionText": "Update the count when accepting a movie.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "            count += 1",
+          "isCode": true
+        },
+        {
+          "label": "            count = 1",
+          "isCode": true
+        },
+        {
+          "label": "            count += b - a",
+          "isCode": true
+        },
+        {
+          "label": "            count = count",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Increment the number of selected movies by one.",
+      "wrongExplanations": {
+        "2": "We count movies, not total duration."
+      },
+      "hint": "Increase the number of accepted movies.",
+      "isCodeBuilding": true,
+      "codeSnippet": "            count += 1",
+      "codeLabel": "Increment count"
+    },
+    {
+      "id": "q31",
+      "phase": "Writing the Code",
+      "questionText": "Update the last_end after accepting a movie.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "            last_end = b",
+          "isCode": true
+        },
+        {
+          "label": "            last_end = a",
+          "isCode": true
+        },
+        {
+          "label": "            last_end = max(last_end, b)",
+          "isCode": true
+        },
+        {
+          "label": "            last_end += b - a",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Set last_end to the end time of the accepted movie.",
+      "wrongExplanations": {
+        "1": "Using a ignores the actual end time of the movie.",
+        "3": "We need the absolute end time, not cumulative duration."
+      },
+      "hint": "After acceptance, the new reference is the movie’s end.",
+      "isCodeBuilding": true,
+      "codeSnippet": "            last_end = b",
+      "codeLabel": "Update last_end"
+    },
+    {
+      "id": "q32",
+      "phase": "Writing the Code",
+      "questionText": "After processing all movies, print the result.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    print(count)",
+          "isCode": true
+        },
+        {
+          "label": "    print(last_end)",
+          "isCode": true
+        },
+        {
+          "label": "    print(n)",
+          "isCode": true
+        },
+        {
+          "label": "    print(len(movies))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We print the number of movies we can watch entirely.",
+      "wrongExplanations": {
+        "1": "last_end is a time, not the number of movies."
+      },
+      "hint": "Output the count.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    print(count)",
+      "codeLabel": "Print count"
+    },
+    {
+      "id": "q33",
+      "phase": "Writing the Code",
+      "questionText": "Add the standard Python entry point to call main().",
+      "diagram": null,
+      "options": [
+        {
+          "label": "if __name__ == \"__main__\":",
+          "isCode": true
+        },
+        {
+          "label": "if __name__ == \"main\":",
+          "isCode": true
+        },
+        {
+          "label": "if __name__ == \"program\":",
+          "isCode": true
+        },
+        {
+          "label": "if __name__ == \"__init__\":",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "This guard runs main when the script is executed directly.",
+      "hint": "Use the common dunder name check.",
+      "isCodeBuilding": true,
+      "codeSnippet": "if __name__ == \"__main__\":",
+      "codeLabel": "Entry guard"
+    },
+    {
+      "id": "q34",
+      "phase": "Writing the Code",
+      "questionText": "Call the main function under the entry guard.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    main()",
+          "isCode": true
+        },
+        {
+          "label": "    solve()",
+          "isCode": true
+        },
+        {
+          "label": "    run()",
+          "isCode": true
+        },
+        {
+          "label": "    program()",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Invoke main to execute your solution.",
+      "hint": "Match the function name you defined.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    main()",
+      "codeLabel": "Call main"
+    },
+    {
+      "id": "q35",
+      "phase": "Verifying the Solution",
+      "questionText": "Run your logic on the sample: 3 movies (3,5), (4,9), (5,8). What is the output?",
+      "diagram": "Sorted by end: (3,5),(5,8),(4,9)\nAccept (3,5) -> last_end=5\nAccept (5,8) -> last_end=8\nReject (4,9)",
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Two movies fit: [3,5] and [5,8].",
+      "hint": "Follow the sorted order and the acceptance condition.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q36",
+      "phase": "Verifying the Solution",
+      "questionText": "Test on: (1,2), (2,4), (3,4), (4,5), (5,9). After sorting by end, what count do you get with a ≥ last_end?",
+      "diagram": "Sorted: (1,2),(3,4),(2,4),(4,5),(5,9)\nAccept (1,2)->last_end=2\nAccept (3,4)->last_end=4\nReject (2,4)\nAccept (4,5)->last_end=5\nAccept (5,9)->last_end=9",
+      "options": [
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Accepted: (1,2),(3,4),(4,5),(5,9) => total 4.",
+      "wrongExplanations": {
+        "0": "You missed one of the adjacent selections."
+      },
+      "hint": "Equality at boundary allows adjacency.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q37",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the time complexity of the solution?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(2^n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Sorting dominates with O(n log n); the scan is O(n).",
+      "hint": "Consider sorting plus a single pass.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q38",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the extra space usage of the approach (not counting input storage)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(1)",
+          "isCode": false
+        },
+        {
+          "label": "O(log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Beyond the list of movies, we only keep a few variables.",
+      "wrongExplanations": {
+        "2": "We do store the movies list (input), but extra working space is constant."
+      },
+      "hint": "Count variables added beyond the input list.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q39",
+      "phase": "Analyzing Complexity",
+      "questionText": "Which edge case is correctly handled by using a ≥ last_end?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Movies with identical end times.",
+          "isCode": false
+        },
+        {
+          "label": "Movies requiring a gap between end and next start.",
+          "isCode": false
+        },
+        {
+          "label": "Movies where partial watching is allowed.",
+          "isCode": false
+        },
+        {
+          "label": "Movies with negative start times.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Ties on end time are fine; the condition ensures no overlap and allows adjacency.",
+      "wrongExplanations": {
+        "1": "A gap is not required; equality suffices."
+      },
+      "hint": "Think about boundary equality.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys",
+    "def main():",
+    "    data = sys.stdin.read().strip().split()",
+    "    if not data:",
+    "        print(0)",
+    "        return",
+    "    it = iter(data)",
+    "    n = int(next(it))",
+    "    movies = []",
+    "    for _ in range(n):",
+    "        a = int(next(it)); b = int(next(it))",
+    "        movies.append((a, b))",
+    "    movies.sort(key=lambda x: x[1])",
+    "    count = 0",
+    "    last_end = 0",
+    "    for a, b in movies:",
+    "        if a >= last_end:",
+    "            count += 1",
+    "            last_end = b",
+    "    print(count)",
+    "if __name__ == \"__main__\":",
+    "    main()"
+  ],
+  "reasoningChain": [
+    {
+      "question": "q1",
+      "insight": "Adjacency is allowed: starting exactly at the previous end is valid; overlap means start < last_end."
+    },
+    {
+      "question": "q5",
+      "insight": "Brute force over subsets is infeasible for large n; we need a simple ordering-based approach."
+    },
+    {
+      "question": "q7",
+      "insight": "Processing movies in increasing end time is promising because it leaves the earliest next free time."
+    },
+    {
+      "question": "q8",
+      "insight": "Core acceptance rule: accept a movie if its start is at least the last selected end (a ≥ last_end)."
+    },
+    {
+      "question": "q9",
+      "insight": "Initialize last_end to a baseline (0) so the first eligible movie can be accepted with given constraints."
+    },
+    {
+      "question": "q25",
+      "insight": "Sort by end time and then scan, applying the acceptance rule to build the maximum count."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1349,
+    "output_tokens": 13538,
+    "input_cost": 0.001686,
+    "output_cost": 0.13538,
+    "total_cost": 0.137066
+  }
+}

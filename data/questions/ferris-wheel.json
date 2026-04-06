@@ -1,0 +1,936 @@
+{
+  "id": "ferris-wheel",
+  "title": "Ferris Wheel",
+  "difficulty": "intermediate",
+  "tags": [
+    "sorting",
+    "two-pointer",
+    "binary-search"
+  ],
+  "estimatedMinutes": 45,
+  "language": "python",
+  "description": "There are n children who want to go to a Ferris wheel, and your task is to find a gondola for each child.\n\nEach gondola may have one or two children in it, and in addition, the total weight in a gondola may not exceed x. You know the weight of every child.\n\nWhat is the minimum number of gondolas needed for the children?\n\nInput:\n- The first line contains two integers n and x: the number of children and the maximum allowed weight.\n- The next line contains n integers p_1, p_2, ..., p_n: the weight of each child.\n\nOutput:\n- Print one integer: the minimum number of gondolas.",
+  "examples": [
+    {
+      "input": "4 10\n7 2 3 9",
+      "output": "3",
+      "explanation": "One optimal arrangement: (7,2), (3), (9) → 3 gondolas."
+    }
+  ],
+  "constraints": [
+    "1 ≤ n ≤ 2 · 10^5",
+    "1 ≤ x ≤ 10^9",
+    "1 ≤ p_i ≤ x"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "Given n=4, x=10 and weights [7, 2, 3, 9], what is the minimum number of gondolas?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Pair 7+2=9 (OK), 3 alone, 9 alone → 3 gondolas. No way to pair 9 with anyone.",
+      "wrongExplanations": {
+        "0": "2 would require pairing both 9 and 3, which exceeds 10.",
+        "2": "4 is too many; 7 and 2 can share."
+      },
+      "hint": "Try pairing the heaviest child with someone if possible.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "For n=3, x=8 and weights [4, 4, 4], what is the minimum number of gondolas?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "One gondola can take two children (4+4=8). The remaining 4 goes alone → 2 total.",
+      "wrongExplanations": {
+        "1": "3 assumes no pairing. But two 4s fit together.",
+        "0": "1 would require placing all three into one gondola, which isn't allowed."
+      },
+      "hint": "At most two children per gondola.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "Can a gondola carry three children if their total weight is ≤ x?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, if their total weight ≤ x",
+          "isCode": false
+        },
+        {
+          "label": "No, a gondola may have at most two children",
+          "isCode": false
+        },
+        {
+          "label": "Yes, but only if all three are the lightest",
+          "isCode": false
+        },
+        {
+          "label": "Yes, but only if their total weight equals exactly x",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "The rule restricts to one or two children per gondola, regardless of total weight.",
+      "wrongExplanations": {
+        "0": "Even if weight allows, capacity is limited to two children.",
+        "2": "Being the lightest doesn't override the 'at most two' rule."
+      },
+      "hint": "Re-read the capacity rule: one or two children only.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "Given 1 ≤ p_i ≤ x for all i, is it possible that some child cannot ride at all?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, if their weight > x",
+          "isCode": false
+        },
+        {
+          "label": "Yes, if n is odd",
+          "isCode": false
+        },
+        {
+          "label": "Yes, if others are too heavy to pair with them",
+          "isCode": false
+        },
+        {
+          "label": "No, each child can always ride alone if needed",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 3,
+      "explanation": "Each child weighs at most x, so any single child can occupy a gondola alone.",
+      "wrongExplanations": {
+        "2": "Pairing isn't mandatory; singles are allowed."
+      },
+      "hint": "Consider a gondola with exactly one child.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Understanding the Problem",
+      "questionText": "For n=4, x=3 and weights [1, 2, 2, 3], what is the minimum number of gondolas?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "We can do (1,2), (2), (3) → 3. Pairing 2+2 is not allowed since 4 > 3.",
+      "wrongExplanations": {
+        "0": "2 would require two pairs but 2+2 and 3+? both fail under x=3.",
+        "2": "4 means no pairing, but 1+2 fits."
+      },
+      "hint": "Try pairing feasible light with heavy carefully.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "If you try every possible way to split children into pairs and singles to find the minimum, how does the number of possibilities grow with n?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Linearly with n",
+          "isCode": false
+        },
+        {
+          "label": "Quadratically with n",
+          "isCode": false
+        },
+        {
+          "label": "Exponentially with n",
+          "isCode": false
+        },
+        {
+          "label": "Logarithmically with n",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "The number of pair/single configurations explodes combinatorially, far too many to try.",
+      "wrongExplanations": {
+        "1": "Quadratic would be manageable, but the space of pairings is much larger."
+      },
+      "hint": "Think about how many ways to choose many disjoint pairs from n items.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "Suppose you sort the weights ascending. To reduce gondolas, which partner should you try first for the current heaviest child?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "The second heaviest",
+          "isCode": false
+        },
+        {
+          "label": "The lightest",
+          "isCode": false
+        },
+        {
+          "label": "Any arbitrary child",
+          "isCode": false
+        },
+        {
+          "label": "A child roughly in the middle",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Pairing the heaviest with the lightest that fits leaves more room for remaining children.",
+      "wrongExplanations": {
+        "0": "Heaviest + second heaviest often exceeds x and wastes capacity.",
+        "2": "Choosing arbitrarily risks missing valid fits."
+      },
+      "hint": "Try to leave as much capacity as possible for the remaining children.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Exploring Approaches",
+      "questionText": "With x=8 and weights [2, 3, 5, 6], which first pairing choice leads to fewer gondolas overall?",
+      "diagram": "Sorted: [2,3,5,6]",
+      "options": [
+        {
+          "label": "Pair 6 with 2 → then 5 with 3 → total 2 gondolas",
+          "isCode": false
+        },
+        {
+          "label": "Pair 6 with 5 (fails), so 6 alone → then 5 with 3 (8) → then 2 alone → total 3 gondolas",
+          "isCode": false
+        },
+        {
+          "label": "Pair 6 with 3 (9>8), 6 alone → then 5 with 2 → total 3 gondolas",
+          "isCode": false
+        },
+        {
+          "label": "All strategies give 4 gondolas",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Pairing heaviest with the lightest that fits (6+2) enables (5+3), using 2 gondolas.",
+      "wrongExplanations": {
+        "3": "There exists a strategy using only 2 gondolas, so 4 is not necessary."
+      },
+      "hint": "Try pairing 6 with the smallest weight that does not exceed x when added.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "After sorting, if lightest + heaviest ≤ x, what should we do?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Put the heaviest alone; keep the lightest for later",
+          "isCode": false
+        },
+        {
+          "label": "Put the lightest alone; keep the heaviest for later",
+          "isCode": false
+        },
+        {
+          "label": "Put both together in one gondola",
+          "isCode": false
+        },
+        {
+          "label": "Try the lightest with the second heaviest instead",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "They fit together, using one gondola efficiently.",
+      "wrongExplanations": {
+        "0": "Wasting a fit increases the total gondolas.",
+        "3": "If the smallest fits with the largest, there's no benefit in skipping it."
+      },
+      "hint": "The goal is to maximize usage per gondola without exceeding x.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "After sorting, if lightest + heaviest > x, what should we do with the heaviest child?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Put the heaviest alone in a gondola",
+          "isCode": false
+        },
+        {
+          "label": "Try pairing the heaviest with someone slightly lighter than the lightest",
+          "isCode": false
+        },
+        {
+          "label": "Skip the heaviest and move to the next heaviest without assigning",
+          "isCode": false
+        },
+        {
+          "label": "Put the lightest alone and keep the heaviest for later",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "If even with the lightest the sum exceeds x, the heaviest cannot pair with anyone.",
+      "wrongExplanations": {
+        "3": "Putting the lightest alone doesn’t make the heaviest pairable later."
+      },
+      "hint": "If the smallest partner doesn't fit, no partner will.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "How many gondolas should we count per iteration of processing (whether we paired two or placed one alone)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Increase the count only when we pair two",
+          "isCode": false
+        },
+        {
+          "label": "Increase the count only when we place someone alone",
+          "isCode": false
+        },
+        {
+          "label": "Increase the count by one in every iteration",
+          "isCode": false
+        },
+        {
+          "label": "Do not increase the count until the end",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Each iteration assigns exactly one gondola: either a pair or a single.",
+      "wrongExplanations": {
+        "0": "Singles also consume a gondola."
+      },
+      "hint": "Each step uses up one gondola, regardless of pairing.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "What loop termination condition properly handles all children, including the last unpaired one?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Continue while i < j",
+          "isCode": false
+        },
+        {
+          "label": "Continue while i <= j",
+          "isCode": false
+        },
+        {
+          "label": "Continue while i + j < n",
+          "isCode": false
+        },
+        {
+          "label": "Continue while i != j",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Using i ≤ j ensures the final remaining child (i == j) is processed.",
+      "wrongExplanations": {
+        "0": "i < j skips the case where exactly one child remains."
+      },
+      "hint": "Think about what happens when only one child is left.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "Simulate the process for x=10 and weights [1, 2, 3, 7, 8] (sorted already). How many gondolas are used?",
+      "diagram": "i=0,j=4: 1+8=9 ✓ → i=1,j=3\n1: 2+7=9 ✓ → i=2,j=2\n2: last 3 alone",
+      "options": [
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Pairs: (1,8), (2,7), then (3) → 3 gondolas.",
+      "wrongExplanations": {
+        "0": "2 would require pairing three numbers into two gondolas, not possible here."
+      },
+      "hint": "Walk pointer-by-pointer: outermost inward.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Building the Idea",
+      "questionText": "For x=7 and weights [6, 6, 6], how many gondolas will the process use?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "No pair fits (6+6>7). Each child goes alone → 3 gondolas.",
+      "wrongExplanations": {
+        "1": "2 would require one pair of 6+6, which exceeds 7."
+      },
+      "hint": "Check if any pair sum ≤ 7 exists.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q15",
+      "phase": "Building the Idea",
+      "questionText": "For x=10 and weights [5, 5, 5, 5] (sorted), how many gondolas are needed?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Pairs (5,5) and (5,5) → 2 gondolas.",
+      "wrongExplanations": {
+        "2": "4 assumes no pairing; but 5+5=10 fits exactly."
+      },
+      "hint": "Try forming as many pairs as possible without exceeding 10.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Read all integers from standard input in Python (robust to any whitespace). Which snippet is correct?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "data = list(map(int, input().split()))",
+          "isCode": true
+        },
+        {
+          "label": "import sys\nnums = sys.stdin.read().split()",
+          "isCode": true
+        },
+        {
+          "label": "import sys\ndata = list(map(int, sys.stdin.read().split()))",
+          "isCode": true
+        },
+        {
+          "label": "import sys\nn, x, *rest = map(int, sys.stdin.readline())",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "sys.stdin.read().split() reads all tokens. Mapping to int collects all numbers reliably.",
+      "wrongExplanations": {
+        "0": "Single input().split() may miss additional lines or be insufficient in some judges.",
+        "1": "nums are strings; missing conversion to int."
+      },
+      "hint": "Prefer reading the entire stream once and splitting into tokens.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\ndata = list(map(int, sys.stdin.read().split()))",
+      "codeLabel": "Read all input"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Parse n, x and the list of weights from the flat data array.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "n, x = data[1], data[0]\np = data[2:]",
+          "isCode": true
+        },
+        {
+          "label": "n, x = data[0], data[1]\np = data[2:n]",
+          "isCode": true
+        },
+        {
+          "label": "n, x = data[0], data[1]\np = data[2:]",
+          "isCode": true
+        },
+        {
+          "label": "n, x = map(int, input().split())\np = list(map(int, input().split()))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "First two numbers are n and x; the remaining numbers are the weights.",
+      "wrongExplanations": {
+        "1": "data[2:n] slices to index n, not n elements; it will truncate the weights.",
+        "0": "Swapping n and x breaks the logic."
+      },
+      "hint": "The first two tokens are n and x; the rest are p_i.",
+      "isCodeBuilding": true,
+      "codeSnippet": "n, x = data[0], data[1]\np = data[2:]",
+      "codeLabel": "Parse n, x, and weights"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Prepare the weights for efficient pairing. Which operation should we perform?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "p.sort()",
+          "isCode": true
+        },
+        {
+          "label": "p.sort(reverse=True)",
+          "isCode": true
+        },
+        {
+          "label": "p = sorted(p, reverse=True)",
+          "isCode": true
+        },
+        {
+          "label": "Leave p as-is; no ordering helps here",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Sorting ascending lets us consider smallest and largest together effectively.",
+      "wrongExplanations": {
+        "1": "Descending order would require different handling later.",
+        "3": "Order does matter for making good pairing decisions quickly."
+      },
+      "hint": "Think of aligning smallest and largest ends.",
+      "isCodeBuilding": true,
+      "codeSnippet": "p.sort()",
+      "codeLabel": "Sort weights ascending"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Initialize positions and the gondola counter.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "i, j = 0, n - 1\ngondolas = 0",
+          "isCode": true
+        },
+        {
+          "label": "i, j = 0, 0\ngondolas = 0",
+          "isCode": true
+        },
+        {
+          "label": "i, j = 1, n\ngondolas = 0",
+          "isCode": true
+        },
+        {
+          "label": "i, j = 0, n - 1\ngondolas = n",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Start at the smallest (index 0) and largest (index n-1); count starts at 0.",
+      "wrongExplanations": {
+        "3": "Starting with gondolas = n prevents counting pairs properly."
+      },
+      "hint": "We will move inward from both ends and count as we assign.",
+      "isCodeBuilding": true,
+      "codeSnippet": "i, j = 0, n - 1\ngondolas = 0",
+      "codeLabel": "Initialize indices and counter"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Write the main loop and decisions that assign children to gondolas.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "while i < j:\n    if p[i] + p[j] <= x:\n        i += 1\n        j -= 1\n    else:\n        j -= 1\n    gondolas += 1",
+          "isCode": true
+        },
+        {
+          "label": "while i <= j:\n    if p[i] + p[j] <= x:\n        i += 1\n        j -= 1\n    else:\n        j -= 1\n    gondolas += 1",
+          "isCode": true
+        },
+        {
+          "label": "while i <= j:\n    if p[i] + p[j] < x:\n        i += 1\n        j -= 1\n    else:\n        i += 1\n    gondolas += 1",
+          "isCode": true
+        },
+        {
+          "label": "while i <= j:\n    if p[i] + p[j] <= x:\n        i += 1\n    else:\n        j -= 1\n    gondolas += 1",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Each step uses one gondola. If smallest+largest fits, move both; else move largest alone.",
+      "wrongExplanations": {
+        "0": "i < j skips the last remaining child (i == j).",
+        "3": "When a pair fits, you must move both ends, not just i."
+      },
+      "hint": "Process until all indices cross; update both ends on a successful fit.",
+      "isCodeBuilding": true,
+      "codeSnippet": "while i <= j:\n    if p[i] + p[j] <= x:\n        i += 1\n        j -= 1\n    else:\n        j -= 1\n    gondolas += 1",
+      "codeLabel": "Loop and assign"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "Output the final answer.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "print(gondolas)",
+          "isCode": true
+        },
+        {
+          "label": "print(len(p) - gondolas)",
+          "isCode": true
+        },
+        {
+          "label": "print(i)",
+          "isCode": true
+        },
+        {
+          "label": "print(j)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We counted one gondola per iteration; print that count.",
+      "wrongExplanations": {
+        "1": "len(p) - gondolas has no meaning here."
+      },
+      "hint": "What variable tracks the number of gondolas used?",
+      "isCodeBuilding": true,
+      "codeSnippet": "print(gondolas)",
+      "codeLabel": "Print result"
+    },
+    {
+      "id": "q22",
+      "phase": "Verifying the Solution",
+      "questionText": "Trace the code for n=6, x=10, weights [2, 3, 3, 5, 6, 7]. How many gondolas?",
+      "diagram": "Sorted: [2,3,3,5,6,7]\n(2,7)=9 ✓ → (3,6)=9 ✓ → (3,5)=8 ✓",
+      "options": [
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "We can pair (2,7), (3,6), (3,5) → total 3.",
+      "wrongExplanations": {
+        "0": "2 would require placing 6 children into 2 gondolas with cap 10, not possible."
+      },
+      "hint": "Move inward from ends, counting one per step.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q23",
+      "phase": "Verifying the Solution",
+      "questionText": "Trace the code for n=4, x=10, weights [4, 5, 5, 9]. How many gondolas?",
+      "diagram": "Sorted: [4,5,5,9]\nTry (4,9)=13 ✗ → 9 alone\nThen (4,5)=9 ✓ → last 5 alone",
+      "options": [
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Assignments: (9), (4,5), (5) → 3 gondolas.",
+      "wrongExplanations": {
+        "0": "2 would require pairing 9 with someone, which exceeds x."
+      },
+      "hint": "Remember one gondola per loop iteration.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the time complexity of the approach (including sorting the weights)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(log n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Sorting dominates at O(n log n); the subsequent pass is O(n).",
+      "wrongExplanations": {
+        "2": "O(n) ignores the cost of sorting."
+      },
+      "hint": "Account for sorting and the single pass afterward.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Analyzing Complexity",
+      "questionText": "What additional space (beyond storing the input list) does the algorithm use?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(1) extra space",
+          "isCode": false
+        },
+        {
+          "label": "O(n) extra space",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n) extra space",
+          "isCode": false
+        },
+        {
+          "label": "O(log n) extra space",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We sort in-place and use a few variables; extra space is constant.",
+      "wrongExplanations": {
+        "1": "No extra arrays are created proportional to n."
+      },
+      "hint": "We modify the list in place and track only indices and a counter.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Analyzing Complexity",
+      "questionText": "Which set of edge cases is most important to test?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "n=1; all p_i=x; all can pair; none can pair; very large n",
+          "isCode": false
+        },
+        {
+          "label": "Only strictly increasing weights",
+          "isCode": false
+        },
+        {
+          "label": "Only random small arrays",
+          "isCode": false
+        },
+        {
+          "label": "Only x=1 with arbitrary weights",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "These cover singleton, exact fits, best/worst pairing scenarios, and performance.",
+      "wrongExplanations": {
+        "1": "Covers too narrow a pattern; misses critical scenarios."
+      },
+      "hint": "Cover correctness extremes and performance limits.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\ndata = list(map(int, sys.stdin.read().split()))",
+    "n, x = data[0], data[1]\np = data[2:]",
+    "p.sort()",
+    "i, j = 0, n - 1\ngondolas = 0",
+    "while i <= j:\n    if p[i] + p[j] <= x:\n        i += 1\n        j -= 1\n    else:\n        j -= 1\n    gondolas += 1",
+    "print(gondolas)"
+  ],
+  "reasoningChain": [
+    {
+      "question": "What does the problem ask and what constraints matter (one or two per gondola, each p_i ≤ x)?",
+      "insight": "Each child can always ride alone; the aim is to form as many valid pairs as possible without exceeding x."
+    },
+    {
+      "question": "Is checking all pair/single configurations feasible?",
+      "insight": "The number of configurations is exponential, so we need a direct constructive strategy."
+    },
+    {
+      "question": "How to guide pairing choices effectively?",
+      "insight": "Sort weights and try to combine the heaviest with the lightest that still fits; if it doesn’t fit with the lightest, it fits with no one."
+    },
+    {
+      "question": "How to implement the process efficiently?",
+      "insight": "Maintain two indices at both ends; when the pair fits, move both; otherwise, place the heaviest alone and move the end."
+    },
+    {
+      "question": "How to count gondolas and stop correctly?",
+      "insight": "Each step uses exactly one gondola; loop while i ≤ j to include the last unpaired child."
+    },
+    {
+      "question": "Does the approach meet limits and handle edge cases?",
+      "insight": "Sorting plus a linear pass gives O(n log n) time and O(1) extra space; it handles all edge cases like singles and exact fits."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1400,
+    "output_tokens": 13756,
+    "input_cost": 0.00175,
+    "output_cost": 0.13756,
+    "total_cost": 0.13931
+  }
+}

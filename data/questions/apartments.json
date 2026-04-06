@@ -1,0 +1,989 @@
+{
+  "id": "apartments-matching-guide",
+  "title": "Apartments",
+  "difficulty": "intermediate",
+  "tags": [
+    "sorting",
+    "two-pointer",
+    "binary-search"
+  ],
+  "estimatedMinutes": 50,
+  "language": "python",
+  "description": "There are n applicants and m free apartments. Your task is to distribute the apartments so that as many applicants as possible will get an apartment.\n\nEach applicant has a desired apartment size, and they will accept any apartment whose size is close enough to the desired size.\n\nInput:\n- First line: three integers n, m, k — number of applicants, number of apartments, and the maximum allowed difference.\n- Second line: n integers a_1..a_n — desired sizes. If an applicant wants size x, they accept any apartment in [x-k, x+k].\n- Third line: m integers b_1..b_m — apartment sizes.\n\nOutput:\nPrint one integer: the maximum number of applicants who get an apartment.\n\nConstraints:\n- 1 ≤ n, m ≤ 2·10^5\n- 0 ≤ k ≤ 10^9\n- 1 ≤ a_i, b_i ≤ 10^9",
+  "examples": [
+    {
+      "input": "4 3 5\n60 45 80 60\n30 60 75\n",
+      "output": "2\n",
+      "explanation": "One optimal matching: applicant 60 with apartment 60 (|0|≤5), applicant 80 with 75 (|5|≤5). Others cannot be matched simultaneously."
+    }
+  ],
+  "constraints": [
+    "1 ≤ n, m ≤ 2·10^5",
+    "0 ≤ k ≤ 10^9",
+    "1 ≤ a_i, b_i ≤ 10^9",
+    "Time limit: 1 s, Memory limit: 512 MB"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "Applicant wants x = 60 and k = 5. Given apartment sizes [54, 55, 60, 65, 66], which sizes are acceptable?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "55, 60, 65",
+          "isCode": false
+        },
+        {
+          "label": "54, 55, 60, 65, 66",
+          "isCode": false
+        },
+        {
+          "label": "55, 60",
+          "isCode": false
+        },
+        {
+          "label": "60, 65, 66",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Accepted range is [60-5, 60+5] = [55,65], inclusive. So 55, 60, and 65 are valid.",
+      "wrongExplanations": {
+        "1": "54 and 66 are outside [55,65].",
+        "3": "55 is also valid; both ends are inclusive."
+      },
+      "hint": "Use inclusive bounds: [x-k, x+k].",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "n=3, m=2, k=1. a=[10,20,30], b=[9,21]. What is the maximum number of matches?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "10↔9 (|1|≤1) and 20↔21 (|1|≤1) can match; 30 has no option. Total=2.",
+      "wrongExplanations": {
+        "1": "You can match 10 with 9, then 20 with 21.",
+        "3": "Only two apartments exist, so at most 2."
+      },
+      "hint": "Try to pair closest sizes within k conservatively.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "If you keep the input order and, for each applicant, assign the first apartment in input order that fits (marking it used), can this miss the optimal answer?",
+      "diagram": "Example: a=[4,10], b=[9,5], k=1\nInput-order greedy would try:\n- Applicant 4 with b=9? no\n- Applicant 4 with b=5? yes (uses 5)\n- Applicant 10 with b=9? yes\nResult=2 here, but is this approach always safe?",
+      "options": [
+        {
+          "label": "Yes, it can miss optimal matches on other inputs without reordering.",
+          "isCode": false
+        },
+        {
+          "label": "No, this always finds the maximum.",
+          "isCode": false
+        },
+        {
+          "label": "Only if k=0.",
+          "isCode": false
+        },
+        {
+          "label": "Only if there are duplicates.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Without reordering, choices can block future matches. Sorting helps make consistent decisions.",
+      "wrongExplanations": {
+        "1": "Counterexamples exist where input order causes a bad early assignment.",
+        "3": "Duplicates are not required to cause a miss."
+      },
+      "hint": "Think of a case where a small apartment should be saved for a small applicant later.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "a=[5,5], b=[5], k=0. How many applicants get an apartment?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "Depends on assignment order",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Each apartment can be used once. Only one of the two applicants can take size 5.",
+      "wrongExplanations": {
+        "2": "One apartment cannot serve two applicants.",
+        "3": "There is only one apartment; order does not change that."
+      },
+      "hint": "Each apartment is assigned to at most one applicant.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Exploring Approaches",
+      "questionText": "Is it feasible to check every applicant–apartment pair (n*m checks) within 1s for n=m=2·10^5?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, ~4·10^10 checks is fine",
+          "isCode": false
+        },
+        {
+          "label": "No, ~4·10^10 checks is far too many",
+          "isCode": false
+        },
+        {
+          "label": "Maybe, with fast I/O",
+          "isCode": false
+        },
+        {
+          "label": "Only if k=0",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "4e10 operations are far beyond 1s. We need something sub-quadratic.",
+      "wrongExplanations": {
+        "0": "4e10 operations is not feasible in 1s in Python.",
+        "2": "I/O speed does not reduce algorithmic checks from 4e10."
+      },
+      "hint": "Estimate n*m where n=m=200000.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "What preprocessing helps make consistent comparisons between applicants and apartments?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Sort both the applicants and the apartments",
+          "isCode": false
+        },
+        {
+          "label": "Sort only the applicants",
+          "isCode": false
+        },
+        {
+          "label": "Sort only the apartments",
+          "isCode": false
+        },
+        {
+          "label": "Do not sort either list",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Sorting both lets you compare the smallest remaining values and decide how to proceed.",
+      "wrongExplanations": {
+        "1": "Unsorted apartments can still cause inconsistent choices.",
+        "3": "Unsorted order is what causes problems."
+      },
+      "hint": "After sorting, comparing current smallest elements is meaningful.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "With both lists sorted ascending, compare current applicant a[i] and apartment b[j]. If b[j] < a[i] - k, what should you do?",
+      "diagram": "a (desired):   a[i]  <= a[i+1] <= ...\nb (sizes):      b[j]  <= b[j+1] <= ...\nWe see b[j] is too small even for a[i].",
+      "options": [
+        {
+          "label": "Skip this apartment (advance j)",
+          "isCode": false
+        },
+        {
+          "label": "Skip this applicant (advance i)",
+          "isCode": false
+        },
+        {
+          "label": "Match them anyway and count +1",
+          "isCode": false
+        },
+        {
+          "label": "Decrease k to force a fit",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "If b[j] is too small for the smallest remaining applicant, it won't fit any later (larger) applicant either. Move j.",
+      "wrongExplanations": {
+        "1": "a[i] might fit a larger apartment; skipping a[i] is unnecessary.",
+        "2": "They don't satisfy the acceptance range."
+      },
+      "hint": "Future applicants want at least as much size as a[i].",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Building the Idea",
+      "questionText": "Still with sorted lists: If b[j] > a[i] + k, what should you do?",
+      "diagram": "a[i] ... [a[i]-k, a[i]+k] ... b[j] (too large)\nA larger apartment might fit someone with a larger desired size.",
+      "options": [
+        {
+          "label": "Advance j (try a smaller apartment)",
+          "isCode": false
+        },
+        {
+          "label": "Advance i (try the next applicant)",
+          "isCode": false
+        },
+        {
+          "label": "Count a match and advance both",
+          "isCode": false
+        },
+        {
+          "label": "Restart from the beginning",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "If b[j] is too large for a[i], a larger desired size may accept it. Move to next applicant.",
+      "wrongExplanations": {
+        "0": "Apartments are sorted ascending; there is no smaller one before j.",
+        "2": "They don't fit within [a[i]-k, a[i]+k]."
+      },
+      "hint": "A larger desired size widens the acceptable upper bound.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "If a[i]-k ≤ b[j] ≤ a[i]+k, what is the best action?",
+      "diagram": "a[i] target range: [a[i]-k .... a[i]+k]\nb[j] lies inside.",
+      "options": [
+        {
+          "label": "Advance i only",
+          "isCode": false
+        },
+        {
+          "label": "Advance j only",
+          "isCode": false
+        },
+        {
+          "label": "Count a match, advance both i and j",
+          "isCode": false
+        },
+        {
+          "label": "Do nothing and look ahead further",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "They are compatible; match them and move on to the next applicant and apartment.",
+      "wrongExplanations": {
+        "0": "Leaving b[j] for later risks blocking better matches.",
+        "1": "Leaving a[i] unmatched is unnecessary when it fits."
+      },
+      "hint": "Each item can be used once; move past both when matched.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "Trace this case: a=[10,20,30], b=[12,19,30], k=2. How many matches using the above rules?",
+      "diagram": "Both lists sorted already.",
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "10↔12, 20↔19, 30↔30 all fit within ±2. Total=3.",
+      "wrongExplanations": {
+        "1": "Check all pairs in order; all three match.",
+        "3": "At least one pair (30↔30) obviously matches."
+      },
+      "hint": "Apply the three cases at each step.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "Trace: a=[10,20,100], b=[5,18,25], k=3. How many matches?",
+      "diagram": "Start i=0,j=0.\n- b[0]=5 < 7 → j++\n- b[1]=18 > 13 → i++\n- b[1]=18 within [17,23] for a[1]=20 → match\n- Then 100 vs 25 → 25 < 97 → j++ (end)",
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Only 20↔18 can match. Others are too far. Total=1.",
+      "wrongExplanations": {
+        "2": "There is no apartment near 100; 25 is too small by a wide margin.",
+        "0": "20 and 18 differ by 2 ≤ 3, so they match."
+      },
+      "hint": "Carefully apply bounds [a[i]-k, a[i]+k] at each step.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "Why is it safe to discard b[j] when b[j] < a[i] - k (with sorted lists)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Because later applicants have ≥ desired size, so b[j] won't fit any of them if it doesn't fit a[i]",
+          "isCode": false
+        },
+        {
+          "label": "Because k will decrease as we go",
+          "isCode": false
+        },
+        {
+          "label": "Because later apartments are smaller",
+          "isCode": false
+        },
+        {
+          "label": "Because equality at bounds is not allowed",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "If the smallest applicant can't accept it, no larger desired size will. Discarding it is safe.",
+      "wrongExplanations": {
+        "1": "k is fixed for the entire input.",
+        "3": "Bounds are inclusive; equality is allowed."
+      },
+      "hint": "Monotonicity of sorted sequences is the key.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "After sorting both lists, if you scan applicants and for each one search from the start of apartments to find a fit, what is the time complexity?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n*m)",
+          "isCode": false
+        },
+        {
+          "label": "O(n + m)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log m)",
+          "isCode": false
+        },
+        {
+          "label": "O(n + m log m)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Restarting from the beginning for each applicant is O(n*m). Keep a moving position instead.",
+      "wrongExplanations": {
+        "1": "A single pass is O(n+m), but this approach isn't a single pass.",
+        "2": "There is no logarithmic search here; it restarts linearly."
+      },
+      "hint": "Count how many apartment positions you look at repeatedly.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Building the Idea",
+      "questionText": "Are the bounds inclusive? For a=50, k=7, is b=43 or b=57 acceptable?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, both 43 and 57 are acceptable",
+          "isCode": false
+        },
+        {
+          "label": "Only 43 is acceptable",
+          "isCode": false
+        },
+        {
+          "label": "Only 57 is acceptable",
+          "isCode": false
+        },
+        {
+          "label": "Neither is acceptable",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Range is [a-k, a+k] = [43,57], inclusive; both endpoints are valid.",
+      "wrongExplanations": {
+        "1": "The upper bound is inclusive too.",
+        "3": "Both endpoints are within the allowed range."
+      },
+      "hint": "Check x-k and x+k in the statement.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Set up input reading efficiently and start main. Choose the best snippet.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\ndef main():\n    data = sys.stdin.read().strip().split()",
+          "isCode": true
+        },
+        {
+          "label": "def main():\n    data = input().split()",
+          "isCode": true
+        },
+        {
+          "label": "import sys\ndef main():\n    data = sys.stdin.readline().split()",
+          "isCode": true
+        },
+        {
+          "label": "def main():\n    data = []\n    while True:\n        data += input().split()",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Reading all tokens once is simple and fast for this problem size.",
+      "wrongExplanations": {
+        "2": "readline reads only one line; here input spans multiple lines.",
+        "3": "Infinite loop without termination condition will hang."
+      },
+      "hint": "We need to consume all integers from stdin.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\ndef main():\n    data = sys.stdin.read().strip().split()",
+      "codeLabel": "Imports and read all tokens"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Parse n, m, k from the token list using an iterator.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    it = iter(data)\n    n = int(next(it)); m = int(next(it)); k = int(next(it))",
+          "isCode": true
+        },
+        {
+          "label": "    n, m, k = map(int, data[:3])",
+          "isCode": true
+        },
+        {
+          "label": "    it = iter(data)\n    n = int(it.next()); m = int(it.next()); k = int(it.next())",
+          "isCode": true
+        },
+        {
+          "label": "    it = iter(data)\n    n = int(next(it)); k = int(next(it)); m = int(next(it))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "An iterator lets us consume tokens in order for the lists as well.",
+      "wrongExplanations": {
+        "1": "Slicing does not advance a shared position for subsequent reads.",
+        "2": "it.next() is not valid in Python 3."
+      },
+      "hint": "We want to advance through data without manual indexing.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    it = iter(data)\n    n = int(next(it)); m = int(next(it)); k = int(next(it))",
+      "codeLabel": "Parse n, m, k"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Read the n desired sizes into list a.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    a = [int(next(it)) for _ in range(n)]",
+          "isCode": true
+        },
+        {
+          "label": "    a = [int(next(it)) for _ in range(m)]",
+          "isCode": true
+        },
+        {
+          "label": "    a = list(map(int, next(it).split()))",
+          "isCode": true
+        },
+        {
+          "label": "    a = []; \n    for _ in range(n): a.append(int(it))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Consume the next n integers from the shared iterator.",
+      "wrongExplanations": {
+        "1": "Should read n values for a, not m.",
+        "2": "next(it) returns a single token, not a full line to split."
+      },
+      "hint": "Use the same iterator to pull exactly n integers.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    a = [int(next(it)) for _ in range(n)]",
+      "codeLabel": "Read a"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Read the m apartment sizes into list b.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    b = [int(next(it)) for _ in range(m)]",
+          "isCode": true
+        },
+        {
+          "label": "    b = [int(next(it)) for _ in range(n)]",
+          "isCode": true
+        },
+        {
+          "label": "    b = list(map(int, data))",
+          "isCode": true
+        },
+        {
+          "label": "    b = a[:m]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Consume the next m integers for b.",
+      "wrongExplanations": {
+        "1": "b has length m, not n.",
+        "3": "b must come from input tokens, not copied from a."
+      },
+      "hint": "Symmetric to how you read a.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    b = [int(next(it)) for _ in range(m)]",
+      "codeLabel": "Read b"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Sort both lists ascending before scanning.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    a.sort()\n    b.sort()",
+          "isCode": true
+        },
+        {
+          "label": "    a.sort(reverse=True)\n    b.sort(reverse=True)",
+          "isCode": true
+        },
+        {
+          "label": "    a = sorted(a)\n    # leave b as-is",
+          "isCode": true
+        },
+        {
+          "label": "    a = list(set(a)); b = list(set(b))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Sort both ascending to compare current smallest values correctly.",
+      "wrongExplanations": {
+        "1": "Descending order complicates comparisons written for ascending.",
+        "3": "Removing duplicates changes the problem and undercounts."
+      },
+      "hint": "We want smallest-on-left for both lists.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    a.sort()\n    b.sort()",
+      "codeLabel": "Sort a and b"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Initialize indices and set up the main loop.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    i = j = 0\n    cnt = 0\n    while i < n and j < m:",
+          "isCode": true
+        },
+        {
+          "label": "    i = j = 1\n    cnt = 0\n    while i <= n and j <= m:",
+          "isCode": true
+        },
+        {
+          "label": "    i = j = 0\n    cnt = 0\n    while i < n or j < m:",
+          "isCode": true
+        },
+        {
+          "label": "    i = 0; j = m-1\n    cnt = 0\n    while i < n and j >= 0:",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Start from the beginning of both lists and loop while both have elements.",
+      "wrongExplanations": {
+        "1": "Starting at 1 and using <= risks IndexError.",
+        "3": "We compare smallest with smallest, not smallest with largest."
+      },
+      "hint": "Use zero-based indices and stop when either list ends.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    i = j = 0\n    cnt = 0\n    while i < n and j < m:",
+      "codeLabel": "Initialize and loop"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "Fill the three-way comparison body.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "        if b[j] < a[i] - k:\n            j += 1\n        elif b[j] > a[i] + k:\n            i += 1\n        else:\n            cnt += 1\n            i += 1\n            j += 1",
+          "isCode": true
+        },
+        {
+          "label": "        if b[j] <= a[i] - k:\n            j += 1\n        elif b[j] >= a[i] + k:\n            i += 1\n        else:\n            cnt += 1\n            i += 1\n            j += 1",
+          "isCode": true
+        },
+        {
+          "label": "        if a[i] - k < b[j] and b[j] < a[i] + k:\n            cnt += 1\n            i += 1\n            j += 1\n        elif b[j] < a[i] - k:\n            i += 1\n        else:\n            j += 1",
+          "isCode": true
+        },
+        {
+          "label": "        if abs(a[i] - b[j]) <= k:\n            cnt += 1\n            j += 1\n        else:\n            i += 1",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Use strict < and > for the out-of-range cases and an inclusive match in the else.",
+      "wrongExplanations": {
+        "1": "Using <=/>= rejects boundary-equal values that should match.",
+        "3": "On mismatch, you must decide whether to advance i or j based on which side is too small/large."
+      },
+      "hint": "Bounds are inclusive for matching; be careful with <= vs <.",
+      "isCodeBuilding": true,
+      "codeSnippet": "        if b[j] < a[i] - k:\n            j += 1\n        elif b[j] > a[i] + k:\n            i += 1\n        else:\n            cnt += 1\n            i += 1\n            j += 1",
+      "codeLabel": "Three-way comparison"
+    },
+    {
+      "id": "q22",
+      "phase": "Writing the Code",
+      "questionText": "Finish by outputting the result and calling main.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    print(cnt)\n\nif __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "    print(i)\n\nif __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "    return cnt\n\nif __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "    sys.stdout.write(cnt)\n\nmain()",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Print the match count and call main under the usual guard.",
+      "wrongExplanations": {
+        "1": "i is an index, not the number of matches.",
+        "3": "sys.stdout.write expects a string; also missing the guard."
+      },
+      "hint": "Standard Python entry point pattern.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    print(cnt)\n\nif __name__ == \"__main__\":\n    main()",
+      "codeLabel": "Output and entry point"
+    },
+    {
+      "id": "q23",
+      "phase": "Verifying the Solution",
+      "questionText": "Run the completed program on the example:\n4 3 5\n60 45 80 60\n30 60 75\nWhat is the output?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Matches: 60↔60 and 80↔75 → 2.",
+      "wrongExplanations": {
+        "0": "At least 60↔60 is a match.",
+        "2": "There are only 3 apartments; not all can match simultaneously."
+      },
+      "hint": "Sort both lists: a=[45,60,60,80], b=[30,60,75]. Apply the rules.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Verifying the Solution",
+      "questionText": "Check edge case: n=3 m=3 k=0; a=[1,1,2], b=[1,2,2]. What does the program print?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Matches: 1↔1, then 1 can't match 2, then 2↔2. Total=2.",
+      "wrongExplanations": {
+        "0": "There are clearly two exact matches available.",
+        "2": "Only two matches exist due to one extra 1 and one extra 2."
+      },
+      "hint": "Equality is required when k=0.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the overall time complexity of the implemented approach?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n log n + m log m)",
+          "isCode": false
+        },
+        {
+          "label": "O(n*m)",
+          "isCode": false
+        },
+        {
+          "label": "O(n + m)",
+          "isCode": false
+        },
+        {
+          "label": "O((n+m)^2)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Sorting both dominates; the linear scan is O(n+m).",
+      "wrongExplanations": {
+        "2": "You must account for sorting costs.",
+        "1": "We avoided pairwise checking."
+      },
+      "hint": "Sum the sort costs plus a single pass.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the extra space complexity beyond storing the input lists?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(1) additional",
+          "isCode": false
+        },
+        {
+          "label": "O(n+m) additional",
+          "isCode": false
+        },
+        {
+          "label": "O(log n + log m) additional",
+          "isCode": false
+        },
+        {
+          "label": "O(k) additional",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We keep a few integers and sort in place; no extra arrays are needed.",
+      "wrongExplanations": {
+        "1": "We do not allocate arrays proportional to input during the scan.",
+        "4": "k does not affect memory usage."
+      },
+      "hint": "We reuse the input lists and only track indices and a counter.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q27",
+      "phase": "Analyzing Complexity",
+      "questionText": "If k is extremely large (e.g., 1e9) and sizes are within [1,1e9], what will the algorithm output?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Always 0",
+          "isCode": false
+        },
+        {
+          "label": "min(n, m)",
+          "isCode": false
+        },
+        {
+          "label": "max(n, m)",
+          "isCode": false
+        },
+        {
+          "label": "Depends on sorting order only",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "All pairs are acceptable, so you can match as many pairs as the smaller list size.",
+      "wrongExplanations": {
+        "0": "Large k makes matching easier, not impossible.",
+        "2": "You cannot match more than the smaller count."
+      },
+      "hint": "If every apartment fits every applicant, what's the limit?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\ndef main():\n    data = sys.stdin.read().strip().split()",
+    "    it = iter(data)\n    n = int(next(it)); m = int(next(it)); k = int(next(it))",
+    "    a = [int(next(it)) for _ in range(n)]",
+    "    b = [int(next(it)) for _ in range(m)]",
+    "    a.sort()\n    b.sort()",
+    "    i = j = 0\n    cnt = 0\n    while i < n and j < m:",
+    "        if b[j] < a[i] - k:\n            j += 1\n        elif b[j] > a[i] + k:\n            i += 1\n        else:\n            cnt += 1\n            i += 1\n            j += 1",
+    "    print(cnt)\n\nif __name__ == \"__main__\":\n    main()"
+  ],
+  "reasoningChain": [
+    {
+      "question": "What sizes are acceptable for an applicant with desired x and allowance k?",
+      "insight": "Use inclusive range [x-k, x+k] to decide acceptance."
+    },
+    {
+      "question": "Is checking all pairs feasible?",
+      "insight": "Full pair checking is too slow; we need structure to reduce comparisons."
+    },
+    {
+      "question": "What preprocessing enables consistent comparison?",
+      "insight": "Sort both lists so we can compare current smallest remaining applicant and apartment."
+    },
+    {
+      "question": "How to progress through sorted lists?",
+      "insight": "Maintain indices i and j; advance j if apartment is too small, advance i if too large, otherwise match and advance both."
+    },
+    {
+      "question": "Why are these moves correct?",
+      "insight": "Monotonicity: if smallest applicant can't take a small apartment, no later applicant can; if an apartment is too big for current, a later larger applicant may accept it."
+    },
+    {
+      "question": "What are complexity and edge considerations?",
+      "insight": "Sorting dominates time (O(n log n + m log m)); scan is linear; handle inclusive boundaries and duplicates; output matches even for extreme k."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1459,
+    "output_tokens": 14598,
+    "input_cost": 0.001824,
+    "output_cost": 0.14598,
+    "total_cost": 0.147804
+  }
+}

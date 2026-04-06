@@ -1,0 +1,988 @@
+{
+  "id": "restaurant-customers-max-overlap",
+  "title": "Restaurant Customers",
+  "difficulty": "intermediate",
+  "tags": [
+    "sorting",
+    "two-pointer",
+    "binary-search"
+  ],
+  "estimatedMinutes": 45,
+  "language": "python",
+  "description": "You are given the arrival and leaving times of n customers in a restaurant.\n\nWhat was the maximum number of customers in the restaurant at any time?\n\nInput:\n- The first line contains an integer n: the number of customers.\n- The next n lines each contain two integers a and b: the arrival and leaving times of a customer.\n\nAll arrival and leaving times are distinct.\n\nOutput:\n- Print a single integer: the maximum number of customers present at the same time.",
+  "examples": [
+    {
+      "input": "3\n5 8\n2 4\n3 9\n",
+      "output": "2\n",
+      "explanation": "Between times 3 and 4 there are two customers (2–4 and 3–9)."
+    }
+  ],
+  "constraints": [
+    "1 ≤ n ≤ 2·10^5",
+    "1 ≤ a < b ≤ 10^9",
+    "All arrival and leaving times are distinct"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "Given two customers with times (1,4) and (2,5), what is the maximum number of customers in the restaurant at any time?",
+      "diagram": "Timeline:\n1----4\n  2------5\nOverlap length: from 2 to 4",
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Between times 2 and 4 both are present, so maximum is 2.",
+      "wrongExplanations": {
+        "0": "There is a clear overlap interval 2–4 with two customers.",
+        "3": "There are only two customers total."
+      },
+      "hint": "Draw the intervals on a line and look for overlap.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "If one customer leaves at time 5 and another arrives at time 5, can they be in the restaurant at the same time?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, both are present at time 5.",
+          "isCode": false
+        },
+        {
+          "label": "This cannot happen under the given constraints.",
+          "isCode": false
+        },
+        {
+          "label": "No, the second arrives only after the first leaves, so count doesn't change.",
+          "isCode": false
+        },
+        {
+          "label": "It depends on whether endpoints are inclusive.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "All arrival and leaving times are distinct, so these times cannot be equal.",
+      "wrongExplanations": {
+        "0": "Times cannot be equal, so this scenario cannot occur.",
+        "2": "The premise assumes equal times, which are disallowed."
+      },
+      "hint": "Re-read the constraint about distinct times.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "For the input intervals (5,8), (2,4), (3,9), what is the maximum number of customers at any time?",
+      "diagram": "2---4\n  3---------9\n      5---8",
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Between 3 and 4, two customers are present ((2,4) and (3,9)).",
+      "wrongExplanations": {
+        "0": "There is overlap (3–4) of two customers.",
+        "3": "All three never overlap at the same time."
+      },
+      "hint": "Check overlaps pairwise to see the maximum at any instant.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "Is it feasible to check every integer time from the minimum arrival to maximum leaving to count customers present?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, because the range is small.",
+          "isCode": false
+        },
+        {
+          "label": "Yes, scanning up to 10^9 steps is fine.",
+          "isCode": false
+        },
+        {
+          "label": "No, times can be as large as 10^9 so scanning every time is too slow.",
+          "isCode": false
+        },
+        {
+          "label": "Only if n ≤ 1000.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "The time range can be up to 10^9; iterating each time would be far too slow.",
+      "wrongExplanations": {
+        "0": "The range can be very large.",
+        "1": "10^9 iterations exceed the time limit."
+      },
+      "hint": "Consider the worst-case time range implied by constraints.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Exploring Approaches",
+      "questionText": "At which times can the number of customers change?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "At every integer time between min and max.",
+          "isCode": false
+        },
+        {
+          "label": "Only at customer-specific midpoints.",
+          "isCode": false
+        },
+        {
+          "label": "Only at leaving times.",
+          "isCode": false
+        },
+        {
+          "label": "At arrival and leaving times.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 3,
+      "explanation": "Counts change only when someone arrives or leaves.",
+      "wrongExplanations": {
+        "0": "Nothing changes between events.",
+        "2": "Arrivals also change the count."
+      },
+      "hint": "When does the count increment or decrement?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "To efficiently compute the maximum, how should you process these arrival and leaving times?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Sort the times and process them in increasing order.",
+          "isCode": false
+        },
+        {
+          "label": "Use them in the input order without reordering.",
+          "isCode": false
+        },
+        {
+          "label": "Put times in a hash map keyed by value and iterate keys arbitrarily.",
+          "isCode": false
+        },
+        {
+          "label": "Randomly shuffle times to avoid bias.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Processing in chronological order lets you update the count correctly.",
+      "wrongExplanations": {
+        "1": "Input order is arbitrary and not chronological.",
+        "2": "Iterating map keys doesn't guarantee increasing order."
+      },
+      "hint": "Chronological order preserves how the count evolves over time.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "You have a sorted list of arrivals and a sorted list of leavings. How do you decide what to process next?",
+      "diagram": "arrivals: a[i] ...\nleavings: d[j] ...\nCompare a[i] and d[j]",
+      "options": [
+        {
+          "label": "Always process the next arrival first.",
+          "isCode": false
+        },
+        {
+          "label": "Always process the next leaving first.",
+          "isCode": false
+        },
+        {
+          "label": "Process whichever of the next arrival or next leaving has the smaller time.",
+          "isCode": false
+        },
+        {
+          "label": "Process both at once to keep counts balanced.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "The next change happens at the earlier of the two times.",
+      "wrongExplanations": {
+        "0": "If a leaving is earlier, the count must decrease first.",
+        "1": "If an arrival is earlier, the count must increase first."
+      },
+      "hint": "Which time occurs next on the timeline?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Building the Idea",
+      "questionText": "Why sort both the arrivals array A and the leavings array B?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "To match each arrival with its leaving by index.",
+          "isCode": false
+        },
+        {
+          "label": "To reduce memory usage.",
+          "isCode": false
+        },
+        {
+          "label": "To avoid reading all inputs.",
+          "isCode": false
+        },
+        {
+          "label": "So we can step through time in order and update the current count correctly.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 3,
+      "explanation": "Sorting lets us process changes in chronological order.",
+      "wrongExplanations": {
+        "0": "Indices no longer correspond to original pairs after sorting.",
+        "1": "Sorting does not change memory usage significantly."
+      },
+      "hint": "We want to simulate the timeline of changes.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "When A[i] < B[j] (an arrival comes before the next leaving), how should the current count change?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Increase current by 1 and consider updating the maximum.",
+          "isCode": false
+        },
+        {
+          "label": "Decrease current by 1 because we handled an event.",
+          "isCode": false
+        },
+        {
+          "label": "Leave current unchanged until both are processed.",
+          "isCode": false
+        },
+        {
+          "label": "Reset current to 0.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "An arrival increases the number of customers by 1; update the maximum if needed.",
+      "wrongExplanations": {
+        "1": "Arrivals increase, not decrease, the count.",
+        "2": "Counts change immediately at arrivals."
+      },
+      "hint": "Arrival means one more customer is present.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "When A[i] > B[j] (a leaving comes before the next arrival), how should the current count change?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Increase current by 1.",
+          "isCode": false
+        },
+        {
+          "label": "Decrease current by 1.",
+          "isCode": false
+        },
+        {
+          "label": "Set current to the maximum so far.",
+          "isCode": false
+        },
+        {
+          "label": "Do nothing until the next arrival.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "A leaving decreases the number of customers by 1.",
+      "wrongExplanations": {
+        "0": "A leaving does not add customers.",
+        "3": "The count changes at the leaving time."
+      },
+      "hint": "Someone leaves; the count should go down by one.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "When should you update the running maximum?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "After every event (arrival or leaving).",
+          "isCode": false
+        },
+        {
+          "label": "Only after leavings, because count stabilizes.",
+          "isCode": false
+        },
+        {
+          "label": "Right after increasing the current count due to an arrival.",
+          "isCode": false
+        },
+        {
+          "label": "Only at the very end.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "The maximum can only increase when an arrival happens and current goes up.",
+      "wrongExplanations": {
+        "0": "After a leaving, current decreases and won't increase the maximum.",
+        "3": "Delaying misses intermediate peaks."
+      },
+      "hint": "When can the peak ever increase?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "Consider A = [2,3,5] and B = [4,8,9] (from intervals (2,4), (3,9), (5,8)). What maximum will be found by the described process?",
+      "diagram": "Sorted arrivals: 2,3,5\nSorted leavings: 4,8,9",
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Arrivals at 2 and 3 before first leaving at 4 make current reach 2; it never reaches 3.",
+      "wrongExplanations": {
+        "0": "There are times (2–4) with two customers.",
+        "2": "Three never overlap simultaneously."
+      },
+      "hint": "Count arrivals before the first leaving.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "What loop condition safely processes events without going out of bounds and still finds the correct maximum?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "while i <= n and j <= n:",
+          "isCode": true
+        },
+        {
+          "label": "while True: (break when done)",
+          "isCode": true
+        },
+        {
+          "label": "while i < n or j < n:",
+          "isCode": true
+        },
+        {
+          "label": "while i < n and j < n:",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 3,
+      "explanation": "Stopping when either list is exhausted is safe: remaining events cannot increase the maximum beyond the last arrival processed.",
+      "wrongExplanations": {
+        "0": "Using <= risks accessing out-of-range indices.",
+        "2": "Using or risks accessing beyond the end of one list."
+      },
+      "hint": "Ensure i and j are valid before accessing A[i] or B[j].",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Writing the Code",
+      "questionText": "Choose the input-reading snippet that parses n and prepares a token iterator for fast reading.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\n\ndata = sys.stdin.read().strip().split()\nit = iter(data)\nn = int(next(it))",
+          "isCode": true
+        },
+        {
+          "label": "n = int(input().strip())\n# we'll read pairs later with input()",
+          "isCode": true
+        },
+        {
+          "label": "import sys\nn = int(sys.stdin.readline())\n# not reading the rest yet",
+          "isCode": true
+        },
+        {
+          "label": "data = sys.stdin.read().split()\nn = int(data.pop(0))\n# no iterator needed",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Reading all tokens and using an iterator is fast and matches subsequent token-by-token parsing.",
+      "wrongExplanations": {
+        "1": "Later snippets expect an iterator ‘it’ for next(it).",
+        "3": "Subsequent code uses next(it); no iterator here will break."
+      },
+      "hint": "Subsequent code uses next(it).",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\n\ndata = sys.stdin.read().strip().split()\nit = iter(data)\nn = int(next(it))",
+      "codeLabel": "Read input tokens"
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Initialize containers for arrivals and leavings.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "arr = []\ndep = []",
+          "isCode": true
+        },
+        {
+          "label": "arr = [0] * n\ndep = [0] * n",
+          "isCode": true
+        },
+        {
+          "label": "times = []  # store (a,b) pairs",
+          "isCode": true
+        },
+        {
+          "label": "arr = set()\ndep = set()",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We will append values; dynamic lists are appropriate.",
+      "wrongExplanations": {
+        "1": "We will use append, not indexed assignment; pre-allocation is unnecessary.",
+        "3": "Sets lose order and allow only unique elements, not suitable here."
+      },
+      "hint": "We’ll push values as we read them.",
+      "isCodeBuilding": true,
+      "codeSnippet": "arr = []\ndep = []",
+      "codeLabel": "Init arrays"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Fill the arrivals and leavings from the token iterator.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "for _ in range(n):\n    a = int(next(it)); b = int(next(it))\n    arr.append(a); dep.append(b)",
+          "isCode": true
+        },
+        {
+          "label": "for _ in range(n):\n    a = int(next(it)); b = int(next(it))\n    dep.append(a); arr.append(b)",
+          "isCode": true
+        },
+        {
+          "label": "for _ in range(n):\n    a, b = map(int, input().split())\n    arr.append(a); dep.append(b)",
+          "isCode": true
+        },
+        {
+          "label": "for _ in range(n):\n    arr.append(int(next(it)))\n    dep.append(int(next(it)))\n    arr.append(int(next(it)))  # read extra by mistake",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Read a then b for each customer and append to their respective lists.",
+      "wrongExplanations": {
+        "1": "Swapping a and b corrupts arrivals vs leavings.",
+        "2": "Mixing input() with iterator causes mismatch and slowdown."
+      },
+      "hint": "Keep using next(it) consistently.",
+      "isCodeBuilding": true,
+      "codeSnippet": "for _ in range(n):\n    a = int(next(it)); b = int(next(it))\n    arr.append(a); dep.append(b)",
+      "codeLabel": "Read pairs"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Sort the arrivals and leavings to process times in order.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "arr.sort()\ndep.sort()",
+          "isCode": true
+        },
+        {
+          "label": "arr = sorted(arr, reverse=True)\ndep = sorted(dep, reverse=True)",
+          "isCode": true
+        },
+        {
+          "label": "arr.sort(); dep = arr",
+          "isCode": true
+        },
+        {
+          "label": "arr.sort(key=lambda x: -x)\ndep.sort()",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Both should be sorted ascending for chronological processing.",
+      "wrongExplanations": {
+        "1": "Descending order complicates choosing the next event.",
+        "2": "Assigning dep = arr loses the departure list."
+      },
+      "hint": "We want increasing time order in both lists.",
+      "isCodeBuilding": true,
+      "codeSnippet": "arr.sort()\ndep.sort()",
+      "codeLabel": "Sort arrays"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Initialize indices and counters for scanning and tracking the best.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "i = j = 0\ncurr = 0\nbest = 0",
+          "isCode": true
+        },
+        {
+          "label": "i = j = n - 1\ncurr = 0\nbest = 0",
+          "isCode": true
+        },
+        {
+          "label": "i = 0; j = 0\ncurr = 1\nbest = 1",
+          "isCode": true
+        },
+        {
+          "label": "i = 0; j = 0\ncurr = -1\nbest = 0",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Start at the beginning of both lists with zero current and zero best.",
+      "wrongExplanations": {
+        "1": "Starting at the end reverses time.",
+        "2": "Current count is initially zero before any events."
+      },
+      "hint": "Begin before processing any events.",
+      "isCodeBuilding": true,
+      "codeSnippet": "i = j = 0\ncurr = 0\nbest = 0",
+      "codeLabel": "Init indices and counters"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Choose the correct loop header to process events safely.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "while i < n and j < n:",
+          "isCode": true
+        },
+        {
+          "label": "while i <= n and j <= n:",
+          "isCode": true
+        },
+        {
+          "label": "while i < n or j < n:",
+          "isCode": true
+        },
+        {
+          "label": "for k in range(n):",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We compare arr[i] and dep[j], so both i and j must be in range.",
+      "wrongExplanations": {
+        "1": "Using <= will access arr[n] or dep[n], which is out of range.",
+        "2": "Using or allows one index to go out of bounds."
+      },
+      "hint": "We access both arr[i] and dep[j] on each iteration.",
+      "isCodeBuilding": true,
+      "codeSnippet": "while i < n and j < n:",
+      "codeLabel": "Loop header"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Complete the branch for handling an earlier arrival (arr[i] < dep[j]).",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    if arr[i] < dep[j]:\n        curr += 1\n        if curr > best:\n            best = curr\n        i += 1",
+          "isCode": true
+        },
+        {
+          "label": "    if arr[i] <= dep[j]:\n        curr += 1\n        best = max(best, curr)\n        j += 1",
+          "isCode": true
+        },
+        {
+          "label": "    if arr[i] < dep[j]:\n        best = max(best, curr)\n        curr += 1\n        i += 1",
+          "isCode": true
+        },
+        {
+          "label": "    if arr[i] < dep[j]:\n        curr += 1\n        i += 1\n        j += 1",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "On arrival, increment current, update best, and advance i.",
+      "wrongExplanations": {
+        "1": "Advancing j on arrival mixes indices; also <= tie handling isn’t needed here.",
+        "3": "Advancing both skips a departure that hasn't happened yet."
+      },
+      "hint": "Only advance the pointer of the event you processed.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    if arr[i] < dep[j]:\n        curr += 1\n        if curr > best:\n            best = curr\n        i += 1",
+      "codeLabel": "Arrival branch"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "Complete the else-branch for handling a leaving and finish with output.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    else:\n        curr -= 1\n        j += 1\nprint(best)",
+          "isCode": true
+        },
+        {
+          "label": "    else:\n        j += 1\n        curr -= 1\n        print(best)",
+          "isCode": true
+        },
+        {
+          "label": "    else:\n        curr += 1\n        j += 1\nprint(curr)",
+          "isCode": true
+        },
+        {
+          "label": "    else:\n        curr -= 1\n        i += 1\nprint(best)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "On leaving, decrement current and advance j. After the loop, print best.",
+      "wrongExplanations": {
+        "1": "Printing inside the loop would print multiple lines and before processing all events.",
+        "3": "Advancing i in the leaving branch skips an arrival."
+      },
+      "hint": "Adjust only the departure index in this branch.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    else:\n        curr -= 1\n        j += 1\nprint(best)",
+      "codeLabel": "Departure branch and output"
+    },
+    {
+      "id": "q22",
+      "phase": "Verifying the Solution",
+      "questionText": "What does your program print for the sample input:\n3\n5 8\n2 4\n3 9",
+      "diagram": "arr: [2,3,5]\ndep: [4,8,9]\nProcess: +1 at 2 -> 1, +1 at 3 -> 2, -1 at 4 -> 1, ...",
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Maximum reaches 2 between 3 and 4.",
+      "wrongExplanations": {
+        "0": "There are two customers between times 3 and 4.",
+        "2": "Three intervals never overlap at once."
+      },
+      "hint": "List events in order: 2(A), 3(A), 4(L), 5(A), 8(L), 9(L).",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q23",
+      "phase": "Verifying the Solution",
+      "questionText": "For input:\n5\n1 4\n2 5\n7 8\n3 9\n10 11\nWhat is the output?",
+      "diagram": "arr: [1,2,3,7,10]\ndep: [4,5,8,9,11]\nBefore 4, three arrivals have occurred.",
+      "options": [
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Three are present between times 3 and 4 (1–4, 2–5, 3–9).",
+      "wrongExplanations": {
+        "0": "There is a moment with three overlapping intervals.",
+        "2": "Only three overlap at most, not four."
+      },
+      "hint": "Count arrivals before the first departure at time 4.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Verifying the Solution",
+      "questionText": "In the same input from the previous question, how many arrivals are processed before the first departure is processed?",
+      "diagram": "arr: [1,2,3,7,10]\ndep: [4,5,8,9,11]\nCompare arr[i] to dep[0]=4.",
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "arrivals 1, 2, and 3 are all < 4, so three arrivals happen before the first departure.",
+      "wrongExplanations": {
+        "0": "Both 2 and 3 are also before 4.",
+        "1": "3 is still before 4, so it's three arrivals."
+      },
+      "hint": "Count how many a[i] < 4.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the overall time complexity of this approach?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(log n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Sorting two lists dominates with O(n log n); the merge-like scan is O(n).",
+      "wrongExplanations": {
+        "0": "There is no nested loop over n.",
+        "2": "Sorting costs more than linear time."
+      },
+      "hint": "Account for sorting plus a single pass.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the additional space complexity (excluding input storage)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(1)",
+          "isCode": false
+        },
+        {
+          "label": "O(log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "We store two lists of length n for arrivals and leavings.",
+      "wrongExplanations": {
+        "0": "We store O(n) values in arrays.",
+        "1": "No recursion or tree structure needs log space."
+      },
+      "hint": "We keep separate arrays for a and b.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q27",
+      "phase": "Analyzing Complexity",
+      "questionText": "For n = 1 with an interval (a, b) where a < b, what should the program output?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "b - a",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "It depends on the values of a and b.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "With one customer, the maximum number present at any time is 1.",
+      "wrongExplanations": {
+        "0": "We’re not asked for duration, but max count.",
+        "1": "There is at least one customer present between a and b."
+      },
+      "hint": "How many customers can be present with a single interval?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\n\ndata = sys.stdin.read().strip().split()\nit = iter(data)\nn = int(next(it))",
+    "arr = []\ndep = []",
+    "for _ in range(n):\n    a = int(next(it)); b = int(next(it))\n    arr.append(a); dep.append(b)",
+    "arr.sort()\ndep.sort()",
+    "i = j = 0\ncurr = 0\nbest = 0",
+    "while i < n and j < n:",
+    "    if arr[i] < dep[j]:\n        curr += 1\n        if curr > best:\n            best = curr\n        i += 1",
+    "    else:\n        curr -= 1\n        j += 1\nprint(best)"
+  ],
+  "reasoningChain": [
+    {
+      "question": "At which moments can the number of customers change?",
+      "insight": "Only at arrival and leaving times; nothing changes between these events."
+    },
+    {
+      "question": "How should we process these times to reflect the count over time?",
+      "insight": "Sort the arrival and leaving times to process them in increasing order."
+    },
+    {
+      "question": "How do we decide which event to process next when stepping through time?",
+      "insight": "Compare the next arrival and next leaving; process the earlier one."
+    },
+    {
+      "question": "How does each event affect the current count and maximum?",
+      "insight": "Arrival increases current and may update maximum; leaving decreases current."
+    },
+    {
+      "question": "What loop structure and termination condition ensure safety and correctness?",
+      "insight": "Advance two indices while both are in range; this avoids out-of-bounds and finds the maximum."
+    },
+    {
+      "question": "What performance can we expect?",
+      "insight": "Sorting dominates to O(n log n); scanning is O(n), with O(n) extra space for the arrays."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1357,
+    "output_tokens": 14086,
+    "input_cost": 0.001696,
+    "output_cost": 0.14086,
+    "total_cost": 0.142556
+  }
+}

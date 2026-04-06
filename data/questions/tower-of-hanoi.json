@@ -1,0 +1,979 @@
+{
+  "id": "tower-of-hanoi-guided-builder",
+  "title": "Tower of Hanoi",
+  "difficulty": "beginner",
+  "tags": [
+    "simulation"
+  ],
+  "estimatedMinutes": 45,
+  "language": "python",
+  "description": "The Tower of Hanoi game consists of three stacks (left, middle and right) and n round disks of different sizes. Initially, the left stack has all the disks, in increasing order of size from top to bottom.\n\nThe goal is to move all the disks to the right stack using the middle stack. On each move you can move the uppermost disk from a stack to another stack. In addition, it is not allowed to place a larger disk on a smaller disk.\n\nYour task is to find a solution that minimizes the number of moves.\n\nInput: A single integer n (1 ≤ n ≤ 16).\n\nOutput: First print an integer k: the minimum number of moves.\n\nAfter this, print k lines that describe the moves. Each line has two integers a and b: you move a disk from stack a to stack b.",
+  "examples": [
+    {
+      "input": "2",
+      "output": "3\n1 2\n1 3\n2 3",
+      "explanation": "Minimum moves for 2 disks is 3. A valid sequence is shown."
+    }
+  ],
+  "constraints": [
+    "1 ≤ n ≤ 16",
+    "Time Limit: 1.00 s",
+    "Memory Limit: 512 MB"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "If n = 1 (one disk on the left stack), what is the minimum number of moves to get it to the right stack?",
+      "diagram": "Stacks (top to bottom):\n1: [1]\n2: []\n3: []",
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "With one disk, you move it directly from 1 to 3 in one move. Zero is impossible because the disk must move.",
+      "wrongExplanations": {
+        "0": "You must move the disk from stack 1 to 3; zero moves won't change the state.",
+        "2": "Two moves are unnecessary because a single move can place it directly on the right stack."
+      },
+      "hint": "You can move the top disk directly to any other stack if it doesn't violate size rules.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "For n = 2 (disks 1 and 2 on the left, 1 on top), what is the minimum number of moves needed?",
+      "diagram": "Initial:\n1: [1,2]\n2: []\n3: []",
+      "options": [
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "A shortest sequence is: 1->2, 1->3, 2->3 (3 moves). Fewer moves cannot move disk 2 legally.",
+      "wrongExplanations": {
+        "0": "Two moves can't place disk 2 on stack 3 because disk 1 must move away first and then back on top.",
+        "1": "Four moves is not minimal; three moves suffice."
+      },
+      "hint": "Try to simulate: first move the smaller disk off the larger one.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "From the start with n = 2, which first move is allowed under the rules?",
+      "diagram": "Initial stacks:\n1: [1,2]\n2: []\n3: []\nOptions use (from -> to).",
+      "options": [
+        {
+          "label": "2 -> 3",
+          "isCode": false
+        },
+        {
+          "label": "2 -> 1",
+          "isCode": false
+        },
+        {
+          "label": "1 -> 2",
+          "isCode": false
+        },
+        {
+          "label": "3 -> 1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Only moving disk 1 off the top is allowed; 1->2 is valid. Moving disk 2 is blocked by disk 1; moving from stack 3 is impossible initially.",
+      "wrongExplanations": {
+        "0": "Disk 2 is not on top; you cannot move it while disk 1 is above it."
+      },
+      "hint": "You can only move the top disk of any non-empty stack.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "To move the largest disk (disk n) from stack 1 to 3 at any point, what must be true first?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Nothing special; it can be moved anytime.",
+          "isCode": false
+        },
+        {
+          "label": "All smaller disks (1..n-1) must be moved off stack 1 to the middle stack.",
+          "isCode": false
+        },
+        {
+          "label": "You can place it on top of a smaller disk if needed.",
+          "isCode": false
+        },
+        {
+          "label": "All disks must already be on stack 3.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "The largest disk must be free on top; that means moving all smaller disks off stack 1, typically to the spare stack.",
+      "wrongExplanations": {
+        "0": "A larger disk cannot be moved if smaller disks sit on top of it.",
+        "2": "Placing a larger disk on a smaller one is forbidden by the rules."
+      },
+      "hint": "Think about what blocks the largest disk from moving initially.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Exploring Approaches",
+      "questionText": "Suppose you need to move n disks from stack 1 to 3. After moving the top n-1 disks from 1 to 2, what is the next single move?",
+      "diagram": "State after first phase:\n1: [n]\n2: [1..n-1]\n3: []",
+      "options": [
+        {
+          "label": "Move disk 1 from 2 to 3",
+          "isCode": false
+        },
+        {
+          "label": "Move disk n from 1 to 3",
+          "isCode": false
+        },
+        {
+          "label": "Move n-1 disks from 2 to 3 before touching disk n",
+          "isCode": false
+        },
+        {
+          "label": "Move disk n from 1 to 2",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Once smaller disks are off stack 1, you can and should move disk n from 1 to 3 next.",
+      "wrongExplanations": {
+        "2": "You cannot move n-1 disks onto 3 yet because disk n is in the way and 3 is empty."
+      },
+      "hint": "What is the only disk on stack 1 now, and where should it go?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "After moving the largest disk to stack 3, what remains to complete the goal?",
+      "diagram": "State now:\n1: []\n2: [1..n-1]\n3: [n]",
+      "options": [
+        {
+          "label": "Move the n-1 disks from stack 2 to stack 3",
+          "isCode": false
+        },
+        {
+          "label": "Move the n-1 disks from stack 2 back to stack 1",
+          "isCode": false
+        },
+        {
+          "label": "Move the largest disk back to stack 2",
+          "isCode": false
+        },
+        {
+          "label": "Move disk 1 to stack 1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The last phase is to move the n-1 disks from the spare (stack 2) onto the largest disk on stack 3.",
+      "wrongExplanations": {
+        "1": "That would undo the progress and not approach the target.",
+        "2": "Moving the largest disk off its goal stack is unnecessary and counterproductive."
+      },
+      "hint": "Where should all smaller disks end up relative to the largest disk?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "Let T(n) be the minimum number of moves to transfer n disks from stack 1 to 3. Which relationship fits the reasoning above?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "T(n) = T(n-1) + n",
+          "isCode": false
+        },
+        {
+          "label": "T(n) = 2*T(n-1) + 1",
+          "isCode": false
+        },
+        {
+          "label": "T(n) = (T(n-1))^2",
+          "isCode": false
+        },
+        {
+          "label": "T(n) = 3*T(n-1) - 1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "You move n-1 disks (T(n-1)), move the largest (+1), then move n-1 again (another T(n-1)): total 2*T(n-1)+1.",
+      "wrongExplanations": {
+        "0": "Adding n doesn’t match the process of moving two blocks of n-1 disks and one extra move."
+      },
+      "hint": "Count moves: first phase, single move, second phase.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Building the Idea",
+      "questionText": "Given T(1) = 1 and the relation T(n) = 2*T(n-1) + 1, what is T(2)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "T(2) = 2*T(1)+1 = 2*1+1 = 3, matching the earlier simulation.",
+      "wrongExplanations": {
+        "1": "T(2)=4 would arise from a different (incorrect) relation.",
+        "0": "Two moves are insufficient for two disks."
+      },
+      "hint": "Plug T(1)=1 into the formula and compute.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "Using the same relation, what is T(3)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "6",
+          "isCode": false
+        },
+        {
+          "label": "7",
+          "isCode": false
+        },
+        {
+          "label": "8",
+          "isCode": false
+        },
+        {
+          "label": "9",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "T(3) = 2*T(2)+1 = 2*3+1 = 7 moves.",
+      "wrongExplanations": {
+        "0": "This ignores the extra +1 move in the relation.",
+        "2": "Eight would be 2^3 but the exact count is 2^3 - 1 = 7."
+      },
+      "hint": "Use T(2)=3 from the previous question.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "Which closed-form expression matches T(n) computed by T(n) = 2*T(n-1) + 1 with T(1)=1?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "2^n - 1",
+          "isCode": false
+        },
+        {
+          "label": "n^2",
+          "isCode": false
+        },
+        {
+          "label": "n!",
+          "isCode": false
+        },
+        {
+          "label": "3^n",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The sequence 1, 3, 7, 15, ... equals 2^n - 1.",
+      "wrongExplanations": {
+        "3": "3^n grows too fast and does not match small values.",
+        "1": "n^2 does not match T(3)=7 or T(4)=15."
+      },
+      "hint": "Look at T(1)=1, T(2)=3, T(3)=7.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "Which describes a correct high-level procedure to list moves from stack a to b using c with n disks?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Move n-1 disks from a to c; move top disk from a to b; move n-1 disks from c to b.",
+          "isCode": false
+        },
+        {
+          "label": "Move n-1 disks from a to b; move top disk from a to c; move n-1 disks from b to c.",
+          "isCode": false
+        },
+        {
+          "label": "Always move the smallest disk in alternating directions.",
+          "isCode": false
+        },
+        {
+          "label": "Move the largest disk first to b, then rearrange the rest on top of it directly.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "You must first clear the largest disk by moving n-1 to the spare, then move it, then place the n-1 on top at the target.",
+      "wrongExplanations": {
+        "1": "This misplaces the intermediate step and does not free the largest disk correctly.",
+        "3": "You cannot move the largest disk first; smaller disks block it."
+      },
+      "hint": "Think of three phases: clear largest, move it, restore smaller on top at target.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "What is a simple base case for the procedure when describing moves for n disks?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "If n == 0, do nothing (return).",
+          "isCode": false
+        },
+        {
+          "label": "If n == 1, do nothing (return).",
+          "isCode": false
+        },
+        {
+          "label": "If n == 0, print a move from a to b.",
+          "isCode": false
+        },
+        {
+          "label": "No base case needed; it will eventually stop.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Stopping when n==0 leads to clean logic: for n>0, handle the three phases; for n==0, nothing to do.",
+      "wrongExplanations": {
+        "1": "If n==1 you must output one move from a to b, not skip it.",
+        "3": "Without an explicit stopping condition, it won't stop."
+      },
+      "hint": "For the smallest meaningful n, should you output a move or stop?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "After moving the largest disk from a to b, how should you describe the final phase parameters?",
+      "diagram": "We did: move n-1 from a->c, then move one disk a->b. Now finish by moving n-1 from c->b using a.",
+      "options": [
+        {
+          "label": "Move n-1 disks from c to b using a as spare.",
+          "isCode": false
+        },
+        {
+          "label": "Move n-1 disks from a to b using c as spare.",
+          "isCode": false
+        },
+        {
+          "label": "Move n-1 disks from b to c using a as spare.",
+          "isCode": false
+        },
+        {
+          "label": "Move n-1 disks from c to a using b as spare.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "You need to transfer the n-1 disks sitting on c onto b, with a now available as spare.",
+      "wrongExplanations": {
+        "1": "This repeats the first phase, not the final phase after moving the largest disk."
+      },
+      "hint": "Where are the n-1 disks just before the final phase?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Building the Idea",
+      "questionText": "Using the described procedure for n = 2 from stack 1 to 3, which sequence of moves is produced?",
+      "diagram": "Disks: 1 (small), 2 (large).",
+      "options": [
+        {
+          "label": "1 3, 1 2, 3 2",
+          "isCode": false
+        },
+        {
+          "label": "1 2, 1 3, 2 3",
+          "isCode": false
+        },
+        {
+          "label": "1 3, 2 3, 1 3",
+          "isCode": false
+        },
+        {
+          "label": "2 1, 2 3, 1 3",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "First move disk 1 to 2, then disk 2 to 3, then disk 1 to 3.",
+      "wrongExplanations": {
+        "0": "This tries to place disk 1 on 2 first to stack 3, which is not following the three-phase plan.",
+        "2": "You cannot move disk 2 to 3 before freeing it."
+      },
+      "hint": "Follow: 1->2, 1->3, 2->3 or 1->2, 2->3, 1->3? Check carefully.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Start the program structure. Which snippet correctly sets up importing and the main function definition?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\n\ndef solve():",
+          "isCode": true
+        },
+        {
+          "label": "from sys import stdin as solve\n\ndef sys():",
+          "isCode": true
+        },
+        {
+          "label": "def main(sys):\n    import solve",
+          "isCode": true
+        },
+        {
+          "label": "import solve\n\ndef sys():",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need to import sys to read input efficiently and define a function solve().",
+      "wrongExplanations": {
+        "1": "This rebinds names incorrectly and does not define a proper function to call.",
+        "2": "This defines a function with a parameter but does not set up input reading or a solve function."
+      },
+      "hint": "Aim for a simple solve() function after importing sys.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\n\ndef solve():",
+      "codeLabel": "Import and function header"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Read the integer n from standard input inside solve(). Which snippet is best here?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "n = int(sys.stdin.readline().strip())",
+          "isCode": true
+        },
+        {
+          "label": "n = sys.stdin.readline()",
+          "isCode": true
+        },
+        {
+          "label": "n = int(input().strip())\ninput()",
+          "isCode": true
+        },
+        {
+          "label": "n = int()",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Parsing an integer from the line is sufficient; stripping whitespace is safe.",
+      "wrongExplanations": {
+        "1": "This leaves n as a string; later numeric operations would fail.",
+        "2": "Reading input twice can consume extra lines and is unnecessary here."
+      },
+      "hint": "We need an integer value for n.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    n = int(sys.stdin.readline().strip())",
+      "codeLabel": "Read input n"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Prepare to record moves and define the move-listing helper. Which snippet fits inside solve() next?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "moves = []\n\ndef move(k, src, dst, aux):",
+          "isCode": true
+        },
+        {
+          "label": "def move(src, dst, aux):\n    moves = []",
+          "isCode": true
+        },
+        {
+          "label": "moves = None\n\ndef move(k, src, dst):",
+          "isCode": true
+        },
+        {
+          "label": "moves = []\n\ndef move(k):",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need a list to collect moves and a helper with parameters: count and three stacks.",
+      "wrongExplanations": {
+        "1": "Reinitializing moves inside the helper would lose accumulated moves.",
+        "2": "The helper needs all three stack identifiers to direct moves."
+      },
+      "hint": "The helper needs to know how many disks and which stacks are source/target/spare.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    moves = []\n\n    def move(k, src, dst, aux):",
+      "codeLabel": "Moves list and helper header"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Write the stopping condition in the helper. Which is correct?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "if k == 0:\n    return",
+          "isCode": true
+        },
+        {
+          "label": "if k == 1:\n    return",
+          "isCode": true
+        },
+        {
+          "label": "if k < 0:\n    return",
+          "isCode": true
+        },
+        {
+          "label": "if k == 0:\n    print(src, dst)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "When there are zero disks to move, do nothing. For k>0 we will add the proper moves.",
+      "wrongExplanations": {
+        "1": "If k==1 we must record one move; returning would miss it.",
+        "3": "When k==0 there is no move to print."
+      },
+      "hint": "A zero-disk task requires no action.",
+      "isCodeBuilding": true,
+      "codeSnippet": "        if k == 0:\n            return",
+      "codeLabel": "Base case"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Fill the first phase inside the helper: move k-1 disks off the largest disk. Which call is correct?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "move(k-1, src, aux, dst)",
+          "isCode": true
+        },
+        {
+          "label": "move(k-1, aux, src, dst)",
+          "isCode": true
+        },
+        {
+          "label": "move(k-1, dst, src, aux)",
+          "isCode": true
+        },
+        {
+          "label": "move(k-1, src, dst, aux)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Move k-1 from source to spare (aux), using destination as the temporary spare.",
+      "wrongExplanations": {
+        "3": "This would try to finish directly without clearing the largest disk first.",
+        "1": "This reverses the intended source and spare."
+      },
+      "hint": "Before moving the largest from src to dst, put k-1 onto aux.",
+      "isCodeBuilding": true,
+      "codeSnippet": "        move(k-1, src, aux, dst)",
+      "codeLabel": "First phase call"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Record the single move of the largest disk and prepare the final phase. Which pair of lines is correct?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "moves.append((src, dst))\nmove(k-1, aux, dst, src)",
+          "isCode": true
+        },
+        {
+          "label": "move(k-1, aux, dst, src)\nmoves.append((src, dst))",
+          "isCode": true
+        },
+        {
+          "label": "moves.append((dst, src))\nmove(k-1, src, aux, dst)",
+          "isCode": true
+        },
+        {
+          "label": "print(src, dst)\nmove(k-1, aux, src, dst)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "First record moving the largest from src to dst, then move k-1 from aux onto dst using src as spare.",
+      "wrongExplanations": {
+        "1": "You must move the largest before moving the remaining k-1 onto it.",
+        "2": "The recorded order (dst, src) is reversed and the second call repeats the first phase."
+      },
+      "hint": "Between the two phases of k-1 moves, insert the single largest-disk move.",
+      "isCodeBuilding": true,
+      "codeSnippet": "        moves.append((src, dst))\n        move(k-1, aux, dst, src)",
+      "codeLabel": "Record move and second phase"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "Call the helper for the full problem and print the total number of moves before listing them. Which snippet is correct?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "move(n, 1, 3, 2)\nprint((1 << n) - 1)\nfor a, b in moves:\n    print(a, b)",
+          "isCode": true
+        },
+        {
+          "label": "print((1 << n) - 1)\nmove(n, 1, 2, 3)\nfor a, b in moves:\n    print(a, b)",
+          "isCode": true
+        },
+        {
+          "label": "move(n, 1, 3, 2)\nfor a, b in moves:\n    print(a, b)\nprint((1 << n) - 1)",
+          "isCode": true
+        },
+        {
+          "label": "move(n, 1, 2, 3)\nprint((1 << n) - 1)\nfor a, b in moves:\n    print(a, b)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We want moves from 1 to 3 using 2, then print the total first, then list moves.",
+      "wrongExplanations": {
+        "1": "This directs the moves to stack 2 instead of 3; also printing before collecting is fine but target is wrong.",
+        "2": "The count must be printed before the move lines per the required output format."
+      },
+      "hint": "Target is stack 3; print k first, then the k moves.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    move(n, 1, 3, 2)\n    print((1 << n) - 1)\n    for a, b in moves:\n        print(a, b)",
+      "codeLabel": "Run and output"
+    },
+    {
+      "id": "q22",
+      "phase": "Writing the Code",
+      "questionText": "Finally, ensure the solve() function runs when the script is executed. Which snippet is standard?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "if __name__ == \"__main__\":\n    solve()",
+          "isCode": true
+        },
+        {
+          "label": "if __name__ == \"main\":\n    solve()",
+          "isCode": true
+        },
+        {
+          "label": "solve() # always run on import",
+          "isCode": true
+        },
+        {
+          "label": "if name == main:\n    solve()",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "This guard runs solve() only when executed as a script, which is standard and safe.",
+      "wrongExplanations": {
+        "1": "The magic name is \"__main__\", not \"main\".",
+        "2": "Running on import is undesirable for reuse and testing."
+      },
+      "hint": "Use the double-underscore guarded entry point.",
+      "isCodeBuilding": true,
+      "codeSnippet": "if __name__ == \"__main__\":\n    solve()",
+      "codeLabel": "Main guard"
+    },
+    {
+      "id": "q23",
+      "phase": "Verifying the Solution",
+      "questionText": "For n = 3, what is the first move printed by the program?",
+      "diagram": "Expected sequence for n=3:\n1 3\n1 2\n3 2\n1 3\n2 1\n2 3\n1 3",
+      "options": [
+        {
+          "label": "1 2",
+          "isCode": false
+        },
+        {
+          "label": "2 3",
+          "isCode": false
+        },
+        {
+          "label": "1 3",
+          "isCode": false
+        },
+        {
+          "label": "3 1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "The helper first moves the smallest disk from 1 to 3 when solving the first phase for k=1.",
+      "wrongExplanations": {
+        "0": "1 2 happens second in this sequence for n=3."
+      },
+      "hint": "Trace move(3,1,3,2): it begins with move(2,1,2,3) which begins with move(1,1,3,2).",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Verifying the Solution",
+      "questionText": "For n = 2, what total number is printed before the moves?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "The program prints (1<<n) - 1 = 3 for n=2.",
+      "wrongExplanations": {
+        "0": "Two is too small; we saw three moves are needed.",
+        "2": "Four would correspond to 2^2, but we need 2^n - 1."
+      },
+      "hint": "Use the earlier closed form for the minimum moves.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the time needed to generate and print all moves as a function of n?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(2^n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n!)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "There are exactly 2^n - 1 moves; generating and printing each is proportional to that count.",
+      "wrongExplanations": {
+        "0": "It grows exponentially with n, not linearly."
+      },
+      "hint": "Relate time to the number of printed moves.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the maximum additional call stack depth used by the helper when n disks are processed?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(1)",
+          "isCode": false
+        },
+        {
+          "label": "O(log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(2^n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Each level handles one fewer disk until reaching 0, so the depth grows linearly with n.",
+      "wrongExplanations": {
+        "1": "The reduction is by one disk at a time, not by a factor."
+      },
+      "hint": "How many nested calls occur before reaching the base case?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q27",
+      "phase": "Analyzing Complexity",
+      "questionText": "For n = 16, how many moves will be printed by the program?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "65536",
+          "isCode": false
+        },
+        {
+          "label": "65535",
+          "isCode": false
+        },
+        {
+          "label": "32767",
+          "isCode": false
+        },
+        {
+          "label": "131071",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "The count is 2^16 - 1 = 65535.",
+      "wrongExplanations": {
+        "0": "65536 is 2^16, but we subtract 1.",
+        "2": "32767 is 2^15 - 1."
+      },
+      "hint": "Use 2^n - 1 with n = 16.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\n\ndef solve():",
+    "    n = int(sys.stdin.readline().strip())",
+    "    moves = []\n\n    def move(k, src, dst, aux):",
+    "        if k == 0:\n            return",
+    "        move(k-1, src, aux, dst)",
+    "        moves.append((src, dst))\n        move(k-1, aux, dst, src)",
+    "    move(n, 1, 3, 2)\n    print((1 << n) - 1)\n    for a, b in moves:\n        print(a, b)",
+    "if __name__ == \"__main__\":\n    solve()"
+  ],
+  "reasoningChain": [
+    {
+      "question": "What minimal moves are needed for very small n, and what moves are legal?",
+      "insight": "Understand the rules and determine base cases (n=1 needs 1 move; can only move top disk; cannot put larger on smaller)."
+    },
+    {
+      "question": "How do you make room to move the largest disk to the target?",
+      "insight": "Realize smaller disks must be moved off the largest disk to the spare stack before moving it."
+    },
+    {
+      "question": "How many moves does the whole process take in terms of smaller problems?",
+      "insight": "Formulate T(n)=2*T(n-1)+1 and recognize the count is 2^n - 1."
+    },
+    {
+      "question": "How to systematically list the moves to achieve the transfer?",
+      "insight": "Define a procedure: move n-1 from source to spare, move largest to target, move n-1 from spare to target."
+    },
+    {
+      "question": "What is the simplest stopping condition and parameter flow?",
+      "insight": "Use base case n==0 to stop; ensure correct ordering of parameters in both phases."
+    },
+    {
+      "question": "How to implement and output results correctly?",
+      "insight": "Build a helper that appends moves, call it with (1,3,2), print total moves then list them."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1401,
+    "output_tokens": 13257,
+    "input_cost": 0.001751,
+    "output_cost": 0.13257,
+    "total_cost": 0.134321
+  }
+}

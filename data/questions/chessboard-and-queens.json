@@ -1,0 +1,982 @@
+{
+  "id": "chessboard-and-queens",
+  "title": "Chessboard and Queens",
+  "difficulty": "beginner",
+  "tags": [
+    "simulation"
+  ],
+  "estimatedMinutes": 45,
+  "language": "python",
+  "description": "Your task is to place eight queens on a chessboard so that no two queens are attacking each other. As an additional challenge, each square is either free or reserved, and you can only place queens on the free squares. However, the reserved squares do not prevent queens from attacking each other.\n\nInput: eight lines, each with eight characters. Each square is either free (.) or reserved (*).\n\nOutput: Print one integer — the number of ways you can place the queens.",
+  "examples": [
+    {
+      "input": "........\n........\n..*.....\n........\n........\n.....**.\n...*....\n........",
+      "output": "65",
+      "explanation": "Counts all valid placements of 8 queens that avoid rows, columns, and diagonals, and never use a '*' square."
+    }
+  ],
+  "constraints": [
+    "Exactly 8 lines of input",
+    "Each line has exactly 8 characters",
+    "Each character is either '.' or '*'",
+    "Output fits in 32-bit integer"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "Can a valid arrangement have two queens in the same row?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, if they are far apart.",
+          "isCode": false
+        },
+        {
+          "label": "No, because queens attack horizontally.",
+          "isCode": false
+        },
+        {
+          "label": "Yes, if a '*' is between them.",
+          "isCode": false
+        },
+        {
+          "label": "Only if they are on different columns and diagonals.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Queens attack along rows regardless of distance. '*' squares do not block attacks.",
+      "wrongExplanations": {
+        "0": "Distance doesn't matter for queen attacks.",
+        "2": "Reserved squares do not block attacks."
+      },
+      "hint": "How does a queen move in chess?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "We must place 8 queens on an 8×8 board with no two in the same row. How many queens will each valid arrangement have per row?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Exactly one queen per row.",
+          "isCode": false
+        },
+        {
+          "label": "Some rows may have zero and others have two.",
+          "isCode": false
+        },
+        {
+          "label": "At most one per row, total rows used can be fewer than 8.",
+          "isCode": false
+        },
+        {
+          "label": "Depends on '*' positions; could be zero in many rows.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Eight queens across eight rows with no row conflicts implies exactly one per row.",
+      "wrongExplanations": {
+        "1": "Two in a row would attack each other.",
+        "2": "If a row has zero, another row must have two, which is impossible."
+      },
+      "hint": "Eight queens must be placed; no row may hold more than one.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "If some row has all 8 squares reserved ('********'), what does that imply about the number of valid arrangements?",
+      "diagram": "Row r: ********",
+      "options": [
+        {
+          "label": "At least one arrangement still exists.",
+          "isCode": false
+        },
+        {
+          "label": "Exactly one arrangement exists.",
+          "isCode": false
+        },
+        {
+          "label": "No arrangement exists (answer is 0).",
+          "isCode": false
+        },
+        {
+          "label": "You can place two queens in a different row to compensate.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "You must place one queen in every row; if a row has no free squares, it's impossible.",
+      "wrongExplanations": {
+        "0": "There's nowhere to place a queen in that row.",
+        "3": "Placing two in one row is invalid."
+      },
+      "hint": "We need exactly one per row and only on '.' squares.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "Do reserved squares ('*') block a queen's line of attack?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, a '*' blocks attacks like a wall.",
+          "isCode": false
+        },
+        {
+          "label": "No, attacks are unaffected by '*'.",
+          "isCode": false
+        },
+        {
+          "label": "Only blocks diagonal attacks, not straight.",
+          "isCode": false
+        },
+        {
+          "label": "Only blocks if between queens on the same row.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "The statement says reserved squares do not prevent attacks.",
+      "wrongExplanations": {
+        "0": "This contradicts the problem's rule.",
+        "2": "There is no special-case blocking for diagonals."
+      },
+      "hint": "Re-read: \"reserved squares do not prevent queens from attacking each other.\"",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Exploring Approaches",
+      "questionText": "To avoid horizontal conflicts, what is a sound way to try placements?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Place queens row by row, at most one per row.",
+          "isCode": false
+        },
+        {
+          "label": "Place queens anywhere; check conflicts at the very end.",
+          "isCode": false
+        },
+        {
+          "label": "Place queens column by column, allowing multiple per row temporarily.",
+          "isCode": false
+        },
+        {
+          "label": "Pick any 8 free squares and check if valid.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "One per row simplifies checks and guarantees no row conflicts.",
+      "wrongExplanations": {
+        "1": "Late checking wastes work and explores many invalid partials.",
+        "3": "Choosing any 8 is combinatorially huge and inefficient."
+      },
+      "hint": "Tie the number of decisions to the 8 rows.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "When trying to place a queen at (row r, column c), what conditions must hold given earlier rows are placed?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Cell is '.', column c unused, and both diagonals through (r,c) unused.",
+          "isCode": false
+        },
+        {
+          "label": "Cell is '.', and column c unused; diagonals can be checked later.",
+          "isCode": false
+        },
+        {
+          "label": "Cell is '.', and both diagonals unused; column conflicts can be checked later.",
+          "isCode": false
+        },
+        {
+          "label": "Only that the cell is '.'. Other conflicts are inevitable anyway.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We must enforce no conflicts immediately: column and both diagonals must be free, and the cell must be '.'.",
+      "wrongExplanations": {
+        "1": "Diagonal conflicts would invalidate the placement.",
+        "3": "Conflicts must be prevented, not ignored."
+      },
+      "hint": "Check all attack lines from (r,c).",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "Two squares (r1,c1) and (r2,c2) share a down-left/up-right diagonal (\\). Which relation captures this?",
+      "diagram": "Diagonal (\\): r - c is constant",
+      "options": [
+        {
+          "label": "r1 - c1 == r2 - c2",
+          "isCode": false
+        },
+        {
+          "label": "r1 + c1 == r2 + c2",
+          "isCode": false
+        },
+        {
+          "label": "abs(r1 - r2) == abs(c1 - c2) only",
+          "isCode": false
+        },
+        {
+          "label": "r1 == r2 or c1 == c2",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "For one diagonal family, r - c is constant; for the other, r + c is constant.",
+      "wrongExplanations": {
+        "1": "This is for the other diagonal (/).",
+        "2": "This is true for any diagonal relation but not indexable directly."
+      },
+      "hint": "Try examples: (0,0),(1,-1),(2,-2) share r-c.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Building the Idea",
+      "questionText": "Two squares share an up-right/down-left diagonal (/). Which relation captures this?",
+      "diagram": "Diagonal (/): r + c is constant",
+      "options": [
+        {
+          "label": "r1 + c1 == r2 + c2",
+          "isCode": false
+        },
+        {
+          "label": "r1 - c1 == r2 - c2",
+          "isCode": false
+        },
+        {
+          "label": "r1 == r2",
+          "isCode": false
+        },
+        {
+          "label": "c1 == c2",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The other diagonal family is indexed by r + c.",
+      "wrongExplanations": {
+        "1": "That's the (\\) diagonal condition."
+      },
+      "hint": "Check (0,7) and (1,6): sums are equal.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "For r-c on an 8×8 board, r-c ranges from -7 to 7. What offset maps this to nonnegative indices [0..14]?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Add 7",
+          "isCode": false
+        },
+        {
+          "label": "Add 8",
+          "isCode": false
+        },
+        {
+          "label": "Add 6",
+          "isCode": false
+        },
+        {
+          "label": "No offset needed",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Adding 7 maps -7→0 and 7→14.",
+      "wrongExplanations": {
+        "1": "This would map -7→1, 7→15 (out of bounds).",
+        "3": "Negative indices would occur for r<c."
+      },
+      "hint": "What should -7 become so index stays within [0..14]?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "How many distinct diagonals does each of the two diagonal families have on an 8×8 board?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "15 for each family",
+          "isCode": false
+        },
+        {
+          "label": "8 for each family",
+          "isCode": false
+        },
+        {
+          "label": "16 for each family",
+          "isCode": false
+        },
+        {
+          "label": "14 for each family",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Indices r-c∈[-7..7] and r+c∈[0..14] give 15 possible values each.",
+      "wrongExplanations": {
+        "1": "There are more diagonals than rows.",
+        "3": "14 misses one end."
+      },
+      "hint": "Count possible values of r+c for r,c∈[0..7].",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "How should we track used columns and diagonals efficiently?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Boolean arrays: cols[8], d1[15], d2[15]",
+          "isCode": false
+        },
+        {
+          "label": "A full 8×8 array marking all attacked cells",
+          "isCode": false
+        },
+        {
+          "label": "Store coordinates of all queens and scan them each time",
+          "isCode": false
+        },
+        {
+          "label": "Use a single set of tuples for all",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Fixed-size boolean arrays give O(1) checks and are simple to index.",
+      "wrongExplanations": {
+        "1": "Marking an 8×8 grid repeatedly is slower and unnecessary."
+      },
+      "hint": "We need O(1) conflict checks per trial position.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "If we place a queen at (r=3,c=1), which indices should be set to True?",
+      "diagram": "r=3, c=1 =>\n- column index: 1\n- d1 index: r-c+7\n- d2 index: r+c",
+      "options": [
+        {
+          "label": "cols[1], d1[9], d2[4]",
+          "isCode": false
+        },
+        {
+          "label": "cols[3], d1[2], d2[4]",
+          "isCode": false
+        },
+        {
+          "label": "cols[1], d1[2], d2[4]",
+          "isCode": false
+        },
+        {
+          "label": "cols[1], d1[10], d2[2]",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "d1: 3-1+7=9; d2: 3+1=4; column is c=1.",
+      "wrongExplanations": {
+        "2": "d1 needs the +7 offset.",
+        "1": "Column index should be c, not r."
+      },
+      "hint": "Compute r-c+7 and r+c carefully.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "When we have placed queens in all 8 rows (r==8), how should we count this configuration?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Return 1 to count one valid arrangement.",
+          "isCode": false
+        },
+        {
+          "label": "Return 0 because no more rows remain.",
+          "isCode": false
+        },
+        {
+          "label": "Continue trying columns in row 8.",
+          "isCode": false
+        },
+        {
+          "label": "Return the current total without incrementing.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Reaching r==8 means a full valid placement; contribute 1 to the total.",
+      "wrongExplanations": {
+        "1": "This would miss counting valid arrangements."
+      },
+      "hint": "Treat reaching the end as one success.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Writing the Code",
+      "questionText": "Initialize the helper and tracking arrays.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def count_queens(board):\n    n = 8\n    cols = [False] * n\n    d1 = [False] * (2 * n - 1)\n    d2 = [False] * (2 * n - 1)",
+          "isCode": true
+        },
+        {
+          "label": "def count_queens(board):\n    n = 8\n    cols = [True] * n\n    d1 = [True] * (2 * n - 1)\n    d2 = [True] * (2 * n - 1)",
+          "isCode": true
+        },
+        {
+          "label": "def count_queens(board):\n    n = 8\n    cols = [False] * n\n    d1 = [False] * (2 * n)\n    d2 = [False] * (2 * n)",
+          "isCode": true
+        },
+        {
+          "label": "def count_queens(board):\n    n = 8\n    cols = [False] * (2 * n - 1)\n    d1 = [False] * n\n    d2 = [False] * n",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need 8 columns and 15 diagonals each, all starting as unused (False).",
+      "wrongExplanations": {
+        "2": "Diagonal arrays must be length 15 (2*n-1), not 16.",
+        "1": "Starting with True would block all placements."
+      },
+      "hint": "How many diagonals exist in each family on an 8×8 board?",
+      "isCodeBuilding": true,
+      "codeSnippet": "def count_queens(board):\n    n = 8\n    cols = [False] * n\n    d1 = [False] * (2 * n - 1)\n    d2 = [False] * (2 * n - 1)",
+      "codeLabel": "Function header and arrays"
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Define the recursive worker with base case and accumulator.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    def search(r):\n        if r == n:\n            return 1\n        total = 0",
+          "isCode": true
+        },
+        {
+          "label": "    def search(r):\n        if r == n - 1:\n            return 1\n        total = 0",
+          "isCode": true
+        },
+        {
+          "label": "    def search(r):\n        if r == n:\n            return 0\n        total = 1",
+          "isCode": true
+        },
+        {
+          "label": "    def search(r):\n        total = 0\n        if r == n:\n            total += 1\n        return total",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Reaching r==n means one full placement; otherwise start total at 0.",
+      "wrongExplanations": {
+        "1": "We still need to place a queen in row n-1.",
+        "3": "This would return immediately without exploring options."
+      },
+      "hint": "When r==n, we should return immediately with one count.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    def search(r):\n        if r == n:\n            return 1\n        total = 0",
+      "codeLabel": "Recursive worker header"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Loop columns and check if a position is safe and free.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "        for c in range(n):\n            if board[r][c] == '.' and not cols[c] and not d1[r - c + (n - 1)] and not d2[r + c]:",
+          "isCode": true
+        },
+        {
+          "label": "        for c in range(n):\n            if not cols[c] and not d1[r - c] and not d2[r + c]:",
+          "isCode": true
+        },
+        {
+          "label": "        for c in range(n):\n            if board[r][c] == '.' and (not cols[c] or not d1[r - c + (n - 1)] or not d2[r + c]):",
+          "isCode": true
+        },
+        {
+          "label": "        for c in range(n):\n            if board[r][c] == '.' and not cols[c] and not d1[r + c] and not d2[r - c + (n - 1)]:",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We must ensure the cell is '.', column unused, and both diagonals unused with correct indices.",
+      "wrongExplanations": {
+        "1": "Missing the '.' check and missing the + (n-1) offset.",
+        "3": "The two diagonal indices are swapped."
+      },
+      "hint": "Use r-c (with offset) for one diagonal and r+c for the other, all must be free.",
+      "isCodeBuilding": true,
+      "codeSnippet": "        for c in range(n):\n            if board[r][c] == '.' and not cols[c] and not d1[r - c + (n - 1)] and not d2[r + c]:",
+      "codeLabel": "Column loop and guard"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Mark the chosen position as used before going deeper.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "                cols[c] = True\n                d1[r - c + (n - 1)] = True\n                d2[r + c] = True",
+          "isCode": true
+        },
+        {
+          "label": "                cols[r] = True\n                d1[r + c] = True\n                d2[r - c + (n - 1)] = True",
+          "isCode": true
+        },
+        {
+          "label": "                cols[c] = True\n                d1[r + c] = True\n                d2[r - c + (n - 1)] = True",
+          "isCode": true
+        },
+        {
+          "label": "                cols[c] = True\n                d1[r - c] = True\n                d2[r + c] = True",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Mark the column and the two correctly indexed diagonal arrays as True.",
+      "wrongExplanations": {
+        "2": "Diagonal indices are swapped.",
+        "3": "d1 needs the +(n-1) offset."
+      },
+      "hint": "Use c for columns, r-c+(n-1) and r+c for diagonals.",
+      "isCodeBuilding": true,
+      "codeSnippet": "                cols[c] = True\n                d1[r - c + (n - 1)] = True\n                d2[r + c] = True",
+      "codeLabel": "Mark usage"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Accumulate the number of ways after placing at (r,c).",
+      "diagram": null,
+      "options": [
+        {
+          "label": "                total += search(r + 1)",
+          "isCode": true
+        },
+        {
+          "label": "                total = search(r + 1)",
+          "isCode": true
+        },
+        {
+          "label": "                return search(r + 1)",
+          "isCode": true
+        },
+        {
+          "label": "                total += search(r)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need to add results of deeper rows to the running total.",
+      "wrongExplanations": {
+        "1": "Overwrites previous counts from other columns.",
+        "2": "Returning here would skip exploring other columns."
+      },
+      "hint": "We want to consider all valid columns in this row.",
+      "isCodeBuilding": true,
+      "codeSnippet": "                total += search(r + 1)",
+      "codeLabel": "Recurse and add"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "After coming back, undo the marks for (r,c).",
+      "diagram": null,
+      "options": [
+        {
+          "label": "                cols[c] = False\n                d1[r - c + (n - 1)] = False\n                d2[r + c] = False",
+          "isCode": true
+        },
+        {
+          "label": "                cols[r] = False\n                d1[r + c] = False\n                d2[r - c + (n - 1)] = False",
+          "isCode": true
+        },
+        {
+          "label": "                cols[c] = True\n                d1[r - c + (n - 1)] = False\n                d2[r + c] = False",
+          "isCode": true
+        },
+        {
+          "label": "                cols[c] = False\n                d1[r - c] = False\n                d2[r + c] = False",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Reset exactly the entries you set earlier so other columns can be tried safely.",
+      "wrongExplanations": {
+        "1": "Using r for columns and swapping diagonals is incorrect.",
+        "2": "Columns should be reset to False, not kept True."
+      },
+      "hint": "Mirror the indices you set to True before recursing.",
+      "isCodeBuilding": true,
+      "codeSnippet": "                cols[c] = False\n                d1[r - c + (n - 1)] = False\n                d2[r + c] = False",
+      "codeLabel": "Unmark usage"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Finish the worker and return the final count from the helper.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "        return total\n    return search(0)",
+          "isCode": true
+        },
+        {
+          "label": "        return total\n    return total",
+          "isCode": true
+        },
+        {
+          "label": "        return 0\n    return search(0)",
+          "isCode": true
+        },
+        {
+          "label": "        return total\n    return search(r)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Return the accumulated total for this row, and kick off from row 0 in the outer function.",
+      "wrongExplanations": {
+        "2": "Returning 0 discards all counts.",
+        "3": "search(r) uses an undefined r at top level."
+      },
+      "hint": "The outer function should start the process at row 0.",
+      "isCodeBuilding": true,
+      "codeSnippet": "        return total\n    return search(0)",
+      "codeLabel": "Returns"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "Read the 8 lines and print the answer.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "board = [input().strip() for _ in range(8)]\nprint(count_queens(board))",
+          "isCode": true
+        },
+        {
+          "label": "board = input().strip().split()\nprint(count_queens(board))",
+          "isCode": true
+        },
+        {
+          "label": "board = [list(input().strip())]\nprint(count_queens(board))",
+          "isCode": true
+        },
+        {
+          "label": "board = [input for _ in range(8)]\nprint(count_queens(board))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need exactly 8 stripped strings and then print the computed count.",
+      "wrongExplanations": {
+        "1": "split() would read one line into multiple tokens, not 8 lines.",
+        "3": "This stores the input function, not read lines."
+      },
+      "hint": "Collect eight separate lines from standard input.",
+      "isCodeBuilding": true,
+      "codeSnippet": "board = [input().strip() for _ in range(8)]\nprint(count_queens(board))",
+      "codeLabel": "I/O"
+    },
+    {
+      "id": "q22",
+      "phase": "Verifying the Solution",
+      "questionText": "If the first row is \"*******.\", and all other rows are \"........\", which column will be chosen in row 0 when trying options left to right?",
+      "diagram": "Row 0: *******.\nIndices: 0 1 2 3 4 5 6 7",
+      "options": [
+        {
+          "label": "Column 0",
+          "isCode": false
+        },
+        {
+          "label": "Column 6",
+          "isCode": false
+        },
+        {
+          "label": "Column 7",
+          "isCode": false
+        },
+        {
+          "label": "No column; row is skipped",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Only column 7 is free ('.'); earlier columns are '*'.",
+      "wrongExplanations": {
+        "0": "Column 0 is reserved ('*').",
+        "3": "We must try available columns; we don't skip rows."
+      },
+      "hint": "Check characters in the first row.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q23",
+      "phase": "Verifying the Solution",
+      "questionText": "If the first row is \"********\", what will the program eventually print?",
+      "diagram": "Row 0: ********",
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "It will loop forever",
+          "isCode": false
+        },
+        {
+          "label": "It will crash due to index errors",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Row 0 has no valid columns, so no placements are possible; total remains 0.",
+      "wrongExplanations": {
+        "1": "There is no place to put the first queen.",
+        "2": "The loop terminates after trying all 8 columns."
+      },
+      "hint": "The guard requires board[r][c]=='.'.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Verifying the Solution",
+      "questionText": "On an empty board, after placing a queen at (0,0), which columns are forbidden for row 1 due to column/diagonal conflicts?",
+      "diagram": "Placed at (0,0):\n- Same column: c=0\n- Diagonals from (0,0): (1,1), (2,2), ...",
+      "options": [
+        {
+          "label": "Columns {0,1}",
+          "isCode": false
+        },
+        {
+          "label": "Columns {0,7}",
+          "isCode": false
+        },
+        {
+          "label": "Columns {1,7}",
+          "isCode": false
+        },
+        {
+          "label": "Only column {0}",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Row 1: c=0 (same column) and c=1 (down-right diagonal) are forbidden.",
+      "wrongExplanations": {
+        "3": "Diagonals also create conflicts, not just columns."
+      },
+      "hint": "From (0,0) the diagonal reaches (1,1).",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Analyzing Complexity",
+      "questionText": "Roughly how many column choices sequences might be explored in the worst case on an empty board (upper bound)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "8! (40320)",
+          "isCode": false
+        },
+        {
+          "label": "8^8 (~16.7 million)",
+          "isCode": false
+        },
+        {
+          "label": "C(64,8) (~4.4 billion)",
+          "isCode": false
+        },
+        {
+          "label": "2^64",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Placing one queen per row with distinct columns yields at most 8! column sequences to try (pruned further by diagonals).",
+      "wrongExplanations": {
+        "1": "We don't try all 8 choices at every row due to used columns.",
+        "2": "We never consider arbitrary 8-square subsets."
+      },
+      "hint": "Each row must use a different column.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the extra space usage of this approach (excluding input)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(1) for arrays plus O(8) call stack depth",
+          "isCode": false
+        },
+        {
+          "label": "O(64) for a full board of booleans",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2) with n=8",
+          "isCode": false
+        },
+        {
+          "label": "O(2^n) due to subsets",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We keep three small arrays (8,15,15) and a recursion depth up to 8.",
+      "wrongExplanations": {
+        "1": "We don't maintain a full attack grid."
+      },
+      "hint": "We track columns and diagonals, not the whole board.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q27",
+      "phase": "Analyzing Complexity",
+      "questionText": "Edge cases: If any row contains only '*', what should the output be?",
+      "diagram": "Some row r: ********",
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "-1",
+          "isCode": false
+        },
+        {
+          "label": "The number of free squares in other rows",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "You cannot place a queen in that row; no valid arrangement exists.",
+      "wrongExplanations": {
+        "1": "A valid arrangement requires a queen in every row.",
+        "3": "Other rows can't compensate for a blocked row."
+      },
+      "hint": "We must place exactly one queen per row.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "def count_queens(board):\n    n = 8\n    cols = [False] * n\n    d1 = [False] * (2 * n - 1)\n    d2 = [False] * (2 * n - 1)",
+    "    def search(r):\n        if r == n:\n            return 1\n        total = 0",
+    "        for c in range(n):\n            if board[r][c] == '.' and not cols[c] and not d1[r - c + (n - 1)] and not d2[r + c]:",
+    "                cols[c] = True\n                d1[r - c + (n - 1)] = True\n                d2[r + c] = True",
+    "                total += search(r + 1)",
+    "                cols[c] = False\n                d1[r - c + (n - 1)] = False\n                d2[r + c] = False",
+    "        return total\n    return search(0)",
+    "board = [input().strip() for _ in range(8)]\nprint(count_queens(board))"
+  ],
+  "reasoningChain": [
+    {
+      "question": "Why can we place queens row by row with exactly one per row?",
+      "insight": "No two queens can share a row; with 8 queens and 8 rows, any valid arrangement has exactly one queen per row."
+    },
+    {
+      "question": "What conflicts must be avoided when placing a queen in a row?",
+      "insight": "The target cell must be free ('.'), and its column and both diagonals must be unused based on earlier rows."
+    },
+    {
+      "question": "How do we detect diagonal conflicts quickly?",
+      "insight": "Use r-c (offset by +7) for one diagonal family and r+c for the other; each family has 15 indices."
+    },
+    {
+      "question": "How do we count all valid arrangements systematically?",
+      "insight": "Use a recursive function that tries each column in the current row, returns 1 when all rows are filled, and sums counts."
+    },
+    {
+      "question": "How do we maintain and restore state between trials?",
+      "insight": "Before the recursive call, mark the column and diagonals as used; after it returns, reset them to allow other columns."
+    },
+    {
+      "question": "How do we handle input/output cleanly?",
+      "insight": "Read exactly 8 lines as strings and print the count computed by the helper function."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1341,
+    "output_tokens": 14774,
+    "input_cost": 0.001676,
+    "output_cost": 0.14774,
+    "total_cost": 0.149416
+  }
+}
