@@ -13,15 +13,15 @@ export interface MCQuestion {
   id: string;
   phase: string;
   questionText: string;
-  diagram?: string;
-  options: [MCQOption, MCQOption, MCQOption, MCQOption];
+  diagram?: string | null;
+  options: MCQOption[];
   correctIndex: number;
   explanation: string;
   wrongExplanations?: Record<string, string>;
   isCodeBuilding?: boolean;
-  codeSnippet?: string;
-  codeLabel?: string;
-  hint?: string;
+  codeSnippet?: string | null;
+  codeLabel?: string | null;
+  hint?: string | null;
 }
 
 export interface ReasoningStep {
