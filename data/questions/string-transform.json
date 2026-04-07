@@ -1,0 +1,948 @@
+{
+  "id": "string-transform-inverse",
+  "title": "String Transform",
+  "difficulty": "hard",
+  "tags": [
+    "string"
+  ],
+  "estimatedMinutes": 60,
+  "language": "python",
+  "description": "You are given a string T that was produced by the following transformation on an unknown string S of length n:\n\n1. Append the character `#` to S (assume `#` is lexicographically smaller than all other characters).\n2. Generate all rotations of the new string S#.\n3. Sort the rotations in increasing order.\n4. Construct a string by taking the last character of each rotation in that sorted order. This is T, of length n+1.\n\nGiven T, reconstruct and print the original string S (without `#`).\n\nEach character of S is one of `a–z`.\n",
+  "examples": [
+    {
+      "input": "cb#ab",
+      "output": "babc",
+      "explanation": "For S = babc, S# = babc#. The sorted rotations are: #babc, abc#b, babc#, bc#ba, c#bab. Taking the last column gives T = cb#ab. Inverting yields S = babc."
+    }
+  ],
+  "constraints": [
+    "1 ≤ n ≤ 10^6",
+    "T has length n+1 and contains exactly one '#'",
+    "Characters of S are 'a'–'z'; '#' is lexicographically smallest"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "If the original string has length n, what is the length of the given transformed string?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "n+1",
+          "isCode": false
+        },
+        {
+          "label": "n",
+          "isCode": false
+        },
+        {
+          "label": "n−1",
+          "isCode": false
+        },
+        {
+          "label": "It depends on the content of the string",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We append exactly one '#' before transforming, so the transformed string length is n+1.",
+      "wrongExplanations": {
+        "1": "The transform uses S# (one extra character).",
+        "3": "The transform’s length doesn’t vary; it is always n+1."
+      },
+      "hint": null,
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "In the example T = cb#ab, what is the first column (the first characters of the sorted rotations) as a string?",
+      "diagram": "Sorted rotations’ first column is the multiset of characters of T, sorted.",
+      "options": [
+        {
+          "label": "#abbc",
+          "isCode": false
+        },
+        {
+          "label": "abbc#",
+          "isCode": false
+        },
+        {
+          "label": "bc#ab",
+          "isCode": false
+        },
+        {
+          "label": "cb#ab",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The first column is the characters of T sorted: '#', 'a', 'b', 'b', 'c' → \"#abbc\".",
+      "wrongExplanations": {
+        "1": "Placing '#' at the end breaks lexicographic order.",
+        "3": "That is T itself (the last column), not the first."
+      },
+      "hint": "Sort the characters of T.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "How many rows in the sorted rotations start with the character '#'?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Exactly one",
+          "isCode": false
+        },
+        {
+          "label": "Zero",
+          "isCode": false
+        },
+        {
+          "label": "Possibly more than one if S contains '#'",
+          "isCode": false
+        },
+        {
+          "label": "It could be any number",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Only one '#' is appended and it is the smallest character, so exactly one row starts with '#'.",
+      "wrongExplanations": {
+        "2": "S# certainly contains '#', so one row must start with it.",
+        "3": "S never contains '#'; it’s appended once."
+      },
+      "hint": "There is exactly one '#', and it is the smallest.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "Does T alone reveal the first character of S directly without extra reasoning?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "No; T is the last column of sorted rotations and must be related back to the first column",
+          "isCode": false
+        },
+        {
+          "label": "Yes; it is simply T[0]",
+          "isCode": false
+        },
+        {
+          "label": "Yes; it is the smallest character in T (excluding '#')",
+          "isCode": false
+        },
+        {
+          "label": "Yes; it is T’s most frequent character",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "T lists last characters of sorted rotations. We must connect T to the first column and row order to recover S.",
+      "wrongExplanations": {
+        "1": "T[0] is just one last-column entry; it isn’t necessarily S’s first character.",
+        "2": "The smallest character could appear multiple times and not be S’s start."
+      },
+      "hint": "Relate T to the sorted first column to navigate rows.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Understanding the Problem",
+      "questionText": "What immediate information about the first column can you compute from T?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "The first column is T’s characters sorted increasingly",
+          "isCode": false
+        },
+        {
+          "label": "The first column equals T reversed",
+          "isCode": false
+        },
+        {
+          "label": "The first column equals T but with '#' moved to the front",
+          "isCode": false
+        },
+        {
+          "label": "The first column cannot be deduced from T",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The first column consists of the same characters as T, ordered increasingly.",
+      "wrongExplanations": {
+        "1": "Reversing doesn’t relate to sorted order.",
+        "2": "Placing '#' first isn’t sufficient to ensure full sorting."
+      },
+      "hint": "Compare character multisets between columns (they match).",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "Why is brute-forcing all possible S of length n to match T infeasible?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "There are 26^n candidates; even n=20 is enormous",
+          "isCode": false
+        },
+        {
+          "label": "Sorting rotations cannot be reversed at all",
+          "isCode": false
+        },
+        {
+          "label": "T loses information, so no S can ever be recovered",
+          "isCode": false
+        },
+        {
+          "label": "Brute force is feasible because n ≤ 10^6",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Candidate count grows exponentially with n; we need to exploit structure.",
+      "wrongExplanations": {
+        "1": "The process is reversible with structure; saying 'cannot' is too strong.",
+        "3": "Large n makes brute force impossible."
+      },
+      "hint": "Estimate 26^n for moderate n.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "Given T (last column) and F (first column, sorted T), how should equal letters across columns be paired to align rows?",
+      "diagram": "Example T = c b # a b\nF = # a b b c\nOccurrences for 'b': T has b(0), b(1); F has b(0), b(1)\nPair by occurrence index: b(0)↔b(0), b(1)↔b(1).",
+      "options": [
+        {
+          "label": "Match the k-th occurrence of each character in F to the k-th occurrence in T",
+          "isCode": false
+        },
+        {
+          "label": "Match all identical letters arbitrarily",
+          "isCode": false
+        },
+        {
+          "label": "Match the leftmost occurrences in F to the rightmost in T",
+          "isCode": false
+        },
+        {
+          "label": "Match based on proximity of indices only",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Rows preserve relative order of identical letters between columns; pair by occurrence index.",
+      "wrongExplanations": {
+        "1": "Arbitrary pairing breaks row alignment.",
+        "2": "Cross pairing flips order of equal letters."
+      },
+      "hint": "Think stable pairing for duplicate letters by their order of appearance.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Exploring Approaches",
+      "questionText": "Which row should we use as the starting point to recover S?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "The row whose first column character is '#'",
+          "isCode": false
+        },
+        {
+          "label": "The row whose last column character is '#'",
+          "isCode": false
+        },
+        {
+          "label": "The row with the smallest last column character (excluding '#')",
+          "isCode": false
+        },
+        {
+          "label": "The median row",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The unique row starting with '#' marks S#’s lexicographically smallest rotation.",
+      "wrongExplanations": {
+        "1": "Last column '#' is not the start of the sorted list by itself.",
+        "2": "Smallest last character doesn’t ensure correct start row."
+      },
+      "hint": "Which row begins with the unique smallest character?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Exploring Approaches",
+      "questionText": "Once rows are paired by character occurrence, how do we read S from the rows?",
+      "diagram": "Let next[pos] map a position in the first column to the corresponding position in the last column with the same k-th occurrence.\nStart at the position of '#' in the first column and follow next repeatedly.",
+      "options": [
+        {
+          "label": "Start at '#' in the first column and follow the pairing repeatedly, taking the first column characters along the way (excluding '#')",
+          "isCode": false
+        },
+        {
+          "label": "Start at '#' in the last column and read T directly",
+          "isCode": false
+        },
+        {
+          "label": "Start at the smallest letter in T and read T left to right",
+          "isCode": false
+        },
+        {
+          "label": "Pick any starting row; the path is the same",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Following the pairing from the first column’s '#' yields S’s characters in order.",
+      "wrongExplanations": {
+        "1": "T alone does not give the order without pairing.",
+        "3": "The starting row matters; '#' uniquely identifies it."
+      },
+      "hint": "Traverse the rows via the consistent pairing starting at '#'.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "For T = cb#ab, what are the counts of each character (#, a, b, c) in T?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "#:1, a:1, b:2, c:1",
+          "isCode": false
+        },
+        {
+          "label": "#:1, a:2, b:1, c:1",
+          "isCode": false
+        },
+        {
+          "label": "#:2, a:1, b:1, c:1",
+          "isCode": false
+        },
+        {
+          "label": "#:1, a:1, b:1, c:2",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "cb#ab has one '#', one 'a', two 'b's, one 'c'.",
+      "wrongExplanations": {
+        "1": "Only one 'a' appears.",
+        "2": "Only one '#'."
+      },
+      "hint": "Count each character in cb#ab.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "Using those counts, what are the starting indices in the first column for '#', 'a', 'b', 'c' (0-based)?",
+      "diagram": "First column F = \"#abbc\".\nStarting index for a char = number of characters strictly smaller than it.",
+      "options": [
+        {
+          "label": "#:0, a:1, b:2, c:4",
+          "isCode": false
+        },
+        {
+          "label": "#:1, a:0, b:2, c:3",
+          "isCode": false
+        },
+        {
+          "label": "#:0, a:2, b:3, c:4",
+          "isCode": false
+        },
+        {
+          "label": "#:0, a:1, b:3, c:2",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "F = # a b b c, so start indices: '#'→0, 'a'→1, 'b'→2, 'c'→4.",
+      "wrongExplanations": {
+        "1": "Start index for '#' is always 0.",
+        "2": "Start index for 'a' is 1, not 2."
+      },
+      "hint": "Sum frequencies of smaller characters.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "In T = c b # a b, what is the number of earlier occurrences (before the index) of the character at position 4 (0-based)?",
+      "diagram": "Positions: 0:c, 1:b, 2:#, 3:a, 4:b.\nCount same-letter occurrences strictly before index 4.",
+      "options": [
+        {
+          "label": "1 (one earlier 'b' at index 1)",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "Depends on the first column",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "At index 4, char 'b' has one earlier occurrence at index 1.",
+      "wrongExplanations": {
+        "1": "There is one earlier 'b'.",
+        "2": "Only two b’s total; one earlier, one current."
+      },
+      "hint": "Scan indices 0..3 for 'b'.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "Using start indices and earlier-occurrence counts, what is the index in the first column corresponding to T[4] = 'b'?",
+      "diagram": "Start('b') = 2, earlier-occurrences of 'b' before index 4 = 1.\nFirst-column index = Start('b') + earlier-occurrences.",
+      "options": [
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Index = 2 + 1 = 3.",
+      "wrongExplanations": {
+        "1": "That would be for the first 'b' occurrence.",
+        "3": "Too large; only two 'b's."
+      },
+      "hint": "Add the two quantities carefully.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Building the Idea",
+      "questionText": "Define an array next[] of length |T| such that next[firstIndex] = lastIndex, pairing k-th occurrences. For T = cb#ab, which of the following next arrays is correct (indices 0..4)?",
+      "diagram": "We pair F indices (\"#abbc\") to T indices (\"cb#ab\").",
+      "options": [
+        {
+          "label": "[2, 3, 1, 4, 0]",
+          "isCode": false
+        },
+        {
+          "label": "[2, 1, 3, 4, 0]",
+          "isCode": false
+        },
+        {
+          "label": "[1, 2, 3, 4, 0]",
+          "isCode": false
+        },
+        {
+          "label": "[2, 3, 4, 1, 0]",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "F indices 0:'#'→2, 1:'a'→3, 2:'b'(0)→1, 3:'b'(1)→4, 4:'c'→0 gives [2,3,1,4,0].",
+      "wrongExplanations": {
+        "1": "This mismatches at least one 'b' occurrence pairing.",
+        "2": "This assumes a linear mapping, which is incorrect."
+      },
+      "hint": "Match k-th identical letters between F and T.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q15",
+      "phase": "Building the Idea",
+      "questionText": "Starting from the position of '#' in the first column (index 0), and using next = [2,3,1,4,0], what string do you obtain by following 4 steps and taking the first-column character at each new index?",
+      "diagram": "F = \"#abbc\"; indices 0:'#',1:'a',2:'b',3:'b',4:'c'.\nPath: i0=0 → i1=next[i0] → i2=next[i1] …",
+      "options": [
+        {
+          "label": "babc",
+          "isCode": false
+        },
+        {
+          "label": "cbab",
+          "isCode": false
+        },
+        {
+          "label": "abcb",
+          "isCode": false
+        },
+        {
+          "label": "bcab",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "0→2:'b', 2→1:'a', 1→3:'b', 3→4:'c' → \"babc\".",
+      "wrongExplanations": {
+        "1": "That sequence comes from taking last-column letters instead.",
+        "2": "Order is wrong; check each step."
+      },
+      "hint": "At each step, move to next[i] and read F at that index.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Read the transformed string T from standard input efficiently.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\ns = sys.stdin.readline().strip()",
+          "isCode": true
+        },
+        {
+          "label": "s = input()",
+          "isCode": true
+        },
+        {
+          "label": "import sys\ns = sys.stdin.read()",
+          "isCode": true
+        },
+        {
+          "label": "import sys\ns = sys.stdin.readline()",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "readline().strip() reads one line and trims the newline.",
+      "wrongExplanations": {
+        "1": "Works, but may be slower and can include trailing spaces.",
+        "2": "Reads entire stdin; may include newlines beyond T.",
+        "3": "Keeps trailing newline; complicates processing."
+      },
+      "hint": "You need exactly one line without the trailing newline.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\ns = sys.stdin.readline().strip()",
+      "codeLabel": "Read input"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Map characters to indices: '#'→0, 'a'→1, …, 'z'→26. Choose a correct helper.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def idx_of(ch):\n    return 0 if ch == '#' else (ord(ch) - 96)",
+          "isCode": true
+        },
+        {
+          "label": "def idx_of(ch):\n    return ord(ch) - 97",
+          "isCode": true
+        },
+        {
+          "label": "def idx_of(ch):\n    return 1 if ch == '#' else (ord(ch) - 96)",
+          "isCode": true
+        },
+        {
+          "label": "def idx_of(ch):\n    return 0 if ch == '#' else (ord(ch) - 97)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need '#'→0 and 'a'→1; ord('a')=97 so 97-96=1.",
+      "wrongExplanations": {
+        "1": "Maps 'a' to 0 and has no special case for '#'.",
+        "3": "Maps 'a' to 0, colliding with '#'."
+      },
+      "hint": "Check ord('a') and define a special case for '#'.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def idx_of(ch):\n    return 0 if ch == '#' else (ord(ch) - 96)",
+      "codeLabel": "Character index mapping"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Count the frequency of each character of s into an array of length 27.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "m = len(s)\nfreq = [0]*27\nfor ch in s:\n    freq[idx_of(ch)] += 1",
+          "isCode": true
+        },
+        {
+          "label": "freq = [0]*26\nfor ch in s:\n    freq[idx_of(ch)] += 1",
+          "isCode": true
+        },
+        {
+          "label": "freq = {}\nfor ch in s:\n    freq[ch] += 1",
+          "isCode": true
+        },
+        {
+          "label": "freq = [0]*27\nfor i in range(len(s)):\n    freq[i] += 1",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need 27 slots including '#'. Increment by mapped index.",
+      "wrongExplanations": {
+        "1": "Size 26 misses '#'.",
+        "2": "freq[ch] must be initialized; and we need integer indices."
+      },
+      "hint": "Use the mapping to index into a fixed-size array.",
+      "isCodeBuilding": true,
+      "codeSnippet": "m = len(s)\nfreq = [0]*27\nfor ch in s:\n    freq[idx_of(ch)] += 1",
+      "codeLabel": "Frequency count"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Compute the starting index in the first column for each character in order '#', 'a', …, 'z'.",
+      "diagram": "C[i] = total count of all characters with index < i.",
+      "options": [
+        {
+          "label": "C = [0]*27\ntotal = 0\nfor i in range(27):\n    C[i] = total\n    total += freq[i]",
+          "isCode": true
+        },
+        {
+          "label": "C = [0]*27\ntotal = 0\nfor i in range(27):\n    total += freq[i]\n    C[i] = total",
+          "isCode": true
+        },
+        {
+          "label": "C = [0]*27\nfor i in range(27):\n    C[i] = sum(freq)",
+          "isCode": true
+        },
+        {
+          "label": "C = [0]*27\nfor i in range(27):\n    C[i] = freq[i]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We want prefix sums before i. Set C[i] to current total, then add freq[i].",
+      "wrongExplanations": {
+        "1": "This sets C[i] to counts up to and including i, off by one.",
+        "3": "This only stores local frequencies, not starts."
+      },
+      "hint": "C[i] should be the number of characters strictly smaller than i.",
+      "isCodeBuilding": true,
+      "codeSnippet": "C = [0]*27\ntotal = 0\nfor i in range(27):\n    C[i] = total\n    total += freq[i]",
+      "codeLabel": "First-column start positions"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Build the pairing next[]: for each position i in s (last column), compute its first-column index and set next[first_index] = i.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "occ = [0]*27\nnxt = [0]*m\nfor i, ch in enumerate(s):\n    t = idx_of(ch)\n    fi = C[t] + occ[t]\n    nxt[fi] = i\n    occ[t] += 1",
+          "isCode": true
+        },
+        {
+          "label": "occ = [0]*27\nnxt = [0]*m\nfor i, ch in enumerate(s):\n    t = idx_of(ch)\n    fi = C[t]\n    nxt[i] = fi\n    occ[t] += 1",
+          "isCode": true
+        },
+        {
+          "label": "occ = [0]*27\nnxt = [0]*m\nfor i, ch in enumerate(s):\n    t = idx_of(ch)\n    fi = C[t] + occ[t]\n    nxt[i] = fi\n    occ[t] += 1",
+          "isCode": true
+        },
+        {
+          "label": "occ = [0]*27\nnxt = [0]*m\nfor i, ch in enumerate(s):\n    t = idx_of(ch)\n    fi = C[t] + 1\n    nxt[fi] = i\n    occ[t] += 1",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Use occurrence counts to compute fi, then store nxt[fi] = i so fi (first column) maps to i (last column).",
+      "wrongExplanations": {
+        "2": "This stores the inverse mapping; we need first→last, not last→first.",
+        "1": "Missing occ[t] causes collisions for duplicates."
+      },
+      "hint": "Combine start index and how many of this char you’ve seen so far.",
+      "isCodeBuilding": true,
+      "codeSnippet": "occ = [0]*27\nnxt = [0]*m\nfor i, ch in enumerate(s):\n    t = idx_of(ch)\n    fi = C[t] + occ[t]\n    nxt[fi] = i\n    occ[t] += 1",
+      "codeLabel": "Build pairing next[]"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "Construct the first-column string F from freq, in order '#', 'a', …, 'z'.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "parts = []\nif freq[0]:\n    parts.append('#' * freq[0])\nfor j in range(1, 27):\n    if freq[j]:\n        parts.append(chr(96 + j) * freq[j])\nF = ''.join(parts)",
+          "isCode": true
+        },
+        {
+          "label": "F = ''\nfor j in range(27):\n    F += chr(96 + j) * freq[j]",
+          "isCode": true
+        },
+        {
+          "label": "F = ''.join(sorted(s))",
+          "isCode": true
+        },
+        {
+          "label": "F = s.replace('#', '') + '#'",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Build F deterministically by expanding counts in correct order, handling '#' explicitly.",
+      "wrongExplanations": {
+        "2": "Sorting a million chars is slower; we already have counts.",
+        "1": "chr(96) is '`', not '#'; this misplaces '#'."
+      },
+      "hint": "Remember '#' is not contiguous with 'a'..'z' in ASCII.",
+      "isCodeBuilding": true,
+      "codeSnippet": "parts = []\nif freq[0]:\n    parts.append('#' * freq[0])\nfor j in range(1, 27):\n    if freq[j]:\n        parts.append(chr(96 + j) * freq[j])\nF = ''.join(parts)",
+      "codeLabel": "Build first column F"
+    },
+    {
+      "id": "q22",
+      "phase": "Writing the Code",
+      "questionText": "Traverse next[] starting from the position of '#' in F to build the original string (length m-1). Choose the correct loop.",
+      "diagram": "Index of '#' in F is 0 because '#' is smallest and unique.",
+      "options": [
+        {
+          "label": "res = []\nidx = 0\nfor _ in range(m-1):\n    idx = nxt[idx]\n    res.append(F[idx])\nprint(''.join(res))",
+          "isCode": true
+        },
+        {
+          "label": "res = []\nidx = 0\nfor _ in range(m):\n    res.append(F[idx])\n    idx = nxt[idx]\nprint(''.join(res))",
+          "isCode": true
+        },
+        {
+          "label": "res = []\nidx = nxt[0]\nfor _ in range(m-1):\n    res.append(F[idx])\n    idx = nxt[idx]\nprint(''.join(res))",
+          "isCode": true
+        },
+        {
+          "label": "res = []\nidx = 0\nfor _ in range(m-1):\n    idx = nxt[idx]\n    res.append(s[idx])\nprint(''.join(res))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each step moves via nxt and records the first-column character; m-1 steps collect S (excluding '#').",
+      "wrongExplanations": {
+        "1": "This yields m characters including '#'.",
+        "3": "Appending last-column characters gives wrong order."
+      },
+      "hint": "Exclude '#', and append from the first column at each step.",
+      "isCodeBuilding": true,
+      "codeSnippet": "res = []\nidx = 0\nfor _ in range(m-1):\n    idx = nxt[idx]\n    res.append(F[idx])\nsys.stdout.write(''.join(res))",
+      "codeLabel": "Reconstruct and output"
+    },
+    {
+      "id": "q23",
+      "phase": "Verifying the Solution",
+      "questionText": "Run the logic on T = cb#ab. After the first iteration of the reconstruction loop, what character is appended?",
+      "diagram": "Start idx=0 (F[0]='#'). Then idx = nxt[0] = 2; append F[2]. F = \"#abbc\".",
+      "options": [
+        {
+          "label": "b",
+          "isCode": false
+        },
+        {
+          "label": "c",
+          "isCode": false
+        },
+        {
+          "label": "#",
+          "isCode": false
+        },
+        {
+          "label": "a",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "F[2] is 'b', the first letter of S.",
+      "wrongExplanations": {
+        "1": "That's F[4], reached later.",
+        "2": "We skip '#'."
+      },
+      "hint": "Use next = [2,3,1,4,0] and F = \"#abbc\".",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Verifying the Solution",
+      "questionText": "Using the same example, what is the full output after completing all iterations?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "babc",
+          "isCode": false
+        },
+        {
+          "label": "cbab",
+          "isCode": false
+        },
+        {
+          "label": "abc#",
+          "isCode": false
+        },
+        {
+          "label": "babc#",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The recovered string is babc, matching the example.",
+      "wrongExplanations": {
+        "1": "This reverses some steps.",
+        "2": "We output S without '#'."
+      },
+      "hint": "The iterations append 4 characters for T of length 5.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the time complexity of the implemented approach with character counting and linear passes?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n + Σ), where Σ is the alphabet size (27 here)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n) because of sorting",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(log n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We count, compute prefixes, build mappings, and traverse once: linear plus a small constant factor.",
+      "wrongExplanations": {
+        "1": "We avoid general-purpose sorting by using counts.",
+        "2": "No nested loops over n."
+      },
+      "hint": "We make a constant number of passes over T plus fixed-range loops.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Analyzing Complexity",
+      "questionText": "Which statement about correctness relies on the character '#'?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "There is exactly one '#' and it is lexicographically smallest, so the starting row is well-defined",
+          "isCode": false
+        },
+        {
+          "label": "There can be multiple '#', but we choose the first",
+          "isCode": false
+        },
+        {
+          "label": "The position of '#' in T is the starting row",
+          "isCode": false
+        },
+        {
+          "label": "We can start at any row because the path cycles through all rows",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Uniqueness and minimality of '#' identify the starting row in the first column.",
+      "wrongExplanations": {
+        "1": "The process appends exactly one '#'.",
+        "2": "We start from the first column’s '#' row."
+      },
+      "hint": "Why does the first step’s index equal 0 in F?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\ns = sys.stdin.readline().strip()",
+    "def idx_of(ch):\n    return 0 if ch == '#' else (ord(ch) - 96)",
+    "m = len(s)\nfreq = [0]*27\nfor ch in s:\n    freq[idx_of(ch)] += 1",
+    "C = [0]*27\ntotal = 0\nfor i in range(27):\n    C[i] = total\n    total += freq[i]",
+    "occ = [0]*27\nnxt = [0]*m\nfor i, ch in enumerate(s):\n    t = idx_of(ch)\n    fi = C[t] + occ[t]\n    nxt[fi] = i\n    occ[t] += 1",
+    "parts = []\nif freq[0]:\n    parts.append('#' * freq[0])\nfor j in range(1, 27):\n    if freq[j]:\n        parts.append(chr(96 + j) * freq[j])\nF = ''.join(parts)",
+    "res = []\nidx = 0\nfor _ in range(m-1):\n    idx = nxt[idx]\n    res.append(F[idx])\nsys.stdout.write(''.join(res))"
+  ],
+  "reasoningChain": [
+    {
+      "question": "What is the first column given only the last column?",
+      "insight": "The first column is the multiset of characters of T sorted increasingly."
+    },
+    {
+      "question": "How to pair rows between first and last columns?",
+      "insight": "Pair the k-th occurrence of each character in the first column with the k-th in the last column to align rows."
+    },
+    {
+      "question": "Where to start reading to recover S?",
+      "insight": "The row where the first column is '#' (index 0) is the unique starting point."
+    },
+    {
+      "question": "How to traverse to output S?",
+      "insight": "Repeatedly follow the pairing from the starting row and collect first-column characters, excluding '#'."
+    },
+    {
+      "question": "How to implement efficiently for large n?",
+      "insight": "Use frequency counting to build start positions and a single pass to build the pairing and reconstruct in overall linear time."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1396,
+    "output_tokens": 17132,
+    "input_cost": 0.001745,
+    "output_cost": 0.17132,
+    "total_cost": 0.173065
+  }
+}

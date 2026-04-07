@@ -1,0 +1,917 @@
+{
+  "id": "maximum-manhattan-distances",
+  "title": "Maximum Manhattan Distances",
+  "difficulty": "hard",
+  "tags": [
+    "geometry",
+    "implementation",
+    "manhattan-distance",
+    "streaming"
+  ],
+  "estimatedMinutes": 55,
+  "language": "python",
+  "description": "You start with an empty set of points on a 2D plane. Then, n points are added one by one. After each addition, output the maximum Manhattan distance between any two points currently in the set.\n\nInput:\n- First line: integer n (number of points).\n- Next n lines: two integers x and y for each point (all points are distinct).\n\nOutput:\n- After each addition, print the maximum Manhattan distance among all points seen so far.\n\nManhattan distance between (x1, y1) and (x2, y2) is |x1 - x2| + |y1 - y2|.",
+  "examples": [
+    {
+      "input": "5\n1 1\n3 2\n2 4\n2 1\n4 5\n",
+      "output": "0\n3\n4\n4\n7\n",
+      "explanation": "After each insertion, the farthest pair's Manhattan distance is 0, 3, 4, 4, and 7 respectively."
+    }
+  ],
+  "constraints": [
+    "1 ≤ n ≤ 2⋅10^5",
+    "−10^9 ≤ x, y ≤ 10^9",
+    "All input points are distinct",
+    "Print the maximum after each insertion"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "After adding the very first point (x, y) to the empty set, what should be printed?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "|x| + |y|",
+          "isCode": false
+        },
+        {
+          "label": "x + y",
+          "isCode": false
+        },
+        {
+          "label": "Nothing can be printed until there are at least two points",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "With one point, the maximum Manhattan distance among all pairs is 0. The example confirms this.",
+      "wrongExplanations": {
+        "1": "This is the distance from the origin, not between two points in the set.",
+        "3": "The problem asks to print after each addition; with one point, the maximum over available pairs is 0."
+      },
+      "hint": "There is only one point available to form pairs.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "After adding the two points (1, 1) and (3, 2), what should be printed?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Manhattan distance is |1-3| + |1-2| = 2 + 1 = 3.",
+      "wrongExplanations": {
+        "0": "4 would be |1-3| + |1-(-2)| which uses the wrong second coordinate.",
+        "2": "2 is just |x difference| or |y difference|, not their sum."
+      },
+      "hint": "Compute |x1 - x2| + |y1 - y2|.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "For points (1, 1), (3, 2), and (2, 4), what is the maximum Manhattan distance among all pairs?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Pairwise distances: (1,1)-(3,2)=3; (1,1)-(2,4)=4; (3,2)-(2,4)=3. Max is 4.",
+      "wrongExplanations": {
+        "0": "3 occurs for two pairs but is not the maximum.",
+        "2": "No pair reaches 5."
+      },
+      "hint": "Check all three pairs and take the maximum.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "As points are added, can the maximum Manhattan distance ever decrease?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, it can decrease if a new point is closer to others",
+          "isCode": false
+        },
+        {
+          "label": "No, it can only stay the same or increase",
+          "isCode": false
+        },
+        {
+          "label": "It always increases with each point",
+          "isCode": false
+        },
+        {
+          "label": "It depends on the order of insertions whether it can decrease",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Adding a point can add new pairs but cannot remove existing pairs. The maximum over a superset cannot be smaller.",
+      "wrongExplanations": {
+        "0": "Closer new points may not increase the maximum, but they don't reduce existing far pairs.",
+        "2": "A new point might be close, so the max can remain the same."
+      },
+      "hint": "Think of the set of pairs growing.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Exploring Approaches",
+      "questionText": "For two points (x1, y1) and (x2, y2), which identity holds for their Manhattan distance?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "max( |(x1+y1) - (x2+y2)|, |(x1-y1) - (x2-y2)| )",
+          "isCode": false
+        },
+        {
+          "label": "|(x1+y1) - (x2+y2)| + |(x1-y1) - (x2-y2)|",
+          "isCode": false
+        },
+        {
+          "label": "max( |x1-x2|, |y1-y2| )",
+          "isCode": false
+        },
+        {
+          "label": "|2x1 - 2x2| + |2y1 - 2y2|",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "|x1-x2|+|y1-y2| equals the maximum of the two absolute differences shown.",
+      "wrongExplanations": {
+        "1": "This sums two quantities; the identity uses the maximum of them, not the sum.",
+        "2": "This is the Chebyshev distance, not the Manhattan distance."
+      },
+      "hint": "Try expanding cases for signs of (x1-x2) and (y1-y2).",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "To get the maximum Manhattan distance among many points, which summary values are sufficient to maintain?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "The minimum and maximum of (x+y) and of (x−y)",
+          "isCode": false
+        },
+        {
+          "label": "The minimum and maximum of x and of y",
+          "isCode": false
+        },
+        {
+          "label": "Only the minimum and maximum of (x+y)",
+          "isCode": false
+        },
+        {
+          "label": "All points must be stored to check all pairs",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The overall maximum equals max( max(x+y)−min(x+y), max(x−y)−min(x−y) ).",
+      "wrongExplanations": {
+        "1": "Max differences of x and y individually don't combine to the Manhattan maximum over all pairs.",
+        "3": "Maintaining extremes of these two expressions is enough; no need to store all points."
+      },
+      "hint": "Use the identity from the previous question over all pairs.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "The maximum Manhattan distance among the set equals which of the following?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "max( max(x+y)−min(x+y), max(x−y)−min(x−y) )",
+          "isCode": false
+        },
+        {
+          "label": "min( max(x+y)−min(x+y), max(x−y)−min(x−y) )",
+          "isCode": false
+        },
+        {
+          "label": "max(x+y)−min(x+y) + max(x−y)−min(x−y)",
+          "isCode": false
+        },
+        {
+          "label": "max(|x|)+max(|y|)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "From the identity, the maximum over all pairs is achieved by the larger of the two ranges.",
+      "wrongExplanations": {
+        "2": "We take the larger of the two ranges, not their sum."
+      },
+      "hint": "Take the larger of the two ranges derived from previous insight.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Building the Idea",
+      "questionText": "Points arrive one by one. After reading a new point, when should you update the stored minimum/maximum values of (x+y) and (x−y)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Update them first to include the new point, then compute the answer",
+          "isCode": false
+        },
+        {
+          "label": "Compute the answer with old values, then update them",
+          "isCode": false
+        },
+        {
+          "label": "Only update (x+y); (x−y) is not needed",
+          "isCode": false
+        },
+        {
+          "label": "Only update (x−y); (x+y) is not needed",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The answer after an addition must include the new point, so extremes must be updated first.",
+      "wrongExplanations": {
+        "1": "This would omit pairs with the newly added point.",
+        "2": "Both (x+y) and (x−y) are required."
+      },
+      "hint": "The new point forms new pairs to consider in the maximum.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "For points (1,1), (3,2), (2,4): compute s1=x+y and s2=x−y for each and choose the resulting maximum distance.",
+      "diagram": "Points:\n(1,1): s1=2, s2=0\n(3,2): s1=5, s2=1\n(2,4): s1=6, s2=-2",
+      "options": [
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        },
+        {
+          "label": "6",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Range s1: 6−2=4; range s2: 1−(−2)=3; take max → 4.",
+      "wrongExplanations": {
+        "0": "That's the s2 range; we must take the larger range.",
+        "2": "No range equals 5 here."
+      },
+      "hint": "Compute the range (max−min) for s1 and for s2.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "How should you handle initialization before any points are processed?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Use None for min/max and set them from the first point when it arrives",
+          "isCode": false
+        },
+        {
+          "label": "Initialize min to +∞ and max to −∞ and never special-case the first point",
+          "isCode": false
+        },
+        {
+          "label": "Initialize all to 0",
+          "isCode": false
+        },
+        {
+          "label": "Defer all updates until two points are read",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Setting from the first point avoids incorrect ranges and is simple to manage.",
+      "wrongExplanations": {
+        "1": "This can work if coded carefully, but complicates updates and comparisons in Python.",
+        "3": "We must output after the first point as well."
+      },
+      "hint": "Think about what the min and max should be after the very first point.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "If only one point has been seen so far, what is the correct value to append to the output?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "x + y of the point",
+          "isCode": false
+        },
+        {
+          "label": "|x| + |y| of the point",
+          "isCode": false
+        },
+        {
+          "label": "Undefined; skip printing",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "With one point, the maximum over all available pairs is 0.",
+      "wrongExplanations": {
+        "2": "Distance is between two points, not the origin."
+      },
+      "hint": "This matches the sample output.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "Given constraints −10^9 ≤ x, y ≤ 10^9, are intermediate values of (x+y) and (x−y) safe in Python?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, Python integers handle arbitrary size",
+          "isCode": false
+        },
+        {
+          "label": "No, (x+y) may overflow 32-bit int",
+          "isCode": false
+        },
+        {
+          "label": "No, (x−y) may overflow 32-bit int",
+          "isCode": false
+        },
+        {
+          "label": "Only if we cast to 64-bit explicitly",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Python integers are unbounded; sums and differences within these ranges are safe.",
+      "wrongExplanations": {
+        "1": "32-bit limits are not relevant in Python's int.",
+        "3": "Python has no manual 64-bit int cast; ints scale automatically."
+      },
+      "hint": "Consider Python's integer model.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "For points (−1, 5) and (4, −3): which range gives the maximum and what is it?",
+      "diagram": "s1 values: 4 and 1 → |4−1|=3\ns2 values: −6 and 7 → |−6−7|=13",
+      "options": [
+        {
+          "label": "x+y range gives 3 (maximum is 3)",
+          "isCode": false
+        },
+        {
+          "label": "x−y range gives 13 (maximum is 13)",
+          "isCode": false
+        },
+        {
+          "label": "Sum of ranges is 16 (maximum is 16)",
+          "isCode": false
+        },
+        {
+          "label": "x+y and x−y ranges are equal (maximum is 3)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Manhattan distance here is 13, matching the x−y range; x+y range is only 3.",
+      "wrongExplanations": {
+        "0": "This ignores the larger x−y range.",
+        "2": "We take the larger single range, not the sum."
+      },
+      "hint": "Compute both ranges and take the larger.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Writing the Code",
+      "questionText": "Choose an efficient input-reading skeleton appropriate for large n.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\n\ndef main():\n    data = sys.stdin.read().strip().split()\n    it = iter(data)\n    n = int(next(it))",
+          "isCode": true
+        },
+        {
+          "label": "def main():\n    n = int(input())\n    data = []\n    for _ in range(n):\n        data.append(tuple(map(int, input().split())))",
+          "isCode": true
+        },
+        {
+          "label": "import sys\n\ndef main():\n    it = sys.stdin\n    n = int(next(it))",
+          "isCode": true
+        },
+        {
+          "label": "def main():\n    s = input().split()\n    n = int(s[0])",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Reading and splitting once is fast and gives a simple iterator for tokens.",
+      "wrongExplanations": {
+        "1": "Line-by-line input with input() can be slower; also later code expects token iteration.",
+        "3": "Only reads the first line tokens; does not prepare to iterate all numbers."
+      },
+      "hint": "Aim for O(total tokens) parsing with minimal overhead.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\n\ndef main():\n    data = sys.stdin.read().strip().split()\n    it = iter(data)\n    n = int(next(it))",
+      "codeLabel": "Read all input and get n"
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Initialize tracking variables for extremes and an output buffer.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    min_s1 = max_s1 = None\n    min_s2 = max_s2 = None\n    out_lines = []",
+          "isCode": true
+        },
+        {
+          "label": "    min_s1 = 0; max_s1 = 0\n    min_s2 = 0; max_s2 = 0\n    out_lines = []",
+          "isCode": true
+        },
+        {
+          "label": "    min_s1 = float('inf'); max_s1 = float('-inf')\n    min_s2 = float('inf'); max_s2 = float('-inf')\n    out_lines = None",
+          "isCode": true
+        },
+        {
+          "label": "    mins = []; maxs = []\n    out_lines = []",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Using None allows a clean first-point initialization; out_lines collects outputs.",
+      "wrongExplanations": {
+        "1": "Zeros are incorrect before reading any point.",
+        "2": "Infinite sentinels complicate logic; also out_lines must be a list of strings."
+      },
+      "hint": "You'll set these from the first point when it arrives.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    min_s1 = max_s1 = None\n    min_s2 = max_s2 = None\n    out_lines = []",
+      "codeLabel": "Initialize extremes and output list"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Process each point, parse x and y, and compute s1 and s2.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    for _ in range(n):\n        x = int(next(it)); y = int(next(it))\n        s1 = x + y\n        s2 = x - y",
+          "isCode": true
+        },
+        {
+          "label": "    for _ in range(n):\n        x, y = next(it)\n        s1 = x + y\n        s2 = x - y",
+          "isCode": true
+        },
+        {
+          "label": "    for _ in range(n):\n        x = next(it); y = next(it)\n        s1 = int(x + y)\n        s2 = int(x - y)",
+          "isCode": true
+        },
+        {
+          "label": "    for _ in range(n):\n        x, y = map(int, next(it).split())\n        s1 = x + y\n        s2 = x - y",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Tokens are strings; convert each to int, then compute s1 and s2.",
+      "wrongExplanations": {
+        "1": "next(it) returns a single token string, not a pair.",
+        "2": "x and y are strings here; x + y concatenates text, not numbers."
+      },
+      "hint": "Each point contributes two consecutive tokens.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    for _ in range(n):\n        x = int(next(it)); y = int(next(it))\n        s1 = x + y\n        s2 = x - y",
+      "codeLabel": "Loop and compute s1, s2"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Handle the very first point by setting all extremes to s1 and s2.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "        if min_s1 is None:\n            min_s1 = max_s1 = s1\n            min_s2 = max_s2 = s2",
+          "isCode": true
+        },
+        {
+          "label": "        if min_s1 == 0:\n            min_s1 = max_s1 = s1\n            min_s2 = max_s2 = s2",
+          "isCode": true
+        },
+        {
+          "label": "        if out_lines == []:\n            min_s1 = min(min_s1, s1); max_s1 = max(max_s1, s1)\n            min_s2 = min(min_s2, s2); max_s2 = max(max_s2, s2)",
+          "isCode": true
+        },
+        {
+          "label": "        if min_s1 is None:\n            min_s1 = s1; min_s2 = s2\n            # leave max_s1, max_s2 unchanged",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "On the first point, set both min and max for each expression to the current value.",
+      "wrongExplanations": {
+        "1": "min_s1 isn't initialized to 0; comparing to 0 is unreliable.",
+        "3": "max values must also be set to the first value."
+      },
+      "hint": "For the first point, min and max should be equal.",
+      "isCodeBuilding": true,
+      "codeSnippet": "        if min_s1 is None:\n            min_s1 = max_s1 = s1\n            min_s2 = max_s2 = s2",
+      "codeLabel": "First-point initialization"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Update extremes when you already have previous points.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "        else:\n            if s1 < min_s1: min_s1 = s1\n            if s1 > max_s1: max_s1 = s1\n            if s2 < min_s2: min_s2 = s2\n            if s2 > max_s2: max_s2 = s2",
+          "isCode": true
+        },
+        {
+          "label": "        else:\n            min_s1 = min(min_s1, s1)\n            max_s1 = max(max_s1, s1)\n            # forget to update s2",
+          "isCode": true
+        },
+        {
+          "label": "        else:\n            min_s1 = s1; max_s1 = s1\n            min_s2 = s2; max_s2 = s2",
+          "isCode": true
+        },
+        {
+          "label": "        else:\n            if s1 > min_s1: min_s1 = s1\n            if s1 < max_s1: max_s1 = s1\n            if s2 > min_s2: min_s2 = s2\n            if s2 < max_s2: max_s2 = s2",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Update each min/max independently for s1 and s2 using standard comparisons.",
+      "wrongExplanations": {
+        "1": "You must update both s1 and s2 extremes.",
+        "2": "This resets extremes every time, losing previous information."
+      },
+      "hint": "Compare s1 with its min and max, and s2 with its min and max.",
+      "isCodeBuilding": true,
+      "codeSnippet": "        else:\n            if s1 < min_s1: min_s1 = s1\n            if s1 > max_s1: max_s1 = s1\n            if s2 < min_s2: min_s2 = s2\n            if s2 > max_s2: max_s2 = s2",
+      "codeLabel": "Update min/max for s1 and s2"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Compute the current answer and append it to the output list.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "        ans = max(max_s1 - min_s1, max_s2 - min_s2)\n        out_lines.append(str(ans))",
+          "isCode": true
+        },
+        {
+          "label": "        ans = (max_s1 - min_s1) + (max_s2 - min_s2)\n        out_lines.append(str(ans))",
+          "isCode": true
+        },
+        {
+          "label": "        ans = abs(max_s1) + abs(min_s1)\n        out_lines.append(ans)",
+          "isCode": true
+        },
+        {
+          "label": "        ans = max_s1 + max_s2 - min_s1 - min_s2\n        out_lines.append(str(ans))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The maximum Manhattan distance is the larger of the two ranges; append as a string.",
+      "wrongExplanations": {
+        "1": "Do not sum ranges; we take the larger one.",
+        "3": "This mixes signs incorrectly; ranges must be differences of max and min separately."
+      },
+      "hint": "Use max(range_s1, range_s2).",
+      "isCodeBuilding": true,
+      "codeSnippet": "        ans = max(max_s1 - min_s1, max_s2 - min_s2)\n        out_lines.append(str(ans))",
+      "codeLabel": "Compute and record answer"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Finish by writing all outputs and adding the usual entry point.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    sys.stdout.write(\"\\n\".join(out_lines))\n\nif __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "    print(out_lines)\n\nif __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "    for s in out_lines:\n        print(s)\n\nmain()",
+          "isCode": true
+        },
+        {
+          "label": "    sys.stdout.write(out_lines)\n\nif __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Join lines with newlines for efficient output and use the standard main guard.",
+      "wrongExplanations": {
+        "1": "Printing the list shows brackets and commas, not the required format.",
+        "3": "sys.stdout.write expects a string, not a list."
+      },
+      "hint": "Ensure exactly one line per answer.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    sys.stdout.write(\"\\n\".join(out_lines))\n\nif __name__ == \"__main__\":\n    main()",
+      "codeLabel": "Output and entry point"
+    },
+    {
+      "id": "q21",
+      "phase": "Verifying the Solution",
+      "questionText": "On the sample input, what is the third printed value?",
+      "diagram": "Input:\n5\n1 1\n3 2\n2 4\n2 1\n4 5",
+      "options": [
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        },
+        {
+          "label": "7",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Sequence is 0, 3, 4, 4, 7. The third value is 4.",
+      "wrongExplanations": {
+        "0": "3 is the second value after two points.",
+        "3": "7 is the last value after all five points."
+      },
+      "hint": "Compute after first three insertions: 0, 3, then 4.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q22",
+      "phase": "Verifying the Solution",
+      "questionText": "After adding (1,1) and then (3,2), what are min/max of s1=x+y and s2=x−y?",
+      "diagram": "Points seen: (1,1) → s1=2, s2=0; (3,2) → s1=5, s2=1",
+      "options": [
+        {
+          "label": "s1: min=2, max=5; s2: min=0, max=1",
+          "isCode": false
+        },
+        {
+          "label": "s1: min=0, max=1; s2: min=2, max=5",
+          "isCode": false
+        },
+        {
+          "label": "s1: min=2, max=5; s2: min=−1, max=1",
+          "isCode": false
+        },
+        {
+          "label": "s1: min=2, max=5; s2: min=0, max=2",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "s1 values: 2 and 5 → min=2, max=5. s2 values: 0 and 1 → min=0, max=1.",
+      "wrongExplanations": {
+        "2": "s2 values are 0 and 1; there is no −1.",
+        "3": "The maximum of s2 is 1, not 2."
+      },
+      "hint": "Compute s1 and s2 for each point and take min/max.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q23",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the time complexity per addition using this approach?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(1)",
+          "isCode": false
+        },
+        {
+          "label": "O(log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We do a constant number of arithmetic and comparisons per point.",
+      "wrongExplanations": {
+        "2": "We are not recomputing distances to all previous points."
+      },
+      "hint": "How many updates per point are done on min/max values?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the extra space used by the algorithm (excluding the output list)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(1)",
+          "isCode": false
+        },
+        {
+          "label": "O(log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We keep only four numbers: min/max for s1 and s2.",
+      "wrongExplanations": {
+        "2": "We do not store all points."
+      },
+      "hint": "Count the number of persistent variables tracking extremes.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Analyzing Complexity",
+      "questionText": "Which coding pitfall would most likely break correctness here?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Computing and printing the answer before updating extremes with the current point",
+          "isCode": false
+        },
+        {
+          "label": "Using Python integers which are arbitrary precision",
+          "isCode": false
+        },
+        {
+          "label": "Joining outputs with \"\\n\" before writing",
+          "isCode": false
+        },
+        {
+          "label": "Reading input with sys.stdin.read()",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "You must include the current point when computing the maximum; otherwise, new far pairs are missed.",
+      "wrongExplanations": {
+        "1": "Python ints are safe for these ranges.",
+        "3": "sys.stdin.read() is fine when used properly."
+      },
+      "hint": "Think about the sequence of update vs. compute steps.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\n\ndef main():\n    data = sys.stdin.read().strip().split()\n    it = iter(data)\n    n = int(next(it))",
+    "    min_s1 = max_s1 = None\n    min_s2 = max_s2 = None\n    out_lines = []",
+    "    for _ in range(n):\n        x = int(next(it)); y = int(next(it))\n        s1 = x + y\n        s2 = x - y",
+    "        if min_s1 is None:\n            min_s1 = max_s1 = s1\n            min_s2 = max_s2 = s2",
+    "        else:\n            if s1 < min_s1: min_s1 = s1\n            if s1 > max_s1: max_s1 = s1\n            if s2 < min_s2: min_s2 = s2\n            if s2 > max_s2: max_s2 = s2",
+    "        ans = max(max_s1 - min_s1, max_s2 - min_s2)\n        out_lines.append(str(ans))",
+    "    sys.stdout.write(\"\\n\".join(out_lines))\n\nif __name__ == \"__main__\":\n    main()"
+  ],
+  "reasoningChain": [
+    {
+      "question": "What should be printed after the first and second insertions, and can the maximum ever decrease?",
+      "insight": "The maximum after one point is 0; adding points never reduces the maximum since pairs are only added."
+    },
+    {
+      "question": "How can |x1−x2|+|y1−y2| be expressed to simplify finding maxima over a set?",
+      "insight": "For any two points, the value equals max(|(x+y) difference|, |(x−y) difference|)."
+    },
+    {
+      "question": "Which aggregate values over the set suffice to compute the overall maximum quickly?",
+      "insight": "Maintaining min and max of (x+y) and of (x−y) is enough; the answer is the larger of the two ranges."
+    },
+    {
+      "question": "How to handle streaming updates when each new point arrives?",
+      "insight": "Update min/max with the new point first, then compute the current maximum as max(range_s1, range_s2)."
+    },
+    {
+      "question": "What are the practical coding details for performance and correctness?",
+      "insight": "Use fast input parsing, handle the first point initialization cleanly, and collect outputs to write at the end."
+    },
+    {
+      "question": "What are the complexity guarantees and edge cases?",
+      "insight": "Each addition is O(1) time and O(1) extra space; Python ints safely handle the numeric ranges."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1347,
+    "output_tokens": 14129,
+    "input_cost": 0.001684,
+    "output_cost": 0.14129,
+    "total_cost": 0.142974
+  }
+}

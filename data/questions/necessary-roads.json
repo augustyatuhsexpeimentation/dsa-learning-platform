@@ -1,0 +1,981 @@
+{
+  "id": "necessary-roads-bridges-json-mcq",
+  "title": "Necessary Roads",
+  "difficulty": "hard",
+  "tags": [
+    "advanced",
+    "graphs",
+    "connectivity"
+  ],
+  "estimatedMinutes": 75,
+  "language": "python",
+  "description": "There are n cities and m roads between them. There is a route between any two cities.\n\nA road is called necessary if there is no route between some two cities after removing that road. Your task is to find all necessary roads.\n\nInput:\n- First line: two integers n and m.\n- Next m lines: two integers a and b describing an undirected road between a and b (1-based). There is at most one road between two cities, and every road connects two distinct cities.\n\nOutput:\n- First print an integer k: the number of necessary roads.\n- Then print k lines, each with two integers describing a necessary road. You may print the roads in any order.\n",
+  "examples": [
+    {
+      "input": "5 5\n1 2\n1 4\n2 4\n3 5\n4 5\n",
+      "output": "2\n3 5\n4 5\n",
+      "explanation": "Removing 3-5 disconnects 3 from others, and removing 4-5 disconnects 5 from others. Edges on the cycle (1-2-4-1) are not necessary."
+    }
+  ],
+  "constraints": [
+    "2 ≤ n ≤ 10^5",
+    "1 ≤ m ≤ 2 · 10^5",
+    "1 ≤ a,b ≤ n",
+    "There is at most one road between any two cities",
+    "Graph is initially connected"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "Consider a line of 3 cities with roads: 1–2, 2–3.\nHow many necessary roads are there?",
+      "diagram": "1 -- 2 -- 3",
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Removing either road disconnects some pair, so both are necessary.",
+      "wrongExplanations": {
+        "1": "Removing 1–2 or 2–3 each disconnects 1 and 3.",
+        "0": "The graph becomes disconnected if you remove any edge."
+      },
+      "hint": "Try removing 1–2; can 1 still reach 3?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "Consider a triangle of 3 cities with roads: 1–2, 2–3, 3–1.\nHow many necessary roads are there?",
+      "diagram": "1\n / \\\n3---2",
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each pair of cities has two different routes; removing any single road keeps connectivity.",
+      "wrongExplanations": {
+        "1": "In a triangle, removing any single edge leaves a path of length 2 between its endpoints."
+      },
+      "hint": "After removing any one edge, is the graph still connected?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "Graph: roads are 1–2, 2–3, 3–4, and 2–4.\nWhich roads are necessary?",
+      "diagram": "1--2\n   | \\\n   3--4",
+      "options": [
+        {
+          "label": "Only 1–2",
+          "isCode": false
+        },
+        {
+          "label": "Only 2–3",
+          "isCode": false
+        },
+        {
+          "label": "Only 3–4",
+          "isCode": false
+        },
+        {
+          "label": "1–2 and 3–4",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "1–2 is the only connection from city 1 to the rest; edges among 2,3,4 lie on a cycle, so they are not necessary.",
+      "wrongExplanations": {
+        "3": "3–4 lies on the triangle 2–3–4–2, so its removal does not disconnect."
+      },
+      "hint": "Edges on a simple cycle are removable without disconnecting that cycle.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "Which statement best characterizes a necessary road in an undirected connected graph?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "An edge is necessary iff it is not part of any cycle.",
+          "isCode": false
+        },
+        {
+          "label": "An edge is necessary iff it touches a node of degree 1.",
+          "isCode": false
+        },
+        {
+          "label": "An edge is necessary iff it is the longest edge by index.",
+          "isCode": false
+        },
+        {
+          "label": "An edge is necessary iff both endpoints have even degree.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "If an edge lies on a cycle, there is an alternate route. If it lies on no cycle, removing it disconnects the graph.",
+      "wrongExplanations": {
+        "1": "Degree-1 edges are necessary, but many necessary edges have higher-degree endpoints too."
+      },
+      "hint": "Think: cycles provide alternate routes between their vertices.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Understanding the Problem",
+      "questionText": "In a connected graph that has exactly one simple cycle of length L, which is true about the number of necessary roads?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "It equals total edges minus L.",
+          "isCode": false
+        },
+        {
+          "label": "It equals L.",
+          "isCode": false
+        },
+        {
+          "label": "It equals n − 1.",
+          "isCode": false
+        },
+        {
+          "label": "It cannot be determined from L.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "All edges not on the unique cycle are necessary; edges on the cycle are not.",
+      "wrongExplanations": {
+        "2": "n − 1 holds for trees; here one extra edge forms the cycle and is not necessary."
+      },
+      "hint": "Edges on the unique cycle are the only non-necessary edges.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "A naive approach: for each road, temporarily remove it and check if all cities are still mutually reachable. What is the time complexity if the reachability check scans all roads and cities?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(m · (n + m))",
+          "isCode": false
+        },
+        {
+          "label": "O(n + m)",
+          "isCode": false
+        },
+        {
+          "label": "O(m log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "For each of m edges, the connectivity check takes O(n + m), so total O(m · (n + m)), which is too slow for constraints.",
+      "wrongExplanations": {
+        "1": "O(n + m) would be for a single scan, not repeated m times."
+      },
+      "hint": "Multiply the cost of one connectivity scan by the number of edges tested.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "We want to detect necessary roads during a single full exploration of the graph. What information per city helps decide if its connection to its parent is the only way back to earlier cities?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Only the depth (distance from start).",
+          "isCode": false
+        },
+        {
+          "label": "Only the parent city.",
+          "isCode": false
+        },
+        {
+          "label": "Both: the step index when first visited, and the smallest such index reachable from it via its neighbors (excluding the direct parent path).",
+          "isCode": false
+        },
+        {
+          "label": "Only the number of neighbors (degree).",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Tracking first-visit order and the smallest such order reachable via other routes tells if there is an alternate way back.",
+      "wrongExplanations": {
+        "0": "Depth alone doesn't tell if there is an alternate route to earlier nodes.",
+        "1": "Parent helps avoid trivial backtracking but is not enough to decide necessity."
+      },
+      "hint": "Think about comparing when a node was first seen versus earlier-seen neighbors it can reach.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Exploring Approaches",
+      "questionText": "While exploring neighbors of u, if you see a neighbor v that was already visited earlier and v is not u's parent, how should you update the smallest-reachable value for u?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Set low[u] = min(low[u], tin[v])",
+          "isCode": false
+        },
+        {
+          "label": "Set low[u] = min(low[u], low[v])",
+          "isCode": false
+        },
+        {
+          "label": "Set low[u] = max(low[u], tin[v])",
+          "isCode": false
+        },
+        {
+          "label": "Do nothing; only unvisited neighbors matter.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "An already-visited neighbor gives a route to an earlier visit time tin[v]; use that to lower low[u].",
+      "wrongExplanations": {
+        "1": "low[v] is meaningful for tree edges; here we only know tin[v] directly.",
+        "3": "This is precisely where you discover alternate routes to earlier nodes."
+      },
+      "hint": "You have discovered a connection to an earlier-visited city.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "After you fully explore an unvisited neighbor v from u and return, how do you update the smallest-reachable value for u?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "low[u] = min(low[u], low[v])",
+          "isCode": false
+        },
+        {
+          "label": "low[u] = min(low[u], tin[v])",
+          "isCode": false
+        },
+        {
+          "label": "low[u] = max(low[u], low[v])",
+          "isCode": false
+        },
+        {
+          "label": "Do not update; low[u] is fixed on entry.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "From v, you may reach earlier nodes via its subtree; update low[u] with low[v].",
+      "wrongExplanations": {
+        "1": "tin[v] ignores routes found below v.",
+        "2": "We want the smallest reachable index, not the largest."
+      },
+      "hint": "Propagate smallest-reachable information upward from children.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "For an edge u–v where v was first discovered from u, when is u–v a necessary road?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "If low[v] > tin[u]",
+          "isCode": false
+        },
+        {
+          "label": "If low[v] >= tin[u]",
+          "isCode": false
+        },
+        {
+          "label": "If low[v] >= tin[v]",
+          "isCode": false
+        },
+        {
+          "label": "If tin[v] < tin[u]",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "If nothing in v’s side can reach u or earlier (low[v] > tin[u]), removing u–v disconnects.",
+      "wrongExplanations": {
+        "1": "Equality means v can reach u or earlier, so there is an alternate route.",
+        "3": "tin[v] < tin[u] does not capture alternate routes through v’s descendants."
+      },
+      "hint": "Compare the smallest-reachable time from v with u’s entry time.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "When inspecting neighbors of u, how should you handle the neighbor that is u's parent p in the exploration?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Always update low[u] with tin[p].",
+          "isCode": false
+        },
+        {
+          "label": "Ignore the edge to p for updates; just skip it.",
+          "isCode": false
+        },
+        {
+          "label": "Treat it like a connection to an earlier non-parent neighbor.",
+          "isCode": false
+        },
+        {
+          "label": "Always mark u–p as necessary.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "The parent edge should be skipped for update checks; it’s the immediate path you came from.",
+      "wrongExplanations": {
+        "0": "Including the parent would falsely suggest an alternate route.",
+        "2": "Only non-parent earlier neighbors provide alternate routes."
+      },
+      "hint": "Avoid counting the immediate back edge to where you came from.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "Apply the rule to the graph with roads 1–2, 2–3, 2–4, 3–4.\nWhich roads are necessary?",
+      "diagram": "1--2\n   | \\\n   3--4",
+      "options": [
+        {
+          "label": "Only 1–2",
+          "isCode": false
+        },
+        {
+          "label": "2–3 and 2–4",
+          "isCode": false
+        },
+        {
+          "label": "Only 3–4",
+          "isCode": false
+        },
+        {
+          "label": "None",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Only 1–2 is outside cycles; edges among 2,3,4 are on a cycle and thus not necessary.",
+      "wrongExplanations": {
+        "3": "Removing 1–2 disconnects city 1 from the rest."
+      },
+      "hint": "Edges on the 2–3–4–2 cycle are not necessary.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "If the graph has no cycles (i.e., it is a tree), which statement is true about necessary roads?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "All roads are necessary.",
+          "isCode": false
+        },
+        {
+          "label": "No roads are necessary.",
+          "isCode": false
+        },
+        {
+          "label": "Exactly n roads are necessary.",
+          "isCode": false
+        },
+        {
+          "label": "Exactly n − 2 roads are necessary.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Without cycles, removing any edge disconnects some cities, so all edges are necessary.",
+      "wrongExplanations": {
+        "1": "In a tree, every edge is critical for connectivity."
+      },
+      "hint": "A tree has exactly one route between any two cities.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Building the Idea",
+      "questionText": "Graph: 1–2–3–1 (triangle) and an extra edge 3–4.\nWhich roads are necessary?",
+      "diagram": "1\n / \\\n3---2\n|\n4",
+      "options": [
+        {
+          "label": "Only 3–4",
+          "isCode": false
+        },
+        {
+          "label": "1–2 and 3–4",
+          "isCode": false
+        },
+        {
+          "label": "All triangle edges and 3–4",
+          "isCode": false
+        },
+        {
+          "label": "None",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "3–4 is a tail; removing it disconnects 4. Triangle edges lie on a cycle and are not necessary.",
+      "wrongExplanations": {
+        "1": "Triangle edges have alternate routes within the cycle."
+      },
+      "hint": "Look for edges not on any cycle.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Start with imports and ensure deep recursion won't overflow for worst-case long chains. Which snippet is most appropriate?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\nsys.setrecursionlimit(1 << 25)",
+          "isCode": true
+        },
+        {
+          "label": "import sys",
+          "isCode": true
+        },
+        {
+          "label": "from sys import stdin",
+          "isCode": true
+        },
+        {
+          "label": "import sys\nsys.setrecursionlimit(1000)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need to raise the recursion limit well above default; 1<<25 is safe for this task.",
+      "wrongExplanations": {
+        "1": "Importing without raising the limit risks RecursionError on deep graphs.",
+        "3": "Default ~1000 is often insufficient for n up to 1e5."
+      },
+      "hint": "Python's default recursion limit is low for n up to 1e5.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\nsys.setrecursionlimit(1 << 25)",
+      "codeLabel": "Imports and recursion limit"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Choose a fast and simple way to read all integers from input.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "data = list(map(int, sys.stdin.buffer.read().split()))\nit = iter(data)\nn = next(it); m = next(it)",
+          "isCode": true
+        },
+        {
+          "label": "n, m = map(int, input().split())\nedges = [tuple(map(int, input().split())) for _ in range(m)]",
+          "isCode": true
+        },
+        {
+          "label": "import sys\nn, m = map(int, sys.stdin.readline().split())\narr = [sys.stdin.readline() for _ in range(m)]",
+          "isCode": true
+        },
+        {
+          "label": "n = int(input())\nm = int(input())",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Reading all tokens and iterating is both fast and straightforward for this task.",
+      "wrongExplanations": {
+        "1": "Line-by-line input with input() may be slower and doesn't parse edges into usable form here.",
+        "3": "Format doesn't match problem (n and m are on the same line)."
+      },
+      "hint": "We will parse many integers; buffered reading helps.",
+      "isCodeBuilding": true,
+      "codeSnippet": "data = list(map(int, sys.stdin.buffer.read().split()))\nit = iter(data)\nn = next(it); m = next(it)",
+      "codeLabel": "Fast input parsing"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Build the adjacency list and read all undirected roads (convert to 0-based indices).",
+      "diagram": null,
+      "options": [
+        {
+          "label": "adj = [[] for _ in range(n)]\nedges = []\nfor _ in range(m):\n    a = next(it); b = next(it); a -= 1; b -= 1\n    adj[a].append(b); adj[b].append(a); edges.append((a, b))",
+          "isCode": true
+        },
+        {
+          "label": "adj = [[] for _ in range(n)]\nfor _ in range(m):\n    a = next(it); b = next(it)\n    adj[a].append(b); adj[b].append(a)",
+          "isCode": true
+        },
+        {
+          "label": "adj = [set() for _ in range(n)]\nfor _ in range(m):\n    a = next(it); b = next(it); a -= 1; b -= 1\n    adj[a].add(b); adj[b].add(a)\nadj = list(adj)",
+          "isCode": true
+        },
+        {
+          "label": "adj = [[] for _ in range(n)]\nfor _ in range(m):\n    a = next(it); b = next(it); a -= 1; b -= 1\n    adj[a].append(b)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We must convert to 0-based and add both directions for an undirected graph.",
+      "wrongExplanations": {
+        "1": "Indexes remain 1-based; also missing conversion may cause index errors.",
+        "3": "Missing the reverse direction will treat the graph as directed."
+      },
+      "hint": "Remember to subtract 1 and add both (a→b) and (b→a).",
+      "isCodeBuilding": true,
+      "codeSnippet": "adj = [[] for _ in range(n)]\nedges = []\nfor _ in range(m):\n    a = next(it); b = next(it); a -= 1; b -= 1\n    adj[a].append(b); adj[b].append(a); edges.append((a, b))",
+      "codeLabel": "Adjacency construction"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Initialize arrays to track first-visit time and smallest-reachable time, a timer, and the result list.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "tin = [-1] * n\nlow = [0] * n\ntimer = [0]\nres = []",
+          "isCode": true
+        },
+        {
+          "label": "tin = [0] * n\nlow = [-1] * n\ntimer = 0\nres = set()",
+          "isCode": true
+        },
+        {
+          "label": "vis = [False] * n\nlow = [10**9] * n\ntime = 0\nans = []",
+          "isCode": true
+        },
+        {
+          "label": "order = []\nparent = [-1] * n\ntimer = [0]\nbridges = []",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Use -1 to mark unvisited tin values, a list timer to mutate inside nested function, and collect results in a list.",
+      "wrongExplanations": {
+        "1": "timer as int won't be mutable inside nested function without nonlocal; also tin initialization is ambiguous.",
+        "2": "These choices don't align with the smallest-reachable logic we need."
+      },
+      "hint": "tin starts at -1 for unvisited; timer should be mutable inside a nested function.",
+      "isCodeBuilding": true,
+      "codeSnippet": "tin = [-1] * n\nlow = [0] * n\ntimer = [0]\nres = []",
+      "codeLabel": "State initialization"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Define the exploration function and stamp a node on entry.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def explore(u, p=-1):\n    tin[u] = timer[0]\n    low[u] = timer[0]\n    timer[0] += 1",
+          "isCode": true
+        },
+        {
+          "label": "def explore(u):\n    low[u] = 0\n    tin[u] = 0",
+          "isCode": true
+        },
+        {
+          "label": "def explore(u, p=-1):\n    timer[0] = 0\n    tin[u] = 0\n    low[u] = 0",
+          "isCode": true
+        },
+        {
+          "label": "def explore(u, p=-1):\n    tin[u] += 1\n    low[u] += 1",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "On entry, set both tin and low to the current timer, then increment the timer.",
+      "wrongExplanations": {
+        "2": "Resetting timer every call breaks unique ordering.",
+        "3": "tin and low must be set from a global counter, not incremented from garbage."
+      },
+      "hint": "tin[u] and low[u] initially equal the visit counter.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def explore(u, p=-1):\n    tin[u] = timer[0]\n    low[u] = timer[0]\n    timer[0] += 1",
+      "codeLabel": "Function header and entry stamp"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Iterate neighbors of u, skip the parent, and handle already-visited neighbors not equal to the parent to update the smallest-reachable value.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    for v in adj[u]:\n        if v == p:\n            continue\n        if tin[v] != -1:\n            if tin[v] < tin[u]:\n                low[u] = min(low[u], tin[v])",
+          "isCode": true
+        },
+        {
+          "label": "    for v in adj[u]:\n        if tin[v] != -1:\n            low[u] = min(low[u], low[v])",
+          "isCode": true
+        },
+        {
+          "label": "    for v in adj[u]:\n        if v == p:\n            low[u] = min(low[u], tin[v])",
+          "isCode": true
+        },
+        {
+          "label": "    for v in adj[u]:\n        if tin[v] == -1:\n            low[u] = min(low[u], tin[v])",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Skip the parent, and for earlier-visited non-parent neighbors, reduce low[u] using their tin values.",
+      "wrongExplanations": {
+        "1": "Using low[v] for already-visited v is incorrect; only tin[v] is meaningful there.",
+        "2": "Do not update with the parent’s tin; skip it."
+      },
+      "hint": "Only non-parent, already-visited neighbors give alternate routes.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    for v in adj[u]:\n        if v == p:\n            continue\n        if tin[v] != -1:\n            if tin[v] < tin[u]:\n                low[u] = min(low[u], tin[v])",
+      "codeLabel": "Neighbor loop (visited neighbor case)"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "Handle unvisited neighbors: recurse, update the smallest-reachable value, and detect necessary roads.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "        else:\n            explore(v, u)\n            low[u] = min(low[u], low[v])\n            if low[v] > tin[u]:\n                res.append((u, v))",
+          "isCode": true
+        },
+        {
+          "label": "        else:\n            explore(v, u)\n            low[u] = max(low[u], low[v])\n            if low[v] >= tin[u]:\n                res.append((u, v))",
+          "isCode": true
+        },
+        {
+          "label": "        else:\n            explore(v, u)\n            if tin[v] > tin[u]:\n                res.append((u, v))",
+          "isCode": true
+        },
+        {
+          "label": "        else:\n            explore(v, u)\n            low[u] = min(low[u], tin[v])\n            if low[v] > tin[v]:\n                res.append((u, v))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "After recursion, propagate low[v] to u; mark u–v necessary when low[v] > tin[u].",
+      "wrongExplanations": {
+        "1": "We need min, not max; and '>=' is too strong (equals means alternative path exists).",
+        "3": "Using tin[v] loses information from v’s descendants."
+      },
+      "hint": "Use the rule from earlier: low[v] > tin[u] means necessary.",
+      "isCodeBuilding": true,
+      "codeSnippet": "        else:\n            explore(v, u)\n            low[u] = min(low[u], low[v])\n            if low[v] > tin[u]:\n                res.append((u, v))",
+      "codeLabel": "Neighbor loop (unvisited neighbor case)"
+    },
+    {
+      "id": "q22",
+      "phase": "Writing the Code",
+      "questionText": "Finish by exploring all cities (in case the graph isn't strictly connected in input variations) and printing the results.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "for i in range(n):\n    if tin[i] == -1:\n        explore(i, -1)\nout = [str(len(res))]\nfor u, v in res:\n    out.append(f\"{u+1} {v+1}\")\nsys.stdout.write(\"\\n\".join(out))",
+          "isCode": true
+        },
+        {
+          "label": "explore(0, -1)\nprint(len(res))\nfor u, v in res:\n    print(u, v)",
+          "isCode": true
+        },
+        {
+          "label": "for i in range(n):\n    explore(i, -1)\nprint(len(res))",
+          "isCode": true
+        },
+        {
+          "label": "explore(0)\nprint(len(res))\nprint(\"\\n\".join(map(str, res)))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Ensure all components are explored defensively and print 1-based endpoints in any order.",
+      "wrongExplanations": {
+        "1": "Starting only at 0 risks missing nodes if the graph isn't fully discovered (defensive programming).",
+        "3": "Printing raw tuples and 0-based indices violates the required format."
+      },
+      "hint": "Convert back to 1-based for output and format as lines.",
+      "isCodeBuilding": true,
+      "codeSnippet": "for i in range(n):\n    if tin[i] == -1:\n        explore(i, -1)\nout = [str(len(res))]\nfor u, v in res:\n    out.append(f\"{u+1} {v+1}\")\nsys.stdout.write(\"\\n\".join(out))",
+      "codeLabel": "Driver and output"
+    },
+    {
+      "id": "q23",
+      "phase": "Verifying the Solution",
+      "questionText": "On the sample input:\n5 5\n1 2\n1 4\n2 4\n3 5\n4 5\nWhat is the first line of output (k)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Edges 3–5 and 4–5 are necessary; edges among 1,2,4 form a cycle.",
+      "wrongExplanations": {
+        "1": "There are two tail-like connections to node 5.",
+        "0": "Removing 4–5 or 3–5 disconnects the graph."
+      },
+      "hint": "Identify edges not on the 1–2–4–1 cycle.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Verifying the Solution",
+      "questionText": "Which road must appear among the printed necessary roads for the sample?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "1 2",
+          "isCode": false
+        },
+        {
+          "label": "1 4",
+          "isCode": false
+        },
+        {
+          "label": "3 5",
+          "isCode": false
+        },
+        {
+          "label": "2 4",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "3–5 is the only link of city 3 to the rest; it must be printed.",
+      "wrongExplanations": {
+        "0": "1–2 lies on a cycle 1–2–4–1 and is not necessary."
+      },
+      "hint": "Which edges disconnect the graph if removed?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the time complexity of the approach that explores each city once and scans all its neighbors, updating values with O(1) work per edge?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n + m)",
+          "isCode": false
+        },
+        {
+          "label": "O(m · (n + m))",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(m log m)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each edge and node is processed a constant number of times; total is linear in n + m.",
+      "wrongExplanations": {
+        "1": "That's the repeated-removal naive approach.",
+        "2": "No sorting or priority structures to introduce log factors."
+      },
+      "hint": "Count how many times each edge is considered.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the overall space complexity (including the adjacency list and auxiliary arrays)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n + m)",
+          "isCode": false
+        },
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(m log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(1)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Adjacency list takes O(n + m), and tin/low/res add O(n).",
+      "wrongExplanations": {
+        "1": "The adjacency list itself requires O(n + m) space.",
+        "3": "We store the graph and arrays; it's not constant."
+      },
+      "hint": "Consider storing neighbors for all roads plus per-node arrays.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q27",
+      "phase": "Analyzing Complexity",
+      "questionText": "Which precaution is important in Python for worst-case long chains when using recursive exploration?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Increase the recursion limit with sys.setrecursionlimit.",
+          "isCode": false
+        },
+        {
+          "label": "Sort the adjacency lists to reduce depth.",
+          "isCode": false
+        },
+        {
+          "label": "Use 1-based indexing internally.",
+          "isCode": false
+        },
+        {
+          "label": "Disable buffering on stdin.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Long paths can exceed the default recursion limit; increasing it avoids RecursionError.",
+      "wrongExplanations": {
+        "1": "Sorting does not affect recursion depth.",
+        "2": "Indexing choice does not change recursion depth."
+      },
+      "hint": "Default recursion is usually ~1000 calls deep.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\nsys.setrecursionlimit(1 << 25)",
+    "data = list(map(int, sys.stdin.buffer.read().split()))\nit = iter(data)\nn = next(it); m = next(it)",
+    "adj = [[] for _ in range(n)]\nedges = []\nfor _ in range(m):\n    a = next(it); b = next(it); a -= 1; b -= 1\n    adj[a].append(b); adj[b].append(a); edges.append((a, b))",
+    "tin = [-1] * n\nlow = [0] * n\ntimer = [0]\nres = []",
+    "def explore(u, p=-1):\n    tin[u] = timer[0]\n    low[u] = timer[0]\n    timer[0] += 1",
+    "    for v in adj[u]:\n        if v == p:\n            continue\n        if tin[v] != -1:\n            if tin[v] < tin[u]:\n                low[u] = min(low[u], tin[v])",
+    "        else:\n            explore(v, u)\n            low[u] = min(low[u], low[v])\n            if low[v] > tin[u]:\n                res.append((u, v))",
+    "for i in range(n):\n    if tin[i] == -1:\n        explore(i, -1)\nout = [str(len(res))]\nfor u, v in res:\n    out.append(f\"{u+1} {v+1}\")\nsys.stdout.write(\"\\n\".join(out))"
+  ],
+  "reasoningChain": [
+    {
+      "question": "What edges are necessary in simple cases (paths vs cycles)?",
+      "insight": "Edges on cycles are not necessary; edges not on any cycle are necessary."
+    },
+    {
+      "question": "Is removing each edge and testing connectivity feasible at scale?",
+      "insight": "Brute force is too slow; we need a linear-time scan with extra per-node info."
+    },
+    {
+      "question": "What per-node values allow deciding if there exists an alternate route to earlier nodes?",
+      "insight": "Record first-visit order and the smallest reachable order via neighbors (excluding the direct parent path)."
+    },
+    {
+      "question": "How to update these values during exploration?",
+      "insight": "Use tin[v] for already-visited non-parent neighbors; use low[v] after returning from an unvisited neighbor."
+    },
+    {
+      "question": "What is the exact condition to flag an explored edge as necessary?",
+      "insight": "For edge u–v discovered from u, it's necessary if low[v] > tin[u]."
+    },
+    {
+      "question": "What practical details ensure correctness and performance in Python?",
+      "insight": "Use adjacency lists, explore all nodes, 1-based to 0-based conversion, raise recursion limit, and print any order."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1437,
+    "output_tokens": 15734,
+    "input_cost": 0.001796,
+    "output_cost": 0.15734,
+    "total_cost": 0.159136
+  }
+}

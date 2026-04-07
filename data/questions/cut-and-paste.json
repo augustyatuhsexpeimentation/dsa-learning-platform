@@ -1,0 +1,927 @@
+{
+  "id": "cut-and-paste-mcqs",
+  "title": "Cut and Paste",
+  "difficulty": "hard",
+  "tags": [
+    "advanced"
+  ],
+  "estimatedMinutes": 70,
+  "language": "python",
+  "description": "You are given a string and a sequence of operations. Each operation cuts the substring from positions a to b (1-indexed, inclusive) and pastes it at the end of the string. After all operations, output the final string.\n\nInput:\n- First line: two integers n and m.\n- Second line: a string S of length n (characters A–Z).\n- Next m lines: two integers a and b per line.\n\nOutput:\n- The final string after performing all operations in order.\n\nExample:\nInput:\n7 2\nAYBABTU\n3 5\n3 5\nOutput:\nAYABTUB",
+  "examples": [
+    {
+      "input": "7 2\nAYBABTU\n3 5\n3 5",
+      "output": "AYABTUB",
+      "explanation": "First cut [3,5]: 'BAB' -> AYTU + BAB => AYTUBAB. Second cut [3,5]: 'TUB' -> AYAB + TUB => AYABTUB."
+    }
+  ],
+  "constraints": [
+    "1 ≤ n, m ≤ 2·10^5",
+    "1 ≤ a ≤ b ≤ n",
+    "String consists of A–Z"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "Given S = \"ABCDE\" and one operation a=2, b=4, what is the string after the operation?",
+      "diagram": "S: A B C D E\nIdx:1 2 3 4 5\nCut [2,4] -> \"BCD\"; remaining: \"AE\"; paste to end.",
+      "options": [
+        {
+          "label": "AEBCD",
+          "isCode": false
+        },
+        {
+          "label": "BCDEA",
+          "isCode": false
+        },
+        {
+          "label": "ABCDE",
+          "isCode": false
+        },
+        {
+          "label": "DABCE",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Cut positions 2..4: \"BCD\". Remaining is \"AE\". Paste cut part to end: \"AE\" + \"BCD\" = \"AEBCD\".",
+      "wrongExplanations": {
+        "1": "This moves the prefix A to the end, not the cut block.",
+        "2": "No change only if a=1, b=n; here a=2, b=4.",
+        "3": "This is not achieved by cutting a contiguous middle block and appending."
+      },
+      "hint": "Cut the exact substring [2,4] and append."
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "S = \"ABCDE\". Operation a=1, b=2. What is the result?",
+      "diagram": "Cut [1,2] -> \"AB\"; remaining: \"CDE\"; paste to end.",
+      "options": [
+        {
+          "label": "CDEAB",
+          "isCode": false
+        },
+        {
+          "label": "ABCDE",
+          "isCode": false
+        },
+        {
+          "label": "ABEDC",
+          "isCode": false
+        },
+        {
+          "label": "EABCD",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Cut first two characters (\"AB\") and paste to end: \"CDE\" + \"AB\" = \"CDEAB\".",
+      "wrongExplanations": {
+        "1": "There is a change; a=1,b=2 removes the first two characters.",
+        "3": "This places E first without reason."
+      },
+      "hint": "a and b are 1-indexed and inclusive."
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "For S = \"AYBABTU\", after one operation a=3, b=5, what is the string?",
+      "diagram": "Idx: 1 A,2 Y,3 B,4 A,5 B,6 T,7 U\nCut [3,5] -> \"BAB\"; remaining: \"AYTU\"; paste to end.",
+      "options": [
+        {
+          "label": "AYTUBAB",
+          "isCode": false
+        },
+        {
+          "label": "AYABTUB",
+          "isCode": false
+        },
+        {
+          "label": "BABAYTU",
+          "isCode": false
+        },
+        {
+          "label": "AYBA TBU",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Cut [3,5] gives \"BAB\"; remaining is \"AYTU\"; result: \"AYTUBAB\".",
+      "wrongExplanations": {
+        "1": "This is after applying the same operation a second time.",
+        "2": "This puts the cut part at the front, not the end."
+      },
+      "hint": "Only one operation here."
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "Do the positions a and b in each operation refer to the original string or the current string after previous operations?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "They refer to the current string after previous operations.",
+          "isCode": false
+        },
+        {
+          "label": "They always refer to the original string only.",
+          "isCode": false
+        },
+        {
+          "label": "a refers to original, b refers to current.",
+          "isCode": false
+        },
+        {
+          "label": "They alternate between original and current each operation.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each operation applies to the current string state.",
+      "wrongExplanations": {
+        "1": "If fixed to original, later cuts would not match typical problems and the sample.",
+        "2": "Mixing bases would be undefined and not stated."
+      },
+      "hint": "Read: \"Finally, there are m lines that describe the operations.\" They apply in order."
+    },
+    {
+      "id": "q5",
+      "phase": "Understanding the Problem",
+      "questionText": "If we physically slice and concatenate Python strings for each operation, what is the worst-case time per operation?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n), because slicing/concatenation touches many characters.",
+          "isCode": false
+        },
+        {
+          "label": "O(1), strings are references.",
+          "isCode": false
+        },
+        {
+          "label": "O(log n), slices are views.",
+          "isCode": false
+        },
+        {
+          "label": "O(m), depends on operations count.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Python strings are immutable; slicing/concat copies characters, taking O(length).",
+      "wrongExplanations": {
+        "1": "Python does not have O(1) slice/concat for strings.",
+        "2": "Slices are copies, not views."
+      },
+      "hint": "Immutable strings must be reallocated."
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "We need to support many cut-and-append operations quickly. Which pair of operations would be sufficient to perform each cut efficiently?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Split the sequence at indices and join sequences back together.",
+          "isCode": false
+        },
+        {
+          "label": "Reverse the whole string and reverse back later.",
+          "isCode": false
+        },
+        {
+          "label": "Sort characters and then reconstruct.",
+          "isCode": false
+        },
+        {
+          "label": "Count character frequencies and rebuild.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "If we can split by position and join in a new order, we can cut and append without copying all characters each time.",
+      "wrongExplanations": {
+        "1": "Reversing does not isolate [a,b].",
+        "2": "Sorting ignores order, not applicable."
+      },
+      "hint": "Think: split by b, then by a-1."
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "Suppose we store the string as a list of characters and do list slicing and concatenation for each operation. What is the typical per-operation time?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n), due to copying slices.",
+          "isCode": false
+        },
+        {
+          "label": "O(1), list slices are views.",
+          "isCode": false
+        },
+        {
+          "label": "O(log n), list maintains a tree internally.",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n), due to sorting inside.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "List slicing creates new lists and concatenation copies elements: O(k) for slice size.",
+      "wrongExplanations": {
+        "1": "Python list slices are copies, not views.",
+        "2": "Lists are arrays, not balanced trees."
+      },
+      "hint": "Avoid copying O(n) per operation."
+    },
+    {
+      "id": "q8",
+      "phase": "Exploring Approaches",
+      "questionText": "Assume we have functions Split(T, k) that returns (first k chars, rest), and Join(A, B) that concatenates. To cut [a,b] and append to end, which sequence is correct?",
+      "diagram": "Let T be current sequence.",
+      "options": [
+        {
+          "label": "LAB, R = Split(T, b); L, M = Split(LAB, a-1); T = Join(L, R); T = Join(T, M)",
+          "isCode": false
+        },
+        {
+          "label": "L, RAB = Split(T, a-1); M, R = Split(RAB, b); T = Join(L, R); T = Join(M, T)",
+          "isCode": false
+        },
+        {
+          "label": "L, R = Split(T, a-1); M, R2 = Split(R, b-a+1); T = Join(L, R2); T = Join(T, M)",
+          "isCode": false
+        },
+        {
+          "label": "M, L = Split(T, b); R, M2 = Split(M, a-1); T = Join(L, R); T = Join(M2, T)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Split off prefix up to a-1, then take next (b-a+1) as M. Remove M by joining L with R2, then append M at end.",
+      "wrongExplanations": {
+        "0": "Second split uses a-1 on a shorter left, which is correct idea but the final joins misplace M.",
+        "1": "Second split should be size (b-a+1) on the right part, not b."
+      },
+      "hint": "After first split at a-1, the desired block length is b-a+1."
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "We maintain a sequence using nodes with left/right children and a stored subtree size. What should Split(T, k) return when k = 0?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "(None, T)",
+          "isCode": false
+        },
+        {
+          "label": "(T, None)",
+          "isCode": false
+        },
+        {
+          "label": "(first node, rest)",
+          "isCode": false
+        },
+        {
+          "label": "Raise an error",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Splitting off zero characters yields an empty left part and all of T on the right.",
+      "wrongExplanations": {
+        "1": "This would split all nodes to the left even when k=0.",
+        "2": "k=0 should not take a character."
+      },
+      "hint": "k counts how many characters go left."
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "Suppose size(T) = 10. After (LAB, R) = Split(T, b) and (L, M) = Split(LAB, a-1), what is length(M)?",
+      "diagram": "Assume 1 ≤ a ≤ b ≤ 10.",
+      "options": [
+        {
+          "label": "b - a + 1",
+          "isCode": false
+        },
+        {
+          "label": "b - a",
+          "isCode": false
+        },
+        {
+          "label": "a + b",
+          "isCode": false
+        },
+        {
+          "label": "Depends on tree shape",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Split at b keeps first b chars; split that at a-1 isolates exactly positions a..b (length b-a+1).",
+      "wrongExplanations": {
+        "1": "Off by one: inclusive range length is b-a+1.",
+        "3": "Split behavior is by index counts, independent of structure shape."
+      },
+      "hint": "Inclusive segment length."
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "After isolating M = [a,b] as above, what is the sequence without M?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Join(L, R)",
+          "isCode": false
+        },
+        {
+          "label": "Join(R, L)",
+          "isCode": false
+        },
+        {
+          "label": "Join(L, M)",
+          "isCode": false
+        },
+        {
+          "label": "Join(M, R)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Removing M leaves the prefix L and suffix R; their concatenation is Join(L, R).",
+      "wrongExplanations": {
+        "1": "This would swap order.",
+        "2": "This keeps M instead of removing it."
+      },
+      "hint": "Think remaining = prefix + suffix."
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "To paste the cut block M to the end, what should we return as the new root sequence?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Join(Join(L, R), M)",
+          "isCode": false
+        },
+        {
+          "label": "Join(M, Join(L, R))",
+          "isCode": false
+        },
+        {
+          "label": "Join(L, Join(M, R))",
+          "isCode": false
+        },
+        {
+          "label": "Join(R, Join(L, M))",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "First remove M via Join(L,R), then append M at the end.",
+      "wrongExplanations": {
+        "1": "This would move M to the front.",
+        "2": "This inserts M between L and R, not at the end."
+      },
+      "hint": "Append means put M after the rest."
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "Edge cases: If a=1 or b=size(T), will two splits still work correctly?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, Split handles k=0 and k=size(T) producing None appropriately.",
+          "isCode": false
+        },
+        {
+          "label": "No, we need special cases for ends.",
+          "isCode": false
+        },
+        {
+          "label": "Only a=1 works; b=size(T) fails.",
+          "isCode": false
+        },
+        {
+          "label": "Only b=size(T) works; a=1 fails.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Split should return (None, T) for k=0 and (T, None) for k=size(T). Two splits still isolate M.",
+      "wrongExplanations": {
+        "1": "Properly implemented split makes special cases unnecessary."
+      },
+      "hint": "Define Split on boundaries carefully."
+    },
+    {
+      "id": "q14",
+      "phase": "Building the Idea",
+      "questionText": "To build the initial structure from string S, which approach preserves order and supports fast future splits/joins?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Start with empty and repeatedly append characters using Join(root, new_node).",
+          "isCode": false
+        },
+        {
+          "label": "Insert each character at the front.",
+          "isCode": false
+        },
+        {
+          "label": "Sort characters and insert.",
+          "isCode": false
+        },
+        {
+          "label": "Build an array and convert once at the end.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Appending in order preserves sequence and prepares the structure for efficient splits/joins.",
+      "wrongExplanations": {
+        "1": "Front-inserting reverses the string.",
+        "2": "Sorting breaks original order."
+      },
+      "hint": "Maintain left-to-right order."
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Choose the most efficient and safe input parsing setup for large n,m and deep recursion.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys, random\nsys.setrecursionlimit(1 << 25)\ndata = sys.stdin.buffer.read().split()\nit = iter(data)\nn = int(next(it)); m = int(next(it))\ns = next(it).decode()",
+          "isCode": true
+        },
+        {
+          "label": "import sys\nn, m = map(int, sys.stdin.readline().split())\ns = sys.stdin.readline().strip()",
+          "isCode": true
+        },
+        {
+          "label": "import sys, random\nsys.setrecursionlimit(10**3)\ndata = sys.stdin.read().split()\nit = iter(data)\nn = int(next(it)); m = int(next(it))\ns = next(it)",
+          "isCode": true
+        },
+        {
+          "label": "import sys, random\nsys.setrecursionlimit(1 << 20)\ndata = sys.stdin.buffer.read().split()\nn = int(data[0]); m = int(data[1]); s = data[2]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Buffered read with split tokens is fast; high recursion limit; decoding the string token.",
+      "wrongExplanations": {
+        "1": "Line-by-line may be slower and may TLE with 2e5 ops.",
+        "2": "Recursion limit too low; s remains bytes."
+      },
+      "hint": "Use buffered read and increase recursion limit.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys, random\nsys.setrecursionlimit(1 << 25)\ndata = sys.stdin.buffer.read().split()\nit = iter(data)\nn = int(next(it)); m = int(next(it))\ns = next(it).decode()",
+      "codeLabel": "Fast input and setup"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Define the node structure to store a character, left/right children, a random priority, and subtree size.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "class Node:\n    __slots__ = ('ch','prio','l','r','sz')\n    def __init__(self, ch):\n        self.ch = ch\n        self.prio = random.randint(1, 1<<30)\n        self.l = None\n        self.r = None\n        self.sz = 1",
+          "isCode": true
+        },
+        {
+          "label": "class Node:\n    def __init__(self, ch):\n        self.ch = ch\n        self.prio = 1\n        self.left = None\n        self.right = None\n        self.sz = 0",
+          "isCode": true
+        },
+        {
+          "label": "class Node:\n    __slots__ = ('ch','l','r')\n    def __init__(self, ch):\n        self.ch = ch\n        self.l = None\n        self.r = None",
+          "isCode": true
+        },
+        {
+          "label": "class Node:\n    __slots__ = ('val','prio','l','r','size')\n    def __init__(self, ch):\n        self.val = ch\n        self.prio = random.random()\n        self.l = None\n        self.r = None\n        self.size = 1",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need character, random priority, children, and subtree size initialized to 1. Using __slots__ reduces overhead.",
+      "wrongExplanations": {
+        "1": "Fixed priority prevents balancing; sz should start at 1.",
+        "3": "Field names inconsistent with later code."
+      },
+      "hint": "Match field names to later helpers.",
+      "isCodeBuilding": true,
+      "codeSnippet": "class Node:\n    __slots__ = ('ch','prio','l','r','sz')\n    def __init__(self, ch):\n        self.ch = ch\n        self.prio = random.randint(1, 1<<30)\n        self.l = None\n        self.r = None\n        self.sz = 1",
+      "codeLabel": "Node definition"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Implement helper functions to get subtree size and update a node’s size.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def sz(t):\n    return t.sz if t else 0\n\ndef upd(t):\n    if t:\n        t.sz = 1 + sz(t.l) + sz(t.r)",
+          "isCode": true
+        },
+        {
+          "label": "def sz(t):\n    return len(t) if t else 0\n\ndef upd(t):\n    t.sz = 1 + sz(t.l) + sz(t.r)",
+          "isCode": true
+        },
+        {
+          "label": "def size(t):\n    return t.sz\n\ndef upd(t):\n    if t:\n        t.sz = 1 + size(t.l) + size(t.r)",
+          "isCode": true
+        },
+        {
+          "label": "def sz(t):\n    return t.sz if t else 0\n\ndef upd(t):\n    t.sz = 1 + sz(t.l) + sz(t.r)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We must handle None safely in both functions; upd should guard t and compute from children sizes.",
+      "wrongExplanations": {
+        "1": "len(t) is invalid for nodes.",
+        "3": "Missing None guard may raise when t is None."
+      },
+      "hint": "Treat None as size 0.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def sz(t):\n    return t.sz if t else 0\n\ndef upd(t):\n    if t:\n        t.sz = 1 + sz(t.l) + sz(t.r)",
+      "codeLabel": "Size helpers"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Implement Split(t, k) that returns the first k characters as left and the rest as right.",
+      "diagram": "If size(left child) >= k, split left; otherwise split right with k reduced by left size + 1.",
+      "options": [
+        {
+          "label": "def split(t, k):\n    if not t:\n        return (None, None)\n    if sz(t.l) >= k:\n        a, b = split(t.l, k)\n        t.l = b\n        upd(t)\n        return (a, t)\n    else:\n        a, b = split(t.r, k - sz(t.l) - 1)\n        t.r = a\n        upd(t)\n        return (t, b)",
+          "isCode": true
+        },
+        {
+          "label": "def split(t, k):\n    if not t:\n        return (None, None)\n    if sz(t.l) > k:\n        a, b = split(t.l, k)\n        t.l = b\n        upd(t)\n        return (a, t)\n    else:\n        a, b = split(t.r, k - sz(t.l))\n        t.r = a\n        upd(t)\n        return (t, b)",
+          "isCode": true
+        },
+        {
+          "label": "def split(t, k):\n    if not t:\n        return (None, None)\n    if sz(t.l) >= k:\n        a, b = split(t.l, k-1)\n        t.l = b\n        upd(t)\n        return (a, t)\n    else:\n        a, b = split(t.r, k - sz(t.l) - 1)\n        t.r = a\n        upd(t)\n        return (t, b)",
+          "isCode": true
+        },
+        {
+          "label": "def split(t, k):\n    if not t:\n        return (None, None)\n    if k == 0:\n        return (None, t)\n    a, b = split(t.r, k-1)\n    t.r = a\n    upd(t)\n    return (t, b)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We compare k with left size; if left has at least k, split left; otherwise go right with k reduced by left size + 1 (for current node).",
+      "wrongExplanations": {
+        "1": "The '>' vs '>=', and missing -1 on k when going right cause off-by-one errors.",
+        "2": "Decrementing k when going left is incorrect; left already has ≥ k."
+      },
+      "hint": "When descending right, you skip left and current node.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def split(t, k):\n    if not t:\n        return (None, None)\n    if sz(t.l) >= k:\n        a, b = split(t.l, k)\n        t.l = b\n        upd(t)\n        return (a, t)\n    else:\n        a, b = split(t.r, k - sz(t.l) - 1)\n        t.r = a\n        upd(t)\n        return (t, b)",
+      "codeLabel": "Split by count"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Implement Join(a, b) that concatenates two sequences, preserving order and updating sizes.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def merge(a, b):\n    if not a or not b:\n        return a or b\n    if a.prio > b.prio:\n        a.r = merge(a.r, b)\n        upd(a)\n        return a\n    else:\n        b.l = merge(a, b.l)\n        upd(b)\n        return b",
+          "isCode": true
+        },
+        {
+          "label": "def merge(a, b):\n    if not a:\n        return b\n    if not b:\n        return a\n    if a.prio < b.prio:\n        a.l = merge(a.l, b)\n        upd(a)\n        return a\n    else:\n        b.r = merge(a, b.r)\n        upd(b)\n        return b",
+          "isCode": true
+        },
+        {
+          "label": "def merge(a, b):\n    if not a or not b:\n        return b or a\n    if a.prio > b.prio:\n        a.l = merge(a.l, b)\n        upd(a)\n        return a\n    else:\n        b.r = merge(a, b.r)\n        upd(b)\n        return b",
+          "isCode": true
+        },
+        {
+          "label": "def merge(a, b):\n    if not a or not b:\n        return a or b\n    a.r = merge(a.r, b)\n    upd(a)\n    return a",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Attach based on priority; if a wins, merge into its right; else merge into b's left. Update sizes on the way up.",
+      "wrongExplanations": {
+        "1": "Attaching on wrong sides breaks in-order sequence.",
+        "2": "Misplaces attachments to left/right, breaking order."
+      },
+      "hint": "Maintain in-order: all of a before all of b.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def merge(a, b):\n    if not a or not b:\n        return a or b\n    if a.prio > b.prio:\n        a.r = merge(a.r, b)\n        upd(a)\n        return a\n    else:\n        b.l = merge(a, b.l)\n        upd(b)\n        return b",
+      "codeLabel": "Join sequences"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Build the initial structure from the input string s in order.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "root = None\nfor ch in s:\n    root = merge(root, Node(ch))",
+          "isCode": true
+        },
+        {
+          "label": "root = None\nfor ch in s:\n    root = merge(Node(ch), root)",
+          "isCode": true
+        },
+        {
+          "label": "root = None\nfor ch in reversed(s):\n    root = merge(root, Node(ch))",
+          "isCode": true
+        },
+        {
+          "label": "root = Node(s[0])\nfor ch in s[1:]:\n    root = merge(Node(ch), root)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Merging on the right appends each character, preserving original order.",
+      "wrongExplanations": {
+        "1": "Merging on the left prepends and may reverse order depending on priorities.",
+        "2": "Reversing the iteration reverses the string."
+      },
+      "hint": "Append in sequence.",
+      "isCodeBuilding": true,
+      "codeSnippet": "root = None\nfor ch in s:\n    root = merge(root, Node(ch))",
+      "codeLabel": "Build initial tree"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "Process each operation (a,b): cut [a,b] and append to end using two splits and two merges. Pick the correct code.",
+      "diagram": "1-indexed a,b.\nleft_ab, right = split(root, b)\nleft, mid = split(left_ab, a-1)\nroot = merge(left, right)\nroot = merge(root, mid)",
+      "options": [
+        {
+          "label": "for _ in range(m):\n    a = int(next(it)); b = int(next(it))\n    left_ab, right = split(root, b)\n    left, mid = split(left_ab, a-1)\n    root = merge(left, right)\n    root = merge(root, mid)",
+          "isCode": true
+        },
+        {
+          "label": "for _ in range(m):\n    a = int(next(it)); b = int(next(it))\n    left, right = split(root, a-1)\n    mid, right2 = split(right, b)\n    root = merge(left, right2)\n    root = merge(mid, root)",
+          "isCode": true
+        },
+        {
+          "label": "for _ in range(m):\n    a = int(next(it)); b = int(next(it))\n    left, mid = split(root, a)\n    mid2, right = split(mid, b-a)\n    root = merge(left, right)\n    root = merge(mid2, root)",
+          "isCode": true
+        },
+        {
+          "label": "for _ in range(m):\n    a = int(next(it)); b = int(next(it))\n    left_ab, right = split(root, b)\n    left, mid = split(left_ab, a)\n    root = merge(left, mid)\n    root = merge(root, right)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Split at b, then at a-1 to isolate mid. Remove mid with merge(left,right), then append mid at end.",
+      "wrongExplanations": {
+        "1": "Second split should be size b-a+1, not b; also final merge order moves mid to front.",
+        "2": "First split off-by-one on a; second split length off by one."
+      },
+      "hint": "Use a-1 and b exactly on the original root or left part.",
+      "isCodeBuilding": true,
+      "codeSnippet": "for _ in range(m):\n    a = int(next(it)); b = int(next(it))\n    left_ab, right = split(root, b)\n    left, mid = split(left_ab, a-1)\n    root = merge(left, right)\n    root = merge(root, mid)",
+      "codeLabel": "Process operations"
+    },
+    {
+      "id": "q22",
+      "phase": "Writing the Code",
+      "questionText": "Output the final string via in-order traversal (iterative to avoid recursion depth issues). Select the correct code.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "out = []\nstack = []\nt = root\nwhile t or stack:\n    while t:\n        stack.append(t)\n        t = t.l\n    t = stack.pop()\n    out.append(t.ch)\n    t = t.r\nsys.stdout.write(''.join(out))",
+          "isCode": true
+        },
+        {
+          "label": "def dfs(t):\n    if not t: return\n    out.append(t.ch)\n    dfs(t.l); dfs(t.r)\nout = []\ndfs(root)\nsys.stdout.write(''.join(out))",
+          "isCode": true
+        },
+        {
+          "label": "out = []\nstack = [root]\nwhile stack:\n    node = stack.pop()\n    if not node: continue\n    out.append(node.ch)\n    stack.append(node.r)\n    stack.append(node.l)\nsys.stdout.write(''.join(out))",
+          "isCode": true
+        },
+        {
+          "label": "out = []\nstack = []\nt = root\nwhile t or stack:\n    while t:\n        stack.append(t)\n        t = t.r\n    t = stack.pop()\n    out.append(t.ch)\n    t = t.l\nsys.stdout.write(''.join(out))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "In-order (left, node, right) yields characters in sequence. The iterative approach avoids recursion limits.",
+      "wrongExplanations": {
+        "1": "This is pre-order, not in-order; order will be wrong.",
+        "3": "This is reverse in-order, producing reversed string."
+      },
+      "hint": "In-order traversal outputs left subtree, then node, then right subtree.",
+      "isCodeBuilding": true,
+      "codeSnippet": "out = []\nstack = []\nt = root\nwhile t or stack:\n    while t:\n        stack.append(t)\n        t = t.l\n    t = stack.pop()\n    out.append(t.ch)\n    t = t.r\nsys.stdout.write(''.join(out))",
+      "codeLabel": "Emit result"
+    },
+    {
+      "id": "q23",
+      "phase": "Verifying the Solution",
+      "questionText": "Trace: S=\"ABCDE\", operations: (2,4) then (1,1). What is the final string?",
+      "diagram": "Op1: cut [2,4] -> \"BCD\" => \"AE\"+\"BCD\" = \"AEBCD\"\nOp2 on current: cut [1,1] -> \"A\" => \"EBCD\"+\"A\" = \"EBCDA\"",
+      "options": [
+        {
+          "label": "EBCDA",
+          "isCode": false
+        },
+        {
+          "label": "AEBCD",
+          "isCode": false
+        },
+        {
+          "label": "BCDEA",
+          "isCode": false
+        },
+        {
+          "label": "ABCDE",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "After two operations, we get \"EBCDA\".",
+      "wrongExplanations": {
+        "1": "That's after only the first operation.",
+        "2": "Misplaces the cut part."
+      },
+      "hint": "Apply operations sequentially to the current string."
+    },
+    {
+      "id": "q24",
+      "phase": "Verifying the Solution",
+      "questionText": "Use the given example: S=\"AYBABTU\", operations (3,5) then (3,5). What does the code produce?",
+      "diagram": "After first: \"AYTUBAB\"; After second: \"AYABTUB\"",
+      "options": [
+        {
+          "label": "AYABTUB",
+          "isCode": false
+        },
+        {
+          "label": "AYTUBAB",
+          "isCode": false
+        },
+        {
+          "label": "AYBABTU",
+          "isCode": false
+        },
+        {
+          "label": "AYTUBBA",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Matches the sample output: AYABTUB.",
+      "wrongExplanations": {
+        "1": "That's after only the first operation."
+      },
+      "hint": "Check provided sample."
+    },
+    {
+      "id": "q25",
+      "phase": "Analyzing Complexity",
+      "questionText": "Assuming the structure stays shallow on average, what is the expected time per operation (split/merge a constant number of times)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(1)",
+          "isCode": false
+        },
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(log^2 n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each operation does a constant number of splits/joins, each expected O(log n).",
+      "wrongExplanations": {
+        "1": "Traversing to a position requires more than O(1).",
+        "2": "We avoid scanning the whole string."
+      },
+      "hint": "Height matters."
+    },
+    {
+      "id": "q26",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the overall expected time complexity for building and processing all m operations?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O((n + m) log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(nm)",
+          "isCode": false
+        },
+        {
+          "label": "O(n + m)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n + m)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Building by repeated appends is O(n log n) expected; each operation is O(log n) expected, totaling O((n+m) log n).",
+      "wrongExplanations": {
+        "1": "We avoid O(n) per operation.",
+        "2": "Each op is not O(1)."
+      },
+      "hint": "Sum costs of build and m operations."
+    },
+    {
+      "id": "q27",
+      "phase": "Analyzing Complexity",
+      "questionText": "Which edge cases should be handled correctly by the implementation?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "a=1 or b=n; a=b; m=0; repeated operations that move the same block.",
+          "isCode": false
+        },
+        {
+          "label": "Only a=1 and b=n; others undefined.",
+          "isCode": false
+        },
+        {
+          "label": "Only when a<b; a=b is invalid.",
+          "isCode": false
+        },
+        {
+          "label": "We must special-case every boundary separately.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Split handles k=0 and k=size, so a=1, b=n, and a=b all work. m=0 should just output the original.",
+      "wrongExplanations": {
+        "1": "All ranges within [1,n] inclusive are valid per constraints."
+      },
+      "hint": "Check constraints: 1 ≤ a ≤ b ≤ n."
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys, random\nsys.setrecursionlimit(1 << 25)\ndata = sys.stdin.buffer.read().split()\nit = iter(data)\nn = int(next(it)); m = int(next(it))\ns = next(it).decode()",
+    "class Node:\n    __slots__ = ('ch','prio','l','r','sz')\n    def __init__(self, ch):\n        self.ch = ch\n        self.prio = random.randint(1, 1<<30)\n        self.l = None\n        self.r = None\n        self.sz = 1",
+    "def sz(t):\n    return t.sz if t else 0\n\ndef upd(t):\n    if t:\n        t.sz = 1 + sz(t.l) + sz(t.r)",
+    "def split(t, k):\n    if not t:\n        return (None, None)\n    if sz(t.l) >= k:\n        a, b = split(t.l, k)\n        t.l = b\n        upd(t)\n        return (a, t)\n    else:\n        a, b = split(t.r, k - sz(t.l) - 1)\n        t.r = a\n        upd(t)\n        return (t, b)",
+    "def merge(a, b):\n    if not a or not b:\n        return a or b\n    if a.prio > b.prio:\n        a.r = merge(a.r, b)\n        upd(a)\n        return a\n    else:\n        b.l = merge(a, b.l)\n        upd(b)\n        return b",
+    "root = None\nfor ch in s:\n    root = merge(root, Node(ch))",
+    "for _ in range(m):\n    a = int(next(it)); b = int(next(it))\n    left_ab, right = split(root, b)\n    left, mid = split(left_ab, a-1)\n    root = merge(left, right)\n    root = merge(root, mid)",
+    "out = []\nstack = []\nt = root\nwhile t or stack:\n    while t:\n        stack.append(t)\n        t = t.l\n    t = stack.pop()\n    out.append(t.ch)\n    t = t.r\nsys.stdout.write(''.join(out))"
+  ],
+  "reasoningChain": [
+    {
+      "question": "What exactly does cutting [a,b] and pasting to the end do on small examples?",
+      "insight": "Understand 1-indexed inclusive range semantics and that each operation applies to the current string."
+    },
+    {
+      "question": "Why is slicing/concatenating the whole string per operation too slow for n,m up to 2e5?",
+      "insight": "Recognize the need to avoid O(n) per operation and instead support fast cut/append."
+    },
+    {
+      "question": "Which operations on a dynamic sequence allow cutting and reattaching blocks efficiently?",
+      "insight": "Realize we need split-by-index and join to rearrange without copying characters."
+    },
+    {
+      "question": "How to isolate [a,b] using two splits and then reassemble to append the block to the end?",
+      "insight": "Use split(root,b), split(left,a-1), then merge(left,right) and merge(result,mid)."
+    },
+    {
+      "question": "How to maintain the sequence with subtree sizes to implement split and join?",
+      "insight": "Store node sizes and use them to navigate and update during split and join operations."
+    },
+    {
+      "question": "How to build from the initial string and output the final string?",
+      "insight": "Append nodes in order using join to build; at the end, do an in-order traversal to emit characters."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1388,
+    "output_tokens": 14127,
+    "input_cost": 0.001735,
+    "output_cost": 0.14127,
+    "total_cost": 0.143005
+  }
+}

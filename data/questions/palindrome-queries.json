@@ -1,0 +1,949 @@
+{
+  "id": "palindrome-queries-guided-hash-updates",
+  "title": "Palindrome Queries",
+  "difficulty": "hard",
+  "tags": [
+    "string"
+  ],
+  "estimatedMinutes": 75,
+  "language": "python",
+  "description": "You are given a string of length n (characters a–z). There are m operations of two types:\n- 1 k x: change the character at position k to x\n- 2 a b: check if the substring from a to b is a palindrome\nPositions are 1-indexed. For each operation of type 2, print YES or NO.",
+  "examples": [
+    {
+      "input": "7 5\naybabtu\n2 3 5\n1 3 x\n2 3 5\n1 5 x\n2 3 5",
+      "output": "YES\nNO\nYES",
+      "explanation": "Substring 3..5 is 'bab' (palindrome) -> YES. After change at 3 to 'x', substring 3..5 is 'xab' -> NO. After change at 5 to 'x', substring 3..5 is 'xax' -> YES."
+    }
+  ],
+  "constraints": [
+    "1 ≤ n, m ≤ 2⋅10^5",
+    "1 ≤ k ≤ n",
+    "1 ≤ a ≤ b ≤ n",
+    "Characters are lowercase a–z"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "Given s = \"aybabtu\", what is the substring for query \"2 3 5\"?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "\"ayb\"",
+          "isCode": false
+        },
+        {
+          "label": "\"yba\"",
+          "isCode": false
+        },
+        {
+          "label": "\"bab\"",
+          "isCode": false
+        },
+        {
+          "label": "\"abt\"",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Positions are 1-indexed. s[3..5] = s[3]s[4]s[5] = 'b','a','b' -> \"bab\".",
+      "wrongExplanations": {
+        "0": "This is s[1..3].",
+        "1": "This is s[2..4]."
+      },
+      "hint": "Indexing is 1-based and inclusive.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "Is the substring \"bab\" a palindrome?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "YES",
+          "isCode": false
+        },
+        {
+          "label": "NO",
+          "isCode": false
+        },
+        {
+          "label": "Only if its length is odd",
+          "isCode": false
+        },
+        {
+          "label": "Depends on case sensitivity",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "\"bab\" reads the same forward and backward -> YES.",
+      "wrongExplanations": {
+        "2": "Odd length is not required for palindromes, e.g., \"aa\".",
+        "3": "All characters are lowercase a–z."
+      },
+      "hint": "Reverse the substring and compare.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "Apply operation \"1 3 x\" to s = \"aybabtu\". What is the new string?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "\"ayxabtu\"",
+          "isCode": false
+        },
+        {
+          "label": "\"axbabtu\"",
+          "isCode": false
+        },
+        {
+          "label": "\"aybaxtu\"",
+          "isCode": false
+        },
+        {
+          "label": "\"aybabxu\"",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Change position 3 to 'x': a y x a b t u.",
+      "wrongExplanations": {
+        "1": "That changes position 2, not 3.",
+        "2": "That changes position 5, not 3."
+      },
+      "hint": "Position 3 was 'b' -> 'x'.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "With s = \"ayxabtu\", is the substring from 3 to 5 a palindrome?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "YES, because 'xab' reversed is 'bax' (same)",
+          "isCode": false
+        },
+        {
+          "label": "NO, because 'xab' reversed is 'bax' (different)",
+          "isCode": false
+        },
+        {
+          "label": "YES, because it contains 'xa'",
+          "isCode": false
+        },
+        {
+          "label": "Depends on previous operations",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Substring 3..5 is 'xab'; reversed is 'bax' -> different -> NO.",
+      "wrongExplanations": {
+        "0": "Reversed is not the same.",
+        "3": "We are evaluating the current state only."
+      },
+      "hint": "Extract s[3..5] and reverse it.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Understanding the Problem",
+      "questionText": "What about a query \"2 4 4\" on any string?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Always YES",
+          "isCode": false
+        },
+        {
+          "label": "Always NO",
+          "isCode": false
+        },
+        {
+          "label": "Depends on the character",
+          "isCode": false
+        },
+        {
+          "label": "Undefined",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "A single-character substring is always a palindrome.",
+      "wrongExplanations": {
+        "1": "Single characters are palindromes by definition."
+      },
+      "hint": "Length 1 substrings read the same both ways.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "If we check each query by directly comparing characters from ends inward for substring [a..b], what is the worst-case time per query?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(1)",
+          "isCode": false
+        },
+        {
+          "label": "O(b - a + 1)",
+          "isCode": false
+        },
+        {
+          "label": "O(log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "We may compare up to the length of the substring, which is O(b-a+1).",
+      "wrongExplanations": {
+        "0": "We must scan characters.",
+        "2": "There is no logarithmic behavior in naive scanning."
+      },
+      "hint": "How many character comparisons might be needed?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "With n, m up to 2e5, what is the worst-case total work of naive per-query scanning?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "About 2e5 operations total",
+          "isCode": false
+        },
+        {
+          "label": "About 4e10 character checks in worst case",
+          "isCode": false
+        },
+        {
+          "label": "About 2e5 log 2e5 operations",
+          "isCode": false
+        },
+        {
+          "label": "About n + m",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "O(m*n) ≈ 2e5 * 2e5 = 4e10, too slow.",
+      "wrongExplanations": {
+        "0": "Underestimates by ignoring substring lengths.",
+        "2": "Naive scanning is not logarithmic."
+      },
+      "hint": "Multiply the number of queries by the maximum substring length.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Exploring Approaches",
+      "questionText": "Would checking only character frequency counts in [a..b] be sufficient to decide if it is a palindrome?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, because palindromes have matching counts",
+          "isCode": false
+        },
+        {
+          "label": "No, counts ignore order (e.g., 'ab' vs 'ba')",
+          "isCode": false
+        },
+        {
+          "label": "Only if the length is odd",
+          "isCode": false
+        },
+        {
+          "label": "Only if the substring is the entire string",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Counts ignore order; 'ab' and 'ba' have same counts but differ.",
+      "wrongExplanations": {
+        "0": "Having matching counts is necessary but not sufficient.",
+        "2": "Length parity doesn't fix order information."
+      },
+      "hint": "Consider two different strings with same letter counts.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Exploring Approaches",
+      "questionText": "We want a fast numeric check for equality of a substring and its reverse using a weighted sum. How can we compare substrings starting at different positions fairly?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Do nothing; compare raw weighted sums",
+          "isCode": false
+        },
+        {
+          "label": "Shift one sum by multiplying or dividing by a power so both start at the same weight",
+          "isCode": false
+        },
+        {
+          "label": "Add the start index to both sums",
+          "isCode": false
+        },
+        {
+          "label": "Subtract the end index from both sums",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Normalize by cancelling the starting power so position doesn’t matter.",
+      "wrongExplanations": {
+        "0": "Raw sums depend on absolute positions.",
+        "2": "Adding indices doesn't undo positional weights."
+      },
+      "hint": "Think of cancelling the factor p^a for substring [a..b].",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "Map characters to numbers for weighted sums. Which mapping is simplest and consistent?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "a->1, b->2, ..., z->26",
+          "isCode": false
+        },
+        {
+          "label": "ASCII codes of letters",
+          "isCode": false
+        },
+        {
+          "label": "a->0, b->1, ..., z->25, but treat zeros specially",
+          "isCode": false
+        },
+        {
+          "label": "Random integers for each letter",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "a=1..z=26 is simple and avoids zero pitfalls.",
+      "wrongExplanations": {
+        "1": "Works but larger values add no benefit.",
+        "3": "Random mapping complicates updates reproducibility."
+      },
+      "hint": "Keep values small and deterministic.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "To keep sums in range and leverage arithmetic properties, what modulus should we use?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "A large prime like 1,000,000,007",
+          "isCode": false
+        },
+        {
+          "label": "A small number like 1000",
+          "isCode": false
+        },
+        {
+          "label": "A power of two near 2^32",
+          "isCode": false
+        },
+        {
+          "label": "No modulus at all",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "A large prime keeps collisions low and supports needed arithmetic.",
+      "wrongExplanations": {
+        "1": "Too small increases collisions.",
+        "3": "Values grow too large without bounds."
+      },
+      "hint": "Commonly used primes around 1e9+7 work well.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "Let S be a prefix-weighted sum with weights p^i (1-indexed). How to compute a position-independent value for substring [a..b] from S?",
+      "diagram": "We store sumF[i] = sum_{k=1..i} val[k]*p^k (mod M). For substring [a..b], we want a value independent of a.",
+      "options": [
+        {
+          "label": "(S[b] - S[a-1]) * inv_pow[a] mod M",
+          "isCode": false
+        },
+        {
+          "label": "(S[b] - S[a-1]) * pow_base[a] mod M",
+          "isCode": false
+        },
+        {
+          "label": "S[b] - S[a-1] without any scaling",
+          "isCode": false
+        },
+        {
+          "label": "(S[b] - S[a-1]) * inv_pow[b] mod M",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Subtract to isolate [a..b], then cancel p^a by multiplying with its inverse.",
+      "wrongExplanations": {
+        "1": "Multiplying by p^a shifts the other way.",
+        "2": "Still depends on absolute position a."
+      },
+      "hint": "We want exponents to start at power p^0.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "We also need a value that matches the reversed substring when normalized. If we store each position i with weight p^{n - i + 1}, how to normalize [a..b]?",
+      "diagram": "sumR[i] accumulates val[i]*p^{n - i + 1}. For [a..b], isolate and cancel the smallest exponent in that range.",
+      "options": [
+        {
+          "label": "(R[b] - R[a-1]) * inv_pow[n - b + 1] mod M",
+          "isCode": false
+        },
+        {
+          "label": "(R[b] - R[a-1]) * inv_pow[a] mod M",
+          "isCode": false
+        },
+        {
+          "label": "(R[b] - R[a-1]) without scaling",
+          "isCode": false
+        },
+        {
+          "label": "(R[b] - R[a-1]) * inv_pow[n - a + 1] mod M",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Within [a..b], exponents run from p^{n-b+1}..p^{n-a+1}. Cancel p^{n-b+1}.",
+      "wrongExplanations": {
+        "1": "This cancels p^a, which doesn't align reverse weighting.",
+        "3": "Cancels the largest exponent instead of the smallest."
+      },
+      "hint": "Find the smallest exponent in [a..b] under reverse weighting.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Building the Idea",
+      "questionText": "Suppose s = \"abba\". For a=2, b=3 (substring \"bb\"), after forward and reverse normalization, what do you expect?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Equal values (palindrome)",
+          "isCode": false
+        },
+        {
+          "label": "Different values (not palindrome)",
+          "isCode": false
+        },
+        {
+          "label": "Sometimes equal depending on base",
+          "isCode": false
+        },
+        {
+          "label": "Cannot tell without computing powers",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "\"bb\" reversed is \"bb\"; normalized values should match.",
+      "wrongExplanations": {
+        "2": "With correct normalization, palindromic substrings match for any base.",
+        "3": "Normalization ensures position-independence."
+      },
+      "hint": "We're testing equality of a string with its reverse.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q15",
+      "phase": "Building the Idea",
+      "questionText": "When changing position i from old to new, how should the weighted sums be updated efficiently?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Add delta = (new-old)*p^i to forward and delta = (new-old)*p^{n - i + 1} to reverse",
+          "isCode": false
+        },
+        {
+          "label": "Recompute sums for all positions ≥ i",
+          "isCode": false
+        },
+        {
+          "label": "Subtract old contribution only; new will be handled on next query",
+          "isCode": false
+        },
+        {
+          "label": "Ignore the update; only handle queries",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Adjust with the difference at that index, scaled by the correct power.",
+      "wrongExplanations": {
+        "1": "Full recomputation is too slow.",
+        "2": "We must also add the new contribution."
+      },
+      "hint": "Think linearity: new sum = old sum + (new-old)*weight.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q16",
+      "phase": "Building the Idea",
+      "questionText": "Indexing detail: If powers are built as p^0, p^1, ... and string indices are 1..n, which power should position i use in forward weighting?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "p^i",
+          "isCode": false
+        },
+        {
+          "label": "p^{i-1}",
+          "isCode": false
+        },
+        {
+          "label": "p^{i+1}",
+          "isCode": false
+        },
+        {
+          "label": "Any consistent choice; we don't use powers",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We defined forward sums with p^i (1-indexed). Consistency is key.",
+      "wrongExplanations": {
+        "1": "Would require changing normalization to match.",
+        "3": "We do use powers to weight positions."
+      },
+      "hint": "Stick to a consistent 1-indexed definition throughout.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Read input efficiently and parse n, m, and the string as a list of chars.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\ndata = sys.stdin.buffer.read().split()\nit = iter(data)\nn = int(next(it)); m = int(next(it))\ns = list(next(it).decode())",
+          "isCode": true
+        },
+        {
+          "label": "n, m = map(int, input().split())\ns = list(input().strip())\nit = None  # placeholder",
+          "isCode": true
+        },
+        {
+          "label": "import sys\ndata = sys.stdin.read().split()\nn = int(data[0]); m = int(data[1])\ns = data[2]  # leave as bytes",
+          "isCode": true
+        },
+        {
+          "label": "import sys\ndata = sys.stdin.buffer.readline().split()\nn = int(data[0]); m = int(data[1])\ns = list(sys.stdin.buffer.readline())  # includes newline",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "This reads all tokens, decodes the string, and prepares an iterator for fast parsing.",
+      "wrongExplanations": {
+        "1": "Works, but later code expects token iterator; mixing styles may break.",
+        "3": "Reading raw bytes list may include newline; not decoded to str."
+      },
+      "hint": "Use buffered read and decode the string once.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\ndata = sys.stdin.buffer.read().split()\nit = iter(data)\nn = int(next(it)); m = int(next(it))\ns = list(next(it).decode())",
+      "codeLabel": "Input parsing"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Set up modulus, base, and precompute powers and the cancelling multipliers up to n.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "MOD = 1000000007\nbase = 911382323\npow_base = [1] * (n + 2)\nfor i in range(1, n + 2):\n    pow_base[i] = (pow_base[i - 1] * base) % MOD\ninv_base = pow(base, MOD - 2, MOD)\ninv_pow = [1] * (n + 2)\nfor i in range(1, n + 2):\n    inv_pow[i] = (inv_pow[i - 1] * inv_base) % MOD",
+          "isCode": true
+        },
+        {
+          "label": "MOD = 1000000007\nbase = 911382323\npow_base = [0] * (n + 1)\nfor i in range(n):\n    pow_base[i] = (base ** i) % MOD\ninv_pow = pow_base[:]  # assume inverse is same",
+          "isCode": true
+        },
+        {
+          "label": "MOD = 10**9\nbase = 911382323\npow_base = [1]*(n+1)\ninv_pow = [1]*(n+1)\n# no need to fill; will compute on the fly",
+          "isCode": true
+        },
+        {
+          "label": "MOD = 1000000007\nbase = 911382323\npow_base = [1]*(n+2)\ninv_pow = [1]*(n+2)\nfor i in range(1, n + 2):\n    pow_base[i] = pow_base[i - 1] * base\n    inv_pow[i] = 1 // base  # placeholder",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We precompute both powers and their cancellers using a multiplicative inverse under MOD.",
+      "wrongExplanations": {
+        "1": "Inverse is not the same as the power; and '**' per step is slow.",
+        "3": "Missing modulo and invalid way to compute the canceller."
+      },
+      "hint": "Use pow(base, MOD-2, MOD) to get a multiplier that cancels base.",
+      "isCodeBuilding": true,
+      "codeSnippet": "MOD = 1000000007\nbase = 911382323\npow_base = [1] * (n + 2)\nfor i in range(1, n + 2):\n    pow_base[i] = (pow_base[i - 1] * base) % MOD\ninv_base = pow(base, MOD - 2, MOD)\ninv_pow = [1] * (n + 2)\nfor i in range(1, n + 2):\n    inv_pow[i] = (inv_pow[i - 1] * inv_base) % MOD",
+      "codeLabel": "Powers and cancellers"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Implement a structure that supports adding a value at an index and querying prefix and range sums modulo MOD.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "class FastPrefix:\n    def __init__(self, n):\n        self.n = n\n        self.bit = [0] * (n + 1)\n    def add(self, i, delta):\n        n = self.n\n        while i <= n:\n            self.bit[i] = (self.bit[i] + delta) % MOD\n            i += i & -i\n    def sum(self, i):\n        res = 0\n        while i > 0:\n            res = (res + self.bit[i]) % MOD\n            i -= i & -i\n        return res\n    def range_sum(self, l, r):\n        return (self.sum(r) - self.sum(l - 1)) % MOD",
+          "isCode": true
+        },
+        {
+          "label": "class FastPrefix:\n    def __init__(self, n):\n        self.arr = [0] * (n + 1)\n    def add(self, i, delta):\n        self.arr[i] = (self.arr[i] + delta) % MOD\n    def sum(self, i):\n        return sum(self.arr[:i+1]) % MOD\n    def range_sum(self, l, r):\n        return (self.sum(r) - self.sum(l - 1)) % MOD",
+          "isCode": true
+        },
+        {
+          "label": "class FastPrefix:\n    def __init__(self, n):\n        self.n = n\n        self.bit = [0] * (n + 2)\n    def add(self, i, delta):\n        while i < self.n:\n            self.bit[i] = (self.bit[i] + delta) % MOD\n            i += 1\n    def sum(self, i):\n        return sum(self.bit[:i+1]) % MOD\n    def range_sum(self, l, r):\n        return (self.sum(r) - self.sum(l - 1)) % MOD",
+          "isCode": true
+        },
+        {
+          "label": "class FastPrefix:\n    def __init__(self, n):\n        self.n = n\n        self.bit = [0] * (n + 1)\n    def add(self, i, delta):\n        while i <= self.n:\n            self.bit[i] += delta\n            i += i & -i\n    def sum(self, i):\n        res = 0\n        while i > 0:\n            res += self.bit[i]\n            i -= i & -i\n        return res\n    def range_sum(self, l, r):\n        return self.sum(r) - self.sum(l - 1)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "This supports O(log n) add and prefix sum with modulo at every step and correct range_sum.",
+      "wrongExplanations": {
+        "1": "sum() here is O(n), too slow for updates and queries.",
+        "3": "Missing modulo may overflow and negative differences are not wrapped."
+      },
+      "hint": "Ensure add and sum run in sublinear time and wrap modulo consistently.",
+      "isCodeBuilding": true,
+      "codeSnippet": "class FastPrefix:\n    def __init__(self, n):\n        self.n = n\n        self.bit = [0] * (n + 1)\n    def add(self, i, delta):\n        n = self.n\n        while i <= n:\n            self.bit[i] = (self.bit[i] + delta) % MOD\n            i += i & -i\n    def sum(self, i):\n        res = 0\n        while i > 0:\n            res = (res + self.bit[i]) % MOD\n            i -= i & -i\n        return res\n    def range_sum(self, l, r):\n        return (self.sum(r) - self.sum(l - 1)) % MOD",
+      "codeLabel": "Fast prefix sums with updates"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Initialize forward and reverse weighted sums and the current values array from the initial string.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "fwd = FastPrefix(n)\nrev = FastPrefix(n)\narr = [0] * (n + 1)\nfor i in range(1, n + 1):\n    v = ord(s[i - 1]) - 96\n    arr[i] = v\n    fwd.add(i, (v * pow_base[i]) % MOD)\n    rev.add(i, (v * pow_base[n - i + 1]) % MOD)",
+          "isCode": true
+        },
+        {
+          "label": "fwd = FastPrefix(n)\nrev = FastPrefix(n)\narr = [0] * (n + 1)\nfor i in range(n):\n    v = ord(s[i]) - 96\n    arr[i] = v\n    fwd.add(i, (v * pow_base[i]) % MOD)\n    rev.add(i, (v * pow_base[n - i]) % MOD)",
+          "isCode": true
+        },
+        {
+          "label": "fwd = FastPrefix(n)\nrev = FastPrefix(n)\narr = [0] * (n + 1)\nfor i in range(1, n + 1):\n    v = ord(s[i]) - 96\n    arr[i] = v\n    fwd.add(i, v)\n    rev.add(i, v)",
+          "isCode": true
+        },
+        {
+          "label": "fwd = FastPrefix(n)\nrev = FastPrefix(n)\narr = [0] * (n + 1)\nfor i in range(1, n + 1):\n    v = ord(s[i - 1]) - 96\n    arr[i] = v\n    fwd.add(i, (v * pow_base[i - 1]) % MOD)\n    rev.add(i, (v * pow_base[i]) % MOD)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Use 1-indexed positions with p^i for forward and p^{n - i + 1} for reverse.",
+      "wrongExplanations": {
+        "1": "Mixes 0- and 1-based indices and wrong reverse exponent.",
+        "3": "Wrong powers for both directions."
+      },
+      "hint": "Carefully align powers with 1-indexed positions.",
+      "isCodeBuilding": true,
+      "codeSnippet": "fwd = FastPrefix(n)\nrev = FastPrefix(n)\narr = [0] * (n + 1)\nfor i in range(1, n + 1):\n    v = ord(s[i - 1]) - 96\n    arr[i] = v\n    fwd.add(i, (v * pow_base[i]) % MOD)\n    rev.add(i, (v * pow_base[n - i + 1]) % MOD)",
+      "codeLabel": "Build weighted sums"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "Process m operations: handle type 1 updates by adjusting both weighted sums with a delta at position k.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "out_lines = []\nfor _ in range(m):\n    t = int(next(it))\n    if t == 1:\n        k = int(next(it)); x = next(it).decode()\n        newv = ord(x) - 96\n        oldv = arr[k]\n        if newv != oldv:\n            delta = (newv - oldv) % MOD\n            fwd.add(k, (delta * pow_base[k]) % MOD)\n            rev.add(k, (delta * pow_base[n - k + 1]) % MOD)\n            arr[k] = newv\n    else:\n        a = int(next(it)); b = int(next(it))\n        h1 = (fwd.range_sum(a, b) * inv_pow[a]) % MOD\n        h2 = (rev.range_sum(a, b) * inv_pow[n - b + 1]) % MOD\n        out_lines.append(\"YES\" if h1 == h2 else \"NO\")",
+          "isCode": true
+        },
+        {
+          "label": "out_lines = []\nfor _ in range(m):\n    t = int(next(it))\n    if t == 1:\n        k = int(next(it)); x = next(it).decode()\n        newv = ord(x) - 96\n        arr[k] = newv\n    else:\n        a = int(next(it)); b = int(next(it))\n        h1 = fwd.range_sum(a, b) % MOD\n        h2 = rev.range_sum(a, b) % MOD\n        out_lines.append(\"YES\" if h1 == h2 else \"NO\")",
+          "isCode": true
+        },
+        {
+          "label": "out_lines = []\nfor _ in range(m):\n    t = int(next(it))\n    if t == 1:\n        k = int(next(it)); x = next(it).decode()\n        newv = ord(x) - 96\n        oldv = arr[k]\n        if newv != oldv:\n            delta = (newv - oldv)\n            fwd.add(k, delta)\n            rev.add(k, delta)\n            arr[k] = newv\n    else:\n        a = int(next(it)); b = int(next(it))\n        h1 = (fwd.range_sum(a, b)) % MOD\n        h2 = (rev.range_sum(a, b)) % MOD\n        out_lines.append(\"YES\" if h1 == h2 else \"NO\")",
+          "isCode": true
+        },
+        {
+          "label": "out_lines = []\nfor _ in range(m):\n    t = int(next(it))\n    if t == 1:\n        k = int(next(it)); x = next(it).decode()\n        newv = ord(x) - 96\n        oldv = arr[k]\n        delta = (newv - oldv) % MOD\n        fwd.add(k, (delta * pow_base[k - 1]) % MOD)\n        rev.add(k, (delta * pow_base[n - k]) % MOD)\n        arr[k] = newv\n    else:\n        a = int(next(it)); b = int(next(it))\n        h1 = (fwd.range_sum(a, b) * inv_pow[a - 1]) % MOD\n        h2 = (rev.range_sum(a, b) * inv_pow[n - b]) % MOD\n        out_lines.append(\"YES\" if h1 == h2 else \"NO\")",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Update by delta at k with correct powers; queries normalize with inv_pow[a] and inv_pow[n-b+1].",
+      "wrongExplanations": {
+        "1": "Doesn't update weights or normalize; comparisons are position-dependent.",
+        "3": "Off-by-one in both update powers and normalization."
+      },
+      "hint": "Use the same power alignment as in initialization and normalization.",
+      "isCodeBuilding": true,
+      "codeSnippet": "out_lines = []\nfor _ in range(m):\n    t = int(next(it))\n    if t == 1:\n        k = int(next(it)); x = next(it).decode()\n        newv = ord(x) - 96\n        oldv = arr[k]\n        if newv != oldv:\n            delta = (newv - oldv) % MOD\n            fwd.add(k, (delta * pow_base[k]) % MOD)\n            rev.add(k, (delta * pow_base[n - k + 1]) % MOD)\n            arr[k] = newv\n    else:\n        a = int(next(it)); b = int(next(it))\n        h1 = (fwd.range_sum(a, b) * inv_pow[a]) % MOD\n        h2 = (rev.range_sum(a, b) * inv_pow[n - b + 1]) % MOD\n        out_lines.append(\"YES\" if h1 == h2 else \"NO\")",
+      "codeLabel": "Process operations"
+    },
+    {
+      "id": "q22",
+      "phase": "Writing the Code",
+      "questionText": "Output all results, one per line, after processing all operations.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "sys.stdout.write(\"\\n\".join(out_lines))",
+          "isCode": true
+        },
+        {
+          "label": "print(out_lines)",
+          "isCode": true
+        },
+        {
+          "label": "for x in out_lines: print(x, end=\"\\n\\n\")",
+          "isCode": true
+        },
+        {
+          "label": "print(\"\\n\".join(out_lines), end=\"\")",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Writing joined lines avoids extra spaces or unexpected formatting.",
+      "wrongExplanations": {
+        "1": "Prints the list representation with brackets/commas.",
+        "2": "Adds blank lines between outputs."
+      },
+      "hint": "Avoid extra characters beyond each line’s YES/NO.",
+      "isCodeBuilding": true,
+      "codeSnippet": "sys.stdout.write(\"\\n\".join(out_lines))",
+      "codeLabel": "Write output"
+    },
+    {
+      "id": "q23",
+      "phase": "Verifying the Solution",
+      "questionText": "Trace the sample: After the first query (2 3 5) on \"aybabtu\", what does the code output?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "YES",
+          "isCode": false
+        },
+        {
+          "label": "NO",
+          "isCode": false
+        },
+        {
+          "label": "Nothing yet",
+          "isCode": false
+        },
+        {
+          "label": "Error due to indexing",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Substring is 'bab' which is a palindrome -> YES.",
+      "wrongExplanations": {
+        "2": "We append output immediately on type 2."
+      },
+      "hint": "See q1 and q2 outcomes.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Verifying the Solution",
+      "questionText": "Continuing the sample: After updates (1 3 x) then query (2 3 5), and then (1 5 x) then query (2 3 5), what are the three outputs in order?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "YES, YES, YES",
+          "isCode": false
+        },
+        {
+          "label": "YES, NO, YES",
+          "isCode": false
+        },
+        {
+          "label": "YES, NO, NO",
+          "isCode": false
+        },
+        {
+          "label": "NO, NO, YES",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "As in sample: 'bab' -> YES; 'xab' -> NO; then 'xax' -> YES.",
+      "wrongExplanations": {
+        "0": "Middle query is not palindrome.",
+        "2": "Final 'xax' is palindrome."
+      },
+      "hint": "See the example explanation given.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the per-operation time of this approach (both update and query)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(1) for both",
+          "isCode": false
+        },
+        {
+          "label": "O(log n) for both",
+          "isCode": false
+        },
+        {
+          "label": "O(n) for updates, O(1) for queries",
+          "isCode": false
+        },
+        {
+          "label": "O(1) for updates, O(n) for queries",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Both add and prefix/range sum operations run in logarithmic time.",
+      "wrongExplanations": {
+        "0": "We don't have constant-time range sums with updates.",
+        "3": "Queries rely on prefix sums, not full scans."
+      },
+      "hint": "Consider how many indices are touched in add/sum.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Analyzing Complexity",
+      "questionText": "Space usage of the solution (in big-O, excluding input)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(1)",
+          "isCode": false
+        },
+        {
+          "label": "O(log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "We store two weighted-sum structures and power arrays, all linear in n.",
+      "wrongExplanations": {
+        "0": "Arrays and structures scale with n.",
+        "1": "We store arrays, not a logarithmic amount."
+      },
+      "hint": "Count arrays: two structures + pow arrays + current values.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\ndata = sys.stdin.buffer.read().split()\nit = iter(data)\nn = int(next(it)); m = int(next(it))\ns = list(next(it).decode())",
+    "MOD = 1000000007\nbase = 911382323\npow_base = [1] * (n + 2)\nfor i in range(1, n + 2):\n    pow_base[i] = (pow_base[i - 1] * base) % MOD\ninv_base = pow(base, MOD - 2, MOD)\ninv_pow = [1] * (n + 2)\nfor i in range(1, n + 2):\n    inv_pow[i] = (inv_pow[i - 1] * inv_base) % MOD",
+    "class FastPrefix:\n    def __init__(self, n):\n        self.n = n\n        self.bit = [0] * (n + 1)\n    def add(self, i, delta):\n        n = self.n\n        while i <= n:\n            self.bit[i] = (self.bit[i] + delta) % MOD\n            i += i & -i\n    def sum(self, i):\n        res = 0\n        while i > 0:\n            res = (res + self.bit[i]) % MOD\n            i -= i & -i\n        return res\n    def range_sum(self, l, r):\n        return (self.sum(r) - self.sum(l - 1)) % MOD",
+    "fwd = FastPrefix(n)\nrev = FastPrefix(n)\narr = [0] * (n + 1)\nfor i in range(1, n + 1):\n    v = ord(s[i - 1]) - 96\n    arr[i] = v\n    fwd.add(i, (v * pow_base[i]) % MOD)\n    rev.add(i, (v * pow_base[n - i + 1]) % MOD)",
+    "out_lines = []\nfor _ in range(m):\n    t = int(next(it))\n    if t == 1:\n        k = int(next(it)); x = next(it).decode()\n        newv = ord(x) - 96\n        oldv = arr[k]\n        if newv != oldv:\n            delta = (newv - oldv) % MOD\n            fwd.add(k, (delta * pow_base[k]) % MOD)\n            rev.add(k, (delta * pow_base[n - k + 1]) % MOD)\n            arr[k] = newv\n    else:\n        a = int(next(it)); b = int(next(it))\n        h1 = (fwd.range_sum(a, b) * inv_pow[a]) % MOD\n        h2 = (rev.range_sum(a, b) * inv_pow[n - b + 1]) % MOD\n        out_lines.append(\"YES\" if h1 == h2 else \"NO\")",
+    "sys.stdout.write(\"\\n\".join(out_lines))"
+  ],
+  "reasoningChain": [
+    {
+      "question": "What substring does a query [a..b] refer to and how to judge a palindrome?",
+      "insight": "Understand 1-indexed inclusive substrings and that a palindrome reads the same forward and backward."
+    },
+    {
+      "question": "Is naive per-query scanning fast enough for large n, m?",
+      "insight": "Directly comparing characters per query is O(length) and too slow for up to 2e5 operations."
+    },
+    {
+      "question": "How to create a position-aware numeric representation that allows fast comparison?",
+      "insight": "Use weighted sums with powers and modular arithmetic to represent substrings compactly."
+    },
+    {
+      "question": "How to make substring values comparable regardless of their start positions?",
+      "insight": "Normalize by cancelling the starting power, and compute an analogous value for the reversed direction."
+    },
+    {
+      "question": "How to support both updates and range queries efficiently?",
+      "insight": "Maintain prefix-weighted sums that allow fast add at an index and fast prefix/range sums."
+    },
+    {
+      "question": "How to apply updates and queries correctly with indices?",
+      "insight": "On update, add a delta scaled by the correct power; on query, normalize forward and reverse slices and compare."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1432,
+    "output_tokens": 17737,
+    "input_cost": 0.00179,
+    "output_cost": 0.17737,
+    "total_cost": 0.17916
+  }
+}

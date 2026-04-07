@@ -1,0 +1,987 @@
+{
+  "id": "pattern-positions-multi-query-substrings",
+  "title": "Pattern Positions",
+  "difficulty": "hard",
+  "tags": [
+    "string"
+  ],
+  "estimatedMinutes": 55,
+  "language": "python",
+  "description": "Given a string and patterns, find for each pattern the first position (1-indexed) where it appears in the string.\n\nInput:\n- First line: a string s (length n)\n- Second line: integer k, the number of patterns\n- Next k lines: each line has a pattern consisting of a–z\n\nOutput:\nPrint k lines: for each pattern, the first 1-indexed position where it appears in s, or -1 if it does not appear.\n\nExample:\nInput:\naybabtu\n3\nbab\nabc\na\nOutput:\n3\n-1\n1",
+  "examples": [
+    {
+      "input": "aybabtu\n3\nbab\nabc\na\n",
+      "output": "3\n-1\n1\n",
+      "explanation": "bab occurs first at s[3..5] (1-indexed). abc does not occur. a occurs first at s[1]."
+    }
+  ],
+  "constraints": [
+    "1 <= n <= 1e5",
+    "1 <= k <= 5e5",
+    "Total length of all patterns <= 5e5",
+    "Characters are lowercase a–z"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "Given s = \"aybabtu\" and pattern = \"bab\", what is the first position (1-indexed) where the pattern appears?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "-1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "bab occurs at indices 3..5 (1-indexed). 2 would be yba, 4 would be abt.",
+      "wrongExplanations": {
+        "0": "Starting at 2 gives yba, not bab.",
+        "2": "Starting at 4 gives abt, not bab."
+      },
+      "hint": "Check substrings starting at positions 1..(n - |p| + 1).",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "Given s = \"aybabtu\" and pattern = \"a\", what is the first position (1-indexed)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "-1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Positions are 1-indexed. The first character is 'a'.",
+      "wrongExplanations": {
+        "0": "0 would be 0-indexed; the problem uses 1-indexed positions.",
+        "2": "The first 'a' is at position 1, not 2."
+      },
+      "hint": "Check the first character.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "For s = \"aaaaa\" and pattern = \"aaa\", what is the first position (1-indexed)? Overlaps are allowed.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "-1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The first occurrence starts at 1 (covers 1..3). Overlaps don't change the first position.",
+      "wrongExplanations": {
+        "1": "2 is the second valid start; the first is at 1.",
+        "2": "3 is later than the earliest start at 1."
+      },
+      "hint": "Start checking from position 1.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "If a pattern of length 4 ends at 0-indexed position 9 in the string, what is its 1-indexed starting position?",
+      "diagram": "end = 9 (0-based), len = 4",
+      "options": [
+        {
+          "label": "6",
+          "isCode": false
+        },
+        {
+          "label": "7",
+          "isCode": false
+        },
+        {
+          "label": "8",
+          "isCode": false
+        },
+        {
+          "label": "10",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Start 0-based = 9 - 4 + 1 = 6, so 1-based start = 7.",
+      "wrongExplanations": {
+        "0": "6 is 0-based start, not 1-based.",
+        "2": "8 assumes subtracting only 1, which is incorrect."
+      },
+      "hint": "Convert 0-based start to 1-based by adding 1.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Exploring Approaches",
+      "questionText": "Naively, for each pattern, scan the entire string to find the first match. What is the worst-case total time in terms of n (string length) and T (total length of all patterns)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n + T)",
+          "isCode": false
+        },
+        {
+          "label": "O(n * T)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n + T)",
+          "isCode": false
+        },
+        {
+          "label": "O(T^2)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Each pattern of length m may scan up to n characters: sum over all patterns gives O(n * T).",
+      "wrongExplanations": {
+        "0": "O(n + T) assumes shared work across patterns, which naive scanning does not do.",
+        "2": "No sorting or logs are involved in naive scanning."
+      },
+      "hint": "Multiply the work per pattern by the number of patterns' total length.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "A better idea: preprocess the main string once into a machine that lets us check any pattern by walking its characters. If building the machine takes O(n) and checking all patterns just walks each character once, what is the total time?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n + T)",
+          "isCode": false
+        },
+        {
+          "label": "O(n * T)",
+          "isCode": false
+        },
+        {
+          "label": "O(n + T log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n + T log n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Build once in O(n), then each pattern walk costs O(length). Summed over all patterns: O(T).",
+      "wrongExplanations": {
+        "1": "We are not rescanning the string per pattern anymore.",
+        "2": "No sorting or binary searches are involved."
+      },
+      "hint": "Add the one-time build to the sum of pattern walks.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "Considering memory, should we preprocess the main string or all patterns into the machine to minimize states?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Preprocess the main string; number of states is linear in n.",
+          "isCode": false
+        },
+        {
+          "label": "Preprocess all patterns; number of states is linear in total pattern length.",
+          "isCode": false
+        },
+        {
+          "label": "Both yield the same number of states.",
+          "isCode": false
+        },
+        {
+          "label": "It's unpredictable which is smaller.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The main string length n ≤ 1e5 while total pattern length can be 5e5; building from the string is typically smaller.",
+      "wrongExplanations": {
+        "1": "Total pattern length can be much larger than n here.",
+        "2": "They differ under these constraints."
+      },
+      "hint": "Compare n vs total pattern length in constraints.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Building the Idea",
+      "questionText": "While scanning the string left-to-right, when we land in some machine state at position i (0-based), which single value should we record per state to later compute first positions?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "The smallest end index i where we reached this state.",
+          "isCode": false
+        },
+        {
+          "label": "The smallest start index of any substring reaching this state.",
+          "isCode": false
+        },
+        {
+          "label": "How many times we visited this state.",
+          "isCode": false
+        },
+        {
+          "label": "The depth of the state in the machine.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The earliest end index lets us recover the starting position for any substring length that maps to this state.",
+      "wrongExplanations": {
+        "1": "Start index varies with substring length; end index ties directly to position i.",
+        "2": "Counts don't give positions."
+      },
+      "hint": "From an end index and the pattern length L, you can compute the start.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "Given the minimal recorded end index E for a state and a pattern length L mapping to that state, what is the 1-indexed starting position?",
+      "diagram": "E = minimal 0-based end index; L = pattern length",
+      "options": [
+        {
+          "label": "E - L + 2",
+          "isCode": false
+        },
+        {
+          "label": "E - L + 1",
+          "isCode": false
+        },
+        {
+          "label": "E - L",
+          "isCode": false
+        },
+        {
+          "label": "E + 1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "0-based start is E - L + 1, convert to 1-based: add 1 → E - L + 2.",
+      "wrongExplanations": {
+        "1": "This is the 0-based starting index.",
+        "3": "E + 1 is the 1-based end index, not start."
+      },
+      "hint": "First get 0-based start, then add 1.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "A state also represents all shorter suffix contexts of the same end positions. Where should the minimal end index be propagated so those shorter contexts learn about early ends?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "From a state to the state representing its longest proper suffix (a special pointer).",
+          "isCode": false
+        },
+        {
+          "label": "From a state to all its outgoing transitions.",
+          "isCode": false
+        },
+        {
+          "label": "Keep it only on the state; others recompute.",
+          "isCode": false
+        },
+        {
+          "label": "Only propagate to the root.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Shortest contexts are reached by repeatedly taking the pointer to the longest proper suffix; they share end indices.",
+      "wrongExplanations": {
+        "1": "Outgoing transitions represent longer strings, not shorter suffixes.",
+        "3": "Root alone is insufficient; we need all shorter suffix contexts."
+      },
+      "hint": "Think of shortening the current substring by removing leading characters.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "What order should we process states to propagate minimal end indices along the suffix pointer so that parents see minima from all longer children?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Decreasing order of their 'longest length' values.",
+          "isCode": false
+        },
+        {
+          "label": "Increasing order of their 'longest length' values.",
+          "isCode": false
+        },
+        {
+          "label": "Any arbitrary order.",
+          "isCode": false
+        },
+        {
+          "label": "Input insertion order.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Propagating from longer to shorter ensures each parent aggregates from all its longer descendants.",
+      "wrongExplanations": {
+        "1": "Shorter-first won't have children minima ready.",
+        "2": "Order matters for correct aggregation."
+      },
+      "hint": "Parents have smaller 'longest length' than their children.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "While extending the machine with a new character c, suppose from some state p we find an existing next state q by c, but q is \"too long\" (its recorded longest length > longest length of p + 1). What should we do?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Create a new state that copies q's transitions, set its longest length to longest(p)+1, and redirect some links/transitions to it.",
+          "isCode": false
+        },
+        {
+          "label": "Just reuse q as-is; no change needed.",
+          "isCode": false
+        },
+        {
+          "label": "Rebuild the whole machine from scratch.",
+          "isCode": false
+        },
+        {
+          "label": "Ignore this and continue; it'll fix itself later.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Splitting q into a new state with adjusted length preserves correctness of lengths and transitions.",
+      "wrongExplanations": {
+        "1": "Reusing breaks the required length constraints.",
+        "3": "It won't fix itself; we must separate contexts now."
+      },
+      "hint": "We need one state per distinct set of end positions and consistent length bounds.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "For the newly created copy state in the previous step, which end-position value should it inherit initially?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "The same end position as q (the state it copies).",
+          "isCode": false
+        },
+        {
+          "label": "The current index where we are extending.",
+          "isCode": false
+        },
+        {
+          "label": "The parent state's end position.",
+          "isCode": false
+        },
+        {
+          "label": "A special INF value to be filled later.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "It represents the same set of end positions initially as q; later propagation will adjust minima.",
+      "wrongExplanations": {
+        "1": "Using current index would bias minima incorrectly.",
+        "3": "It should already have a valid representative end position."
+      },
+      "hint": "It's a structural copy of q with adjusted length bounds.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Building the Idea",
+      "questionText": "If we fail to find any preceding state p with a transition by c (we reached the start), what should the suffix pointer of the new state be?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Point it to the initial state (root).",
+          "isCode": false
+        },
+        {
+          "label": "Set it to -1.",
+          "isCode": false
+        },
+        {
+          "label": "Point it back to the same state.",
+          "isCode": false
+        },
+        {
+          "label": "Point it to the last state we created before.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "At the start, the only proper suffix context is the empty context, represented by the initial state.",
+      "wrongExplanations": {
+        "1": "We need a valid state to continue transitions.",
+        "3": "That does not represent the empty context."
+      },
+      "hint": "Think about the shortest possible context.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Read the input as tokens and parse s, k, and the k patterns.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\n\ndef main():\n    data = sys.stdin.read().strip().split()\n    if not data:\n        return\n    it = iter(data)\n    s = next(it)\n    k = int(next(it))\n    patterns = [next(it) for _ in range(k)]",
+          "isCode": true
+        },
+        {
+          "label": "import sys\n\ndef main():\n    s = sys.stdin.readline().strip()\n    k = int(sys.stdin.readline())\n    patterns = [sys.stdin.readline() for _ in range(k+1)]",
+          "isCode": true
+        },
+        {
+          "label": "import sys\n\ndef main():\n    data = sys.stdin.read().splitlines()\n    s = data[0]\n    k = int(data[1])\n    patterns = data[2:2*k]",
+          "isCode": true
+        },
+        {
+          "label": "import sys\n\ndef main():\n    data = sys.stdin.readline().split()\n    s = data[0]\n    k = int(data[1])\n    patterns = [sys.stdin.readline().split()[0] for _ in range(k)]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Token-based reading handles both spaces and newlines and reads exactly k patterns after s and k.",
+      "wrongExplanations": {
+        "1": "Reads k+1 patterns and keeps trailing newlines; off-by-one and stray whitespace.",
+        "2": "Slices patterns incorrectly; 2:2*k is wrong when k is large."
+      },
+      "hint": "Use a token iterator to avoid line-boundary issues.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\n\ndef main():\n    data = sys.stdin.read().strip().split()\n    if not data:\n        return\n    it = iter(data)\n    s = next(it)\n    k = int(next(it))\n    patterns = [next(it) for _ in range(k)]",
+      "codeLabel": "Read input"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Initialize helper and the machine's storage (transitions, pointers, lengths, positions).",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    def idx(c): return ord(c) - 97\n\n    nexts = [{}]\n    link = [-1]\n    maxlen = [0]\n    firstpos = [-1]\n    last = 0",
+          "isCode": true
+        },
+        {
+          "label": "    def idx(c): return ord(c)\n\n    nexts = []\n    link = []\n    maxlen = []\n    firstpos = []\n    last = -1",
+          "isCode": true
+        },
+        {
+          "label": "    def idx(c): return ord(c) - ord('a')\n\n    nexts = [{}]\n    link = [0]\n    maxlen = [0]\n    firstpos = [0]\n    last = 0",
+          "isCode": true
+        },
+        {
+          "label": "    def idx(c): return c\n\n    nexts = [{}]\n    link = [-1]\n    maxlen = [1]\n    firstpos = [-1]\n    last = 0",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We start with a root state: empty transitions, link -1, longest length 0, and a helper mapping 'a'..'z' to 0..25.",
+      "wrongExplanations": {
+        "1": "Not initializing the root breaks invariants; idx must map to 0..25.",
+        "2": "The root's link should be -1, and firstpos shouldn't be 0."
+      },
+      "hint": "Root state exists from the start and has no parent.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    def idx(c): return ord(c) - 97\n\n    nexts = [{}]\n    link = [-1]\n    maxlen = [0]\n    firstpos = [-1]\n    last = 0",
+      "codeLabel": "Init structures"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Build the machine by iterating s and adding transitions for a new state; fill missing transitions while walking suffix pointers.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    for i, ch in enumerate(s):\n        c = idx(ch)\n        cur = len(nexts)\n        nexts.append({})\n        maxlen.append(maxlen[last] + 1)\n        link.append(0)\n        firstpos.append(i)\n        p = last\n        while p != -1 and c not in nexts[p]:\n            nexts[p][c] = cur\n            p = link[p]",
+          "isCode": true
+        },
+        {
+          "label": "    for i, ch in enumerate(s):\n        c = idx(ch)\n        cur = len(nexts)\n        nexts.append({})\n        maxlen.append(maxlen[last])\n        link.append(-1)\n        firstpos.append(i)\n        p = 0\n        while p != -1 and c not in nexts[p]:\n            nexts[p][c] = cur\n            p = link[p]",
+          "isCode": true
+        },
+        {
+          "label": "    for i, ch in enumerate(s):\n        c = idx(ch)\n        cur = len(nexts)\n        nexts.append({})\n        maxlen.append(maxlen[last] + 1)\n        link.append(0)\n        firstpos.append(i)\n        p = 0\n        while c not in nexts[p]:\n            nexts[p][c] = cur\n            p = link[p]",
+          "isCode": true
+        },
+        {
+          "label": "    for i, ch in enumerate(s):\n        c = idx(ch)\n        cur = len(nexts)\n        nexts.append({})\n        maxlen.append(maxlen[last] + 1)\n        link.append(0)\n        firstpos.append(i)\n        p = last\n        while p != 0 and c not in nexts[p]:\n            nexts[p][c] = cur\n            p = link[p]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We start from last, create a new state, and add missing transitions while following suffix pointers until -1.",
+      "wrongExplanations": {
+        "1": "maxlen must increase by 1 and link of cur initially 0; starting p at 0 misses suffix chain.",
+        "3": "Stopping at 0 misses propagating from the root when needed."
+      },
+      "hint": "Walk suffix pointers until none left (p == -1).",
+      "isCodeBuilding": true,
+      "codeSnippet": "    for i, ch in enumerate(s):\n        c = idx(ch)\n        cur = len(nexts)\n        nexts.append({})\n        maxlen.append(maxlen[last] + 1)\n        link.append(0)\n        firstpos.append(i)\n        p = last\n        while p != -1 and c not in nexts[p]:\n            nexts[p][c] = cur\n            p = link[p]",
+      "codeLabel": "Extend: add missing transitions"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Complete the extension logic: handle the case when a transition existed (possibly creating a copy state), set links, and update last.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "        if p == -1:\n            link[cur] = 0\n        else:\n            q = nexts[p][c]\n            if maxlen[p] + 1 == maxlen[q]:\n                link[cur] = q\n            else:\n                clone = len(nexts)\n                nexts.append(nexts[q].copy())\n                maxlen.append(maxlen[p] + 1)\n                link.append(link[q])\n                firstpos.append(firstpos[q])\n                while p != -1 and nexts[p].get(c) == q:\n                    nexts[p][c] = clone\n                    p = link[p]\n                link[q] = clone\n                link[cur] = clone\n        last = cur",
+          "isCode": true
+        },
+        {
+          "label": "        if p == -1:\n            link[cur] = -1\n        else:\n            q = nexts[p][c]\n            if maxlen[p] + 1 == maxlen[q]:\n                link[cur] = p\n            else:\n                clone = len(nexts)\n                nexts.append({})\n                maxlen.append(maxlen[p])\n                link.append(0)\n                firstpos.append(i)\n                while p != -1 and nexts[p].get(c) == q:\n                    nexts[p][c] = clone\n                    p = link[p]\n                link[q] = clone\n                link[cur] = clone\n        last = cur",
+          "isCode": true
+        },
+        {
+          "label": "        if p == -1:\n            link[cur] = 0\n        else:\n            q = nexts[p][c]\n            link[cur] = q\n        last = cur",
+          "isCode": true
+        },
+        {
+          "label": "        if p == -1:\n            link[cur] = 0\n        else:\n            q = nexts[p][c]\n            if maxlen[p] + 1 == maxlen[q]:\n                link[cur] = q\n            else:\n                clone = len(nexts)\n                nexts.append(nexts[q])\n                maxlen.append(maxlen[p] + 2)\n                link.append(link[q])\n                firstpos.append(firstpos[q])\n                while p != -1 and nexts[p].get(c) == q:\n                    nexts[p][c] = clone\n                    p = link[p]\n                link[q] = clone\n                link[cur] = clone\n        last = p",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We link to root if none found; otherwise link to q or create a copy state with adjusted longest length and copied transitions, then redirect and set links.",
+      "wrongExplanations": {
+        "1": "Wrong links and wrong longest lengths; also clone transitions lost.",
+        "3": "Not copying dict (aliasing) and wrong lengths; also updating last incorrectly."
+      },
+      "hint": "When splitting, copy q's transitions and set clone's longest length to maxlen[p]+1.",
+      "isCodeBuilding": true,
+      "codeSnippet": "        if p == -1:\n            link[cur] = 0\n        else:\n            q = nexts[p][c]\n            if maxlen[p] + 1 == maxlen[q]:\n                link[cur] = q\n            else:\n                clone = len(nexts)\n                nexts.append(nexts[q].copy())\n                maxlen.append(maxlen[p] + 1)\n                link.append(link[q])\n                firstpos.append(firstpos[q])\n                while p != -1 and nexts[p].get(c) == q:\n                    nexts[p][c] = clone\n                    p = link[p]\n                link[q] = clone\n                link[cur] = clone\n        last = cur",
+      "codeLabel": "Extend: links and clone"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Compute an order of states sorted by their 'longest length' using counting to later propagate minima.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    nstates = len(nexts)\n    cnt = [0] * (max(maxlen) + 1)\n    for L in maxlen:\n        cnt[L] += 1\n    for i2 in range(1, len(cnt)):\n        cnt[i2] += cnt[i2 - 1]\n    order = [0] * nstates\n    for v in range(nstates - 1, -1, -1):\n        L = maxlen[v]\n        cnt[L] -= 1\n        order[cnt[L]] = v",
+          "isCode": true
+        },
+        {
+          "label": "    nstates = len(nexts)\n    order = list(range(nstates))\n    order.sort(key=lambda v: -maxlen[v])",
+          "isCode": true
+        },
+        {
+          "label": "    nstates = len(nexts)\n    cnt = [0] * (max(maxlen) + 2)\n    for L in maxlen:\n        cnt[L+1] += 1\n    for i2 in range(len(cnt)-2, -1, -1):\n        cnt[i2] += cnt[i2 + 1]\n    order = [0] * nstates\n    for v in range(nstates):\n        L = maxlen[v]\n        cnt[L+1] -= 1\n        order[cnt[L+1]] = v",
+          "isCode": true
+        },
+        {
+          "label": "    order = list(range(len(nexts)))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Counting by longest length yields a stable ascending order; we can later iterate it reversed for decreasing order.",
+      "wrongExplanations": {
+        "1": "Sorting works but may be slower; we also need ascending order for later reverse.",
+        "3": "Arbitrary order won't guarantee correct propagation."
+      },
+      "hint": "We need ascending by longest length to reverse it later.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    nstates = len(nexts)\n    cnt = [0] * (max(maxlen) + 1)\n    for L in maxlen:\n        cnt[L] += 1\n    for i2 in range(1, len(cnt)):\n        cnt[i2] += cnt[i2 - 1]\n    order = [0] * nstates\n    for v in range(nstates - 1, -1, -1):\n        L = maxlen[v]\n        cnt[L] -= 1\n        order[cnt[L]] = v",
+      "codeLabel": "Order states by longest length"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "Initialize minimal end positions per state and propagate them along suffix pointers in decreasing 'longest length' order.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    INF = 10**18\n    minpos = [INF] * nstates\n    for v in range(nstates):\n        if firstpos[v] != -1:\n            minpos[v] = firstpos[v]\n    for v in reversed(order[1:]):\n        p = link[v]\n        if p != -1 and minpos[v] < minpos[p]:\n            minpos[p] = minpos[v]",
+          "isCode": true
+        },
+        {
+          "label": "    INF = 10**18\n    minpos = [0] * nstates\n    for v in order:\n        p = link[v]\n        if p != -1 and minpos[p] < minpos[v]:\n            minpos[v] = minpos[p]",
+          "isCode": true
+        },
+        {
+          "label": "    INF = 10**18\n    minpos = firstpos[:]\n    for v in order:\n        p = link[v]\n        if p != -1 and minpos[v] > minpos[p]:\n            minpos[v] = minpos[p]",
+          "isCode": true
+        },
+        {
+          "label": "    INF = 10**18\n    minpos = [INF] * nstates\n    for v in reversed(order):\n        p = link[v]\n        if p != -1:\n            minpos[p] = minpos[v]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Initialize with each state's own end position, then push minima from longer states to their suffix parent in decreasing order.",
+      "wrongExplanations": {
+        "1": "Initializing to 0 makes minima incorrect; order is also wrong.",
+        "3": "Unconditional assignment may overwrite smaller values."
+      },
+      "hint": "Push smaller end indices upward along the suffix pointer.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    INF = 10**18\n    minpos = [INF] * nstates\n    for v in range(nstates):\n        if firstpos[v] != -1:\n            minpos[v] = firstpos[v]\n    for v in reversed(order[1:]):\n        p = link[v]\n        if p != -1 and minpos[v] < minpos[p]:\n            minpos[p] = minpos[v]",
+      "codeLabel": "Propagate minimal end positions"
+    },
+    {
+      "id": "q22",
+      "phase": "Writing the Code",
+      "questionText": "Walk each pattern in the machine, compute the earliest starting position, and collect outputs.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    out_lines = []\n    for pat in patterns:\n        v = 0\n        ok = True\n        for ch in pat:\n            c = idx(ch)\n            nxt = nexts[v].get(c)\n            if nxt is None:\n                ok = False\n                break\n            v = nxt\n        if not ok:\n            out_lines.append(\"-1\")\n        else:\n            L = len(pat)\n            end = minpos[v]\n            if end == INF:\n                out_lines.append(\"-1\")\n            else:\n                start1 = end - L + 2\n                out_lines.append(str(start1))",
+          "isCode": true
+        },
+        {
+          "label": "    out_lines = []\n    for pat in patterns:\n        v = 0\n        for ch in pat:\n            c = idx(ch)\n            if c not in nexts[v]:\n                v = 0\n                break\n            v = nexts[v][c]\n        L = len(pat)\n        end = minpos[v]\n        start1 = end - L + 1\n        out_lines.append(str(start1))",
+          "isCode": true
+        },
+        {
+          "label": "    out_lines = []\n    for pat in patterns:\n        v = 0\n        ok = True\n        for ch in pat:\n            c = idx(ch)\n            if c in nexts[v]:\n                v = nexts[v][c]\n        if not ok:\n            out_lines.append(\"-1\")\n        else:\n            L = len(pat)\n            start1 = minpos[v] - L + 2\n            out_lines.append(str(start1))",
+          "isCode": true
+        },
+        {
+          "label": "    out_lines = []\n    for pat in patterns:\n        v = 0\n        ok = True\n        for ch in pat:\n            c = idx(ch)\n            nxt = nexts[v].get(c, -1)\n            if nxt == -1:\n                ok = False\n                break\n            v = nxt\n        if not ok:\n            out_lines.append(\"0\")\n        else:\n            L = len(pat)\n            end = minpos[v]\n            start1 = end - L + 2\n            out_lines.append(str(start1))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We walk transitions; if any missing, answer is -1. Otherwise use the minimal end index to compute 1-based start via end - L + 2.",
+      "wrongExplanations": {
+        "1": "Computes 0-based start and prints it; also doesn't handle missing transitions with -1.",
+        "3": "Prints 0 for missing patterns; the problem requires -1."
+      },
+      "hint": "Use dictionary get to detect missing transitions cleanly.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    out_lines = []\n    for pat in patterns:\n        v = 0\n        ok = True\n        for ch in pat:\n            c = idx(ch)\n            nxt = nexts[v].get(c)\n            if nxt is None:\n                ok = False\n                break\n            v = nxt\n        if not ok:\n            out_lines.append(\"-1\")\n        else:\n            L = len(pat)\n            end = minpos[v]\n            if end == INF:\n                out_lines.append(\"-1\")\n            else:\n                start1 = end - L + 2\n                out_lines.append(str(start1))",
+      "codeLabel": "Answer queries"
+    },
+    {
+      "id": "q23",
+      "phase": "Writing the Code",
+      "questionText": "Finish by printing the results and calling main.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    sys.stdout.write(\"\\n\".join(out_lines))\n\nif __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "    print(out_lines)\n\nif __name__ == \"__main__\":\n    main",
+          "isCode": true
+        },
+        {
+          "label": "    for line in out_lines:\n        print(line, end=\" \")\n\nif __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "    sys.stdout.write(\" \".join(out_lines))\n\nif __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Print each answer on its own line and ensure main is called.",
+      "wrongExplanations": {
+        "1": "Doesn't call main and prints a list repr.",
+        "3": "Uses spaces instead of newlines."
+      },
+      "hint": "Match the sample output format.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    sys.stdout.write(\"\\n\".join(out_lines))\n\nif __name__ == \"__main__\":\n    main()",
+      "codeLabel": "Output"
+    },
+    {
+      "id": "q25",
+      "phase": "Verifying the Solution",
+      "questionText": "Run the solution on the sample:\ns = aybabtu\npatterns = [bab, abc, a]\nWhat output is produced?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "3\\n-1\\n1",
+          "isCode": false
+        },
+        {
+          "label": "2\\n-1\\n1",
+          "isCode": false
+        },
+        {
+          "label": "3\\n0\\n1",
+          "isCode": false
+        },
+        {
+          "label": "3\\n-1\\n0",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Matches the example: bab at 3, abc absent (-1), a at 1.",
+      "wrongExplanations": {
+        "1": "bab starts at 3, not 2.",
+        "2": "Absent patterns must produce -1, not 0."
+      },
+      "hint": "Compare to the provided example output.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Verifying the Solution",
+      "questionText": "Test s = \"abcababc\" with patterns [\"abc\", \"cab\", \"babc\"]. What should be printed?",
+      "diagram": "s (1-indexed): a b c a b a b c",
+      "options": [
+        {
+          "label": "1\\n3\\n5",
+          "isCode": false
+        },
+        {
+          "label": "1\\n4\\n5",
+          "isCode": false
+        },
+        {
+          "label": "1\\n3\\n6",
+          "isCode": false
+        },
+        {
+          "label": "2\\n3\\n5",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "abc at 1, cab at 3 (c a b), babc at 5 (b a b c).",
+      "wrongExplanations": {
+        "1": "cab starts at 3, not 4.",
+        "2": "babc starts at 5, not 6."
+      },
+      "hint": "Scan start positions for each pattern.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q27",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the overall time complexity with this approach, in terms of n (string length) and T (total length of all patterns)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n + T)",
+          "isCode": false
+        },
+        {
+          "label": "O(n * T)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n + T)",
+          "isCode": false
+        },
+        {
+          "label": "O(T^2)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We build once in O(n) and walk all patterns in O(T).",
+      "wrongExplanations": {
+        "1": "We do not rescan the string per pattern.",
+        "3": "There is no quadratic behavior in T here."
+      },
+      "hint": "Add build time and total query time.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q28",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the space complexity for the constructed machine and auxiliary arrays?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(T)",
+          "isCode": false
+        },
+        {
+          "label": "O(n + T)",
+          "isCode": false
+        },
+        {
+          "label": "O(26^n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Number of states and transitions is linear in n for this machine; auxiliary arrays are also linear in states.",
+      "wrongExplanations": {
+        "2": "We don't store the patterns inside the machine.",
+        "3": "Exponential space is not used."
+      },
+      "hint": "The machine is built from the string only.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q29",
+      "phase": "Analyzing Complexity",
+      "questionText": "If a pattern does not appear in the string (e.g., longer than the string or mismatching characters), what should be printed?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "-1",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "length of the pattern",
+          "isCode": false
+        },
+        {
+          "label": "n - length(pattern) + 1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Per problem statement, print -1 when the pattern does not appear at all.",
+      "wrongExplanations": {
+        "1": "Positions are 1-indexed; 0 is not used for absence.",
+        "3": "This is the last possible start, not a valid answer for absence."
+      },
+      "hint": "Check the output requirement for missing patterns.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\n\ndef main():\n    data = sys.stdin.read().strip().split()\n    if not data:\n        return\n    it = iter(data)\n    s = next(it)\n    k = int(next(it))\n    patterns = [next(it) for _ in range(k)]",
+    "    def idx(c): return ord(c) - 97\n\n    nexts = [{}]\n    link = [-1]\n    maxlen = [0]\n    firstpos = [-1]\n    last = 0",
+    "    for i, ch in enumerate(s):\n        c = idx(ch)\n        cur = len(nexts)\n        nexts.append({})\n        maxlen.append(maxlen[last] + 1)\n        link.append(0)\n        firstpos.append(i)\n        p = last\n        while p != -1 and c not in nexts[p]:\n            nexts[p][c] = cur\n            p = link[p]",
+    "        if p == -1:\n            link[cur] = 0\n        else:\n            q = nexts[p][c]\n            if maxlen[p] + 1 == maxlen[q]:\n                link[cur] = q\n            else:\n                clone = len(nexts)\n                nexts.append(nexts[q].copy())\n                maxlen.append(maxlen[p] + 1)\n                link.append(link[q])\n                firstpos.append(firstpos[q])\n                while p != -1 and nexts[p].get(c) == q:\n                    nexts[p][c] = clone\n                    p = link[p]\n                link[q] = clone\n                link[cur] = clone\n        last = cur",
+    "    nstates = len(nexts)\n    cnt = [0] * (max(maxlen) + 1)\n    for L in maxlen:\n        cnt[L] += 1\n    for i2 in range(1, len(cnt)):\n        cnt[i2] += cnt[i2 - 1]\n    order = [0] * nstates\n    for v in range(nstates - 1, -1, -1):\n        L = maxlen[v]\n        cnt[L] -= 1\n        order[cnt[L]] = v",
+    "    INF = 10**18\n    minpos = [INF] * nstates\n    for v in range(nstates):\n        if firstpos[v] != -1:\n            minpos[v] = firstpos[v]\n    for v in reversed(order[1:]):\n        p = link[v]\n        if p != -1 and minpos[v] < minpos[p]:\n            minpos[p] = minpos[v]",
+    "    out_lines = []\n    for pat in patterns:\n        v = 0\n        ok = True\n        for ch in pat:\n            c = idx(ch)\n            nxt = nexts[v].get(c)\n            if nxt is None:\n                ok = False\n                break\n            v = nxt\n        if not ok:\n            out_lines.append(\"-1\")\n        else:\n            L = len(pat)\n            end = minpos[v]\n            if end == INF:\n                out_lines.append(\"-1\")\n            else:\n                start1 = end - L + 2\n                out_lines.append(str(start1))",
+    "    sys.stdout.write(\"\\n\".join(out_lines))\n\nif __name__ == \"__main__\":\n    main()"
+  ],
+  "reasoningChain": [
+    {
+      "question": "Why is scanning the string separately for every pattern too slow under the given constraints?",
+      "insight": "Because total work becomes O(n * total_pattern_length), which can reach 5e10 comparisons."
+    },
+    {
+      "question": "What single preprocessing step can let us answer many pattern queries efficiently?",
+      "insight": "Build a deterministic state machine from the main string that can check any pattern by walking its characters."
+    },
+    {
+      "question": "What should we record during the string scan to later compute first positions?",
+      "insight": "For each state, record the minimal end index where it was reached."
+    },
+    {
+      "question": "How do we ensure shorter suffix contexts also inherit early end indices?",
+      "insight": "Propagate minimal end indices from longer states to their suffix parent in decreasing order of longest length."
+    },
+    {
+      "question": "What structural adjustment is needed when a found transition leads to a state with an incompatible length?",
+      "insight": "Create a copy state with adjusted longest length and redirected transitions to maintain correctness."
+    },
+    {
+      "question": "How do we answer each query after preprocessing?",
+      "insight": "Walk the pattern through the machine; if reachable, use end_min[state] - len + 2 to compute the 1-indexed starting position; otherwise print -1."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1364,
+    "output_tokens": 22552,
+    "input_cost": 0.001705,
+    "output_cost": 0.22552,
+    "total_cost": 0.227225
+  }
+}

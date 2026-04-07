@@ -1,0 +1,1058 @@
+{
+  "id": "finding-patterns",
+  "title": "Finding Patterns",
+  "difficulty": "hard",
+  "tags": [
+    "string"
+  ],
+  "estimatedMinutes": 70,
+  "language": "python",
+  "description": "Given a string s and k patterns, determine for each pattern whether it appears as a contiguous substring in s.\n\nInput:\n- First line: string s of length n (characters a–z)\n- Second line: integer k\n- Next k lines: one pattern per line\n\nOutput:\n- For each pattern, print \"YES\" if it appears in s and \"NO\" otherwise.\n\nGoal: Ensure the total running time handles up to n = 1e5 and total pattern length ≤ 5e5.",
+  "examples": [
+    {
+      "input": "aybabtu\n3\nbab\nabc\nayba\n",
+      "output": "YES\nNO\nYES\n",
+      "explanation": "Substrings of s include \"bab\" and \"ayba\" (positions 2–4 and 1–4 respectively), but not \"abc\"."
+    }
+  ],
+  "constraints": [
+    "1 ≤ n ≤ 1e5",
+    "1 ≤ k ≤ 5⋅10^5",
+    "Total length of all patterns ≤ 5⋅10^5",
+    "Alphabet: lowercase a–z"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "In the sample s = \"aybabtu\", does the pattern \"bab\" appear as a substring?",
+      "diagram": "s: a y b a b t u\n        ^ ^ ^",
+      "options": [
+        {
+          "label": "YES, at positions 3–5",
+          "isCode": false
+        },
+        {
+          "label": "NO, only as a subsequence",
+          "isCode": false
+        },
+        {
+          "label": "YES, at positions 2–4",
+          "isCode": false
+        },
+        {
+          "label": "NO, because of repeated 'b'",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "It appears as s[2..4] (0-based index 2–4): 'b','a','b'. Positions 3–5 is off by one.",
+      "wrongExplanations": {
+        "0": "Indexing off by one: positions 2–4 (0-based), not 3–5.",
+        "1": "We need contiguous substrings, and it does occur contiguously.",
+        "3": "Repeated letters are allowed; this does not prevent appearance."
+      },
+      "hint": "Scan s for a contiguous 'b','a','b' sequence.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "For s = \"aybabtu\", does the pattern \"abc\" appear?",
+      "diagram": "s: a y b a b t u",
+      "options": [
+        {
+          "label": "YES, characters 'a','b','c' appear in order",
+          "isCode": false
+        },
+        {
+          "label": "NO, because 'c' does not appear in s",
+          "isCode": false
+        },
+        {
+          "label": "YES, as a non-contiguous match is enough",
+          "isCode": false
+        },
+        {
+          "label": "NO, because patterns must be prefixes",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "'c' is not in s, so 'abc' cannot be a substring. We need contiguous matches, not subsequences.",
+      "wrongExplanations": {
+        "0": "Order alone isn't enough; also 'c' is absent.",
+        "2": "We require contiguous substrings, not subsequences."
+      },
+      "hint": "Check if 'c' occurs in s.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "If a pattern length is greater than |s|, can it appear in s?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, if characters are all in s",
+          "isCode": false
+        },
+        {
+          "label": "No, a longer string cannot be a substring of a shorter one",
+          "isCode": false
+        },
+        {
+          "label": "Yes, if pattern repeats a short substring",
+          "isCode": false
+        },
+        {
+          "label": "Only if s occurs inside the pattern",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "A substring cannot be longer than the string itself.",
+      "wrongExplanations": {
+        "0": "Membership of characters is irrelevant; substring must be contiguous in s.",
+        "2": "Repetition doesn't help if the pattern is longer than s."
+      },
+      "hint": "Compare lengths.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "We must answer up to k = 5⋅10^5 patterns. If we scan the entire s for each pattern independently in O(n) time, what is the worst-case number of character inspections?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n + k)",
+          "isCode": false
+        },
+        {
+          "label": "O(nk)",
+          "isCode": false
+        },
+        {
+          "label": "O(k log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Doing O(n) work per pattern yields O(nk), which is too large for n=1e5, k=5e5.",
+      "wrongExplanations": {
+        "0": "You would still scan s for each pattern, so add doesn't apply.",
+        "3": "Only scanning once would be O(n), but here it's per-pattern."
+      },
+      "hint": "Multiply per-query cost by number of queries.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Understanding the Problem",
+      "questionText": "Given the total length of all patterns is at most 5⋅10^5, what total target time is reasonable?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n + total pattern length)",
+          "isCode": false
+        },
+        {
+          "label": "O(n ⋅ total pattern length)",
+          "isCode": false
+        },
+        {
+          "label": "O(k + n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(total pattern length^2)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "A near-linear preprocessing on s and linear in total pattern length for queries is the goal.",
+      "wrongExplanations": {
+        "1": "Quadratic in practice; too slow.",
+        "2": "n^2 is too large; we can do better.",
+        "3": "Quadratic in patterns length is unnecessary."
+      },
+      "hint": "Think linear preprocessing + linear query processing.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "Which plan aligns with the target time bound?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Enumerate all substrings of s into a set and test membership",
+          "isCode": false
+        },
+        {
+          "label": "Build a compact state machine from s once, then check each pattern by walking it",
+          "isCode": false
+        },
+        {
+          "label": "For each pattern, scan s from scratch searching for it",
+          "isCode": false
+        },
+        {
+          "label": "Sort all substrings of s lexicographically and binary search for each pattern",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "A compact state machine over s supports O(len(pattern)) checks. Enumerating substrings is O(n^2).",
+      "wrongExplanations": {
+        "0": "There are O(n^2) substrings; memory/time is too large.",
+        "3": "Sorting all substrings is also O(n^2 log n), infeasible."
+      },
+      "hint": "Preprocess s once to support fast pattern walks.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "When appending a new character c to the current prefix of s, which new substrings are introduced?",
+      "diagram": "Current prefix: P\nNew prefix: P + c",
+      "options": [
+        {
+          "label": "All substrings of P",
+          "isCode": false
+        },
+        {
+          "label": "All substrings that end at the new position (the suffixes of P + c)",
+          "isCode": false
+        },
+        {
+          "label": "Only the character c",
+          "isCode": false
+        },
+        {
+          "label": "All substrings starting at the first character",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Appending c introduces exactly the suffixes ending at the new last character.",
+      "wrongExplanations": {
+        "0": "Substrings of P already existed before appending c.",
+        "2": "Single-character c is one of the new substrings, but not the only one."
+      },
+      "hint": "Which substrings weren't present before appending c?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Exploring Approaches",
+      "questionText": "We want a machine that accepts exactly all substrings of s. How should checking a pattern work on it?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Start at an initial state and follow edges by pattern characters; success if all edges exist",
+          "isCode": false
+        },
+        {
+          "label": "Sort states by creation time and compare indices",
+          "isCode": false
+        },
+        {
+          "label": "Jump to a state based on pattern length and check only the last character",
+          "isCode": false
+        },
+        {
+          "label": "Count how many times each character appears and compare with the pattern",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Walking the pattern character by character and failing on a missing edge lets us test substring membership.",
+      "wrongExplanations": {
+        "3": "Character counts cannot ensure contiguity.",
+        "1": "State indices alone don’t encode the pattern’s path."
+      },
+      "hint": "Think of following transitions labeled by characters.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Exploring Approaches",
+      "questionText": "While building the machine character by character, if from a state p there is no edge labeled c, what should we do?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Create an edge labeled c from p to the new state and continue from a fallback of p",
+          "isCode": false
+        },
+        {
+          "label": "Stop building and restart from the root",
+          "isCode": false
+        },
+        {
+          "label": "Delete state p to avoid duplicates",
+          "isCode": false
+        },
+        {
+          "label": "Create edges labeled by all letters from p",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need to connect missing c-edges from states until we reach a state that already has such an edge or the root.",
+      "wrongExplanations": {
+        "1": "We should continue updating using fallbacks, not restart.",
+        "3": "Only create the needed edge for c, not for all letters."
+      },
+      "hint": "Propagate the new c-transition backward using links to previous states.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "Each state will track the maximum length of any string reaching it. After adding a new character c, what should be the length for the new state?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Same as the previous state's length",
+          "isCode": false
+        },
+        {
+          "label": "Previous state's length + 1",
+          "isCode": false
+        },
+        {
+          "label": "Always 1",
+          "isCode": false
+        },
+        {
+          "label": "Previous state's length + number of outgoing edges",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "The new state corresponds to substrings ending at the new last position, so max length increases by 1.",
+      "wrongExplanations": {
+        "0": "We extended by one character, so max length increases.",
+        "2": "Only if the string was empty before; in general it increases by 1."
+      },
+      "hint": "Consider the longest substring ending at the newest position.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "Suppose from a state p, an edge labeled c already exists to state q. When can we directly set the fallback of the new state to q without any split?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Always; direct link to q is fine",
+          "isCode": false
+        },
+        {
+          "label": "Only if max_length[p] + 1 == max_length[q]",
+          "isCode": false
+        },
+        {
+          "label": "Only if q has no outgoing edges",
+          "isCode": false
+        },
+        {
+          "label": "Never; we must always split",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "If q’s max length matches p’s + 1, it’s consistent to link the new state to q; otherwise we need a split.",
+      "wrongExplanations": {
+        "0": "Not always safe; lengths must align.",
+        "3": "Splitting is only needed when lengths are inconsistent."
+      },
+      "hint": "Think about path lengths of strings reaching q.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "When a split is needed (lengths don’t align), what max length should the cloned state have?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "max_length[q]",
+          "isCode": false
+        },
+        {
+          "label": "max_length[p] + 1",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "max_length[p]",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "The clone represents the immediate extension from p by c, so its max length is max_length[p] + 1.",
+      "wrongExplanations": {
+        "0": "We need to shorten q’s length to match the first occurrence of c after p.",
+        "3": "We extended by one character; +1 is required."
+      },
+      "hint": "Clone represents one-character extension from p via c.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "After creating a cloned state, which transitions and fallback should it initially copy?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Copy all transitions of q and copy q's fallback",
+          "isCode": false
+        },
+        {
+          "label": "Copy nothing; start empty",
+          "isCode": false
+        },
+        {
+          "label": "Copy only the c-transition and keep fallback to root",
+          "isCode": false
+        },
+        {
+          "label": "Copy only transitions that lead to terminal states",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The clone mirrors q’s transitions and fallback before redirecting some incoming c-edges to it.",
+      "wrongExplanations": {
+        "1": "The clone must behave like q initially; empty transitions break paths.",
+        "2": "Only copying c is insufficient; other transitions must be preserved."
+      },
+      "hint": "The clone starts as a structural copy of q, then we adjust links into it.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Building the Idea",
+      "questionText": "When no state p has a c-edge (we reached the root and failed), what should the fallback of the new state be?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Link to itself",
+          "isCode": false
+        },
+        {
+          "label": "Link to the root state",
+          "isCode": false
+        },
+        {
+          "label": "Leave it unset",
+          "isCode": false
+        },
+        {
+          "label": "Link to the last state",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "If nothing matches c on fallback chain, the new state falls back to the root (empty string).",
+      "wrongExplanations": {
+        "0": "Self-loops would break fallback properties.",
+        "2": "Fallback must be defined for later updates."
+      },
+      "hint": "Consider the longest proper suffix when none exists.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "cb1",
+      "phase": "Writing the Code",
+      "questionText": "Read input efficiently: s, k, then k patterns. Choose the correct code block.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\n\ndef main():\n    data = sys.stdin.read().strip().split()\n    if not data:\n        return\n    it = iter(data)\n    s = next(it)\n    k = int(next(it))\n    patterns = [next(it) for _ in range(k)]",
+          "isCode": true
+        },
+        {
+          "label": "def main():\n    s = input().strip()\n    k = int(input())\n    patterns = [input().strip() for _ in range(k)]\n    data = []",
+          "isCode": true
+        },
+        {
+          "label": "import sys\n\ndef main():\n    tokens = sys.stdin.read().splitlines()\n    s = tokens[0]\n    k = int(tokens[1])\n    patterns = tokens[2:k]",
+          "isCode": true
+        },
+        {
+          "label": "def main():\n    s = input()\n    k = int(input())\n    patterns = [input() for _ in range(k)]\n    it = iter([])",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Reading all tokens then iterating handles large input and blank lines safely.",
+      "wrongExplanations": {
+        "1": "Line-by-line can work but is less robust with trailing spaces and isn't as efficient for large inputs.",
+        "3": "Not stripping newlines may leave trailing whitespace."
+      },
+      "hint": "Use sys.stdin.read().split() to gather tokens.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\n\ndef main():\n    data = sys.stdin.read().strip().split()\n    if not data:\n        return\n    it = iter(data)\n    s = next(it)\n    k = int(next(it))\n    patterns = [next(it) for _ in range(k)]",
+      "codeLabel": "Input reading"
+    },
+    {
+      "id": "cb2",
+      "phase": "Writing the Code",
+      "questionText": "Initialize the state machine structures.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    nexts = [dict()]\n    link = [-1]\n    length = [0]\n    last = 0",
+          "isCode": true
+        },
+        {
+          "label": "    nexts = {}\n    link = {}\n    length = {}\n    last = -1",
+          "isCode": true
+        },
+        {
+          "label": "    nexts = [set()]\n    link = [None]\n    length = [1]\n    last = 1",
+          "isCode": true
+        },
+        {
+          "label": "    nexts = [{} for _ in range(2*len(s))]\n    link = [-1]*(2*len(s))\n    length = [0]*(2*len(s))\n    last = 0",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Start with a single root state: empty transitions, link -1, max length 0, last at root.",
+      "wrongExplanations": {
+        "1": "We need lists indexed by state id, not dicts for the top structure.",
+        "3": "Preallocating 2*len(s) dicts wastes memory and complicates dynamic growth."
+      },
+      "hint": "Root is state 0 with no transitions and link -1.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    nexts = [dict()]\n    link = [-1]\n    length = [0]\n    last = 0",
+      "codeLabel": "Initialization"
+    },
+    {
+      "id": "cb3",
+      "phase": "Writing the Code",
+      "questionText": "Define the function to add one character and create the new state.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    def sa_extend(c):\n        nonlocal last\n        cur = len(length)\n        length.append(length[last] + 1)\n        nexts.append({})\n        link.append(0)\n        p = last",
+          "isCode": true
+        },
+        {
+          "label": "    def sa_extend(c):\n        global last\n        cur = len(length)\n        length.append(length[last])\n        nexts.append({})\n        link.append(-1)\n        p = 0",
+          "isCode": true
+        },
+        {
+          "label": "    def sa_extend(c):\n        nonlocal last\n        cur = len(nexts)\n        length.append(1)\n        nexts.append(set())\n        link.append(0)\n        p = -1",
+          "isCode": true
+        },
+        {
+          "label": "    def sa_extend(c):\n        nonlocal last\n        cur = 0\n        length[cur] = length[last] + 1\n        nexts.append({})\n        link.append(0)\n        p = last",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Create a new state with max length = previous max + 1; append empty transitions; start p from last.",
+      "wrongExplanations": {
+        "1": "The new state's max length should increase by 1; p should start from last, not root.",
+        "2": "Transitions need dicts, not sets; length should grow from last, not reset to 1."
+      },
+      "hint": "New state index is current number of states; max length grows by one.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    def sa_extend(c):\n        nonlocal last\n        cur = len(length)\n        length.append(length[last] + 1)\n        nexts.append({})\n        link.append(0)\n        p = last",
+      "codeLabel": "Extend: new state"
+    },
+    {
+      "id": "cb4",
+      "phase": "Writing the Code",
+      "questionText": "Fill missing c-transitions from p backwards using fallbacks.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "        while p != -1 and c not in nexts[p]:\n            nexts[p][c] = cur\n            p = link[p]",
+          "isCode": true
+        },
+        {
+          "label": "        while p == -1 or c in nexts[p]:\n            nexts[p][c] = cur\n            p = link[p]",
+          "isCode": true
+        },
+        {
+          "label": "        while p != -1:\n            nexts[p][c] = cur\n            p = link[p]",
+          "isCode": true
+        },
+        {
+          "label": "        while c not in nexts[p]:\n            nexts[p][c] = p\n            p = link[p]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Add c-edges to cur until you reach a state that already has c or the root (p = -1).",
+      "wrongExplanations": {
+        "2": "We must stop once a c-edge exists to preserve existing paths.",
+        "3": "This creates self-loops and breaks the structure."
+      },
+      "hint": "Stop the loop when a c-edge exists or you hit -1.",
+      "isCodeBuilding": true,
+      "codeSnippet": "        while p != -1 and c not in nexts[p]:\n            nexts[p][c] = cur\n            p = link[p]",
+      "codeLabel": "Extend: fill transitions"
+    },
+    {
+      "id": "cb5",
+      "phase": "Writing the Code",
+      "questionText": "Handle the case when no c-edge was found on the fallback chain or when one exists.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "        if p == -1:\n            link[cur] = 0\n        else:\n            q = nexts[p][c]\n            if length[p] + 1 == length[q]:\n                link[cur] = q\n            else:\n                clone = len(length)\n                length.append(length[p] + 1)\n                nexts.append(nexts[q].copy())\n                link.append(link[q])",
+          "isCode": true
+        },
+        {
+          "label": "        if p == -1:\n            link[cur] = -1\n        else:\n            q = nexts[p][c]\n            if length[p] == length[q]:\n                link[cur] = q\n            else:\n                clone = len(length)\n                length.append(length[q])\n                nexts.append({})\n                link.append(0)",
+          "isCode": true
+        },
+        {
+          "label": "        if p == -1:\n            link[cur] = 0\n        else:\n            q = nexts[p][c]\n            if length[p] + 1 != length[q]:\n                link[cur] = q\n            else:\n                clone = len(length)\n                length.append(length[p])\n                nexts.append(nexts[q])\n                link.append(link[q])",
+          "isCode": true
+        },
+        {
+          "label": "        if p == -1:\n            link[cur] = 1\n        else:\n            q = nexts[p][c]\n            link[cur] = 0",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "If we fell off the chain, fallback to root. Otherwise, set fallback to q if lengths align; else prepare a cloned state.",
+      "wrongExplanations": {
+        "1": "Fallback -1 is only for root; lengths and clone handling are incorrect.",
+        "3": "This ignores the necessary length check and cloning logic."
+      },
+      "hint": "When p == -1, fallback to root; otherwise compare lengths.",
+      "isCodeBuilding": true,
+      "codeSnippet": "        if p == -1:\n            link[cur] = 0\n        else:\n            q = nexts[p][c]\n            if length[p] + 1 == length[q]:\n                link[cur] = q\n            else:\n                clone = len(length)\n                length.append(length[p] + 1)\n                nexts.append(nexts[q].copy())\n                link.append(link[q])",
+      "codeLabel": "Extend: link or prepare clone"
+    },
+    {
+      "id": "cb6",
+      "phase": "Writing the Code",
+      "questionText": "Complete the clone case by redirecting edges and updating fallbacks.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "                while p != -1 and nexts[p].get(c, -1) == q:\n                    nexts[p][c] = clone\n                    p = link[p]\n                link[q] = link[cur] = clone",
+          "isCode": true
+        },
+        {
+          "label": "                while p != -1 and c in nexts[p]:\n                    nexts[p][c] = clone\n                    p = link[p]\n                link[q] = 0\n                link[cur] = 0",
+          "isCode": true
+        },
+        {
+          "label": "                while p == -1:\n                    nexts[p][c] = clone\n                    p = link[p]\n                link[q] = clone\n                # leave link[cur] unchanged",
+          "isCode": true
+        },
+        {
+          "label": "                while p != -1 and nexts[p][c] != q:\n                    p = link[p]\n                link[cur] = q\n                link[q] = clone",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Redirect exactly those c-edges that pointed to q, then set q and cur to fall back to the clone.",
+      "wrongExplanations": {
+        "1": "This overwrites unrelated edges and resets fallbacks incorrectly.",
+        "3": "You must update link[cur] to the clone; not doing so breaks lengths."
+      },
+      "hint": "Only change c-edges that led to q. Both q and cur should fallback to clone.",
+      "isCodeBuilding": true,
+      "codeSnippet": "                while p != -1 and nexts[p].get(c, -1) == q:\n                    nexts[p][c] = clone\n                    p = link[p]\n                link[q] = link[cur] = clone",
+      "codeLabel": "Extend: finalize clone"
+    },
+    {
+      "id": "cb7",
+      "phase": "Writing the Code",
+      "questionText": "Finish the extension by updating the last state.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "        last = cur",
+          "isCode": true
+        },
+        {
+          "label": "        last = p",
+          "isCode": true
+        },
+        {
+          "label": "        last = q",
+          "isCode": true
+        },
+        {
+          "label": "        last = link[cur]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The new state becomes the new 'last' (the state representing all substrings ending at the newest position).",
+      "wrongExplanations": {
+        "1": "p may have moved via fallbacks; 'last' should represent the newest end.",
+        "3": "Fallback is not the new last state."
+      },
+      "hint": "After adding c, the newest position corresponds to 'cur'.",
+      "isCodeBuilding": true,
+      "codeSnippet": "        last = cur",
+      "codeLabel": "Extend: update last"
+    },
+    {
+      "id": "cb8",
+      "phase": "Writing the Code",
+      "questionText": "Build the machine by adding all characters of s.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    for ch in s:\n        sa_extend(ch)",
+          "isCode": true
+        },
+        {
+          "label": "    for i in range(len(s)):\n        sa_extend(s)",
+          "isCode": true
+        },
+        {
+          "label": "    while s:\n        sa_extend(s[0])",
+          "isCode": true
+        },
+        {
+          "label": "    sa_extend(s)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Extend the structure character by character.",
+      "wrongExplanations": {
+        "1": "Passing the whole string each time is incorrect.",
+        "3": "sa_extend expects a single character."
+      },
+      "hint": "Iterate over characters of s.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    for ch in s:\n        sa_extend(ch)",
+      "codeLabel": "Build from s"
+    },
+    {
+      "id": "cb9",
+      "phase": "Writing the Code",
+      "questionText": "For each pattern, walk the machine to test membership and collect outputs.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    out_lines = []\n    for pat in patterns:\n        v = 0\n        ok = True\n        for ch in pat:\n            if ch in nexts[v]:\n                v = nexts[v][ch]\n            else:\n                ok = False\n                break\n        out_lines.append(\"YES\" if ok else \"NO\")",
+          "isCode": true
+        },
+        {
+          "label": "    out_lines = []\n    for pat in patterns:\n        v = 0\n        for ch in pat:\n            v = nexts[v][ch]\n        out_lines.append(\"YES\")",
+          "isCode": true
+        },
+        {
+          "label": "    out_lines = []\n    for pat in patterns:\n        v = 0\n        ok = True\n        for ch in pat:\n            if ch not in nexts[v]:\n                continue\n            v = nexts[v][ch]\n        out_lines.append(\"YES\" if ok else \"NO\")",
+          "isCode": true
+        },
+        {
+          "label": "    out_lines = []\n    for pat in patterns:\n        ok = (pat in s)\n        out_lines.append(\"YES\" if ok else \"NO\")",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Check each character transition; if any missing, mark NO; otherwise YES. Start from root for each pattern.",
+      "wrongExplanations": {
+        "1": "Accessing nexts[v][ch] without checking may KeyError if transition missing.",
+        "3": "Using 'pat in s' scans s per pattern; too slow."
+      },
+      "hint": "Handle missing transitions gracefully.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    out_lines = []\n    for pat in patterns:\n        v = 0\n        ok = True\n        for ch in pat:\n            if ch in nexts[v]:\n                v = nexts[v][ch]\n            else:\n                ok = False\n                break\n        out_lines.append(\"YES\" if ok else \"NO\")",
+      "codeLabel": "Query patterns"
+    },
+    {
+      "id": "cb10",
+      "phase": "Writing the Code",
+      "questionText": "Print the results and wrap up the program.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    sys.stdout.write(\"\\n\".join(out_lines))\n\nif __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "    print(out_lines)\n\nif __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "    for x in out_lines:\n        print(x, end=' ')\n\nif __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "    sys.stdout.write(\" \".join(out_lines))\n\nif __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Join by newlines to match the required output format.",
+      "wrongExplanations": {
+        "1": "Printing the list will show brackets and quotes.",
+        "2": "Spaces between answers do not match the required format."
+      },
+      "hint": "Each answer should be on its own line.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    sys.stdout.write(\"\\n\".join(out_lines))\n\nif __name__ == \"__main__\":\n    main()",
+      "codeLabel": "Output and main guard"
+    },
+    {
+      "id": "q15",
+      "phase": "Verifying the Solution",
+      "questionText": "Run the assembled code on the sample input. What is the output?",
+      "diagram": "Input:\naybabtu\n3\nbab\nabc\nayba",
+      "options": [
+        {
+          "label": "YES\nNO\nYES",
+          "isCode": false
+        },
+        {
+          "label": "YES\nYES\nNO",
+          "isCode": false
+        },
+        {
+          "label": "NO\nNO\nYES",
+          "isCode": false
+        },
+        {
+          "label": "NO\nYES\nYES",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "As reasoned earlier: 'bab' and 'ayba' appear; 'abc' does not.",
+      "wrongExplanations": {
+        "1": "This claims 'abc' appears, which is false.",
+        "3": "This claims 'bab' is missing, which is false."
+      },
+      "hint": "We already traced these patterns against s.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q16",
+      "phase": "Verifying the Solution",
+      "questionText": "Consider s = \"aaaa\" and patterns: [\"aa\", \"ba\", \"aaa\"]. What should the output be?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "YES\nNO\nYES",
+          "isCode": false
+        },
+        {
+          "label": "YES\nYES\nYES",
+          "isCode": false
+        },
+        {
+          "label": "NO\nNO\nNO",
+          "isCode": false
+        },
+        {
+          "label": "YES\nNO\nNO",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "\"aa\" and \"aaa\" appear in \"aaaa\"; \"ba\" does not.",
+      "wrongExplanations": {
+        "1": "\"ba\" is not a substring of \"aaaa\".",
+        "3": "\"aaa\" appears (positions 1–3 and 2–4)."
+      },
+      "hint": "List substrings of \"aaaa\".",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q17",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the time complexity to build the state machine from s?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(1)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The building process runs in linear time in |s|.",
+      "wrongExplanations": {
+        "2": "We avoid quadratic work by careful linking and occasional cloning."
+      },
+      "hint": "Each character causes a bounded amount of work.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q18",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the total time to answer all pattern queries after building the machine?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(total pattern length)",
+          "isCode": false
+        },
+        {
+          "label": "O(k log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(k ⋅ n)",
+          "isCode": false
+        },
+        {
+          "label": "O(1) per pattern regardless of length",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each pattern is checked by walking its characters; total time is proportional to the sum of lengths.",
+      "wrongExplanations": {
+        "2": "We do not rescan s per pattern.",
+        "3": "Longer patterns take more steps."
+      },
+      "hint": "We only traverse transitions for pattern characters.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q19",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the upper bound on the number of states in this machine for a string of length n?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "At most 2n",
+          "isCode": false
+        },
+        {
+          "label": "Exactly n",
+          "isCode": false
+        },
+        {
+          "label": "At most n^2",
+          "isCode": false
+        },
+        {
+          "label": "At most n + 26",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The number of states is at most 2n; memory fits easily in the constraints.",
+      "wrongExplanations": {
+        "1": "There can be more due to clones.",
+        "3": "Alphabet size doesn't bound states this way."
+      },
+      "hint": "Cloning occasionally creates extra states.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\n\ndef main():\n    data = sys.stdin.read().strip().split()\n    if not data:\n        return\n    it = iter(data)\n    s = next(it)\n    k = int(next(it))\n    patterns = [next(it) for _ in range(k)]",
+    "    nexts = [dict()]\n    link = [-1]\n    length = [0]\n    last = 0",
+    "    def sa_extend(c):\n        nonlocal last\n        cur = len(length)\n        length.append(length[last] + 1)\n        nexts.append({})\n        link.append(0)\n        p = last",
+    "        while p != -1 and c not in nexts[p]:\n            nexts[p][c] = cur\n            p = link[p]",
+    "        if p == -1:\n            link[cur] = 0\n        else:\n            q = nexts[p][c]\n            if length[p] + 1 == length[q]:\n                link[cur] = q\n            else:\n                clone = len(length)\n                length.append(length[p] + 1)\n                nexts.append(nexts[q].copy())\n                link.append(link[q])",
+    "                while p != -1 and nexts[p].get(c, -1) == q:\n                    nexts[p][c] = clone\n                    p = link[p]\n                link[q] = link[cur] = clone",
+    "        last = cur",
+    "    for ch in s:\n        sa_extend(ch)",
+    "    out_lines = []\n    for pat in patterns:\n        v = 0\n        ok = True\n        for ch in pat:\n            if ch in nexts[v]:\n                v = nexts[v][ch]\n            else:\n                ok = False\n                break\n        out_lines.append(\"YES\" if ok else \"NO\")",
+    "    sys.stdout.write(\"\\n\".join(out_lines))\n\nif __name__ == \"__main__\":\n    main()"
+  ],
+  "reasoningChain": [
+    {
+      "question": "What does substring membership mean and how to validate it on tiny examples?",
+      "insight": "A substring is contiguous; if any character is missing from s or order isn’t contiguous, the pattern does not appear."
+    },
+    {
+      "question": "Why is scanning s for every pattern too slow and what is a better target?",
+      "insight": "With up to 5e5 patterns, per-pattern O(n) is infeasible; aim for O(n) preprocessing and O(total pattern length) for all queries."
+    },
+    {
+      "question": "How to preprocess s to support fast pattern checks?",
+      "insight": "Build a compact state machine from s that accepts all substrings; then checking a pattern reduces to following transitions."
+    },
+    {
+      "question": "How to build the machine online as we append characters?",
+      "insight": "Appending a char introduces suffixes ending at that char; link missing c-edges backward and handle existing c-edges by comparing max lengths and cloning if necessary."
+    },
+    {
+      "question": "How to answer queries once built?",
+      "insight": "Start at the root and follow transitions for each pattern; if any step fails, answer NO; otherwise YES."
+    },
+    {
+      "question": "Does this meet constraints?",
+      "insight": "Building uses at most 2n states in O(n) time; queries sum to O(total pattern length), fitting limits easily."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1356,
+    "output_tokens": 17945,
+    "input_cost": 0.001695,
+    "output_cost": 0.17945,
+    "total_cost": 0.181145
+  }
+}

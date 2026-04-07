@@ -1,0 +1,1023 @@
+{
+  "id": "necessary-cities",
+  "title": "Necessary Cities",
+  "difficulty": "hard",
+  "tags": [
+    "advanced"
+  ],
+  "estimatedMinutes": 80,
+  "language": "python",
+  "description": "You are given an undirected connected graph with n cities and m roads. A city is called necessary if, after removing that city and all its adjacent roads, there exists a pair of other cities that no longer have a route between them. Find all necessary cities.\n\nInput:\n- First line: n m\n- Next m lines: a b, indicating a road between cities a and b (1 <= a,b <= n). There is at most one road between two cities, and no self-loops.\n\nOutput:\n- First print k: the number of necessary cities.\n- Then print k city indices in any order on the next line.\n\nThe graph is connected initially.\n",
+  "examples": [
+    {
+      "input": "5 5\n1 2\n1 4\n2 4\n3 5\n4 5\n",
+      "output": "2\n4 5\n",
+      "explanation": "Removing 4 or 5 disconnects some pair of other cities. No other single city has this effect."
+    }
+  ],
+  "constraints": [
+    "2 ≤ n ≤ 1e5",
+    "1 ≤ m ≤ 2e5",
+    "1 ≤ a,b ≤ n",
+    "Graph is connected initially"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "Consider 3 cities with roads: 1-2, 2-3 (a simple path).\nWhich cities are necessary?",
+      "diagram": "1 -- 2 -- 3",
+      "options": [
+        {
+          "label": "{2}",
+          "isCode": false
+        },
+        {
+          "label": "{1,3}",
+          "isCode": false
+        },
+        {
+          "label": "{2,3}",
+          "isCode": false
+        },
+        {
+          "label": "{}",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Removing 2 disconnects 1 and 3. Removing 1 or 3 leaves 2 and the other city still connected via a single node (no pair to disconnect).",
+      "wrongExplanations": {
+        "1": "Removing an endpoint does not disconnect any other two cities.",
+        "3": "There exists a pair (1,3) disconnected after removing 2."
+      },
+      "hint": "Try removing each city and check if any other two cities become disconnected.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "Consider 3 cities forming a cycle: roads 1-2, 2-3, 3-1.\nWhich cities are necessary?",
+      "diagram": "1\n/ \\\n2---3",
+      "options": [
+        {
+          "label": "{}",
+          "isCode": false
+        },
+        {
+          "label": "{1}",
+          "isCode": false
+        },
+        {
+          "label": "{2}",
+          "isCode": false
+        },
+        {
+          "label": "{1,2}",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Removing any single city leaves a path between the other two cities. So none are necessary.",
+      "wrongExplanations": {
+        "1": "After removing 1, 2 and 3 are still directly connected.",
+        "2": "Symmetric to removing 1."
+      },
+      "hint": "In a triangle, removing one node still keeps the other two connected.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "Graph: cycle 1-2-3-4-1 and an extra road 2-5 (a leaf off 2).\nWhich cities are necessary?",
+      "diagram": "1 -- 2 -- 3\n|         |\n4 ---------\n|\n5 (connected only to 2)",
+      "options": [
+        {
+          "label": "{2}",
+          "isCode": false
+        },
+        {
+          "label": "{1,3}",
+          "isCode": false
+        },
+        {
+          "label": "{2,5}",
+          "isCode": false
+        },
+        {
+          "label": "{}",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Removing 2 isolates 5 from the rest. Removing others keeps the cycle connected and 5 still attached via 2.",
+      "wrongExplanations": {
+        "2": "Removing 5 does not disconnect any other two cities.",
+        "3": "The cycle ensures connectivity when removing 1 or 3."
+      },
+      "hint": "Check what happens to city 5 when removing 2.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "In the definition: a city is necessary if \"there is no route between some other two cities\" after removing it.\nWhich pairs are considered?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "All pairs among the remaining cities (excluding the removed one)",
+          "isCode": false
+        },
+        {
+          "label": "Pairs that include the removed city",
+          "isCode": false
+        },
+        {
+          "label": "Only pairs that were direct neighbors of the removed city",
+          "isCode": false
+        },
+        {
+          "label": "At least one pair including or excluding the removed city",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We consider connectivity among the remaining cities. The removed city is not part of any pair.",
+      "wrongExplanations": {
+        "1": "The removed city is not part of the remaining graph.",
+        "2": "Neighbors are not the only pairs that matter."
+      },
+      "hint": "After removing a city, test connectivity among the remaining nodes only.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Understanding the Problem",
+      "questionText": "Naive idea: For each city, remove it and check if the remaining graph is connected via a traversal.\nWhat is the time complexity of this approach?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n * (n + m))",
+          "isCode": false
+        },
+        {
+          "label": "O(n + m)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(m * (n + m))",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Checking connectivity is O(n+m). Doing it for each city makes it O(n*(n+m)), too slow for n up to 1e5.",
+      "wrongExplanations": {
+        "1": "Single traversal is O(n+m), not per-node repeated.",
+        "2": "You still process edges; m can be large."
+      },
+      "hint": "Multiply the cost of one connectivity check by the number of cities.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "We want a near-linear method. Imagine building a spanning tree by a deep recursive walk and noting edges that go to already visited ancestors.\nWhen is a city u necessary in terms of one of its child subtrees?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "If some child subtree cannot reach any ancestor of u using edges outside the tree",
+          "isCode": false
+        },
+        {
+          "label": "If deg(u) ≤ 1 in the original graph",
+          "isCode": false
+        },
+        {
+          "label": "If there is no cycle passing through u",
+          "isCode": false
+        },
+        {
+          "label": "If u has the highest degree in its component",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "If a child subtree has no alternative route to nodes above u, removing u separates that subtree from the rest.",
+      "wrongExplanations": {
+        "1": "Degree alone doesn’t determine the effect of removal.",
+        "2": "Cycles matter only relative to reconnecting around u."
+      },
+      "hint": "Think about whether the child's subtree has a way to bypass u to connect to earlier nodes.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "In the same recursive tree, what about the starting city (the root of a component)?\nWhen is the root necessary?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "If it has more than one child in the tree",
+          "isCode": false
+        },
+        {
+          "label": "If it has exactly one child in the tree",
+          "isCode": false
+        },
+        {
+          "label": "If it has zero children in the tree",
+          "isCode": false
+        },
+        {
+          "label": "It is never necessary",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Multiple disjoint child subtrees would only be connected through the root; removing it separates them.",
+      "wrongExplanations": {
+        "1": "Exactly one child means the rest stays connected through that child.",
+        "3": "A leaf root cannot separate others."
+      },
+      "hint": "Think how many disjoint child regions the root connects.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Exploring Approaches",
+      "questionText": "To test the condition efficiently during the recursive walk, what information should we track for each city?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Its discovery index and the smallest discovery index reachable from its subtree using one extra edge upwards",
+          "isCode": false
+        },
+        {
+          "label": "Only its degree",
+          "isCode": false
+        },
+        {
+          "label": "Only its parent and depth",
+          "isCode": false
+        },
+        {
+          "label": "Only distances from the start city",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need the visit order and how far upwards a subtree can connect to detect separation.",
+      "wrongExplanations": {
+        "1": "Degree isn’t enough to detect back connections.",
+        "2": "Parent/depth alone doesn’t capture alternative upward edges."
+      },
+      "hint": "We need to compare a subtree’s upward reach against the ancestor’s discovery index.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "Let tin[u] be the index when u is first visited. Let low[u] be the smallest tin reachable from u’s subtree using zero or more tree edges and at most one extra edge upwards.\nWhen u sees a neighbor w that is already visited and is not its parent, how should low[u] be updated?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "low[u] = min(low[u], tin[w])",
+          "isCode": false
+        },
+        {
+          "label": "low[u] = min(low[u], low[w])",
+          "isCode": false
+        },
+        {
+          "label": "low[u] = max(low[u], tin[w])",
+          "isCode": false
+        },
+        {
+          "label": "Do not update low[u] in this case",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "An extra edge to an already visited ancestor allows reaching its discovery index tin[w].",
+      "wrongExplanations": {
+        "1": "low[w] includes subtree info that isn’t traversed via a single upward edge from u.",
+        "3": "We need the minimum reachable index, not maximum."
+      },
+      "hint": "Use the neighbor’s discovery index when the neighbor is an ancestor.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "For a neighbor v that is first visited from u (a tree edge), after returning from v’s subtree, how should low[u] be updated?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "low[u] = min(low[u], low[v])",
+          "isCode": false
+        },
+        {
+          "label": "low[u] = min(low[u], tin[v])",
+          "isCode": false
+        },
+        {
+          "label": "low[u] = max(low[u], low[v])",
+          "isCode": false
+        },
+        {
+          "label": "Do not update low[u] using children",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The child’s subtree may reach an ancestor with a lower discovery index; propagate the minimum upward.",
+      "wrongExplanations": {
+        "1": "tin[v] ignores deeper upward connections discovered in v’s subtree.",
+        "2": "We seek the minimum, not maximum."
+      },
+      "hint": "The child’s subtree can connect upwards; reflect that reach in the parent.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "For a non-root u and its child v in the traversal tree, what condition indicates u is necessary (due to v’s subtree)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "low[v] >= tin[u]",
+          "isCode": false
+        },
+        {
+          "label": "low[v] > tin[v]",
+          "isCode": false
+        },
+        {
+          "label": "low[v] > tin[u] only if deg(u) ≥ 3",
+          "isCode": false
+        },
+        {
+          "label": "tin[v] >= tin[u]",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "If v’s subtree cannot reach any ancestor of u (low[v] >= tin[u]), removing u separates that subtree.",
+      "wrongExplanations": {
+        "1": "Comparing low[v] to tin[v] ignores u’s position.",
+        "3": "Degree threshold is irrelevant to the condition."
+      },
+      "hint": "Compare the subtree’s upward reach against u’s discovery index.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "While scanning neighbors of u, how should we treat the edge to its parent p in the tree?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Skip the edge to p (do not use it to update low[u])",
+          "isCode": false
+        },
+        {
+          "label": "Update low[u] = min(low[u], tin[p])",
+          "isCode": false
+        },
+        {
+          "label": "Treat it like a back edge to update low[u] using low[p]",
+          "isCode": false
+        },
+        {
+          "label": "Skip it only if deg(u) > 1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The edge to the parent is the tree edge we came from and must be ignored for back-edge updates.",
+      "wrongExplanations": {
+        "1": "Using the parent edge would always lower low[u] to tin[p], masking real structure.",
+        "2": "Degree does not affect this rule."
+      },
+      "hint": "We only consider extra edges other than the one we used to enter u.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "What is the correct special case for the root of a traversal component?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Root is necessary if it has more than one child in the tree",
+          "isCode": false
+        },
+        {
+          "label": "Root is necessary if it has at least one child in the tree",
+          "isCode": false
+        },
+        {
+          "label": "Root is necessary only if it has three or more children",
+          "isCode": false
+        },
+        {
+          "label": "Root is never necessary",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Multiple child subtrees are disjoint except through the root; removing it separates them.",
+      "wrongExplanations": {
+        "1": "One child does not split the remaining graph.",
+        "2": "Requiring three is too strict."
+      },
+      "hint": "How many independent child branches does the root connect?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Building the Idea",
+      "questionText": "To be robust (even if a future variant allows multiple components), how should we start the recursive walk?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "From every city that is still unvisited",
+          "isCode": false
+        },
+        {
+          "label": "From city 1 only",
+          "isCode": false
+        },
+        {
+          "label": "From the city with the highest degree",
+          "isCode": false
+        },
+        {
+          "label": "From each neighbor of city 1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Starting from all unvisited cities ensures all components are processed.",
+      "wrongExplanations": {
+        "1": "Starting only at one city can miss other components.",
+        "2": "Degree doesn’t ensure coverage."
+      },
+      "hint": "Think coverage: we want to visit every node regardless of connectivity.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Set up imports and recursion settings.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\nsys.setrecursionlimit(1 << 25)",
+          "isCode": true
+        },
+        {
+          "label": "from sys import stdin\nsetrecursionlimit(1 << 25)",
+          "isCode": true
+        },
+        {
+          "label": "import sys",
+          "isCode": true
+        },
+        {
+          "label": "sys.setrecursionlimit(1 << 25)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need to import sys before calling sys.setrecursionlimit and set a high limit.",
+      "wrongExplanations": {
+        "1": "setrecursionlimit is in sys; importing stdin alone is insufficient.",
+        "3": "sys must be imported before calling its functions."
+      },
+      "hint": "Both import and the limit call are required.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\nsys.setrecursionlimit(1 << 25)",
+      "codeLabel": "Imports and recursion limit"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Read input efficiently and start main function.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def main():\n    data = sys.stdin.read().strip().split()\n    if not data:\n        return\n    it = iter(data)\n    n = int(next(it)); m = int(next(it))",
+          "isCode": true
+        },
+        {
+          "label": "def main():\n    n, m = map(int, sys.stdin.readline().split())\n    it = None",
+          "isCode": true
+        },
+        {
+          "label": "def main():\n    tokens = input().split()\n    n = int(tokens[0]); m = int(tokens[1])",
+          "isCode": true
+        },
+        {
+          "label": "def main():\n    lines = sys.stdin.readlines()\n    n, m = map(int, lines[0].split())\n    it = iter(lines[1:])",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Reading all tokens and using an iterator cleanly parses the large input within time limits.",
+      "wrongExplanations": {
+        "1": "Mixing methods and not parsing all edges makes later code inconsistent.",
+        "2": "Using input() repeatedly can be slower and doesn’t set up an iterator for edges."
+      },
+      "hint": "Use a token iterator over the entire input for speed and simplicity.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def main():\n    data = sys.stdin.read().strip().split()\n    if not data:\n        return\n    it = iter(data)\n    n = int(next(it)); m = int(next(it))",
+      "codeLabel": "Main + input tokens"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Build an adjacency list for an undirected graph (1-based indexing).",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    g = [[] for _ in range(n+1)]\n    for _ in range(m):\n        a = int(next(it)); b = int(next(it))\n        g[a].append(b); g[b].append(a)",
+          "isCode": true
+        },
+        {
+          "label": "    g = [[] for _ in range(n)]\n    for _ in range(m):\n        a = int(next(it)); b = int(next(it))\n        g[a].append(b); g[b].append(a)",
+          "isCode": true
+        },
+        {
+          "label": "    g = [[] for _ in range(n+1)]\n    for _ in range(m):\n        a = int(next(it)); b = int(next(it))\n        g[a].append(b)",
+          "isCode": true
+        },
+        {
+          "label": "    g = [set() for _ in range(n+1)]\n    for _ in range(m):\n        a = int(next(it)); b = int(next(it))\n        g[a].add(b)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Use n+1 for 1-based indices and add both directions for an undirected graph.",
+      "wrongExplanations": {
+        "1": "Size n misses index n, causing errors on city n.",
+        "2": "Missing the reverse edge breaks undirected connectivity."
+      },
+      "hint": "Each undirected edge should be added twice.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    g = [[] for _ in range(n+1)]\n    for _ in range(m):\n        a = int(next(it)); b = int(next(it))\n        g[a].append(b); g[b].append(a)",
+      "codeLabel": "Adjacency list"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Initialize data structures for the traversal: visited flags, discovery indices, low values, necessary flags, and a timer.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    visited = [False]*(n+1)\n    tin = [0]*(n+1)\n    low = [0]*(n+1)\n    is_art = [False]*(n+1)\n    timer = 0",
+          "isCode": true
+        },
+        {
+          "label": "    visited = [False]*n\n    tin = [0]*n\n    low = [0]*n\n    is_art = [False]*n\n    timer = 1",
+          "isCode": true
+        },
+        {
+          "label": "    visited = set()\n    tin = {}\n    low = {}\n    is_art = set()\n    timer = 0",
+          "isCode": true
+        },
+        {
+          "label": "    visited = [0]*(n+1)\n    tin = [None]*(n+1)\n    low = [None]*(n+1)\n    is_art = [0]*(n+1)\n    timer = 0",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Use arrays of size n+1 for 1-based IDs. Timer starts at 0 and increments on visits.",
+      "wrongExplanations": {
+        "1": "Arrays sized n will fail for city n.",
+        "3": "Inconsistent types complicate operations and comparisons."
+      },
+      "hint": "Keep 1-based indexing consistent across all arrays.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    visited = [False]*(n+1)\n    tin = [0]*(n+1)\n    low = [0]*(n+1)\n    is_art = [False]*(n+1)\n    timer = 0",
+      "codeLabel": "State arrays"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Define the recursive function that performs the deep walk and initializes per-node state.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    def dfs(u, p):\n        nonlocal timer\n        visited[u] = True\n        timer += 1\n        tin[u] = low[u] = timer\n        children = 0",
+          "isCode": true
+        },
+        {
+          "label": "    def dfs(u, p):\n        visited[u] = True\n        tin[u] = timer\n        low[u] = 0\n        children = 0",
+          "isCode": true
+        },
+        {
+          "label": "    def dfs(u, p):\n        nonlocal timer\n        visited[u] = True\n        tin[u] = low[u] = timer\n        children = 0",
+          "isCode": true
+        },
+        {
+          "label": "    def dfs(u):\n        nonlocal timer\n        visited[u] = True\n        timer += 1\n        tin[u] = low[u] = timer\n        children = 0",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We must increment the timer on entry, set tin and low to that value, and keep track of children. The parent parameter is needed.",
+      "wrongExplanations": {
+        "1": "Missing timer increment and low initialization are incorrect.",
+        "2": "Not incrementing timer causes duplicate discovery indices."
+      },
+      "hint": "Increment timer, set both tin and low to the new time, and accept the parent parameter.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    def dfs(u, p):\n        nonlocal timer\n        visited[u] = True\n        timer += 1\n        tin[u] = low[u] = timer\n        children = 0",
+      "codeLabel": "DFS header and init"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Fill the neighbor loop: skip the edge to parent, update low for already-visited neighbors, recurse on unvisited neighbors, and check the separation condition for non-root.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "        for v in g[u]:\n            if v == p:\n                continue\n            if visited[v]:\n                low[u] = min(low[u], tin[v])\n            else:\n                dfs(v, u)\n                low[u] = min(low[u], low[v])\n                if low[v] >= tin[u] and p != -1:\n                    is_art[u] = True\n                children += 1",
+          "isCode": true
+        },
+        {
+          "label": "        for v in g[u]:\n            if visited[v]:\n                low[u] = min(low[u], low[v])\n            else:\n                dfs(v, u)\n                low[u] = min(low[u], tin[v])\n                if low[v] > tin[v]:\n                    is_art[u] = True\n                children += 1",
+          "isCode": true
+        },
+        {
+          "label": "        for v in g[u]:\n            if v == p:\n                low[u] = min(low[u], tin[v])\n            if visited[v]:\n                continue\n            dfs(v, u)\n            low[u] = min(low[u], low[v])\n            if low[v] > tin[u] and p == -1:\n                is_art[u] = True\n            children += 1",
+          "isCode": true
+        },
+        {
+          "label": "        for v in g[u]:\n            if v != p and visited[v]:\n                low[u] = max(low[u], tin[v])\n            elif not visited[v]:\n                dfs(v, u)\n                if low[v] <= tin[u]:\n                    is_art[u] = True\n                low[u] = max(low[u], low[v])\n                children += 1",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Skip the parent edge, use tin for already-visited neighbors, propagate low from children, and mark non-root u if low[v] >= tin[u].",
+      "wrongExplanations": {
+        "1": "Mixes tin/low updates and uses the wrong condition for separation.",
+        "2": "Updates low via the parent edge and uses the root condition incorrectly.",
+        "3": "Uses max instead of min and an inverted condition."
+      },
+      "hint": "Be careful to use tin for back edges and low for child returns; compare low[v] with tin[u].",
+      "isCodeBuilding": true,
+      "codeSnippet": "        for v in g[u]:\n            if v == p:\n                continue\n            if visited[v]:\n                low[u] = min(low[u], tin[v])\n            else:\n                dfs(v, u)\n                low[u] = min(low[u], low[v])\n                if low[v] >= tin[u] and p != -1:\n                    is_art[u] = True\n                children += 1",
+      "codeLabel": "Neighbor processing"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "Handle the root special case after processing all neighbors.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "        if p == -1 and children > 1:\n            is_art[u] = True",
+          "isCode": true
+        },
+        {
+          "label": "        if p != -1 and children > 1:\n            is_art[u] = True",
+          "isCode": true
+        },
+        {
+          "label": "        if p == -1 and children >= 1:\n            is_art[u] = True",
+          "isCode": true
+        },
+        {
+          "label": "        if p == -1 and children > 2:\n            is_art[u] = True",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Only the root with more than one child separates the graph into multiple pieces.",
+      "wrongExplanations": {
+        "1": "This would incorrectly mark non-roots using the root’s child count.",
+        "2": "A single child does not split the remaining graph."
+      },
+      "hint": "More than one child is the threshold for the root.",
+      "isCodeBuilding": true,
+      "codeSnippet": "        if p == -1 and children > 1:\n            is_art[u] = True",
+      "codeLabel": "Root special case"
+    },
+    {
+      "id": "q22",
+      "phase": "Writing the Code",
+      "questionText": "Start the traversal from all unvisited cities to cover the entire graph.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    for u in range(1, n+1):\n        if not visited[u]:\n            dfs(u, -1)",
+          "isCode": true
+        },
+        {
+          "label": "    dfs(1, -1)",
+          "isCode": true
+        },
+        {
+          "label": "    for u in range(n):\n        if not visited[u]:\n            dfs(u, -1)",
+          "isCode": true
+        },
+        {
+          "label": "    for u in range(1, n+1):\n        dfs(u, -1)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Loop over 1..n and start the walk from unvisited cities only.",
+      "wrongExplanations": {
+        "1": "Assumes a single component and risks missing others.",
+        "2": "This uses 0-based indices; our arrays are 1-based."
+      },
+      "hint": "Guard the call by the visited flag.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    for u in range(1, n+1):\n        if not visited[u]:\n            dfs(u, -1)",
+      "codeLabel": "Start traversal"
+    },
+    {
+      "id": "q23",
+      "phase": "Writing the Code",
+      "questionText": "Collect and print the result, and add the entry point to run main().",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    res = [i for i in range(1, n+1) if is_art[i]]\n    print(len(res))\n    if res:\n        print(*res)\n\nif __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "    res = [i for i in range(n) if is_art[i]]\n    print(len(res))\n    print(*res)\n\nif __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "    res = []\n    for i in range(1, n+1):\n        if is_art[i]:\n            print(i)\n\nif __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "    res = sorted([i for i in range(1, n+1) if is_art[i]])\n    print(*res)\n\nif __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Print the count first, then the list if non-empty. Maintain 1-based indices. Add the standard entry point.",
+      "wrongExplanations": {
+        "1": "Mixes 0-based with 1-based indices and always prints the list even if empty on the same line.",
+        "3": "The required output prints the count first on its own line."
+      },
+      "hint": "First line is the count; second line is the list, if any.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    res = [i for i in range(1, n+1) if is_art[i]]\n    print(len(res))\n    if res:\n        print(*res)\n\nif __name__ == \"__main__\":\n    main()",
+      "codeLabel": "Output + main guard"
+    },
+    {
+      "id": "q24",
+      "phase": "Verifying the Solution",
+      "questionText": "Run your reasoning on the sample input:\n5 5\n1 2\n1 4\n2 4\n3 5\n4 5\nWhich cities are necessary?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "{4,5}",
+          "isCode": false
+        },
+        {
+          "label": "{1,4,5}",
+          "isCode": false
+        },
+        {
+          "label": "{2,4}",
+          "isCode": false
+        },
+        {
+          "label": "{}",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Removing 4 disconnects {1,2} from {3,5}; removing 5 disconnects 3 from others. No other removals break connectivity among remaining cities.",
+      "wrongExplanations": {
+        "1": "Removing 1 keeps others connected via 2-4-5-3.",
+        "2": "2 alone does not disconnect the remaining cities."
+      },
+      "hint": "Check removal of 4 and 5 individually.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Verifying the Solution",
+      "questionText": "Consider a star: 1 connected to 2,3,4,5 (and no other edges). Which cities are necessary?",
+      "diagram": "   2\n   |\n4--1--3\n   |\n   5",
+      "options": [
+        {
+          "label": "{1}",
+          "isCode": false
+        },
+        {
+          "label": "{2,3,4,5}",
+          "isCode": false
+        },
+        {
+          "label": "{1,2}",
+          "isCode": false
+        },
+        {
+          "label": "{}",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Removing 1 disconnects leaves. Removing any leaf still leaves no pair of other cities disconnected.",
+      "wrongExplanations": {
+        "1": "Leaves are not necessary; only the center connects them.",
+        "3": "Only city 1 breaks connectivity among the remaining cities."
+      },
+      "hint": "Does removing a leaf disconnect any other two leaves?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the time complexity of the implemented approach in terms of n cities and m roads?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n + m)",
+          "isCode": false
+        },
+        {
+          "label": "O(n * (n + m))",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n + m log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(m^2)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each road and city is processed a constant number of times.",
+      "wrongExplanations": {
+        "1": "That was the naive repeated-check approach.",
+        "2": "No sorting or priority structures are used."
+      },
+      "hint": "Count how many times each edge and node is visited.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q27",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the auxiliary space complexity?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n + m)",
+          "isCode": false
+        },
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(m)",
+          "isCode": false
+        },
+        {
+          "label": "O(1)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Adjacency lists use O(n+m); arrays (visited, tin, low, flags) add O(n).",
+      "wrongExplanations": {
+        "1": "Ignoring the adjacency list underestimates space.",
+        "3": "Both nodes and edges are stored."
+      },
+      "hint": "Consider both graph storage and per-node arrays.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q28",
+      "phase": "Analyzing Complexity",
+      "questionText": "Edge case: n=2, m=1 (a single road 1-2). Are there any necessary cities?",
+      "diagram": "1 -- 2",
+      "options": [
+        {
+          "label": "None",
+          "isCode": false
+        },
+        {
+          "label": "Both 1 and 2",
+          "isCode": false
+        },
+        {
+          "label": "Only 1",
+          "isCode": false
+        },
+        {
+          "label": "Only 2",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "After removing one city, only one city remains; there is no pair of other cities to become disconnected.",
+      "wrongExplanations": {
+        "1": "The definition requires two other cities to be disconnected.",
+        "2": "Symmetric graph; neither is necessary."
+      },
+      "hint": "Check the definition carefully for \"some other two cities\".",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\nsys.setrecursionlimit(1 << 25)",
+    "def main():\n    data = sys.stdin.read().strip().split()\n    if not data:\n        return\n    it = iter(data)\n    n = int(next(it)); m = int(next(it))",
+    "    g = [[] for _ in range(n+1)]\n    for _ in range(m):\n        a = int(next(it)); b = int(next(it))\n        g[a].append(b); g[b].append(a)",
+    "    visited = [False]*(n+1)\n    tin = [0]*(n+1)\n    low = [0]*(n+1)\n    is_art = [False]*(n+1)\n    timer = 0",
+    "    def dfs(u, p):\n        nonlocal timer\n        visited[u] = True\n        timer += 1\n        tin[u] = low[u] = timer\n        children = 0",
+    "        for v in g[u]:\n            if v == p:\n                continue\n            if visited[v]:\n                low[u] = min(low[u], tin[v])\n            else:\n                dfs(v, u)\n                low[u] = min(low[u], low[v])\n                if low[v] >= tin[u] and p != -1:\n                    is_art[u] = True\n                children += 1",
+    "        if p == -1 and children > 1:\n            is_art[u] = True",
+    "    for u in range(1, n+1):\n        if not visited[u]:\n            dfs(u, -1)",
+    "    res = [i for i in range(1, n+1) if is_art[i]]\n    print(len(res))\n    if res:\n        print(*res)\n\nif __name__ == \"__main__\":\n    main()"
+  ],
+  "reasoningChain": [
+    {
+      "question": "What does it mean for a city to be necessary, and how do removals affect connectivity among remaining cities?",
+      "insight": "A city is necessary if removing it disconnects at least one pair of other cities; the removed city itself is excluded from connectivity checks."
+    },
+    {
+      "question": "Why is removing each city and rechecking connectivity too slow for large n and m?",
+      "insight": "That approach costs O(n*(n+m)); we need a single near-linear pass."
+    },
+    {
+      "question": "How can a single recursive walk reveal whether removing a city disconnects child subtrees?",
+      "insight": "By building a tree of first visits and noting extra edges to ancestors, we can detect when a child's subtree lacks alternative paths upward."
+    },
+    {
+      "question": "What per-node values should we track during the walk to test separations?",
+      "insight": "Track discovery index tin[u] and the smallest discovery index reachable from u’s subtree (low[u])."
+    },
+    {
+      "question": "What is the condition for non-root cities and the special rule for roots?",
+      "insight": "Non-root u is necessary if any child v has low[v] >= tin[u]; a root is necessary if it has more than one child."
+    },
+    {
+      "question": "What are key implementation details to avoid mistakes?",
+      "insight": "Skip the parent edge when updating, update low[u] with tin[w] for already-visited neighbors, propagate low from children, and start from all unvisited cities."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1437,
+    "output_tokens": 17722,
+    "input_cost": 0.001796,
+    "output_cost": 0.17722,
+    "total_cost": 0.179016
+  }
+}

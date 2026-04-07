@@ -1,0 +1,954 @@
+{
+  "id": "reversals-and-sums-implicit-tree",
+  "title": "Reversals and Sums",
+  "difficulty": "hard",
+  "tags": [
+    "advanced"
+  ],
+  "estimatedMinutes": 90,
+  "language": "python",
+  "description": "You are given an array of n integers and m operations. Each operation is either:\n- reverse a subarray [a, b]\n- compute the sum of values in a subarray [a, b]\n\nIndices are 1-based. For each sum query, print the result.",
+  "examples": [
+    {
+      "input": "8 3\n2 1 3 4 5 3 4 4\n2 2 4\n1 3 6\n2 2 4\n",
+      "output": "8\n9\n",
+      "explanation": "Initial array: [2,1,3,4,5,3,4,4]. Sum 2..4 = 1+3+4 = 8. Reverse 3..6 -> [2,1,3,5,4,3,4,4]. Sum 2..4 = 1+3+5 = 9."
+    }
+  ],
+  "constraints": [
+    "1 ≤ n ≤ 2⋅10^5",
+    "1 ≤ m ≤ 10^5",
+    "0 ≤ x_i ≤ 10^9",
+    "1 ≤ a ≤ b ≤ n"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "Given the array [2,1,3,4,5,3,4,4], what is the result of the sum query on the range [2,4] (1-based)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "6",
+          "isCode": false
+        },
+        {
+          "label": "7",
+          "isCode": false
+        },
+        {
+          "label": "8",
+          "isCode": false
+        },
+        {
+          "label": "9",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Positions 2..4 are [1,3,4], sum is 8. Watch the 1-based indexing.",
+      "wrongExplanations": {
+        "3": "9 would be the sum if the middle value were 5 instead of 4."
+      },
+      "hint": "Add elements at indices 2, 3, and 4.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "From the same array, after reversing the subarray [3,6], what is the sum on [2,4]?",
+      "diagram": "Start: [2,1,3,4,5,3,4,4]\nReverse 3..6: [2,1,3,5,4,3,4,4]\nNow sum 2..4?",
+      "options": [
+        {
+          "label": "7",
+          "isCode": false
+        },
+        {
+          "label": "8",
+          "isCode": false
+        },
+        {
+          "label": "9",
+          "isCode": false
+        },
+        {
+          "label": "10",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "After reversal, positions 2..4 are [1,3,5], sum = 9.",
+      "wrongExplanations": {
+        "1": "8 is the value before reversing the subarray."
+      },
+      "hint": "Be careful: 1-based indices and reversing only 3..6.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "If you reverse the entire array [1..n] and then reverse [1..n] again, what happens to the array?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "It stays reversed after two reversals.",
+          "isCode": false
+        },
+        {
+          "label": "It becomes the original array.",
+          "isCode": false
+        },
+        {
+          "label": "Only the first and last elements swap back.",
+          "isCode": false
+        },
+        {
+          "label": "The middle portion remains reversed.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Reversing twice restores the original order.",
+      "wrongExplanations": {
+        "0": "Reversing twice cancels out the effect.",
+        "2": "All positions are restored, not only the ends."
+      },
+      "hint": "Try a small example of length 3.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "What is the effect of reversing a subarray [a,a] of length 1, and what should a sum query [a,a] return?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Reversal changes nothing; sum [a,a] returns the element at a.",
+          "isCode": false
+        },
+        {
+          "label": "Reversal swaps it with a neighbor; sum [a,a] returns 0.",
+          "isCode": false
+        },
+        {
+          "label": "Reversal deletes the element; sum [a,a] returns the previous prefix sum.",
+          "isCode": false
+        },
+        {
+          "label": "Reversal inverts the sign; sum [a,a] returns its negative.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "A single element reversal is a no-op; a single-element sum returns that value.",
+      "wrongExplanations": {
+        "1": "Reversal doesn't swap with neighbors; it only reverses within the selected range."
+      },
+      "hint": "Length-1 sequences are identical to their reverse.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Exploring Approaches",
+      "questionText": "Why is a direct approach that reverses by swapping elements one by one and sums by looping through the range too slow here?",
+      "diagram": "n up to 2e5, m up to 1e5",
+      "options": [
+        {
+          "label": "Because reversing needs extra memory for a copy of the entire array.",
+          "isCode": false
+        },
+        {
+          "label": "Because the per-operation cost can be proportional to the subarray length, leading to ~2e10 steps in worst-case.",
+          "isCode": false
+        },
+        {
+          "label": "Because addition is not associative.",
+          "isCode": false
+        },
+        {
+          "label": "Because reversing changes array size.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Doing O(length) work per operation can cause ~n*m operations; too slow for given limits.",
+      "wrongExplanations": {
+        "0": "In-place reversal doesn't need full-array extra memory.",
+        "2": "Addition is associative; the issue is time, not math properties."
+      },
+      "hint": "Estimate worst-case operations if each query touches O(n) elements.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "Can maintaining a static prefix-sum array answer sums fast after many reversals without extra work?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes; prefix sums remain valid under reversals.",
+          "isCode": false
+        },
+        {
+          "label": "Yes; because reversing does not affect sums.",
+          "isCode": false
+        },
+        {
+          "label": "No; reversals change positions, so the prefix sums would need to be updated in linear time.",
+          "isCode": false
+        },
+        {
+          "label": "No; but we can rebuild the array after each query.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Reversals reorder elements; static prefix sums become invalid unless updated, which is too slow.",
+      "wrongExplanations": {
+        "0": "Prefix sums depend on positions. Reordering breaks them."
+      },
+      "hint": "Does the element formerly at index i stay at i after a reversal?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "We need a representation that supports fast range operations. Which operation combo will let us reverse [a,b] and get sum [a,b] efficiently?",
+      "diagram": "Think in terms of splitting and rejoining a sequence.",
+      "options": [
+        {
+          "label": "Ability to circularly rotate the array by 1 step repeatedly.",
+          "isCode": false
+        },
+        {
+          "label": "Ability to split the sequence at positions, flip a whole block in one step, and then join parts while keeping sums.",
+          "isCode": false
+        },
+        {
+          "label": "Ability to sort the array after each reversal.",
+          "isCode": false
+        },
+        {
+          "label": "Ability to rebuild a full prefix-sum table after each operation.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "If we can cut into three parts, flip the middle block as a unit, and rejoin, both operations can be fast.",
+      "wrongExplanations": {
+        "0": "Rotations don't directly support arbitrary subarray reversal.",
+        "3": "Rebuilding a full prefix table per operation is too slow."
+      },
+      "hint": "Isolate [a,b] without touching internal elements one by one.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Building the Idea",
+      "questionText": "Suppose each node stores the sum of its substructure and a boolean flag meaning \"this substructure should be considered reversed.\" What should happen when we apply this flag to a node?",
+      "diagram": "node.rev = True",
+      "options": [
+        {
+          "label": "Swap its left and right children; toggle the flag on its children; keep the stored sum the same.",
+          "isCode": false
+        },
+        {
+          "label": "Negate all values in the substructure and clear the flag.",
+          "isCode": false
+        },
+        {
+          "label": "Set sum to zero until recomputed from scratch.",
+          "isCode": false
+        },
+        {
+          "label": "Only toggle the flag at the node; never touch children.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Reversal swaps children and propagates a toggle; sums are order-independent so they remain valid.",
+      "wrongExplanations": {
+        "1": "Reversal does not change values themselves.",
+        "3": "Children must eventually be marked so the reversal is applied throughout."
+      },
+      "hint": "Reversing order leaves sums intact but flips child positions.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "When a node has the reverse flag set, do we need to change the stored sum at that node immediately?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, add the children's sums twice to compensate.",
+          "isCode": false
+        },
+        {
+          "label": "No, the sum over a set of values is independent of their order.",
+          "isCode": false
+        },
+        {
+          "label": "Yes, subtract the current sum from the total array sum.",
+          "isCode": false
+        },
+        {
+          "label": "Yes, because reversing changes element values.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Reordering doesn't change sums; we only need to ensure the flag is applied before accessing children.",
+      "wrongExplanations": {
+        "0": "There's no reason to double-count children.",
+        "3": "Values do not change under reversal."
+      },
+      "hint": "Consider sum([a,b,c]) == sum([c,b,a]).",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "Define split(root, k) as splitting the sequence into two parts: first k elements and the rest. For k=0 and k=size, what should split return?",
+      "diagram": "L has first k elements, R has the rest.",
+      "options": [
+        {
+          "label": "For k=0: (None, root); for k=size: (root, None).",
+          "isCode": false
+        },
+        {
+          "label": "For k=0: (root, None); for k=size: (None, root).",
+          "isCode": false
+        },
+        {
+          "label": "Always (None, root).",
+          "isCode": false
+        },
+        {
+          "label": "Always (root, None).",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "First k=0 means nothing on the left; k=size means everything on the left.",
+      "wrongExplanations": {
+        "1": "This swaps the meanings of left and right parts.",
+        "2": "Only true if k=0; not general."
+      },
+      "hint": "Left should contain exactly k elements.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "To reverse [a,b] using splits and joins, which sequence of operations is correct (1-based indexing)?",
+      "diagram": "root -> split at a-1 -> split at (b-a+1) on the right part",
+      "options": [
+        {
+          "label": "left, rest = split(root, a-1); mid, right = split(rest, b-a+1); toggle mid; root = join(left, join(mid, right))",
+          "isCode": false
+        },
+        {
+          "label": "left, rest = split(root, a); mid, right = split(rest, b-a); toggle mid; root = join(left, join(mid, right))",
+          "isCode": false
+        },
+        {
+          "label": "mid, rest = split(root, b); left, mid = split(mid, a-1); toggle mid; root = join(left, join(mid, rest))",
+          "isCode": false
+        },
+        {
+          "label": "left, mid = split(root, a-1); right, rest = split(root, b-a+1); toggle right; root = join(left, join(right, rest))",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "First cut off first a-1, then isolate b-a+1 elements, toggle their reverse flag, and rejoin in the same order.",
+      "wrongExplanations": {
+        "1": "Off-by-one errors misplace boundaries.",
+        "3": "Second split must act on the remainder, not the original root."
+      },
+      "hint": "Isolate exactly b-a+1 elements starting after a-1.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "For sum query [a,b], after isolating the middle block with two splits, what should we do to maintain structure?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Read the stored sum of the middle block and then rejoin left, middle, and right back in order.",
+          "isCode": false
+        },
+        {
+          "label": "Iterate through all elements in the middle block to sum and discard the block.",
+          "isCode": false
+        },
+        {
+          "label": "Swap left and right blocks before rejoining.",
+          "isCode": false
+        },
+        {
+          "label": "Only read the sum and forget to rejoin.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Use the aggregate sum and restore the original sequence by rejoining.",
+      "wrongExplanations": {
+        "3": "You must rejoin; otherwise later operations see a broken structure."
+      },
+      "hint": "Aggregates are stored; avoid iterating element-wise.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Writing the Code",
+      "questionText": "Set up imports and recursion limit for deep recursion in joins/splits.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\n\nsys.setrecursionlimit(1 << 25)",
+          "isCode": true
+        },
+        {
+          "label": "import sys\nimport random\n\nsys.setrecursionlimit(1 << 25)",
+          "isCode": true
+        },
+        {
+          "label": "import sys, random\n\nsys.setrecursionlimit(1000)",
+          "isCode": true
+        },
+        {
+          "label": "from random import randint\nimport sys\n\nsys.setrecursionlimit(1 << 25)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "We need both sys and random, and a high recursion limit. The chosen snippet provides both imports and a safe limit.",
+      "wrongExplanations": {
+        "0": "Missing random import leads to NameError when generating priorities.",
+        "2": "Recursion limit 1000 risks RecursionError even for moderate depth.",
+        "3": "Node code uses random.randint, so importing randint alone won't work unless referenced correctly."
+      },
+      "hint": "We'll construct nodes using a random function later.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\nimport random\n\nsys.setrecursionlimit(1 << 25)",
+      "codeLabel": "Imports/limits"
+    },
+    {
+      "id": "q14",
+      "phase": "Writing the Code",
+      "questionText": "Define the node structure and small helpers for size and sum.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "class Node:\n    __slots__ = ('val', 'prio', 'left', 'right', 'size', 'sum', 'rev')\n    def __init__(self, val):\n        self.val = val\n        self.prio = random.randint(1, 1 << 30)\n        self.left = None\n        self.right = None\n        self.size = 1\n        self.sum = val\n        self.rev = False\n\ndef sz(t):\n    return t.size if t else 0\n\ndef sm(t):\n    return t.sum if t else 0",
+          "isCode": true
+        },
+        {
+          "label": "class Node:\n    def __init__(self, val):\n        self.val = val\n        self.left = None\n        self.right = None\n        self.size = 0\n        self.sum = 0\n        self.rev = True\n\ndef sz(t):\n    return 0\n\ndef sm(t):\n    return 0",
+          "isCode": true
+        },
+        {
+          "label": "class Node:\n    __slots__ = ('val', 'prio', 'left', 'right')\n    def __init__(self, val):\n        self.val = val\n        self.prio = random.randint(1, 1 << 30)\n        self.left = None\n        self.right = None\n\ndef sz(t):\n    return t.size\n\ndef sm(t):\n    return t.sum",
+          "isCode": true
+        },
+        {
+          "label": "class Node:\n    __slots__ = ('val', 'prio', 'left', 'right', 'rev')\n    def __init__(self, val):\n        self.val = val\n        self.prio = random.random()\n        self.left = None\n        self.right = None\n        self.rev = False\n\ndef sz(t):\n    return t.size if t else 0\n\ndef sm(t):\n    return t.sum if t else 0",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We track value, random priority, children, size, sum, and reverse flag. Helpers return 0 on None.",
+      "wrongExplanations": {
+        "1": "size and sum must initialize to 1 and val. rev default shouldn't be True.",
+        "2": "Missing size/sum fields and helpers would crash.",
+        "3": "random.random() yields float priorities; ints are fine, but size/sum fields are missing."
+      },
+      "hint": "Initialize size and sum consistently for a single node.",
+      "isCodeBuilding": true,
+      "codeSnippet": "class Node:\n    __slots__ = ('val', 'prio', 'left', 'right', 'size', 'sum', 'rev')\n    def __init__(self, val):\n        self.val = val\n        self.prio = random.randint(1, 1 << 30)\n        self.left = None\n        self.right = None\n        self.size = 1\n        self.sum = val\n        self.rev = False\n\ndef sz(t):\n    return t.size if t else 0\n\ndef sm(t):\n    return t.sum if t else 0",
+      "codeLabel": "Node + helpers"
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Write functions to recompute a node’s size/sum from children and to apply the reverse flag to a node.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def recalc(t):\n    if t:\n        t.size = 1 + sz(t.left) + sz(t.right)\n        t.sum = t.val + sm(t.left) + sm(t.right)\n\ndef push(t):\n    if t and t.rev:\n        t.rev = False\n        t.left, t.right = t.right, t.left\n        if t.left:\n            t.left.rev ^= True\n        if t.right:\n            t.right.rev ^= True",
+          "isCode": true
+        },
+        {
+          "label": "def recalc(t):\n    if t:\n        t.size = sz(t.left) + sz(t.right)\n        t.sum = sm(t.left) + sm(t.right)\n\ndef push(t):\n    if t and t.rev:\n        t.rev = False\n        if t.left:\n            t.left.rev = False\n        if t.right:\n            t.right.rev = False",
+          "isCode": true
+        },
+        {
+          "label": "def recalc(t):\n    if t:\n        t.size = 1 + sz(t.left) + sz(t.right)\n        t.sum = sm(t.left) + sm(t.right)\n\ndef push(t):\n    if t and t.rev:\n        t.left, t.right = t.right, t.left",
+          "isCode": true
+        },
+        {
+          "label": "def recalc(t):\n    pass\n\ndef push(t):\n    if t and t.rev:\n        t.rev = False\n        t.sum = -t.sum",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "recalc includes the node’s own value; push swaps children, toggles their flags, and clears the flag.",
+      "wrongExplanations": {
+        "2": "sum must include t.val. push must also toggle children and clear the flag.",
+        "1": "size/sum must include the node; push must propagate reversal, not clear children’s flags."
+      },
+      "hint": "Order changes, values do not; sums remain intact under push.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def recalc(t):\n    if t:\n        t.size = 1 + sz(t.left) + sz(t.right)\n        t.sum = t.val + sm(t.left) + sm(t.right)\n\ndef push(t):\n    if t and t.rev:\n        t.rev = False\n        t.left, t.right = t.right, t.left\n        if t.left:\n            t.left.rev ^= True\n        if t.right:\n            t.right.rev ^= True",
+      "codeLabel": "recalc + push"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Implement join of two sequences that preserves order and maintains aggregates.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def merge(a, b):\n    if not a or not b:\n        return a or b\n    push(a)\n    push(b)\n    if a.prio < b.prio:\n        a.right = merge(a.right, b)\n        recalc(a)\n        return a\n    else:\n        b.left = merge(a, b.left)\n        recalc(b)\n        return b",
+          "isCode": true
+        },
+        {
+          "label": "def merge(a, b):\n    if not a:\n        return b\n    if not b:\n        return a\n    if a.prio < b.prio:\n        a.right = merge(a.right, b)\n        return a\n    else:\n        b.left = merge(a, b.left)\n        return b",
+          "isCode": true
+        },
+        {
+          "label": "def merge(a, b):\n    if not a or not b:\n        return b or a\n    push(a)\n    push(b)\n    if a.prio > b.prio:\n        a.right = merge(a.right, b)\n        recalc(a)\n        return a\n    else:\n        b.left = merge(a, b.left)\n        recalc(b)\n        return b",
+          "isCode": true
+        },
+        {
+          "label": "def merge(a, b):\n    return a if a else b",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We must push flags before using children and recalc after linking. The chosen version does both correctly.",
+      "wrongExplanations": {
+        "1": "Missing push and recalc leads to stale structure and wrong sums.",
+        "2": "Swapping the comparison changes the balance policy and can skew the structure badly."
+      },
+      "hint": "Remember to apply pending flags before choosing branches.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def merge(a, b):\n    if not a or not b:\n        return a or b\n    push(a)\n    push(b)\n    if a.prio < b.prio:\n        a.right = merge(a.right, b)\n        recalc(a)\n        return a\n    else:\n        b.left = merge(a, b.left)\n        recalc(b)\n        return b",
+      "codeLabel": "merge"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Implement split(root, k) so the left part has exactly k elements.",
+      "diagram": "L = first k elements, R = remaining",
+      "options": [
+        {
+          "label": "def split(t, k):\n    # returns (L, R) where L has first k elements\n    if not t:\n        return (None, None)\n    push(t)\n    if sz(t.left) >= k:\n        L, R = split(t.left, k)\n        t.left = R\n        recalc(t)\n        return (L, t)\n    else:\n        L, R = split(t.right, k - sz(t.left) - 1)\n        t.right = L\n        recalc(t)\n        return (t, R)",
+          "isCode": true
+        },
+        {
+          "label": "def split(t, k):\n    if not t:\n        return (None, None)\n    if sz(t.left) > k:\n        L, R = split(t.left, k)\n        t.left = R\n        return (L, t)\n    else:\n        L, R = split(t.right, k - sz(t.left))\n        t.right = L\n        return (t, R)",
+          "isCode": true
+        },
+        {
+          "label": "def split(t, k):\n    if not t:\n        return (None, None)\n    push(t)\n    if sz(t.left) >= k:\n        L, R = split(t.left, k)\n        t.left = R\n        return (L, t)\n    else:\n        L, R = split(t.right, k - sz(t.left))\n        t.right = L\n        return (t, R)",
+          "isCode": true
+        },
+        {
+          "label": "def split(t, k):\n    return (t, None)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We push pending flags, use sz(left) to decide and adjust k by left size and the current node. Recompute aggregates after rewiring.",
+      "wrongExplanations": {
+        "2": "Off-by-one bug: the right recursive call must subtract 1 for the current node.",
+        "1": "Missing push and off-by-one errors cause incorrect splits."
+      },
+      "hint": "When going right, you consume left size + 1 (current node).",
+      "isCodeBuilding": true,
+      "codeSnippet": "def split(t, k):\n    # returns (L, R) where L has first k elements\n    if not t:\n        return (None, None)\n    push(t)\n    if sz(t.left) >= k:\n        L, R = split(t.left, k)\n        t.left = R\n        recalc(t)\n        return (L, t)\n    else:\n        L, R = split(t.right, k - sz(t.left) - 1)\n        t.right = L\n        recalc(t)\n        return (t, R)",
+      "codeLabel": "split"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Build the initial structure from the input array.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def build(arr):\n    root = None\n    for x in arr:\n        root = merge(root, Node(x))\n    return root",
+          "isCode": true
+        },
+        {
+          "label": "def build(arr):\n    root = None\n    for x in arr:\n        if not root:\n            root = Node(x)\n        else:\n            root.right = Node(x)\n    return root",
+          "isCode": true
+        },
+        {
+          "label": "def build(arr):\n    return None",
+          "isCode": true
+        },
+        {
+          "label": "def build(arr):\n    root = None\n    for x in sorted(arr):\n        root = merge(root, Node(x))\n    return root",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Sequentially joining nodes with merge preserves order and maintains aggregates.",
+      "wrongExplanations": {
+        "1": "Linking to right without recalculation/joins breaks invariants.",
+        "4": "Sorting destroys the original order; reversals/sums must respect input order."
+      },
+      "hint": "Use the same join used for reassembly.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def build(arr):\n    root = None\n    for x in arr:\n        root = merge(root, Node(x))\n    return root",
+      "codeLabel": "build"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Implement the range reverse and range sum operations using two splits each.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def reverse_range(root, l, r):\n    left, rest = split(root, l - 1)\n    mid, right = split(rest, r - l + 1)\n    if mid:\n        mid.rev ^= True\n    return merge(left, merge(mid, right))\n\ndef sum_range(root, l, r):\n    left, rest = split(root, l - 1)\n    mid, right = split(rest, r - l + 1)\n    ans = sm(mid)\n    root = merge(left, merge(mid, right))\n    return ans, root",
+          "isCode": true
+        },
+        {
+          "label": "def reverse_range(root, l, r):\n    left, rest = split(root, l)\n    mid, right = split(rest, r - l)\n    if mid:\n        mid.rev ^= True\n    return merge(left, merge(mid, right))\n\ndef sum_range(root, l, r):\n    left, rest = split(root, l)\n    mid, right = split(rest, r - l)\n    ans = sm(mid)\n    return ans, merge(left, merge(mid, right))",
+          "isCode": true
+        },
+        {
+          "label": "def reverse_range(root, l, r):\n    mid, rest = split(root, r)\n    left, mid = split(mid, l)\n    if mid:\n        mid.rev ^= True\n    return merge(left, merge(mid, rest))\n\ndef sum_range(root, l, r):\n    left, mid = split(root, l - 1)\n    mid, right = split(mid, r)\n    ans = sm(mid)\n    root = merge(left, merge(mid, right))\n    return ans, root",
+          "isCode": true
+        },
+        {
+          "label": "def reverse_range(root, l, r):\n    return root\n\ndef sum_range(root, l, r):\n    return 0, root",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Split off l-1, then take r-l+1, toggle the middle’s reverse flag, and rejoin. For sum, read mid’s sum and rejoin.",
+      "wrongExplanations": {
+        "1": "Off-by-one errors in split sizes will target wrong elements.",
+        "2": "The sequences of splits are inconsistent and misordered."
+      },
+      "hint": "Be consistent with k = l-1 and length = r-l+1.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def reverse_range(root, l, r):\n    left, rest = split(root, l - 1)\n    mid, right = split(rest, r - l + 1)\n    if mid:\n        mid.rev ^= True\n    return merge(left, merge(mid, right))\n\ndef sum_range(root, l, r):\n    left, rest = split(root, l - 1)\n    mid, right = split(rest, r - l + 1)\n    ans = sm(mid)\n    root = merge(left, merge(mid, right))\n    return ans, root",
+      "codeLabel": "range ops"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Complete the I/O: read input, build the structure, process m operations, and output sums.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def main():\n    data = sys.stdin.read().strip().split()\n    if not data:\n        return\n    it = iter(data)\n    n = int(next(it)); m = int(next(it))\n    arr = [int(next(it)) for _ in range(n)]\n    root = build(arr)\n    out_lines = []\n    for _ in range(m):\n        t = int(next(it)); a = int(next(it)); b = int(next(it))\n        if t == 1:\n            root = reverse_range(root, a, b)\n        else:\n            s, root = sum_range(root, a, b)\n            out_lines.append(str(s))\n    sys.stdout.write(\"\\n\".join(out_lines))\n\nif __name__ == \"__main__\":\n    random.seed(0)\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "def main():\n    n, m = map(int, sys.stdin.readline().split())\n    arr = list(map(int, sys.stdin.readline().split()))\n    root = build(arr)\n    for _ in range(m):\n        t, a, b = map(int, sys.stdin.readline().split())\n        if t == 1:\n            reverse_range(root, a, b)\n        else:\n            print(sum_range(root, a, b)[0])\n\nif __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "def main():\n    data = sys.stdin.read().split()\n    it = iter(data)\n    n = int(next(it)); m = int(next(it))\n    arr = [int(next(it)) for _ in range(n)]\n    root = build(arr)\n    for _ in range(m):\n        t = int(next(it)); a = int(next(it)); b = int(next(it))\n        if t == 1:\n            root = reverse_range(root, a, b)\n        else:\n            print(sum_range(root, a, b))\n\nif __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "def main():\n    data = sys.stdin.read().strip().split()\n    it = iter(data)\n    n = int(next(it)); m = int(next(it))\n    arr = [int(next(it)) for _ in range(n)]\n    root = build(arr)\n    out_lines = []\n    for _ in range(m):\n        t = int(next(it)); a = int(next(it)); b = int(next(it))\n        if t == 1:\n            reverse_range(root, a, b)\n        else:\n            s, _ = sum_range(root, a, b)\n            out_lines.append(str(s))\n    print(\"\\n\".join(out_lines))\n\nif __name__ == \"__main__\":\n    random.seed(0)\n    main()",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We must update root after both operations and collect outputs. Seeding ensures reproducibility.",
+      "wrongExplanations": {
+        "1": "Does not update root on reverse or sum; structure becomes stale.",
+        "2": "Prints the tuple from sum_range instead of just the sum; also lacks seeding."
+      },
+      "hint": "Both operations return a root that must be used for subsequent queries.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def main():\n    data = sys.stdin.read().strip().split()\n    if not data:\n        return\n    it = iter(data)\n    n = int(next(it)); m = int(next(it))\n    arr = [int(next(it)) for _ in range(n)]\n    root = build(arr)\n    out_lines = []\n    for _ in range(m):\n        t = int(next(it)); a = int(next(it)); b = int(next(it))\n        if t == 1:\n            root = reverse_range(root, a, b)\n        else:\n            s, root = sum_range(root, a, b)\n            out_lines.append(str(s))\n    sys.stdout.write(\"\\n\".join(out_lines))\n\nif __name__ == \"__main__\":\n    random.seed(0)\n    main()",
+      "codeLabel": "main I/O"
+    },
+    {
+      "id": "q21",
+      "phase": "Verifying the Solution",
+      "questionText": "Run the code conceptually on the example:\n8 3\n2 1 3 4 5 3 4 4\n2 2 4\n1 3 6\n2 2 4\nWhat outputs should be produced?",
+      "diagram": "Operation 1: sum 2..4; Operation 2: reverse 3..6; Operation 3: sum 2..4",
+      "options": [
+        {
+          "label": "8 then 9",
+          "isCode": false
+        },
+        {
+          "label": "8 then 8",
+          "isCode": false
+        },
+        {
+          "label": "9 then 8",
+          "isCode": false
+        },
+        {
+          "label": "9 then 9",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "First sum is 8. After reversal, the array becomes [2,1,3,5,4,3,4,4], so sum 2..4 is 9.",
+      "wrongExplanations": {
+        "1": "Second sum changes due to the reversal.",
+        "2": "First sum is before any reversal."
+      },
+      "hint": "Trace the array after each operation.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q22",
+      "phase": "Verifying the Solution",
+      "questionText": "If you reverse the entire array [1..n] and then query sum [1..n], what should the sum be compared to the original total?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "It stays the same as the original total sum.",
+          "isCode": false
+        },
+        {
+          "label": "It becomes zero.",
+          "isCode": false
+        },
+        {
+          "label": "It doubles.",
+          "isCode": false
+        },
+        {
+          "label": "It becomes the sum of indices.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Reordering does not change the total sum; the aggregate is invariant under reversals.",
+      "wrongExplanations": {
+        "1": "Nothing cancels out; values don't change sign.",
+        "2": "No reason to double."
+      },
+      "hint": "Order vs. values.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q23",
+      "phase": "Verifying the Solution",
+      "questionText": "Why is it important that we \"apply\" the reverse flag (swap children and propagate) before descending during split/join?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Otherwise, child pointers reflect an outdated logical order, leading to incorrect boundaries and sums.",
+          "isCode": false
+        },
+        {
+          "label": "Because swapping children reduces the height of the structure.",
+          "isCode": false
+        },
+        {
+          "label": "Because sums must be recomputed from scratch each time.",
+          "isCode": false
+        },
+        {
+          "label": "Because we want to avoid using recursion.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Without applying pending reversals, the traversal order is wrong and splits/merges isolate wrong ranges.",
+      "wrongExplanations": {
+        "1": "Swapping children doesn’t inherently reduce height.",
+        "2": "We maintain sums incrementally, not from scratch."
+      },
+      "hint": "Think about left/right meaning under a pending reverse.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the expected time per operation (reverse or sum) with this approach?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Expected O(log n) due to balanced structure and limited splits/joins.",
+          "isCode": false
+        },
+        {
+          "label": "O(1), constant time.",
+          "isCode": false
+        },
+        {
+          "label": "O(n), linear in array size.",
+          "isCode": false
+        },
+        {
+          "label": "O(log^2 n), because of double loops.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each operation uses a small constant number of splits/joins, each taking expected logarithmic time.",
+      "wrongExplanations": {
+        "1": "There’s recursion proportional to the height; not constant.",
+        "3": "We don’t nest logarithmic procedures beyond a constant factor."
+      },
+      "hint": "Count how many recursive joins/splits are done per operation.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the additional space used by the data structure (excluding the input array values themselves)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n) nodes with a few fields each.",
+          "isCode": false
+        },
+        {
+          "label": "O(log n) extra nodes for balancing.",
+          "isCode": false
+        },
+        {
+          "label": "O(1) regardless of n.",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2) because of storing all subarray sums.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We store one node per element plus a few fields, so linear space.",
+      "wrongExplanations": {
+        "1": "We don’t allocate extra nodes just to balance.",
+        "3": "We don’t precompute all subarray sums."
+      },
+      "hint": "Each original element corresponds to exactly one node.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Analyzing Complexity",
+      "questionText": "Which edge cases must be handled carefully in the implementation?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Ranges at the ends (a=1 or b=n), single-element ranges (a=b), and empty splits (k=0 or k=size).",
+          "isCode": false
+        },
+        {
+          "label": "Only when a and b are both even.",
+          "isCode": false
+        },
+        {
+          "label": "Only when all values are zero.",
+          "isCode": false
+        },
+        {
+          "label": "Only when the array is strictly increasing.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Boundary ranges and empty splits are common and must be correctly handled by split/join and flags.",
+      "wrongExplanations": {
+        "1": "Parity of indices is irrelevant.",
+        "3": "Monotonicity of values doesn’t affect operations."
+      },
+      "hint": "Think of the sizes passed to split and how they can be 0 or the full size.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\nimport random\n\nsys.setrecursionlimit(1 << 25)",
+    "class Node:\n    __slots__ = ('val', 'prio', 'left', 'right', 'size', 'sum', 'rev')\n    def __init__(self, val):\n        self.val = val\n        self.prio = random.randint(1, 1 << 30)\n        self.left = None\n        self.right = None\n        self.size = 1\n        self.sum = val\n        self.rev = False\n\ndef sz(t):\n    return t.size if t else 0\n\ndef sm(t):\n    return t.sum if t else 0",
+    "def recalc(t):\n    if t:\n        t.size = 1 + sz(t.left) + sz(t.right)\n        t.sum = t.val + sm(t.left) + sm(t.right)\n\ndef push(t):\n    if t and t.rev:\n        t.rev = False\n        t.left, t.right = t.right, t.left\n        if t.left:\n            t.left.rev ^= True\n        if t.right:\n            t.right.rev ^= True",
+    "def merge(a, b):\n    if not a or not b:\n        return a or b\n    push(a)\n    push(b)\n    if a.prio < b.prio:\n        a.right = merge(a.right, b)\n        recalc(a)\n        return a\n    else:\n        b.left = merge(a, b.left)\n        recalc(b)\n        return b",
+    "def split(t, k):\n    # returns (L, R) where L has first k elements\n    if not t:\n        return (None, None)\n    push(t)\n    if sz(t.left) >= k:\n        L, R = split(t.left, k)\n        t.left = R\n        recalc(t)\n        return (L, t)\n    else:\n        L, R = split(t.right, k - sz(t.left) - 1)\n        t.right = L\n        recalc(t)\n        return (t, R)",
+    "def build(arr):\n    root = None\n    for x in arr:\n        root = merge(root, Node(x))\n    return root",
+    "def reverse_range(root, l, r):\n    left, rest = split(root, l - 1)\n    mid, right = split(rest, r - l + 1)\n    if mid:\n        mid.rev ^= True\n    return merge(left, merge(mid, right))\n\ndef sum_range(root, l, r):\n    left, rest = split(root, l - 1)\n    mid, right = split(rest, r - l + 1)\n    ans = sm(mid)\n    root = merge(left, merge(mid, right))\n    return ans, root",
+    "def main():\n    data = sys.stdin.read().strip().split()\n    if not data:\n        return\n    it = iter(data)\n    n = int(next(it)); m = int(next(it))\n    arr = [int(next(it)) for _ in range(n)]\n    root = build(arr)\n    out_lines = []\n    for _ in range(m):\n        t = int(next(it)); a = int(next(it)); b = int(next(it))\n        if t == 1:\n            root = reverse_range(root, a, b)\n        else:\n            s, root = sum_range(root, a, b)\n            out_lines.append(str(s))\n    sys.stdout.write(\"\\n\".join(out_lines))\n\nif __name__ == \"__main__\":\n    random.seed(0)\n    main()"
+  ],
+  "reasoningChain": [
+    {
+      "question": "Why is a per-element approach too slow for up to 10^5 operations on arrays up to 2⋅10^5?",
+      "insight": "We need sublinear work per operation; touching O(n) elements per query is infeasible."
+    },
+    {
+      "question": "What operations do we need to efficiently isolate and manipulate [a,b] as a unit?",
+      "insight": "We need to cut the sequence into three parts around [a,b], operate on the middle block, and rejoin."
+    },
+    {
+      "question": "How can we represent positions implicitly to allow fast cuts and joins?",
+      "insight": "Use a node-based structure storing subtree sizes to navigate by index without storing explicit indices."
+    },
+    {
+      "question": "How do we support reversing a whole block without walking through each element?",
+      "insight": "Store a boolean flag at a node meaning the entire substructure is reversed; apply by swapping children and toggling child flags."
+    },
+    {
+      "question": "How do we maintain sums efficiently through operations?",
+      "insight": "Maintain each node’s sum as value + left.sum + right.sum; sums are order-independent so reversal flags don’t change sums."
+    },
+    {
+      "question": "How do we implement the two key primitives to isolate [a,b]?",
+      "insight": "Implement split(root,k) to take first k elements and merge(left,right) to join sequences, applying flags before recursing."
+    },
+    {
+      "question": "How do we implement reverse and sum queries using these primitives?",
+      "insight": "Do two splits to get left/mid/right; toggle mid’s reverse for reverse; read mid.sum for sum; then rejoin left,mid,right in order."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1457,
+    "output_tokens": 17400,
+    "input_cost": 0.001821,
+    "output_cost": 0.174,
+    "total_cost": 0.175821
+  }
+}

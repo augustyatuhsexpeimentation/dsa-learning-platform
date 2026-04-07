@@ -1,0 +1,952 @@
+{
+  "id": "corner-subgrid-count",
+  "title": "Corner Subgrid Count",
+  "difficulty": "hard",
+  "tags": [
+    "advanced"
+  ],
+  "estimatedMinutes": 90,
+  "language": "python",
+  "description": "You are given an n × n grid whose each square is either black (1) or white (0). A subgrid is called beautiful if its height and width are at least two and all of its four corners are black. Count how many beautiful subgrids exist.\n\nInput:\n- First line: integer n\n- Next n lines: each line is a string of n characters '0' or '1' representing a row of the grid\n\nOutput:\n- A single integer: the number of beautiful subgrids",
+  "examples": [
+    {
+      "input": "5\n00010\n11111\n00110\n11001\n00010\n",
+      "output": "4\n",
+      "explanation": "There are 4 subgrids whose four corner cells are black."
+    }
+  ],
+  "constraints": [
+    "1 ≤ n ≤ 3000",
+    "Grid characters are '0' or '1'",
+    "Subgrid height and width ≥ 2"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "Given a 2×2 grid with all cells black, how many beautiful subgrids are there?",
+      "diagram": "11\n11",
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Only the whole 2×2 grid qualifies; height and width must both be ≥2 and corners are black.",
+      "wrongExplanations": {
+        "1": "There aren't two distinct 2×2 subgrids.",
+        "2": "You might be counting individual cells, which are not allowed.",
+        "3": "At least one 2×2 exists here."
+      },
+      "hint": "A subgrid must be at least 2×2."
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "Consider this 3×3 grid. Which of the following subgrid counts is correct for beautiful subgrids?\nGrid:\n111\n101\n111",
+      "diagram": "111\n101\n111",
+      "options": [
+        {
+          "label": "4 (the four 2×2 subgrids only)",
+          "isCode": false
+        },
+        {
+          "label": "5 (four 2×2 plus the 3×3)",
+          "isCode": false
+        },
+        {
+          "label": "1 (only the top-left 2×2)",
+          "isCode": false
+        },
+        {
+          "label": "0 (center is white so none)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "All four 2×2 corners are black and the 3×3 has black corners too. Center doesn't matter.",
+      "wrongExplanations": {
+        "0": "The full 3×3 also has black corners.",
+        "2": "Other 2×2 positions also have black corners."
+      },
+      "hint": "Check corners only; interior cells do not matter."
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "Focus on two fixed rows r1 and r2. Suppose the columns with black in r1 are {1,3,4} and in r2 are {0,3,4,5}. How many subgrids use r1 and r2 as top and bottom and have black corners?",
+      "diagram": "Common columns = {3,4}",
+      "options": [
+        {
+          "label": "1 (choose 2 from the 2 common columns)",
+          "isCode": false
+        },
+        {
+          "label": "2 (pairs (3,4) and (4,5))",
+          "isCode": false
+        },
+        {
+          "label": "3 (choose 2 from 3+4+5)",
+          "isCode": false
+        },
+        {
+          "label": "0 (need contiguous columns)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Only columns common to both rows matter. With 2 common columns, combinations choose(2,2)=1.",
+      "wrongExplanations": {
+        "1": "Column 5 isn't in r1, and (4,5) isn't common.",
+        "3": "Columns need not be contiguous; only corners matter."
+      },
+      "hint": "Count pairs of columns that are black in both rows."
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "If for every pair of rows (i<j) we count pairs of columns that are black in both rows, and sum these counts, does this equal the total number of beautiful subgrids?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, each subgrid is uniquely determined by its top row, bottom row, left column, and right column.",
+          "isCode": false
+        },
+        {
+          "label": "No, some subgrids would be counted multiple times.",
+          "isCode": false
+        },
+        {
+          "label": "No, we would miss subgrids where columns are not adjacent.",
+          "isCode": false
+        },
+        {
+          "label": "No, this only counts squares, not rectangles.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each beautiful subgrid maps to exactly one pair of rows and one pair of columns. No overlaps or misses.",
+      "wrongExplanations": {
+        "1": "A subgrid's row pair and column pair are unique.",
+        "2": "Adjacency is irrelevant; corners define validity."
+      },
+      "hint": "Is there any other way a subgrid could be counted?"
+    },
+    {
+      "id": "q5",
+      "phase": "Exploring Approaches",
+      "questionText": "What's the rough cost of enumerating all subgrids and checking their four corners in an n×n grid?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n^4): choose two rows and two columns",
+          "isCode": false
+        },
+        {
+          "label": "O(n^3): three nested loops suffice",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2): you can scan corners in linear time",
+          "isCode": false
+        },
+        {
+          "label": "O(n): only depends on n",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Two choices for rows and two for columns give O(n^4).",
+      "wrongExplanations": {
+        "1": "Three loops miss one dimension (second column or row)."
+      },
+      "hint": "Count how many ways to pick top, bottom, left, right."
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "If we iterate over all pairs of rows (≈n^2/2) and scan all n columns to count common black columns, what's the time?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n^3)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^4)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "≈(n^2/2) row pairs times n columns yields O(n^3).",
+      "wrongExplanations": {
+        "1": "You still scan n columns per row pair."
+      },
+      "hint": "Multiply row pairs by columns scanned."
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "How can we quickly count common black columns for a given pair of rows in Python?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Represent each row as a bit mask integer; compute (row[i] & row[j]).bit_count()",
+          "isCode": false
+        },
+        {
+          "label": "Store indices in Python sets and use intersection; len(set_i & set_j)",
+          "isCode": false
+        },
+        {
+          "label": "Use lists and count membership for each column",
+          "isCode": false
+        },
+        {
+          "label": "Sort column indices of both rows and merge-count",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Bitwise AND and bit_count are fast in C for Python ints. Other options add Python-level overhead.",
+      "wrongExplanations": {
+        "1": "Set operations are fast, but per-pair overhead in Python remains high.",
+        "3": "Sorting/merging per pair is too slow overall."
+      },
+      "hint": "Python integers can act as packed bit arrays."
+    },
+    {
+      "id": "q8",
+      "phase": "Building the Idea",
+      "questionText": "How to build a bit representation for a row string s of length n (0-based columns)?",
+      "diagram": "Example s='1010' => bits at positions 0 and 2",
+      "options": [
+        {
+          "label": "Initialize b=0; for i,ch in enumerate(s): if ch=='1': b |= (1<<i)",
+          "isCode": true
+        },
+        {
+          "label": "Initialize b=0; for i,ch in enumerate(s): if ch=='1': b |= (1<<(n-1-i))",
+          "isCode": true
+        },
+        {
+          "label": "Initialize b=0; for i,ch in enumerate(s): if ch=='0': b |= (1<<i)",
+          "isCode": true
+        },
+        {
+          "label": "Initialize b=1; for i,ch in enumerate(s): if ch=='1': b <<= 1",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Map column i to bit i for consistency across rows. Other mappings invert order or set bits on '0'.",
+      "wrongExplanations": {
+        "1": "This flips column order; both rows must use the same mapping.",
+        "2": "We need bits at '1', not '0'."
+      },
+      "hint": "Use the same bit position for the same column index."
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "Given two row bitmasks a and b, which expression counts common black columns?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "(a & b).bit_count()",
+          "isCode": true
+        },
+        {
+          "label": "(a | b).bit_count()",
+          "isCode": true
+        },
+        {
+          "label": "(a ^ b).bit_count()",
+          "isCode": true
+        },
+        {
+          "label": "a.bit_count() + b.bit_count()",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Bitwise AND keeps only positions where both have 1; bit_count counts them.",
+      "wrongExplanations": {
+        "1": "OR counts positions where either is 1, not both.",
+        "2": "XOR counts positions where exactly one is 1."
+      },
+      "hint": "We need columns with 1 in both rows."
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "There are about n(n−1)/2 row pairs. For n=3000, that's ~4.5 million. Why is a pure double loop over all pairs risky in Python even with fast bit operations?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "The Python-level loop over ~4.5M iterations adds significant overhead.",
+          "isCode": false
+        },
+        {
+          "label": "bit_count is too slow in C for large integers.",
+          "isCode": false
+        },
+        {
+          "label": "The AND operation changes the original rows.",
+          "isCode": false
+        },
+        {
+          "label": "Integer bit operations are not supported for >64 bits.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each Python iteration has overhead that accumulates at millions of iterations.",
+      "wrongExplanations": {
+        "1": "bit_count and AND are optimized in C; they're not the bottleneck.",
+        "3": "Python supports arbitrary-precision ints."
+      },
+      "hint": "Consider interpreter overhead per iteration."
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "Suppose a row has k black cells. Iterating all pairs of its black columns is how many operations?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "k*(k-1)/2",
+          "isCode": false
+        },
+        {
+          "label": "k",
+          "isCode": false
+        },
+        {
+          "label": "n",
+          "isCode": false
+        },
+        {
+          "label": "k^2",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Number of unordered pairs among k items is k choose 2 = k(k−1)/2.",
+      "wrongExplanations": {
+        "3": "Pairs are combinations, not all ordered pairs."
+      },
+      "hint": "Think combinations, not permutations."
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "For rows with small k, how can we count contributions efficiently using column pairs?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "For each row, for every pair of its black columns (c<d), add to answer the number of earlier rows that also had (c,d), then increment that pair's count.",
+          "isCode": false
+        },
+        {
+          "label": "For each row, for every black column c, add count of earlier rows that had c.",
+          "isCode": false
+        },
+        {
+          "label": "For each row, only consider adjacent black columns.",
+          "isCode": false
+        },
+        {
+          "label": "For each row, count pairs (c,d) across all columns, regardless of this row's black cells.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Only pairs (c,d) that are black in the current row can form corners with another row. Accumulate counts per pair.",
+      "wrongExplanations": {
+        "1": "Single-column matches don't form a rectangle.",
+        "2": "Columns need not be adjacent."
+      },
+      "hint": "Two rows form a rectangle only if both share both columns."
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "We split rows by a threshold T: rows with ≤T black cells use the column-pair method; rows with >T use fast bit operations with all later rows. Will any pair of rows be double-counted?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "No. Pairs of two light rows are counted by the pair map; pairs with at least one heavy row are counted in the bit loop.",
+          "isCode": false
+        },
+        {
+          "label": "Yes, heavy–light pairs are counted twice.",
+          "isCode": false
+        },
+        {
+          "label": "Yes, light–light pairs get counted in both methods.",
+          "isCode": false
+        },
+        {
+          "label": "Some heavy–heavy pairs are missed.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We only iterate bit operations with the first row heavy, so light–light are excluded there. Heavy–heavy and heavy–light are covered exactly once.",
+      "wrongExplanations": {
+        "1": "Heavy–light appears only in the heavy row loop.",
+        "3": "Heavy–heavy appears when the earlier heavy row loops."
+      },
+      "hint": "Restrict the bit loop to rows where the first index is heavy."
+    },
+    {
+      "id": "q14",
+      "phase": "Building the Idea",
+      "questionText": "What is a good practical choice for T to balance work between the two parts for n up to 3000?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "T ≈ floor(sqrt(n))",
+          "isCode": false
+        },
+        {
+          "label": "T = 1",
+          "isCode": false
+        },
+        {
+          "label": "T = n/2",
+          "isCode": false
+        },
+        {
+          "label": "T = n",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "A square-root scale keeps light-row pair iterations and heavy-row comparisons both manageable.",
+      "wrongExplanations": {
+        "1": "Too small T makes many rows heavy, increasing comparisons.",
+        "2": "Too large T makes too many rows light, increasing pair counts."
+      },
+      "hint": "Balance k choose 2 per row vs heavy comparisons per row."
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Set up input reading and initial structures.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\ndef main():\n    data = sys.stdin.read().strip().split()\n    if not data:\n        print(0)\n        return\n    it = iter(data)\n    n = int(next(it))\n    rows = []\n    bits = []\n    ones_counts = []\n    light_positions = []",
+          "isCode": true
+        },
+        {
+          "label": "import sys\ndef main():\n    n = int(sys.stdin.readline())\n    data = [sys.stdin.readline().strip() for _ in range(n)]\n    bits = {}\n    ones_counts = set()\n    light_positions = set()",
+          "isCode": true
+        },
+        {
+          "label": "def main():\n    from sys import input\n    n = input()\n    bits = []\n    ones_counts = []\n    light_positions = []",
+          "isCode": true
+        },
+        {
+          "label": "import sys\ndef main():\n    data = sys.stdin.read().splitlines()\n    n = int(data[0])\n    bits = []\n    ones_counts = []\n    light_positions = []\n    it = iter(data[1:])",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We read all tokens to handle compact inputs, set up iterator, and initialize needed lists.",
+      "wrongExplanations": {
+        "1": "Using sets/dicts here breaks ordering and shapes; also missing guards.",
+        "3": "Splitting lines only may fail if rows aren't line-aligned tokens."
+      },
+      "hint": "Tokenize input generically; initialize lists for rows' data.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\ndef main():\n    data = sys.stdin.read().strip().split()\n    if not data:\n        print(0)\n        return\n    it = iter(data)\n    n = int(next(it))\n    rows = []\n    bits = []\n    ones_counts = []\n    light_positions = []",
+      "codeLabel": "Input and init"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Fill the loop to build per-row bitmask and positions of '1's.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "for _ in range(n):\n    s = next(it).strip()\n    b = 0\n    cnt = 0\n    pos = []\n    for i, ch in enumerate(s):\n        if ch == '1':\n            b |= (1 << i)\n            cnt += 1\n            pos.append(i)\n    bits.append(b)\n    ones_counts.append(cnt)\n    light_positions.append(pos)",
+          "isCode": true
+        },
+        {
+          "label": "for _ in range(n):\n    s = next(it).strip()\n    b = 0\n    cnt = 0\n    pos = []\n    for i, ch in enumerate(s):\n        if ch == '1':\n            b |= (1 << (n - 1 - i))\n            cnt += 1\n            pos.append(n - 1 - i)\n    bits.append(b)\n    ones_counts.append(cnt)\n    light_positions.append(pos)",
+          "isCode": true
+        },
+        {
+          "label": "for _ in range(n):\n    s = next(it).strip()\n    b = 0\n    cnt = 0\n    pos = []\n    for i, ch in enumerate(s):\n        if ch == '0':\n            b |= (1 << i)\n            cnt += 1\n            pos.append(i)\n    bits.append(b)\n    ones_counts.append(cnt)\n    light_positions.append(pos)",
+          "isCode": true
+        },
+        {
+          "label": "for _ in range(n):\n    s = next(it).strip()\n    b = 0\n    cnt = 0\n    pos = []\n    for i, ch in enumerate(s):\n        if ch == 1:\n            b |= (1 << i)\n            cnt += 1\n            pos.append(i)\n    bits.append(b)\n    ones_counts.append(cnt)\n    light_positions.append(pos)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Use column index i consistently for both bitmask and positions. Avoid reversing and ensure ch is compared to '1'.",
+      "wrongExplanations": {
+        "1": "Reversing indices changes column mapping inconsistently.",
+        "3": "Input characters are '0'/'1', not integers."
+      },
+      "hint": "Keep a consistent 0-based mapping across all rows.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    for _ in range(n):\n        s = next(it).strip()\n        b = 0\n        cnt = 0\n        pos = []\n        for i, ch in enumerate(s):\n            if ch == '1':\n                b |= (1 << i)\n                cnt += 1\n                pos.append(i)\n        bits.append(b)\n        ones_counts.append(cnt)\n        light_positions.append(pos)",
+      "codeLabel": "Build row masks and positions"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Choose and compute the threshold T.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "T = max(1, int(n ** 0.5))",
+          "isCode": true
+        },
+        {
+          "label": "T = n",
+          "isCode": true
+        },
+        {
+          "label": "T = 1",
+          "isCode": true
+        },
+        {
+          "label": "T = int((n // 2))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "A square-root threshold balances the two parts; ensure at least 1.",
+      "wrongExplanations": {
+        "1": "Too large; almost all rows would be light.",
+        "2": "Too small; almost all rows would be heavy."
+      },
+      "hint": "We want T^2 and n^2/T on the same order.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    T = max(1, int(n ** 0.5))\n    is_light = [c <= T for c in ones_counts]",
+      "codeLabel": "Threshold and light classification"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Initialize structures for counting light-row column pairs and the answer.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "from collections import defaultdict\ncount_pairs = defaultdict(int)\nans = 0",
+          "isCode": true
+        },
+        {
+          "label": "count_pairs = {}\nans = []",
+          "isCode": true
+        },
+        {
+          "label": "from collections import Counter\ncount_pairs = Counter()\nans = 0.0",
+          "isCode": true
+        },
+        {
+          "label": "count_pairs = set()\nans = 0",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "A defaultdict(int) is convenient for incrementing counts; answer is an integer.",
+      "wrongExplanations": {
+        "1": "ans should be integer, and dict without defaults needs extra handling.",
+        "3": "We need counts, not a set."
+      },
+      "hint": "We will do count_pairs[key] += 1 repeatedly.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    from collections import defaultdict\n    count_pairs = defaultdict(int)\n    ans = 0",
+      "codeLabel": "Init counters"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Fill the light-row processing loop. Use a compact integer key for (ci,cj) to save memory.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "for r in range(n):\n    if not is_light[r]:\n        continue\n    cols = light_positions[r]\n    k = len(cols)\n    for a in range(k):\n        ci = cols[a]\n        for b in range(a + 1, k):\n            cj = cols[b]\n            key = ci * n + cj\n            ans += count_pairs[key]\n            count_pairs[key] += 1",
+          "isCode": true
+        },
+        {
+          "label": "for r in range(n):\n    if is_light[r]:\n        cols = light_positions[r]\n        for ci in cols:\n            key = ci\n            ans += count_pairs[key]\n            count_pairs[key] += 1",
+          "isCode": true
+        },
+        {
+          "label": "for r in range(n):\n    if not is_light[r]: continue\n    cols = light_positions[r]\n    for a in range(len(cols)):\n        for b in range(len(cols)):\n            if a == b: continue\n            key = cols[a] * n + cols[b]\n            ans += count_pairs[key]\n            count_pairs[key] += 1",
+          "isCode": true
+        },
+        {
+          "label": "for r in range(n):\n    if not is_light[r]:\n        continue\n    cols = light_positions[r]\n    for a in range(len(cols)):\n        for b in range(a + 1, len(cols)):\n            ci, cj = cols[b], cols[a]\n            key = ci * n + cj\n            count_pairs[key] += 1\n            ans += count_pairs[key]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Iterate unordered pairs (ci<cj), add current count (previous rows), then increment. Key=ci*n+cj is unique.",
+      "wrongExplanations": {
+        "2": "This double-counts ordered pairs and includes (a,b) and (b,a).",
+        "3": "Adding after increment overcounts by 1 for each pair."
+      },
+      "hint": "Use pairs with a<b and add-before-increment to count prior rows.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    for r in range(n):\n        if not is_light[r]:\n            continue\n        cols = light_positions[r]\n        k = len(cols)\n        for a in range(k):\n            ci = cols[a]\n            for b in range(a + 1, k):\n                cj = cols[b]\n                key = ci * n + cj\n                ans += count_pairs[key]\n                count_pairs[key] += 1",
+      "codeLabel": "Process light rows"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Select code to collect heavy row indices.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "heavy_indices = [i for i, c in enumerate(ones_counts) if c > T]",
+          "isCode": true
+        },
+        {
+          "label": "heavy_indices = [i for i, c in enumerate(ones_counts) if c >= T]",
+          "isCode": true
+        },
+        {
+          "label": "heavy_indices = list(range(n))",
+          "isCode": true
+        },
+        {
+          "label": "heavy_indices = [i for i in range(n) if is_light[i]]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Heavy rows are those with strictly more than T ones; light rows are ≤T.",
+      "wrongExplanations": {
+        "1": "Rows with exactly T ones are treated as light, not heavy.",
+        "3": "This selects light rows, the opposite of heavy."
+      },
+      "hint": "Light rows are defined by ≤T."
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "Fill the loop to add contributions from pairs where the first row is heavy.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "for i in heavy_indices:\n    bi = bits[i]\n    for j in range(i + 1, n):\n        c = (bi & bits[j]).bit_count()\n        if c >= 2:\n            ans += c * (c - 1) // 2",
+          "isCode": true
+        },
+        {
+          "label": "for i in heavy_indices:\n    bi = bits[i]\n    for j in range(n):\n        c = (bi & bits[j]).bit_count()\n        ans += c * (c - 1) // 2",
+          "isCode": true
+        },
+        {
+          "label": "for i in heavy_indices:\n    bi = bits[i]\n    for j in range(i):\n        c = (bi & bits[j]).bit_count()\n        ans += c * (c - 1) // 2",
+          "isCode": true
+        },
+        {
+          "label": "for i in heavy_indices:\n    bi = bits[i]\n    for j in range(i + 1, n):\n        c = (bi | bits[j]).bit_count()\n        ans += c * (c - 1) // 2",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Use j>i to avoid duplicates; AND to get common columns; add choose(c,2) only if c≥2.",
+      "wrongExplanations": {
+        "1": "Includes j≤i causing double counting and i=j.",
+        "3": "OR counts union, not intersection."
+      },
+      "hint": "Avoid double counting and count only common columns.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    heavy_indices = [i for i, c in enumerate(ones_counts) if c > T]\n    for i in heavy_indices:\n        bi = bits[i]\n        for j in range(i + 1, n):\n            c = (bi & bits[j]).bit_count()\n            if c >= 2:\n                ans += c * (c - 1) // 2",
+      "codeLabel": "Process heavy pairs"
+    },
+    {
+      "id": "q22",
+      "phase": "Writing the Code",
+      "questionText": "Finish by printing the answer and adding the main guard.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    print(ans)\nif __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "print(ans)\nif __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "    print(ans)\nmain()",
+          "isCode": true
+        },
+        {
+          "label": "print(ans)\nmain()",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Print inside main; call main under the standard guard.",
+      "wrongExplanations": {
+        "1": "This prints before defining main's variables.",
+        "3": "Calling main without the guard may be fine, but printing outside main will fail here."
+      },
+      "hint": "Keep ans in scope when printing.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    print(ans)\nif __name__ == \"__main__\":\n    main()",
+      "codeLabel": "Output and guard"
+    },
+    {
+      "id": "q23",
+      "phase": "Verifying the Solution",
+      "questionText": "On this grid, what is the number of beautiful subgrids?\n3\n110\n110\n000",
+      "diagram": "Rows:\n0: 110\n1: 110\n2: 000",
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Only rows (0,1) have common columns {0,1}, giving choose(2,2)=1 rectangle.",
+      "wrongExplanations": {
+        "1": "There aren't more pairs of rows with two common columns.",
+        "3": "There is at least one 2×2 in the top-left."
+      },
+      "hint": "Check pairs of rows: (0,1), (0,2), (1,2)."
+    },
+    {
+      "id": "q24",
+      "phase": "Verifying the Solution",
+      "questionText": "Consider the grid:\n4\n1001\n0000\n1001\n1001\nWhat is the correct output?",
+      "diagram": "Rows:\n0: 1..1\n1: ....\n2: 1..1\n3: 1..1",
+      "options": [
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Row pairs (0,2), (0,3), (2,3) share columns {0,3}. Each gives 1 rectangle: total 3.",
+      "wrongExplanations": {
+        "1": "You missed some row pairs.",
+        "3": "No extra pairs beyond these three."
+      },
+      "hint": "List all row pairs and count common columns."
+    },
+    {
+      "id": "q25",
+      "phase": "Verifying the Solution",
+      "questionText": "For n=5, T≈2. Which rows are treated as light if a row has exactly 2 ones?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Rows with exactly 2 ones are light (≤T).",
+          "isCode": false
+        },
+        {
+          "label": "Rows with exactly 2 ones are heavy (>T).",
+          "isCode": false
+        },
+        {
+          "label": "It depends on the row index parity.",
+          "isCode": false
+        },
+        {
+          "label": "They are ignored.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Light rows satisfy count ≤ T; heavy are strictly greater.",
+      "wrongExplanations": {
+        "1": "Heavy requires strictly more than T.",
+        "3": "All rows are considered."
+      },
+      "hint": "Recall the definition of light vs heavy."
+    },
+    {
+      "id": "q26",
+      "phase": "Analyzing Complexity",
+      "questionText": "With T≈sqrt(n), what is the overall time complexity of this approach?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n^2) (light pairs ~ n*T^2 and heavy comparisons ~ n^2/T)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^3)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2 log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2.5)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "n*T^2 + n^2/T is minimized near T≈sqrt(n), yielding O(n^2).",
+      "wrongExplanations": {
+        "1": "We avoid the cubic scan of all columns per row pair."
+      },
+      "hint": "Balance the two terms by setting T≈sqrt(n)."
+    },
+    {
+      "id": "q27",
+      "phase": "Analyzing Complexity",
+      "questionText": "What dominates extra space usage?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Counts for column pairs from light rows; in practice O(n*T^2), which is O(n^2) for T≈sqrt(n).",
+          "isCode": false
+        },
+        {
+          "label": "The bitmasks; they are O(n^2) bits stored in Python ints.",
+          "isCode": false
+        },
+        {
+          "label": "The input grid is duplicated many times.",
+          "isCode": false
+        },
+        {
+          "label": "No extra space beyond O(1).",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The map of seen column pairs grows with light rows and their k choose 2 pairs.",
+      "wrongExplanations": {
+        "1": "We store one integer per row, not O(n^2) integers."
+      },
+      "hint": "Consider the dictionary that tracks pairs (c,d)."
+    },
+    {
+      "id": "q28",
+      "phase": "Analyzing Complexity",
+      "questionText": "Which edge cases must be handled explicitly?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "n<2 or no row pair has two common black columns → answer is 0.",
+          "isCode": false
+        },
+        {
+          "label": "All rows identical → subtract duplicates.",
+          "isCode": false
+        },
+        {
+          "label": "If a row has only one black cell, count it as a 1×1 subgrid.",
+          "isCode": false
+        },
+        {
+          "label": "If any white cell exists, answer is 0.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "At least two rows and two columns are needed; if none exist, the count is 0.",
+      "wrongExplanations": {
+        "1": "Duplicates are valid distinct subgrids from different positions.",
+        "2": "1×1 subgrids are disallowed."
+      },
+      "hint": "Check the minimum size requirement."
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\ndef main():\n    data = sys.stdin.read().strip().split()\n    if not data:\n        print(0)\n        return\n    it = iter(data)\n    n = int(next(it))\n    rows = []\n    bits = []\n    ones_counts = []\n    light_positions = []",
+    "    for _ in range(n):\n        s = next(it).strip()\n        b = 0\n        cnt = 0\n        pos = []\n        for i, ch in enumerate(s):\n            if ch == '1':\n                b |= (1 << i)\n                cnt += 1\n                pos.append(i)\n        bits.append(b)\n        ones_counts.append(cnt)\n        light_positions.append(pos)",
+    "    T = max(1, int(n ** 0.5))\n    is_light = [c <= T for c in ones_counts]",
+    "    from collections import defaultdict\n    count_pairs = defaultdict(int)\n    ans = 0",
+    "    for r in range(n):\n        if not is_light[r]:\n            continue\n        cols = light_positions[r]\n        k = len(cols)\n        for a in range(k):\n            ci = cols[a]\n            for b in range(a + 1, k):\n                cj = cols[b]\n                key = ci * n + cj\n                ans += count_pairs[key]\n                count_pairs[key] += 1",
+    "    heavy_indices = [i for i, c in enumerate(ones_counts) if c > T]\n    for i in heavy_indices:\n        bi = bits[i]\n        for j in range(i + 1, n):\n            c = (bi & bits[j]).bit_count()\n            if c >= 2:\n                ans += c * (c - 1) // 2",
+    "    print(ans)\nif __name__ == \"__main__\":\n    main()"
+  ],
+  "reasoningChain": [
+    {
+      "question": "How can we reframe counting subgrids in terms of row pairs and common columns?",
+      "insight": "Each beautiful subgrid corresponds to a pair of rows and a pair of columns where both rows have black cells; sum choose(common,2) over all row pairs."
+    },
+    {
+      "question": "How to quickly count common black columns for a pair of rows?",
+      "insight": "Represent rows as integer bit masks and use (row[i] & row[j]).bit_count() to count common columns efficiently."
+    },
+    {
+      "question": "Why is iterating all row pairs risky in Python?",
+      "insight": "There are ~n^2/2 pairs; for n=3000 it's ~4.5M iterations. Even with fast bit operations, Python loop overhead is large."
+    },
+    {
+      "question": "How to handle sparse rows efficiently?",
+      "insight": "For rows with few black cells, iterate their column pairs and accumulate counts in a map; add prior counts to the answer."
+    },
+    {
+      "question": "How to combine both methods without double counting?",
+      "insight": "Use the pair-map only for light–light pairs; for heavy rows, iterate bit operations with all later rows to cover heavy–light and heavy–heavy."
+    },
+    {
+      "question": "How to choose a good threshold T?",
+      "insight": "Pick T≈sqrt(n) to balance work: light processing ~n*T^2 and heavy comparisons ~n^2/T, giving about O(n^2)."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1347,
+    "output_tokens": 19093,
+    "input_cost": 0.001684,
+    "output_cost": 0.19093,
+    "total_cost": 0.192614
+  }
+}

@@ -1,0 +1,951 @@
+{
+  "id": "counting-grids-rotations",
+  "title": "Counting Grids",
+  "difficulty": "intermediate",
+  "tags": [
+    "math"
+  ],
+  "estimatedMinutes": 50,
+  "language": "python",
+  "description": "Your task is to count the number of different n × n grids whose each square is black or white. Two grids are considered to be different if it is not possible to rotate one of them so that they look the same.\n\nInput: an integer n (1 ≤ n ≤ 10^9).\n\nOutput: print the number of grids modulo 10^9+7.",
+  "examples": [
+    {
+      "input": "4",
+      "output": "16456",
+      "explanation": "The number of distinct 4×4 black/white grids up to rotation is 16456."
+    }
+  ],
+  "constraints": [
+    "1 ≤ n ≤ 10^9",
+    "Time Limit: 1.00 s",
+    "Memory Limit: 512 MB"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "For n = 1 (a single cell), how many different grids are there up to rotation?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "The single cell can be black or white. Rotations do nothing, so there are 2 distinct grids.",
+      "wrongExplanations": {
+        "0": "There are two color choices (black/white), not one."
+      },
+      "hint": "Count all colorings and note rotation doesn't change a single cell.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "Are two grids that are mirror images (reflections) of each other considered the same in this problem?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, reflections are allowed and considered the same.",
+          "isCode": false
+        },
+        {
+          "label": "No, only rotations are considered; reflections are different.",
+          "isCode": false
+        },
+        {
+          "label": "Yes, both rotations and reflections are allowed.",
+          "isCode": false
+        },
+        {
+          "label": "It depends on n being even or odd.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "The statement only allows rotations. Reflections are not considered the same.",
+      "wrongExplanations": {
+        "0": "Reflections are not mentioned as allowed equivalences.",
+        "2": "Only rotations are allowed, not reflections."
+      },
+      "hint": "Re-read: only rotation is mentioned.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "If we did not identify rotations (i.e., every coloring is different), how many total colorings are there for an n × n grid?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "n^2",
+          "isCode": false
+        },
+        {
+          "label": "2^n",
+          "isCode": false
+        },
+        {
+          "label": "2^{n^2}",
+          "isCode": false
+        },
+        {
+          "label": "n!",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Each of the n^2 cells has 2 choices, so 2^{n^2}.",
+      "wrongExplanations": {
+        "1": "2^n counts rows or columns, not cells.",
+        "0": "n^2 is the number of cells, not colorings."
+      },
+      "hint": "Multiply choices per cell.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "For n = 2, how many distinct grids are there up to rotation?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "4 (just divide 16 by 4, since there are 4 rotations)",
+          "isCode": false
+        },
+        {
+          "label": "6",
+          "isCode": false
+        },
+        {
+          "label": "8",
+          "isCode": false
+        },
+        {
+          "label": "16 (no reduction by rotation)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Some patterns are unchanged by 180° or 90° rotations, so it’s not a simple divide by 4. The correct count is 6.",
+      "wrongExplanations": {
+        "0": "This ignores symmetry cases where rotations overlap.",
+        "2": "Still overcounts symmetric cases; actual result is 6."
+      },
+      "hint": "Not all patterns produce 4 distinct rotations.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Exploring Approaches",
+      "questionText": "Why is brute-forcing all colorings infeasible for large n?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Because the number of rotations is large.",
+          "isCode": false
+        },
+        {
+          "label": "Because 2^{n^2} grows too fast; even n=10 gives over a trillion colorings.",
+          "isCode": false
+        },
+        {
+          "label": "Because checking rotations is impossible in code.",
+          "isCode": false
+        },
+        {
+          "label": "Because memory limit is small but time is enough.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "2^{n^2} is astronomically large quickly. We need a counting formula instead of enumeration.",
+      "wrongExplanations": {
+        "0": "There are only 4 rotations; that’s not the bottleneck.",
+        "2": "Checking rotations is easy; enumerating all colorings is the issue."
+      },
+      "hint": "Estimate 2^{n^2} for moderate n.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "Let F0, F90, F180, F270 be the numbers of grids that stay exactly the same after 0°, 90°, 180°, 270° rotations, respectively. Which expression gives the count of distinct grids up to rotation?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "(F0 + F90 + F180 + F270) / 4",
+          "isCode": false
+        },
+        {
+          "label": "F0 / 4",
+          "isCode": false
+        },
+        {
+          "label": "(F0 + 2·F90 + F180) / 4",
+          "isCode": false
+        },
+        {
+          "label": "min(F0, F90, F180, F270)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Averaging the counts of colorings that are unchanged by each rotation gives the number of rotation-classes.",
+      "wrongExplanations": {
+        "1": "Dividing only F0 ignores invariance under other rotations.",
+        "2": "90° and 270° contribute separately; symmetric, but both must be counted."
+      },
+      "hint": "Each class contributes equally across rotated views; average unchanged counts.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "What is F0, the number of grids unchanged by a 0° rotation?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "2^{n}",
+          "isCode": false
+        },
+        {
+          "label": "2^{n^2}",
+          "isCode": false
+        },
+        {
+          "label": "n^2",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "0° rotation leaves every grid unchanged, so F0 equals all colorings: 2^{n^2}.",
+      "wrongExplanations": {
+        "0": "2^n counts lines, not cells.",
+        "2": "n^2 is number of cells, not colorings."
+      },
+      "hint": "All colorings qualify for 0°.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Building the Idea",
+      "questionText": "Under a 180° rotation, for even n, how many independent cells determine the whole grid?",
+      "diagram": "Cells pair with their opposite across the center; no single fixed cell when n is even.",
+      "options": [
+        {
+          "label": "n^2 / 2",
+          "isCode": false
+        },
+        {
+          "label": "n^2",
+          "isCode": false
+        },
+        {
+          "label": "n^2 / 4",
+          "isCode": false
+        },
+        {
+          "label": "n^2 / 2 + 1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Every cell pairs with a distinct opposite cell; choices on one side determine the other: n^2/2 pairs.",
+      "wrongExplanations": {
+        "2": "Pairs are size 2, not 4.",
+        "3": "There is no center cell fixed when n is even."
+      },
+      "hint": "Count pairs of cells mapped to each other by 180°.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "Under a 180° rotation, for odd n, how many independent cells determine the grid?",
+      "diagram": "There is exactly one center cell that maps to itself; all other cells form pairs.",
+      "options": [
+        {
+          "label": "(n^2 + 1) / 2",
+          "isCode": false
+        },
+        {
+          "label": "(n^2 - 1) / 2",
+          "isCode": false
+        },
+        {
+          "label": "n^2 / 2",
+          "isCode": false
+        },
+        {
+          "label": "(n^2 + 3) / 4",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "One fixed center cell plus (n^2−1)/2 pairs gives (n^2+1)/2 independent choices.",
+      "wrongExplanations": {
+        "1": "This omits the center cell.",
+        "2": "n^2/2 is not an integer for odd n and ignores the center."
+      },
+      "hint": "Add 1 for the center cell.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "Under a 90° rotation, for even n, how many independent groups of cells determine the grid?",
+      "diagram": "Non-center cells cycle through 4 positions under 90° rotation when n is even.",
+      "options": [
+        {
+          "label": "n^2 / 4",
+          "isCode": false
+        },
+        {
+          "label": "n^2 / 2",
+          "isCode": false
+        },
+        {
+          "label": "(n^2 + 1) / 2",
+          "isCode": false
+        },
+        {
+          "label": "(n^2 + 3) / 4",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Cells form 4-cycles; each 4-cycle contributes one independent choice: n^2/4 groups.",
+      "wrongExplanations": {
+        "1": "Cycles are size 4, not 2.",
+        "3": "The '+3' adjustment is for odd n (center cell)."
+      },
+      "hint": "Every orbit has size 4 when n is even.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "Under a 90° rotation, for odd n, how many independent groups of cells determine the grid?",
+      "diagram": "There’s exactly one fixed center cell; all others are in 4-cycles.",
+      "options": [
+        {
+          "label": "(n^2 + 3) / 4",
+          "isCode": false
+        },
+        {
+          "label": "(n^2 + 1) / 2",
+          "isCode": false
+        },
+        {
+          "label": "n^2 / 4",
+          "isCode": false
+        },
+        {
+          "label": "(n^2 + 3) / 2",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "One fixed cell plus ((n^2−1)/4) 4-cycles yields (n^2+3)/4 groups.",
+      "wrongExplanations": {
+        "2": "For odd n, there is also a fixed center cell to account for.",
+        "1": "This would be for pairing, not 4-cycles."
+      },
+      "hint": "Start with (n^2−1)/4 and add the center cell.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "How does the count of colorings unchanged by 270° rotation compare to that for 90°?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "They are equal.",
+          "isCode": false
+        },
+        {
+          "label": "270° equals the 180° count.",
+          "isCode": false
+        },
+        {
+          "label": "270° equals the 0° count.",
+          "isCode": false
+        },
+        {
+          "label": "It depends on n’s parity; they differ when n is odd.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "90° and 270° have the same cycle structure, so they have equal counts.",
+      "wrongExplanations": {
+        "1": "180° has 2-cycles (and maybe 1 center), different from 90°.",
+        "3": "Parity affects both 90° and 270° the same way."
+      },
+      "hint": "90° and 270° are inverses and partition cells into the same cycle sizes.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "For n = 3, how many colorings are unchanged by a 90° rotation?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "8",
+          "isCode": false
+        },
+        {
+          "label": "16",
+          "isCode": false
+        },
+        {
+          "label": "32",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "For n=3 (odd), groups = (9+3)/4 = 3, so 2^3 = 8 colorings are unchanged by 90°.",
+      "wrongExplanations": {
+        "0": "This would be 2^2, not matching the 3 groups.",
+        "2": "2^4 would correspond to 4 groups, but there are 3."
+      },
+      "hint": "Use (n^2+3)/4 groups; each group chooses a color.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Writing the Code",
+      "questionText": "Start by reading input and defining the modulus. Which snippet is correct?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "MOD = 10**9 + 7\nn = int(input().strip())",
+          "isCode": true
+        },
+        {
+          "label": "MOD = 10^9 + 7\nn = int(input())",
+          "isCode": true
+        },
+        {
+          "label": "MOD = 1000000007\nn = input().strip()",
+          "isCode": true
+        },
+        {
+          "label": "MOD = 10**9+7\nn = int(sys.stdin)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Use 10**9+7 for modulus and parse input as int. 10^9 is XOR; reading as string or from sys.stdin object is wrong.",
+      "wrongExplanations": {
+        "1": "^ is bitwise XOR, not power.",
+        "2": "n must be an int, not a string."
+      },
+      "hint": "Use exponentiation operator and int parsing.",
+      "isCodeBuilding": true,
+      "codeSnippet": "MOD = 10**9 + 7\nn = int(input().strip())",
+      "codeLabel": "Init: MOD and input"
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Compute n^2 as an integer for later use.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "nn = n ** n",
+          "isCode": true
+        },
+        {
+          "label": "nn = pow(n, 2, MOD)",
+          "isCode": true
+        },
+        {
+          "label": "nn = n ^ 2",
+          "isCode": true
+        },
+        {
+          "label": "nn = n * n",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 3,
+      "explanation": "n*n is n^2 as an integer. Other options either compute n^n, reduce modulo, or use XOR.",
+      "wrongExplanations": {
+        "0": "This computes n^n, not n^2.",
+        "2": "The ^ operator is XOR in Python, not exponentiation."
+      },
+      "hint": "You want plain integer square, no modulo.",
+      "isCodeBuilding": true,
+      "codeSnippet": "nn = n * n",
+      "codeLabel": "Compute nn"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Write the branch for even n to compute k90 and k180.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "if n % 2 == 0:\n    k90 = nn // 4\n    k180 = nn // 2",
+          "isCode": true
+        },
+        {
+          "label": "if n % 2 == 0:\n    k90 = nn / 4\n    k180 = nn / 2",
+          "isCode": true
+        },
+        {
+          "label": "if n % 2 == 0:\n    k90 = (nn + 3) // 4\n    k180 = (nn + 1) // 2",
+          "isCode": true
+        },
+        {
+          "label": "if n % 2 == 0:\n    k90 = nn // 2\n    k180 = nn // 4",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "For even n: k90=nn/4, k180=nn/2 using integer division. Other formulas swap or use odd-n adjustments.",
+      "wrongExplanations": {
+        "1": "Use integer division (//), not float division.",
+        "2": "These are the odd-n formulas, not even-n."
+      },
+      "hint": "Even n has no fixed center for these rotations.",
+      "isCodeBuilding": true,
+      "codeSnippet": "if n % 2 == 0:\n    k90 = nn // 4\n    k180 = nn // 2",
+      "codeLabel": "Even branch"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Write the branch for odd n to compute k90 and k180.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "else:\n    k90 = (nn + 1) // 4\n    k180 = (nn + 3) // 2",
+          "isCode": true
+        },
+        {
+          "label": "else:\n    k90 = (nn + 3) // 4\n    k180 = (nn + 1) // 2",
+          "isCode": true
+        },
+        {
+          "label": "else:\n    k90 = nn // 4\n    k180 = nn // 2",
+          "isCode": true
+        },
+        {
+          "label": "else:\n    k90 = (nn - 1) // 4\n    k180 = (nn - 1) // 2",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "For odd n: k90=(nn+3)//4 and k180=(nn+1)//2 to account for the center cell.",
+      "wrongExplanations": {
+        "0": "(nn+1)//4 is wrong for k90; center adds 3 in numerator.",
+        "2": "Those are even-n formulas."
+      },
+      "hint": "Remember: add 1 center for 180°, and 1 center + 4-cycles for 90°.",
+      "isCodeBuilding": true,
+      "codeSnippet": "else:\n    k90 = (nn + 3) // 4\n    k180 = (nn + 1) // 2",
+      "codeLabel": "Odd branch"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Compute the counts a0, a90, a180 using modular exponentiation.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "a0 = pow(2, nn, MOD)\na90 = pow(2, k90, MOD)\na180 = pow(2, k180, MOD)",
+          "isCode": true
+        },
+        {
+          "label": "a0 = pow(nn, 2, MOD)\na90 = pow(k90, 2, MOD)\na180 = pow(k180, 2, MOD)",
+          "isCode": true
+        },
+        {
+          "label": "a0 = 2 ** nn\na90 = 2 ** k90\na180 = 2 ** k180",
+          "isCode": true
+        },
+        {
+          "label": "a0 = pow(2, nn, MOD-1)\na90 = pow(2, k90, MOD-1)\na180 = pow(2, k180, MOD-1)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need 2^{exponent} modulo MOD; use pow with modulus for efficiency and correctness.",
+      "wrongExplanations": {
+        "2": "This computes huge integers without modulus.",
+        "1": "This squares exponents; we need 2^exponent."
+      },
+      "hint": "Use Python’s built-in pow with three arguments.",
+      "isCodeBuilding": true,
+      "codeSnippet": "a0 = pow(2, nn, MOD)\na90 = pow(2, k90, MOD)\na180 = pow(2, k180, MOD)",
+      "codeLabel": "Compute powers"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "We must divide by 4 under modulo. Choose the correct way to compute the modular inverse of 4.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "inv4 = pow(4, MOD - 2, MOD)",
+          "isCode": true
+        },
+        {
+          "label": "inv4 = pow(4, MOD - 1, MOD)",
+          "isCode": true
+        },
+        {
+          "label": "inv4 = 4 // MOD",
+          "isCode": true
+        },
+        {
+          "label": "inv4 = (4 % MOD) ** (MOD - 2)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Use pow(4, MOD-2, MOD) to get the inverse modulo prime MOD. Other options don’t give the inverse correctly.",
+      "wrongExplanations": {
+        "1": "pow(4, MOD-1, MOD) is 1 by Fermat, not the inverse of 4.",
+        "2": "4 // MOD is 0, not an inverse."
+      },
+      "hint": "Use exponent MOD-2 with modulus for inverse.",
+      "isCodeBuilding": true,
+      "codeSnippet": "inv4 = pow(4, MOD - 2, MOD)",
+      "codeLabel": "Inverse of 4"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Combine the counts before dividing by 4. Which line correctly sums them modulo MOD?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "ans = a0 + 2 * a90 + a180",
+          "isCode": true
+        },
+        {
+          "label": "ans = (a0 + a90 + a180) % MOD",
+          "isCode": true
+        },
+        {
+          "label": "ans = (a0 + 2 * a90 + a180) % MOD",
+          "isCode": true
+        },
+        {
+          "label": "ans = (a0 + 4 * a90 + a180) % MOD",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "We need a0 + 2·a90 + a180, reduced modulo MOD to avoid overflow and for correctness.",
+      "wrongExplanations": {
+        "0": "Forgetting modulo may overflow and must be reduced.",
+        "3": "90° and 270° together contribute 2·a90, not 4·a90."
+      },
+      "hint": "Remember 90° and 270° are equal and both included.",
+      "isCodeBuilding": true,
+      "codeSnippet": "ans = (a0 + 2 * a90 + a180) % MOD",
+      "codeLabel": "Sum contributions"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "Finish by dividing by 4 under modulo and printing the answer.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "ans = ans // 4\nprint(ans)",
+          "isCode": true
+        },
+        {
+          "label": "ans = ans * inv4 % MOD\nprint(ans)",
+          "isCode": true
+        },
+        {
+          "label": "print(ans * 4 % MOD)",
+          "isCode": true
+        },
+        {
+          "label": "print(ans // 4 % MOD)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Division under modulo uses multiplication by the modular inverse. Then print the result.",
+      "wrongExplanations": {
+        "0": "Integer division loses information in modular arithmetic.",
+        "2": "Multiplying by 4 is the opposite of dividing by 4."
+      },
+      "hint": "Use the inverse you computed.",
+      "isCodeBuilding": true,
+      "codeSnippet": "ans = ans * inv4 % MOD\nprint(ans)",
+      "codeLabel": "Divide by 4 and print"
+    },
+    {
+      "id": "q22",
+      "phase": "Verifying the Solution",
+      "questionText": "Test n = 4. Compute nn=16, k90=4, k180=8. Then a0=2^16=65536, a90=16, a180=256. What is the final answer?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "(65536 + 2*16 + 256)/4 = 16456",
+          "isCode": false
+        },
+        {
+          "label": "(65536 + 16 + 256)/4 = 16452",
+          "isCode": false
+        },
+        {
+          "label": "(65536 + 2*256 + 16)/4 = 16516",
+          "isCode": false
+        },
+        {
+          "label": "(65536 + 2*16 + 256) = 65824",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Sum is 65824; dividing by 4 gives 16456, matching the example.",
+      "wrongExplanations": {
+        "1": "You forgot that 90° and 270° both contribute.",
+        "3": "You must divide by 4 (with inverse modulo in code)."
+      },
+      "hint": "Remember two 90°-type rotations.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q23",
+      "phase": "Verifying the Solution",
+      "questionText": "Test n = 3. nn=9, k90=(9+3)/4=3, k180=(9+1)/2=5. a0=512, a90=8, a180=32. What is the answer?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "(512 + 2*8 + 32)/4 = 140",
+          "isCode": false
+        },
+        {
+          "label": "(512 + 8 + 32)/4 = 138",
+          "isCode": false
+        },
+        {
+          "label": "(512 + 2*32 + 8)/4 = 146",
+          "isCode": false
+        },
+        {
+          "label": "(512 + 2*8 + 32) = 560",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "512 + 16 + 32 = 560; divide by 4 to get 140.",
+      "wrongExplanations": {
+        "1": "You missed the 270° rotation contribution.",
+        "3": "Need to divide by 4 at the end."
+      },
+      "hint": "Add, then divide by 4.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Verifying the Solution",
+      "questionText": "Test n = 2 quickly. nn=4, k90=1, k180=2. a0=16, a90=2, a180=4. Final answer?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "(16 + 2*2 + 4)/4 = 6",
+          "isCode": false
+        },
+        {
+          "label": "(16 + 2 + 4)/4 = 5.5",
+          "isCode": false
+        },
+        {
+          "label": "(16 + 4 + 4)/4 = 6",
+          "isCode": false
+        },
+        {
+          "label": "(16 + 2*4 + 2)/4 = 7",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "16 + 4 + 4 = 24; 24/4 = 6.",
+      "wrongExplanations": {
+        "1": "90° and 270° both add; a90=2, so 2*a90=4.",
+        "3": "You misassigned a90 and a180."
+      },
+      "hint": "Double-check a90 and a180.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the time complexity of the final approach in terms of n?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(1)",
+          "isCode": false
+        },
+        {
+          "label": "O(log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(2^{n^2})",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Each modular exponentiation runs in logarithmic time in the exponent (which is O(log n^2) = O(log n)). Constant number of pow calls.",
+      "wrongExplanations": {
+        "0": "Exponentiation by squaring is logarithmic, not constant time.",
+        "2": "We never iterate over cells."
+      },
+      "hint": "Consider the cost of pow with a huge exponent.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Analyzing Complexity",
+      "questionText": "Why is it valid to divide by 4 modulo 1e9+7 in the code?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Because 4 always divides any integer sum.",
+          "isCode": false
+        },
+        {
+          "label": "Because 1e9+7 is prime and 4 has a modular inverse.",
+          "isCode": false
+        },
+        {
+          "label": "Because we only need an approximate answer.",
+          "isCode": false
+        },
+        {
+          "label": "Because 4 ≡ 0 mod 1e9+7.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Modulo a prime, any number not divisible by the modulus has an inverse. inv4 = pow(4, MOD-2, MOD).",
+      "wrongExplanations": {
+        "0": "We are working modulo a prime; exact divisibility of integers is not the point.",
+        "3": "4 is not 0 modulo 1e9+7."
+      },
+      "hint": "Use the modular inverse of 4.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "MOD = 10**9 + 7\nn = int(input().strip())",
+    "nn = n * n",
+    "if n % 2 == 0:\n    k90 = nn // 4\n    k180 = nn // 2",
+    "else:\n    k90 = (nn + 3) // 4\n    k180 = (nn + 1) // 2",
+    "a0 = pow(2, nn, MOD)\na90 = pow(2, k90, MOD)\na180 = pow(2, k180, MOD)",
+    "inv4 = pow(4, MOD - 2, MOD)",
+    "ans = (a0 + 2 * a90 + a180) % MOD",
+    "ans = ans * inv4 % MOD\nprint(ans)"
+  ],
+  "reasoningChain": [
+    {
+      "question": "Are reflections considered the same? What exactly does 'same up to rotation' mean?",
+      "insight": "Only rotations (0°, 90°, 180°, 270°) are allowed; reflections are not identified."
+    },
+    {
+      "question": "How to count distinct colorings without enumerating all?",
+      "insight": "Distinct classes can be counted by averaging how many colorings remain unchanged under each rotation."
+    },
+    {
+      "question": "What are the unchanged counts for 0°, 90°, 180°, 270° rotations?",
+      "insight": "F0=2^{n^2}; 90°/270° use 4-cycles (and possibly a center), 180° uses pairs (and possibly a center)."
+    },
+    {
+      "question": "How do even and odd n differ for 90° and 180° rotations?",
+      "insight": "Even n: k90=n^2/4, k180=n^2/2. Odd n: k90=(n^2+3)/4, k180=(n^2+1)/2 due to the center cell."
+    },
+    {
+      "question": "How to compute the counts modulo 1e9+7 efficiently?",
+      "insight": "Use fast modular exponentiation: pow(2, exponent, MOD) for each case."
+    },
+    {
+      "question": "How to divide by 4 in modular arithmetic?",
+      "insight": "Multiply by the modular inverse inv4 = pow(4, MOD-2, MOD) and reduce modulo MOD."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1303,
+    "output_tokens": 14289,
+    "input_cost": 0.001629,
+    "output_cost": 0.14289,
+    "total_cost": 0.144519
+  }
+}

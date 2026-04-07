@@ -1,0 +1,988 @@
+{
+  "id": "meet-in-the-middle-subset-sum-count",
+  "title": "Meet in the Middle",
+  "difficulty": "hard",
+  "tags": [
+    "advanced"
+  ],
+  "estimatedMinutes": 75,
+  "language": "python",
+  "description": "You are given an array of n numbers. In how many ways can you choose a subset of the numbers with sum x?\n\nInput:\n- First line: two integers n and x\n- Second line: n integers t_1, t_2, ..., t_n\n\nOutput:\n- Print the number of ways you can create the sum x.\n\nNote: Different index selections count as different subsets, even if values are the same.",
+  "examples": [
+    {
+      "input": "4 5\n1 2 3 2",
+      "output": "3",
+      "explanation": "The subsets are {2(idx2),3}, {2(idx4),3}, and {1,2(idx2),2(idx4)}."
+    }
+  ],
+  "constraints": [
+    "1 <= n <= 40",
+    "1 <= x <= 10^9",
+    "1 <= t_i <= 10^9"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "For input n=4, x=5 and array [1, 2, 3, 2], how many subsets sum to 5?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "There are three: {2(idx2),3}, {2(idx4),3}, and {1,2(idx2),2(idx4)}. Different indices make different subsets.",
+      "wrongExplanations": {
+        "0": "It misses either the second 2+3 way or the 1+2+2 way.",
+        "2": "There aren't four distinct index sets that yield 5."
+      },
+      "hint": "Consider that the two '2's are at different positions.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "If the array has two 2's (positions 2 and 4) and one 3, how many different subsets produce 5 using a 2 and the 3?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "Depends on the order of elements in the subset list",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Two subsets: choose the 3 and either of the two 2's. Different indices ⇒ different subsets.",
+      "wrongExplanations": {
+        "0": "There are two distinct index choices for the 2.",
+        "1": "Subsets do not consider order, only which indices are chosen."
+      },
+      "hint": "Think in terms of picking indices, not values.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "Roughly how many subsets exist when n=40?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "2^40 ≈ 10^12",
+          "isCode": false
+        },
+        {
+          "label": "2^20 ≈ 10^6",
+          "isCode": false
+        },
+        {
+          "label": "40",
+          "isCode": false
+        },
+        {
+          "label": "10^9",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "There are 2^n subsets. For n=40, that's about 1 trillion.",
+      "wrongExplanations": {
+        "1": "2^20 corresponds to n=20, not 40.",
+        "2": "This ignores subsets of all sizes."
+      },
+      "hint": "Each element can be either included or not included.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "Is checking every subset directly feasible within 1 second for n up to 40?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, because modern computers are fast",
+          "isCode": false
+        },
+        {
+          "label": "Only if x is small",
+          "isCode": false
+        },
+        {
+          "label": "Only if numbers are small",
+          "isCode": false
+        },
+        {
+          "label": "No, ~2^40 checks is far too many",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 3,
+      "explanation": "~1e12 subset checks is not feasible in 1 second.",
+      "wrongExplanations": {
+        "0": "Even fast machines can't handle ~1e12 checks in time.",
+        "1": "x being small doesn't reduce the number of subsets to check."
+      },
+      "hint": "Compare 2^40 with about 10^8 operations per second.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Understanding the Problem",
+      "questionText": "Should the empty subset be considered when x ≥ 1?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, it contributes once",
+          "isCode": false
+        },
+        {
+          "label": "It exists but never contributes since its sum is 0",
+          "isCode": false
+        },
+        {
+          "label": "No, we must not generate it at all",
+          "isCode": false
+        },
+        {
+          "label": "Only if n=0",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "The empty subset sums to 0, so when x≥1 it doesn't add to the count.",
+      "wrongExplanations": {
+        "0": "It would only contribute if x=0.",
+        "2": "Generating it is harmless and simplifies uniform handling."
+      },
+      "hint": "Does its sum ever equal x≥1?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "If we split the array into two halves of about n/2 elements each, how many subset sums are there per half?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "About 2^(n/2) per half",
+          "isCode": false
+        },
+        {
+          "label": "About n per half",
+          "isCode": false
+        },
+        {
+          "label": "About 2^n per half",
+          "isCode": false
+        },
+        {
+          "label": "About n^2 per half",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each half has 2^(n/2) subsets; computing their sums is manageable for n≤40.",
+      "wrongExplanations": {
+        "2": "2^n would be for the whole array, not one half."
+      },
+      "hint": "Each element in a half is either included or not.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "After computing all subset sums L (left half) and R (right half), how can we count subsets summing to x?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "For each s in L, count how many r in R equal x - s and add those counts",
+          "isCode": false
+        },
+        {
+          "label": "For each s in L, if x - s appears in R, add exactly 1",
+          "isCode": false
+        },
+        {
+          "label": "For each r in R, add s + r to the answer",
+          "isCode": false
+        },
+        {
+          "label": "Take the maximum s in L and r in R with s + r <= x",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Every pair (s,r) with s+r=x corresponds to a valid subset across both halves.",
+      "wrongExplanations": {
+        "1": "We must count all occurrences of x-s in R, not just presence.",
+        "3": "We need exact sum x, not a maximum under x."
+      },
+      "hint": "Each left sum can pair with multiple right sums.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Exploring Approaches",
+      "questionText": "When constructing R, should we keep duplicate sums?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes. Different index choices that produce the same sum must be counted separately",
+          "isCode": false
+        },
+        {
+          "label": "No. Convert to a set to speed up lookups",
+          "isCode": false
+        },
+        {
+          "label": "Keep only the smallest and largest sums",
+          "isCode": false
+        },
+        {
+          "label": "Replace duplicates with a single copy and a boolean flag",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Duplicates represent multiple distinct subsets; they must be preserved for correct counting.",
+      "wrongExplanations": {
+        "1": "A set loses multiplicities and undercounts.",
+        "3": "A boolean flag cannot represent how many times a sum occurs."
+      },
+      "hint": "We need the number of ways, not just whether a sum is possible.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "Which method correctly generates all subset sums for a list while preserving how many ways each sum occurs?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Use a list sums=[0]; for each v in nums, extend with s+v for all s in current sums",
+          "isCode": false
+        },
+        {
+          "label": "Use a set and add sums; sets automatically handle counts",
+          "isCode": false
+        },
+        {
+          "label": "Compute prefix sums and take all pairwise differences",
+          "isCode": false
+        },
+        {
+          "label": "Sort nums and greedily pick values until exceeding x",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Extending a list keeps duplicate sums as separate entries, reflecting multiple ways.",
+      "wrongExplanations": {
+        "1": "Sets remove duplicates, losing multiplicity.",
+        "3": "Greedy does not enumerate all subsets nor preserve counts."
+      },
+      "hint": "We need every subset sum and how many times it occurs.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "Starting with sums=[0], after processing nums=[a,b] by extending with s+v for each v, what does sums contain (order irrelevant)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "[0, a, b, a+b]",
+          "isCode": false
+        },
+        {
+          "label": "[a, b]",
+          "isCode": false
+        },
+        {
+          "label": "[0, a, a+b]",
+          "isCode": false
+        },
+        {
+          "label": "[0, a, a-b, b]",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "After a: [0,a]; after b: add b to both prior entries: [0,a,b,a+b].",
+      "wrongExplanations": {
+        "1": "It misses the empty sum and combination a+b.",
+        "2": "It misses sum b and double-counts nothing."
+      },
+      "hint": "Each new element doubles the number of sums.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "To quickly find how many times a value appears in R, what must be true about R?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "R should be sorted",
+          "isCode": false
+        },
+        {
+          "label": "R should contain unique values only",
+          "isCode": false
+        },
+        {
+          "label": "R can be in any order",
+          "isCode": false
+        },
+        {
+          "label": "R must be stored in a set",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Sorting allows us to locate the range of equal values efficiently.",
+      "wrongExplanations": {
+        "1": "We need duplicates to count multiplicities.",
+        "3": "Sets do not keep duplicate counts."
+      },
+      "hint": "Think about locating the first and last index of a value.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "Given sorted R, which expression gives the number of occurrences of value v using standard library helpers?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "bisect_right(R, v) - bisect_left(R, v)",
+          "isCode": true
+        },
+        {
+          "label": "R.count(v)",
+          "isCode": true
+        },
+        {
+          "label": "bisect_left(R, v)",
+          "isCode": true
+        },
+        {
+          "label": "index = R.index(v); 1 if index != -1 else 0",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The difference between right and left insertion points gives the count of v in sorted R.",
+      "wrongExplanations": {
+        "1": "Works but is linear; we want a faster approach for large R.",
+        "2": "This returns the insertion point, not the count."
+      },
+      "hint": "Find the span [first position of v, first position of >v).",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "If L = [0, 1], R = [2, 3] and x = 3, how many pairs (s in L, r in R) satisfy s + r = x?",
+      "diagram": "Pairs to consider:\n(0,2) -> 2\n(0,3) -> 3\n(1,2) -> 3\n(1,3) -> 4",
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Valid pairs are (0,3) and (1,2), so total is 2.",
+      "wrongExplanations": {
+        "0": "You missed one valid pair.",
+        "2": "There are only two matching sums."
+      },
+      "hint": "Check each pair and sum explicitly.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Building the Idea",
+      "questionText": "Let L = [0, 2], R = [1, 1, 1], and x = 1. How many pairs (s, r) satisfy s + r = x?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 3,
+      "explanation": "We need r = 1 - s. For s=0, r=1 occurs 3 times; for s=2, r=-1 occurs 0 times. Total 3.",
+      "wrongExplanations": {
+        "0": "You may have overlooked r=1 occurs three times when s=0.",
+        "1": "There are three occurrences of 1 in R."
+      },
+      "hint": "Count how many times 1 appears in R when s=0.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Choose the correct code to read all integers from stdin and prepare basic imports.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\nfrom bisect import bisect_left, bisect_right\ndata = sys.stdin.readline().split()\n# n, x, and array not fully read",
+          "isCode": true
+        },
+        {
+          "label": "import sys\nfrom bisect import bisect_left, bisect_right\ndata = list(map(int, sys.stdin.read().split()))\n# data now holds all integers",
+          "isCode": true
+        },
+        {
+          "label": "from sys import stdin\n# No bisect import\ndata = [int(x) for x in stdin.readline().split()]",
+          "isCode": true
+        },
+        {
+          "label": "import sys\n# Wrong: strings not converted to ints\ndata = sys.stdin.read().split()",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Reading the whole stream and mapping to int ensures we get n, x, and all t_i. We also import bisect helpers.",
+      "wrongExplanations": {
+        "0": "Reads only one line; the array may be on another line.",
+        "3": "Leaves tokens as strings, not integers."
+      },
+      "hint": "We need every integer token from the entire input.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\nfrom bisect import bisect_left, bisect_right\ndata = list(map(int, sys.stdin.read().split()))\n# data now holds all integers",
+      "codeLabel": "Imports and read input"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Parse n, x, and split the array into two halves correctly.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "n, x = data[0], data[1]\narr = data[2:2+n]\nmid = n // 2\nleft = arr[:mid]\nright = arr[mid:]",
+          "isCode": true
+        },
+        {
+          "label": "n, x = data[1], data[0]\narr = data[2:]\nmid = n // 2\nleft = arr[:mid]\nright = arr[mid:]",
+          "isCode": true
+        },
+        {
+          "label": "n, x = data[0], data[1]\narr = data[2:]\nmid = (n + 1) // 2\nleft = arr[:mid]\nright = arr[mid+1:]",
+          "isCode": true
+        },
+        {
+          "label": "n, x = data[0], data[1]\narr = data[2:2+n]\nmid = n // 2\nleft = arr[:mid-1]\nright = arr[mid-1:]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We take exactly n numbers for arr, split at mid without skipping or overlapping indices.",
+      "wrongExplanations": {
+        "1": "Swapping n and x breaks parsing.",
+        "2": "This skips an element in the right half (mid+1)."
+      },
+      "hint": "Ensure you use exactly n array elements and don't miss any in the split.",
+      "isCodeBuilding": true,
+      "codeSnippet": "n, x = data[0], data[1]\narr = data[2:2+n]\nmid = n // 2\nleft = arr[:mid]\nright = arr[mid:]",
+      "codeLabel": "Parse and split halves"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Define a helper that initializes storage for subset sums properly.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def subset_sums(nums):\n    sums = [0]\n    return sums  # to be filled later",
+          "isCode": true
+        },
+        {
+          "label": "def subset_sums(nums):\n    sums = []\n    # start empty\n    return sums",
+          "isCode": true
+        },
+        {
+          "label": "def subset_sums(nums):\n    sums = {0}\n    return sums",
+          "isCode": true
+        },
+        {
+          "label": "def subset_sums(nums):\n    return [0, nums[0]]  # only for first element",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We must start with [0] so the empty subset is represented; other options either lose multiplicity or are incomplete.",
+      "wrongExplanations": {
+        "1": "Without 0, you can't build sums that exclude elements.",
+        "3": "Only handles a single element."
+      },
+      "hint": "The empty subset sum should be present initially.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def subset_sums(nums):\n    sums = [0]\n    return sums  # to be filled later",
+      "codeLabel": "Subset sums init"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Fill in subset_sums to generate all sums while preserving multiplicity.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def subset_sums(nums):\n    sums = [0]\n    for v in nums:\n        sums += [s + v for s in sums]\n    return sums",
+          "isCode": true
+        },
+        {
+          "label": "def subset_sums(nums):\n    sums = [0]\n    for v in nums:\n        sums = [s + v for s in sums]  # overwrites previous sums\n    return sums",
+          "isCode": true
+        },
+        {
+          "label": "def subset_sums(nums):\n    sums = set([0])\n    for v in nums:\n        sums |= {s + v for s in sums}\n    return list(sums)",
+          "isCode": true
+        },
+        {
+          "label": "def subset_sums(nums):\n    sums = [0]\n    for v in nums:\n        sums.append(v)  # misses combinations\n    return sums",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Extending with [s+v for s in sums] keeps all prior sums and adds new ones, preserving duplicates.",
+      "wrongExplanations": {
+        "1": "Overwriting loses sums excluding earlier elements.",
+        "3": "Only adds singletons; misses many subset sums."
+      },
+      "hint": "Each new element doubles the list length.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def subset_sums(nums):\n    sums = [0]\n    for v in nums:\n        sums += [s + v for s in sums]\n    return sums",
+      "codeLabel": "Subset sums body"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Compute both halves' sums and prepare the right side for fast counting.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "sums_left = subset_sums(left)\nsums_right = subset_sums(right)\nsums_right.sort()",
+          "isCode": true
+        },
+        {
+          "label": "sums_left = subset_sums(left)\nsums_right = subset_sums(right)\n# keep as is; no need to sort",
+          "isCode": true
+        },
+        {
+          "label": "sums_left = subset_sums(left)\nsums_right = set(subset_sums(right))\n# lose duplicates",
+          "isCode": true
+        },
+        {
+          "label": "sums_left = sorted(subset_sums(left))\nsums_right = subset_sums(right)\n# sort the left only",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need sums_right sorted to locate the count of a target value efficiently; keep duplicates.",
+      "wrongExplanations": {
+        "1": "Unsorted data prevents fast range location.",
+        "2": "Sets remove necessary multiplicities."
+      },
+      "hint": "We'll search ranges of equal values in the right list.",
+      "isCodeBuilding": true,
+      "codeSnippet": "sums_left = subset_sums(left)\nsums_right = subset_sums(right)\nsums_right.sort()",
+      "codeLabel": "Compute and sort sums"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Write a helper to count how many times a value appears in a sorted list using insertion points.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def count_equal(sorted_list, value):\n    lo = bisect_left(sorted_list, value)\n    hi = bisect_right(sorted_list, value)\n    return hi - lo",
+          "isCode": true
+        },
+        {
+          "label": "def count_equal(sorted_list, value):\n    idx = bisect_left(sorted_list, value)\n    return 1 if idx < len(sorted_list) and sorted_list[idx] == value else 0",
+          "isCode": true
+        },
+        {
+          "label": "def count_equal(sorted_list, value):\n    return sorted_list.count(value)",
+          "isCode": true
+        },
+        {
+          "label": "def count_equal(sorted_list, value):\n    lo = bisect_right(sorted_list, value)\n    hi = bisect_left(sorted_list, value)\n    return lo - hi - 1",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The count is the width between first position of value and first position of greater-than value.",
+      "wrongExplanations": {
+        "1": "Only checks presence; not the number of occurrences.",
+        "2": "Correct but linear time; we want a faster method."
+      },
+      "hint": "Use both left and right insertion points.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def count_equal(sorted_list, value):\n    lo = bisect_left(sorted_list, value)\n    hi = bisect_right(sorted_list, value)\n    return hi - lo",
+      "codeLabel": "Count occurrences in sorted list"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "Accumulate the total number of valid pairs using the helper.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "ans = 0\nfor s in sums_left:\n    ans += count_equal(sums_right, x - s)",
+          "isCode": true
+        },
+        {
+          "label": "ans = 0\nfor r in sums_right:\n    ans += count_equal(sums_left, x - r)",
+          "isCode": true
+        },
+        {
+          "label": "ans = 0\nfor s in sums_left:\n    if count_equal(sums_right, x - s):\n        ans += 1",
+          "isCode": true
+        },
+        {
+          "label": "ans = 0\nfor s in sums_left:\n    ans += count_equal(sums_right, x + s)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need to count all r equal to x - s for each s; summing the counts gives the total.",
+      "wrongExplanations": {
+        "1": "This also works in principle but we must be consistent with sorted side and helper use.",
+        "2": "Only adds 1 even if there are many matches."
+      },
+      "hint": "Use x - s as the needed complement.",
+      "isCodeBuilding": true,
+      "codeSnippet": "ans = 0\nfor s in sums_left:\n    ans += count_equal(sums_right, x - s)",
+      "codeLabel": "Accumulate answer"
+    },
+    {
+      "id": "q22",
+      "phase": "Writing the Code",
+      "questionText": "Finish by outputting the result.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "print(ans)",
+          "isCode": true
+        },
+        {
+          "label": "print(len(ans))",
+          "isCode": true
+        },
+        {
+          "label": "print(*ans)",
+          "isCode": true
+        },
+        {
+          "label": "sys.stdout.write(ans)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "ans is an integer count; printing it directly is correct.",
+      "wrongExplanations": {
+        "1": "ans is an int, len(ans) is invalid.",
+        "3": "write expects a string; ans is an int."
+      },
+      "hint": "The variable is an integer.",
+      "isCodeBuilding": true,
+      "codeSnippet": "print(ans)",
+      "codeLabel": "Output"
+    },
+    {
+      "id": "q23",
+      "phase": "Verifying the Solution",
+      "questionText": "Run the program on input:\n4 5\n1 2 3 2\nWhat is the output?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Subsets: {2(idx2),3}, {2(idx4),3}, {1,2(idx2),2(idx4)} → total 3.",
+      "wrongExplanations": {
+        "0": "Misses one valid subset.",
+        "2": "Overcounts beyond existing combinations."
+      },
+      "hint": "Check both 2+3 choices and 1+2+2.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Verifying the Solution",
+      "questionText": "Test input:\n3 4\n4 4 1\nWhat should the program print?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Subsets summing to 4: pick the first 4, or pick the second 4. The 1 cannot help reach 4.",
+      "wrongExplanations": {
+        "0": "There are two distinct choices of 4 by index.",
+        "2": "There aren't three different ways."
+      },
+      "hint": "Each 4 alone works; 1 doesn't combine to 4 with any other.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the time complexity of this approach in terms of n (ignore small constant factors)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(2^(n/2) * n + 2^(n/2) * log(2^(n/2)))",
+          "isCode": false
+        },
+        {
+          "label": "O(2^n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n * 2^n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Generating sums per half is O(n*2^(n/2)); sorting right is O(2^(n/2) log 2^(n/2)); combining adds O(2^(n/2) log 2^(n/2)).",
+      "wrongExplanations": {
+        "1": "We avoid enumerating all 2^n subsets at once.",
+        "2": "Too small for enumerating all half-subsets."
+      },
+      "hint": "Count the work to build each half and to combine them.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the extra space usage of the algorithm?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(2^(n/2)) for storing sums of one half (plus the other half similarly)",
+          "isCode": false
+        },
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(1)",
+          "isCode": false
+        },
+        {
+          "label": "O(2^n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We store both halves' sums; each list has size ~2^(n/2).",
+      "wrongExplanations": {
+        "3": "We never store all 2^n subset sums at once."
+      },
+      "hint": "Consider the size of the lists of subset sums.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q27",
+      "phase": "Analyzing Complexity",
+      "questionText": "If we accidentally used a set for the right sums instead of a list, what happens?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "We lose multiplicities and undercount the number of subsets",
+          "isCode": false
+        },
+        {
+          "label": "Nothing changes; counts remain correct",
+          "isCode": false
+        },
+        {
+          "label": "It becomes faster and still correct",
+          "isCode": false
+        },
+        {
+          "label": "It becomes slower but still correct",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Sets collapse duplicates, so identical sums from different subsets are merged, reducing the counted ways.",
+      "wrongExplanations": {
+        "1": "Counts will be wrong without multiplicity.",
+        "2": "It might be faster for lookups but correctness is broken."
+      },
+      "hint": "We need to count how many times each sum occurs.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\nfrom bisect import bisect_left, bisect_right\ndata = list(map(int, sys.stdin.read().split()))\n# data now holds all integers",
+    "n, x = data[0], data[1]\narr = data[2:2+n]\nmid = n // 2\nleft = arr[:mid]\nright = arr[mid:]",
+    "def subset_sums(nums):\n    sums = [0]\n    return sums  # to be filled later",
+    "def subset_sums(nums):\n    sums = [0]\n    for v in nums:\n        sums += [s + v for s in sums]\n    return sums",
+    "sums_left = subset_sums(left)\nsums_right = subset_sums(right)\nsums_right.sort()",
+    "def count_equal(sorted_list, value):\n    lo = bisect_left(sorted_list, value)\n    hi = bisect_right(sorted_list, value)\n    return hi - lo",
+    "ans = 0\nfor s in sums_left:\n    ans += count_equal(sums_right, x - s)",
+    "print(ans)"
+  ],
+  "reasoningChain": [
+    {
+      "question": "How many subsets are there for n=40 and is brute force feasible?",
+      "insight": "There are 2^n subsets; for n=40 this is too many to enumerate directly."
+    },
+    {
+      "question": "Can we reduce work by considering two halves separately?",
+      "insight": "Compute all subset sums for each half; each has 2^(n/2) sums, which is manageable."
+    },
+    {
+      "question": "How do we count full-array subsets from half sums?",
+      "insight": "For each left sum s, we need the number of right sums equal to x - s; sum these counts."
+    },
+    {
+      "question": "How to generate all subset sums while keeping multiplicities?",
+      "insight": "Start with [0] and for each value v, extend with s+v for every current s; keep a list, not a set."
+    },
+    {
+      "question": "How to count occurrences of a value quickly in the right sums?",
+      "insight": "Sort the right sums and use the positions of first >=v and first >v to get the count."
+    },
+    {
+      "question": "What pitfalls to avoid in implementation?",
+      "insight": "Parse input correctly, split without skipping, don't deduplicate sums, and ensure the right side is sorted before counting."
+    },
+    {
+      "question": "What is the resulting complexity and memory usage?",
+      "insight": "Time roughly O(2^(n/2) * (n + log 2^(n/2))); space O(2^(n/2)) for each list of sums."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1336,
+    "output_tokens": 15281,
+    "input_cost": 0.00167,
+    "output_cost": 0.15281,
+    "total_cost": 0.15448
+  }
+}

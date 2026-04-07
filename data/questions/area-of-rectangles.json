@@ -1,0 +1,954 @@
+{
+  "id": "area-of-rectangles-union",
+  "title": "Area of Rectangles",
+  "difficulty": "hard",
+  "tags": [
+    "geometry"
+  ],
+  "estimatedMinutes": 85,
+  "language": "python",
+  "description": "Given n axis-aligned rectangles, determine the total area covered by their union. Each rectangle is given by (x1,y1) as the lower-left corner and (x2,y2) as the upper-right corner. The rectangles may overlap. Print the total area covered.\n\nInput:\n- First line: integer n\n- Next n lines: four integers x1 y1 x2 y2 per line (with x1 < x2 and y1 < y2)\n\nOutput:\n- Single integer: total area of the union of rectangles\n\nExample:\nInput:\n3\n1 3 4 5\n3 1 7 4\n5 3 8 6\nOutput:\n24",
+  "examples": [
+    {
+      "input": "3\n1 3 4 5\n3 1 7 4\n5 3 8 6\n",
+      "output": "24\n",
+      "explanation": "The total union area of the three rectangles is 24."
+    }
+  ],
+  "constraints": [
+    "1 ≤ n ≤ 10^5",
+    "-10^6 ≤ x1 < x2 ≤ 10^6",
+    "-10^6 ≤ y1 < y2 ≤ 10^6",
+    "Time limit: 1 s, Memory limit: 512 MB"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "Two rectangles: A:(0,0)-(2,1) and B:(2,0)-(3,1). They touch at x=2 but do not overlap.\nWhat is the union area?",
+      "diagram": "A: [0,2]x[0,1]\nB:        [2,3]x[0,1]\nTouching edge only.",
+      "options": [
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Areas are 2 and 1; they don't overlap in area, so 2+1=3. Shared boundary has zero area.",
+      "wrongExplanations": {
+        "2": "4 would double-count nonexistent overlap.",
+        "0": "2 ignores the area of the second rectangle."
+      },
+      "hint": "A shared border contributes no area.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "Rectangles: A:(0,0)-(2,2) and B:(1,0)-(3,1).\nCompute the union area.",
+      "diagram": "A covers [0,2]x[0,2]; B covers [1,3]x[0,1]\nOverlap is [1,2]x[0,1] of area 1.",
+      "options": [
+        {
+          "label": "6",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        },
+        {
+          "label": "7",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Area A=4, B=2, overlap=1 => 4+2-1=5.",
+      "wrongExplanations": {
+        "0": "6 double-counts the overlap.",
+        "1": "4 ignores the area of part of B outside A."
+      },
+      "hint": "Use area(A)+area(B)-area(overlap).",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "For many rectangles (n up to 1e5), is it feasible to compute union area by summing areas, subtracting all pairwise overlaps, adding all triple overlaps, etc.?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, always feasible and fast.",
+          "isCode": false
+        },
+        {
+          "label": "In theory the alternating sum is correct, but enumerating all overlaps for large n is infeasible.",
+          "isCode": false
+        },
+        {
+          "label": "No, the alternating sum is mathematically wrong.",
+          "isCode": false
+        },
+        {
+          "label": "Only subtract pairwise overlaps; higher-order overlaps can be ignored safely.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "The inclusion-exclusion sum is correct, but enumerating combinations is exponential and too slow for large n.",
+      "wrongExplanations": {
+        "0": "Feasibility is the problem: combinations explode.",
+        "2": "The alternating sum is correct in principle; the issue is computation."
+      },
+      "hint": "How many pairs, triples, etc., exist when n is large?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "Rectangles A:(0,0)-(2,1) and B:(1,0)-(3,1). For x in (1,2), what is the total covered vertical length at that x?",
+      "diagram": "At x in (1,2): A covers y in [0,1), B covers y in [0,1) too. Union along y is [0,1).",
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "Depends on x within (1,2).",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Both cover [0,1), so union length is 1 regardless of x in (1,2).",
+      "wrongExplanations": {
+        "0": "There is coverage: the union isn’t empty.",
+        "2": "2 would be double-counting the same segment."
+      },
+      "hint": "Consider y-intervals at a fixed x.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Understanding the Problem",
+      "questionText": "Would tiling the plane with unit grid cells and counting covered cells be viable and accurate for coordinates up to 1e6?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, it’s both accurate and fast.",
+          "isCode": false
+        },
+        {
+          "label": "It could be accurate but far too slow and memory-heavy.",
+          "isCode": false
+        },
+        {
+          "label": "It’s fast but inaccurate for overlaps.",
+          "isCode": false
+        },
+        {
+          "label": "It’s accurate if we only sample integer x and y lines.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "A 2D grid up to 1e6×1e6 is enormous; it’s infeasible in time and memory.",
+      "wrongExplanations": {
+        "0": "Feasibility fails: too many cells.",
+        "3": "Sampling lines misses areas between lines."
+      },
+      "hint": "How many cells would there be?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "If we move from left to right along x, what quantity multiplied by the horizontal distance dx gives the area gained over that step?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "The total vertical length covered by rectangles at that x.",
+          "isCode": false
+        },
+        {
+          "label": "The number of rectangles active at that x.",
+          "isCode": false
+        },
+        {
+          "label": "The sum of rectangle heights regardless of overlap.",
+          "isCode": false
+        },
+        {
+          "label": "The sum of perimeters of active rectangles.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Area added over dx equals covered-y-length * dx at that slice.",
+      "wrongExplanations": {
+        "1": "Counting rectangles ignores overlaps.",
+        "2": "Summing heights double-counts overlapped y ranges."
+      },
+      "hint": "Think of a thin vertical slice of thickness dx.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "How can we keep track of the covered vertical length efficiently as we move along x?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Recompute the union by merging all active y-intervals from scratch at every step.",
+          "isCode": false
+        },
+        {
+          "label": "Keep an active set of y-intervals; when x hits a rectangle edge, add or remove that interval and update the covered length.",
+          "isCode": false
+        },
+        {
+          "label": "Track only the tallest rectangle height at each x.",
+          "isCode": false
+        },
+        {
+          "label": "Only count rectangles that started most recently.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Add/remove y-intervals at x changes and update the union length; avoids recomputing from scratch.",
+      "wrongExplanations": {
+        "0": "Merging all intervals at each step is too slow.",
+        "2": "Tallest height ignores multiple disjoint covered segments."
+      },
+      "hint": "Only x at rectangle edges change the set of active intervals.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Exploring Approaches",
+      "questionText": "Which x-positions are sufficient to consider for changes in coverage?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "All integer x values between min and max.",
+          "isCode": false
+        },
+        {
+          "label": "Only the unique x1 and x2 values of rectangles.",
+          "isCode": false
+        },
+        {
+          "label": "Only midpoints of rectangles.",
+          "isCode": false
+        },
+        {
+          "label": "Only the smallest and largest x across all rectangles.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Coverage only changes at rectangle vertical edges x1 and x2.",
+      "wrongExplanations": {
+        "0": "Intermediate integer x that aren’t edges don’t change intervals.",
+        "3": "Ignoring interior edges misses changes in coverage."
+      },
+      "hint": "When do new y-intervals appear or disappear?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "For each rectangle, which x-boundaries cause changes as we move along x?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "The left boundary x1 and the right boundary x2.",
+          "isCode": false
+        },
+        {
+          "label": "The bottom boundary y1 and the top boundary y2.",
+          "isCode": false
+        },
+        {
+          "label": "The rectangle center along x.",
+          "isCode": false
+        },
+        {
+          "label": "Every integer x between x1 and x2.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "At x1 the interval [y1,y2) appears; at x2 it disappears.",
+      "wrongExplanations": {
+        "1": "y boundaries define vertical extents, not x-change points.",
+        "3": "Changes occur only at edges, not every integer x."
+      },
+      "hint": "Think of entering and leaving a rectangle along x.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "What information should we store for each boundary to update vertical coverage?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "x, y1, y2, and a type (+1 for start at x1, -1 for end at x2).",
+          "isCode": false
+        },
+        {
+          "label": "Only x; we can derive y from elsewhere.",
+          "isCode": false
+        },
+        {
+          "label": "Only y1 and y2; x is not needed.",
+          "isCode": false
+        },
+        {
+          "label": "x and area of the rectangle.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need to add/remove [y1,y2) when we pass x1/x2, hence store (x,y1,y2,type).",
+      "wrongExplanations": {
+        "1": "Without y1,y2 we cannot update vertical coverage.",
+        "2": "We must know at which x to change coverage."
+      },
+      "hint": "We need to know what y-range appears/disappears at an x.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "At a boundary x, should we accumulate area using the previous covered length before or after applying updates at x?",
+      "diagram": "prev_x ---[dx]---> x\nArea added over dx uses coverage from (prev_x, x).",
+      "options": [
+        {
+          "label": "Before applying updates at x (using coverage from (prev_x, x)).",
+          "isCode": false
+        },
+        {
+          "label": "After applying updates at x.",
+          "isCode": false
+        },
+        {
+          "label": "It doesn't matter; both give the same result.",
+          "isCode": false
+        },
+        {
+          "label": "Accumulate both before and after to be safe.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Coverage over (prev_x, x) is determined by the state before x; update at x affects the next interval.",
+      "wrongExplanations": {
+        "1": "Applying first uses coverage appropriate for (x,next_x), not (prev_x,x).",
+        "2": "Order matters at discontinuities."
+      },
+      "hint": "Which coverage is valid in the open interval (prev_x, x)?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "How to compute the total covered vertical length from active intervals efficiently?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Sum lengths of active intervals and subtract pairwise overlaps each time.",
+          "isCode": false
+        },
+        {
+          "label": "Keep counts over a partition of y and maintain the union length as intervals are added/removed.",
+          "isCode": false
+        },
+        {
+          "label": "Take the maximum interval length at any time.",
+          "isCode": false
+        },
+        {
+          "label": "Only keep the last added interval; others are redundant.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Partition y by unique boundaries and keep coverage counts to compute union length quickly.",
+      "wrongExplanations": {
+        "0": "Recomputing overlaps repeatedly is too slow.",
+        "2": "Maximum ignores disjoint covered parts."
+      },
+      "hint": "Unique y boundaries allow us to split into elementary segments.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "Why discretize y using the sorted unique y1 and y2 values?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "So updates and lengths align to elementary strips [y[i], y[i+1]) and we only track O(unique y) segments.",
+          "isCode": false
+        },
+        {
+          "label": "To avoid using integers.",
+          "isCode": false
+        },
+        {
+          "label": "Because x ranges are small.",
+          "isCode": false
+        },
+        {
+          "label": "It makes sorting x boundaries unnecessary.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Discretization turns continuous y into a finite set of strips that match all interval boundaries.",
+      "wrongExplanations": {
+        "1": "We still use integers; the goal is alignment and efficiency.",
+        "3": "We still sort x boundaries."
+      },
+      "hint": "All added/removed intervals start/end at these y values.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Building the Idea",
+      "questionText": "If y1 maps to index i1 and y2 maps to index i2 in the sorted unique list, which elementary strips should be updated for interval [y1, y2)?",
+      "diagram": "Elementary strips are [y[i], y[i+1]) for i=0..m-2.",
+      "options": [
+        {
+          "label": "Indices [i1, i2-1] (inclusive).",
+          "isCode": false
+        },
+        {
+          "label": "Indices [i1, i2] (inclusive).",
+          "isCode": false
+        },
+        {
+          "label": "Only index i1.",
+          "isCode": false
+        },
+        {
+          "label": "Only index i2-1.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Strips are half-open; covering [y1,y2) means covering all strips from i1 up to i2-1.",
+      "wrongExplanations": {
+        "1": "Including i2 would extend past y2.",
+        "2": "Only i1 ignores the full vertical span."
+      },
+      "hint": "Each strip [y[i], y[i+1]) lies fully within [y1,y2) for i in that range.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Read all input quickly and extract n. Choose the best snippet.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\ndata = list(map(int, sys.stdin.buffer.read().split()))\nit = iter(data)\ntry:\n    n = next(it)\nexcept StopIteration:\n    print(0); sys.exit(0)",
+          "isCode": true
+        },
+        {
+          "label": "n = int(input())\nnums = []\nfor line in sys.stdin:\n    nums += list(map(int, line.split()))",
+          "isCode": true
+        },
+        {
+          "label": "import sys\ns = sys.stdin.read().strip().split()\nn = int(s[0])\nit = iter(map(int, s[1:]))",
+          "isCode": true
+        },
+        {
+          "label": "import sys\nbuf = sys.stdin.buffer.readline\nn = int(buf())\nstream = []",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Reading all as ints and iterating is fast and robust; it handles empty input safely.",
+      "wrongExplanations": {
+        "1": "Mixing input() and manual parsing can be slower and incomplete.",
+        "3": "Doesn’t parse remaining integers; incomplete setup."
+      },
+      "hint": "Use buffered bulk read for speed.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\ndata = list(map(int, sys.stdin.buffer.read().split()))\nit = iter(data)\ntry:\n    n = next(it)\nexcept StopIteration:\n    print(0); sys.exit(0)",
+      "codeLabel": "Read all input and n"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Build boundary events and collect y-coordinates. Pick the correct snippet.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "events = []; ys = []\nfor _ in range(n):\n    x1 = next(it); y1 = next(it); x2 = next(it); y2 = next(it)\n    events.append((x1, y1, y2, 1)); events.append((x2, y1, y2, -1))\n    ys.append(y1); ys.append(y2)",
+          "isCode": true
+        },
+        {
+          "label": "events = []; ys = []\nfor _ in range(n):\n    x1 = next(it); y1 = next(it); x2 = next(it); y2 = next(it)\n    events.append((x1, y1, y2, 1))\n    ys.append(y1)",
+          "isCode": true
+        },
+        {
+          "label": "events = []; ys = []\nfor _ in range(n):\n    x1 = next(it); y1 = next(it); x2 = next(it); y2 = next(it)\n    events.append((x1, y1, y2, 1)); events.append((x2, y1, y2, 1))\n    ys.extend([y1])",
+          "isCode": true
+        },
+        {
+          "label": "events = []; ys = []\nfor _ in range(n):\n    x1 = next(it); y1 = next(it); x2 = next(it); y2 = next(it)\n    events.append((x1, y1, y2, -1)); events.append((x2, y1, y2, 1))\n    ys.append(y2)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We add a start (+1) at x1 and an end (-1) at x2, and collect both y1 and y2.",
+      "wrongExplanations": {
+        "1": "Missing end events and missing y2 breaks removals and compression.",
+        "2": "End event must be -1; also need y2.",
+        "3": "Signs reversed and missing y1 or y2 for compression."
+      },
+      "hint": "Each rectangle contributes two events and two y-values.",
+      "isCodeBuilding": true,
+      "codeSnippet": "events = []; ys = []\nfor _ in range(n):\n    x1 = next(it); y1 = next(it); x2 = next(it); y2 = next(it)\n    events.append((x1, y1, y2, 1)); events.append((x2, y1, y2, -1))\n    ys.append(y1); ys.append(y2)",
+      "codeLabel": "Build events and y list"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Discretize y and guard the trivial case. Choose the correct code.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "ys = sorted(set(ys))\nif len(ys) < 2:\n    print(0); sys.exit(0)\ny_to_i = {v:i for i,v in enumerate(ys)}",
+          "isCode": true
+        },
+        {
+          "label": "ys = list(set(ys))\ny_to_i = {v:i for i,v in enumerate(ys)}",
+          "isCode": true
+        },
+        {
+          "label": "ys.sort()\ny_to_i = {v:i for i,v in enumerate(ys)}",
+          "isCode": true
+        },
+        {
+          "label": "ys = sorted(ys)\nif not ys:\n    print(0); sys.exit(0)\ny_to_i = {v:i for i,v in enumerate(ys)}",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need unique, sorted y values; if fewer than 2, there are no strips. The mapping uses these.",
+      "wrongExplanations": {
+        "1": "Using set without sorting yields arbitrary order (wrong indices).",
+        "2": "Duplicates remain; mapping repeats indices incorrectly."
+      },
+      "hint": "Strips are [y[i], y[i+1]); need sorted unique values.",
+      "isCodeBuilding": true,
+      "codeSnippet": "ys = sorted(set(ys))\nif len(ys) < 2:\n    print(0); sys.exit(0)\ny_to_i = {v:i for i,v in enumerate(ys)}",
+      "codeLabel": "Coordinate compression for y"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Convert events to index-based intervals and sort by x.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "ev2 = []\nfor x, y1, y2, t in events:\n    i1 = y_to_i[y1]; i2 = y_to_i[y2]\n    if i1 < i2: ev2.append((x, i1, i2, t))\nev2.sort(key=lambda e: e[0])",
+          "isCode": true
+        },
+        {
+          "label": "ev2 = []\nfor x, y1, y2, t in events:\n    i1 = y_to_i[y1]; i2 = y_to_i[y2]\n    ev2.append((x, i1, i2-1, t))\nev2.sort(key=lambda e: e[1])",
+          "isCode": true
+        },
+        {
+          "label": "ev2 = []\nfor x, y1, y2, t in events:\n    i1 = y_to_i[y1]; i2 = y_to_i[y2]\n    ev2.append((x, i1, i2, t))\nev2.sort()",
+          "isCode": true
+        },
+        {
+          "label": "ev2 = []\nfor x, y1, y2, t in events:\n    i1 = y_to_i[y1]\n    ev2.append((x, i1, i1, t))\nev2.sort(key=lambda e: e[0])",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Store (x, i1, i2, t) and sort by x; the [i1, i2-1] range is applied during updates.",
+      "wrongExplanations": {
+        "1": "Sorting by y breaks x-order; also pre-subtracting 1 here mixes responsibilities.",
+        "3": "Loses the upper index; interval length collapses."
+      },
+      "hint": "Sorting must be by x so we process boundaries left to right.",
+      "isCodeBuilding": true,
+      "codeSnippet": "ev2 = []\nfor x, y1, y2, t in events:\n    i1 = y_to_i[y1]; i2 = y_to_i[y2]\n    if i1 < i2: ev2.append((x, i1, i2, t))\nev2.sort(key=lambda e: e[0])",
+      "codeLabel": "Index events and sort"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Prepare arrays for tracking coverage over elementary y-strips.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "N = len(ys) - 1\nsize = 4 * N\ncnt = [0] * (size)\nlength = [0] * (size)",
+          "isCode": true
+        },
+        {
+          "label": "N = len(ys)\nsize = 4 * N\ncnt = [0] * (size)\nlength = [0] * (size)",
+          "isCode": true
+        },
+        {
+          "label": "N = len(ys) - 1\nsize = 2 * N\ncnt = [0] * (size)\nlength = [0] * (size)",
+          "isCode": true
+        },
+        {
+          "label": "N = len(ys)\nsize = N\ncnt = [0] * (size)\nlength = [0] * (size)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "There are len(ys)-1 strips. Sizing arrays to ~4*N is a safe upper bound for recursive structure.",
+      "wrongExplanations": {
+        "1": "Using len(ys) miscounts by one; leaves represent strips between y's.",
+        "2": "Too small for recursion depth in general."
+      },
+      "hint": "How many [y[i], y[i+1]) strips are there?",
+      "isCodeBuilding": true,
+      "codeSnippet": "N = len(ys) - 1\nsize = 4 * N\ncnt = [0] * (size)\nlength = [0] * (size)",
+      "codeLabel": "Allocate coverage arrays"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Implement the update procedure to add/remove coverage on [ql, qr] (inclusive) over strip indices.",
+      "diagram": "If cnt[node] > 0, covered length on [l,r] is ys[r+1]-ys[l]; else sum children or 0 at leaf.",
+      "options": [
+        {
+          "label": "def update(node, l, r, ql, qr, val):\n    if ql > r or qr < l: return\n    if ql <= l and r <= qr:\n        cnt[node] += val\n    else:\n        mid = (l + r) // 2\n        update(node*2, l, mid, ql, qr, val)\n        update(node*2+1, mid+1, r, ql, qr, val)\n    if cnt[node] > 0:\n        length[node] = ys[r+1] - ys[l]\n    else:\n        if l == r:\n            length[node] = 0\n        else:\n            length[node] = length[node*2] + length[node*2+1]",
+          "isCode": true
+        },
+        {
+          "label": "def update(node, l, r, ql, qr, val):\n    if ql > r or qr < l: return\n    if ql <= l and r <= qr:\n        cnt[node] += val\n        length[node] = ys[r] - ys[l]\n        return\n    mid = (l + r) // 2\n    update(node*2, l, mid, ql, qr, val)\n    update(node*2+1, mid+1, r, ql, qr, val)\n    length[node] = length[node*2] + length[node*2+1]",
+          "isCode": true
+        },
+        {
+          "label": "def update(node, l, r, ql, qr, val):\n    if ql > r or qr < l: return\n    mid = (l + r) // 2\n    if ql <= mid:\n        update(node*2, l, mid, ql, qr, val)\n    if qr > mid:\n        update(node*2+1, mid+1, r, ql, qr, val)\n    if cnt[node] > 0:\n        length[node] = ys[r] - ys[l]\n    else:\n        length[node] = length[node*2] + length[node*2+1]",
+          "isCode": true
+        },
+        {
+          "label": "def update(node, l, r, ql, qr, val):\n    if ql > r or qr < l: return\n    if l == r:\n        cnt[node] += val\n        length[node] = ys[r+1] - ys[l] if cnt[node] > 0 else 0\n        return\n    mid = (l + r) // 2\n    update(node*2, l, mid, ql, qr, val)\n    update(node*2+1, mid+1, r, ql, qr, val)\n    length[node] = length[node*2] + length[node*2+1]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We store a coverage count; if positive, the entire segment is covered. Otherwise sum children (or 0 at leaf). Note ys[r+1]-ys[l].",
+      "wrongExplanations": {
+        "1": "Using ys[r]-ys[l] misses the last boundary and ignores nested counts.",
+        "3": "Updating only leaves fails to maintain coverage counts for larger segments."
+      },
+      "hint": "When coverage count > 0, the whole segment’s length is covered regardless of children.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def update(node, l, r, ql, qr, val):\n    if ql > r or qr < l: return\n    if ql <= l and r <= qr:\n        cnt[node] += val\n    else:\n        mid = (l + r) // 2\n        update(node*2, l, mid, ql, qr, val)\n        update(node*2+1, mid+1, r, ql, qr, val)\n    if cnt[node] > 0:\n        length[node] = ys[r+1] - ys[l]\n    else:\n        if l == r:\n            length[node] = 0\n        else:\n            length[node] = length[node*2] + length[node*2+1]",
+      "codeLabel": "Update coverage counts and lengths"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "Initialize area tracking and accumulate with horizontal steps before applying updates at the current x.",
+      "diagram": "prev_x ---- dx ----> x\narea += covered_y_length * dx",
+      "options": [
+        {
+          "label": "area = 0\nprev_x = ev2[0][0] if ev2 else 0\ni = 0\nwhile i < len(ev2):\n    x = ev2[i][0]\n    dx = x - prev_x\n    if dx:\n        area += length[1] * dx",
+          "isCode": true
+        },
+        {
+          "label": "area = 0\nprev_x = 0\ni = 0\nwhile i < len(ev2):\n    x = ev2[i][0]\n    area += length[1] * (prev_x - x)",
+          "isCode": true
+        },
+        {
+          "label": "area = 0\nprev_x = ev2[0][0] if ev2 else 0\ni = 0\nwhile i < len(ev2):\n    x = ev2[i][0]\n    # apply updates here first\n    dx = x - prev_x\n    area += length[1] * dx",
+          "isCode": true
+        },
+        {
+          "label": "area = 0\nprev_x = ev2[0][0] if ev2 else 0\ni = 0\nwhile i < len(ev2):\n    x = ev2[i][0]\n    dx = prev_x - x\n    area += max(0, dx) * length[1]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We compute dx = x - prev_x and add area using the previous coverage (length[1]) before applying events at x.",
+      "wrongExplanations": {
+        "2": "Applying updates before adding area uses the next state, not coverage over (prev_x, x).",
+        "1": "dx sign is reversed and prev_x not initialized to first boundary."
+      },
+      "hint": "Use coverage from the last interval.",
+      "isCodeBuilding": true,
+      "codeSnippet": "area = 0\nprev_x = ev2[0][0] if ev2 else 0\ni = 0\nwhile i < len(ev2):\n    x = ev2[i][0]\n    dx = x - prev_x\n    if dx:\n        area += length[1] * dx",
+      "codeLabel": "Accumulate area with dx"
+    },
+    {
+      "id": "q22",
+      "phase": "Writing the Code",
+      "questionText": "Process all events at the same x by updating [i1, i2-1], then advance prev_x and finally print area.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    while i < len(ev2) and ev2[i][0] == x:\n        _, a, b, t = ev2[i]\n        update(1, 0, N-1, a, b-1, t)\n        i += 1\n    prev_x = x\nprint(area)",
+          "isCode": true
+        },
+        {
+          "label": "    while i < len(ev2) and ev2[i][0] == x:\n        _, a, b, t = ev2[i]\n        update(1, 0, N-1, a, b, t)\n        i += 1\n    prev_x = x\nprint(length[1])",
+          "isCode": true
+        },
+        {
+          "label": "    _, a, b, t = ev2[i]\n    update(1, 0, N-1, a, b-1, t)\n    i += 1\n    prev_x = x\nprint(area)",
+          "isCode": true
+        },
+        {
+          "label": "    while i < len(ev2) and ev2[i][0] == x:\n        _, a, b, t = ev2[i]\n        update(1, 0, N-1, a+1, b-1, t)\n        i += 1\n    prev_x = x\nprint(area)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We must update [a, b-1] for [y1,y2) and print the accumulated area, not the current covered length.",
+      "wrongExplanations": {
+        "1": "Using [a,b] over-covers by one strip and printing length[1] isn’t the area.",
+        "2": "Only processes one event at x; multiple edges at the same x must be grouped."
+      },
+      "hint": "Half-open y-intervals imply an inclusive index range [i1, i2-1].",
+      "isCodeBuilding": true,
+      "codeSnippet": "    while i < len(ev2) and ev2[i][0] == x:\n        _, a, b, t = ev2[i]\n        update(1, 0, N-1, a, b-1, t)\n        i += 1\n    prev_x = x\nprint(area)",
+      "codeLabel": "Apply events at x and output"
+    },
+    {
+      "id": "q23",
+      "phase": "Verifying the Solution",
+      "questionText": "Using the approach, what is the union area for the sample input?\n3\n1 3 4 5\n3 1 7 4\n5 3 8 6",
+      "diagram": null,
+      "options": [
+        {
+          "label": "22",
+          "isCode": false
+        },
+        {
+          "label": "24",
+          "isCode": false
+        },
+        {
+          "label": "20",
+          "isCode": false
+        },
+        {
+          "label": "26",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "The correct total union area is 24 as in the example.",
+      "wrongExplanations": {
+        "0": "22 undercounts; check overlaps across all x.",
+        "2": "20 undercounts significantly."
+      },
+      "hint": "Break into x-intervals: [1,3), [3,4), [4,5), [5,7), [7,8).",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Verifying the Solution",
+      "questionText": "For the sample, what is the covered vertical length for x in [3,4)?\nActive rectangles: (1,3)-(4,5) and (3,1)-(7,4).",
+      "diagram": "y-intervals: [1,4) and [3,5) => union [1,5) length 4.",
+      "options": [
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Union [1,4) ∪ [3,5) = [1,5) with length 4.",
+      "wrongExplanations": {
+        "0": "3 misses part of [3,4) to [5).",
+        "3": "5 would double-count overlapping [3,4)."
+      },
+      "hint": "Merge [1,4) and [3,5).",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the overall time complexity in terms of n (rectangles) and m (unique y values)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n log n + n log m)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log(10^6))",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Sorting 2n boundaries costs O(n log n); each update is logarithmic in the number of y-strips, repeated O(n) times.",
+      "wrongExplanations": {
+        "1": "Quadratic would imply recomputing from scratch each step.",
+        "2": "Ignoring sorting and updates is unrealistic."
+      },
+      "hint": "Sort edges and update a hierarchical structure per event.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Analyzing Complexity",
+      "questionText": "Rectangles may touch along edges (e.g., one ends at y=3 and another starts at y=3). How is this treated for area?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Shared edges contribute zero area; using [y1, y2) strips avoids double counting.",
+          "isCode": false
+        },
+        {
+          "label": "Shared edges add a thin line of area that should be counted once.",
+          "isCode": false
+        },
+        {
+          "label": "They cancel out and remove nearby area.",
+          "isCode": false
+        },
+        {
+          "label": "We must shift coordinates slightly to avoid ties.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Edges have zero area; modeling y-intervals as half-open [y1,y2) prevents overlap on boundaries.",
+      "wrongExplanations": {
+        "1": "Lines have zero area in the plane.",
+        "3": "No coordinate shifting is needed; handle ties consistently."
+      },
+      "hint": "Segments of zero width or height contribute no area.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\ndata = list(map(int, sys.stdin.buffer.read().split()))\nit = iter(data)\ntry:\n    n = next(it)\nexcept StopIteration:\n    print(0); sys.exit(0)",
+    "events = []; ys = []\nfor _ in range(n):\n    x1 = next(it); y1 = next(it); x2 = next(it); y2 = next(it)\n    events.append((x1, y1, y2, 1)); events.append((x2, y1, y2, -1))\n    ys.append(y1); ys.append(y2)",
+    "ys = sorted(set(ys))\nif len(ys) < 2:\n    print(0); sys.exit(0)\ny_to_i = {v:i for i,v in enumerate(ys)}",
+    "ev2 = []\nfor x, y1, y2, t in events:\n    i1 = y_to_i[y1]; i2 = y_to_i[y2]\n    if i1 < i2: ev2.append((x, i1, i2, t))\nev2.sort(key=lambda e: e[0])",
+    "N = len(ys) - 1\nsize = 4 * N\ncnt = [0] * (size)\nlength = [0] * (size)",
+    "def update(node, l, r, ql, qr, val):\n    if ql > r or qr < l: return\n    if ql <= l and r <= qr:\n        cnt[node] += val\n    else:\n        mid = (l + r) // 2\n        update(node*2, l, mid, ql, qr, val)\n        update(node*2+1, mid+1, r, ql, qr, val)\n    if cnt[node] > 0:\n        length[node] = ys[r+1] - ys[l]\n    else:\n        if l == r:\n            length[node] = 0\n        else:\n            length[node] = length[node*2] + length[node*2+1]",
+    "area = 0\nprev_x = ev2[0][0] if ev2 else 0\ni = 0\nwhile i < len(ev2):\n    x = ev2[i][0]\n    dx = x - prev_x\n    if dx:\n        area += length[1] * dx",
+    "    while i < len(ev2) and ev2[i][0] == x:\n        _, a, b, t = ev2[i]\n        update(1, 0, N-1, a, b-1, t)\n        i += 1\n    prev_x = x\nprint(area)"
+  ],
+  "reasoningChain": [
+    {
+      "question": "How do we ensure overlapping regions are counted once?",
+      "insight": "Union area is not the sum of rectangle areas; overlaps must be merged."
+    },
+    {
+      "question": "How can we compute union area by moving along x?",
+      "insight": "Area added over a horizontal step equals covered vertical length times dx."
+    },
+    {
+      "question": "Which events change coverage along x?",
+      "insight": "Only vertical edges at x1 (add [y1,y2)) and x2 (remove [y1,y2)) change coverage."
+    },
+    {
+      "question": "How do we maintain covered vertical length efficiently?",
+      "insight": "Discretize y using unique boundaries and track coverage counts over elementary y-strips."
+    },
+    {
+      "question": "What rule computes covered length per segment?",
+      "insight": "If a segment’s coverage count > 0, its entire length contributes; otherwise sum children or 0 at a leaf."
+    },
+    {
+      "question": "When do we accumulate area relative to processing events at an x?",
+      "insight": "Accumulate using the previous coverage for (prev_x, x), then apply all updates at x for the next interval."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1384,
+    "output_tokens": 16918,
+    "input_cost": 0.00173,
+    "output_cost": 0.16918,
+    "total_cost": 0.17091
+  }
+}

@@ -1,0 +1,997 @@
+{
+  "id": "reachable-nodes-dag",
+  "title": "Reachable Nodes",
+  "difficulty": "hard",
+  "tags": [
+    "advanced",
+    "graphs",
+    "dag"
+  ],
+  "estimatedMinutes": 70,
+  "language": "python",
+  "description": "You are given a directed acyclic graph with n nodes and m edges. Nodes are numbered 1..n. For each node, compute how many nodes are reachable from it (including the node itself).\n\nInput:\n- First line: two integers n and m.\n- Next m lines: edges a b meaning an edge from a to b.\n\nOutput:\n- Print n integers: for each node 1..n, the number of reachable nodes.\n\nConstraints:\n- 1 ≤ n ≤ 5⋅10^4\n- 1 ≤ m ≤ 10^5\n- The graph is acyclic.",
+  "examples": [
+    {
+      "input": "5 6\n1 2\n1 3\n1 4\n2 3\n3 5\n4 5\n",
+      "output": "5 3 2 2 1\n",
+      "explanation": "From 1 you can reach all nodes. From 2: {2,3,5}. From 3: {3,5}. From 4: {4,5}. From 5: {5}."
+    }
+  ],
+  "constraints": [
+    "1 ≤ n ≤ 5⋅10^4",
+    "1 ≤ m ≤ 10^5",
+    "Graph is acyclic",
+    "Nodes numbered 1..n"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "Given a chain 1 → 2 → 3, what are the counts of reachable nodes (including itself) for nodes 1, 2, and 3?",
+      "diagram": "1 -> 2 -> 3",
+      "options": [
+        {
+          "label": "1: 3, 2: 2, 3: 1",
+          "isCode": false
+        },
+        {
+          "label": "1: 2, 2: 2, 3: 1",
+          "isCode": false
+        },
+        {
+          "label": "1: 3, 2: 3, 3: 1",
+          "isCode": false
+        },
+        {
+          "label": "1: 2, 2: 1, 3: 1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "From 1: {1,2,3} → 3. From 2: {2,3} → 2. From 3: {3} → 1.",
+      "wrongExplanations": {
+        "1": "From node 1 you can reach 3 nodes (including itself), not 2.",
+        "2": "Node 2 cannot reach 3 nodes; it reaches {2,3}."
+      },
+      "hint": "Include the node itself in the count.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "Consider 1 → 2, 1 → 3, 2 → 4, 3 → 4. What is the count for node 1?",
+      "diagram": "1 -> 2 -> 4\n \\-> 3 -/\n",
+      "options": [
+        {
+          "label": "3 (paths 1→2→4 and 1→3→4 share 4, counted once)",
+          "isCode": false
+        },
+        {
+          "label": "4 (nodes {1,2,3,4})",
+          "isCode": false
+        },
+        {
+          "label": "5 (counting node 4 twice due to two paths)",
+          "isCode": false
+        },
+        {
+          "label": "2 (only direct neighbors 2 and 3)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Reachable from 1: {1,2,3,4} → 4. Shared nodes are not double-counted.",
+      "wrongExplanations": {
+        "0": "This forgets to include node 1 itself.",
+        "2": "Do not double-count nodes even if multiple paths exist."
+      },
+      "hint": "Count distinct nodes, not paths.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "If a node has no outgoing edges, what is its reachable count?",
+      "diagram": "u (no outgoing edges)",
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "1 (itself)",
+          "isCode": false
+        },
+        {
+          "label": "Depends on incoming edges",
+          "isCode": false
+        },
+        {
+          "label": "Number of nodes that can reach it",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "You can always reach the node itself, so the count is 1.",
+      "wrongExplanations": {
+        "0": "The node counts itself.",
+        "2": "Incoming edges don’t affect where the node can go."
+      },
+      "hint": "Reachability is forward along edges.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "For edges 1→2, 2→3, and 1→3, what is the reachable count for node 1?",
+      "diagram": "1 -> 2 -> 3\n \\------>\n",
+      "options": [
+        {
+          "label": "2 (nodes {1,2})",
+          "isCode": false
+        },
+        {
+          "label": "3 (nodes {1,2,3})",
+          "isCode": false
+        },
+        {
+          "label": "4 (counting node 3 twice due to two paths)",
+          "isCode": false
+        },
+        {
+          "label": "1 (only itself)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Reachable: {1,2,3} → 3. Do not double-count node 3.",
+      "wrongExplanations": {
+        "0": "Node 3 is reachable from 1 via either path.",
+        "2": "Nodes are counted once regardless of path multiplicity."
+      },
+      "hint": "Count distinct nodes reachable from 1.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Exploring Approaches",
+      "questionText": "Why not run a separate traversal from each node to count reachable nodes? Estimate its time for n=5⋅10^4, m=10^5.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "About O(n*(n+m)), too slow at this scale",
+          "isCode": false
+        },
+        {
+          "label": "O(n+m), fine for this scale",
+          "isCode": false
+        },
+        {
+          "label": "O(m^2), fine for this scale",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2), always fine",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Repeating traversal per node costs about O(n*(n+m)), which is too slow.",
+      "wrongExplanations": {
+        "1": "A single traversal is O(n+m); doing it n times multiplies cost.",
+        "3": "n^2 ~ 2.5e9 operations is also too large here."
+      },
+      "hint": "Consider doing n traversals, each touching many edges.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "In an ordering where every edge goes from an earlier node to a later node, when should you compute the reachable set for a node u?",
+      "diagram": "u -> v means u appears earlier than v in the ordering",
+      "options": [
+        {
+          "label": "Before its successors, so you can push information forward",
+          "isCode": false
+        },
+        {
+          "label": "After its successors, so you can combine their results",
+          "isCode": false
+        },
+        {
+          "label": "In any order; it doesn’t matter",
+          "isCode": false
+        },
+        {
+          "label": "Randomly to balance work",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "If u→v, compute v first so u can use v’s reachability when combining.",
+      "wrongExplanations": {
+        "0": "Computing u before v means u can’t use v’s result.",
+        "2": "Order matters: you need successors computed first."
+      },
+      "hint": "Think sinks to sources.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "To avoid double-counting when combining results from multiple successors, what is an efficient representation to merge without counting duplicates?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Store only counts and add them up",
+          "isCode": false
+        },
+        {
+          "label": "A boolean mask per node encoded as an integer; merge with bitwise OR",
+          "isCode": false
+        },
+        {
+          "label": "Keep lists of paths and count them",
+          "isCode": false
+        },
+        {
+          "label": "Keep adjacency lists only",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "A bit-mask per node lets you union successors’ masks with OR to avoid duplicates.",
+      "wrongExplanations": {
+        "0": "Adding counts double-counts shared descendants.",
+        "2": "Counting paths doesn’t give distinct nodes."
+      },
+      "hint": "Think of a compact set-union over {1..n}.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Building the Idea",
+      "questionText": "If nodes are labeled 1..n, how do you set the bit for node i in a zero-indexed mask?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "(1 << i)",
+          "isCode": true
+        },
+        {
+          "label": "(1 << (i-1))",
+          "isCode": true
+        },
+        {
+          "label": "(1 << (i+1))",
+          "isCode": true
+        },
+        {
+          "label": "(1 << (n-i))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "For labels 1..n but zero-indexed mask, node i maps to bit (i-1).",
+      "wrongExplanations": {
+        "0": "This sets bit i, which corresponds to label i+1 in zero-based.",
+        "2": "Shifting by i+1 is off by one in the other direction."
+      },
+      "hint": "Label 1 should correspond to bit 0.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "Suppose u has successors v and w. If M[x] is the mask for node x, which formula correctly builds M[u]?",
+      "diagram": "u -> v, u -> w",
+      "options": [
+        {
+          "label": "M[u] = M[v] | M[w]",
+          "isCode": true
+        },
+        {
+          "label": "M[u] = (1 << (u-1)) | M[v] | M[w]",
+          "isCode": true
+        },
+        {
+          "label": "M[u] = (1 << (u-1)) ^ M[v] ^ M[w]",
+          "isCode": true
+        },
+        {
+          "label": "M[u] = (1 << (u-1)) | (M[v] & M[w])",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Include u itself and all reachable via v and w using OR.",
+      "wrongExplanations": {
+        "0": "This omits u itself.",
+        "2": "XOR would drop bits present in both M[v] and M[w]."
+      },
+      "hint": "Union of successors plus itself.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "For an edge u→v, when combining masks, in what relative order should you process u and v?",
+      "diagram": "u -> v",
+      "options": [
+        {
+          "label": "Process u before v",
+          "isCode": false
+        },
+        {
+          "label": "Process v before u",
+          "isCode": false
+        },
+        {
+          "label": "Any order",
+          "isCode": false
+        },
+        {
+          "label": "Alternate levels",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Compute v first so u can OR in M[v].",
+      "wrongExplanations": {
+        "0": "Then u cannot use v’s mask yet.",
+        "2": "Order matters for correct combination."
+      },
+      "hint": "Think sinks upward.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "What should the mask be for a node with no outgoing edges?",
+      "diagram": "u (no outgoing edges)",
+      "options": [
+        {
+          "label": "(1 << (u-1))",
+          "isCode": true
+        },
+        {
+          "label": "0",
+          "isCode": true
+        },
+        {
+          "label": "Mask of all nodes",
+          "isCode": true
+        },
+        {
+          "label": "Mask of all its incoming neighbors",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "It can reach itself only, so set only its own bit.",
+      "wrongExplanations": {
+        "1": "Zero would mean it reaches nothing.",
+        "2": "It doesn’t reach other nodes without outgoing edges."
+      },
+      "hint": "Include itself even if it has no edges.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "How do you convert a node’s mask to the number of reachable nodes in Python?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "mask[u].bit_count()",
+          "isCode": true
+        },
+        {
+          "label": "mask[u].bit_length()",
+          "isCode": true
+        },
+        {
+          "label": "bin(mask[u]).count('1') - 1",
+          "isCode": true
+        },
+        {
+          "label": "int(mask[u])",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "bit_count() returns the number of set bits, i.e., reachable nodes.",
+      "wrongExplanations": {
+        "1": "bit_length() returns position of highest bit, not count.",
+        "2": "bin().count('1') counts set bits, but no need to subtract 1."
+      },
+      "hint": "There’s a built-in method to count set bits on ints.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "Which ordering ensures every edge goes from earlier to later, so reversing it lets you combine from sinks upward?",
+      "diagram": "Order nodes so u -> v implies position(u) < position(v)",
+      "options": [
+        {
+          "label": "Any BFS order from an arbitrary source",
+          "isCode": false
+        },
+        {
+          "label": "An order where every edge goes from earlier to later; then reverse it to combine",
+          "isCode": false
+        },
+        {
+          "label": "Sort by node id",
+          "isCode": false
+        },
+        {
+          "label": "Order by out-degree descending",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Such an order exists for acyclic graphs and reversing it lets you combine correctly.",
+      "wrongExplanations": {
+        "0": "An arbitrary BFS doesn’t ensure edge direction property globally.",
+        "2": "IDs don’t guarantee edges go forward."
+      },
+      "hint": "Use indegrees to build such an order.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Building the Idea",
+      "questionText": "Test the idea: For edges 1→2, 1→3, 3→4, what is the reachable count for node 1?",
+      "diagram": "1 -> 2\n1 -> 3 -> 4",
+      "options": [
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Reachable from 1: {1,2,3,4} → 4.",
+      "wrongExplanations": {
+        "0": "Don’t forget to include node 1 itself.",
+        "2": "You can also reach 3 and 4 via 1→3."
+      },
+      "hint": "Include itself plus all via its successors.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Read all integers from stdin efficiently and extract n and m. Which snippet is correct?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\nfrom collections import deque\ndata = list(map(int, sys.stdin.buffer.read().split()))\nit = iter(data)\nn = next(it); m = next(it)",
+          "isCode": true
+        },
+        {
+          "label": "import sys\nn, m = map(int, sys.stdin.read())",
+          "isCode": true
+        },
+        {
+          "label": "import sys\nn = int(sys.stdin.readline()); m = int(sys.stdin.readline())",
+          "isCode": true
+        },
+        {
+          "label": "import sys\ndata = sys.stdin.read().split()\nn = int(data[0]); m = int(data[1]); it = iter(map(int, data[2:]))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Option A reads all ints, builds an iterator, and extracts n, m correctly.",
+      "wrongExplanations": {
+        "1": "sys.stdin.read() returns a string; you must split and map to ints.",
+        "2": "n and m are on the same line; this reads each as a whole line."
+      },
+      "hint": "Use buffer.read().split() then map to int.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\nfrom collections import deque\ndata = list(map(int, sys.stdin.buffer.read().split()))\nit = iter(data)\nn = next(it); m = next(it)",
+      "codeLabel": "Read input ints"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Initialize adjacency and indegree structures for n nodes (0-based). Choose the correct snippet.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "adj = [[] for _ in range(n)]\nindeg = [0]*n",
+          "isCode": true
+        },
+        {
+          "label": "adj = [set() for _ in range(n+1)]\nindeg = [0]*(n+1)",
+          "isCode": true
+        },
+        {
+          "label": "adj = {}\nindeg = {}",
+          "isCode": true
+        },
+        {
+          "label": "adj = [[]]*(n)\nindeg = [0]*n",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need n lists for 0..n-1 and indegree array of length n.",
+      "wrongExplanations": {
+        "1": "This creates n+1 entries and uses sets unnecessarily.",
+        "4": "Using [[]]*n makes all rows share the same list."
+      },
+      "hint": "Create independent lists for each node.",
+      "isCodeBuilding": true,
+      "codeSnippet": "adj = [[] for _ in range(n)]\nindeg = [0]*n",
+      "codeLabel": "Init graph structures"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Fill adjacency and indegree from m edges a b (edge a→b). Use 0-based indices.",
+      "diagram": "Edge lines: a b (1-based)",
+      "options": [
+        {
+          "label": "for _ in range(m):\n    a = next(it)-1; b = next(it)-1\n    adj[a].append(b)\n    indeg[b] += 1",
+          "isCode": true
+        },
+        {
+          "label": "for _ in range(m):\n    a = next(it); b = next(it)\n    adj[a].append(b)\n    indeg[a] += 1",
+          "isCode": true
+        },
+        {
+          "label": "for _ in range(m):\n    a = next(it)-1; b = next(it)-1\n    adj[b].append(a)\n    indeg[a] += 1",
+          "isCode": true
+        },
+        {
+          "label": "for _ in range(m):\n    a = next(it)-1; b = next(it)-1\n    adj[a].append(b)\n    indeg[a] += 1",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Subtract 1 for 0-based, add edge a→b, and increment indegree of b.",
+      "wrongExplanations": {
+        "2": "This reverses the edge; we need a→b, not b→a.",
+        "3": "Indegree should increase for destination b, not source a."
+      },
+      "hint": "Edge is from a to b; destination’s indegree increases.",
+      "isCodeBuilding": true,
+      "codeSnippet": "for _ in range(m):\n    a = next(it)-1; b = next(it)-1\n    adj[a].append(b)\n    indeg[b] += 1",
+      "codeLabel": "Build edges and indegrees"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Initialize a queue with all nodes of indegree 0 to build an order where edges go forward.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "q = deque(i for i in range(n) if indeg[i] == 0)",
+          "isCode": true
+        },
+        {
+          "label": "q = deque(range(n))",
+          "isCode": true
+        },
+        {
+          "label": "q = deque(i for i in range(n) if indeg[i] > 0)",
+          "isCode": true
+        },
+        {
+          "label": "q = deque(); q.append(0)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Start with all nodes that have no incoming edges.",
+      "wrongExplanations": {
+        "2": "We need starting nodes with no incoming edges, not those with incoming edges.",
+        "3": "Only adding node 0 ignores other starting nodes."
+      },
+      "hint": "Nodes with no prerequisites go first.",
+      "isCodeBuilding": true,
+      "codeSnippet": "q = deque(i for i in range(n) if indeg[i] == 0)",
+      "codeLabel": "Init queue of sources"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Build the ordering by removing nodes from the queue and reducing indegrees of their neighbors.",
+      "diagram": "While queue not empty: pop u; for v in adj[u]: indeg[v]--, if indeg[v]==0 push v",
+      "options": [
+        {
+          "label": "topo = []\nwhile q:\n    u = q.popleft()\n    topo.append(u)\n    for v in adj[u]:\n        indeg[v] -= 1\n        if indeg[v] == 0:\n            q.append(v)",
+          "isCode": true
+        },
+        {
+          "label": "topo = []\nwhile q:\n    u = q.pop()\n    topo.append(u)\n    for v in adj[u]:\n        indeg[v] -= 1\n        if indeg[u] == 0:\n            q.append(v)",
+          "isCode": true
+        },
+        {
+          "label": "topo = []\nfor u in range(n):\n    topo.append(u)",
+          "isCode": true
+        },
+        {
+          "label": "topo = []\nwhile q:\n    u = q.popleft()\n    for v in adj[u]:\n        indeg[v] -= 1\n    topo.append(v)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Remove a node, append it, decrease neighbors’ indegrees, enqueue when they drop to 0.",
+      "wrongExplanations": {
+        "1": "Popping from the right and checking indeg[u]==0 for neighbor enqueue are both wrong.",
+        "3": "Appends v after loop, losing u and ordering correctness."
+      },
+      "hint": "Use FIFO, and enqueue neighbors whose indegree becomes 0.",
+      "isCodeBuilding": true,
+      "codeSnippet": "topo = []\nwhile q:\n    u = q.popleft()\n    topo.append(u)\n    for v in adj[u]:\n        indeg[v] -= 1\n        if indeg[v] == 0:\n            q.append(v)",
+      "codeLabel": "Build forward-order list"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Initialize the mask array so each node’s mask has its own bit set.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "mask = [0]*n\nfor i in range(n):\n    mask[i] = (1 << i)",
+          "isCode": true
+        },
+        {
+          "label": "mask = [(1 << i) for i in range(1, n+1)]",
+          "isCode": true
+        },
+        {
+          "label": "mask = [1]*n",
+          "isCode": true
+        },
+        {
+          "label": "mask = [0]*n\nfor i in range(n):\n    mask[i] = (1 << (i+1))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "For 0-based bits, bit i corresponds to node i (label i+1).",
+      "wrongExplanations": {
+        "1": "This creates n entries but shifts 1..n, off by one for 0-based bit positions.",
+        "3": "Shifting by i+1 sets the wrong bit."
+      },
+      "hint": "Node i (0-based) should map to bit i.",
+      "isCodeBuilding": true,
+      "codeSnippet": "mask = [0]*n\nfor i in range(n):\n    mask[i] = (1 << i)",
+      "codeLabel": "Init masks"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "Accumulate masks by traversing the order from the end (so successors are ready). Pick the correct loop.",
+      "diagram": "Process reversed order:\nfor u in reversed(topo):\n    mu = mask[u]\n    for v in adj[u]: mu |= mask[v]\n    mask[u] = mu",
+      "options": [
+        {
+          "label": "for u in topo:\n    mu = mask[u]\n    for v in adj[u]:\n        mu |= mask[v]\n    mask[u] = mu",
+          "isCode": true
+        },
+        {
+          "label": "for u in reversed(topo):\n    mu = mask[u]\n    for v in adj[u]:\n        mu |= mask[v]\n    mask[u] = mu",
+          "isCode": true
+        },
+        {
+          "label": "for u in reversed(topo):\n    mu = 0\n    for v in adj[u]:\n        mu ^= mask[v]\n    mask[u] = mu",
+          "isCode": true
+        },
+        {
+          "label": "for u in reversed(topo):\n    for v in adj[u]:\n        mask[u] = mask[v]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Go backward so successors are ready; start from current mask (self bit) and OR in successors.",
+      "wrongExplanations": {
+        "0": "Forward order risks using successors before they are combined.",
+        "2": "XOR drops bits that appear in multiple successors; use OR."
+      },
+      "hint": "Reverse the order so u can use masks of its neighbors.",
+      "isCodeBuilding": true,
+      "codeSnippet": "for u in reversed(topo):\n    mu = mask[u]\n    for v in adj[u]:\n        mu |= mask[v]\n    mask[u] = mu",
+      "codeLabel": "Combine masks in reverse order"
+    },
+    {
+      "id": "q22",
+      "phase": "Writing the Code",
+      "questionText": "Convert masks to counts and print space-separated results.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "res = [str(mask[i].bit_count()) for i in range(n)]\nsys.stdout.write(\" \".join(res))",
+          "isCode": true
+        },
+        {
+          "label": "res = [mask[i].bit_length() for i in range(n)]\nprint(*res)",
+          "isCode": true
+        },
+        {
+          "label": "res = [str(bin(mask[i]).count('1')) for i in range(n)]\nprint(res)",
+          "isCode": true
+        },
+        {
+          "label": "for i in range(n):\n    print(mask[i].bit_count(), end=' ')",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "bit_count() gives counts; join as a single line matches the required format.",
+      "wrongExplanations": {
+        "1": "bit_length() is not the count of set bits.",
+        "2": "Printing the list prints brackets and commas."
+      },
+      "hint": "Produce exactly n integers separated by spaces.",
+      "isCodeBuilding": true,
+      "codeSnippet": "res = [str(mask[i].bit_count()) for i in range(n)]\nsys.stdout.write(\" \".join(res))",
+      "codeLabel": "Output results"
+    },
+    {
+      "id": "q23",
+      "phase": "Verifying the Solution",
+      "questionText": "Given the sample input:\n5 6\n1 2\n1 3\n1 4\n2 3\n3 5\n4 5\nWhat output should the program produce?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "5 3 2 2 1",
+          "isCode": false
+        },
+        {
+          "label": "4 3 2 2 1",
+          "isCode": false
+        },
+        {
+          "label": "5 4 2 2 1",
+          "isCode": false
+        },
+        {
+          "label": "5 3 3 2 1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "From 1: all 5; from 2: {2,3,5}; from 3: {3,5}; from 4:{4,5}; from 5:{5}.",
+      "wrongExplanations": {
+        "1": "Node 1 can reach 5 nodes including itself.",
+        "3": "Node 3 reaches only {3,5}."
+      },
+      "hint": "Trace from each node including itself.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Verifying the Solution",
+      "questionText": "Consider 4 nodes with edges: 1 2, 1 3, 3 4. What is the reachable count for node 2?",
+      "diagram": "1 -> 2\n1 -> 3 -> 4",
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Node 2 has no outgoing edges; it reaches only itself.",
+      "wrongExplanations": {
+        "1": "There is no path from 2 to another node.",
+        "2": "Counts from 1 do not affect counts from 2."
+      },
+      "hint": "Check outgoing edges from node 2.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the time cost of building the ordering from indegrees and edges?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n + m)",
+          "isCode": false
+        },
+        {
+          "label": "O(n*m)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(m^2)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each node and edge is processed a constant number of times.",
+      "wrongExplanations": {
+        "1": "We don’t nest loops over all pairs; it’s linear in nodes and edges.",
+        "2": "No quadratic nested loops here."
+      },
+      "hint": "Each edge’s indegree is decreased once.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Analyzing Complexity",
+      "questionText": "Combining masks does ORs over integers with up to n bits. Roughly, what is the additional work to combine across all edges?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "About O(m * (n / word_size)) for the bitwise merges",
+          "isCode": false
+        },
+        {
+          "label": "O(m)",
+          "isCode": false
+        },
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^3)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each merge touches chunks of the n-bit integers; overall scales with m and mask size.",
+      "wrongExplanations": {
+        "1": "Each OR on big integers processes multiple machine words.",
+        "3": "There’s no triple nested loop."
+      },
+      "hint": "Think per-edge OR over chunks of the mask.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q27",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the space usage for the masks across all nodes (ignoring Python object overheads)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "About n * n bits (≈ n^2 / 8 bytes)",
+          "isCode": false
+        },
+        {
+          "label": "O(n + m) bits",
+          "isCode": false
+        },
+        {
+          "label": "O(m^2) bits",
+          "isCode": false
+        },
+        {
+          "label": "O(n) bits",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each of n masks is n bits, so about n^2 bits total.",
+      "wrongExplanations": {
+        "1": "Masks dominate memory, not just graph representation.",
+        "3": "Each mask alone is n bits."
+      },
+      "hint": "Each node keeps a boolean presence for all nodes.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\nfrom collections import deque\ndata = list(map(int, sys.stdin.buffer.read().split()))\nit = iter(data)\nn = next(it); m = next(it)",
+    "adj = [[] for _ in range(n)]\nindeg = [0]*n",
+    "for _ in range(m):\n    a = next(it)-1; b = next(it)-1\n    adj[a].append(b)\n    indeg[b] += 1",
+    "q = deque(i for i in range(n) if indeg[i] == 0)",
+    "topo = []\nwhile q:\n    u = q.popleft()\n    topo.append(u)\n    for v in adj[u]:\n        indeg[v] -= 1\n        if indeg[v] == 0:\n            q.append(v)",
+    "mask = [0]*n\nfor i in range(n):\n    mask[i] = (1 << i)",
+    "for u in reversed(topo):\n    mu = mask[u]\n    for v in adj[u]:\n        mu |= mask[v]\n    mask[u] = mu",
+    "res = [str(mask[i].bit_count()) for i in range(n)]\nsys.stdout.write(\" \".join(res))"
+  ],
+  "reasoningChain": [
+    {
+      "question": "q2",
+      "insight": "Counting distinct reachable nodes means merges should not double-count shared descendants."
+    },
+    {
+      "question": "q5",
+      "insight": "Running a separate traversal from each node is too slow for the given constraints."
+    },
+    {
+      "question": "q6",
+      "insight": "Process nodes so that each node’s successors are computed earlier, enabling combination."
+    },
+    {
+      "question": "q7",
+      "insight": "Use a compact boolean mask per node to merge successors without duplicates."
+    },
+    {
+      "question": "q10",
+      "insight": "For edge u→v, compute v before u to combine masks correctly."
+    },
+    {
+      "question": "q12",
+      "insight": "Convert masks to counts via the number of set bits."
+    },
+    {
+      "question": "q25",
+      "insight": "Building the processing order is linear in nodes and edges."
+    },
+    {
+      "question": "q26",
+      "insight": "Merging masks adds work proportional to edges times mask size."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1381,
+    "output_tokens": 15134,
+    "input_cost": 0.001726,
+    "output_cost": 0.15134,
+    "total_cost": 0.153066
+  }
+}

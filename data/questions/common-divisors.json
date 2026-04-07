@@ -1,0 +1,918 @@
+{
+  "id": "common-divisors-max-gcd",
+  "title": "Common Divisors",
+  "difficulty": "intermediate",
+  "tags": [
+    "math"
+  ],
+  "estimatedMinutes": 45,
+  "language": "python",
+  "description": "You are given an array of n positive integers. Your task is to find two integers such that their greatest common divisor is as large as possible.\n\nInput:\n- The first line has an integer n: the size of the array.\n- The second line has n integers x_1, x_2, ..., x_n: the contents of the array.\n\nOutput:\nPrint the maximum greatest common divisor among any pair of elements in the array.",
+  "examples": [
+    {
+      "input": "5\n3 14 15 7 9\n",
+      "output": "7",
+      "explanation": "The pair (14, 7) has gcd 7, which is the maximum among all pairs."
+    }
+  ],
+  "constraints": [
+    "2 <= n <= 2 * 10^5",
+    "1 <= x_i <= 10^6",
+    "Time Limit: 1.00 s",
+    "Memory Limit: 512 MB"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "Given the array [3, 14, 15, 7, 9], what is the maximum greatest common divisor among any pair?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "9",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        },
+        {
+          "label": "7",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "gcd(14,7)=7 is the maximum. Other notable gcds: gcd(3,9)=3. No pair yields >7.",
+      "wrongExplanations": {
+        "0": "No pair has gcd 9; 9 only appears once.",
+        "1": "5 is not a gcd of any pair here."
+      },
+      "hint": "Check gcds of pairs: (14,7), (3,9), etc.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "For array [6, 10, 15], what is the maximum gcd among any pair?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "5",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "gcd(10,15)=5. Other pairs: gcd(6,10)=2, gcd(6,15)=3.",
+      "wrongExplanations": {
+        "2": "2 is gcd(6,10) but not the maximum.",
+        "1": "3 is gcd(6,15) but 5 is larger."
+      },
+      "hint": "Compute gcd for each pair and take the maximum.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "If the array contains two equal numbers, e.g., [12, 12, 18], what is the maximum gcd among any pair?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "6",
+          "isCode": false
+        },
+        {
+          "label": "12",
+          "isCode": false
+        },
+        {
+          "label": "18",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "A number with itself has gcd equal to the number: gcd(12,12)=12.",
+      "wrongExplanations": {
+        "0": "6 is a divisor of 12 but not the maximum possible here.",
+        "2": "18 doesn't appear twice; gcd(18,12)=6."
+      },
+      "hint": "gcd(x, x) = x.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "With n up to 2·10^5, how many unordered pairs are there if you check all pairs, and is that feasible?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "~2×10^10 pairs (too many for 1s)",
+          "isCode": false
+        },
+        {
+          "label": "~2×10^6 pairs (feasible)",
+          "isCode": false
+        },
+        {
+          "label": "~2×10^8 pairs (maybe)",
+          "isCode": false
+        },
+        {
+          "label": "~2×10^5 pairs (feasible)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "n(n−1)/2 ≈ 2e10 pairs; enumerating gcds for all is too slow.",
+      "wrongExplanations": {
+        "2": "This underestimates; the true count is much larger.",
+        "1": "Way too low; for n=2e5, pairs are ~2e10."
+      },
+      "hint": "Compute n(n−1)/2 for n=200000.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Exploring Approaches",
+      "questionText": "Consider an integer g. Which statement helps us decide if some pair can have gcd at least g?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "If at least two numbers are multiples of g, there exists a pair with gcd exactly g.",
+          "isCode": false
+        },
+        {
+          "label": "If at least two numbers are multiples of g, there exists a pair with gcd at least g.",
+          "isCode": false
+        },
+        {
+          "label": "If exactly one number is a multiple of g, we can still get gcd g.",
+          "isCode": false
+        },
+        {
+          "label": "If no numbers are multiples of g, a pair may still have gcd g.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Two multiples of g share g as a common divisor, so their gcd is ≥ g.",
+      "wrongExplanations": {
+        "0": "The gcd could be larger than g; we only know it's at least g.",
+        "2": "You need two numbers both divisible by g."
+      },
+      "hint": "A gcd must divide both numbers.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "Suppose we can count, for each g, how many array elements are multiples of g. How should we scan g to get the answer quickly with an early exit?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Scan g from 1 upward and remember the last g with count ≥ 2.",
+          "isCode": false
+        },
+        {
+          "label": "Pick any order; all yield the same early exit.",
+          "isCode": false
+        },
+        {
+          "label": "Pick random g values until count ≥ 2 occurs.",
+          "isCode": false
+        },
+        {
+          "label": "Scan g from max value downward and return the first g with count ≥ 2.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 3,
+      "explanation": "Descending scan returns the largest g for which at least two multiples exist, which is the answer.",
+      "wrongExplanations": {
+        "0": "Ascending requires scanning all g or tracking the last; no early exit at the maximum.",
+        "1": "Order matters for early exit; descending is key."
+      },
+      "hint": "We want the largest valid g as soon as it's found.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "Using counts of exact values (frequency by value), how can we compute how many numbers are multiples of g efficiently?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Loop over the array for each g and test divisibility.",
+          "isCode": false
+        },
+        {
+          "label": "Sort the array and binary search for multiples.",
+          "isCode": false
+        },
+        {
+          "label": "Sum counts at positions g, 2g, 3g, ..., up to the maximum value.",
+          "isCode": false
+        },
+        {
+          "label": "Precompute all pair gcds once and reuse.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Summing cnt[g] + cnt[2g] + ... gives how many numbers are divisible by g in O(maxA/g).",
+      "wrongExplanations": {
+        "0": "This is O(n) per g, too slow over all g.",
+        "1": "Multiples aren't contiguous in sorted order without more structure."
+      },
+      "hint": "Use the fact that value range is bounded; index counts by value.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Building the Idea",
+      "questionText": "Let maxA be the maximum array value. What length should we allocate for the count array so that count[v] is valid for any 1 ≤ v ≤ maxA?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "maxA",
+          "isCode": false
+        },
+        {
+          "label": "n + 1",
+          "isCode": false
+        },
+        {
+          "label": "1_000_000 + 1 (fixed)",
+          "isCode": false
+        },
+        {
+          "label": "maxA + 1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 3,
+      "explanation": "We need indices up to maxA inclusive, so allocate length maxA + 1.",
+      "wrongExplanations": {
+        "0": "Length maxA misses index maxA.",
+        "2": "This works but wastes memory if maxA is smaller."
+      },
+      "hint": "Python lists are 0-indexed; index maxA requires length maxA+1.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "For array [2, 3, 4, 9, 12], how many elements are divisible by g = 3?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "3, 9, and 12 are divisible by 3 ⇒ count is 3.",
+      "wrongExplanations": {
+        "0": "You missed 12.",
+        "2": "Only three numbers are divisible by 3, not four."
+      },
+      "hint": "List which values are multiples of 3.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "For the same array [2, 3, 4, 9, 12], what is the maximum gcd among any pair?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "6",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Pair (4,12) has gcd 4. No pair has gcd 6.",
+      "wrongExplanations": {
+        "0": "6 doesn't divide any pair here.",
+        "2": "3 occurs, but 4 is larger."
+      },
+      "hint": "Try gcds of (4,12), (3,9), and others.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "Why does scanning g from maxA down to 1 and stopping at the first g with ≥2 multiples yield the correct answer?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Because the first g encountered divides all numbers.",
+          "isCode": false
+        },
+        {
+          "label": "Because smaller g values always have fewer multiples.",
+          "isCode": false
+        },
+        {
+          "label": "Because any pair’s gcd G* will appear when g = G*, and any larger valid g would have been found earlier.",
+          "isCode": false
+        },
+        {
+          "label": "Because the array is sorted by value.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "At g=G*, at least two multiples exist. If a larger g also had ≥2 multiples, it would have been returned first.",
+      "wrongExplanations": {
+        "0": "We only need two numbers, not all.",
+        "1": "Counts of multiples generally increase as g decreases."
+      },
+      "hint": "Think about the largest gcd G* that occurs for some pair.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "If for each g we sum cnt[g] + cnt[2g] + cnt[3g] + … up to maxA, what is the total complexity over all g (ignoring the initial counting)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(maxA · log maxA) (harmonic series over multiples)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(n · log maxA)",
+          "isCode": false
+        },
+        {
+          "label": "O(maxA^2)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Sum over g of maxA/g ≈ maxA · (1 + 1/2 + …) = O(maxA log maxA).",
+      "wrongExplanations": {
+        "3": "We only touch multiples, not all pairs of values.",
+        "1": "We don’t scan all pairs; the value range bounds the work."
+      },
+      "hint": "Use ∑(maxA/g) for g=1..maxA.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "If the array is [5, 5, 5], what will the algorithm output?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        },
+        {
+          "label": "10",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "There are at least two multiples of 5, so the maximum gcd is 5.",
+      "wrongExplanations": {
+        "0": "1 is a gcd, but not the maximum.",
+        "2": "10 is not a gcd of any pair here."
+      },
+      "hint": "gcd(5,5)=5.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Writing the Code",
+      "questionText": "We will read all integers at once for speed and simplicity. Choose the correct snippet.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\ndata = list(map(int, sys.stdin.read().split()))",
+          "isCode": true
+        },
+        {
+          "label": "import sys\ndata = list(map(int, sys.stdin.readline().split()))",
+          "isCode": true
+        },
+        {
+          "label": "data = list(map(int, sys.stdin.read().split()))",
+          "isCode": true
+        },
+        {
+          "label": "import sys\ndata = [int(sys.stdin.read())]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Reading all tokens via sys.stdin.read().split() ensures we capture both lines efficiently.",
+      "wrongExplanations": {
+        "1": "readline() reads only one line; we need both.",
+        "2": "Missing the import of sys; this will NameError."
+      },
+      "hint": "Use sys.stdin.read() and split, then map to int.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\ndata = list(map(int, sys.stdin.read().split()))",
+      "codeLabel": "Read all input"
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Extract n and the array from the flat integer list without mutating the list.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "n = data[0]\narr = data[1:n]",
+          "isCode": true
+        },
+        {
+          "label": "n = len(data)\narr = data[1:]",
+          "isCode": true
+        },
+        {
+          "label": "n = data[0]\narr = data[1:1+n]",
+          "isCode": true
+        },
+        {
+          "label": "n, arr = data.pop(0), data",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "data[0] is n; the next n numbers are data[1:1+n].",
+      "wrongExplanations": {
+        "0": "Slice data[1:n] is missing the element at index n; off by one.",
+        "1": "This ignores n and trusts the rest; not robust if extra tokens exist."
+      },
+      "hint": "Slice exactly n elements after the first.",
+      "isCodeBuilding": true,
+      "codeSnippet": "n = data[0]\narr = data[1:1+n]",
+      "codeLabel": "Parse n and arr"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Compute the maximum array value to size the count array.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "maxA = max(arr)",
+          "isCode": true
+        },
+        {
+          "label": "maxA = max(data)",
+          "isCode": true
+        },
+        {
+          "label": "maxA = len(arr)",
+          "isCode": true
+        },
+        {
+          "label": "maxA = arr[-1]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We only want the maximum among array values.",
+      "wrongExplanations": {
+        "1": "Includes n; could underestimate or mis-size the count array.",
+        "3": "arr isn't guaranteed sorted; last element may be smaller than the max."
+      },
+      "hint": "Use Python’s built-in max on the array.",
+      "isCodeBuilding": true,
+      "codeSnippet": "maxA = max(arr)",
+      "codeLabel": "Find maximum value"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Initialize the count array so that indices 0..maxA are valid.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "cnt = [0] * maxA",
+          "isCode": true
+        },
+        {
+          "label": "cnt = [0 for _ in range(maxA)]",
+          "isCode": true
+        },
+        {
+          "label": "cnt = [0] * (maxA + 1)",
+          "isCode": true
+        },
+        {
+          "label": "cnt = [0] * (maxA - 1)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "We need space for index maxA, so length is maxA+1.",
+      "wrongExplanations": {
+        "0": "Index maxA would be out of range.",
+        "1": "Same issue: length maxA misses index maxA."
+      },
+      "hint": "Remember zero-based indexing.",
+      "isCodeBuilding": true,
+      "codeSnippet": "cnt = [0] * (maxA + 1)",
+      "codeLabel": "Allocate count array"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Fill the count array with frequencies of each value.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "for i, x in enumerate(arr):\n    cnt[i] += 1",
+          "isCode": true
+        },
+        {
+          "label": "for x in arr:\n    cnt[x] += 1",
+          "isCode": true
+        },
+        {
+          "label": "for x in arr:\n    cnt[x-1] += 1",
+          "isCode": true
+        },
+        {
+          "label": "for x in set(arr):\n    cnt[x] = 1",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Index by the value itself: cnt[x]++ for each x in arr.",
+      "wrongExplanations": {
+        "0": "This counts positions, not the values.",
+        "2": "Off by one; would shift counts and break divisibility indexing."
+      },
+      "hint": "Value v should increment cnt[v].",
+      "isCodeBuilding": true,
+      "codeSnippet": "for x in arr:\n    cnt[x] += 1",
+      "codeLabel": "Build frequencies"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Set up the outer loop to scan candidate gcd values in descending order and reset the running sum per g.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "for g in range(maxA, 0, -1):\n    s = 0",
+          "isCode": true
+        },
+        {
+          "label": "for g in range(maxA, 1, -1):\ns = 0",
+          "isCode": true
+        },
+        {
+          "label": "for g in reversed(range(maxA)):\n    s = 0",
+          "isCode": true
+        },
+        {
+          "label": "for g in range(1, maxA+1):\n    s = 0",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "range(maxA, 0, -1) visits maxA..1. Reset s for each g.",
+      "wrongExplanations": {
+        "1": "This omits g=1 and has bad indentation.",
+        "2": "Includes g=0 later, which would break the inner step."
+      },
+      "hint": "We must include g=1 and exclude g=0, scanning downward.",
+      "isCodeBuilding": true,
+      "codeSnippet": "for g in range(maxA, 0, -1):\n    s = 0",
+      "codeLabel": "Outer loop over g"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Complete the inner loop to add counts of multiples of g and stop when we find the answer.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    for m in range(g, maxA + 1, g):\n        s += cnt[m]\n    if s >= 2:\n        print(g)\n        break",
+          "isCode": true
+        },
+        {
+          "label": "    for m in range(0, maxA + 1, g):\n        s += cnt[m]\n    if s > 2:\n        print(g)\n        break",
+          "isCode": true
+        },
+        {
+          "label": "    for m in range(g, maxA, g):\n        s += cnt[g]\n    if s >= 2:\n        print(s)\n        break",
+          "isCode": true
+        },
+        {
+          "label": "    for m in range(1, maxA + 1):\n        if m % g == 0:\n            s += cnt[m]\n    if s >= 2:\n        print(g)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Sum cnt at multiples of g (including maxA). If at least two, print g and break.",
+      "wrongExplanations": {
+        "1": "Starting at 0 is invalid for our cnt; also threshold should be ≥ 2.",
+        "2": "Adds cnt[g] repeatedly and prints s, not g."
+      },
+      "hint": "Iterate m = g, 2g, 3g, … and stop on the first g with sum ≥ 2.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    for m in range(g, maxA + 1, g):\n        s += cnt[m]\n    if s >= 2:\n        print(g)\n        break",
+      "codeLabel": "Sum multiples and stop"
+    },
+    {
+      "id": "q21",
+      "phase": "Verifying the Solution",
+      "questionText": "Run the assembled code on the example input:\n5\n3 14 15 7 9\nWhat is the output?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "7",
+          "isCode": false
+        },
+        {
+          "label": "9",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "It finds g=7 as the first g with at least two multiples (14 and 7).",
+      "wrongExplanations": {
+        "1": "9 appears once; need two multiples.",
+        "2": "5 isn't a gcd of any pair here."
+      },
+      "hint": "Which g from 15..1 has ≥2 multiples? 7 qualifies.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q22",
+      "phase": "Verifying the Solution",
+      "questionText": "Test input:\n4\n8 12 16 30\nWhat will the program print?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "6",
+          "isCode": false
+        },
+        {
+          "label": "8",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 3,
+      "explanation": "The maximum gcd is 8 from (8,16). No pair has gcd > 8.",
+      "wrongExplanations": {
+        "1": "4 is valid (e.g., 12&16) but 8 is larger.",
+        "2": "6 doesn't divide any pair here."
+      },
+      "hint": "Check pairs involving 16 and 8 first.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q23",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the overall time complexity of the approach (building counts + scanning multiples for all g)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(n + maxA · log maxA)",
+          "isCode": false
+        },
+        {
+          "label": "O(maxA · n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n · log n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Counting is O(n), and summing multiples over all g is O(maxA log maxA).",
+      "wrongExplanations": {
+        "2": "We don't iterate over all array elements for each g.",
+        "0": "We never enumerate all pairs."
+      },
+      "hint": "Combine O(n) for counting with the harmonic sum over g.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the additional space complexity (beyond storing the input array) of this solution?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(1)",
+          "isCode": false
+        },
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(maxA)",
+          "isCode": false
+        },
+        {
+          "label": "O(n + maxA)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "We allocate the count array of length maxA+1.",
+      "wrongExplanations": {
+        "0": "The count array size grows with maxA.",
+        "1": "We don't allocate space proportional only to n."
+      },
+      "hint": "Consider only auxiliary structures, not the input list.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Analyzing Complexity",
+      "questionText": "Edge case check: If all numbers are 1, e.g., n=4 and arr=[1,1,1,1], what should the program output?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "Undefined (no pairs)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Any pair’s gcd is 1, so the maximum is 1.",
+      "wrongExplanations": {
+        "0": "gcds of positive integers are at least 1.",
+        "3": "There are pairs when n ≥ 2."
+      },
+      "hint": "gcd(1,1)=1.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\ndata = list(map(int, sys.stdin.read().split()))",
+    "n = data[0]\narr = data[1:1+n]",
+    "maxA = max(arr)",
+    "cnt = [0] * (maxA + 1)",
+    "for x in arr:\n    cnt[x] += 1",
+    "for g in range(maxA, 0, -1):\n    s = 0",
+    "    for m in range(g, maxA + 1, g):\n        s += cnt[m]\n    if s >= 2:\n        print(g)\n        break"
+  ],
+  "reasoningChain": [
+    {
+      "question": "Why is checking all O(n^2) pairs infeasible for n up to 2·10^5?",
+      "insight": "The pair count is ~2e10, far beyond limits; we need to avoid enumerating pairs."
+    },
+    {
+      "question": "How can a fixed g help decide if a pair with gcd ≥ g exists?",
+      "insight": "If at least two numbers are multiples of g, some pair has gcd at least g."
+    },
+    {
+      "question": "How do we count multiples of g quickly using the bounded value range?",
+      "insight": "Build a frequency array by value up to maxA, then sum counts at indices g, 2g, 3g, …"
+    },
+    {
+      "question": "How do we ensure we find the maximum gcd efficiently?",
+      "insight": "Scan g from maxA down to 1 and return the first g with at least two multiples."
+    },
+    {
+      "question": "Will this run within limits?",
+      "insight": "Summing over multiples for all g is O(maxA log maxA), plus O(n) to build counts, which fits the constraints."
+    },
+    {
+      "question": "Any tricky cases like duplicates or all ones?",
+      "insight": "Duplicates are handled since cnt[value] ≥ 2 triggers that value; all ones produce gcd 1."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1328,
+    "output_tokens": 15784,
+    "input_cost": 0.00166,
+    "output_cost": 0.15784,
+    "total_cost": 0.1595
+  }
+}

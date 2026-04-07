@@ -1,0 +1,980 @@
+{
+  "id": "polygon-area-2a",
+  "title": "Polygon Area",
+  "difficulty": "hard",
+  "tags": [
+    "geometry"
+  ],
+  "estimatedMinutes": 70,
+  "language": "python",
+  "description": "Your task is to calculate the area of a given polygon.\n\nThe polygon consists of n vertices (x_1,y_1),(x_2,y_2),..., (x_n,y_n). The vertices (x_i,y_i) and (x_{i+1},y_{i+1}) are adjacent for i=1,2,...,n-1, and the vertices (x_1,y_1) and (x_n,y_n) are also adjacent.\n\nInput:\n- The first input line has an integer n: the number of vertices.\n- After this, there are n lines that describe the vertices. The i-th such line has two integers x_i and y_i.\n- The polygon is simple (it does not intersect itself).\n\nOutput:\n- Print one integer: 2a where the area of the polygon is a (this ensures that the result is an integer).",
+  "examples": [
+    {
+      "input": "4\n1 1\n4 2\n3 5\n1 4\n",
+      "output": "16\n",
+      "explanation": "The polygon area a is 8, so 2a = 16."
+    }
+  ],
+  "constraints": [
+    "3 <= n <= 1000",
+    "-10^9 <= x_i, y_i <= 10^9",
+    "Polygon is simple (no self-intersections)"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "For the triangle with vertices (0,0), (2,0), (0,2), what should the program output (i.e., 2a)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "8",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Area a = base*height/2 = 2; so 2a = 4. We must output 2a, not a.",
+      "wrongExplanations": {
+        "0": "2 is the area a, but output requires 2a.",
+        "2": "8 would be 4 times the area, not 2a."
+      },
+      "hint": "Compute area normally, then multiply by 2.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "For n=4, if you connect edges (1-2), (2-3), (3-4), which additional edge must be added to close the polygon as defined?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "(4-1)",
+          "isCode": false
+        },
+        {
+          "label": "(1-3)",
+          "isCode": false
+        },
+        {
+          "label": "(2-4)",
+          "isCode": false
+        },
+        {
+          "label": "No additional edge is needed",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The polygon includes edge (x_1,y_1)-(x_n,y_n), so we must add (4-1).",
+      "wrongExplanations": {
+        "3": "The definition explicitly adds the edge between vertex 1 and vertex n."
+      },
+      "hint": "Check the problem statement adjacency.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "Consider the axis-aligned square with vertices (0,0), (1,0), (1,1), (0,1) in order. What is 2a?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Area a = 1, so 2a = 2.",
+      "wrongExplanations": {
+        "3": "4 would be the area of a 2x2 square; here side length is 1."
+      },
+      "hint": "Area of unit square is 1.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "A naive idea: compute (max x − min x) * (max y − min y) and use that as the polygon area. Is this generally correct?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Always correct for any simple polygon",
+          "isCode": false
+        },
+        {
+          "label": "Correct only for convex polygons",
+          "isCode": false
+        },
+        {
+          "label": "Correct only for rectangles aligned with axes",
+          "isCode": false
+        },
+        {
+          "label": "Not generally correct",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 3,
+      "explanation": "That computes the bounding box area, not the polygon's area; it overcounts in most cases.",
+      "wrongExplanations": {
+        "2": "Even for axis-aligned rectangles it matches, but for other shapes it fails."
+      },
+      "hint": "Think of an L-shaped polygon inside its bounding box.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Exploring Approaches",
+      "questionText": "For a triangle with vertices (0,0), (a,b), (c,d), which expression equals twice its area?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "|a*d - b*c|",
+          "isCode": false
+        },
+        {
+          "label": "|a*c + b*d|",
+          "isCode": false
+        },
+        {
+          "label": "|a*b + c*d|",
+          "isCode": false
+        },
+        {
+          "label": "|(a+d) - (b+c)|",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Twice the area of this triangle equals |ad - bc|.",
+      "wrongExplanations": {
+        "1": "a*c + b*d lacks the alternating structure needed for area.",
+        "2": "a*b + c*d mixes components incorrectly."
+      },
+      "hint": "Area relates to the parallelogram spanned by the two vectors.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "If we sum S = Σ_{i=1..n} (x_i*y_{i+1} − x_{i+1}*y_i) with (x_{n+1},y_{n+1}) = (x_1,y_1), what does S represent for a simple polygon?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Always 0",
+          "isCode": false
+        },
+        {
+          "label": "Twice the area, with a sign depending on vertex order",
+          "isCode": false
+        },
+        {
+          "label": "The perimeter",
+          "isCode": false
+        },
+        {
+          "label": "Sum of squared edge lengths",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "S equals ±2a: positive for one orientation, negative for the other.",
+      "wrongExplanations": {
+        "0": "It’s 0 only for degenerate cases, not for general polygons."
+      },
+      "hint": "Check it on small polygons in both orders.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "When forming the sum S = Σ(x_i*y_{i+1} − x_{i+1}*y_i), which pair must be included to handle the last vertex?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "(x_{n-1},y_{n-1}) with (x_n,y_n)",
+          "isCode": false
+        },
+        {
+          "label": "(x_1,y_1) with (x_2,y_2)",
+          "isCode": false
+        },
+        {
+          "label": "(x_n,y_n) with (x_1,y_1)",
+          "isCode": false
+        },
+        {
+          "label": "No special pair is needed",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Include the wrap-around term (x_n,y_n)-(x_1,y_1) to close the sum.",
+      "wrongExplanations": {
+        "3": "Without it, the polygon is not closed in the sum."
+      },
+      "hint": "Think of the edge connecting the last and first vertices.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Building the Idea",
+      "questionText": "Compute S = Σ(x_i*y_{i+1} − x_{i+1}*y_i) for (0,0) → (2,0) → (0,2) → (0,0). What is S?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "-4",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Terms: 0→(2,0):0; (2,0)→(0,2):4; (0,2)→0:0. Sum=4.",
+      "wrongExplanations": {
+        "1": "Negative occurs in reversed order.",
+        "2": "Nonzero for this triangle."
+      },
+      "hint": "Compute each term carefully and sum.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "Now list vertices as (0,0) → (0,2) → (2,0) → (0,0). What is S?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "-4",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 3,
+      "explanation": "The orientation flips the sign: S = -4.",
+      "wrongExplanations": {
+        "0": "That was the previous order. Orientation matters before taking absolute."
+      },
+      "hint": "Expect the same magnitude, different sign.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "How should we ensure the printed result is nonnegative regardless of vertex order?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Square the sum S",
+          "isCode": false
+        },
+        {
+          "label": "Take the absolute value of the final sum S",
+          "isCode": false
+        },
+        {
+          "label": "Sort vertices by angle before summing",
+          "isCode": false
+        },
+        {
+          "label": "Ignore edges with negative contributions",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Take |S| at the end; squaring changes the scale, sorting is unnecessary, ignoring terms breaks correctness.",
+      "wrongExplanations": {
+        "0": "Squaring loses the linear relation to area."
+      },
+      "hint": "Area is magnitude-only; sign encodes orientation.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "Given integer coordinates and the required output 2a, what should we print?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Print abs(S) directly (no division needed)",
+          "isCode": false
+        },
+        {
+          "label": "Print abs(S) // 2",
+          "isCode": false
+        },
+        {
+          "label": "Print S as a float rounded to nearest int",
+          "isCode": false
+        },
+        {
+          "label": "Print 2 * abs(S)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "S already equals ±2a; printing |S| gives the required integer.",
+      "wrongExplanations": {
+        "1": "Division by 2 would output a, not 2a."
+      },
+      "hint": "2a is the sum’s magnitude.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "Does the summation S = Σ(x_i*y_{i+1} − x_{i+1}*y_i) work for concave simple polygons?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Only for convex polygons",
+          "isCode": false
+        },
+        {
+          "label": "Only when x-coordinates are non-decreasing",
+          "isCode": false
+        },
+        {
+          "label": "Yes, for any simple polygon regardless of concavity",
+          "isCode": false
+        },
+        {
+          "label": "Only when the origin lies inside the polygon",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "The summation works for any simple polygon; concavity and origin position do not matter.",
+      "wrongExplanations": {
+        "0": "Convexity is not required."
+      },
+      "hint": "Concavity does not break this area computation.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "If we rotate the starting vertex but keep the same cyclic order (e.g., start from vertex k and wrap around), what happens to S?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "It changes sign",
+          "isCode": false
+        },
+        {
+          "label": "It stays the same",
+          "isCode": false
+        },
+        {
+          "label": "It changes by subtracting the first edge term",
+          "isCode": false
+        },
+        {
+          "label": "It doubles",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Cyclic shifts preserve S; only reversing the order flips the sign.",
+      "wrongExplanations": {
+        "0": "Sign flips only if the order is reversed, not cyclically shifted."
+      },
+      "hint": "Think of the sum as a cycle; rotation doesn’t alter it.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Writing the Code",
+      "questionText": "Start the program with an import and a main function skeleton.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\n\ndef main():",
+          "isCode": true
+        },
+        {
+          "label": "import sys\nif __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "from sys import stdin\n\ndef main():",
+          "isCode": true
+        },
+        {
+          "label": "import math\n\ndef main():",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need sys for fast input and a main function body to build into.",
+      "wrongExplanations": {
+        "1": "Calls main without defining it.",
+        "2": "We'll use sys.stdin later; importing only stdin mismatches our later references."
+      },
+      "hint": "We'll read from sys.stdin inside main.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\n\ndef main():",
+      "codeLabel": "Import and main skeleton"
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Read all input tokens and prepare an iterator.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "data = input().split()\nit = iter(data)",
+          "isCode": true
+        },
+        {
+          "label": "data = sys.stdin.readline().split()\nit = iter(data)",
+          "isCode": true
+        },
+        {
+          "label": "    data = sys.stdin.read().strip().split()\n    it = iter(data)",
+          "isCode": true
+        },
+        {
+          "label": "    tokens = list(sys.stdin)\n    it = iter(tokens.split())",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Reading the whole input then splitting ensures we get all numbers reliably.",
+      "wrongExplanations": {
+        "0": "Reads only the first line; points on later lines would be missed.",
+        "1": "Reads a single line; we need all lines."
+      },
+      "hint": "Use sys.stdin.read() to capture the entire input.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    data = sys.stdin.read().strip().split()\n    it = iter(data)",
+      "codeLabel": "Read input tokens"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Extract n and initialize a container for points.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    n = next(it)\n    pts = []",
+          "isCode": true
+        },
+        {
+          "label": "    n = int(next(it))\n    pts = {}",
+          "isCode": true
+        },
+        {
+          "label": "    n = int(input())\n    pts = []",
+          "isCode": true
+        },
+        {
+          "label": "    n = int(next(it))\n    pts = []",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 3,
+      "explanation": "n is the first token; convert to int and prepare a list for points.",
+      "wrongExplanations": {
+        "0": "n must be converted to int.",
+        "1": "We need a list, not a dict."
+      },
+      "hint": "Use next(it) and int().",
+      "isCodeBuilding": true,
+      "codeSnippet": "    n = int(next(it))\n    pts = []",
+      "codeLabel": "Read n and init list"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Read n points and store them.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    for _ in range(n):\n        x = int(next(it)); y = int(next(it))\n        pts.append((y, x))",
+          "isCode": true
+        },
+        {
+          "label": "    for _ in range(n):\n        x = int(next(it)); y = int(next(it))\n        pts.append((x, y))",
+          "isCode": true
+        },
+        {
+          "label": "    for _ in range(n):\n        pts.append((int(next(it))))",
+          "isCode": true
+        },
+        {
+          "label": "    for _ in n:\n        x = int(next(it)); y = int(next(it))\n        pts.add((x, y))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Read x then y as ints and append as a pair.",
+      "wrongExplanations": {
+        "0": "Swaps x and y; coordinates would be wrong.",
+        "2": "This reads only one number per point; we need two."
+      },
+      "hint": "Each point contributes two integers.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    for _ in range(n):\n        x = int(next(it)); y = int(next(it))\n        pts.append((x, y))",
+      "codeLabel": "Read points"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Initialize the running sum for the final summation.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    s = 0",
+          "isCode": true
+        },
+        {
+          "label": "    s = 0.0",
+          "isCode": true
+        },
+        {
+          "label": "    s = []",
+          "isCode": true
+        },
+        {
+          "label": "    s = None",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Use an integer accumulator; Python ints are unbounded, so no overflow.",
+      "wrongExplanations": {
+        "1": "Floats risk precision issues for large integers."
+      },
+      "hint": "We want exact integer arithmetic.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    s = 0",
+      "codeLabel": "Init accumulator"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Loop over edges and pick the current and next vertex with wrap-around.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    for i in range(1, n):\n        x1, y1 = pts[i]\n        x2, y2 = pts[i+1]",
+          "isCode": true
+        },
+        {
+          "label": "    for i in range(n-1):\n        x1, y1 = pts[i]\n        x2, y2 = pts[i+1]",
+          "isCode": true
+        },
+        {
+          "label": "    for i in range(n):\n        x1, y1 = pts[i]\n        x2, y2 = pts[(i - 1) % n]",
+          "isCode": true
+        },
+        {
+          "label": "    for i in range(n):\n        x1, y1 = pts[i]\n        x2, y2 = pts[(i + 1) % n]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 3,
+      "explanation": "Iterate all i and use (i+1)%n to include the last-to-first edge.",
+      "wrongExplanations": {
+        "1": "range(n-1) misses the edge from the last to the first vertex."
+      },
+      "hint": "Use modulo to wrap the index.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    for i in range(n):\n        x1, y1 = pts[i]\n        x2, y2 = pts[(i + 1) % n]",
+      "codeLabel": "Iterate edges"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Accumulate the signed contribution for the current edge.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "        s += x1 * y2 + x2 * y1",
+          "isCode": true
+        },
+        {
+          "label": "        s += (x1 - x2) * (y2 - y1)",
+          "isCode": true
+        },
+        {
+          "label": "        s += x1 * y2 - x2 * y1",
+          "isCode": true
+        },
+        {
+          "label": "        s += abs(x1 * y2 - x2 * y1)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Each edge contributes x1*y2 - x2*y1. Do not take abs per edge; take it once at the end.",
+      "wrongExplanations": {
+        "3": "Taking abs per edge breaks cancellation needed for the correct signed sum."
+      },
+      "hint": "Use the alternating cross-term difference.",
+      "isCodeBuilding": true,
+      "codeSnippet": "        s += x1 * y2 - x2 * y1",
+      "codeLabel": "Accumulate contribution"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "Print the required integer and add the standard entry point to call main.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    print(abs(s))\n\nif __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "    print(s)\n\nif __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "    print(abs(s)//2)\n\nif __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "if __name__ == \"__main__\":\n    main()\n    print(abs(s))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We must print |S| (which equals 2a) and call main under the guard.",
+      "wrongExplanations": {
+        "1": "s may be negative depending on orientation; abs is required.",
+        "2": "Dividing by 2 would print a, not 2a.",
+        "3": "Printing after calling main at top level tries to use s out of scope."
+      },
+      "hint": "No division is needed. Ensure main is invoked when run as a script.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    print(abs(s))\n\nif __name__ == \"__main__\":\n    main()",
+      "codeLabel": "Print and main guard"
+    },
+    {
+      "id": "q22",
+      "phase": "Verifying the Solution",
+      "questionText": "Run the algorithm on the sample input:\n4\n1 1\n4 2\n3 5\n1 4\nWhat does it print?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "8",
+          "isCode": false
+        },
+        {
+          "label": "16",
+          "isCode": false
+        },
+        {
+          "label": "32",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "The correct output is 16 (2a).",
+      "wrongExplanations": {
+        "0": "8 would be a (half of required).",
+        "2": "32 is too large; check the sum carefully."
+      },
+      "hint": "Compute S and take abs(S).",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q23",
+      "phase": "Verifying the Solution",
+      "questionText": "If the same points are given in reverse order, what does the program print?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "16",
+          "isCode": false
+        },
+        {
+          "label": "-16",
+          "isCode": false
+        },
+        {
+          "label": "8",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "S would change sign, but abs(S) remains 16.",
+      "wrongExplanations": {
+        "1": "The program prints abs(S), not S."
+      },
+      "hint": "Final absolute removes orientation sign.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Verifying the Solution",
+      "questionText": "Consider a concave polygon: n=5\n(0,0)\n(4,0)\n(2,1)\n(4,2)\n(0,2)\nWhat does the program print?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "8",
+          "isCode": false
+        },
+        {
+          "label": "10",
+          "isCode": false
+        },
+        {
+          "label": "12",
+          "isCode": false
+        },
+        {
+          "label": "14",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "S = 12; so 2a = 12.",
+      "wrongExplanations": {
+        "0": "Recheck each term x_i*y_{i+1} − x_{i+1}*y_i."
+      },
+      "hint": "Compute each edge’s contribution and sum.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the time complexity of the implemented algorithm?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(1)",
+          "isCode": false
+        },
+        {
+          "label": "O(n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 3,
+      "explanation": "We perform a constant amount of work per vertex: O(n).",
+      "wrongExplanations": {
+        "1": "There is no nested loop over vertices."
+      },
+      "hint": "Count the passes over the vertices.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the space complexity of this implementation (in terms of extra space)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(1)",
+          "isCode": false
+        },
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(log n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "We store all n points in a list: O(n) extra space.",
+      "wrongExplanations": {
+        "0": "We could stream to get O(1), but our code stores all points."
+      },
+      "hint": "Look at the pts list.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q27",
+      "phase": "Analyzing Complexity",
+      "questionText": "Which statements about the implementation are correct?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "It works for any simple polygon regardless of orientation or concavity.",
+          "isCode": false
+        },
+        {
+          "label": "Vertices must be sorted by increasing x.",
+          "isCode": false
+        },
+        {
+          "label": "It fails if coordinates are negative.",
+          "isCode": false
+        },
+        {
+          "label": "It must divide by 2 at the end to print the correct integer.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The method handles any simple polygon and uses abs to ignore orientation.",
+      "wrongExplanations": {
+        "3": "We print 2a directly; no division is needed."
+      },
+      "hint": "Think about orientation and concavity handling.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys",
+    "",
+    "def main():",
+    "    data = sys.stdin.read().strip().split()",
+    "    it = iter(data)",
+    "    n = int(next(it))",
+    "    pts = []",
+    "    for _ in range(n):",
+    "        x = int(next(it)); y = int(next(it))",
+    "        pts.append((x, y))",
+    "    s = 0",
+    "    for i in range(n):",
+    "        x1, y1 = pts[i]",
+    "        x2, y2 = pts[(i + 1) % n]",
+    "        s += x1 * y2 - x2 * y1",
+    "    print(abs(s))",
+    "",
+    "if __name__ == \"__main__\":",
+    "    main()"
+  ],
+  "reasoningChain": [
+    {
+      "question": "q2",
+      "insight": "The polygon is closed; include the edge from the last vertex back to the first."
+    },
+    {
+      "question": "q5",
+      "insight": "Twice the area of a triangle from the origin to two points equals |ad − bc|."
+    },
+    {
+      "question": "q6",
+      "insight": "Summing x_i*y_{i+1} − x_{i+1}*y_i over all edges yields ±2a for a simple polygon."
+    },
+    {
+      "question": "q10",
+      "insight": "Take the absolute value at the end to get a nonnegative 2a regardless of orientation."
+    },
+    {
+      "question": "q11",
+      "insight": "Since the sum already equals 2a in magnitude, print abs(sum) without division."
+    },
+    {
+      "question": "q19",
+      "insight": "Implement the edge loop with wrap-around using (i+1) % n to include the last-to-first edge."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1439,
+    "output_tokens": 15923,
+    "input_cost": 0.001799,
+    "output_cost": 0.15923,
+    "total_cost": 0.161029
+  }
+}

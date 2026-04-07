@@ -1,0 +1,883 @@
+{
+  "id": "string-matching-cses",
+  "title": "String Matching",
+  "difficulty": "hard",
+  "tags": [
+    "string"
+  ],
+  "estimatedMinutes": 60,
+  "language": "python",
+  "description": "Given a string and a pattern, count the number of positions where the pattern occurs in the string. The input has two lines: the first line is the text of length n, and the second line is the pattern of length m. Both consist of characters a–z. Print the number of occurrences (overlapping allowed).",
+  "examples": [
+    {
+      "input": "saippuakauppias\npp",
+      "output": "2",
+      "explanation": "The substring \"pp\" occurs twice in \"saippuakauppias\" (overlapping is allowed)."
+    }
+  ],
+  "constraints": [
+    "1 ≤ n, m ≤ 10^6",
+    "Characters are lowercase a–z",
+    "Time limit: 1.00 s",
+    "Memory limit: 512 MB"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "For text s = \"aaaa\" and pattern p = \"aa\", how many occurrences should be counted?",
+      "diagram": "Indices (0-based):\ns: a a a a\n    ^^\n      ^^\n        ^^",
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Occurrences can overlap. The matches start at indices 0, 1, and 2, so total is 3.",
+      "wrongExplanations": {
+        "1": "Overlapping matches are allowed; counting only non-overlapping gives 2.",
+        "3": "There are only 3 starting positions (0..2) for a length-2 pattern in length-4 text."
+      },
+      "hint": "Consider overlapping starting positions.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "If n < m (text shorter than pattern), what should the output be?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "n",
+          "isCode": false
+        },
+        {
+          "label": "Undefined behavior",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "If the pattern is longer than the text, it cannot occur; count is 0.",
+      "wrongExplanations": {
+        "1": "There is no way for a longer pattern to appear even once.",
+        "2": "The count does not depend on n here; it must be 0."
+      },
+      "hint": "Can a longer substring fit into a shorter string?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "Given the sample: s = \"saippuakauppias\" and p = \"pp\", what is the number of occurrences?",
+      "diagram": "saippuakauppias\n   ^^       ^^",
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "There are two occurrences: starting at indices 3 and 10 (0-based).",
+      "wrongExplanations": {
+        "0": "There are two pairs of consecutive 'p's in the string.",
+        "2": "Only two pairs of 'p's exist; no third occurrence."
+      },
+      "hint": "Scan visually for consecutive 'p' pairs.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "What is the worst-case number of character comparisons for the naive method that checks the pattern at every starting index?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n + m)",
+          "isCode": false
+        },
+        {
+          "label": "O(n m)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(m^2)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "At each of ~n starting positions, up to m characters may be compared, giving O(n m).",
+      "wrongExplanations": {
+        "0": "You are redoing work at each position; it's not linear.",
+        "2": "n^2 does not reflect dependency on m; the product n·m is the right bound."
+      },
+      "hint": "Multiply starting positions by work per position.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Exploring Approaches",
+      "questionText": "Given n, m up to 10^6, which high-level idea helps avoid re-checking characters from scratch after a mismatch?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Restart comparison from the next index in the text every time",
+          "isCode": false
+        },
+        {
+          "label": "Precompute, for the pattern, how much of its prefix can still match after a mismatch and reuse this while scanning the text",
+          "isCode": false
+        },
+        {
+          "label": "Sort the text and the pattern and compare sorted orders",
+          "isCode": false
+        },
+        {
+          "label": "Randomly jump ahead to reduce comparisons on average",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Carry forward the length of the matched prefix and fall back using precomputed information to skip redundant checks.",
+      "wrongExplanations": {
+        "0": "This is the naive approach; too slow.",
+        "2": "Sorting destroys positional information; matching requires order."
+      },
+      "hint": "Think about remembering the longest prefix matched so far.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "What should be precomputed for the pattern to allow efficient fallback on mismatches?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "For each position i, the length of the longest proper prefix of pattern[0..i] that is also a suffix of pattern[0..i]",
+          "isCode": false
+        },
+        {
+          "label": "The frequency of each character in the pattern",
+          "isCode": false
+        },
+        {
+          "label": "The next index of each character in the pattern",
+          "isCode": false
+        },
+        {
+          "label": "The number of distinct substrings of the pattern",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "This length lets us know how much of the pattern remains matched after a mismatch without rechecking.",
+      "wrongExplanations": {
+        "1": "Frequencies ignore order, which is essential for matching.",
+        "2": "Next occurrences do not capture overlapping prefix-suffix structure."
+      },
+      "hint": "Think 'longest prefix = suffix' for prefixes of the pattern.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "To detect all matches by scanning one combined string, we can build: combined = pattern + SEP + text. What property must SEP have?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "SEP must not appear in either the pattern or the text",
+          "isCode": false
+        },
+        {
+          "label": "SEP should be the first character of the pattern",
+          "isCode": false
+        },
+        {
+          "label": "SEP should be a vowel",
+          "isCode": false
+        },
+        {
+          "label": "Any lowercase letter a–z works",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "SEP must be outside the alphabet a–z so matches cannot cross the boundary between pattern and text.",
+      "wrongExplanations": {
+        "3": "A lowercase letter may occur in input, allowing false cross-boundary matches.",
+        "1": "Using a pattern character risks appearing in the input."
+      },
+      "hint": "Pick a character not in 'a'–'z', e.g., '{'.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Building the Idea",
+      "questionText": "Compute the array L for s = \"ababa\" where L[i] = length of the longest proper prefix of s[0..i] that is also a suffix of s[0..i].",
+      "diagram": "s: a b a b a\ni: 0 1 2 3 4",
+      "options": [
+        {
+          "label": "[0, 0, 1, 2, 3]",
+          "isCode": false
+        },
+        {
+          "label": "[1, 0, 1, 2, 3]",
+          "isCode": false
+        },
+        {
+          "label": "[0, 1, 0, 1, 0]",
+          "isCode": false
+        },
+        {
+          "label": "[0, 0, 1, 1, 2]",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Prefixes/suffixes grow: a:0, ab:0, aba:1, abab:2, ababa:3.",
+      "wrongExplanations": {
+        "1": "L[0] is 0 by definition (proper prefix must be shorter).",
+        "3": "At i=3, longest border is 'ab' length 2, not 1."
+      },
+      "hint": "List prefix-suffix pairs for each position.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "Compute L for s = \"aaaa\".",
+      "diagram": "s: a a a a\ni: 0 1 2 3",
+      "options": [
+        {
+          "label": "[0, 1, 2, 3]",
+          "isCode": false
+        },
+        {
+          "label": "[0, 0, 0, 0]",
+          "isCode": false
+        },
+        {
+          "label": "[1, 2, 3, 4]",
+          "isCode": false
+        },
+        {
+          "label": "[0, 1, 1, 2]",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "At each step, the border extends by one: 0,1,2,3.",
+      "wrongExplanations": {
+        "1": "Repeated 'a's create increasing borders.",
+        "2": "Proper prefix cannot be the whole string at i=3."
+      },
+      "hint": "Compare prefixes/suffixes for 'aaaa' carefully.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "Compute L for s = \"abcab\".",
+      "diagram": "s: a b c a b\ni: 0 1 2 3 4",
+      "options": [
+        {
+          "label": "[0, 0, 0, 1, 2]",
+          "isCode": false
+        },
+        {
+          "label": "[0, 1, 0, 1, 0]",
+          "isCode": false
+        },
+        {
+          "label": "[0, 0, 1, 2, 3]",
+          "isCode": false
+        },
+        {
+          "label": "[0, 0, 0, 0, 1]",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "At i=3, border 'a' (1); at i=4, border 'ab' (2). Others 0.",
+      "wrongExplanations": {
+        "2": "This would require longer borders not present.",
+        "3": "At i=4, 'ab' matches; length should be 2."
+      },
+      "hint": "Check suffixes that also equal prefixes at each i.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "Why does building L over t = pattern + SEP + text let us count matches by summing positions where L[i] equals m = len(pattern)?",
+      "diagram": "t = P + SEP + S\nL[i] tracks border length up to i\nCount positions with L[i] == m",
+      "options": [
+        {
+          "label": "Because P is a prefix of t, any suffix of t ending at a text position equal to P gives L[i] = m",
+          "isCode": false
+        },
+        {
+          "label": "Because SEP forces L[i] to be non-decreasing",
+          "isCode": false
+        },
+        {
+          "label": "Because L[i] counts how many times P appears up to i",
+          "isCode": false
+        },
+        {
+          "label": "Because L[i] equals the number of matching characters at the very first index only",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "L[i] = m iff the suffix ending at i matches the full pattern, as P is the global prefix and SEP blocks crossing.",
+      "wrongExplanations": {
+        "1": "L can decrease after mismatches; SEP's role is to prevent crossing, not monotonicity.",
+        "2": "L[i] is a single length, not a cumulative count."
+      },
+      "hint": "When the entire pattern matches ending at i, the longest prefix-suffix is the full pattern.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "What happens if SEP is chosen as a lowercase letter that appears in the inputs?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Matches may be falsely counted across the boundary, giving incorrect results",
+          "isCode": false
+        },
+        {
+          "label": "The count will still be correct but slower",
+          "isCode": false
+        },
+        {
+          "label": "No effect; any character works",
+          "isCode": false
+        },
+        {
+          "label": "It will only affect memory usage",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The boundary can be crossed in L, leading to spurious full-pattern borders and wrong counts.",
+      "wrongExplanations": {
+        "2": "The separator’s purpose is to prevent cross-boundary matches; choosing an existing letter breaks this.",
+        "1": "It changes correctness, not just speed."
+      },
+      "hint": "Ensure SEP is not in a–z.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "Do we need to adjust the count (e.g., subtract something) when counting positions where L[i] == m on t = pattern + SEP + text?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "No, summing all positions where L[i] == m directly gives the number of occurrences",
+          "isCode": false
+        },
+        {
+          "label": "Yes, subtract 1 to ignore the pattern itself",
+          "isCode": false
+        },
+        {
+          "label": "Yes, subtract the number of pattern characters",
+          "isCode": false
+        },
+        {
+          "label": "Yes, subtract the length of t before SEP",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "L[i] cannot be m within the pattern segment due to SEP; only text positions reach m, so no adjustment is needed.",
+      "wrongExplanations": {
+        "1": "Within the pattern segment, L[i] < m because the prefix must be proper.",
+        "3": "No offset is required; the counting condition is precise."
+      },
+      "hint": "SEP prevents counting inside the pattern part.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Writing the Code",
+      "questionText": "Read the input lines for text and pattern.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\ns = sys.stdin.readline().strip()\np = sys.stdin.readline().strip()",
+          "isCode": true
+        },
+        {
+          "label": "import sys\np = sys.stdin.readline().strip()\ns = sys.stdin.readline().strip()",
+          "isCode": true
+        },
+        {
+          "label": "s, p = input().strip().split()",
+          "isCode": true
+        },
+        {
+          "label": "s = input().strip()\np = input()",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Input is two separate lines: first text, then pattern. Stripping both lines avoids trailing newlines.",
+      "wrongExplanations": {
+        "1": "This swaps text and pattern, producing wrong answers.",
+        "2": "The input is on two lines, not space-separated on one line."
+      },
+      "hint": "Use two separate reads; keep the given order.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\ns = sys.stdin.readline().strip()\np = sys.stdin.readline().strip()",
+      "codeLabel": "Read input"
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Set up the pattern length and choose a safe separator character.",
+      "diagram": "Alphabet is a–z; choose a character outside this set.",
+      "options": [
+        {
+          "label": "m = len(p)\nsep = '{'",
+          "isCode": true
+        },
+        {
+          "label": "m = len(p)\nsep = 'a'",
+          "isCode": true
+        },
+        {
+          "label": "m = len(s)\nsep = '{'",
+          "isCode": true
+        },
+        {
+          "label": "m = len(p)\nsep = 'z'",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "'{' is not in a–z, so it safely separates pattern and text. Use m = len(p).",
+      "wrongExplanations": {
+        "1": "'a' can appear in inputs; not a safe separator.",
+        "2": "m should be the pattern length, not the text length."
+      },
+      "hint": "Pick a non-lowercase letter as separator and store pattern length.",
+      "isCodeBuilding": true,
+      "codeSnippet": "m = len(p)\nsep = '{'",
+      "codeLabel": "Prepare lengths and separator"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Build the combined string and initialize the array of border lengths.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "t = p + sep + s\npi = [0] * len(t)",
+          "isCode": true
+        },
+        {
+          "label": "t = s + sep + p\npi = [0] * len(p)",
+          "isCode": true
+        },
+        {
+          "label": "t = p + s\npi = [0] * len(t)",
+          "isCode": true
+        },
+        {
+          "label": "t = p + sep + s\npi = [0] * (len(t) + 1)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Correct order is pattern + separator + text, and pi must match t's length exactly.",
+      "wrongExplanations": {
+        "1": "Wrong concatenation order and incorrect array length.",
+        "2": "Missing the separator breaks correctness."
+      },
+      "hint": "Ensure the separator is in the middle and array sizes align.",
+      "isCodeBuilding": true,
+      "codeSnippet": "t = p + sep + s\npi = [0] * len(t)",
+      "codeLabel": "Combine and init array"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Write the loop header and the fallback step for mismatches while computing the border lengths.",
+      "diagram": "for i from 1 to len(t)-1:\n  j = pi[i-1]\n  while j>0 and t[i] != t[j]: j = pi[j-1]",
+      "options": [
+        {
+          "label": "for i in range(1, len(t)):\n    j = pi[i-1]\n    while j > 0 and t[i] != t[j]:\n        j = pi[j-1]",
+          "isCode": true
+        },
+        {
+          "label": "for i in range(len(t)):\n    j = pi[i]\n    while j > 0 and t[i] != t[j]:\n        j = pi[j-1]",
+          "isCode": true
+        },
+        {
+          "label": "for i in range(1, len(t)):\n    j = pi[i-1]\n    while j >= 0 and t[i] != t[j]:\n        j -= 1",
+          "isCode": true
+        },
+        {
+          "label": "for i in range(1, len(t)):\n    j = pi[i-1]\n    while j > 0 and t[i] == t[j]:\n        j = pi[j-1]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Initialize j from previous value and fall back using pi[j-1] until characters match or j==0.",
+      "wrongExplanations": {
+        "1": "Using pi[i] before computing it and starting at i=0 is incorrect.",
+        "2": "Allowing j to become -1 and decrementing loses the invariant and indexing."
+      },
+      "hint": "Start i at 1 and use the previously computed value to fall back.",
+      "isCodeBuilding": true,
+      "codeSnippet": "for i in range(1, len(t)):\n    j = pi[i-1]\n    while j > 0 and t[i] != t[j]:\n        j = pi[j-1]",
+      "codeLabel": "Loop and fallback"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "After fallback, how do we extend the current border length and store it?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "if t[i] == t[j]:\n    j += 1\npi[i] = j",
+          "isCode": true
+        },
+        {
+          "label": "if t[i] == t[j-1]:\n    j += 1\npi[i] = j",
+          "isCode": true
+        },
+        {
+          "label": "if t[i] != t[j]:\n    j += 1\npi[i] = j",
+          "isCode": true
+        },
+        {
+          "label": "if t[i] == t[j]:\n    j += 1\npi[i] = j + 1",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "If characters match, increase j by 1 and set pi[i] to j.",
+      "wrongExplanations": {
+        "1": "Compare to t[j], not t[j-1], after fallback.",
+        "3": "pi[i] should be the current j, not j+1."
+      },
+      "hint": "Only increment when characters match; store exactly j.",
+      "isCodeBuilding": true,
+      "codeSnippet": "if t[i] == t[j]:\n    j += 1\npi[i] = j",
+      "codeLabel": "Extend and store"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Count the occurrences and print the answer.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "ans = sum(1 for x in pi if x == m)\nprint(ans)",
+          "isCode": true
+        },
+        {
+          "label": "ans = sum(1 for x in pi if x >= m)\nprint(ans)",
+          "isCode": true
+        },
+        {
+          "label": "print(sum(pi))",
+          "isCode": true
+        },
+        {
+          "label": "ans = len([x for x in pi if x == m and x < len(p)])\nprint(ans)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Every position with pi value exactly m corresponds to one pattern occurrence; summing those gives the count.",
+      "wrongExplanations": {
+        "1": "Values greater than m cannot occur; using >= m risks masking logic errors.",
+        "2": "Summing pi values does not count matches."
+      },
+      "hint": "Count positions where the border length equals the full pattern length.",
+      "isCodeBuilding": true,
+      "codeSnippet": "ans = sum(1 for x in pi if x == m)\nprint(ans)",
+      "codeLabel": "Count and output"
+    },
+    {
+      "id": "q20",
+      "phase": "Verifying the Solution",
+      "questionText": "Run the algorithm conceptually on s = \"aaaaa\" and p = \"aa\". What should be printed?",
+      "diagram": "s: a a a a a\np: a a\nMatches at starts: 0,1,2,3",
+      "options": [
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "There are 4 overlapping occurrences: indices 0,1,2,3.",
+      "wrongExplanations": {
+        "0": "Do not forget overlaps.",
+        "2": "Pattern length is 2; cannot start at index 4."
+      },
+      "hint": "Count all overlapping positions where p fits.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q21",
+      "phase": "Verifying the Solution",
+      "questionText": "For s = \"abcabca\" and p = \"abca\", what output should the code produce?",
+      "diagram": "s: a b c a b c a\np: a b c a\nMatches at starts: 0 and 3",
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Occurrences at indices 0 and 3; total 2.",
+      "wrongExplanations": {
+        "0": "There are two matches, not one.",
+        "3": "Pattern clearly appears at least once."
+      },
+      "hint": "Check starts 0..(n-m).",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q22",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the time complexity of this approach (building the array over t and counting)? Let n = len(s) and m = len(p).",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n + m)",
+          "isCode": false
+        },
+        {
+          "label": "O(n m)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log m)",
+          "isCode": false
+        },
+        {
+          "label": "O(m^2)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each position in t is processed with at most a few fallbacks overall, yielding linear time.",
+      "wrongExplanations": {
+        "1": "We avoid rechecking from scratch at each index.",
+        "2": "No logarithmic factor is introduced."
+      },
+      "hint": "Each index advances or decreases j; both sum to O(n+m).",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q23",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the extra space complexity of the algorithm (beyond input storage)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n + m) for the combined string and the array",
+          "isCode": false
+        },
+        {
+          "label": "O(1)",
+          "isCode": false
+        },
+        {
+          "label": "O(m^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(n m)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We store the combined string t and its array of the same length.",
+      "wrongExplanations": {
+        "1": "We explicitly allocate an array of length |t|.",
+        "3": "No 2D structures are used."
+      },
+      "hint": "Consider t and the array over t.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Analyzing Complexity",
+      "questionText": "Which edge case must be handled by the choice of separator to ensure correctness for all inputs?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Separator must not be any lowercase letter a–z (e.g., '{')",
+          "isCode": false
+        },
+        {
+          "label": "Separator must be equal to the first character of the pattern",
+          "isCode": false
+        },
+        {
+          "label": "Separator should be the most frequent character in the text",
+          "isCode": false
+        },
+        {
+          "label": "Separator can be any character as long as it repeats",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Picking a character outside a–z prevents cross-boundary matches for any input strings over a–z.",
+      "wrongExplanations": {
+        "1": "Using a pattern character risks appearing in the text.",
+        "2": "Frequency is irrelevant; we need guaranteed absence."
+      },
+      "hint": "Guarantee that the separator never appears in the input.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\ns = sys.stdin.readline().strip()\np = sys.stdin.readline().strip()",
+    "m = len(p)\nsep = '{'",
+    "t = p + sep + s\npi = [0] * len(t)",
+    "for i in range(1, len(t)):\n    j = pi[i-1]\n    while j > 0 and t[i] != t[j]:\n        j = pi[j-1]",
+    "if t[i] == t[j]:\n    j += 1\npi[i] = j",
+    "ans = sum(1 for x in pi if x == m)\nprint(ans)"
+  ],
+  "reasoningChain": [
+    {
+      "question": "Do overlapping occurrences count, and what happens when n < m?",
+      "insight": "Occurrences are counted even if they overlap; if pattern is longer than text, count is 0."
+    },
+    {
+      "question": "Why is the naive per-position scan too slow for n, m up to 10^6?",
+      "insight": "Naive approach can take O(n m) comparisons, which is infeasible under the limits."
+    },
+    {
+      "question": "What information should we precompute on the pattern to avoid rechecking?",
+      "insight": "For each prefix of the pattern, store the longest proper prefix equal to its suffix to know fallback lengths."
+    },
+    {
+      "question": "How can we turn matching into scanning a single string?",
+      "insight": "Concatenate pattern + separator + text with a separator not in a–z to prevent boundary crossings."
+    },
+    {
+      "question": "How do we compute the border-length array over the combined string?",
+      "insight": "Iterate positions, fallback using prior values until characters match, then extend by one."
+    },
+    {
+      "question": "How do we count occurrences from the computed array?",
+      "insight": "Every position where the array equals the pattern length corresponds to one occurrence; summing these gives the answer."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1297,
+    "output_tokens": 13667,
+    "input_cost": 0.001621,
+    "output_cost": 0.13667,
+    "total_cost": 0.138291
+  }
+}

@@ -1,0 +1,851 @@
+{
+  "id": "inverse-suffix-array-reconstruction-mcqs",
+  "title": "Inverse Suffix Array",
+  "difficulty": "hard",
+  "tags": [
+    "string"
+  ],
+  "estimatedMinutes": 70,
+  "language": "python",
+  "description": "Given the suffix array of a string, reconstruct any string over 'a'–'z' whose suffix array matches it, or print -1 if impossible. The suffix array is a permutation of positions 1..n giving the lexicographic order of suffixes.",
+  "examples": [
+    {
+      "input": "7\n4 1 3 5 6 7 2\n",
+      "output": "aybabtu\n",
+      "explanation": "One valid string is 'aybabtu'. Any string whose suffix array equals the given permutation is accepted."
+    }
+  ],
+  "constraints": [
+    "1 ≤ n ≤ 100000",
+    "Input suffix array is a permutation of 1..n",
+    "Output must be 'a'–'z' only"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "For the string s = \"aba\", list its suffixes and choose the correct suffix array (1-based).",
+      "diagram": "Suffixes:\n1: aba\n2: ba\n3: a\nSorted: a < aba < ba",
+      "options": [
+        {
+          "label": "[1, 2, 3]",
+          "isCode": false
+        },
+        {
+          "label": "[3, 1, 2]",
+          "isCode": false
+        },
+        {
+          "label": "[2, 3, 1]",
+          "isCode": false
+        },
+        {
+          "label": "[1, 3, 2]",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Sorted suffixes are: index 3 \"a\", then index 1 \"aba\", then index 2 \"ba\". So the array is [3,1,2].",
+      "wrongExplanations": {
+        "0": "This would mean original order is already sorted, which is false (\"aba\" > \"a\").",
+        "2": "\"ba\" cannot come before \"a\" or \"aba\" lexicographically."
+      },
+      "hint": "Sort the strings: a, aba, ba (by usual lexicographic rules).",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "The input permutation is 1-based. If n=3 and the line is \"3 1 2\", what are the 0-based positions of the sorted suffixes?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "[3, 1, 2]",
+          "isCode": false
+        },
+        {
+          "label": "[2, 0, 1]",
+          "isCode": false
+        },
+        {
+          "label": "[1, 3, 2]",
+          "isCode": false
+        },
+        {
+          "label": "[2, 1, 0]",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Subtract 1 from each: 3→2, 1→0, 2→1. So [2,0,1].",
+      "wrongExplanations": {
+        "0": "This is still 1-based and out of range 0..2.",
+        "3": "This reverses order; subtracting 1 should keep relative order the same."
+      },
+      "hint": "Just subtract 1 from each entry.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "For s = \"ba\" (n=2), what is its suffix array (1-based)?",
+      "diagram": "Suffixes:\n1: ba\n2: a\nSorted: a < ba",
+      "options": [
+        {
+          "label": "[2, 1]",
+          "isCode": false
+        },
+        {
+          "label": "[1, 2]",
+          "isCode": false
+        },
+        {
+          "label": "[1, 1]",
+          "isCode": false
+        },
+        {
+          "label": "[2, 2]",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "\"a\" (index 2) comes before \"ba\" (index 1), so [2,1].",
+      "wrongExplanations": {
+        "1": "That would require \"ba\" < \"a\", which is false.",
+        "2": "The suffix array must be a permutation of distinct positions."
+      },
+      "hint": "Compare the two suffixes lexicographically: \"a\" vs \"ba\".",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "If two suffixes start with the same character, what determines their relative order?",
+      "diagram": "Compare s[i:] and s[j:]. If s[i] == s[j], then compare s[i+1:] and s[j+1:], and so on.",
+      "options": [
+        {
+          "label": "The second character onward decides (continue comparing until a difference or end).",
+          "isCode": false
+        },
+        {
+          "label": "The shorter suffix comes last, regardless of further characters.",
+          "isCode": false
+        },
+        {
+          "label": "The suffix with the smaller starting index always comes first.",
+          "isCode": false
+        },
+        {
+          "label": "They must be equal and can appear in any order.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Lexicographic compare proceeds to next positions on ties until a difference or one ends.",
+      "wrongExplanations": {
+        "2": "Start index does not determine order; characters do.",
+        "3": "Order is fixed by lexicographic comparison, not arbitrary."
+      },
+      "hint": "Think of dictionary order when the first letters are the same.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Exploring Approaches",
+      "questionText": "Why is brute-forcing all possible strings of length n over 'a'–'z' infeasible for n up to 1e5?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "It would require checking up to 26^n strings.",
+          "isCode": false
+        },
+        {
+          "label": "We can do it in O(n) by guessing letters one by one.",
+          "isCode": false
+        },
+        {
+          "label": "We only need to check n strings.",
+          "isCode": false
+        },
+        {
+          "label": "It's infeasible because we don't know the alphabet size.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The search space is exponential (26^n), far beyond limits for n=1e5.",
+      "wrongExplanations": {
+        "1": "Guessing letters arbitrarily does not avoid exponential blowup.",
+        "2": "There are vastly more than n possible strings."
+      },
+      "hint": "Estimate how many strings exist over 26 letters of length n.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "Suppose we assign letters to positions in the order of the given suffix array. When is it safe to give the SAME first letter to two adjacent suffixes in this order?",
+      "diagram": "Let x = SA[k], y = SA[k+1]. We want s[x] == s[y].",
+      "options": [
+        {
+          "label": "When the suffix starting at x+1 appears earlier than the suffix starting at y+1 in the given order.",
+          "isCode": false
+        },
+        {
+          "label": "When x < y.",
+          "isCode": false
+        },
+        {
+          "label": "When the two suffixes have the same length.",
+          "isCode": false
+        },
+        {
+          "label": "Always; ties can be broken arbitrarily later.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "If first letters tie, the order must be decided by comparing tails s[x+1:] vs s[y+1:]. The earlier tail must come first.",
+      "wrongExplanations": {
+        "1": "Start indices do not imply order by themselves.",
+        "3": "Order is not arbitrary; it must match the provided permutation."
+      },
+      "hint": "If s[x] == s[y], what must s[x+1:], s[y+1:] satisfy?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "How can we quickly check which of two suffixes (starting at i and j) comes first in the given order?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Build an inverse array R where R[pos] = rank of suffix starting at pos, and compare R[i] and R[j].",
+          "isCode": false
+        },
+        {
+          "label": "Binary search the suffix array for i and j each time.",
+          "isCode": false
+        },
+        {
+          "label": "Compare i and j numerically; smaller index comes first.",
+          "isCode": false
+        },
+        {
+          "label": "We cannot check without reconstructing the full string.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The inverse of the permutation gives constant-time rank lookups for any starting position.",
+      "wrongExplanations": {
+        "1": "Binary searching for each comparison would be too slow.",
+        "3": "We can use the input order directly via its inverse."
+      },
+      "hint": "For a permutation P, its inverse P^{-1} maps position -> order index.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Building the Idea",
+      "questionText": "Given SA (1-based) = [3, 1, 2] for n=3, convert to 0-based and compute R (inverse). Which R is correct?",
+      "diagram": "0-based SA = [2, 0, 1]. R[pos] = rank such that SA[rank] = pos.",
+      "options": [
+        {
+          "label": "R = [1, 2, 0]",
+          "isCode": false
+        },
+        {
+          "label": "R = [0, 1, 2]",
+          "isCode": false
+        },
+        {
+          "label": "R = [2, 0, 1]",
+          "isCode": false
+        },
+        {
+          "label": "R = [1, 0, 2]",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "SA=[2,0,1] ⇒ R[2]=0, R[0]=1, R[1]=2, so R=[1,2,0].",
+      "wrongExplanations": {
+        "1": "This would mean SA is already sorted by index, which it isn't.",
+        "2": "This repeats SA, not its inverse."
+      },
+      "hint": "Fill R so that R[SA[k]] = k for each k.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "When comparing s[i:] and s[j:] with s[i] == s[j], we compare s[i+1:] and s[j+1:]. If i is the last index (i = n-1), how should we treat the “rank” of s[i+1:]?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "As smaller than any real suffix (use a sentinel less than all ranks).",
+          "isCode": false
+        },
+        {
+          "label": "As larger than any real suffix (use a sentinel greater than all ranks).",
+          "isCode": false
+        },
+        {
+          "label": "As equal to any other tail.",
+          "isCode": false
+        },
+        {
+          "label": "Reuse the rank of s[i:].",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The empty string is smaller than any non-empty continuation when prefixes are equal, so use a smallest sentinel.",
+      "wrongExplanations": {
+        "1": "A largest sentinel would invert comparisons at string ends.",
+        "3": "The tail is not the same as the current suffix."
+      },
+      "hint": "In lex order, an empty string is smaller than any non-empty string.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "Let x = SA[k], y = SA[k+1]. Using R for ranks and a smallest sentinel for empty tails, when can we assign s[x] == s[y]?",
+      "diagram": "Allow s[x] == s[y] only if tails preserve order.",
+      "options": [
+        {
+          "label": "If R[x+1] < R[y+1] (treat R[n] = -1).",
+          "isCode": false
+        },
+        {
+          "label": "If R[x+1] <= R[y+1].",
+          "isCode": false
+        },
+        {
+          "label": "If x < y.",
+          "isCode": false
+        },
+        {
+          "label": "Only if x = y - 1.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Strictly smaller tail rank ensures the tie on first char is broken in the same direction.",
+      "wrongExplanations": {
+        "1": "Tails cannot have equal ranks (permutation), and non-strict allows conflicts.",
+        "2": "Start indices don’t dictate lex order."
+      },
+      "hint": "A tie on first char must be broken by the tails in the same order.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "Consider n=4 and SA (1-based) = [4, 1, 2, 3]. Following the rule, how many distinct first letters are needed (minimum)?",
+      "diagram": "0-based SA=[3,0,1,2]\nR: R[3]=0,R[0]=1,R[1]=2,R[2]=3\nnext ranks: nr[3]=-1, nr[0]=2, nr[1]=3, nr[2]=0\nCheck pairs: (3,0): -1<2 same; (0,1): 2<3 same; (1,2): 3<0 false → new letter",
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "First three can share a letter; the last needs a new one → 2 letters.",
+      "wrongExplanations": {
+        "0": "One letter fails at the last boundary where 3 < 0 is false.",
+        "3": "We only need to increment when needed; not every suffix needs a unique letter."
+      },
+      "hint": "Count the boundaries where the tail order fails and forces an increment.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "Why does grouping adjacent suffixes with equal first letters (where allowed) still produce exactly the given order?",
+      "diagram": "- Within a group: tails are strictly increasing, so order matches.\n- Across groups: earlier group's letter is smaller, so all its suffixes come first.",
+      "options": [
+        {
+          "label": "Within a group, tails strictly increase; across groups, first letters differ and enforce order.",
+          "isCode": false
+        },
+        {
+          "label": "Because ties are arbitrary and won't affect order.",
+          "isCode": false
+        },
+        {
+          "label": "Because all groups have the same letter.",
+          "isCode": false
+        },
+        {
+          "label": "Because groups are sorted by start indices.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Equal first letters defer to tails which increase; different first letters globally separate groups.",
+      "wrongExplanations": {
+        "1": "Order is not arbitrary; it must match the permutation.",
+        "3": "Start indices do not define lex order."
+      },
+      "hint": "Consider intra-group vs inter-group comparisons separately.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Writing the Code",
+      "questionText": "Read all input tokens and parse n from the stream. Choose the most robust input reading for multiple lines.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\ndata = sys.stdin.read().strip().split()\nit = iter(data)\nn = int(next(it))\nsa = [int(next(it)) - 1 for _ in range(n)]",
+          "isCode": true
+        },
+        {
+          "label": "import sys\nn = int(input())\nsa = list(map(int, input().split()))",
+          "isCode": true
+        },
+        {
+          "label": "from sys import stdin\nn = int(stdin.readline())\nsa = [int(x) for x in stdin.readline().split()]",
+          "isCode": true
+        },
+        {
+          "label": "import os\ndata = os.read(0, 1<<20).split()\nn = int(data[0])\nsa = [int(x) for x in data[1:]]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Reading all tokens and iterating handles arbitrary line breaks and subtracts 1 to make positions 0-based.",
+      "wrongExplanations": {
+        "1": "This may fail if the suffix array spans multiple lines and doesn't convert to 0-based.",
+        "3": "Using os.read without converting indices and sizes is error-prone here."
+      },
+      "hint": "Aim for a method that handles any number of lines and converts indices.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\ndata = sys.stdin.read().strip().split()\nit = iter(data)\nn = int(next(it))\nsa = [int(next(it)) - 1 for _ in range(n)]",
+      "codeLabel": "Read input and parse"
+    },
+    {
+      "id": "q14",
+      "phase": "Writing the Code",
+      "questionText": "Build the inverse array R (rank by start position). Which snippet correctly maps R[pos] = rank?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "isa = [0] * n\nfor r, p in enumerate(sa):\n    isa[p] = r",
+          "isCode": true
+        },
+        {
+          "label": "isa = [0] * n\nfor r, p in enumerate(sa):\n    isa[r] = p",
+          "isCode": true
+        },
+        {
+          "label": "isa = [0] * n\nfor i in range(n):\n    isa[i] = sa[i]",
+          "isCode": true
+        },
+        {
+          "label": "isa = sa.copy()",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need the inverse mapping: at start position p, store its rank r.",
+      "wrongExplanations": {
+        "1": "This stores positions by rank, not ranks by position.",
+        "2": "This copies SA order, not inverse."
+      },
+      "hint": "Ensure isa[SA[k]] = k holds for all k.",
+      "isCodeBuilding": true,
+      "codeSnippet": "isa = [0] * n\nfor r, p in enumerate(sa):\n    isa[p] = r",
+      "codeLabel": "Build inverse ranks"
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Precompute the tail ranks R[i+1], using a smallest sentinel for i = n-1.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "next_rank = [0] * n\nfor i in range(n):\n    next_rank[i] = -1 if i == n - 1 else isa[i + 1]",
+          "isCode": true
+        },
+        {
+          "label": "next_rank = [0] * n\nfor i in range(n):\n    next_rank[i] = 0 if i == n - 1 else isa[i + 1]",
+          "isCode": true
+        },
+        {
+          "label": "next_rank = [0] * n\nfor i in range(n):\n    next_rank[i] = isa[i - 1] if i > 0 else -1",
+          "isCode": true
+        },
+        {
+          "label": "next_rank = isa[1:] + [-1]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need R[i+1] and a smallest sentinel at the last index (empty tail).",
+      "wrongExplanations": {
+        "1": "Zero may not be the smallest rank; -1 ensures it is smaller than all.",
+        "3": "This fails for i = n-1 and loses alignment with positions."
+      },
+      "hint": "Map each i to the rank of suffix starting at i+1; use -1 at the end.",
+      "isCodeBuilding": true,
+      "codeSnippet": "next_rank = [0] * n\nfor i in range(n):\n    next_rank[i] = -1 if i == n - 1 else isa[i + 1]",
+      "codeLabel": "Compute tail ranks with sentinel"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Initialize the answer storage and current letter index.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "ans = [0] * n\ncur = 0",
+          "isCode": true
+        },
+        {
+          "label": "ans = ['a'] * n\ncur = 'a'",
+          "isCode": true
+        },
+        {
+          "label": "ans = []\ncur = 0",
+          "isCode": true
+        },
+        {
+          "label": "ans = [None] * (n+1)\ncur = 1",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Store numeric letter codes 0..25; start with 0 representing 'a'.",
+      "wrongExplanations": {
+        "1": "Using characters complicates incrementing and comparisons.",
+        "2": "We need a fixed-size array indexed by position."
+      },
+      "hint": "We'll convert numbers to letters at the end.",
+      "isCodeBuilding": true,
+      "codeSnippet": "ans = [0] * n\ncur = 0",
+      "codeLabel": "Initialize state"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Write the main loop to assign letters and decide when to increment. Choose the correct block.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "for k in range(n):\n    p = sa[k]\n    ans[p] = cur\n    if k < n - 1:\n        l = next_rank[p]\n        rnk = next_rank[sa[k + 1]]\n        if not (l < rnk):\n            cur += 1\n            if cur >= 26:\n                print(-1)\n                sys.exit(0)",
+          "isCode": true
+        },
+        {
+          "label": "for k in range(n):\n    p = sa[k]\n    ans[p] = cur\n    if k < n - 1:\n        l = next_rank[p]\n        rnk = next_rank[sa[k + 1]]\n        if l <= rnk:\n            cur += 1",
+          "isCode": true
+        },
+        {
+          "label": "for k in range(n - 1):\n    p = sa[k]\n    ans[p] = cur\n    l = isa[p]\n    rnk = isa[sa[k + 1]]\n    if not (l < rnk):\n        cur += 1",
+          "isCode": true
+        },
+        {
+          "label": "for k in range(n):\n    p = sa[k]\n    ans[p] = cur\n    if k < n - 1 and next_rank[sa[k + 1]] < next_rank[p]:\n        cur += 1\n        if cur > 26:\n            print(-1); sys.exit(0)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We compare tail ranks l and rnk with strict <. If not, we must increase the letter; guard exceeding 25 (26 letters).",
+      "wrongExplanations": {
+        "1": "Using <= would force increments even when tails are strictly increasing.",
+        "3": "The bound check should be cur >= 26; and the comparison direction is already handled by not (l < rnk)."
+      },
+      "hint": "Increment only when l ≥ rnk; allow equal only if l < rnk.",
+      "isCodeBuilding": true,
+      "codeSnippet": "for k in range(n):\n    p = sa[k]\n    ans[p] = cur\n    if k < n - 1:\n        l = next_rank[p]\n        rnk = next_rank[sa[k + 1]]\n        if not (l < rnk):\n            cur += 1\n            if cur >= 26:\n                print(-1)\n                sys.exit(0)",
+      "codeLabel": "Assign letters along SA"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Convert numeric codes to letters and print the result.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "s = ''.join(chr(ord('a') + x) for x in ans)\nprint(s)",
+          "isCode": true
+        },
+        {
+          "label": "print(''.join(ans))",
+          "isCode": true
+        },
+        {
+          "label": "s = ''.join(chr(x) for x in ans)\nprint(s)",
+          "isCode": true
+        },
+        {
+          "label": "print(ans)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Map 0→'a', 1→'b', … and join to a string before printing.",
+      "wrongExplanations": {
+        "1": "ans contains integers, not characters.",
+        "2": "chr(x) would produce control characters for small integers."
+      },
+      "hint": "Shift from 'a' using ord/chr.",
+      "isCodeBuilding": true,
+      "codeSnippet": "s = ''.join(chr(ord('a') + x) for x in ans)\nprint(s)",
+      "codeLabel": "Build and print output"
+    },
+    {
+      "id": "q19",
+      "phase": "Verifying the Solution",
+      "questionText": "On the sample input n=7 and SA (1-based): 4 1 3 5 6 7 2, what is the letter assigned to position SA[1] (1-based), i.e., index 4 in the string?",
+      "diagram": "We always start with 'a' for the first suffix in order.",
+      "options": [
+        {
+          "label": "'a'",
+          "isCode": false
+        },
+        {
+          "label": "'b'",
+          "isCode": false
+        },
+        {
+          "label": "'z'",
+          "isCode": false
+        },
+        {
+          "label": "It depends on the next tail ranks",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The first suffix in the order always gets 'a'.",
+      "wrongExplanations": {
+        "3": "The first assignment is always 'a'; tail ranks affect later increments."
+      },
+      "hint": "We set cur=0, assign to SA[0], then decide increments for future elements.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q20",
+      "phase": "Verifying the Solution",
+      "questionText": "For n=2 and SA (1-based) = [1, 2], what string does the algorithm output?",
+      "diagram": "0-based SA=[0,1]; next_rank[0]=R[1]=1, next_rank[1]=-1 → 1 < -1 is false → increment before second.",
+      "options": [
+        {
+          "label": "ab",
+          "isCode": false
+        },
+        {
+          "label": "aa",
+          "isCode": false
+        },
+        {
+          "label": "ba",
+          "isCode": false
+        },
+        {
+          "label": "bb",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "First position gets 'a'; boundary fails so second gets 'b' → \"ab\".",
+      "wrongExplanations": {
+        "1": "Equal letters would make [2,1], not [1,2].",
+        "3": "Both 'b's also give [2,1] due to tie broken by tails."
+      },
+      "hint": "If the second suffix must come after the first, first letters must differ.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q21",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the time complexity of the algorithm with respect to n?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(26^n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We do a constant number of passes over arrays of size n.",
+      "wrongExplanations": {
+        "1": "No sorting or logarithmic factors are used.",
+        "2": "No nested loops over n are present."
+      },
+      "hint": "Count full-array passes.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q22",
+      "phase": "Analyzing Complexity",
+      "questionText": "When should the program print -1?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "When more than 26 distinct first-letter groups are needed along the given order.",
+          "isCode": false
+        },
+        {
+          "label": "When the input permutation is not strictly increasing.",
+          "isCode": false
+        },
+        {
+          "label": "Whenever two adjacent suffixes have equal tail ranks.",
+          "isCode": false
+        },
+        {
+          "label": "If any suffix is shorter than 26 characters.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We can only use 'a'..'z'; if increments exceed 25, impossible.",
+      "wrongExplanations": {
+        "1": "The array is a permutation, not a sorted list.",
+        "2": "Tail ranks are unique except the empty sentinel; the rule handles it."
+      },
+      "hint": "Count how many times we had to increase the current letter.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q23",
+      "phase": "Analyzing Complexity",
+      "questionText": "Edge case: If n=1 and SA = [1], what does the algorithm output?",
+      "diagram": "Only one suffix; assign 'a' and done.",
+      "options": [
+        {
+          "label": "a",
+          "isCode": false
+        },
+        {
+          "label": "z",
+          "isCode": false
+        },
+        {
+          "label": "-1",
+          "isCode": false
+        },
+        {
+          "label": "b",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The first (and only) suffix gets 'a'.",
+      "wrongExplanations": {
+        "2": "Single suffix needs only one letter; it's always possible.",
+        "3": "No need to increment with one suffix."
+      },
+      "hint": "There are no boundaries to check.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\ndata = sys.stdin.read().strip().split()\nit = iter(data)\nn = int(next(it))\nsa = [int(next(it)) - 1 for _ in range(n)]",
+    "isa = [0] * n\nfor r, p in enumerate(sa):\n    isa[p] = r",
+    "next_rank = [0] * n\nfor i in range(n):\n    next_rank[i] = -1 if i == n - 1 else isa[i + 1]",
+    "ans = [0] * n\ncur = 0",
+    "for k in range(n):\n    p = sa[k]\n    ans[p] = cur\n    if k < n - 1:\n        l = next_rank[p]\n        rnk = next_rank[sa[k + 1]]\n        if not (l < rnk):\n            cur += 1\n            if cur >= 26:\n                print(-1)\n                sys.exit(0)",
+    "s = ''.join(chr(ord('a') + x) for x in ans)\nprint(s)"
+  ],
+  "reasoningChain": [
+    {
+      "question": "What does the suffix array represent and how do we handle 1-based vs 0-based indices?",
+      "insight": "It lists starting positions of suffixes in lexicographic order; convert to 0-based for array indexing."
+    },
+    {
+      "question": "How are two suffixes ordered when their first characters are equal?",
+      "insight": "Comparisons move to the next characters; the order depends on their tails at positions +1."
+    },
+    {
+      "question": "Why not brute force, and what structure can guide a constructive solution?",
+      "insight": "Brute force is exponential; we can assign letters along the given order and let tails break ties when allowed."
+    },
+    {
+      "question": "How to check quickly which tail comes first for positions i+1 and j+1?",
+      "insight": "Build the inverse permutation R mapping start position to its rank to compare tails in O(1)."
+    },
+    {
+      "question": "What rule ensures two adjacent suffixes can share the same first letter?",
+      "insight": "Allow equality only if R[x+1] < R[y+1], treating the empty tail as smallest (sentinel)."
+    },
+    {
+      "question": "How to implement the one-pass assignment and detect impossibility with the 26-letter limit?",
+      "insight": "Scan SA left to right, assign current letter, increment when the tail order fails; if increments exceed 25, print -1."
+    },
+    {
+      "question": "What are the complexity and edge behaviors?",
+      "insight": "Linear time and space; n=1 outputs 'a'; correctness follows from tie-breaking by tails within groups and smaller letters across groups."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1363,
+    "output_tokens": 17585,
+    "input_cost": 0.001704,
+    "output_cost": 0.17585,
+    "total_cost": 0.177554
+  }
+}

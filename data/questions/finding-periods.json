@@ -1,0 +1,1096 @@
+{
+  "id": "finding-periods",
+  "title": "Finding Periods",
+  "difficulty": "hard",
+  "tags": [
+    "string"
+  ],
+  "estimatedMinutes": 75,
+  "language": "python",
+  "description": "A period of a string is a prefix that can be used to generate the whole string by repeating the prefix. The last repetition may be partial. For example, the periods of `abcabca` are `abc`, `abcabc` and `abcabca`. Your task is to find all period lengths of a string and print them in increasing order.\n\nInput: a single string `s` (characters `a`–`z`).\nOutput: all period lengths in increasing order.",
+  "examples": [
+    {
+      "input": "abcabca",
+      "output": "3 6 7",
+      "explanation": "The string can be formed by repeating `abc` (length 3), `abcabc` (length 6) with a partial last repeat, and itself (length 7)."
+    }
+  ],
+  "constraints": [
+    "1 ≤ n ≤ 10^6",
+    "characters are lowercase a–z"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "Which period lengths does the string `abcabca` have?",
+      "diagram": "s = a b c a b c a\n    0 1 2 3 4 5 6",
+      "options": [
+        {
+          "label": "3 6 7",
+          "isCode": false
+        },
+        {
+          "label": "3 7",
+          "isCode": false
+        },
+        {
+          "label": "1 3 6 7",
+          "isCode": false
+        },
+        {
+          "label": "3 4 6 7",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Check k is a period if s[k:] == s[:n-k]. For k=3 and k=6 this holds; k=7 (full string) always holds. k=1,4 do not align.",
+      "wrongExplanations": {
+        "2": "Length 1 does not work: s[1:] != s[:6] since 'b' != 'a' at the first compared position.",
+        "3": "Length 4 would require s[4:] == s[:3], but 'b' != 'a'."
+      },
+      "hint": "Compare s[k:] to s[:n-k] for candidate k.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "For the string `aaaaa`, which period lengths are valid?",
+      "diagram": "s = a a a a a",
+      "options": [
+        {
+          "label": "1 2 3 4 5",
+          "isCode": false
+        },
+        {
+          "label": "1 5",
+          "isCode": false
+        },
+        {
+          "label": "2 4 5",
+          "isCode": false
+        },
+        {
+          "label": "3 5",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Every shift aligns since all characters are 'a', so all lengths 1..5 are periods.",
+      "wrongExplanations": {
+        "1": "Not only the trivial full length; smaller lengths also align.",
+        "2": "Length 3 is also a valid period; leaving it out is incorrect."
+      },
+      "hint": "If all characters are equal, any shift keeps equality.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "Must a period length always divide the string length n?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "No, the last repetition may be partial.",
+          "isCode": false
+        },
+        {
+          "label": "Yes, otherwise the repeats can't align.",
+          "isCode": false
+        },
+        {
+          "label": "Only if the string has all distinct characters.",
+          "isCode": false
+        },
+        {
+          "label": "Only if the string length is prime.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Periods can have a partial last repetition, so divisibility is not required (e.g., 6 is a period of length 7).",
+      "wrongExplanations": {
+        "1": "Divisibility would be required only if the last repetition had to be complete.",
+        "2": "Character distinctness is irrelevant to the divisibility requirement."
+      },
+      "hint": "Recall `abcabca` has period 6 though 6 ∤ 7.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "For `abcd`, what are the period lengths?",
+      "diagram": "s = a b c d",
+      "options": [
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "1 4",
+          "isCode": false
+        },
+        {
+          "label": "2 4",
+          "isCode": false
+        },
+        {
+          "label": "1 2 4",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Only the full string works; any smaller k fails since adjacent characters differ.",
+      "wrongExplanations": {
+        "1": "Length 1 would require all equal characters.",
+        "2": "Length 2 would require s[2:] == s[:2] = 'ab', but 'cd' != 'ab'."
+      },
+      "hint": "Try k=1: s[1:] vs s[:3].",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Exploring Approaches",
+      "questionText": "If you check every k from 1..n and compare s[k:] with s[:n-k] character by character, what is the worst-case time complexity?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(log n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each k can cost up to O(n) comparisons, repeated for O(n) values of k.",
+      "wrongExplanations": {
+        "1": "There is no logarithmic factor with this direct double loop.",
+        "2": "A single pass is not enough with this brute-force method."
+      },
+      "hint": "Think: nested loops over k and positions.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "Express the condition “k is a period of s of length n” using a substring equality.",
+      "diagram": "0..k-1 | k..n-1\nprefix | shifted suffix",
+      "options": [
+        {
+          "label": "s[:k] == s[n-k:]",
+          "isCode": false
+        },
+        {
+          "label": "s[k:] == s[:n-k]",
+          "isCode": false
+        },
+        {
+          "label": "s[:k] == s[n-k:n]",
+          "isCode": false
+        },
+        {
+          "label": "s[:n-k] == s[k-1:]",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Shifting by k, we require s[k..] equals s[..n-k-1]. That's s[k:] == s[:n-k].",
+      "wrongExplanations": {
+        "0": "This compares prefix to suffix; we need suffix of length n-k to equal prefix of length n-k.",
+        "3": "This misaligns by one index (k-1), causing off-by-one."
+      },
+      "hint": "Align positions i and i-k for i = k..n-1.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "From s[k:] == s[:n-k], what must n−k be for k to be a period?",
+      "diagram": "Compare suffix length n-k to prefix length n-k",
+      "options": [
+        {
+          "label": "A length where prefix == suffix (a proper prefix-suffix length).",
+          "isCode": false
+        },
+        {
+          "label": "A divisor of n.",
+          "isCode": false
+        },
+        {
+          "label": "Equal to the longest repeating prefix length.",
+          "isCode": false
+        },
+        {
+          "label": "Equal to the number of distinct characters.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "k is a period iff the suffix of length n−k equals the prefix of length n−k.",
+      "wrongExplanations": {
+        "1": "Divisibility is not necessary due to allowing partial repeats.",
+        "2": "We need all such lengths, not just the longest one."
+      },
+      "hint": "Think about matching suffix and prefix segments.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Building the Idea",
+      "questionText": "To list all k that are periods, which set is sufficient to compute for the whole string?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "All lengths ℓ where the prefix of length ℓ equals the suffix of length ℓ.",
+          "isCode": false
+        },
+        {
+          "label": "All such lengths for every prefix of s.",
+          "isCode": false
+        },
+        {
+          "label": "All positions where s[i] == s[i+1].",
+          "isCode": false
+        },
+        {
+          "label": "All divisors of n.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Periods k correspond to lengths ℓ = n−k where prefix and suffix of length ℓ match.",
+      "wrongExplanations": {
+        "1": "We only need these lengths for the entire string, not every prefix.",
+        "3": "Divisors are irrelevant due to partial final repetition."
+      },
+      "hint": "Recall n−k must be a prefix-suffix length.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "How can we compute, for each position i, the length of the longest proper prefix of s[:i+1] that is also a suffix of s[:i+1], in one left-to-right pass?",
+      "diagram": "We maintain a current match length j and adjust it when s[i] mismatches.",
+      "options": [
+        {
+          "label": "Maintain a length j; while j>0 and s[i]!=s[j], set j to the value at j−1; if s[i]==s[j], increment j; store j.",
+          "isCode": false
+        },
+        {
+          "label": "For each i, scan all lengths from i down to 1 to find the largest match; store it.",
+          "isCode": false
+        },
+        {
+          "label": "Maintain a set of seen substrings and check membership at each step.",
+          "isCode": false
+        },
+        {
+          "label": "Sort all substrings and compare adjacent ones.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Reusing previous match length j and stepping back on mismatch yields a linear-time pass.",
+      "wrongExplanations": {
+        "1": "Scanning all lengths per i is O(n^2) and too slow.",
+        "3": "Sorting substrings is far too slow and memory heavy."
+      },
+      "hint": "Reuse the previous match length instead of starting over each time.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "For s = `abcabca`, what is the length of the longest proper prefix of the whole string that is also a suffix?",
+      "diagram": "Prefixes/Suffixes:\n- length 1: a ... a -> match\n- length 4: abca ... abca -> match\n- length 5: abcab vs bcabc -> no",
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "6",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "The longest proper prefix that is also a suffix is `abca` of length 4.",
+      "wrongExplanations": {
+        "0": "Length 1 matches, but there is a longer one of length 4.",
+        "3": "Length 6 does not match the suffix `bcabca`."
+      },
+      "hint": "Compare length 4: `abca` vs last 4 characters.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "Once we know the longest proper prefix-suffix length L for the whole string, how do we list all such lengths efficiently?",
+      "diagram": "Let x = L; repeatedly replace x by the stored value at position x−1 until x=0.",
+      "options": [
+        {
+          "label": "Start from L and repeatedly jump to the stored length at index x−1 until reaching 0.",
+          "isCode": false
+        },
+        {
+          "label": "Decrease x by 1 each time and test if it works.",
+          "isCode": false
+        },
+        {
+          "label": "Binary search for smaller matches.",
+          "isCode": false
+        },
+        {
+          "label": "Recompute matches from scratch for each smaller length.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Following the chain of stored lengths reuses computed information to get all prefix-suffix lengths.",
+      "wrongExplanations": {
+        "1": "Testing all lengths is too slow (O(n^2))."
+      },
+      "hint": "Use the already computed lengths as links.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "How do we convert the set of proper prefix-suffix lengths b into period lengths k?",
+      "diagram": "k = n − b; also include k = n (the full string).",
+      "options": [
+        {
+          "label": "k = n − b for each b; then also include n.",
+          "isCode": false
+        },
+        {
+          "label": "k = b for each b; also include 1.",
+          "isCode": false
+        },
+        {
+          "label": "Include b only if b divides n.",
+          "isCode": false
+        },
+        {
+          "label": "k = n − b for b > 0; exclude n.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "From s[k:] == s[:n−k], we have b = n−k. Include n to represent repeating the whole string once.",
+      "wrongExplanations": {
+        "1": "b are border lengths, not period lengths; mapping is k = n − b.",
+        "2": "Divisibility is not required."
+      },
+      "hint": "Remember the relation from earlier: b = n−k.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Writing the Code",
+      "questionText": "Import what we need for fast input as used later in the code.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys",
+          "isCode": true
+        },
+        {
+          "label": "from sys import stdout",
+          "isCode": true
+        },
+        {
+          "label": "import io",
+          "isCode": true
+        },
+        {
+          "label": "from collections import deque",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We will use sys.stdin.readline(), so we need to import sys.",
+      "wrongExplanations": {
+        "1": "stdout alone doesn't provide stdin access.",
+        "2": "io isn't used; the code uses sys.stdin directly."
+      },
+      "hint": "We will call sys.stdin.readline().",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys",
+      "codeLabel": "Import"
+    },
+    {
+      "id": "q14",
+      "phase": "Writing the Code",
+      "questionText": "Read the input string s and its length n using sys, trimming the newline.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "s = sys.stdin.readline().strip()\nn = len(s)",
+          "isCode": true
+        },
+        {
+          "label": "s = sys.stdin.readline()\nn = len(s)",
+          "isCode": true
+        },
+        {
+          "label": "s = input().strip()\nn = len(s)",
+          "isCode": true
+        },
+        {
+          "label": "s = sys.stdin.read()\nn = len(s.split())",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "This reads one line, strips the newline, and sets n to the character count.",
+      "wrongExplanations": {
+        "1": "Without strip(), s includes a trailing newline, breaking matches.",
+        "3": "Reading the whole stream and splitting miscomputes n for arbitrary strings."
+      },
+      "hint": "Use sys.stdin and strip the trailing newline.",
+      "isCodeBuilding": true,
+      "codeSnippet": "s = sys.stdin.readline().strip()\nn = len(s)",
+      "codeLabel": "Read input"
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Initialize the array to store, for each position, the longest proper prefix that is also a suffix.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "border = [0] * n",
+          "isCode": true
+        },
+        {
+          "label": "border = [n] * 0",
+          "isCode": true
+        },
+        {
+          "label": "border = [0 for _ in range(n+1)]",
+          "isCode": true
+        },
+        {
+          "label": "border = []",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need an array of length n initialized to zeros.",
+      "wrongExplanations": {
+        "2": "Length n+1 misaligns indices and wastes space.",
+        "3": "An empty list cannot be indexed for positions 0..n-1."
+      },
+      "hint": "One integer per character position.",
+      "isCodeBuilding": true,
+      "codeSnippet": "border = [0] * n",
+      "codeLabel": "Init border array"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Initialize the current match length j before scanning the string.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "j = 0",
+          "isCode": true
+        },
+        {
+          "label": "j = border[n - 1]",
+          "isCode": true
+        },
+        {
+          "label": "j = 1",
+          "isCode": true
+        },
+        {
+          "label": "j = None",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We start with no match length accumulated.",
+      "wrongExplanations": {
+        "1": "We have not computed border[n-1] yet; scanning starts from scratch.",
+        "2": "Starting at 1 would skip checking the first possible match."
+      },
+      "hint": "No characters matched initially.",
+      "isCodeBuilding": true,
+      "codeSnippet": "j = 0",
+      "codeLabel": "Init j"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Write the loop header to scan positions i from 1 to n-1.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "for i in range(1, n):",
+          "isCode": true
+        },
+        {
+          "label": "for i in range(n):",
+          "isCode": true
+        },
+        {
+          "label": "for i in range(1, n+1):",
+          "isCode": true
+        },
+        {
+          "label": "for i in range(0, n-1):",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We begin at i=1 and process up to n-1 inclusive.",
+      "wrongExplanations": {
+        "1": "Starting at 0 would compare s[0] to s[0], which is unnecessary.",
+        "2": "n+1 would go out of range."
+      },
+      "hint": "We compare s[i] with s[j], j starts at 0.",
+      "isCodeBuilding": true,
+      "codeSnippet": "for i in range(1, n):",
+      "codeLabel": "Loop header"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Fill the fallback on mismatch inside the loop.",
+      "diagram": "While the next character doesn't match, shorten the current match using prior info.",
+      "options": [
+        {
+          "label": "while j > 0 and s[i] != s[j]:\n    j = border[j - 1]",
+          "isCode": true
+        },
+        {
+          "label": "while j > 0 and s[i] != s[j]:\n    j -= 1",
+          "isCode": true
+        },
+        {
+          "label": "while j >= 0 and s[i] != s[j]:\n    j = border[i - 1]",
+          "isCode": true
+        },
+        {
+          "label": "while j > 0 and s[i] == s[j]:\n    j = border[j - 1]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "On mismatch, jump j to the previously computed length at j−1; repeat until match or j=0.",
+      "wrongExplanations": {
+        "1": "Decrementing by 1 can be too slow and ignores stored jumps.",
+        "3": "We must fallback on mismatch, not when they already match."
+      },
+      "hint": "Use stored lengths to jump back quickly.",
+      "isCodeBuilding": true,
+      "codeSnippet": "while j > 0 and s[i] != s[j]:\n    j = border[j - 1]",
+      "codeLabel": "Fallback"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Advance the match length when the next character matches.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "if s[i] == s[j]:\n    j += 1",
+          "isCode": true
+        },
+        {
+          "label": "if s[i] == s[j+1]:\n    j += 1",
+          "isCode": true
+        },
+        {
+          "label": "if s[i] != s[j]:\n    j += 1",
+          "isCode": true
+        },
+        {
+          "label": "if s[i] == s[j]:\n    j = 1",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "When s[i] equals s[j], we can extend the current match by one.",
+      "wrongExplanations": {
+        "1": "j points to the next char to match; comparing to s[j+1] is off by one.",
+        "3": "Resetting j to 1 ignores the length already matched."
+      },
+      "hint": "j counts how many characters of the prefix are currently matched.",
+      "isCodeBuilding": true,
+      "codeSnippet": "if s[i] == s[j]:\n    j += 1",
+      "codeLabel": "Advance on match"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Store the current longest proper prefix-suffix length for position i.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "border[i] = j",
+          "isCode": true
+        },
+        {
+          "label": "border[j] = i",
+          "isCode": true
+        },
+        {
+          "label": "border[i - 1] = j",
+          "isCode": true
+        },
+        {
+          "label": "border[i] = j - 1",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "border[i] holds the best length for s[:i+1], which is j after updates.",
+      "wrongExplanations": {
+        "1": "This swaps indices and values; border stores lengths, not positions.",
+        "3": "j already represents the correct length; don't subtract 1."
+      },
+      "hint": "Store exactly the current j for this i.",
+      "isCodeBuilding": true,
+      "codeSnippet": "border[i] = j",
+      "codeLabel": "Store length"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "Initialize variables to collect all prefix-suffix lengths for the whole string.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "lens = []\nx = border[n - 1]",
+          "isCode": true
+        },
+        {
+          "label": "lens = [border[n - 1]]\nx = n - 1",
+          "isCode": true
+        },
+        {
+          "label": "lens = []\nx = border[n]",
+          "isCode": true
+        },
+        {
+          "label": "lens = None\nx = border[n - 1]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Start with the longest length at the end, and an empty list to collect all lengths.",
+      "wrongExplanations": {
+        "2": "border[n] is out of bounds.",
+        "3": "lens should be a list, not None."
+      },
+      "hint": "We’ll follow links from border[n-1] downward.",
+      "isCodeBuilding": true,
+      "codeSnippet": "lens = []\nx = border[n - 1]",
+      "codeLabel": "Init collection"
+    },
+    {
+      "id": "q22",
+      "phase": "Writing the Code",
+      "questionText": "Follow the chain of lengths to collect all proper prefix-suffix lengths.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "while x > 0:\n    lens.append(x)\n    x = border[x - 1]",
+          "isCode": true
+        },
+        {
+          "label": "while x >= 0:\n    lens.append(x)\n    x = border[x]",
+          "isCode": true
+        },
+        {
+          "label": "while x > 0:\n    lens.append(n - x)\n    x = border[x - 1]",
+          "isCode": true
+        },
+        {
+          "label": "for x in range(border[n - 1], 0, -1):\n    lens.append(x)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each step appends the current length and jumps to the next candidate using x−1.",
+      "wrongExplanations": {
+        "2": "Here lens would store periods (n−x) prematurely, conflicting with later conversion.",
+        "3": "This ignores the stored links and adds non-matching lengths."
+      },
+      "hint": "Use lens to store border lengths, not periods yet.",
+      "isCodeBuilding": true,
+      "codeSnippet": "while x > 0:\n    lens.append(x)\n    x = border[x - 1]",
+      "codeLabel": "Collect links"
+    },
+    {
+      "id": "q23",
+      "phase": "Writing the Code",
+      "questionText": "Convert the collected border lengths into period lengths and sort them.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "periods = [n - b for b in lens]\nperiods.sort()",
+          "isCode": true
+        },
+        {
+          "label": "periods = lens[:]\nperiods.sort()",
+          "isCode": true
+        },
+        {
+          "label": "periods = [b for b in lens if n % b == 0]\nperiods.sort()",
+          "isCode": true
+        },
+        {
+          "label": "periods = sorted(set(lens))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "k = n − b for each border length b. Sorting prepares for output.",
+      "wrongExplanations": {
+        "1": "These are border lengths, not periods.",
+        "2": "Divisibility is not required for periods here."
+      },
+      "hint": "Use the relation k = n − b.",
+      "isCodeBuilding": true,
+      "codeSnippet": "periods = [n - b for b in lens]\nperiods.sort()",
+      "codeLabel": "Map to periods"
+    },
+    {
+      "id": "q24",
+      "phase": "Writing the Code",
+      "questionText": "Ensure the full string length is included as a period.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "periods.append(n)",
+          "isCode": true
+        },
+        {
+          "label": "periods.insert(0, n)",
+          "isCode": true
+        },
+        {
+          "label": "periods = periods[:-1] + [n]",
+          "isCode": true
+        },
+        {
+          "label": "if n not in periods: pass",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "n corresponds to b=0; append it after sorting the smaller periods.",
+      "wrongExplanations": {
+        "1": "Inserting at 0 may break sorted order if smaller periods exist.",
+        "3": "We must explicitly add n; doing nothing will omit it."
+      },
+      "hint": "Add n after sorting ascending smaller values.",
+      "isCodeBuilding": true,
+      "codeSnippet": "periods.append(n)",
+      "codeLabel": "Add full length"
+    },
+    {
+      "id": "q25",
+      "phase": "Writing the Code",
+      "questionText": "Print the period lengths space-separated.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "print(\" \".join(map(str, periods)))",
+          "isCode": true
+        },
+        {
+          "label": "print(\" \".join(periods))",
+          "isCode": true
+        },
+        {
+          "label": "print(*periods)",
+          "isCode": true
+        },
+        {
+          "label": "sys.stdout.write(\" \".join(periods))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Join string representations with spaces. Using map(str, ...) ensures correct types.",
+      "wrongExplanations": {
+        "1": "Join expects strings; periods are integers.",
+        "3": "Join expects strings; also uses sys without conversion."
+      },
+      "hint": "Convert integers to strings before joining.",
+      "isCodeBuilding": true,
+      "codeSnippet": "print(\" \".join(map(str, periods)))",
+      "codeLabel": "Output"
+    },
+    {
+      "id": "q26",
+      "phase": "Verifying the Solution",
+      "questionText": "What does the program print for input `abcabca`?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "3 6 7",
+          "isCode": false
+        },
+        {
+          "label": "6 3 7",
+          "isCode": false
+        },
+        {
+          "label": "4 7",
+          "isCode": false
+        },
+        {
+          "label": "3 7",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Borders: 4 and 1; periods: 7−4=3, 7−1=6; plus 7. Sorted: 3 6 7.",
+      "wrongExplanations": {
+        "1": "Order must be increasing.",
+        "2": "Length 4 is a border, not a period; it maps to k=3."
+      },
+      "hint": "Map borders b to periods n−b and sort; then add n.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q27",
+      "phase": "Verifying the Solution",
+      "questionText": "For input `aaaaa`, what is the output?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "1 2 3 4 5",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        },
+        {
+          "label": "2 3 4 5",
+          "isCode": false
+        },
+        {
+          "label": "1 5",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "All shifts align in a string of identical characters, so every length 1..5 is a period.",
+      "wrongExplanations": {
+        "1": "Not only the trivial period; smaller ones also work.",
+        "3": "Many more than 1 and 5 work here."
+      },
+      "hint": "Check the condition s[k:] == s[:n-k] for each k.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q28",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the time complexity of the algorithm?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(log n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The scan to build the border array is linear, and following links is also linear overall.",
+      "wrongExplanations": {
+        "2": "We avoid the quadratic scan by reusing previous computations."
+      },
+      "hint": "Each character is processed a constant number of times.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q29",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the additional space complexity of the solution?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n) for the border array",
+          "isCode": false
+        },
+        {
+          "label": "O(1) extra space",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We store an array of length n with integers; other structures are O(1) or smaller.",
+      "wrongExplanations": {
+        "1": "We need the array to compute and follow prefix-suffix lengths."
+      },
+      "hint": "How many integers do we store?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q30",
+      "phase": "Analyzing Complexity",
+      "questionText": "Which edge-case outputs are correct for this solution?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "For n=1, output `1`. For a string with no smaller matches (e.g., `abcd`), output only `n`.",
+          "isCode": false
+        },
+        {
+          "label": "For n=1, output nothing. For unique strings, output `1`.",
+          "isCode": false
+        },
+        {
+          "label": "Always include `1` and `n`.",
+          "isCode": false
+        },
+        {
+          "label": "Include only lengths that divide n.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The full length n is always a period; smaller ones appear only if prefix-suffix matches exist.",
+      "wrongExplanations": {
+        "2": "Length 1 is not always a period (e.g., `abcd`).",
+        "3": "Divisibility is not required because partial repeats are allowed."
+      },
+      "hint": "Check s[k:] == s[:n-k] for k=1 in `abcd`.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys",
+    "s = sys.stdin.readline().strip()",
+    "n = len(s)",
+    "border = [0] * n",
+    "j = 0",
+    "for i in range(1, n):",
+    "    while j > 0 and s[i] != s[j]:",
+    "        j = border[j - 1]",
+    "    if s[i] == s[j]:",
+    "        j += 1",
+    "    border[i] = j",
+    "lens = []",
+    "x = border[n - 1]",
+    "while x > 0:",
+    "    lens.append(x)",
+    "    x = border[x - 1]",
+    "periods = [n - b for b in lens]",
+    "periods.sort()",
+    "periods.append(n)",
+    "print(\" \".join(map(str, periods)))"
+  ],
+  "reasoningChain": [
+    {
+      "question": "What does it mean for k to be a period, and does it have to divide n?",
+      "insight": "k is a period if s[k:] == s[:n-k]; divisibility is not required due to partial final repetition."
+    },
+    {
+      "question": "How to relate periods to prefix-suffix matches?",
+      "insight": "k is a period iff n−k is a length where the prefix of length n−k equals the suffix of length n−k."
+    },
+    {
+      "question": "What should we compute to get all periods efficiently?",
+      "insight": "Compute, for each position, the length of the longest proper prefix that is also a suffix; for the full string, follow links to enumerate all such lengths."
+    },
+    {
+      "question": "How to compute these lengths in linear time?",
+      "insight": "Scan left-to-right maintaining a current match length j; on mismatch, jump to the stored value at j−1; on match, increment j and store it."
+    },
+    {
+      "question": "How to convert border lengths to period lengths?",
+      "insight": "Map each border length b to a period k = n−b; then include n as well and sort."
+    },
+    {
+      "question": "Why is the solution efficient?",
+      "insight": "Each character is processed a constant number of times, yielding O(n) time and O(n) space for the array."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1328,
+    "output_tokens": 15444,
+    "input_cost": 0.00166,
+    "output_cost": 0.15444,
+    "total_cost": 0.1561
+  }
+}

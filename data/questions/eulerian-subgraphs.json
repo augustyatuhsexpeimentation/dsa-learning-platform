@@ -1,0 +1,886 @@
+{
+  "id": "eulerian-subgraphs",
+  "title": "Eulerian Subgraphs",
+  "difficulty": "hard",
+  "tags": [
+    "advanced",
+    "graphs",
+    "parity",
+    "counting"
+  ],
+  "estimatedMinutes": 60,
+  "language": "python",
+  "description": "You are given an undirected graph with n nodes and m edges.\n\nWe consider subgraphs that have all nodes of the original graph and some of its edges. A subgraph is called Eulerian if each node has even degree.\n\nYour task is to count the number of Eulerian subgraphs modulo 10^9+7.\n\nInput:\n- First line: two integers n and m\n- Next m lines: two integers a and b describing an undirected edge between a and b\n\nThere is at most one edge between two nodes, and each edge connects two distinct nodes.\n\nOutput:\n- Print a single integer: the number of Eulerian subgraphs modulo 10^9+7.",
+  "examples": [
+    {
+      "input": "4 3\n1 2\n1 3\n2 3\n",
+      "output": "2",
+      "explanation": "Nodes {1,2,3} form a triangle and node 4 is isolated. Valid subgraphs with all degrees even are: the empty set, and the three triangle edges together. Hence the answer is 2."
+    }
+  ],
+  "constraints": [
+    "1 ≤ n ≤ 1e5",
+    "0 ≤ m ≤ 2e5",
+    "1 ≤ a,b ≤ n",
+    "No self-loops, and at most one edge between two nodes"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Phase 1: Understanding the Problem",
+      "questionText": "Consider n=2, m=1 with a single edge between nodes 1 and 2.\nHow many subgraphs (choosing a subset of edges) have every node with even degree?",
+      "diagram": "1 --- 2",
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Only the empty edge set works; choosing the edge gives degree 1 at both nodes (odd).",
+      "wrongExplanations": {
+        "2": "Empty and full are not both valid here; the full has odd degrees.",
+        "0": "The empty subgraph always has degree 0 at every node, which is even."
+      },
+      "hint": "Degree 0 is even.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Phase 1: Understanding the Problem",
+      "questionText": "Triangle graph (n=3, m=3) with edges (1-2, 2-3, 1-3). How many Eulerian subgraphs?",
+      "diagram": "1\n|\\\n| \\\n2---3",
+      "options": [
+        {
+          "label": "1 (only the empty set)",
+          "isCode": false
+        },
+        {
+          "label": "2 (empty set and all three edges)",
+          "isCode": false
+        },
+        {
+          "label": "3 (empty, any two edges)",
+          "isCode": false
+        },
+        {
+          "label": "4 (empty, any one edge, all three)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Empty set works. Any one or two edges creates odd degrees. All three edges give degree 2 at each node.",
+      "wrongExplanations": {
+        "2": "Any two edges form a path; the endpoints have degree 1 (odd).",
+        "3": "Single edges yield odd degrees at their endpoints."
+      },
+      "hint": "Check degrees for subsets of size 1,2,3.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Phase 1: Understanding the Problem",
+      "questionText": "Graph with n=3, m=1, edge (1-2). Node 3 is isolated. How many Eulerian subgraphs?",
+      "diagram": "1 --- 2    3",
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Only the empty set works. The isolated node has degree 0 (even) regardless.",
+      "wrongExplanations": {
+        "1": "Choosing the lone edge gives degree 1 at nodes 1 and 2 (odd).",
+        "3": "There are only 2 subsets of the single edge; not all are valid."
+      },
+      "hint": "Isolated nodes do not restrict edge choices.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Phase 1: Understanding the Problem",
+      "questionText": "Cycle of length 4 (square): nodes 1-2-3-4-1. How many Eulerian subgraphs?",
+      "diagram": "1 --- 2\n|     |\n4 --- 3",
+      "options": [
+        {
+          "label": "1 (only empty set)",
+          "isCode": false
+        },
+        {
+          "label": "2 (empty set and all four edges)",
+          "isCode": false
+        },
+        {
+          "label": "3 (empty, opposite edges, all four)",
+          "isCode": false
+        },
+        {
+          "label": "4 (empty, any two edges, all four)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Empty and full cycle work. Any two edges create nodes with odd degree (either a path or disjoint edges).",
+      "wrongExplanations": {
+        "2": "Two opposite edges give degree 1 at four nodes (odd).",
+        "3": "Any two edges still cause odd-degree nodes."
+      },
+      "hint": "Check degrees for subsets of size 2.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Phase 2: Exploring Approaches",
+      "questionText": "If we try all edge subsets, how many subsets are there for m edges?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "m!",
+          "isCode": false
+        },
+        {
+          "label": "2^m",
+          "isCode": false
+        },
+        {
+          "label": "m^2",
+          "isCode": false
+        },
+        {
+          "label": "m·log m",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Each edge is either chosen or not: 2 choices per edge, total 2^m.",
+      "wrongExplanations": {
+        "0": "Ordering edges does not matter; it's about subsets.",
+        "2": "Subsets are exponential in m, not quadratic."
+      },
+      "hint": "Each edge has two states: chosen or not.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Phase 2: Exploring Approaches",
+      "questionText": "Express the Eulerian condition per node using parity:",
+      "diagram": null,
+      "options": [
+        {
+          "label": "For each node, the number of incident chosen edges is even.",
+          "isCode": false
+        },
+        {
+          "label": "For each node, its degree equals the average degree.",
+          "isCode": false
+        },
+        {
+          "label": "Across the graph, the sum of degrees is even.",
+          "isCode": false
+        },
+        {
+          "label": "For each node, the number of incident chosen edges is even (sum mod 2 = 0).",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 3,
+      "explanation": "Even-degree per node means the incident count is 0 mod 2.",
+      "wrongExplanations": {
+        "0": "This is essentially correct but lacks the precise parity phrasing; choose the most explicit parity statement.",
+        "2": "The global degree sum is always even in any undirected graph; it doesn't enforce per-node evenness."
+      },
+      "hint": "Think in modulo 2 at every node.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Phase 2: Exploring Approaches",
+      "questionText": "In a connected component, consider one parity condition per node (sum mod 2 = 0). How many of these conditions are independent within that component?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Equal to the number of nodes in the component",
+          "isCode": false
+        },
+        {
+          "label": "Number of nodes in the component minus 1",
+          "isCode": false
+        },
+        {
+          "label": "Equal to the number of edges in the component",
+          "isCode": false
+        },
+        {
+          "label": "Exactly 1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Summing all node equations gives 0=0 (each edge counted twice), so one is redundant; the rest are independent.",
+      "wrongExplanations": {
+        "0": "One equation is dependent: their sum is always 0.",
+        "2": "Edge count does not determine the number of independent node parity conditions."
+      },
+      "hint": "What happens if you sum all node equations in a connected piece?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Phase 3: Building the Idea",
+      "questionText": "If the graph has n nodes and c connected components, how many independent per-node parity conditions are there in total?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "n",
+          "isCode": false
+        },
+        {
+          "label": "n - 1",
+          "isCode": false
+        },
+        {
+          "label": "n - c",
+          "isCode": false
+        },
+        {
+          "label": "c",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Each component contributes (nodes in it - 1) independent conditions; summing over components gives n - c.",
+      "wrongExplanations": {
+        "1": "This holds only if the graph is connected (c=1).",
+        "3": "c is how many redundant ones exist, not the total independent ones."
+      },
+      "hint": "Sum over components: (n1-1) + (n2-1) + ...",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Phase 3: Building the Idea",
+      "questionText": "If you have m boolean choices (edges) and k independent parity conditions, how many subsets satisfy all conditions?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "2^(m - k)",
+          "isCode": false
+        },
+        {
+          "label": "2^(m + k)",
+          "isCode": false
+        },
+        {
+          "label": "m - k",
+          "isCode": false
+        },
+        {
+          "label": "m + k",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each independent condition halves the number of valid choices.",
+      "wrongExplanations": {
+        "1": "Adding conditions cannot increase the number of solutions.",
+        "2": "The answer counts subsets, not just an integer difference."
+      },
+      "hint": "One independent parity condition removes exactly half of the subsets.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Phase 3: Building the Idea",
+      "questionText": "Combine the previous results. What is the count of Eulerian subgraphs in terms of n (nodes), m (edges), and c (components)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "2^(n - m + c)",
+          "isCode": false
+        },
+        {
+          "label": "2^(m + n - c)",
+          "isCode": false
+        },
+        {
+          "label": "2^c",
+          "isCode": false
+        },
+        {
+          "label": "2^(m - n + c)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 3,
+      "explanation": "k = n - c independent conditions, so count = 2^(m - (n - c)) = 2^(m - n + c).",
+      "wrongExplanations": {
+        "0": "The conditions reduce choices; m - (n - c) appears in the exponent.",
+        "2": "Depends on m and n too; not just c."
+      },
+      "hint": "Use k = n - c and 2^(m - k).",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Phase 3: Building the Idea",
+      "questionText": "Use the formula for the sample: n=4, m=3, edges (1-2,1-3,2-3), node 4 isolated. What is the result?",
+      "diagram": "Triangle on {1,2,3}, node 4 isolated",
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Components c=2, exponent = m - n + c = 3 - 4 + 2 = 1, so 2^1 = 2.",
+      "wrongExplanations": {
+        "0": "Empty and full triangle are both valid.",
+        "3": "Exponent is 1, not 2."
+      },
+      "hint": "First find c, then compute m - n + c.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Phase 3: Building the Idea",
+      "questionText": "If a graph has no cycles (e.g., made of trees and isolated nodes), what is the number of Eulerian subgraphs?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2^(number of components)",
+          "isCode": false
+        },
+        {
+          "label": "2^(number of edges)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "In a forest, m = n - c, so exponent m - n + c = 0. Only the empty set works.",
+      "wrongExplanations": {
+        "2": "Components do not multiply solutions beyond cycles; forests have no cycles.",
+        "3": "Edges in a forest do not allow non-empty even-degree subgraphs."
+      },
+      "hint": "Use exponent m - n + c when m = n - c.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Phase 4: Writing the Code",
+      "questionText": "Start the program with the necessary import.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys",
+          "isCode": true
+        },
+        {
+          "label": "from sys import stdin",
+          "isCode": true
+        },
+        {
+          "label": "import os",
+          "isCode": true
+        },
+        {
+          "label": "import math",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We will use sys.stdin; importing sys is appropriate.",
+      "wrongExplanations": {
+        "1": "This alone won't provide the 'sys' name used later.",
+        "2": "We don't need os here."
+      },
+      "hint": "We'll read from sys.stdin.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys",
+      "codeLabel": "Import sys"
+    },
+    {
+      "id": "q14",
+      "phase": "Phase 4: Writing the Code",
+      "questionText": "Read all input tokens and parse n and m at the start inside a main function.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def main():\n    n, m = map(int, sys.stdin.readline().split())\n    data = sys.stdin.read().split()",
+          "isCode": true
+        },
+        {
+          "label": "def main():\n    data = sys.stdin.read().strip().split()\n    n = int(data[0]); m = int(data[1])",
+          "isCode": true
+        },
+        {
+          "label": "def main():\n    data = sys.stdin.read().strip().split()\n    it = iter(data)\n    n = int(next(it)); m = int(next(it))",
+          "isCode": true
+        },
+        {
+          "label": "def main():\n    tokens = input().split()\n    n = tokens[0]; m = tokens[1]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Reading all tokens and iterating handles large inputs cleanly. We parse n and m as ints.",
+      "wrongExplanations": {
+        "0": "Mixing readline and read can desynchronize; also ignores remaining tokens iteration.",
+        "3": "Leaves n and m as strings and reads only the first line."
+      },
+      "hint": "Read everything once and iterate through tokens.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def main():\n    data = sys.stdin.read().strip().split()\n    it = iter(data)\n    n = int(next(it)); m = int(next(it))",
+      "codeLabel": "Read tokens, parse n and m"
+    },
+    {
+      "id": "q15",
+      "phase": "Phase 4: Writing the Code",
+      "questionText": "Build the adjacency list and read m undirected edges (convert to 0-based).",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    adj = [[] for _ in range(n)]\n    for _ in range(m+1):\n        a = int(next(it)); b = int(next(it))\n        adj[a].append(b)\n        adj[b].append(a)",
+          "isCode": true
+        },
+        {
+          "label": "    adj = [[] for _ in range(n)]\n    for _ in range(m):\n        a = int(next(it)); b = int(next(it))\n        a -= 1; b -= 1\n        adj[a].append(b)\n        adj[b].append(a)",
+          "isCode": true
+        },
+        {
+          "label": "    adj = [[] for _ in range(n+1)]\n    for _ in range(m):\n        a = int(next(it)); b = int(next(it))\n        adj[a].append(b)\n        adj[b].append(a)",
+          "isCode": true
+        },
+        {
+          "label": "    adj = [[] for _ in range(n)]\n    for _ in range(m):\n        a = int(next(it)); b = int(next(it))\n        a -= 1; b -= 1\n        adj[a].append(b)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "We need 0-based indices and to add edges in both directions for an undirected graph.",
+      "wrongExplanations": {
+        "0": "Off-by-one in loop: reads one extra edge.",
+        "2": "Allocates n+1 lists and uses 1-based indexing inconsistently.",
+        "3": "Misses the reverse direction; the graph is undirected."
+      },
+      "hint": "Remember to subtract 1 from a and b and add both ways.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    adj = [[] for _ in range(n)]\n    for _ in range(m):\n        a = int(next(it)); b = int(next(it))\n        a -= 1; b -= 1\n        adj[a].append(b)\n        adj[b].append(a)",
+      "codeLabel": "Build adjacency list"
+    },
+    {
+      "id": "q16",
+      "phase": "Phase 4: Writing the Code",
+      "questionText": "Initialize the visited structure and a counter for components.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    visited = [False] * (n + 1)\n    components = 1",
+          "isCode": true
+        },
+        {
+          "label": "    visited = set()\n    components = 0",
+          "isCode": true
+        },
+        {
+          "label": "    visited = {}\n    components = 0",
+          "isCode": true
+        },
+        {
+          "label": "    visited = [False] * n\n    components = 0",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 3,
+      "explanation": "A boolean list of length n tracks visits; components starts at 0.",
+      "wrongExplanations": {
+        "0": "Length n+1 mismatches our 0-based indexing, and components should start at 0.",
+        "1": "A set could track visited nodes, but the rest of our code expects a boolean list."
+      },
+      "hint": "We'll index nodes 0..n-1 in a boolean array.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    visited = [False] * n\n    components = 0",
+      "codeLabel": "Initialize visited and component counter"
+    },
+    {
+      "id": "q17",
+      "phase": "Phase 4: Writing the Code",
+      "questionText": "Write the loop to count components and traverse each one using an explicit stack (handle isolated nodes too).",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    for i in range(n):\n        if not visited[i] and adj[i]:\n            components += 1\n            stack = [i]\n            while stack:\n                u = stack.pop()\n                for v in adj[u]:\n                    if not visited[v]:\n                        visited[v] = True\n                        stack.append(v)",
+          "isCode": true
+        },
+        {
+          "label": "    for i in range(n):\n        if not visited[i]:\n            components += 1\n            stack = [i]\n            visited[i] = True\n            while stack:\n                u = stack.pop()\n                for v in adj[u]:\n                    if not visited[v]:\n                        visited[v] = True\n                        stack.append(v)",
+          "isCode": true
+        },
+        {
+          "label": "    for i in range(n):\n        if visited[i]:\n            continue\n        components += 1\n        queue = [i]\n        while queue:\n            u = queue.pop(0)\n            for v in adj[u]:\n                queue.append(v)\n                visited[v] = True",
+          "isCode": true
+        },
+        {
+          "label": "    for i in range(n):\n        if not visited[i]:\n            components += 1\n            stack = [i]\n            while stack:\n                u = stack.pop()\n                for v in adj[u]:\n                    stack.append(v)\n            visited[i] = True",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Start from any unvisited node (including isolated), mark it visited, and expand to neighbors, marking them when discovered.",
+      "wrongExplanations": {
+        "0": "Checks adj[i]; this skips isolated nodes and undercounts components.",
+        "2": "Does not mark the starting node visited before enqueuing; also missing checks causes duplicate enqueues."
+      },
+      "hint": "Increment components on each new unvisited node, even if it has no neighbors.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    for i in range(n):\n        if not visited[i]:\n            components += 1\n            stack = [i]\n            visited[i] = True\n            while stack:\n                u = stack.pop()\n                for v in adj[u]:\n                    if not visited[v]:\n                        visited[v] = True\n                        stack.append(v)",
+      "codeLabel": "Count components with a stack"
+    },
+    {
+      "id": "q18",
+      "phase": "Phase 4: Writing the Code",
+      "questionText": "Compute the exponent and the final answer modulo 1e9+7, then print it.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    MOD = 10**9 + 7\n    exp = n - m + components\n    ans = pow(2, exp, MOD)\n    print(ans)",
+          "isCode": true
+        },
+        {
+          "label": "    MOD = 10**9 + 7\n    exp = m - n + components\n    ans = pow(2, exp)\n    print(ans)",
+          "isCode": true
+        },
+        {
+          "label": "    MOD = 10**9 + 7\n    exp = m - n + components\n    ans = pow(2, exp, MOD)\n    print(ans)",
+          "isCode": true
+        },
+        {
+          "label": "    MOD = 10**9 + 7\n    exp = m + n - components\n    ans = pow(2, exp, MOD)\n    print(ans)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "The count is 2^(m - n + c). Using pow with three arguments computes the result modulo MOD efficiently.",
+      "wrongExplanations": {
+        "0": "The exponent should be m - n + components, not n - m + components.",
+        "1": "Missing the modulo in pow; printing the huge integer is unnecessary and slow."
+      },
+      "hint": "Use exponent = m - n + components and the 3-argument pow.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    MOD = 10**9 + 7\n    exp = m - n + components\n    ans = pow(2, exp, MOD)\n    print(ans)",
+      "codeLabel": "Compute and print answer"
+    },
+    {
+      "id": "q19",
+      "phase": "Phase 4: Writing the Code",
+      "questionText": "Add the standard boilerplate to call main.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "if __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "if __name__ == \"__main__\":\n    solve()",
+          "isCode": true
+        },
+        {
+          "label": "main()",
+          "isCode": true
+        },
+        {
+          "label": "if __name__ == \"main\":\n    main()",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The canonical guard checks '__main__' and calls main().",
+      "wrongExplanations": {
+        "1": "Our function is named main(), not solve().",
+        "2": "Calling at top-level without guard is less robust in some environments."
+      },
+      "hint": "Use the common __name__ check.",
+      "isCodeBuilding": true,
+      "codeSnippet": "if __name__ == \"__main__\":\n    main()",
+      "codeLabel": "Entry point"
+    },
+    {
+      "id": "q20",
+      "phase": "Phase 5: Verifying the Solution",
+      "questionText": "For the sample graph (triangle on {1,2,3} and isolated node 4), how many connected components c does our traversal find?",
+      "diagram": "Triangle on nodes 1-2-3; node 4 alone",
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "One component is {1,2,3}; the other is {4}. So c=2.",
+      "wrongExplanations": {
+        "0": "Disconnected due to the isolated node."
+      },
+      "hint": "Count disconnected pieces including isolated nodes.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q21",
+      "phase": "Phase 5: Verifying the Solution",
+      "questionText": "Using c=2 for the sample, what is the final answer our program prints?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Exponent m - n + c = 3 - 4 + 2 = 1; 2^1 mod 1e9+7 = 2.",
+      "wrongExplanations": {
+        "0": "There are two valid subgraphs: empty and the full triangle.",
+        "3": "Exponent is 1, not 2."
+      },
+      "hint": "Compute exponent first, then 2^exponent modulo 1e9+7.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q22",
+      "phase": "Phase 6: Analyzing Complexity",
+      "questionText": "What is the time complexity of this approach (traversal to count components + computing power)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n + m)",
+          "isCode": false
+        },
+        {
+          "label": "O(n·m)",
+          "isCode": false
+        },
+        {
+          "label": "O(m log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(2^m)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Traversal visits each node and edge a constant number of times; power with modulus is logarithmic in exponent, negligible here.",
+      "wrongExplanations": {
+        "1": "We do not multiply loops over nodes and edges.",
+        "3": "We never enumerate subsets."
+      },
+      "hint": "Each node and edge is processed once or twice.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q23",
+      "phase": "Phase 6: Analyzing Complexity",
+      "questionText": "What is the additional space complexity (excluding input storage), dominated by adjacency and visited?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n + m)",
+          "isCode": false
+        },
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(m^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(log m)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Adjacency lists store each edge twice; visited is O(n).",
+      "wrongExplanations": {
+        "1": "Adjacency requires O(n + m), not just O(n)."
+      },
+      "hint": "Adjacency lists hold endpoints for all edges.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Phase 6: Analyzing Complexity",
+      "questionText": "Which edge cases must be handled for correctness and performance?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Graphs with many components, including isolated nodes; graphs with no edges; large m and n within limits.",
+          "isCode": false
+        },
+        {
+          "label": "Only connected graphs with at least one cycle.",
+          "isCode": false
+        },
+        {
+          "label": "Only trees; other cases are too slow.",
+          "isCode": false
+        },
+        {
+          "label": "Only graphs where m ≥ n.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We must correctly count components including isolated nodes and handle extreme sizes; other restrictions are not allowed.",
+      "wrongExplanations": {
+        "1": "The input may be disconnected and may have no cycles.",
+        "2": "Non-tree graphs are within constraints and must be supported."
+      },
+      "hint": "Think about isolated nodes and empty graphs.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys",
+    "def main():\n    data = sys.stdin.read().strip().split()\n    it = iter(data)\n    n = int(next(it)); m = int(next(it))",
+    "    adj = [[] for _ in range(n)]\n    for _ in range(m):\n        a = int(next(it)); b = int(next(it))\n        a -= 1; b -= 1\n        adj[a].append(b)\n        adj[b].append(a)",
+    "    visited = [False] * n\n    components = 0",
+    "    for i in range(n):\n        if not visited[i]:\n            components += 1\n            stack = [i]\n            visited[i] = True\n            while stack:\n                u = stack.pop()\n                for v in adj[u]:\n                    if not visited[v]:\n                        visited[v] = True\n                        stack.append(v)",
+    "    MOD = 10**9 + 7\n    exp = m - n + components\n    ans = pow(2, exp, MOD)\n    print(ans)",
+    "if __name__ == \"__main__\":\n    main()"
+  ],
+  "reasoningChain": [
+    {
+      "question": "What does it mean for a subgraph to be Eulerian at each node?",
+      "insight": "Each node must have an even number of incident chosen edges, i.e., a parity condition per node."
+    },
+    {
+      "question": "How many independent node-wise parity conditions exist across the graph?",
+      "insight": "In each connected component, one condition is redundant, so total independent conditions = n - c."
+    },
+    {
+      "question": "How do independent parity conditions affect the number of valid edge subsets?",
+      "insight": "Each independent condition halves the solution count; with k conditions, count is 2^(m - k)."
+    },
+    {
+      "question": "Combine these to obtain a closed-form answer.",
+      "insight": "Set k = n - c to get 2^(m - n + c) Eulerian subgraphs."
+    },
+    {
+      "question": "How to compute c efficiently on large graphs?",
+      "insight": "Iterate over nodes, and from each unvisited node, traverse its neighbors with a stack to mark the entire component."
+    },
+    {
+      "question": "How to compute the final count modulo 1e9+7 efficiently?",
+      "insight": "Use fast modular exponentiation with pow(2, exponent, MOD)."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1427,
+    "output_tokens": 16707,
+    "input_cost": 0.001784,
+    "output_cost": 0.16707,
+    "total_cost": 0.168854
+  }
+}

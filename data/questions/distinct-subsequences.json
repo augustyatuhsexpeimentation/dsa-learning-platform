@@ -1,0 +1,1019 @@
+{
+  "id": "distinct-subsequences-counting",
+  "title": "Distinct Subsequences",
+  "difficulty": "hard",
+  "tags": [
+    "string"
+  ],
+  "estimatedMinutes": 45,
+  "language": "python",
+  "description": "You are given a string s (characters 'a'–'z'). You may remove any number of characters without changing the order of the remaining characters.\n\nHow many different strings can you generate? Print the result modulo 10^9+7.\n\nNote: Removing all characters yields the empty string, but the expected output excludes the empty string from the count.",
+  "examples": [
+    {
+      "input": "aybabtu",
+      "output": "103",
+      "explanation": "There are 104 distinct subsequences including the empty string, so the answer is 104 - 1 = 103."
+    }
+  ],
+  "constraints": [
+    "1 ≤ n ≤ 5 · 10^5",
+    "s consists of 'a'–'z'"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "For s = \"a\", list all distinct strings you can generate (including the empty string).",
+      "diagram": null,
+      "options": [
+        {
+          "label": "[\"\", \"a\"]",
+          "isCode": false
+        },
+        {
+          "label": "[\"a\"]",
+          "isCode": false
+        },
+        {
+          "label": "[\"\", \"a\", \"aa\"]",
+          "isCode": false
+        },
+        {
+          "label": "[\"\", \"aa\"]",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "From one character 'a', you can keep it or remove it, giving \"a\" and \"\".",
+      "wrongExplanations": {
+        "1": "\"a\" misses the empty string.",
+        "2": "\"aa\" cannot be formed from a single 'a'."
+      },
+      "hint": "You can either keep 'a' or remove it.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "From s = \"ab\", which length-2 string(s) are possible as generated strings?",
+      "diagram": "s: a  b\nidx:0  1",
+      "options": [
+        {
+          "label": "\"ab\" only",
+          "isCode": false
+        },
+        {
+          "label": "\"ba\" only",
+          "isCode": false
+        },
+        {
+          "label": "Both \"ab\" and \"ba\"",
+          "isCode": false
+        },
+        {
+          "label": "Neither",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Order must be preserved: only \"ab\" is possible. \"ba\" is impossible.",
+      "wrongExplanations": {
+        "1": "\"ba\" reverses order.",
+        "2": "You cannot reorder characters, so not both."
+      },
+      "hint": "You can delete, but you cannot reorder.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "For s = \"aa\", how many distinct strings are there if you include the empty string?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Distinct strings: \"\", \"a\", \"aa\" → 3. The two ways to pick one 'a' form the same string.",
+      "wrongExplanations": {
+        "0": "4 is 2^2 without merging duplicates.",
+        "2": "You missed \"aa\"."
+      },
+      "hint": "List them explicitly and remove duplicates.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "For s = \"ab\", how many distinct strings should be counted in the final answer (excluding the empty string)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Distinct (including empty): \"\", \"a\", \"b\", \"ab\" → 4. Excluding empty → 3.",
+      "wrongExplanations": {
+        "0": "You missed one of 'a', 'b', 'ab'.",
+        "2": "This includes the empty string."
+      },
+      "hint": "List all and subtract 1 for the empty string.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Understanding the Problem",
+      "questionText": "For s = \"aaa\", how many distinct strings should the program output (excluding the empty string)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "7",
+          "isCode": false
+        },
+        {
+          "label": "6",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Distinct including empty: \"\", \"a\", \"aa\", \"aaa\" → 4. Excluding empty → 3.",
+      "wrongExplanations": {
+        "2": "7 is 2^3 - 1, but duplicates collapse heavily."
+      },
+      "hint": "How many different lengths of 'a' runs can you form?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "If we do not merge duplicates, how many subsequences does a length-n string have?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "2^n",
+          "isCode": false
+        },
+        {
+          "label": "n!",
+          "isCode": false
+        },
+        {
+          "label": "n^2",
+          "isCode": false
+        },
+        {
+          "label": "2^{n-1}",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each character is either kept or removed → 2 choices per position → 2^n total subsequences.",
+      "wrongExplanations": {
+        "1": "Permutations are unrelated to subsequences here.",
+        "3": "2^{n-1} misses half the subsets."
+      },
+      "hint": "Think: keep or delete at each position.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "When processing a character c that has appeared before, which set exactly represents the duplicates created by naive doubling?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "All strings x + c where x ranges over distinct strings formed using only characters before the previous c",
+          "isCode": false
+        },
+        {
+          "label": "All strings formed using only characters before the previous c (without appending c)",
+          "isCode": false
+        },
+        {
+          "label": "All strings x + c where x ranges over distinct strings formed using all processed characters so far",
+          "isCode": false
+        },
+        {
+          "label": "Only the single-character string \"c\"",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Exactly those formed by appending c to strings available before the previous c were already counted previously.",
+      "wrongExplanations": {
+        "1": "Without appending c, these aren't the duplicates caused by the new c.",
+        "3": "Duplicates include more than just \"c\" if c appeared before."
+      },
+      "hint": "Compare: using the new c vs using the earlier c to end with c.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Exploring Approaches",
+      "questionText": "Let T be the number of distinct strings (including empty) after processing some prefix. When the next char c arrives, how should T change?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "If c is new: T' = 2T; if c appeared before: T' = 2T - U, where U is the number of distinct strings formed up to just before the previous c",
+          "isCode": false
+        },
+        {
+          "label": "Always T' = 2T",
+          "isCode": false
+        },
+        {
+          "label": "Always T' = T + 1",
+          "isCode": false
+        },
+        {
+          "label": "If c appeared before: T' = T - 1; otherwise T' = T",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Doubling counts keep vs use-new-c; subtract the ones already formed by using the earlier c.",
+      "wrongExplanations": {
+        "1": "Ignores duplicates when c repeats.",
+        "2": "Underestimates growth.",
+        "3": "Oversimplifies; subtracting 1 is not general."
+      },
+      "hint": "Think: new strings by appending c; which of those were already present?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "If c has not appeared before, and T is the current count (including empty), what is the new count T' after processing c?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "T' = 2T",
+          "isCode": false
+        },
+        {
+          "label": "T' = T + 1",
+          "isCode": false
+        },
+        {
+          "label": "T' = T",
+          "isCode": false
+        },
+        {
+          "label": "T' = 2T - 1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "You can keep c or append c to each existing string → doubles the set without overlap.",
+      "wrongExplanations": {
+        "1": "The increase is more than 1.",
+        "3": "Nothing to subtract if c is new."
+      },
+      "hint": "No overlaps when c is new.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "Simulate s = \"aa\" counting including empty. Start T=1. After first 'a': T=?. After second 'a': T' = 2T - U, where U is T just before the previous 'a'. What is the final T'?",
+      "diagram": "Step 1: T0 = 1\nAfter 1st 'a': T1 = 2\nU (before previous 'a') = 1\nT2 = 2*T1 - U = ?",
+      "options": [
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "T1 = 2; T2 = 2*2 - 1 = 3 (\"\", \"a\", \"aa\").",
+      "wrongExplanations": {
+        "2": "You forgot to subtract duplicates.",
+        "1": "You undercounted; 'aa' is new."
+      },
+      "hint": "Subtract the count before the previous 'a'.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "What should we store for each character to compute the subtraction U quickly when we see it again?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "The total count T at the moment just before we processed this character the last time",
+          "isCode": false
+        },
+        {
+          "label": "The index of its last occurrence",
+          "isCode": false
+        },
+        {
+          "label": "How many times it has appeared so far",
+          "isCode": false
+        },
+        {
+          "label": "The last different character seen before it",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need U = the count from before the previous occurrence; store that per character.",
+      "wrongExplanations": {
+        "1": "Position alone doesn't give U.",
+        "2": "Count of occurrences doesn't give U."
+      },
+      "hint": "U depends on the total just before the previous occurrence.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "When updating for character c with current count T and stored U_c, when should we update the stored value for c?",
+      "diagram": "Compute: new_T = 2*T - U_c",
+      "options": [
+        {
+          "label": "Before computing new_T, set stored[c] = T",
+          "isCode": false
+        },
+        {
+          "label": "After computing new_T, set stored[c] to the old T",
+          "isCode": false
+        },
+        {
+          "label": "Never update stored[c]",
+          "isCode": false
+        },
+        {
+          "label": "After computing new_T, set stored[c] to new_T",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Use old stored[c] for subtraction, then update stored[c] to the old T for future occurrences.",
+      "wrongExplanations": {
+        "0": "Overwriting stored[c] too early loses needed U_c.",
+        "3": "Future subtractions need the old T, not new_T."
+      },
+      "hint": "Use stored[c] first; then refresh it.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "How do we map a lowercase letter ch to an index 0..25 for an array of size 26?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "ord(ch) - ord('a')",
+          "isCode": false
+        },
+        {
+          "label": "ord('a') - ord(ch)",
+          "isCode": false
+        },
+        {
+          "label": "ord(ch) % 26",
+          "isCode": false
+        },
+        {
+          "label": "int(ch)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Subtracting the code of 'a' normalizes 'a'→0, 'b'→1, ... 'z'→25.",
+      "wrongExplanations": {
+        "1": "This yields negatives for letters > 'a'.",
+        "3": "Characters aren't numeric digits."
+      },
+      "hint": "Use ASCII/Unicode codes.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Building the Idea",
+      "questionText": "After processing all characters, what should we output?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "T % MOD",
+          "isCode": false
+        },
+        {
+          "label": "(T - 1) % MOD",
+          "isCode": false
+        },
+        {
+          "label": "(T + 1) % MOD",
+          "isCode": false
+        },
+        {
+          "label": "The number of repeated characters",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "We counted the empty string; subtract 1 and apply modulo.",
+      "wrongExplanations": {
+        "0": "This includes the empty string.",
+        "2": "Adding 1 is unjustified."
+      },
+      "hint": "Remember whether to include the empty string in the final answer.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Add the necessary import to read from standard input as used later.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys",
+          "isCode": true
+        },
+        {
+          "label": "from sys import stdin",
+          "isCode": true
+        },
+        {
+          "label": "import os",
+          "isCode": true
+        },
+        {
+          "label": "import math",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We will use sys.stdin.readline(), so we need import sys.",
+      "wrongExplanations": {
+        "1": "Later code uses sys.stdin, not stdin directly.",
+        "2": "os doesn't provide stdin here."
+      },
+      "hint": "Match the exact namespace used later.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys",
+      "codeLabel": "Import sys"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Define the modulo constant correctly.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "MOD = 10**9 + 7",
+          "isCode": true
+        },
+        {
+          "label": "MOD = 10**9 + 9",
+          "isCode": true
+        },
+        {
+          "label": "MOD = 10**9",
+          "isCode": true
+        },
+        {
+          "label": "MOD = 10e9 + 7",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The problem asks for modulo 1_000_000_007.",
+      "wrongExplanations": {
+        "1": "Wrong prime.",
+        "4": "10e9 is 1e10, not 1e9."
+      },
+      "hint": "It's 1,000,000,007.",
+      "isCodeBuilding": true,
+      "codeSnippet": "MOD = 10**9 + 7",
+      "codeLabel": "Modulo constant"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Read the input string using the same module as imported.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "s = sys.stdin.readline().strip()",
+          "isCode": true
+        },
+        {
+          "label": "s = input().strip()",
+          "isCode": true
+        },
+        {
+          "label": "s = sys.stdin.read()",
+          "isCode": true
+        },
+        {
+          "label": "s = sys.stdin.readline()",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Using sys.stdin.readline().strip() matches the import and removes the trailing newline.",
+      "wrongExplanations": {
+        "2": "read() may read extra whitespace/newlines; we only need one line.",
+        "3": "Without strip(), a trailing newline may remain."
+      },
+      "hint": "We imported sys and will use .readline().",
+      "isCodeBuilding": true,
+      "codeSnippet": "s = sys.stdin.readline().strip()",
+      "codeLabel": "Read input"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Initialize the running total and the per-character storage.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "dp = 1\nlast = [0] * 26",
+          "isCode": true
+        },
+        {
+          "label": "dp = 0\nlast = [0] * 26",
+          "isCode": true
+        },
+        {
+          "label": "dp = 1\nlast = [0] * 27",
+          "isCode": true
+        },
+        {
+          "label": "dp = 1\nlast = {}",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Start with dp=1 for the empty string; we need 26 slots for 'a'..'z'.",
+      "wrongExplanations": {
+        "1": "dp must start at 1 to count the empty string.",
+        "3": "Use a fixed-size list for constant-time indexing."
+      },
+      "hint": "We count including empty initially.",
+      "isCodeBuilding": true,
+      "codeSnippet": "dp = 1\nlast = [0] * 26",
+      "codeLabel": "Initialize state"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Iterate over the characters of the string.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "for ch in s:",
+          "isCode": true
+        },
+        {
+          "label": "for ch in range(len(s)):",
+          "isCode": true
+        },
+        {
+          "label": "for i, ch in enumerate(s):",
+          "isCode": true
+        },
+        {
+          "label": "while ch in s:",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Directly iterating characters keeps the code simple with a 'ch' variable.",
+      "wrongExplanations": {
+        "1": "This iterates indices, not the characters used below.",
+        "3": "This is not a proper iteration construct here."
+      },
+      "hint": "We want 'ch' to be a character each time.",
+      "isCodeBuilding": true,
+      "codeSnippet": "for ch in s:",
+      "codeLabel": "Loop over characters"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Inside the loop, compute the array index for ch and save the previous total before updating.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    idx = ord(ch) - ord('a')\n    prev = dp",
+          "isCode": true
+        },
+        {
+          "label": "    idx = ord('a') - ord(ch)\n    prev = dp",
+          "isCode": true
+        },
+        {
+          "label": "    idx = ord(ch)\n    prev = dp",
+          "isCode": true
+        },
+        {
+          "label": "    idx = ord(ch) - ord('a')\n    prev = dp - 1",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Map 'a'..'z' to 0..25 and store the old dp in prev.",
+      "wrongExplanations": {
+        "1": "Order reversed gives negative indices.",
+        "3": "prev must be the full old total, not minus 1."
+      },
+      "hint": "Normalize by ord('a').",
+      "isCodeBuilding": true,
+      "codeSnippet": "    idx = ord(ch) - ord('a')\n    prev = dp",
+      "codeLabel": "Index and save previous"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "Inside the loop, update the running total and refresh the stored value for this character.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    dp = (2 * dp - last[idx]) % MOD\n    last[idx] = prev",
+          "isCode": true
+        },
+        {
+          "label": "    dp = (2 * dp - last[idx])\n    last[idx] = prev",
+          "isCode": true
+        },
+        {
+          "label": "    last[idx] = prev\n    dp = (2 * dp - last[idx]) % MOD",
+          "isCode": true
+        },
+        {
+          "label": "    dp = (2 * dp - last[idx]) % MOD\n    last[idx] = dp",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Compute new dp using the stored previous value, then set last[idx] to the old dp (prev).",
+      "wrongExplanations": {
+        "1": "Missing modulo risks overflow/wrong values.",
+        "3": "last[idx] must store the old dp, not the new dp."
+      },
+      "hint": "Subtract the stored value, then store the old total.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    dp = (2 * dp - last[idx]) % MOD\n    last[idx] = prev",
+      "codeLabel": "Update dp and last"
+    },
+    {
+      "id": "q22",
+      "phase": "Writing the Code",
+      "questionText": "After the loop, produce the required output.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "ans = (dp - 1) % MOD\nprint(ans)",
+          "isCode": true
+        },
+        {
+          "label": "print(dp)",
+          "isCode": true
+        },
+        {
+          "label": "print((dp + 1) % MOD)",
+          "isCode": true
+        },
+        {
+          "label": "ans = dp % MOD\nprint(ans)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Subtract 1 to exclude the empty string, then apply modulo.",
+      "wrongExplanations": {
+        "1": "This includes the empty string.",
+        "3": "Still includes the empty string."
+      },
+      "hint": "Remember to remove the empty string from the count.",
+      "isCodeBuilding": true,
+      "codeSnippet": "ans = (dp - 1) % MOD\nprint(ans)",
+      "codeLabel": "Finalize and print"
+    },
+    {
+      "id": "q23",
+      "phase": "Verifying the Solution",
+      "questionText": "Run the algorithm on s = \"aa\". What is the printed result?",
+      "diagram": "Step by step:\nT0=1\n'a' → T1=2\n'a' → T2=2*T1 - T0 = 3\nAnswer = T2 - 1",
+      "options": [
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Final T including empty is 3, so output 3 - 1 = 2.",
+      "wrongExplanations": {
+        "1": "3 includes the empty string.",
+        "3": "Overcounts without subtracting duplicates."
+      },
+      "hint": "Subtract the empty string at the end.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Verifying the Solution",
+      "questionText": "Run the algorithm on s = \"aba\". What is the printed result?",
+      "diagram": "T0=1\n'a'→2\n'b'→4\n'a' repeats: T3=2*4 - T(before previous 'a')=2*4 - 1=7\nAnswer = 7 - 1",
+      "options": [
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "6",
+          "isCode": false
+        },
+        {
+          "label": "7",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Final T is 7 including empty, so output 6.",
+      "wrongExplanations": {
+        "3": "This includes the empty string.",
+        "1": "Undercounting distinct combinations."
+      },
+      "hint": "Remember to subtract the count from before the previous 'a' (which is 1).",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Verifying the Solution",
+      "questionText": "Based on the approach, what should the program output for s = \"aybabtu\"?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "104",
+          "isCode": false
+        },
+        {
+          "label": "103",
+          "isCode": false
+        },
+        {
+          "label": "128",
+          "isCode": false
+        },
+        {
+          "label": "102",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "There are 104 including empty; subtract 1 to get 103.",
+      "wrongExplanations": {
+        "0": "This includes the empty string.",
+        "2": "2^7 ignores duplicates from repeated letters."
+      },
+      "hint": "Check whether the empty string is included in the final output.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the time complexity of the implemented algorithm with n = |s|?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(2^n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(26·n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We do a constant amount of work per character → O(n). 26 is a constant.",
+      "wrongExplanations": {
+        "3": "26 is a constant; asymptotically it's O(n).",
+        "1": "We never enumerate all subsequences."
+      },
+      "hint": "Consider operations per character.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q27",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the extra space used by the algorithm (excluding the input string)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(1)",
+          "isCode": false
+        },
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(26·n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We store a fixed-size array of length 26 and a few integers → O(1).",
+      "wrongExplanations": {
+        "1": "We don't store per-position data.",
+        "3": "We don't keep per-character-per-position info."
+      },
+      "hint": "Only 26 letters need tracking.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q28",
+      "phase": "Analyzing Complexity",
+      "questionText": "If s consists of the same character repeated n times, how many distinct strings (excluding empty) does the algorithm produce?",
+      "diagram": "s = \"aaaa...a\" (n times)",
+      "options": [
+        {
+          "label": "n",
+          "isCode": false
+        },
+        {
+          "label": "2^n - 1",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "n + 1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Distinct non-empty strings are \"a\", \"aa\", ..., \"a\"×n → n of them.",
+      "wrongExplanations": {
+        "1": "Duplicates collapse most subsets.",
+        "3": "This includes the empty string; we exclude it."
+      },
+      "hint": "How many different lengths of runs are possible?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys",
+    "MOD = 10**9 + 7",
+    "s = sys.stdin.readline().strip()",
+    "dp = 1\nlast = [0] * 26",
+    "for ch in s:",
+    "    idx = ord(ch) - ord('a')\n    prev = dp",
+    "    dp = (2 * dp - last[idx]) % MOD\n    last[idx] = prev",
+    "ans = (dp - 1) % MOD\nprint(ans)"
+  ],
+  "reasoningChain": [
+    {
+      "question": "How do deletions generate strings and does order matter?",
+      "insight": "Generated strings are subsequences that preserve order; removing characters can yield the empty string."
+    },
+    {
+      "question": "Why not enumerate all subsequences?",
+      "insight": "There are 2^n subsequences; n up to 5e5 makes enumeration impossible."
+    },
+    {
+      "question": "How do repeated characters create duplicates in counting?",
+      "insight": "Appending a repeated character c duplicates strings that already ended with c from earlier; subtract those formed before the previous c."
+    },
+    {
+      "question": "What recurrence updates the total count per character?",
+      "insight": "If T is current total (including empty), new T = 2T if c is new; otherwise 2T minus the total from before the previous c."
+    },
+    {
+      "question": "What state must be tracked efficiently?",
+      "insight": "For each letter 'a'..'z', store the total count at the moment just before its last occurrence to enable O(1) subtraction."
+    },
+    {
+      "question": "How to finalize the answer?",
+      "insight": "Return (T - 1) modulo 1e9+7 to exclude the empty string."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1303,
+    "output_tokens": 17550,
+    "input_cost": 0.001629,
+    "output_cost": 0.1755,
+    "total_cost": 0.177129
+  }
+}

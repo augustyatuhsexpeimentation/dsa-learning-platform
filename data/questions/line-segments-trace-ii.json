@@ -1,0 +1,1104 @@
+{
+  "id": "line-segments-trace-ii",
+  "title": "Line Segments Trace II",
+  "difficulty": "hard",
+  "tags": [
+    "geometry"
+  ],
+  "estimatedMinutes": 90,
+  "language": "python",
+  "description": "There are n line segments whose endpoints have integer coordinates. Each x-coordinate is between 0 and m. The slope of each segment is an integer.\n\nFor each integer x-coordinate 0,1,\\dots,m, find the maximum y among all points on any line segment at that x. If there is no segment covering that x, the maximum is -1.\n\nInput\n- First line: two integers n and m.\n- Next n lines: four integers x1 y1 x2 y2 describing a segment between (x1,y1) and (x2,y2).\n\nOutput\nPrint m+1 integers: the maximum y for x=0,1,\\dots,m.",
+  "examples": [
+    {
+      "input": "4 5\n1 1 3 3\n1 2 4 2\n2 4 5 7\n2 8 5 2",
+      "output": "-1 2 8 6 6 7",
+      "explanation": "For each x from 0 to 5, take the maximum y among segments covering that x. Where no segment covers, output -1."
+    }
+  ],
+  "constraints": [
+    "1 <= n, m <= 1e5",
+    "0 <= x1 < x2 <= m",
+    "0 <= y1, y2 <= 1e9",
+    "Each segment has integer slope"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "A segment goes from (1,3) to (4,9). For which x-values is this segment considered when producing outputs for x=0..m?",
+      "diagram": "x: 0 1 2 3 4 5 ...\n    ^-------segment------^",
+      "options": [
+        {
+          "label": "x in {1,2,3,4} (both endpoints included)",
+          "isCode": false
+        },
+        {
+          "label": "x in {2,3} (only interior points)",
+          "isCode": false
+        },
+        {
+          "label": "x in {1,2,3} (include left endpoint, exclude right)",
+          "isCode": false
+        },
+        {
+          "label": "x in {2,3,4} (exclude left endpoint, include right)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Segments include both endpoints, so all integers x with 1 ≤ x ≤ 4 are covered. Interior-only or half-open interpretations are incorrect here.",
+      "wrongExplanations": {
+        "1": "The problem includes endpoints; interior-only is not stated.",
+        "2": "No half-open intervals are indicated; both ends count."
+      },
+      "hint": "Endpoints are part of the segment.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "For a segment from (1,1) to (3,3), what is the y-value at x=2?",
+      "diagram": "Points: (1,1) -> (2,?) -> (3,3)\nSlope = (3-1)/(3-1) = 1",
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "It does not exist because x=2 is not an endpoint",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Slope is 1, so y increases by 1 per x: y(2)=2. Interior integer x are valid.",
+      "wrongExplanations": {
+        "0": "That's y at x=1, not x=2.",
+        "3": "Interior points on the segment are included."
+      },
+      "hint": "Use linear interpolation with integer slope.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "Consider a segment from (0,0) to (3,1). Is this a valid input segment under the problem constraints?",
+      "diagram": "Slope = (1-0)/(3-0) = 1/3",
+      "options": [
+        {
+          "label": "Yes, any segment is allowed",
+          "isCode": false
+        },
+        {
+          "label": "No, because the slope is not an integer",
+          "isCode": false
+        },
+        {
+          "label": "Yes, but y-values would be rounded to nearest integer",
+          "isCode": false
+        },
+        {
+          "label": "No, because x1 is not strictly less than x2",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "The slope must be an integer; 1/3 is not allowed. x1 < x2 here, so that is fine.",
+      "wrongExplanations": {
+        "0": "The problem restricts to integer slopes.",
+        "2": "No rounding is performed; values are exact on integer x."
+      },
+      "hint": "Check the slope requirement.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "Two segments: A: (0,0)-(2,2) and B: (0,2)-(2,0). What is the maximum y at x=1?",
+      "diagram": "A: y=x ; B: y=2-x ; At x=1: y_A=1, y_B=1",
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "-1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Both segments give y=1 at x=1, so the maximum is 1.",
+      "wrongExplanations": {
+        "2": "That's y at x=0 or x=2 on segment B, not at x=1.",
+        "3": "There are segments covering x=1."
+      },
+      "hint": "Compute y for both segments at x=1 and take the maximum.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Understanding the Problem",
+      "questionText": "If no segment covers some x, what value should be output at that x?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "-1",
+          "isCode": false
+        },
+        {
+          "label": "Repeat the previous maximum",
+          "isCode": false
+        },
+        {
+          "label": "The smallest y among all segments",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "By problem statement, output -1 where no segment covers.",
+      "wrongExplanations": {
+        "0": "Zero is not specified as a default.",
+        "2": "Results for each x are independent."
+      },
+      "hint": "The statement specifies a sentinel value when empty.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "Considering a direct method that checks all n segments for each x in 0..m, what is the time complexity?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n + m)",
+          "isCode": false
+        },
+        {
+          "label": "O(n m)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log m + m)",
+          "isCode": false
+        },
+        {
+          "label": "O(n + m log n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Checking all segments for each x is O(n) per x, across m+1 x-values gives O(n m).",
+      "wrongExplanations": {
+        "0": "You would not scan all segments in linear total time.",
+        "2": "No logarithmic factor arises in the naive scan."
+      },
+      "hint": "Multiply work per x by number of x-values.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "Any segment between (x1,y1) and (x2,y2) with integer slope defines y(x) = s*x + b for x in [x1,x2]. For (2,5) to (5,2), what are s and b?",
+      "diagram": "s = (2-5)/(5-2), b = y1 - s*x1",
+      "options": [
+        {
+          "label": "s = -1, b = 7",
+          "isCode": false
+        },
+        {
+          "label": "s = -1, b = 3",
+          "isCode": false
+        },
+        {
+          "label": "s = 1, b = 3",
+          "isCode": false
+        },
+        {
+          "label": "s = -3, b = 11",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "s=(-3)/3=-1, b=5-(-1)*2=7, so y=x*(-1)+7.",
+      "wrongExplanations": {
+        "1": "b computed as y1 - s*x1; plug s=-1 gives 7, not 3.",
+        "2": "Slope sign is wrong; y decreases as x increases."
+      },
+      "hint": "Compute s, then b = y1 - s*x1.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Exploring Approaches",
+      "questionText": "We need to combine many linear functions restricted to intervals. What core operations must our data structure support to solve this efficiently?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Add a line (s,b) active on [x1,x2] and get the maximum at a given x",
+          "isCode": false
+        },
+        {
+          "label": "Add a constant to a range [x1,x2] and query the range maximum",
+          "isCode": false
+        },
+        {
+          "label": "Store all lines in a list and recompute at each x",
+          "isCode": false
+        },
+        {
+          "label": "Precompute prefix maxima of y-values for each segment",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We must add linear functions on intervals and query maxima at points. Other operations don't capture varying slopes.",
+      "wrongExplanations": {
+        "1": "Range adding constants ignores x-dependent changes.",
+        "2": "This is the naive O(n m) approach."
+      },
+      "hint": "Think in terms of functions y(x) that are linear within [x1,x2].",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "When deciding which of two lines is better on an interval [L,R], which x-value should be used as the pivot to decide which line to keep at the current interval?",
+      "diagram": "Interval [L,R], pivot at mid = (L+R)//2",
+      "options": [
+        {
+          "label": "Always pick the left endpoint L",
+          "isCode": false
+        },
+        {
+          "label": "Always pick the midpoint (L+R)//2",
+          "isCode": false
+        },
+        {
+          "label": "Always pick the right endpoint R",
+          "isCode": false
+        },
+        {
+          "label": "Pick any point; it doesn't matter",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Keeping the better line at the midpoint lets you pass the other to the side where it can still win. Endpoints or arbitrary points can misroute work.",
+      "wrongExplanations": {
+        "0": "If you choose L, you may misassign for the right side.",
+        "3": "The choice affects correctness; mid-based decision is used."
+      },
+      "hint": "Use a symmetric point to split decisions for left/right.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "After ensuring the line stored at an interval [L,R] is better at the midpoint, how do we decide where the other line might still win?",
+      "diagram": "Compare at L and R to choose left or right child",
+      "options": [
+        {
+          "label": "If the other line is better at L, go left; else if it's better at R, go right; else stop",
+          "isCode": false
+        },
+        {
+          "label": "Always go to both children",
+          "isCode": false
+        },
+        {
+          "label": "Always go to the left child",
+          "isCode": false
+        },
+        {
+          "label": "Pick a child based on the sign of the slope",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Line differences are linear, so checking at endpoints tells which side (if any) it can win. Exploring both children is unnecessary.",
+      "wrongExplanations": {
+        "1": "Unnecessary and slower; the losing regions can be pruned.",
+        "3": "Slope sign alone doesn't determine dominance region."
+      },
+      "hint": "Use endpoint comparisons to route the remaining line.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "Why is comparing at endpoints (L and R) sufficient to decide to go left or right for the remaining line?",
+      "diagram": "f(x)-g(x) is linear; its sign changes at most once",
+      "options": [
+        {
+          "label": "Because the difference of two linear functions is linear, so the better region is contiguous",
+          "isCode": false
+        },
+        {
+          "label": "Because we must evaluate all points anyway",
+          "isCode": false
+        },
+        {
+          "label": "Comparing only at the midpoint is always enough",
+          "isCode": false
+        },
+        {
+          "label": "We should compare at endpoints and always go both sides",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The sign of a linear difference changes at most once, so one side (or none) can be better.",
+      "wrongExplanations": {
+        "1": "We can avoid evaluating all points by endpoint checks.",
+        "3": "Going both sides is unnecessary if neither endpoint is better."
+      },
+      "hint": "Think about where one line exceeds another on [L,R].",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "How do we ensure a line only affects its active x-range [x1,x2] when inserting into the interval structure?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Only apply the line to nodes fully inside [x1,x2]; otherwise recurse to children",
+          "isCode": false
+        },
+        {
+          "label": "Insert the line at every node overlapping [x1,x2]",
+          "isCode": false
+        },
+        {
+          "label": "Insert it everywhere and filter during queries",
+          "isCode": false
+        },
+        {
+          "label": "Ignore [x1,x2]; it doesn't matter for queries",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We restrict updates to fully covered nodes; otherwise we descend to split coverage accurately.",
+      "wrongExplanations": {
+        "1": "Over-inserting causes incorrect dominance outside [x1,x2].",
+        "2": "Storing everywhere bloats and complicates queries."
+      },
+      "hint": "Treat [x1,x2] like a coverage interval over the tree.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "How do we answer a query for a single x0 using the interval structure with stored candidate lines?",
+      "diagram": "Path from root to leaf x0; take max of stored lines along the path",
+      "options": [
+        {
+          "label": "Follow the path root→leaf containing x0 and take the maximum of stored lines' values at x0",
+          "isCode": false
+        },
+        {
+          "label": "Look only at the leaf node for x0",
+          "isCode": false
+        },
+        {
+          "label": "Look only at the root node",
+          "isCode": false
+        },
+        {
+          "label": "Scan all nodes to find the maximum",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Lines relevant to x0 will be along that path; take the maximum across them.",
+      "wrongExplanations": {
+        "1": "The best line may be stored higher up.",
+        "3": "Scanning all nodes defeats efficiency."
+      },
+      "hint": "Only nodes whose intervals contain x0 can contribute.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Building the Idea",
+      "questionText": "When inserting a line on [x1,x2], should x1 and x2 be treated as inclusive bounds?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, both endpoints inclusive",
+          "isCode": false
+        },
+        {
+          "label": "No, treat as half-open [x1,x2)",
+          "isCode": false
+        },
+        {
+          "label": "No, treat as (x1,x2]",
+          "isCode": false
+        },
+        {
+          "label": "Only include if x1 and x2 are both even",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "By the problem, endpoints are included. So insert with inclusive bounds.",
+      "wrongExplanations": {
+        "1": "Half-open would miss y at x2.",
+        "2": "This misses y at x1."
+      },
+      "hint": "Check earlier: endpoints count in coverage.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Read all input and start main with iteration over integers n and m. Choose the correct setup.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\n\ndef main():\n    data = list(map(int, sys.stdin.read().strip().split()))\n    if not data:\n        return\n    it = iter(data)\n    n = next(it)\n    m = next(it)\n",
+          "isCode": true
+        },
+        {
+          "label": "import sys\n\ndef main():\n    parts = sys.stdin.read().split()\n    n = int(parts[0]); m = int(parts[1])\n    it = iter(parts[2:])\n",
+          "isCode": true
+        },
+        {
+          "label": "def main():\n    import sys\n    n, m = map(int, sys.stdin.readline().split())\n    it = sys.stdin\n",
+          "isCode": true
+        },
+        {
+          "label": "import sys\n\ndef main():\n    tokens = sys.stdin.read().strip().split()\n    it = iter(tokens)\n    n = int(next(it)); m = int(next(it))\n    # leave tokens as strings\n",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We read all ints into a list and iterate, ensuring numeric types. Other options mix strings or incomplete iterators.",
+      "wrongExplanations": {
+        "2": "Mixing readline with later iteration over lines complicates reading the rest.",
+        "4": "Strings would require repeated int casting later; we prefer int upfront."
+      },
+      "hint": "Convert all tokens to int once and iterate.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\n\ndef main():\n    data = list(map(int, sys.stdin.read().strip().split()))\n    if not data:\n        return\n    it = iter(data)\n    n = next(it)\n    m = next(it)\n",
+      "codeLabel": "Input read and main header"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Initialize arrays for the interval tree and a negative infinity sentinel.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    size = 4 * (m + 1)\n    INF_NEG = -10**30\n\n    slopes = [None] * (size)\n    intercepts = [None] * (size)\n",
+          "isCode": true
+        },
+        {
+          "label": "    size = m\n    INF_NEG = float('-inf')\n\n    slopes = [0] * (size)\n    intercepts = [0] * (size)\n",
+          "isCode": true
+        },
+        {
+          "label": "    size = 2 * (m + 1)\n    INF_NEG = -10**9\n\n    slopes = [None] * (size)\n    intercepts = [None] * (size)\n",
+          "isCode": true
+        },
+        {
+          "label": "    size = 4 * (m + 1)\n    INF_NEG = 0\n\n    slopes = [0] * (size)\n    intercepts = [0] * (size)\n",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need enough nodes (≈4*(m+1)), a very small sentinel, and None to mark empty nodes.",
+      "wrongExplanations": {
+        "1": "Using 0 defaults and float infinities complicates comparisons; also size may be too small.",
+        "3": "Zero is not a safe sentinel; valid y can be negative."
+      },
+      "hint": "Use a large negative integer sentinel and None to mark empty.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    size = 4 * (m + 1)\n    INF_NEG = -10**30\n\n    slopes = [None] * (size)\n    intercepts = [None] * (size)\n",
+      "codeLabel": "Arrays and constants"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Define a function to evaluate a line y = s*x + b at integer x.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    def eval_line(s, b, x):\n        return s * x + b\n",
+          "isCode": true
+        },
+        {
+          "label": "    def eval_line(s, b, x):\n        return s * x - b\n",
+          "isCode": true
+        },
+        {
+          "label": "    def eval_line(s, b, x):\n        return int(s * x + b)\n",
+          "isCode": true
+        },
+        {
+          "label": "    def eval_line(s, b, x):\n        return s // x + b\n",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Evaluation is s*x + b using integer arithmetic; no rounding or division needed.",
+      "wrongExplanations": {
+        "1": "Sign on b is incorrect.",
+        "3": "Division by x is not part of y=s*x+b."
+      },
+      "hint": "It’s a direct linear expression.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    def eval_line(s, b, x):\n        return s * x + b\n",
+      "codeLabel": "Line evaluation"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Write a helper to get the value stored at a node for a given x, returning a very small number if the node is empty.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    def node_value(idx, x):\n        s = slopes[idx]\n        if s is None:\n            return INF_NEG\n        return eval_line(s, intercepts[idx], x)\n",
+          "isCode": true
+        },
+        {
+          "label": "    def node_value(idx, x):\n        if slopes[idx] is None:\n            return 0\n        return eval_line(slopes[idx], intercepts[idx], x)\n",
+          "isCode": true
+        },
+        {
+          "label": "    def node_value(idx, x):\n        return eval_line(slopes[idx], intercepts[idx], x)\n",
+          "isCode": true
+        },
+        {
+          "label": "    def node_value(idx, x):\n        if slopes[idx] is None:\n            return 10**30\n        return eval_line(slopes[idx], intercepts[idx], x)\n",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Empty nodes should return a very small value so they don't affect maxima. Using 0 or large positive is unsafe.",
+      "wrongExplanations": {
+        "1": "0 may overshadow negative valid values.",
+        "3": "A large positive would incorrectly dominate the max."
+      },
+      "hint": "Max with an empty node should not change the result.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    def node_value(idx, x):\n        s = slopes[idx]\n        if s is None:\n            return INF_NEG\n        return eval_line(s, intercepts[idx], x)\n",
+      "codeLabel": "Node value helper"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Implement insertion of a single line into a node interval [l,r], keeping the better line at the midpoint and routing the other to the side where it can still win.",
+      "diagram": "At node [l,r] with mid, keep better-at-mid; recurse based on endpoint comparisons",
+      "options": [
+        {
+          "label": "    def add_line(idx, l, r, s_new, b_new):\n        s_cur = slopes[idx]\n        if s_cur is None:\n            slopes[idx] = s_new\n            intercepts[idx] = b_new\n            return\n        s_old = slopes[idx]\n        b_old = intercepts[idx]\n        mid = (l + r) // 2\n        if eval_line(s_new, b_new, mid) > eval_line(s_old, b_old, mid):\n            slopes[idx], intercepts[idx], s_old, b_old = s_new, b_new, slopes[idx], intercepts[idx]\n            s_new, b_new = s_old, b_old\n        if l == r:\n            return\n        if eval_line(s_new, b_new, l) > eval_line(slopes[idx], intercepts[idx], l):\n            add_line(idx * 2, l, (l + r) // 2, s_new, b_new)\n        elif eval_line(s_new, b_new, r) > eval_line(slopes[idx], intercepts[idx], r):\n            add_line(idx * 2 + 1, (l + r) // 2 + 1, r, s_new, b_new)\n",
+          "isCode": true
+        },
+        {
+          "label": "    def add_line(idx, l, r, s_new, b_new):\n        if slopes[idx] is None:\n            slopes[idx] = s_new; intercepts[idx] = b_new\n        mid = (l + r) // 2\n        if eval_line(s_new, b_new, l) > eval_line(slopes[idx], intercepts[idx], l):\n            add_line(idx * 2, l, mid, s_new, b_new)\n        if eval_line(s_new, b_new, r) > eval_line(slopes[idx], intercepts[idx], r):\n            add_line(idx * 2 + 1, mid + 1, r, s_new, b_new)\n",
+          "isCode": true
+        },
+        {
+          "label": "    def add_line(idx, l, r, s_new, b_new):\n        s_cur = slopes[idx]\n        s_old = slopes[idx]\n        b_old = intercepts[idx]\n        mid = (l + r) // 2\n        if eval_line(s_new, b_new, mid) < eval_line(s_old, b_old, mid):\n            slopes[idx], intercepts[idx] = s_new, b_new\n        if l == r:\n            return\n        add_line(idx * 2, l, mid, s_new, b_new)\n        add_line(idx * 2 + 1, mid + 1, r, s_new, b_new)\n",
+          "isCode": true
+        },
+        {
+          "label": "    def add_line(idx, l, r, s_new, b_new):\n        if slopes[idx] is None:\n            slopes[idx] = s_new; intercepts[idx] = b_new; return\n        mid = (l + r) // 2\n        if eval_line(s_new, b_new, mid) > eval_line(slopes[idx], intercepts[idx], mid):\n            slopes[idx], intercepts[idx] = s_new, b_new\n        if l != r:\n            add_line(idx * 2, l, mid, s_new, b_new)\n",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We keep the better-at-mid at the node, then pass the other line to the side where it can still win based on endpoint checks.",
+      "wrongExplanations": {
+        "1": "It can recurse to both sides and doesn't ensure best-at-mid stored.",
+        "2": "The comparison direction is wrong and it recurses everywhere."
+      },
+      "hint": "Swap so the current node stores the better-at-mid line; route the remaining line to one side if it wins there.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    def add_line(idx, l, r, s_new, b_new):\n        s_cur = slopes[idx]\n        if s_cur is None:\n            slopes[idx] = s_new\n            intercepts[idx] = b_new\n            return\n        s_old = slopes[idx]\n        b_old = intercepts[idx]\n        mid = (l + r) // 2\n        if eval_line(s_new, b_new, mid) > eval_line(s_old, b_old, mid):\n            slopes[idx], intercepts[idx], s_old, b_old = s_new, b_new, slopes[idx], intercepts[idx]\n            s_new, b_new = s_old, b_old\n        if l == r:\n            return\n        if eval_line(s_new, b_new, l) > eval_line(slopes[idx], intercepts[idx], l):\n            add_line(idx * 2, l, (l + r) // 2, s_new, b_new)\n        elif eval_line(s_new, b_new, r) > eval_line(slopes[idx], intercepts[idx], r):\n            add_line(idx * 2 + 1, (l + r) // 2 + 1, r, s_new, b_new)\n",
+      "codeLabel": "Insert a line into an interval node"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Implement insertion of a line restricted to [ql, qr], only affecting fully covered nodes and recursing otherwise.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    def add_segment(idx, l, r, ql, qr, s, b):\n        if qr < l or r < ql:\n            return\n        if ql <= l and r <= qr:\n            add_line(idx, l, r, s, b)\n            return\n        mid = (l + r) // 2\n        add_segment(idx * 2, l, mid, ql, qr, s, b)\n        add_segment(idx * 2 + 1, mid + 1, r, ql, qr, s, b)\n",
+          "isCode": true
+        },
+        {
+          "label": "    def add_segment(idx, l, r, ql, qr, s, b):\n        if ql <= l and r <= qr:\n            add_line(idx, l, r, s, b)\n            return\n        mid = (l + r) // 2\n        add_segment(idx * 2, l, mid, ql, qr, s, b)\n",
+          "isCode": true
+        },
+        {
+          "label": "    def add_segment(idx, l, r, ql, qr, s, b):\n        if l == r:\n            add_line(idx, l, r, s, b)\n            return\n        mid = (l + r) // 2\n        if ql <= mid:\n            add_segment(idx * 2, l, mid, ql, qr, s, b)\n        if qr > mid:\n            add_segment(idx * 2, l, mid, ql, qr, s, b)\n",
+          "isCode": true
+        },
+        {
+          "label": "    def add_segment(idx, l, r, ql, qr, s, b):\n        if qr < l and r < ql:\n            return\n        add_line(idx, l, r, s, b)\n",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Skip non-overlaps, apply when fully covered, otherwise split and recurse to children.",
+      "wrongExplanations": {
+        "1": "Missing the non-overlap check and only recursing left loses right coverage.",
+        "3": "Incorrect overlap test and applies line everywhere."
+      },
+      "hint": "This is a standard interval cover test with recursion.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    def add_segment(idx, l, r, ql, qr, s, b):\n        if qr < l or r < ql:\n            return\n        if ql <= l and r <= qr:\n            add_line(idx, l, r, s, b)\n            return\n        mid = (l + r) // 2\n        add_segment(idx * 2, l, mid, ql, qr, s, b)\n        add_segment(idx * 2 + 1, mid + 1, r, ql, qr, s, b)\n",
+      "codeLabel": "Insert a line on [ql,qr]"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "Implement query to get the maximum at a single x by traversing the tree path.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    def query(idx, l, r, x):\n        res = node_value(idx, x)\n        if l == r:\n            return res\n        mid = (l + r) // 2\n        if x <= mid:\n            v = query(idx * 2, l, mid, x)\n        else:\n            v = query(idx * 2 + 1, mid + 1, r, x)\n        return res if res >= v else v\n",
+          "isCode": true
+        },
+        {
+          "label": "    def query(idx, l, r, x):\n        if slopes[idx] is None:\n            return 0\n        if l == r:\n            return eval_line(slopes[idx], intercepts[idx], x)\n        mid = (l + r) // 2\n        return max(eval_line(slopes[idx], intercepts[idx], x), query(idx * 2, l, mid, x))\n",
+          "isCode": true
+        },
+        {
+          "label": "    def query(idx, l, r, x):\n        res = node_value(idx, x)\n        if l == r:\n            return res\n        mid = (l + r) // 2\n        return min(res, query(idx * 2 + 1, mid + 1, r, x))\n",
+          "isCode": true
+        },
+        {
+          "label": "    def query(idx, l, r, x):\n        res = node_value(idx, x)\n        return res\n",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We compare the node's candidate with the best from the child containing x and return the maximum.",
+      "wrongExplanations": {
+        "1": "It ignores the right child when x > mid and returns 0 for empty nodes.",
+        "3": "It doesn't traverse down to gather better candidates."
+      },
+      "hint": "At each level, compare the node’s value with the child that contains x.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    def query(idx, l, r, x):\n        res = node_value(idx, x)\n        if l == r:\n            return res\n        mid = (l + r) // 2\n        if x <= mid:\n            v = query(idx * 2, l, mid, x)\n        else:\n            v = query(idx * 2 + 1, mid + 1, r, x)\n        return res if res >= v else v\n",
+      "codeLabel": "Point query"
+    },
+    {
+      "id": "q22",
+      "phase": "Writing the Code",
+      "questionText": "Process each input segment: normalize endpoints, compute integer slope and intercept, and insert the line over [x1,x2]. Choose the correct block.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    for _ in range(n):\n        x1 = next(it); y1 = next(it); x2 = next(it); y2 = next(it)\n        if x1 > x2:\n            x1, x2 = x2, x1\n            y1, y2 = y2, y1\n        dx = x2 - x1\n        dy = y2 - y1\n        s = dy // dx\n        b = y1 - s * x1\n        add_segment(1, 0, m, x1, x2, s, b)\n",
+          "isCode": true
+        },
+        {
+          "label": "    for _ in range(n):\n        x1 = next(it); y1 = next(it); x2 = next(it); y2 = next(it)\n        dx = abs(x2 - x1)\n        dy = y2 - y1\n        s = dy / dx\n        b = y1 + s * x1\n        add_segment(1, 0, m, min(x1,x2), max(x1,x2), s, b)\n",
+          "isCode": true
+        },
+        {
+          "label": "    for _ in range(n):\n        x1 = next(it); y1 = next(it); x2 = next(it); y2 = next(it)\n        if x1 < x2:\n            x1, x2 = x2, x1\n            y1, y2 = y2, y1\n        dx = x2 - x1\n        dy = y2 - y1\n        s = dy // dx\n        b = y1 - s * x1\n        add_segment(1, 0, m, x1 + 1, x2 - 1, s, b)\n",
+          "isCode": true
+        },
+        {
+          "label": "    for _ in range(n):\n        x1 = next(it); y1 = next(it); x2 = next(it); y2 = next(it)\n        if x1 > x2:\n            x1, x2 = x2, x1\n        s = (y2 - y1) // (x2 - x1)\n        b = y2 - s * x2\n        add_segment(1, 0, m, x1, x2, s, b)\n",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We ensure x1 ≤ x2 and swap y accordingly, compute integer slope s and intercept b using y1 - s*x1, and insert on inclusive [x1,x2].",
+      "wrongExplanations": {
+        "1": "Uses float division and wrong sign for b.",
+        "3": "Does not swap y when swapping x; using b from the other endpoint is okay but swapping y must match x."
+      },
+      "hint": "Keep endpoints aligned when swapping; use integer division for slope.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    for _ in range(n):\n        x1 = next(it); y1 = next(it); x2 = next(it); y2 = next(it)\n        if x1 > x2:\n            x1, x2 = x2, x1\n            y1, y2 = y2, y1\n        dx = x2 - x1\n        dy = y2 - y1\n        s = dy // dx\n        b = y1 - s * x1\n        add_segment(1, 0, m, x1, x2, s, b)\n",
+      "codeLabel": "Process segments"
+    },
+    {
+      "id": "q23",
+      "phase": "Writing the Code",
+      "questionText": "Output results for x=0..m, mapping empty results to -1. Choose the correct block.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    out = []\n    for x in range(0, m + 1):\n        val = query(1, 0, m, x)\n        if val < -10**25:\n            out.append(\"-1\")\n        else:\n            out.append(str(val))\n    sys.stdout.write(\" \".join(out))\n\nif __name__ == \"__main__\":\n    main()\n",
+          "isCode": true
+        },
+        {
+          "label": "    for x in range(m + 1):\n        print(query(1, 0, m, x))\n\nif __name__ == \"__main__\":\n    main()\n",
+          "isCode": true
+        },
+        {
+          "label": "    out = []\n    for x in range(0, m):\n        val = query(1, 0, m, x)\n        out.append(str(max(0, val)))\n    print(\" \".join(out))\n\nif __name__ == \"__main__\":\n    main()\n",
+          "isCode": true
+        },
+        {
+          "label": "    out = []\n    for x in range(0, m + 1):\n        val = node_value(1, x)\n        out.append(str(val))\n    sys.stdout.write(\" \".join(out))\n\nif __name__ == \"__main__\":\n    main()\n",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We query each x, map sentinel to -1, and print space-separated. Other options print per line, skip x=m, or bypass full query path.",
+      "wrongExplanations": {
+        "1": "Prints each on a new line, not required format.",
+        "3": "node_value at root ignores candidates in deeper nodes."
+      },
+      "hint": "Convert to strings and join with spaces; include x=m.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    out = []\n    for x in range(0, m + 1):\n        val = query(1, 0, m, x)\n        if val < -10**25:\n            out.append(\"-1\")\n        else:\n            out.append(str(val))\n    sys.stdout.write(\" \".join(out))\n\nif __name__ == \"__main__\":\n    main()\n",
+      "codeLabel": "Output and main tail"
+    },
+    {
+      "id": "q24",
+      "phase": "Verifying the Solution",
+      "questionText": "Test: n=1, m=4; segment (1,2)-(3,6). What output for x=0..4?",
+      "diagram": "s=(6-2)/(3-1)=2, b=2-2*1=0 -> y=2x on [1,3]",
+      "options": [
+        {
+          "label": "-1 2 4 6 -1",
+          "isCode": false
+        },
+        {
+          "label": "0 2 4 6 8",
+          "isCode": false
+        },
+        {
+          "label": "-1 2 3 6 -1",
+          "isCode": false
+        },
+        {
+          "label": "-1 -1 4 6 -1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Valid x are 1..3 with y=2,4,6; others are -1.",
+      "wrongExplanations": {
+        "1": "x=0 and x=4 are not covered.",
+        "3": "x=1 should be covered."
+      },
+      "hint": "Evaluate y only for x in [1,3].",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Verifying the Solution",
+      "questionText": "Test: n=2, m=3; segments (0,0)-(3,3) and (1,3)-(2,3). What output for x=0..3?",
+      "diagram": "First: y=x; Second: y=3 on [1,2]",
+      "options": [
+        {
+          "label": "0 3 3 3",
+          "isCode": false
+        },
+        {
+          "label": "0 1 2 3",
+          "isCode": false
+        },
+        {
+          "label": "-1 3 3 -1",
+          "isCode": false
+        },
+        {
+          "label": "0 3 2 3",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "x=0:0; x=1: max(1,3)=3; x=2: max(2,3)=3; x=3:3.",
+      "wrongExplanations": {
+        "2": "x=0 and x=3 are covered by the first segment.",
+        "4": "At x=2, the max is 3, not 2."
+      },
+      "hint": "Compute both y-values at each x and take maximum.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the time complexity of inserting n segments and answering m+1 point queries with this structure?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O((n + m) log m)",
+          "isCode": false
+        },
+        {
+          "label": "O(n m)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n + m)",
+          "isCode": false
+        },
+        {
+          "label": "O(n + m)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each segment insert and each query traverses O(log m) nodes.",
+      "wrongExplanations": {
+        "2": "No sorting by n is required for the core operations.",
+        "3": "We traverse a tree, not linear time."
+      },
+      "hint": "Each operation goes down a binary interval structure.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q27",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the space complexity of the interval structure used here?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(m)",
+          "isCode": false
+        },
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n + m)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log m)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We store a constant amount per tree node, and the tree has O(m) nodes.",
+      "wrongExplanations": {
+        "2": "We don't store per-segment data proportional to n besides inserting.",
+        "4": "There's no per-insert memory growth beyond the tree."
+      },
+      "hint": "The tree is over the x-domain, not the number of segments.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q28",
+      "phase": "Analyzing Complexity",
+      "questionText": "Which statements about edge cases are correct for this implementation?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Python integers handle large values; use a very small sentinel to detect no-line and map to -1",
+          "isCode": false
+        },
+        {
+          "label": "Use floating-point arithmetic to avoid overflow",
+          "isCode": false
+        },
+        {
+          "label": "Negative slopes require special-case handling in queries",
+          "isCode": false
+        },
+        {
+          "label": "Endpoints should be excluded to avoid double counting",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Python ints don't overflow; using an appropriately small sentinel avoids false positives. Negative slopes are naturally handled; endpoints are inclusive.",
+      "wrongExplanations": {
+        "1": "Floating-point can introduce precision errors.",
+        "3": "Endpoints are included by the problem."
+      },
+      "hint": "Stick to integer math throughout.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys",
+    "",
+    "def main():",
+    "    data = list(map(int, sys.stdin.read().strip().split()))",
+    "    if not data:",
+    "        return",
+    "    it = iter(data)",
+    "    n = next(it)",
+    "    m = next(it)",
+    "",
+    "    size = 4 * (m + 1)",
+    "    INF_NEG = -10**30",
+    "",
+    "    slopes = [None] * (size)",
+    "    intercepts = [None] * (size)",
+    "",
+    "    def eval_line(s, b, x):",
+    "        return s * x + b",
+    "",
+    "    def node_value(idx, x):",
+    "        s = slopes[idx]",
+    "        if s is None:",
+    "            return INF_NEG",
+    "        return eval_line(s, intercepts[idx], x)",
+    "",
+    "    def add_line(idx, l, r, s_new, b_new):",
+    "        s_cur = slopes[idx]",
+    "        if s_cur is None:",
+    "            slopes[idx] = s_new",
+    "            intercepts[idx] = b_new",
+    "            return",
+    "        s_old = slopes[idx]",
+    "        b_old = intercepts[idx]",
+    "        mid = (l + r) // 2",
+    "        if eval_line(s_new, b_new, mid) > eval_line(s_old, b_old, mid):",
+    "            slopes[idx], intercepts[idx], s_old, b_old = s_new, b_new, slopes[idx], intercepts[idx]",
+    "            s_new, b_new = s_old, b_old",
+    "        if l == r:",
+    "            return",
+    "        if eval_line(s_new, b_new, l) > eval_line(slopes[idx], intercepts[idx], l):",
+    "            add_line(idx * 2, l, (l + r) // 2, s_new, b_new)",
+    "        elif eval_line(s_new, b_new, r) > eval_line(slopes[idx], intercepts[idx], r):",
+    "            add_line(idx * 2 + 1, (l + r) // 2 + 1, r, s_new, b_new)",
+    "",
+    "    def add_segment(idx, l, r, ql, qr, s, b):",
+    "        if qr < l or r < ql:",
+    "            return",
+    "        if ql <= l and r <= qr:",
+    "            add_line(idx, l, r, s, b)",
+    "            return",
+    "        mid = (l + r) // 2",
+    "        add_segment(idx * 2, l, mid, ql, qr, s, b)",
+    "        add_segment(idx * 2 + 1, mid + 1, r, ql, qr, s, b)",
+    "",
+    "    def query(idx, l, r, x):",
+    "        res = node_value(idx, x)",
+    "        if l == r:",
+    "            return res",
+    "        mid = (l + r) // 2",
+    "        if x <= mid:",
+    "            v = query(idx * 2, l, mid, x)",
+    "        else:",
+    "            v = query(idx * 2 + 1, mid + 1, r, x)",
+    "        return res if res >= v else v",
+    "",
+    "    for _ in range(n):",
+    "        x1 = next(it); y1 = next(it); x2 = next(it); y2 = next(it)",
+    "        if x1 > x2:",
+    "            x1, x2 = x2, x1",
+    "            y1, y2 = y2, y1",
+    "        dx = x2 - x1",
+    "        dy = y2 - y1",
+    "        s = dy // dx",
+    "        b = y1 - s * x1",
+    "        add_segment(1, 0, m, x1, x2, s, b)",
+    "",
+    "    out = []",
+    "    for x in range(0, m + 1):",
+    "        val = query(1, 0, m, x)",
+    "        if val < -10**25:",
+    "            out.append(\"-1\")",
+    "        else:",
+    "            out.append(str(val))",
+    "    sys.stdout.write(\" \".join(out))",
+    "",
+    "if __name__ == \"__main__\":",
+    "    main()"
+  ],
+  "reasoningChain": [
+    {
+      "question": "What x-values are covered by a segment and how to get y at integer x?",
+      "insight": "Coverage is inclusive of endpoints; with integer slope, y(x) is exactly y1 + s*(x - x1) for integer x in [x1,x2]."
+    },
+    {
+      "question": "Why is brute-force scanning too slow?",
+      "insight": "Checking all n segments for each of m+1 x is O(n m), exceeding limits for 1e5."
+    },
+    {
+      "question": "How to model segments uniformly for fast combination?",
+      "insight": "Each segment defines a linear function y=sx+b valid only on [x1,x2]; we need to add such functions on ranges and query max at points."
+    },
+    {
+      "question": "How to organize intervals to combine lines efficiently?",
+      "insight": "Use a binary partition over x; at each node store the line better at the midpoint and pass the other line to the side where it can still win."
+    },
+    {
+      "question": "How to limit a line’s effect to its active range?",
+      "insight": "Only apply the line to nodes fully within [x1,x2]; otherwise recursively split, ensuring no effect outside the segment."
+    },
+    {
+      "question": "How to answer queries?",
+      "insight": "Traverse from root to leaf for x, taking the maximum among stored candidate lines along the path."
+    },
+    {
+      "question": "What are the resulting complexities and edge handling?",
+      "insight": "Insert and query each take O(log m), total O((n+m) log m), space O(m); use integer math and a very small sentinel mapped to -1."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1464,
+    "output_tokens": 19672,
+    "input_cost": 0.00183,
+    "output_cost": 0.19672,
+    "total_cost": 0.19855
+  }
+}

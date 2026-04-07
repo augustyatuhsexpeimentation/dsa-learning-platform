@@ -1,0 +1,1020 @@
+{
+  "id": "subarray-squares-min-cost",
+  "title": "Subarray Squares",
+  "difficulty": "hard",
+  "tags": [
+    "advanced"
+  ],
+  "estimatedMinutes": 70,
+  "language": "python",
+  "description": "Given an array of n positive integers, divide it into exactly k non-empty contiguous subarrays. The cost of a subarray is the square of the sum of its elements. Find the minimum possible total cost.\n\nInput:\n- First line: two integers n and k\n- Second line: n integers x_1, x_2, ..., x_n\n\nOutput:\n- A single integer: the minimum total cost.",
+  "examples": [
+    {
+      "input": "8 3\n2 3 1 2 2 3 4 1",
+      "output": "110",
+      "explanation": "An optimal partition yields total squared-sum cost 110."
+    }
+  ],
+  "constraints": [
+    "1 ≤ k ≤ n ≤ 3000",
+    "1 ≤ x_i ≤ 10^5"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "If n=3, k=1 and the array is [1,2,3], what is the total cost?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "36",
+          "isCode": false
+        },
+        {
+          "label": "14",
+          "isCode": false
+        },
+        {
+          "label": "6",
+          "isCode": false
+        },
+        {
+          "label": "12",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "With one subarray, cost = (1+2+3)^2 = 36. Others are sums or sums of squares, not the required square of the total sum.",
+      "wrongExplanations": {
+        "1": "14 is 1^2+2^2+3^2, which is for k=3.",
+        "2": "6 is the sum, not squared.",
+        "3": "12 is unrelated to (sum)^2."
+      },
+      "hint": "One subarray means square of the sum of all elements.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "If n=3, k=3 and the array is [1,2,3], what is the total cost?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "14",
+          "isCode": false
+        },
+        {
+          "label": "36",
+          "isCode": false
+        },
+        {
+          "label": "6",
+          "isCode": false
+        },
+        {
+          "label": "12",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each element forms its own subarray: 1^2 + 2^2 + 3^2 = 14.",
+      "wrongExplanations": {
+        "1": "36 is (1+2+3)^2 for k=1.",
+        "2": "6 is just the sum.",
+        "3": "12 is not a correct aggregation here."
+      },
+      "hint": "k equals n: each element is alone.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "Array [2,1,3], k=2. Which split minimizes total cost?",
+      "diagram": "Possible splits:\n- (2) | (1,3)\n- (2,1) | (3)",
+      "options": [
+        {
+          "label": "(2)|(1,3) cost = 4 + 16 = 20",
+          "isCode": false
+        },
+        {
+          "label": "(2,1)|(3) cost = 9 + 9 = 18",
+          "isCode": false
+        },
+        {
+          "label": "Both give 22",
+          "isCode": false
+        },
+        {
+          "label": "(2)|(1,3) cost = 9 + 9 = 18",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "(2,1)|(3) gives 18 which is smaller than 20 from (2)|(1,3).",
+      "wrongExplanations": {
+        "0": "You computed (2)|(1,3) correctly but it's not minimal.",
+        "3": "The costs for (2)|(1,3) are 4 and 16, not 9 and 9."
+      },
+      "hint": "Compute squared sums for each subarray and add.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "Given 1 ≤ x_i, what can we say about prefix sums s[i] = x_1 + ... + x_i?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "They are strictly increasing with i.",
+          "isCode": false
+        },
+        {
+          "label": "They are nondecreasing but might stay equal.",
+          "isCode": false
+        },
+        {
+          "label": "They can decrease if a later x_i is small.",
+          "isCode": false
+        },
+        {
+          "label": "They are constant for all i.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each x_i ≥ 1, so adding a positive number strictly increases the sum.",
+      "wrongExplanations": {
+        "1": "No zeros allowed; equality cannot happen.",
+        "2": "Sums cannot decrease with positive terms."
+      },
+      "hint": "Adding a positive number strictly increases the total.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Understanding the Problem",
+      "questionText": "For n=4 and k=2, how many distinct cut positions exist to consider if we brute-force all splits?",
+      "diagram": "Positions between elements: _ x1 | x2 | x3 | x4 _",
+      "options": [
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "6",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "There are n-1=3 gaps between elements; choose 1 for k=2.",
+      "wrongExplanations": {
+        "1": "4 would be the number of elements, not gaps.",
+        "3": "6 counts ordered pairs; we choose only one cut."
+      },
+      "hint": "Count the gaps between elements.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "How many ways to choose k−1 cut positions among n−1 gaps (brute force)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "C(n−1, k−1)",
+          "isCode": false
+        },
+        {
+          "label": "C(n, k)",
+          "isCode": false
+        },
+        {
+          "label": "n^(k−1)",
+          "isCode": false
+        },
+        {
+          "label": "k^(n−1)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We pick k−1 cuts among n−1 positions: combinations C(n−1, k−1).",
+      "wrongExplanations": {
+        "1": "C(n, k) counts subsets of elements, not gaps.",
+        "2": "n^(k−1) is not the combinatorial count here."
+      },
+      "hint": "We are choosing unordered cut positions without repetition.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "Let F(r,i) be the minimum total cost to split the first i elements into r subarrays. What is F(1,i)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "F(1,i) = (x_1 + ... + x_i)^2",
+          "isCode": false
+        },
+        {
+          "label": "F(1,i) = x_i^2",
+          "isCode": false
+        },
+        {
+          "label": "F(1,i) = x_1^2 + ... + x_i^2",
+          "isCode": false
+        },
+        {
+          "label": "F(1,i) = (x_1 + ... + x_i)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "With one subarray, we group all first i elements: square of their sum.",
+      "wrongExplanations": {
+        "2": "Sum of squares corresponds to r=i, each element alone.",
+        "3": "We must square the sum for the cost."
+      },
+      "hint": "One segment covering prefix 1..i.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Exploring Approaches",
+      "questionText": "Which recurrence correctly defines F(r,i) using prefix sums s[j] = x_1+...+x_j?",
+      "diagram": "Consider the last cut at position t (r−1 ≤ t < i).",
+      "options": [
+        {
+          "label": "F(r,i) = min_{t=r−1..i−1} [ F(r−1,t) + (s[i] − s[t])^2 ]",
+          "isCode": false
+        },
+        {
+          "label": "F(r,i) = min_{t=0..i} [ F(r,t) + (s[i] − s[t])^2 ]",
+          "isCode": false
+        },
+        {
+          "label": "F(r,i) = min_{t=1..i−1} [ F(r−1,t) + (s[t] − s[i]) ]",
+          "isCode": false
+        },
+        {
+          "label": "F(r,i) = F(r,i−1) + x_i^2",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We split at t where the last subarray is (t+1..i): cost adds (s[i]−s[t])^2.",
+      "wrongExplanations": {
+        "1": "It uses F(r, t) and allows t=i, which is invalid.",
+        "3": "Cost depends on squared sum of a segment, not x_i^2 alone."
+      },
+      "hint": "t must leave r−1 non-empty subarrays before it.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "Expand (s[i] − s[t])^2 into a sum of terms.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "s[i]^2 − 2 s[i] s[t] + s[t]^2",
+          "isCode": false
+        },
+        {
+          "label": "s[i]^2 + 2 s[i] s[t] + s[t]^2",
+          "isCode": false
+        },
+        {
+          "label": "s[i]^2 − s[t]^2",
+          "isCode": false
+        },
+        {
+          "label": "2(s[i] − s[t])",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Binomial expansion yields s[i]^2 − 2 s[i] s[t] + s[t]^2.",
+      "wrongExplanations": {
+        "1": "The middle term sign is negative, not positive.",
+        "2": "That's a difference of squares, not the expansion."
+      },
+      "hint": "Use (a−b)^2 = a^2 − 2ab + b^2.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "For fixed i, F(r,i) = s[i]^2 + min over t of [F(r−1,t) + s[t]^2 − 2 s[t]·s[i]]. Which representation matches a linear expression in x = s[i] for each t?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "y = m x + b with m = −2 s[t], b = F(r−1,t) + s[t]^2",
+          "isCode": false
+        },
+        {
+          "label": "y = m x + b with m = 2 s[t], b = F(r−1,t) − s[t]^2",
+          "isCode": false
+        },
+        {
+          "label": "y = m x + b with m = s[t]^2, b = F(r−1,t)",
+          "isCode": false
+        },
+        {
+          "label": "y = m x + b with m = −2 F(r−1,t), b = s[t]^2",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Group terms as (−2 s[t])·x + (F(r−1,t)+s[t]^2). Then add s[i]^2 afterward.",
+      "wrongExplanations": {
+        "1": "The coefficient of s[i] is −2 s[t], not +2 s[t].",
+        "3": "m depends on s[t], not F(r−1,t)."
+      },
+      "hint": "Identify coefficient of s[i] and the remaining constant for each t.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "As t increases, how do the coefficients m = −2 s[t] change?",
+      "diagram": "Recall s[t] increases because x_i ≥ 1.",
+      "options": [
+        {
+          "label": "They strictly decrease.",
+          "isCode": false
+        },
+        {
+          "label": "They strictly increase.",
+          "isCode": false
+        },
+        {
+          "label": "They stay constant.",
+          "isCode": false
+        },
+        {
+          "label": "They can oscillate.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "s[t] increases, so −2 s[t] becomes more negative: strictly decreasing.",
+      "wrongExplanations": {
+        "1": "This would require s[t] to decrease.",
+        "2": "s[t] is not constant."
+      },
+      "hint": "Multiply an increasing positive sequence by −2.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "As we compute F(r,i) for i from r to n, how does x = s[i] change?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "x increases with i, so queries are in increasing order.",
+          "isCode": false
+        },
+        {
+          "label": "x decreases with i, so queries are in decreasing order.",
+          "isCode": false
+        },
+        {
+          "label": "x stays the same.",
+          "isCode": false
+        },
+        {
+          "label": "x varies unpredictably.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "s[i] increases because array entries are positive; we can process queries in increasing x.",
+      "wrongExplanations": {
+        "1": "s[i] does not decrease with positive inputs."
+      },
+      "hint": "s[i] = s[i−1] + x_i with x_i ≥ 1.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "For a fixed r, which index must be added first as a candidate split before iterating i?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "t = r−1",
+          "isCode": false
+        },
+        {
+          "label": "t = 0",
+          "isCode": false
+        },
+        {
+          "label": "t = 1",
+          "isCode": false
+        },
+        {
+          "label": "t = r",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "To split into r subarrays, the earliest possible last cut is at t=r−1 so the last segment has at least one element.",
+      "wrongExplanations": {
+        "3": "t cannot be r before computing F(r,i); t must be < i.",
+        "1": "t=0 would allow an empty segment before, which is invalid."
+      },
+      "hint": "Ensure non-empty segments and t < i.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Building the Idea",
+      "questionText": "While iterating i from r to n, after computing F(r,i), which t should be added next as a candidate for future i?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "t = i",
+          "isCode": false
+        },
+        {
+          "label": "t = i−1",
+          "isCode": false
+        },
+        {
+          "label": "t = r−1",
+          "isCode": false
+        },
+        {
+          "label": "No new t needs to be added.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "For the next i, splits up to t=i are valid; add the new index i.",
+      "wrongExplanations": {
+        "1": "t=i−1 was already added in the previous step.",
+        "2": "Only initial t=r−1 is added first; more t must be added as i grows."
+      },
+      "hint": "At step i+1, the new valid t is i.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q15",
+      "phase": "Building the Idea",
+      "questionText": "Quick check: For array [1,2,3], s = [0,1,3,6], F(1,i) = s[i]^2. What is F(2,3)?",
+      "diagram": "Try t=1 and t=2:\n- t=1: F(1,1)+(s3−s1)^2 = 1 + (6−1)^2 = 26\n- t=2: F(1,2)+(s3−s2)^2 = 9 + (6−3)^2 = 18",
+      "options": [
+        {
+          "label": "18",
+          "isCode": false
+        },
+        {
+          "label": "26",
+          "isCode": false
+        },
+        {
+          "label": "20",
+          "isCode": false
+        },
+        {
+          "label": "36",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Minimum over t is 18 (t=2).",
+      "wrongExplanations": {
+        "1": "26 is the larger candidate (t=1).",
+        "3": "36 is F(1,3), not with two subarrays."
+      },
+      "hint": "Compute both t and take the minimum.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Start with the right imports for fast input and a double-ended queue.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\nfrom collections import deque",
+          "isCode": true
+        },
+        {
+          "label": "import sys, collections\nfrom collections import list",
+          "isCode": true
+        },
+        {
+          "label": "from sys import stdin\nfrom collections import defaultdict",
+          "isCode": true
+        },
+        {
+          "label": "import io\nfrom collections import deque as dq",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need sys for fast input and deque for maintaining candidates.",
+      "wrongExplanations": {
+        "2": "defaultdict is not needed; we need deque.",
+        "3": "Using io alone doesn't help; also aliasing deque but not used consistently later."
+      },
+      "hint": "Use sys and deque.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\nfrom collections import deque",
+      "codeLabel": "Imports"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Parse input efficiently into n, k, and array a.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "data = list(map(int, sys.stdin.buffer.read().split()))\nit = iter(data); n = next(it); k = next(it)\na = [next(it) for _ in range(n)]",
+          "isCode": true
+        },
+        {
+          "label": "n, k = map(int, sys.stdin.readline().split())\na = list(map(int, sys.stdin.readline()))",
+          "isCode": true
+        },
+        {
+          "label": "tokens = sys.stdin.read().split()\nn = int(tokens[0]); k = int(tokens[2])\na = list(map(int, tokens[3:3+n]))",
+          "isCode": true
+        },
+        {
+          "label": "vals = [int(x) for x in sys.stdin]\nn, k = vals[0], vals[1]\na = vals[2:]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Reading all ints and iterating avoids newline issues and parses exactly n array values.",
+      "wrongExplanations": {
+        "1": "Second line parsing is wrong: readline() returns a string; mapping without split breaks.",
+        "2": "k index is wrong; tokens[1] is k, not tokens[2]."
+      },
+      "hint": "Read all integers and slice deterministically.",
+      "isCodeBuilding": true,
+      "codeSnippet": "data = list(map(int, sys.stdin.buffer.read().split()))\nit = iter(data); n = next(it); k = next(it)\na = [next(it) for _ in range(n)]",
+      "codeLabel": "Input parsing"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Build the prefix sums array s of length n+1 with s[0]=0.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "s = [0]*(n+1)\nfor i in range(1, n+1):\n    s[i] = s[i-1] + a[i-1]",
+          "isCode": true
+        },
+        {
+          "label": "s = [0]*n\nfor i in range(n):\n    s[i] = s[i-1] + a[i]",
+          "isCode": true
+        },
+        {
+          "label": "s = [0]*(n+1)\nfor i in range(1, n+1):\n    s[i] = s[i-1] + a[i]",
+          "isCode": true
+        },
+        {
+          "label": "s = [0]\nfor i in range(n):\n    s.append(s[i] + a[i+1])",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "s[i] sums a[0..i−1], so use s[i-1]+a[i-1] and size n+1.",
+      "wrongExplanations": {
+        "2": "Indexing a[i] goes out of range at i=n.",
+        "1": "Array size and indices are off; s[0] is used before set."
+      },
+      "hint": "s[i] should represent sum of first i elements.",
+      "isCodeBuilding": true,
+      "codeSnippet": "s = [0]*(n+1)\nfor i in range(1, n+1):\n    s[i] = s[i-1] + a[i-1]",
+      "codeLabel": "Prefix sums"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Define helpers to evaluate a candidate and to drop dominated candidates using cross-multiplication.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def eval_line(line, x):\n    return line[0]*x + line[1]\n\ndef is_bad(l1, l2, l3):\n    return (l3[1] - l1[1]) * (l1[0] - l2[0]) <= (l2[1] - l1[1]) * (l1[0] - l3[0])",
+          "isCode": true
+        },
+        {
+          "label": "def eval_line(line, x):\n    return line[1]*x + line[0]\n\ndef is_bad(l1, l2, l3):\n    return (l3[1] - l2[1]) * (l2[0] - l1[0]) <= (l2[1] - l1[1]) * (l3[0] - l2[0])",
+          "isCode": true
+        },
+        {
+          "label": "def eval_line(line, x):\n    return line[0] + line[1]*x\n\ndef is_bad(l1, l2, l3):\n    return (l3[1] - l1[1]) * (l2[0] - l1[0]) <= (l2[1] - l1[1]) * (l3[0] - l1[0])",
+          "isCode": true
+        },
+        {
+          "label": "def eval_line(line, x):\n    return x*line[0] - line[1]\n\ndef is_bad(l1, l2, l3):\n    return (l3[1] - l1[1]) * (l1[0] - l2[0]) >= (l2[1] - l1[1]) * (l1[0] - l3[0])",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We store a line as (m,b); eval m*x+b. The inequality removes the middle when the new one makes it unnecessary for future queries.",
+      "wrongExplanations": {
+        "3": "Sign flipped: it would keep dominated lines and remove useful ones.",
+        "1": "Swapped roles and wrong eval; would mis-evaluate candidates."
+      },
+      "hint": "Keep m*x+b and compare intersection orders without floats.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def eval_line(line, x):\n    return line[0]*x + line[1]\n\ndef is_bad(l1, l2, l3):\n    return (l3[1] - l1[1]) * (l1[0] - l2[0]) <= (l2[1] - l1[1]) * (l1[0] - l3[0])",
+      "codeLabel": "Helpers"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Initialize the base array of best costs for one subarray.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "dp_prev = [0]*(n+1)\nfor i in range(1, n+1):\n    dp_prev[i] = s[i]*s[i]",
+          "isCode": true
+        },
+        {
+          "label": "dp_prev = [0]*n\nfor i in range(n):\n    dp_prev[i] = s[i]*s[i]",
+          "isCode": true
+        },
+        {
+          "label": "dp_prev = [s[i]*s[i] for i in range(n+1)]",
+          "isCode": true
+        },
+        {
+          "label": "dp_prev = [0]*(n+1)\nfor i in range(0, n):\n    dp_prev[i] = s[i]*s[i]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "F(1,i)=s[i]^2 for i≥1. We keep index 0 as 0 and fill 1..n.",
+      "wrongExplanations": {
+        "2": "This also sets dp_prev[0]=0^2=0 (fine), but must be careful about intended indexing in later loops.",
+        "1": "Length and indices mismatch further loops expecting n+1 length."
+      },
+      "hint": "Set dp_prev[1..n] to squared prefix sums.",
+      "isCodeBuilding": true,
+      "codeSnippet": "dp_prev = [0]*(n+1)\nfor i in range(1, n+1):\n    dp_prev[i] = s[i]*s[i]",
+      "codeLabel": "Base costs"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "Start processing layers r=2..k: initialize candidates and an array for current results.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "for r in range(2, k+1):\n    dq = deque()\n    t = r - 1\n    m = -2 * s[t]\n    b = dp_prev[t] + s[t]*s[t]\n    dq.append((m, b))\n    dp_curr = [0]*(n+1)",
+          "isCode": true
+        },
+        {
+          "label": "for r in range(1, k):\n    dq = deque()\n    t = r\n    m = 2 * s[t]\n    b = dp_prev[t] + s[t]*s[t]\n    dq.append((m, b))\n    dp_curr = [0]*n",
+          "isCode": true
+        },
+        {
+          "label": "for r in range(2, k+1):\n    dq = deque([])\n    t = r\n    m = - s[t]\n    b = dp_prev[t] + s[t]\n    dq.append((m, b))\n    dp_curr = [0]*(n)",
+          "isCode": true
+        },
+        {
+          "label": "for r in range(2, k+1):\n    dq = []\n    t = r - 1\n    dq.append((-2*s[t], dp_prev[t]))\n    dp_curr = [0]*n",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Initialize with t=r−1, m=−2*s[t], b=dp_prev[t]+s[t]^2, and dp_curr sized n+1.",
+      "wrongExplanations": {
+        "1": "Wrong r range and wrong slope sign; dp_curr size off by one.",
+        "3": "dq must be a deque, and b must include s[t]^2."
+      },
+      "hint": "The first valid split index is r−1 and slopes are −2*s[t].",
+      "isCodeBuilding": true,
+      "codeSnippet": "for r in range(2, k+1):\n    dq = deque()\n    t = r - 1\n    m = -2 * s[t]\n    b = dp_prev[t] + s[t]*s[t]\n    dq.append((m, b))\n    dp_curr = [0]*(n+1)",
+      "codeLabel": "Layer init"
+    },
+    {
+      "id": "q22",
+      "phase": "Writing the Code",
+      "questionText": "Fill the inner loop: query best candidate for x=s[i], compute current cost, and add the new split index.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    for i in range(r, n+1):\n        x = s[i]\n        while len(dq) >= 2 and eval_line(dq[0], x) >= eval_line(dq[1], x):\n            dq.popleft()\n        best = eval_line(dq[0], x)\n        dp_curr[i] = x*x + best\n        m2 = -2 * s[i]\n        b2 = dp_prev[i] + s[i]*s[i]\n        while len(dq) >= 2 and is_bad(dq[-2], dq[-1], (m2, b2)):\n            dq.pop()\n        dq.append((m2, b2))",
+          "isCode": true
+        },
+        {
+          "label": "    for i in range(r, n+1):\n        x = s[i]\n        while len(dq) >= 2 and eval_line(dq[0], x) <= eval_line(dq[1], x):\n            dq.popleft()\n        best = eval_line(dq[1], x)\n        dp_curr[i] = x + best\n        m2 = -2 * s[i]\n        b2 = dp_prev[i]\n        while len(dq) >= 2 and is_bad(dq[-2], dq[-1], (m2, b2)):\n            dq.pop()\n        dq.append((m2, b2))",
+          "isCode": true
+        },
+        {
+          "label": "    for i in range(1, n+1):\n        x = s[i]\n        while len(dq) >= 2 and eval_line(dq[0], x) >= eval_line(dq[1], x):\n            dq.popleft()\n        best = eval_line(dq[0], x)\n        dp_curr[i] = x*x + best\n        m2 = 2 * s[i]\n        b2 = dp_prev[i] + s[i]*s[i]\n        dq.append((m2, b2))",
+          "isCode": true
+        },
+        {
+          "label": "    for i in range(r, n+1):\n        x = s[i]\n        best = min(eval_line(L, x) for L in dq)\n        dp_curr[i] = x*x + best\n        m2 = -2 * s[i]\n        b2 = dp_prev[i] + s[i]*s[i]\n        dq.append((m2, b2))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Pop from front while the next is better, compute dp_curr[i]=x^2+best, then add the new candidate and clean from the back.",
+      "wrongExplanations": {
+        "1": "Pop condition flipped, wrong line chosen, and missing s[i]^2 in b2.",
+        "3": "Brute-force scanning dq loses the intended O(1) amortized query per i."
+      },
+      "hint": "Use front-pop for queries and back-pop for pruning when adding.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    for i in range(r, n+1):\n        x = s[i]\n        while len(dq) >= 2 and eval_line(dq[0], x) >= eval_line(dq[1], x):\n            dq.popleft()\n        best = eval_line(dq[0], x)\n        dp_curr[i] = x*x + best\n        m2 = -2 * s[i]\n        b2 = dp_prev[i] + s[i]*s[i]\n        while len(dq) >= 2 and is_bad(dq[-2], dq[-1], (m2, b2)):\n            dq.pop()\n        dq.append((m2, b2))",
+      "codeLabel": "Inner loop"
+    },
+    {
+      "id": "q23",
+      "phase": "Writing the Code",
+      "questionText": "Finish the layer and output the final result.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    dp_prev = dp_curr\nprint(dp_prev[n])",
+          "isCode": true
+        },
+        {
+          "label": "    dp_prev = dp_curr\nprint(dp_curr[n])",
+          "isCode": true
+        },
+        {
+          "label": "    dp_curr = dp_prev\nprint(dp_prev[n-1])",
+          "isCode": true
+        },
+        {
+          "label": "    dp_prev = dp_curr\nprint(s[n]*s[n])",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "After finishing r, update dp_prev; the answer is dp_prev[n].",
+      "wrongExplanations": {
+        "1": "Equivalent here, but dp_prev is used as the latest layer elsewhere; stick to dp_prev.",
+        "3": "Only for k=1; in general we need dp_prev[n] for r=k."
+      },
+      "hint": "Carry forward the current layer for the next, and print the last entry.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    dp_prev = dp_curr\nprint(dp_prev[n])",
+      "codeLabel": "Finalize and print"
+    },
+    {
+      "id": "q24",
+      "phase": "Verifying the Solution",
+      "questionText": "Run the program conceptually on the example input:\n8 3\n2 3 1 2 2 3 4 1\nWhat final value is printed?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "110",
+          "isCode": false
+        },
+        {
+          "label": "114",
+          "isCode": false
+        },
+        {
+          "label": "106",
+          "isCode": false
+        },
+        {
+          "label": "118",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The constructed approach matches the example output 110.",
+      "wrongExplanations": {
+        "1": "Close but not minimal according to the recurrence.",
+        "2": "Too small; violates the minimal cost derived by the process."
+      },
+      "hint": "Trust the recurrence and structure; it matches the sample output.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Verifying the Solution",
+      "questionText": "For array [1,1,1,1] and k=2, what is the minimum total cost?",
+      "diagram": "Best split is [1,1]|[1,1]: 2^2 + 2^2 = 8",
+      "options": [
+        {
+          "label": "8",
+          "isCode": false
+        },
+        {
+          "label": "10",
+          "isCode": false
+        },
+        {
+          "label": "16",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Balanced sums 2 and 2 give 4+4=8, the minimum.",
+      "wrongExplanations": {
+        "1": "Splits 1|3 or 3|1 give 1+9=10.",
+        "2": "Single segment cost (k=1) would be 16; here k=2."
+      },
+      "hint": "Try all cut positions at 1,2,3 and compare.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the time complexity of the implemented approach in terms of n and k?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(k·n)",
+          "isCode": false
+        },
+        {
+          "label": "O(k·n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "For each r (k layers), we process i=1..n and each candidate is added/removed at most once.",
+      "wrongExplanations": {
+        "1": "The inner minimization is optimized to near O(1) per i.",
+        "2": "This ignores dependence on k."
+      },
+      "hint": "Each layer linear in n; k layers total.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q27",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the space complexity of the solution?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(k·n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(log n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We store prefix sums, two arrays of length n+1, and a small candidate set.",
+      "wrongExplanations": {
+        "1": "We do not keep all layers simultaneously.",
+        "3": "We store arrays of size proportional to n."
+      },
+      "hint": "Only two layers of size n+1 are kept.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q28",
+      "phase": "Analyzing Complexity",
+      "questionText": "Which statements about edge cases are true?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "For k=1, answer is s[n]^2; for k=n, answer is sum of x_i^2.",
+          "isCode": false
+        },
+        {
+          "label": "For k=1, answer is sum of x_i; for k=n, answer is s[n]^2.",
+          "isCode": false
+        },
+        {
+          "label": "For k=n, answer is s[n]^2; for k=1, answer is min x_i^2.",
+          "isCode": false
+        },
+        {
+          "label": "Neither case has a simple form.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Single segment squares the total sum; all singletons sum the squares.",
+      "wrongExplanations": {
+        "1": "Both statements are reversed and incorrect.",
+        "3": "Both cases are straightforward as described."
+      },
+      "hint": "Recall definitions of cost for one segment and for all singletons.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\nfrom collections import deque",
+    "data = list(map(int, sys.stdin.buffer.read().split()))\nit = iter(data); n = next(it); k = next(it)\na = [next(it) for _ in range(n)]",
+    "s = [0]*(n+1)\nfor i in range(1, n+1):\n    s[i] = s[i-1] + a[i-1]",
+    "def eval_line(line, x):\n    return line[0]*x + line[1]\n\ndef is_bad(l1, l2, l3):\n    return (l3[1] - l1[1]) * (l1[0] - l2[0]) <= (l2[1] - l1[1]) * (l1[0] - l3[0])",
+    "dp_prev = [0]*(n+1)\nfor i in range(1, n+1):\n    dp_prev[i] = s[i]*s[i]",
+    "for r in range(2, k+1):\n    dq = deque()\n    t = r - 1\n    m = -2 * s[t]\n    b = dp_prev[t] + s[t]*s[t]\n    dq.append((m, b))\n    dp_curr = [0]*(n+1)",
+    "    for i in range(r, n+1):\n        x = s[i]\n        while len(dq) >= 2 and eval_line(dq[0], x) >= eval_line(dq[1], x):\n            dq.popleft()\n        best = eval_line(dq[0], x)\n        dp_curr[i] = x*x + best\n        m2 = -2 * s[i]\n        b2 = dp_prev[i] + s[i]*s[i]\n        while len(dq) >= 2 and is_bad(dq[-2], dq[-1], (m2, b2)):\n            dq.pop()\n        dq.append((m2, b2))",
+    "    dp_prev = dp_curr\nprint(dp_prev[n])"
+  ],
+  "reasoningChain": [
+    {
+      "question": "How can we express the minimum cost for the first i elements split into r parts?",
+      "insight": "Define F(r,i) as the minimal cost; base is F(1,i) = (prefix sum)^2 and the last split at t gives F(r,i) = min_t F(r-1,t) + (s[i]−s[t])^2."
+    },
+    {
+      "question": "What does expanding (s[i]−s[t])^2 reveal?",
+      "insight": "F(r,i) = s[i]^2 + min_t [F(r−1,t) + s[t]^2 − 2 s[t]·s[i]], isolating a constant s[i]^2 and a term linear in s[i]."
+    },
+    {
+      "question": "How to treat the minimization over t for fixed i?",
+      "insight": "Each t contributes a linear function in x = s[i] with slope −2 s[t] and intercept F(r−1,t) + s[t]^2; we need the minimum value at x."
+    },
+    {
+      "question": "What monotonic properties help streamline evaluation?",
+      "insight": "Since x_i ≥ 1, s[t] and s[i] strictly increase, so slopes −2 s[t] strictly decrease and query x values increase with i."
+    },
+    {
+      "question": "How to maintain and query the best candidates efficiently?",
+      "insight": "Maintain a deque of candidates ordered by slope; pop from the front while the next is better at current x, and prune the back when a new candidate makes the previous unnecessary using cross-multiplication."
+    },
+    {
+      "question": "How to implement the layered computation over r and i?",
+      "insight": "Initialize with F(1,i)=s[i]^2, then for r=2..k iterate i=r..n, querying the current candidates for x=s[i], computing F(r,i), and adding the new index i as a candidate."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1372,
+    "output_tokens": 19167,
+    "input_cost": 0.001715,
+    "output_cost": 0.19167,
+    "total_cost": 0.193385
+  }
+}

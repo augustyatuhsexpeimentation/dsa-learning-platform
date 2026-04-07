@@ -1,0 +1,993 @@
+{
+  "id": "houses-and-schools-k-medians",
+  "title": "Houses and Schools",
+  "difficulty": "hard",
+  "tags": [
+    "advanced",
+    "arrays",
+    "prefix-sums",
+    "optimization"
+  ],
+  "estimatedMinutes": 120,
+  "language": "python",
+  "description": "There are n houses on a street, numbered 1,2,\\dots,n. The distance between houses a and b is |a - b|. You know the number of children in each house.\n\nYour task is to build k schools, each located at some house. Then each child goes to the nearest school. Find the minimum possible total walking distance if you choose optimally.\n\nInput:\n- First line: two integers n and k.\n- Second line: n integers c_1, c_2, \\dots, c_n – the number of children in each house.\n\nOutput:\n- Print the minimum total distance.",
+  "examples": [
+    {
+      "input": "6 2\n2 7 1 4 6 4\n",
+      "output": "11\n",
+      "explanation": "One optimal strategy partitions houses into two contiguous groups and places a school at the weighted median of each group."
+    }
+  ],
+  "constraints": [
+    "1 ≤ k ≤ n ≤ 3000",
+    "1 ≤ c_i ≤ 10^9",
+    "Time limit: 1.00 s",
+    "Memory limit: 512 MB"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "Suppose n=3, k=1, and children counts are c=[2,1,1] at houses 1..3. If you place the single school at house 2, what is the total walking distance?",
+      "diagram": "House:    1   2   3\nChildren: 2   1   1\nSchool at house 2",
+      "options": [
+        {
+          "label": "3 (2*|1-2| + 1*|2-2| + 1*|3-2| = 2 + 0 + 1)",
+          "isCode": false
+        },
+        {
+          "label": "2 (because two houses are adjacent to 2)",
+          "isCode": false
+        },
+        {
+          "label": "4 (2*|1-2| + 1*|2-2| + 1*|3-2| = 2 + 0 + 2)",
+          "isCode": false
+        },
+        {
+          "label": "0 (the school is in the middle)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each child walks |house - 2|. This gives 2*1 + 1*0 + 1*1 = 3. Middle placement doesn't imply zero distance.",
+      "wrongExplanations": {
+        "1": "Adjacency doesn't sum distances. You must multiply by children counts.",
+        "2": "The distance from house 3 to 2 is 1, not 2."
+      },
+      "hint": "Sum c[i]*|i-2| for i=1..3.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "For n=3, c=[1,4,1], k=1, which house minimizes the total walking distance when placing one school?",
+      "diagram": "House:    1   2   3\nChildren: 1   4   1",
+      "options": [
+        {
+          "label": "House 1",
+          "isCode": false
+        },
+        {
+          "label": "House 2",
+          "isCode": false
+        },
+        {
+          "label": "House 3",
+          "isCode": false
+        },
+        {
+          "label": "Any house yields the same distance",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "With more children at house 2, placing the school at house 2 minimizes distance. Ends would incur larger distances for many children.",
+      "wrongExplanations": {
+        "0": "Placing at an end increases distance for the majority at house 2.",
+        "2": "Symmetric to house 1; still worse than house 2."
+      },
+      "hint": "Try computing total distances for each potential school house.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "With c=[1,4,1] and k=2, if schools are at houses 1 and 3, what is the total walking distance?",
+      "diagram": "Schools at 1 and 3. Children at 1..3: [1,4,1]. Each child goes to the nearest school.",
+      "options": [
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Children at house 2 walk distance 1 (to either 1 or 3), contributing 4. Houses 1 and 3 contribute 0. Total = 4.",
+      "wrongExplanations": {
+        "0": "You may have summed houses instead of children counts.",
+        "1": "Recheck: 4 children at house 2 each walk distance 1."
+      },
+      "hint": "Compute per house: 1*0 + 4*1 + 1*0.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "If schools are placed at some houses on a line, do the children assigned to each school always form a contiguous block of houses?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, always contiguous",
+          "isCode": false
+        },
+        {
+          "label": "No, they can be interleaved",
+          "isCode": false
+        },
+        {
+          "label": "Only if all c_i are equal",
+          "isCode": false
+        },
+        {
+          "label": "Only if k=2",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "On a line, nearest assignment partitions houses into contiguous regions around the schools.",
+      "wrongExplanations": {
+        "1": "Interleaving would violate nearest-house ordering on a line."
+      },
+      "hint": "Consider the ordering of houses by position.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Exploring Approaches",
+      "questionText": "Naively choosing k school locations among n houses, how many combinations are there?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "C(n, k)",
+          "isCode": false
+        },
+        {
+          "label": "n^k",
+          "isCode": false
+        },
+        {
+          "label": "2^n",
+          "isCode": false
+        },
+        {
+          "label": "k^n",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Choosing k distinct houses yields C(n, k) combinations.",
+      "wrongExplanations": {
+        "1": "n^k counts ordered selections with repetition.",
+        "2": "2^n counts subsets, not necessarily of size k."
+      },
+      "hint": "Order doesn't matter and you cannot repeat houses.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "If you evaluate every combination and simulate nearest assignment in O(n) time, what is the total time?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(C(n,k) * n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(k n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each of the C(n,k) combinations requires scanning houses to compute total distance.",
+      "wrongExplanations": {
+        "1": "n^2 ignores the combination factor.",
+        "2": "k n is far too optimistic without structure."
+      },
+      "hint": "Multiply combinations by per-evaluation cost.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "Because assignments are contiguous blocks, the problem is equivalent to partitioning houses into k segments and choosing one school per segment. Is this true?",
+      "diagram": "Houses: 1..n\nSegments: [1..p1], [p1+1..p2], ..., [pk-1+1..n]",
+      "options": [
+        {
+          "label": "True",
+          "isCode": false
+        },
+        {
+          "label": "False",
+          "isCode": false
+        },
+        {
+          "label": "True only when k=2",
+          "isCode": false
+        },
+        {
+          "label": "True only if c_i are strictly increasing",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Line structure implies contiguous catchment areas; thus it's a partition into k segments.",
+      "wrongExplanations": {
+        "1": "Nearest assignments can't interleave segments on a line."
+      },
+      "hint": "Think of boundaries where nearest school changes.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Building the Idea",
+      "questionText": "For a fixed segment [i..j], which house minimizes the sum of c[t]*|t - x| over t in [i..j]?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "The leftmost house i",
+          "isCode": false
+        },
+        {
+          "label": "The rightmost house j",
+          "isCode": false
+        },
+        {
+          "label": "The house where cumulative children from i reaches at least half of total in [i..j]",
+          "isCode": false
+        },
+        {
+          "label": "The arithmetic mean of i and j",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "The best x is the weighted median: the smallest index where left weight ≥ right weight.",
+      "wrongExplanations": {
+        "0": "Extremes are usually suboptimal unless heavily skewed.",
+        "3": "Mean of positions doesn't account for weights."
+      },
+      "hint": "Consider how shifting x left or right affects distance sum.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "Given a segment [i..j] and its optimal house m, how can you compute the cost sum c[t]*|t-m| using prefix sums?",
+      "diagram": "Let WL = sum_{i..m} c[t], WR = sum_{m+1..j} c[t]\nPL = sum_{i..m} c[t]*t, PR = sum_{m+1..j} c[t]*t",
+      "options": [
+        {
+          "label": "cost = (m*WL - PL) + (PR - m*WR)",
+          "isCode": false
+        },
+        {
+          "label": "cost = (PL - m*WL) + (m*WR - PR)",
+          "isCode": false
+        },
+        {
+          "label": "cost = (m*WL + PL) + (PR + m*WR)",
+          "isCode": false
+        },
+        {
+          "label": "cost = (PL + PR) - m*(WL + WR)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Left contribution: sum c[t]*(m - t) = m*WL - PL. Right: sum c[t]*(t - m) = PR - m*WR.",
+      "wrongExplanations": {
+        "1": "Signs are inverted; distances must be nonnegative sums.",
+        "3": "That mixes both sides without absolute value handling."
+      },
+      "hint": "Split left (t≤m) and right (t>m) contributions separately.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "Which prefix sums enable O(1) evaluation of WL, WR, PL, PR for any [i..j] and m?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "W[x] = sum_{0..x-1} c[t] and P[x] = sum_{0..x-1} c[t]*t",
+          "isCode": false
+        },
+        {
+          "label": "Only W[x] = sum_{0..x-1} c[t]",
+          "isCode": false
+        },
+        {
+          "label": "Only P[x] = sum_{0..x-1} t",
+          "isCode": false
+        },
+        {
+          "label": "W[x] = sum_{0..x-1} t and P[x] = sum_{0..x-1} t^2",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need both counts and weighted positions to compute sums quickly.",
+      "wrongExplanations": {
+        "1": "Without P, you can't compute sum c[t]*t.",
+        "2": "Missing weights c[t]."
+      },
+      "hint": "Think of extracting sum c[t] and sum c[t]*t on any interval.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "How do you define the weighted median index m for [i..j] in terms of W (prefix sums of c)?",
+      "diagram": "Let T = total weight in [i..j]. Target = ceil(T/2).",
+      "options": [
+        {
+          "label": "Smallest m in [i..j] with W[m+1] - W[i] ≥ ceil(T/2)",
+          "isCode": false
+        },
+        {
+          "label": "Largest m in [i..j] with W[m+1] - W[i] ≤ floor(T/2)",
+          "isCode": false
+        },
+        {
+          "label": "Any m with W[m+1] - W[i] = T/2",
+          "isCode": false
+        },
+        {
+          "label": "Smallest m with W[m] - W[i] ≥ ceil(T/2)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Choose the smallest m so that left weight ≥ half the segment's total.",
+      "wrongExplanations": {
+        "1": "Using ≤ can choose points where left < right.",
+        "3": "Off by one: W counts up to m-1 if you use W[m]."
+      },
+      "hint": "W counts prefix up to index-1 if you use W[x] for x elements.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "We need costs for all O(n^2) segments. What's a feasible way to get all medians m for segments [i..j]?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "For each i, increase j from i to n-1 and adjust m only to the right when needed",
+          "isCode": false
+        },
+        {
+          "label": "Scan the entire [i..j] to recompute m each time",
+          "isCode": false
+        },
+        {
+          "label": "Binary search for m for every (i,j)",
+          "isCode": false
+        },
+        {
+          "label": "Pick m = (i + j)//2 for all segments",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "As j grows, the weighted median never moves left; adjust m rightward only when needed.",
+      "wrongExplanations": {
+        "1": "Recomputing each time gives O(n^3) time.",
+        "2": "Binary search per pair adds a log factor on top of O(n^2)."
+      },
+      "hint": "Use the fact that adding weight on the right cannot move the median left.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "To compute segment costs in O(1) later, what should we precompute/store for all [i..j]?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Store the median index m[i][j] in a compact array and derive cost from prefixes",
+          "isCode": false
+        },
+        {
+          "label": "Store the full cost matrix cost[i][j]",
+          "isCode": false
+        },
+        {
+          "label": "Store nothing and recompute median via binary search each time",
+          "isCode": false
+        },
+        {
+          "label": "Store only the main diagonal",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Storing m allows O(1) cost using W and P. Storing costs is memory-heavy in Python.",
+      "wrongExplanations": {
+        "1": "n^2 Python ints are too heavy in memory.",
+        "3": "Diagonal alone is insufficient for general segments."
+      },
+      "hint": "Use a compact typed array for indices 0..n-1.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Writing the Code",
+      "questionText": "Read input efficiently and parse n, k, and the list c of length n.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\nfrom array import array\n\ndata = list(map(int, sys.stdin.buffer.read().split()))\nif not data:\n    print(0)\n    raise SystemExit\nit = iter(data)\nn = next(it); k = next(it)\nc = [next(it) for _ in range(n)]",
+          "isCode": true
+        },
+        {
+          "label": "import sys\nn, k = map(int, sys.stdin.readline().split())\nc = list(map(int, sys.stdin.readline().split()))\nif len(c) != k:\n    c = c[:k]",
+          "isCode": true
+        },
+        {
+          "label": "import sys\nn, k = map(int, sys.stdin.read().split())\nc = [int(x) for x in sys.stdin.read().split()]",
+          "isCode": true
+        },
+        {
+          "label": "import sys\nfrom array import array\n\ndata = sys.stdin.read().split()\nn = int(data[0]); k = int(data[1])\nc = list(map(int, data[2:2+k]))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Reads all ints once, then slices exactly n items for c. Other options risk wrong lengths or multiple reads.",
+      "wrongExplanations": {
+        "1": "Truncates c to k by mistake; needs n.",
+        "3": "Takes only k children instead of n."
+      },
+      "hint": "You need exactly n child counts after the first two integers.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\nfrom array import array\n\ndata = list(map(int, sys.stdin.buffer.read().split()))\nif not data:\n    print(0)\n    raise SystemExit\nit = iter(data)\nn = next(it); k = next(it)\nc = [next(it) for _ in range(n)]",
+      "codeLabel": "Read input"
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Build prefix sums W (weights) and P (weighted positions) for indices 0..n.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "W = [0]*(n+1)\nP = [0]*(n+1)\nfor i in range(n):\n    W[i+1] = W[i] + c[i]\n    P[i+1] = P[i] + c[i]*i",
+          "isCode": true
+        },
+        {
+          "label": "W = [0]*n\nP = [0]*n\nfor i in range(1, n):\n    W[i] = W[i-1] + c[i]\n    P[i] = P[i-1] + c[i]*i",
+          "isCode": true
+        },
+        {
+          "label": "W = [0]*(n+1)\nP = [0]*(n+1)\nfor i in range(n):\n    W[i+1] = W[i] + 1\n    P[i+1] = P[i] + i",
+          "isCode": true
+        },
+        {
+          "label": "W = [0]*(n+1)\nP = [0]*(n+1)\nfor i in range(n):\n    W[i] = W[i-1] + c[i]\n    P[i] = P[i-1] + c[i]*i",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need W[i+1]=W[i]+c[i] and P[i+1]=P[i]+c[i]*i so that intervals are easy to slice.",
+      "wrongExplanations": {
+        "1": "Leaves W[0],P[0] uninitialized and off by one.",
+        "2": "Ignores weights c[i]."
+      },
+      "hint": "Use arrays of length n+1 so intervals [l..r] are W[r+1]-W[l].",
+      "isCodeBuilding": true,
+      "codeSnippet": "W = [0]*(n+1)\nP = [0]*(n+1)\nfor i in range(n):\n    W[i+1] = W[i] + c[i]\n    P[i+1] = P[i] + c[i]*i",
+      "codeLabel": "Prefix sums"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Initialize a compact array to store the median index m for every pair (i,j) and prepare to fill it.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "mid = array('H', [0]) * (n*n)",
+          "isCode": true
+        },
+        {
+          "label": "mid = [[0]*n for _ in range(n)]",
+          "isCode": true
+        },
+        {
+          "label": "mid = array('I', [0]) * n",
+          "isCode": true
+        },
+        {
+          "label": "mid = [0]*(n*n*8)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "A flat array of unsigned short (2 bytes) stores indices 0..n-1 compactly for n≤3000.",
+      "wrongExplanations": {
+        "1": "A Python list-of-lists of ints is memory-heavy.",
+        "2": "Too small; only n entries, but we need n*n."
+      },
+      "hint": "We need n*n entries with minimal overhead.",
+      "isCodeBuilding": true,
+      "codeSnippet": "mid = array('H', [0]) * (n*n)",
+      "codeLabel": "Median index array"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Fill base values for each i and initialize variables for median tracking for segment growth.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "for i in range(n):\n    base = i * n\n    m = i\n    left = c[i]\n    right = 0\n    mid[base + i] = i",
+          "isCode": true
+        },
+        {
+          "label": "for i in range(n):\n    base = i\n    m = 0\n    left = 0\n    right = c[i]\n    mid[base + i] = m",
+          "isCode": true
+        },
+        {
+          "label": "for i in range(n):\n    base = i * n\n    m = 0\n    left = 0\n    right = 0\n    mid[i] = i",
+          "isCode": true
+        },
+        {
+          "label": "for i in range(n):\n    base = i * n\n    m = i\n    left = 0\n    right = c[i]\n    mid[base + i] = i",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "For segment [i..i], m=i and left weight is c[i]; right is 0. Index into flat array with base=i*n.",
+      "wrongExplanations": {
+        "1": "Wrong base and initial weights; m should start at i.",
+        "3": "Left/right weights are swapped for initialization."
+      },
+      "hint": "For [i..i], all weight is on the left of m=i.",
+      "isCodeBuilding": true,
+      "codeSnippet": "for i in range(n):\n    base = i * n\n    m = i\n    left = c[i]\n    right = 0\n    mid[base + i] = i",
+      "codeLabel": "Initialize per-row"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Complete the loop that grows j and updates the median m for each [i..j].",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    for j in range(i+1, n):\n        right += c[j]\n        while left < right:\n            m += 1\n            left += c[m]\n            right -= c[m]\n        mid[base + j] = m",
+          "isCode": true
+        },
+        {
+          "label": "    for j in range(i+1, n):\n        right += c[j]\n        while left <= right:\n            m += 1\n            left += c[m]\n            right -= c[m]\n        mid[base + j] = m",
+          "isCode": true
+        },
+        {
+          "label": "    for j in range(i+1, n):\n        left += c[j]\n        while left < right:\n            m -= 1\n        mid[base + j] = m",
+          "isCode": true
+        },
+        {
+          "label": "    for j in range(i+1, n):\n        right += c[j]\n        if left > right:\n            m -= 1\n        mid[base + j] = m",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Add new right weight and move m right while left < right to satisfy left ≥ right.",
+      "wrongExplanations": {
+        "1": "Using ≤ overshoots, pushing m too far.",
+        "3": "Median never moves left when adding weight to the right."
+      },
+      "hint": "Maintain invariant: sum up to m ≥ sum from m+1 to j.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    for j in range(i+1, n):\n        right += c[j]\n        while left < right:\n            m += 1\n            left += c[m]\n            right -= c[m]\n        mid[base + j] = m",
+      "codeLabel": "Grow segments and update median"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Write the function that returns the segment cost using the stored median m and prefix sums.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def seg_cost(i, j):\n    m = mid[i*n + j]\n    WL = W[m+1] - W[i]\n    WR = W[j+1] - W[m+1]\n    PL = P[m+1] - P[i]\n    PR = P[j+1] - P[m+1]\n    return m*WL - PL + PR - m*WR",
+          "isCode": true
+        },
+        {
+          "label": "def seg_cost(i, j):\n    m = mid[i*n + j]\n    WL = W[m] - W[i]\n    WR = W[j] - W[m]\n    PL = P[m] - P[i]\n    PR = P[j] - P[m]\n    return m*WL - PL + PR - m*WR",
+          "isCode": true
+        },
+        {
+          "label": "def seg_cost(i, j):\n    m = mid[j*n + i]\n    WL = W[m+1] - W[i]\n    WR = W[j+1] - W[m+1]\n    PL = P[m+1] - P[i]\n    PR = P[j+1] - P[m+1]\n    return m*WL - PL + PR - m*WR",
+          "isCode": true
+        },
+        {
+          "label": "def seg_cost(i, j):\n    m = mid[i*n + j]\n    WL = W[m+1] - W[i]\n    WR = W[j+1] - W[m+1]\n    PL = P[m+1] - P[i]\n    PR = P[j+1] - P[m+1]\n    return (PL + PR) - m*(WL + WR)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Use half-open prefix sums: [l..r] as [r+1]-[l]. Cost splits into left and right contributions around m.",
+      "wrongExplanations": {
+        "1": "Off-by-one: W[m] excludes c[m], but m should be included on the left.",
+        "3": "Combines terms incorrectly; distances must be nonnegative sums."
+      },
+      "hint": "Be careful with inclusive/exclusive bounds at m.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def seg_cost(i, j):\n    m = mid[i*n + j]\n    WL = W[m+1] - W[i]\n    WR = W[j+1] - W[m+1]\n    PL = P[m+1] - P[i]\n    PR = P[j+1] - P[m+1]\n    return m*WL - PL + PR - m*WR",
+      "codeLabel": "Segment cost function"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Initialize the base DP for one school and handle the k=1 case.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "INF = 10**30\ndp_prev = [0]*n\nfor j in range(n):\n    dp_prev[j] = seg_cost(0, j)\nif k == 1:\n    print(dp_prev[-1])\n    raise SystemExit",
+          "isCode": true
+        },
+        {
+          "label": "INF = 10**9\ndp_prev = [0]*n\nfor j in range(n):\n    dp_prev[j] = seg_cost(j, n-1)\nif k == 1:\n    print(dp_prev[0])\n    raise SystemExit",
+          "isCode": true
+        },
+        {
+          "label": "INF = 10**30\ndp_prev = [0]*n\nfor j in range(n):\n    dp_prev[j] = 0\nif k == 1:\n    print(0)\n    raise SystemExit",
+          "isCode": true
+        },
+        {
+          "label": "INF = 10**30\ndp_prev = [seg_cost(0, j) for j in range(1, n)]\nif k == 1:\n    print(dp_prev[-1])\n    raise SystemExit",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "With one school, best cost for prefix [0..j] is seg_cost(0,j). Early exit when k=1.",
+      "wrongExplanations": {
+        "1": "Computes costs for suffixes, not prefixes.",
+        "3": "Misses j=0 case and has wrong dp length."
+      },
+      "hint": "One school serves the whole prefix [0..j].",
+      "isCodeBuilding": true,
+      "codeSnippet": "INF = 10**30\ndp_prev = [0]*n\nfor j in range(n):\n    dp_prev[j] = seg_cost(0, j)\nif k == 1:\n    print(dp_prev[-1])\n    raise SystemExit",
+      "codeLabel": "Base DP for one school"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "Write the recursive helper to compute one DP layer using the fact that the best split index doesn't move left as j increases.",
+      "diagram": "We compute dp_cur[j] = min_{p in [optl..min(j-1,optr)]} dp_prev[p] + seg_cost(p+1, j)",
+      "options": [
+        {
+          "label": "def compute_layer(l, r, optl, optr, dp_prev, dp_cur):\n    if l > r:\n        return\n    j = (l + r) // 2\n    best_p = optl\n    best_val = INF\n    start = optl\n    end = min(j - 1, optr)\n    if start <= end:\n        for p in range(start, end + 1):\n            val = dp_prev[p] + seg_cost(p + 1, j)\n            if val < best_val:\n                best_val = val\n                best_p = p\n        dp_cur[j] = best_val\n        compute_layer(l, j - 1, optl, best_p, dp_prev, dp_cur)\n        compute_layer(j + 1, r, best_p, optr, dp_prev, dp_cur)\n    else:\n        dp_cur[j] = INF\n        compute_layer(l, j - 1, optl, optr, dp_prev, dp_cur)\n        compute_layer(j + 1, r, optl, optr, dp_prev, dp_cur)",
+          "isCode": true
+        },
+        {
+          "label": "def compute_layer(l, r, optl, optr, dp_prev, dp_cur):\n    if l > r:\n        return\n    j = (l + r) // 2\n    best_p = optl\n    best_val = INF\n    for p in range(optl, optr + 1):\n        val = dp_prev[p] + seg_cost(p, j)\n        if val <= best_val:\n            best_val = val\n            best_p = p\n    dp_cur[j] = best_val\n    compute_layer(l, j - 1, optl, best_p, dp_prev, dp_cur)\n    compute_layer(j + 1, r, best_p, optr, dp_prev, dp_cur)",
+          "isCode": true
+        },
+        {
+          "label": "def compute_layer(l, r, optl, optr, dp_prev, dp_cur):\n    if l >= r:\n        return\n    j = (l + r) // 2\n    best_p = optl\n    best_val = INF\n    for p in range(optl, min(j, optr)):\n        val = dp_prev[p] + seg_cost(p + 1, j)\n        if val < best_val:\n            best_val = val\n            best_p = p\n    dp_cur[j] = best_val\n    compute_layer(l, j, optl, best_p, dp_prev, dp_cur)\n    compute_layer(j, r, best_p, optr, dp_prev, dp_cur)",
+          "isCode": true
+        },
+        {
+          "label": "def compute_layer(l, r, optl, optr, dp_prev, dp_cur):\n    if l > r:\n        return\n    j = (l + r) // 2\n    best_p = optr\n    best_val = INF\n    for p in range(optl, j):\n        val = dp_prev[p] + seg_cost(p + 1, j)\n        if val < best_val:\n            best_val = val\n            best_p = p\n    dp_cur[j] = best_val\n    compute_layer(l, j - 1, optl, best_p, dp_prev, dp_cur)\n    compute_layer(j + 1, r, optl, optr, dp_prev, dp_cur)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Search p in [optl..min(j-1,optr)] and split the recursion with updated bounds based on the argmin.",
+      "wrongExplanations": {
+        "1": "Uses seg_cost(p, j) instead of seg_cost(p+1, j) and searches too wide.",
+        "3": "Doesn't enforce the right boundary optr on the right recursive call."
+      },
+      "hint": "The last segment must start at p+1 and p < j.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def compute_layer(l, r, optl, optr, dp_prev, dp_cur):\n    if l > r:\n        return\n    j = (l + r) // 2\n    best_p = optl\n    best_val = INF\n    start = optl\n    end = min(j - 1, optr)\n    if start <= end:\n        for p in range(start, end + 1):\n            val = dp_prev[p] + seg_cost(p + 1, j)\n            if val < best_val:\n                best_val = val\n                best_p = p\n        dp_cur[j] = best_val\n        compute_layer(l, j - 1, optl, best_p, dp_prev, dp_cur)\n        compute_layer(j + 1, r, best_p, optr, dp_prev, dp_cur)\n    else:\n        dp_cur[j] = INF\n        compute_layer(l, j - 1, optl, optr, dp_prev, dp_cur)\n        compute_layer(j + 1, r, optl, optr, dp_prev, dp_cur)",
+      "codeLabel": "Recursive layer computation"
+    },
+    {
+      "id": "q22",
+      "phase": "Writing the Code",
+      "questionText": "Finish the DP by iterating over the number of schools and computing each layer.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "dp_cur = [INF]*n\nfor t in range(2, k + 1):\n    for j in range(t - 1):\n        dp_cur[j] = INF\n    compute_layer(t - 1, n - 1, t - 2, n - 2, dp_prev, dp_cur)\n    dp_prev, dp_cur = dp_cur, dp_prev\nprint(dp_prev[-1])",
+          "isCode": true
+        },
+        {
+          "label": "dp_cur = [INF]*n\nfor t in range(2, k + 1):\n    compute_layer(0, n - 1, 0, n - 1, dp_prev, dp_cur)\n    dp_prev = dp_cur\nprint(dp_prev[-1])",
+          "isCode": true
+        },
+        {
+          "label": "dp_cur = [0]*n\nfor t in range(2, k + 1):\n    compute_layer(t, n, t - 1, n - 1, dp_prev, dp_cur)\nprint(dp_cur[-1])",
+          "isCode": true
+        },
+        {
+          "label": "dp_cur = [INF]*n\nfor t in range(2, k + 1):\n    for j in range(n):\n        dp_cur[j] = min(dp_prev[p] + seg_cost(p + 1, j) for p in range(j))\n    dp_prev, dp_cur = dp_cur, dp_prev\nprint(dp_prev[-1])",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Compute j in [t-1..n-1] with candidates p in [t-2..j-1], then swap layers. Others ignore bounds or the optimized search.",
+      "wrongExplanations": {
+        "1": "Doesn't restrict p range and ignores infeasible j < t-1.",
+        "3": "Quadratic inner loop defeats the purpose and is slow."
+      },
+      "hint": "For t groups, the last group must cover at least one house.",
+      "isCodeBuilding": true,
+      "codeSnippet": "dp_cur = [INF]*n\nfor t in range(2, k + 1):\n    for j in range(t - 1):\n        dp_cur[j] = INF\n    compute_layer(t - 1, n - 1, t - 2, n - 2, dp_prev, dp_cur)\n    dp_prev, dp_cur = dp_cur, dp_prev\nprint(dp_prev[-1])",
+      "codeLabel": "DP loop and output"
+    },
+    {
+      "id": "q23",
+      "phase": "Verifying the Solution",
+      "questionText": "Run the constructed algorithm on the sample input:\n6 2\n2 7 1 4 6 4\nWhat is the output?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "11",
+          "isCode": false
+        },
+        {
+          "label": "12",
+          "isCode": false
+        },
+        {
+          "label": "10",
+          "isCode": false
+        },
+        {
+          "label": "9",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The minimum total distance is 11 for an optimal partition and choices of school positions.",
+      "wrongExplanations": {
+        "1": "Close, but not minimal. Verify segment choices.",
+        "2": "Underestimates some distances."
+      },
+      "hint": "Try splitting into two segments around a good pivot.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Verifying the Solution",
+      "questionText": "Consider n=4, k=2, c=[1,100,1,1]. What is the minimum total distance?",
+      "diagram": "One optimal split is [1..2] and [3..4].",
+      "options": [
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "100",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Place schools at houses 2 and 3: costs 1 (for [1..2]) + 1 (for [3..4]) = 2.",
+      "wrongExplanations": {
+        "1": "Each segment must have one house at distance 1 unless weights are zero.",
+        "3": "Check both segments' contributions."
+      },
+      "hint": "Segment the big weight 100 separately with its neighbor.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the time complexity of precomputing all medians m[i][j] using the incremental method for each i?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^3)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "For each i, j runs from i..n-1 and m only moves right, leading to O(n^2) total updates.",
+      "wrongExplanations": {
+        "2": "We don't rescan; m moves monotonically.",
+        "4": "No sorting or binary searches in this pass."
+      },
+      "hint": "Count total inner iterations across all i.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Analyzing Complexity",
+      "questionText": "Given we compute each DP layer with a narrowed search range per j, what is the overall time complexity across all k layers (excluding median precomputation)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(k n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(k n)",
+          "isCode": false
+        },
+        {
+          "label": "O(k n log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log k)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "The recursive computation visits O(n) states per layer with logarithmic splitting; overall about O(k n log n).",
+      "wrongExplanations": {
+        "0": "We avoid scanning all p for all j.",
+        "1": "Too optimistic; we still consider multiple p per j via recursion."
+      },
+      "hint": "Each layer processes all j with reduced candidate ranges.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q27",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the dominant additional memory usage of this approach (beyond the input list)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(k n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Storing m[i][j] for all pairs uses O(n^2) space (compactly via a typed array).",
+      "wrongExplanations": {
+        "0": "We store a value per (i,j), not per i.",
+        "3": "k doesn't affect the median index table size."
+      },
+      "hint": "We keep a table for all segments.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\nfrom array import array\n\ndata = list(map(int, sys.stdin.buffer.read().split()))\nif not data:\n    print(0)\n    raise SystemExit\nit = iter(data)\nn = next(it); k = next(it)\nc = [next(it) for _ in range(n)]",
+    "W = [0]*(n+1)\nP = [0]*(n+1)\nfor i in range(n):\n    W[i+1] = W[i] + c[i]\n    P[i+1] = P[i] + c[i]*i",
+    "mid = array('H', [0]) * (n*n)",
+    "for i in range(n):\n    base = i * n\n    m = i\n    left = c[i]\n    right = 0\n    mid[base + i] = i",
+    "    for j in range(i+1, n):\n        right += c[j]\n        while left < right:\n            m += 1\n            left += c[m]\n            right -= c[m]\n        mid[base + j] = m",
+    "def seg_cost(i, j):\n    m = mid[i*n + j]\n    WL = W[m+1] - W[i]\n    WR = W[j+1] - W[m+1]\n    PL = P[m+1] - P[i]\n    PR = P[j+1] - P[m+1]\n    return m*WL - PL + PR - m*WR",
+    "INF = 10**30\ndp_prev = [0]*n\nfor j in range(n):\n    dp_prev[j] = seg_cost(0, j)\nif k == 1:\n    print(dp_prev[-1])\n    raise SystemExit",
+    "def compute_layer(l, r, optl, optr, dp_prev, dp_cur):\n    if l > r:\n        return\n    j = (l + r) // 2\n    best_p = optl\n    best_val = INF\n    start = optl\n    end = min(j - 1, optr)\n    if start <= end:\n        for p in range(start, end + 1):\n            val = dp_prev[p] + seg_cost(p + 1, j)\n            if val < best_val:\n                best_val = val\n                best_p = p\n        dp_cur[j] = best_val\n        compute_layer(l, j - 1, optl, best_p, dp_prev, dp_cur)\n        compute_layer(j + 1, r, best_p, optr, dp_prev, dp_cur)\n    else:\n        dp_cur[j] = INF\n        compute_layer(l, j - 1, optl, optr, dp_prev, dp_cur)\n        compute_layer(j + 1, r, optl, optr, dp_prev, dp_cur)",
+    "dp_cur = [INF]*n\nfor t in range(2, k + 1):\n    for j in range(t - 1):\n        dp_cur[j] = INF\n    compute_layer(t - 1, n - 1, t - 2, n - 2, dp_prev, dp_cur)\n    dp_prev, dp_cur = dp_cur, dp_prev\nprint(dp_prev[-1])"
+  ],
+  "reasoningChain": [
+    {
+      "question": "Why does optimal assignment to nearest schools create contiguous segments of houses?",
+      "insight": "On a line, nearest-choice boundaries are monotone, so catchment areas are contiguous."
+    },
+    {
+      "question": "Where should a single school be placed for a given segment?",
+      "insight": "The optimal house is the weighted median where left-side weight is at least half the segment’s total."
+    },
+    {
+      "question": "How can we compute segment cost quickly?",
+      "insight": "Use prefix sums of counts and weighted positions to evaluate cost around the median in O(1)."
+    },
+    {
+      "question": "How to prepare all medians efficiently?",
+      "insight": "For each left index i, grow the right end j; the median never moves left, so update it incrementally in O(n^2) total."
+    },
+    {
+      "question": "How to combine segments into k groups optimally?",
+      "insight": "Use a recurrence over prefixes: best for j with t groups is min over last split p of best for p plus cost of segment [p+1..j]."
+    },
+    {
+      "question": "How to make the recurrence fast enough?",
+      "insight": "The best split index for larger j does not move left, enabling recursive computation over j with narrowed candidate ranges."
+    },
+    {
+      "question": "Do time and space fit constraints?",
+      "insight": "Median precompute is O(n^2) time and compact O(n^2) space; the layered recurrence runs about O(k n log n) with O(1) cost queries."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1403,
+    "output_tokens": 22882,
+    "input_cost": 0.001754,
+    "output_cost": 0.22882,
+    "total_cost": 0.230574
+  }
+}

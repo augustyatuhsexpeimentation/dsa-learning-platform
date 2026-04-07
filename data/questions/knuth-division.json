@@ -1,0 +1,989 @@
+{
+  "id": "knuth-division-cses-guided",
+  "title": "Knuth Division",
+  "difficulty": "hard",
+  "tags": [
+    "advanced"
+  ],
+  "estimatedMinutes": 85,
+  "language": "python",
+  "description": "Given an array of n numbers, your task is to divide it into n subarrays, each of which has a single element.\n\nOn each move, you may choose any subarray and split it into two subarrays. The cost of such a move is the sum of values in the chosen subarray.\n\nWhat is the minimum total cost if you act optimally?\n\nInput:\n- First line: integer n (array size).\n- Second line: n integers x_1, x_2, ..., x_n.\n\nOutput:\n- Print one integer: the minimum total cost.",
+  "examples": [
+    {
+      "input": "5\n2 7 3 2 5",
+      "output": "43",
+      "explanation": "One optimal splitting order yields total cost 43."
+    }
+  ],
+  "constraints": [
+    "1 <= n <= 5000",
+    "1 <= x_i <= 10^9"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "If the array has a single element [x1], what is the minimum total cost?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "x1",
+          "isCode": false
+        },
+        {
+          "label": "2*x1",
+          "isCode": false
+        },
+        {
+          "label": "It depends on x1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "No splits are needed for a single element, so cost is 0.",
+      "wrongExplanations": {
+        "1": "Paying x1 would mean performing a split, but no split is needed.",
+        "2": "There is no multiplying factor; splitting once would cost x1, not 2*x1."
+      },
+      "hint": "No moves are required for a single-element subarray.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "For an array of two elements [a, b], what is the minimum total cost?",
+      "diagram": "We must split [a,b] -> [a] and [b]. Cost = sum([a,b]).",
+      "options": [
+        {
+          "label": "a + b",
+          "isCode": false
+        },
+        {
+          "label": "min(a, b)",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "a + b + min(a, b)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Exactly one split is required, costing a + b.",
+      "wrongExplanations": {
+        "1": "The cost is the sum of the chosen subarray, not the smaller element.",
+        "3": "Only one split is needed, not two."
+      },
+      "hint": "You split [a,b] once; the cost is the sum of that subarray.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "For three elements [a, b, c], consider splitting first at position k (between b and c or between a and b). What is the correct total cost expression?",
+      "diagram": "[a,b,c]\nSplit at k=1: [a] | [b,c]\nSplit at k=2: [a,b] | [c]",
+      "options": [
+        {
+          "label": "sum([a,b,c]) + min( sum([a,b]), sum([b,c]) )",
+          "isCode": false
+        },
+        {
+          "label": "min( sum([a,b]), sum([b,c]) )",
+          "isCode": false
+        },
+        {
+          "label": "sum([a,b,c])",
+          "isCode": false
+        },
+        {
+          "label": "sum([a,b,c]) + sum([a,b]) + sum([b,c])",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "First split costs a+b+c; then splitting the chosen side costs either a+b or b+c. Total is a+b+c + min(a+b, b+c).",
+      "wrongExplanations": {
+        "1": "You must include the initial split cost a+b+c.",
+        "3": "You don’t split both sides after the first split; only the chosen side needs one more split."
+      },
+      "hint": "After the first split, only one of the halves still needs a split.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "Compute the minimum total cost for [2, 7, 3].",
+      "diagram": "Try both first splits:\n- Split at k=1: cost = 12 + cost([7,3]) = 12 + 10 = 22\n- Split at k=2: cost = 12 + cost([2,7]) = 12 + 9 = 21",
+      "options": [
+        {
+          "label": "21",
+          "isCode": false
+        },
+        {
+          "label": "22",
+          "isCode": false
+        },
+        {
+          "label": "19",
+          "isCode": false
+        },
+        {
+          "label": "12",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Best is split at k=2: 12 + 9 = 21.",
+      "wrongExplanations": {
+        "1": "Splitting at k=1 gives 22, not minimal.",
+        "2": "19 ignores some split costs.",
+        "3": "12 is only the first split cost."
+      },
+      "hint": "Sum is 12. Compare adding cost([2,7]) vs cost([7,3]).",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Understanding the Problem",
+      "questionText": "Does choosing the first split that minimizes the smaller side’s sum always give the global optimum?",
+      "diagram": "Example: [5,1,4]\n- Split at k=1: cost = 10 + cost([1,4]=5) = 15\n- Split at k=2: cost = 10 + cost([5,1]=6) = 16",
+      "options": [
+        {
+          "label": "No, minimizing the immediate smaller side can be suboptimal.",
+          "isCode": false
+        },
+        {
+          "label": "Yes, the smaller side rule always works.",
+          "isCode": false
+        },
+        {
+          "label": "Yes, because each step independently minimizes future costs.",
+          "isCode": false
+        },
+        {
+          "label": "It depends only on whether the array is sorted.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Local choices can lead to higher future costs. The example shows the smaller side choice is worse.",
+      "wrongExplanations": {
+        "1": "Counterexamples exist (e.g., [5,1,4]).",
+        "2": "Local minimization does not guarantee global optimality."
+      },
+      "hint": "Try small counterexamples to test greedy rules.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "Let cost[l][r] be the minimum cost to split subarray a[l..r] into singletons (0-indexed). Which relation is correct?",
+      "diagram": "Choosing first split at k (l <= k < r):\n- First split cost = sum(l..r)\n- Left subarray: a[l..k]\n- Right subarray: a[k+1..r]",
+      "options": [
+        {
+          "label": "cost[l][r] = min_k ( cost[l][k] + cost[k+1][r] + sum(l..r) )",
+          "isCode": false
+        },
+        {
+          "label": "cost[l][r] = min_k ( cost[l][k] + cost[k+1][r] )",
+          "isCode": false
+        },
+        {
+          "label": "cost[l][r] = sum(l..r) + cost[l+1][r-1]",
+          "isCode": false
+        },
+        {
+          "label": "cost[l][r] = min_k ( sum(l..k) + sum(k+1..r) )",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each first split pays sum(l..r) and then optimally splits the two halves.",
+      "wrongExplanations": {
+        "1": "You must include the cost of the first split sum(l..r).",
+        "2": "This ignores how the halves split recursively."
+      },
+      "hint": "Account for the cost of the first split and both halves thereafter.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "How to compute sum(l..r) quickly for many queries (0-indexed)? Let pref[i] = a[0] + ... + a[i-1]. Which is correct?",
+      "diagram": "pref: pref[0]=0, pref[1]=a[0], ..., pref[n]=sum of all",
+      "options": [
+        {
+          "label": "sum(l..r) = pref[r+1] - pref[l]",
+          "isCode": false
+        },
+        {
+          "label": "sum(l..r) = pref[r] - pref[l]",
+          "isCode": false
+        },
+        {
+          "label": "sum(l..r) = pref[r] - pref[l-1]",
+          "isCode": false
+        },
+        {
+          "label": "sum(l..r) = pref[r+1] + pref[l]",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "With pref as defined, sum(l..r) = pref[r+1] - pref[l].",
+      "wrongExplanations": {
+        "1": "This misses a[r] due to 0-indexing and pref definition.",
+        "2": "pref[l-1] is invalid for l=0 with this pref definition."
+      },
+      "hint": "Think about how many elements pref includes up to index r.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Exploring Approaches",
+      "questionText": "If we compute cost[l][r] by checking all k for each interval length, what is the rough time complexity for n elements?",
+      "diagram": "All intervals O(n^2), each scans O(n) split points.",
+      "options": [
+        {
+          "label": "O(n^3), too slow for n = 5000",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2), likely fine for n = 5000",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n), fine for n = 5000",
+          "isCode": false
+        },
+        {
+          "label": "O(n), fine for n = 5000",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "There are ~n^2 intervals and up to ~n splits per interval, giving O(n^3).",
+      "wrongExplanations": {
+        "1": "O(n^2) ignores the per-interval split scan.",
+        "2": "No logarithmic factor appears in the basic approach."
+      },
+      "hint": "Count intervals and split positions per interval.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "Let best[l][r] be the split index k that minimizes cost for a[l..r]. As we extend [l..r-1] to [l..r], how does the best split index typically move?",
+      "diagram": "Compare best split for [l..r-1] and [l..r].",
+      "options": [
+        {
+          "label": "It does not decrease; it can stay or move right.",
+          "isCode": false
+        },
+        {
+          "label": "It does not increase; it can stay or move left.",
+          "isCode": false
+        },
+        {
+          "label": "It jumps arbitrarily across the entire range.",
+          "isCode": false
+        },
+        {
+          "label": "It always becomes the midpoint.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "For this cost structure, widening to the right doesn’t push the best split left.",
+      "wrongExplanations": {
+        "1": "Moving left contradicts typical behavior of these costs.",
+        "2": "It does not jump arbitrarily under this cost structure."
+      },
+      "hint": "Adding a new element to the right adds the same sum(l..r) term for all k.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "Let KL = best[l][r-1] and KR = best[l+1][r]. Where can best[l][r] lie?",
+      "diagram": "Should best[l][r] be between KL and KR?",
+      "options": [
+        {
+          "label": "Between KL and KR inclusive",
+          "isCode": false
+        },
+        {
+          "label": "At most KL",
+          "isCode": false
+        },
+        {
+          "label": "At least KR",
+          "isCode": false
+        },
+        {
+          "label": "Anywhere in [l, r-1] without restriction",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The optimal split for [l..r] falls between the neighboring interval optima.",
+      "wrongExplanations": {
+        "1": "It need not be ≤ KL; it can be larger.",
+        "2": "It need not be ≥ KR; it can be smaller."
+      },
+      "hint": "Use the non-decreasing behavior when extending left or right.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "Given the previous observation, what range of k should we check when computing cost[l][r]?",
+      "diagram": "k in [best[l][r-1], best[l+1][r]]",
+      "options": [
+        {
+          "label": "[ best[l][r-1], best[l+1][r] ]",
+          "isCode": false
+        },
+        {
+          "label": "[ l, r-1 ]",
+          "isCode": false
+        },
+        {
+          "label": "[ best[l][r-1], r-1 ]",
+          "isCode": false
+        },
+        {
+          "label": "[ l, best[l+1][r] ]",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Only k in this interval can be optimal, so checking fewer k speeds up computation.",
+      "wrongExplanations": {
+        "1": "This is the full scan; we can do better.",
+        "2": "The upper bound can be tightened to best[l+1][r]."
+      },
+      "hint": "Use both neighboring best splits as bounds.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "For subarrays of length 2, what is best[l][l+1]?",
+      "diagram": "[a[l], a[l+1]]: only one possible split k=l.",
+      "options": [
+        {
+          "label": "l",
+          "isCode": false
+        },
+        {
+          "label": "l+1",
+          "isCode": false
+        },
+        {
+          "label": "Either l or l+1, both equal",
+          "isCode": false
+        },
+        {
+          "label": "Depends on a[l] and a[l+1]",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Only k=l is valid (k ranges l..r-1).",
+      "wrongExplanations": {
+        "1": "k cannot equal r for splitting [l..r].",
+        "3": "There is only one feasible split position."
+      },
+      "hint": "k must satisfy l <= k < r.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "To store costs and best split indices, which layout is more memory-friendly in Python for n up to 5000?",
+      "diagram": "We only need entries where l <= r, forming an upper triangle.",
+      "options": [
+        {
+          "label": "A triangular structure: row l has length n-l",
+          "isCode": false
+        },
+        {
+          "label": "A full n x n 2D list of Python ints",
+          "isCode": false
+        },
+        {
+          "label": "Recompute everything on the fly, no tables",
+          "isCode": false
+        },
+        {
+          "label": "Use a dictionary keyed by (l,r) for all pairs",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Triangular storage avoids half the cells and is contiguous per row.",
+      "wrongExplanations": {
+        "1": "A full n x n Python int matrix is too heavy.",
+        "3": "Dictionary overhead and lookups are slow and memory-heavy."
+      },
+      "hint": "Only store l<=r entries.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Building the Idea",
+      "questionText": "We will also store best split indices best[l][r]. What compact type can store indices up to 5000 in Python's array module?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Unsigned short ('H') since 0..65535 fits 5000",
+          "isCode": false
+        },
+        {
+          "label": "Byte ('b') since 0..127 is enough",
+          "isCode": false
+        },
+        {
+          "label": "Signed int ('i') only",
+          "isCode": false
+        },
+        {
+          "label": "Character ('u') for Unicode",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Indices up to 5000 fit in 16 bits, so 'H' is compact and sufficient.",
+      "wrongExplanations": {
+        "1": "Byte is too small for 5000.",
+        "2": "'int' works but uses more memory; 'u' is unrelated."
+      },
+      "hint": "Pick a type that can hold numbers up to at least 5000.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Import needed modules.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "from array import array\nimport sys",
+          "isCode": true
+        },
+        {
+          "label": "import arrays\nimport system",
+          "isCode": true
+        },
+        {
+          "label": "from collections import array\nimport sys",
+          "isCode": true
+        },
+        {
+          "label": "import sys\nimport array as arrays",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We use array.array for compact numeric storage and sys for input.",
+      "wrongExplanations": {
+        "1": "There is no 'arrays' or 'system' module matching our needs.",
+        "2": "array is in the 'array' module, not 'collections'."
+      },
+      "hint": "array is a standard module: 'from array import array'.",
+      "isCodeBuilding": true,
+      "codeSnippet": "from array import array\nimport sys",
+      "codeLabel": "Imports"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Read input n and the array a.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "data = list(map(int, sys.stdin.read().split()))\nn = data[0]\na = data[1:1+n]",
+          "isCode": true
+        },
+        {
+          "label": "n = int(sys.stdin.readline())\na = list(map(int, sys.stdin.readline()))",
+          "isCode": true
+        },
+        {
+          "label": "tokens = sys.stdin.read().split()\nn = tokens[0]\na = tokens[1:]",
+          "isCode": true
+        },
+        {
+          "label": "n, a = map(int, sys.stdin.read().split())",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Reading all tokens and slicing works robustly; ensure ints are parsed.",
+      "wrongExplanations": {
+        "1": "Second line needs splitting then mapping to int; this maps characters.",
+        "2": "tokens are strings; need to convert to int."
+      },
+      "hint": "Use split()+map(int) and slice after the first integer.",
+      "isCodeBuilding": true,
+      "codeSnippet": "data = list(map(int, sys.stdin.read().split()))\nn = data[0]\na = data[1:1+n]",
+      "codeLabel": "Input"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Build prefix sums pref so that pref[i+1] = pref[i] + a[i].",
+      "diagram": null,
+      "options": [
+        {
+          "label": "pref = [0]*(n+1)\nfor i in range(n):\n    pref[i+1] = pref[i] + a[i]",
+          "isCode": true
+        },
+        {
+          "label": "pref = [0]*n\nfor i in range(1, n):\n    pref[i] = pref[i-1] + a[i]",
+          "isCode": true
+        },
+        {
+          "label": "pref = [0]*(n+1)\nfor i in range(n):\n    pref[i] = pref[i] + a[i]",
+          "isCode": true
+        },
+        {
+          "label": "pref = [a[0]]*n\nfor i in range(1, n):\n    pref[i] += a[i]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "pref of length n+1 with pref[i+1]=pref[i]+a[i] supports sum(l..r)=pref[r+1]-pref[l].",
+      "wrongExplanations": {
+        "1": "pref length and indices are off for sum queries.",
+        "2": "Overwrites pref[i] without advancing index."
+      },
+      "hint": "Make pref length n+1 and fill forward using i+1.",
+      "isCodeBuilding": true,
+      "codeSnippet": "pref = [0]*(n+1)\nfor i in range(n):\n    pref[i+1] = pref[i] + a[i]",
+      "codeLabel": "Prefix sums"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Allocate triangular arrays for costs and best split indices.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "# allocate cost table (triangular)\ndp = [array('q', [0]*(n - i)) for i in range(n)]\nopt = [array('H', [0]*(n - i)) for i in range(n)]",
+          "isCode": true
+        },
+        {
+          "label": "dp = [[0]*n for _ in range(n)]\nopt = [[0]*n for _ in range(n)]",
+          "isCode": true
+        },
+        {
+          "label": "dp = [array('i', [0]*(n - i)) for i in range(n)]\nopt = [array('b', [0]*(n - i)) for i in range(n)]",
+          "isCode": true
+        },
+        {
+          "label": "dp = [array('q', [0]*i) for i in range(n)]\nopt = [array('H', [0]*i) for i in range(n)]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Use 64-bit ('q') for costs and 'H' for indices; row lengths are n-i.",
+      "wrongExplanations": {
+        "1": "A full n x n Python int matrix is too heavy.",
+        "2": "'i' may overflow and 'b' cannot hold indices up to 5000.",
+        "3": "Row lengths should be n-i, not i."
+      },
+      "hint": "Row l should have entries for r=l..n-1, i.e., length n-l.",
+      "isCodeBuilding": true,
+      "codeSnippet": "# allocate cost table (triangular)\ndp = [array('q', [0]*(n - i)) for i in range(n)]\nopt = [array('H', [0]*(n - i)) for i in range(n)]",
+      "codeLabel": "Allocate tables"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Initialize the best split index for length-1 intervals (single elements).",
+      "diagram": null,
+      "options": [
+        {
+          "label": "for i in range(n):\n    opt[i][0] = i",
+          "isCode": true
+        },
+        {
+          "label": "for i in range(n):\n    opt[i][0] = 0",
+          "isCode": true
+        },
+        {
+          "label": "for i in range(n):\n    opt[0][i] = i",
+          "isCode": true
+        },
+        {
+          "label": "opt = [array('H', [i]) for i in range(n)]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "For [i..i], best split index is i by convention for bounding future ranges.",
+      "wrongExplanations": {
+        "1": "Setting all to 0 misguides bounds for later intervals.",
+        "2": "We need opt per row l at offset 0, not row 0."
+      },
+      "hint": "Each row l has length n-l; the 0-th entry corresponds to [l..l].",
+      "isCodeBuilding": true,
+      "codeSnippet": "for i in range(n):\n    opt[i][0] = i",
+      "codeLabel": "Init opt base"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Write the outer loops over interval length and starting index.",
+      "diagram": "We fill by increasing length from 2 to n.",
+      "options": [
+        {
+          "label": "for length in range(2, n+1):\n    for l in range(0, n - length + 1):",
+          "isCode": true
+        },
+        {
+          "label": "for length in range(1, n+1):\n    for l in range(0, n - length + 1):",
+          "isCode": true
+        },
+        {
+          "label": "for l in range(n):\n    for length in range(2, n - l):",
+          "isCode": true
+        },
+        {
+          "label": "for length in range(2, n):\n    for l in range(0, n - length):",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We start at length=2 since length=1 costs are zero and known.",
+      "wrongExplanations": {
+        "1": "length=1 intervals need no processing.",
+        "3": "Ranges excluding length=n or r boundary will miss intervals."
+      },
+      "hint": "Ensure r = l + length - 1 stays within 0..n-1.",
+      "isCodeBuilding": true,
+      "codeSnippet": "for length in range(2, n+1):\n    for l in range(0, n - length + 1):",
+      "codeLabel": "Loops header"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "Inside the loops, set r, s, bounds for k using neighboring best splits, and initialize best variables.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "        r = l + length - 1\n        s = pref[r+1] - pref[l]\n        lt = length - 2\n        start = opt[l][lt]\n        end = opt[l+1][lt]\n        if end > r - 1:\n            end = r - 1\n        bestK = start\n        bestVal = None",
+          "isCode": true
+        },
+        {
+          "label": "        r = l + length\n        s = pref[r] - pref[l]\n        lt = length - 1\n        start = opt[l][lt]\n        end = opt[l+1][lt]\n        bestK = l\n        bestVal = 0",
+          "isCode": true
+        },
+        {
+          "label": "        r = l + length - 1\n        s = pref[r] - pref[l]\n        lt = length - 2\n        start = l\n        end = r\n        bestK = l\n        bestVal = None",
+          "isCode": true
+        },
+        {
+          "label": "        r = l + length - 1\n        s = pref[r+1] - pref[l]\n        lt = length - 2\n        start = opt[l+1][lt]\n        end = opt[l][lt]\n        bestK = end\n        bestVal = None",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "r is l+length-1; sum is pref[r+1]-pref[l]; k in [opt[l][lt], opt[l+1][lt]] and clamp to r-1.",
+      "wrongExplanations": {
+        "1": "Off-by-one errors in r and sum; lt must be length-2.",
+        "2": "This reverts to full scan and wrong sum indexing."
+      },
+      "hint": "Use neighboring length-1 intervals to bound k.",
+      "isCodeBuilding": true,
+      "codeSnippet": "        r = l + length - 1\n        s = pref[r+1] - pref[l]\n        lt = length - 2\n        start = opt[l][lt]\n        end = opt[l+1][lt]\n        if end > r - 1:\n            end = r - 1\n        bestK = start\n        bestVal = None",
+      "codeLabel": "Set bounds and init"
+    },
+    {
+      "id": "q22",
+      "phase": "Writing the Code",
+      "questionText": "Write the inner loop to evaluate k in [start..end], compute value, and store best cost and split.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "        for k in range(start, end + 1):\n            left = dp[l][k - l]\n            right = dp[k + 1][r - (k + 1)]\n            val = left + right + s\n            if bestVal is None or val < bestVal:\n                bestVal = val\n                bestK = k\n        dp[l][r - l] = bestVal\n        opt[l][r - l] = bestK",
+          "isCode": true
+        },
+        {
+          "label": "        for k in range(start, end + 1):\n            left = dp[l][k]\n            right = dp[k + 1][r]\n            val = left + right + s\n            if bestVal is None or val <= bestVal:\n                bestVal = val\n                bestK = k\n        dp[l][r] = bestVal\n        opt[l][r] = bestK",
+          "isCode": true
+        },
+        {
+          "label": "        for k in range(l, r):\n            left = dp[l][k - l]\n            right = dp[k + 1][r - (k + 1)]\n            val = left + right + s\n            if val < bestVal:\n                bestVal = val\n                bestK = k\n        dp[l][r - l] = bestVal\n        opt[l][r - l] = bestK",
+          "isCode": true
+        },
+        {
+          "label": "        for k in range(start, end):\n            left = dp[l][k - l]\n            right = dp[k + 1][r - (k + 1)]\n            val = left + right\n            if bestVal is None or val < bestVal:\n                bestVal = val\n                bestK = k\n        dp[l][r - l] = bestVal + s\n        opt[l][r - l] = bestK",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Index into triangular rows by offset (k-l) and (r-(k+1)); include s in each val; store at offset r-l.",
+      "wrongExplanations": {
+        "1": "dp row indices must be offsets, not absolute r. Also potential tie policy changes index.",
+        "2": "bestVal starts None; comparing val < bestVal will error.",
+        "3": "Splitting s outside the loop risks mis-adding if bestK isn't last."
+      },
+      "hint": "Remember dp[l] stores entries for r=l..n-1 at positions [0..].",
+      "isCodeBuilding": true,
+      "codeSnippet": "        for k in range(start, end + 1):\n            left = dp[l][k - l]\n            right = dp[k + 1][r - (k + 1)]\n            val = left + right + s\n            if bestVal is None or val < bestVal:\n                bestVal = val\n                bestK = k\n        dp[l][r - l] = bestVal\n        opt[l][r - l] = bestK",
+      "codeLabel": "Evaluate and assign"
+    },
+    {
+      "id": "q23",
+      "phase": "Writing the Code",
+      "questionText": "Finally, print the answer (handle n=0 just in case).",
+      "diagram": null,
+      "options": [
+        {
+          "label": "print(dp[0][n-1] if n > 0 else 0)",
+          "isCode": true
+        },
+        {
+          "label": "print(dp[0][0])",
+          "isCode": true
+        },
+        {
+          "label": "print(sum(a))",
+          "isCode": true
+        },
+        {
+          "label": "print(opt[0][n-1])",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The answer is the cost for the whole interval [0..n-1], or 0 if empty.",
+      "wrongExplanations": {
+        "1": "dp[0][0] is only for a single element, not the whole array.",
+        "2": "Sum is the first split cost only, not total."
+      },
+      "hint": "Use the triangular index r-l at r=n-1.",
+      "isCodeBuilding": true,
+      "codeSnippet": "print(dp[0][n-1] if n > 0 else 0)",
+      "codeLabel": "Print result"
+    },
+    {
+      "id": "q24",
+      "phase": "Verifying the Solution",
+      "questionText": "Run the program on the sample input:\n5\n2 7 3 2 5\nWhat does it print?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "43",
+          "isCode": false
+        },
+        {
+          "label": "42",
+          "isCode": false
+        },
+        {
+          "label": "44",
+          "isCode": false
+        },
+        {
+          "label": "41",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The minimal total cost for the sample is 43.",
+      "wrongExplanations": {
+        "1": "42 is not achievable with any split order.",
+        "2": "44 is higher than necessary."
+      },
+      "hint": "Trust earlier reasoning; the code matches it.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Verifying the Solution",
+      "questionText": "What is the output for input:\n4\n1 1 1 1",
+      "diagram": "Optimal: split into two pairs (cost 4), then each pair (2+2): total 8.",
+      "options": [
+        {
+          "label": "8",
+          "isCode": false
+        },
+        {
+          "label": "6",
+          "isCode": false
+        },
+        {
+          "label": "10",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Best is 4 + 2 + 2 = 8.",
+      "wrongExplanations": {
+        "1": "6 undercounts the necessary splits.",
+        "3": "4 is just the first split."
+      },
+      "hint": "Try a balanced first split to minimize repeated sums.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the time complexity of this approach when using the bounded k-range per interval?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^3)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We process O(n^2) intervals and check a small k-range per interval.",
+      "wrongExplanations": {
+        "1": "Full k-scan yields O(n^3), but we bound k.",
+        "2": "No logarithmic factor arises here."
+      },
+      "hint": "Count intervals; k-range is narrow due to index bounds.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q27",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the space complexity and suitable numeric types for Python implementation?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n^2) space; store costs in 64-bit ('q') and indices in 'H'",
+          "isCode": false
+        },
+        {
+          "label": "O(n) space; recompute everything to save memory",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2) space; store costs in Python int lists",
+          "isCode": false
+        },
+        {
+          "label": "O(n^3) space; need to store all k values per interval",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Triangular arrays take O(n^2); 64-bit signed fits cost ranges; 'H' fits indices.",
+      "wrongExplanations": {
+        "1": "Recomputing all values would blow up time and still need many entries.",
+        "2": "Python int matrices are too memory-heavy at this scale."
+      },
+      "hint": "Use compact arrays to fit memory limits.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "from array import array\nimport sys",
+    "data = list(map(int, sys.stdin.read().split()))\nn = data[0]\na = data[1:1+n]",
+    "pref = [0]*(n+1)\nfor i in range(n):\n    pref[i+1] = pref[i] + a[i]",
+    "# allocate cost table (triangular)\ndp = [array('q', [0]*(n - i)) for i in range(n)]\nopt = [array('H', [0]*(n - i)) for i in range(n)]",
+    "for i in range(n):\n    opt[i][0] = i",
+    "for length in range(2, n+1):\n    for l in range(0, n - length + 1):",
+    "        r = l + length - 1\n        s = pref[r+1] - pref[l]\n        lt = length - 2\n        start = opt[l][lt]\n        end = opt[l+1][lt]\n        if end > r - 1:\n            end = r - 1\n        bestK = start\n        bestVal = None",
+    "        for k in range(start, end + 1):\n            left = dp[l][k - l]\n            right = dp[k + 1][r - (k + 1)]\n            val = left + right + s\n            if bestVal is None or val < bestVal:\n                bestVal = val\n                bestK = k\n        dp[l][r - l] = bestVal\n        opt[l][r - l] = bestK",
+    "print(dp[0][n-1] if n > 0 else 0)"
+  ],
+  "reasoningChain": [
+    {
+      "question": "How do we express the cost of splitting an interval [l..r] using a first split at k?",
+      "insight": "The total equals sum(l..r) plus the optimal cost to split left [l..k] and right [k+1..r]."
+    },
+    {
+      "question": "How can we compute subarray sums quickly for many intervals?",
+      "insight": "Build prefix sums so sum(l..r) is pref[r+1] - pref[l] in O(1)."
+    },
+    {
+      "question": "Is checking every k for every interval feasible for n up to 5000?",
+      "insight": "No; scanning all k for all intervals is O(n^3) and too slow."
+    },
+    {
+      "question": "Can we bound the split index search range for [l..r]?",
+      "insight": "Yes; the best split index for [l..r] lies between best[l][r-1] and best[l+1][r], making the search narrow."
+    },
+    {
+      "question": "How should we fill the cost table effectively?",
+      "insight": "Process intervals by increasing length, using the bounded k-range and triangular storage."
+    },
+    {
+      "question": "What data structures and numeric types are suitable at this scale?",
+      "insight": "Use compact arrays: 64-bit signed for costs and 16-bit for best indices to fit memory and handle large sums."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1377,
+    "output_tokens": 16700,
+    "input_cost": 0.001721,
+    "output_cost": 0.167,
+    "total_cost": 0.168721
+  }
+}

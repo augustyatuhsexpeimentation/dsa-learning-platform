@@ -1,0 +1,1092 @@
+{
+  "id": "polygon-lattice-points",
+  "title": "Polygon Lattice Points",
+  "difficulty": "hard",
+  "tags": [
+    "geometry"
+  ],
+  "estimatedMinutes": 70,
+  "language": "python",
+  "description": "Given a simple polygon with integer-coordinate vertices, compute two values: the number of lattice points strictly inside the polygon and the number of lattice points on its boundary. Vertices are given in order, and the last vertex connects back to the first. You must output two integers: interior count and boundary count.",
+  "examples": [
+    {
+      "input": "4\n1 1\n5 3\n3 5\n1 4\n",
+      "output": "6 8",
+      "explanation": "The polygon has 8 lattice points on its boundary and 6 interior lattice points."
+    }
+  ],
+  "constraints": [
+    "3 <= n <= 1e5",
+    "-1e9 <= x_i, y_i <= 1e9",
+    "The polygon is simple (non-self-intersecting)"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "For a polygon with vertices listed in order (x1,y1),(x2,y2),...,(xn,yn), which pairs are adjacent edges?",
+      "diagram": "Vertices: (x1,y1) -> (x2,y2) -> ... -> (xn,y_n) -> back to (x1,y1)",
+      "options": [
+        {
+          "label": "(x_i,y_i) with (x_{i+1},y_{i+1}) for i=1..n-1, and (x_n,y_n) with (x_1,y_1)",
+          "isCode": false
+        },
+        {
+          "label": "Only (x_i,y_i) with (x_{i+1},y_{i+1}) for i=1..n-1; the last vertex has no neighbor",
+          "isCode": false
+        },
+        {
+          "label": "All possible pairs of vertices are adjacent",
+          "isCode": false
+        },
+        {
+          "label": "(x_i,y_i) with (x_{i+2},y_{i+2}) to avoid sharp turns",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Edges connect consecutive vertices and also the last back to the first to close the polygon. No skipping or all-pairs connections.",
+      "wrongExplanations": {
+        "1": "The polygon must be closed, so the last connects to the first.",
+        "2": "Only consecutive vertices define edges in the given order."
+      },
+      "hint": "Think of walking around the polygon and returning to the start.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "Consider the segment from (0,0) to (3,0). How many lattice points lie on this segment including both endpoints?",
+      "diagram": "(0,0) ---- (1,0) ---- (2,0) ---- (3,0)",
+      "options": [
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Points are (0,0),(1,0),(2,0),(3,0) => 4. Not just endpoints.",
+      "wrongExplanations": {
+        "0": "That counts only endpoints; lattice points also include integer points in between.",
+        "1": "There are two interior lattice points (1,0) and (2,0) as well."
+      },
+      "hint": "Count every point with integer coordinates on the segment.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "Square with vertices (0,0),(2,0),(2,2),(0,2). Is the point (2,1) counted as an interior lattice point?",
+      "diagram": "Square of side 2; point (2,1) lies on the right edge.",
+      "options": [
+        {
+          "label": "Yes, it is interior and not boundary",
+          "isCode": false
+        },
+        {
+          "label": "No, it is boundary (counts only in boundary)",
+          "isCode": false
+        },
+        {
+          "label": "It is neither interior nor boundary",
+          "isCode": false
+        },
+        {
+          "label": "It counts as both interior and boundary",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Points on the edges are boundary points, not interior. Interior is strictly inside.",
+      "wrongExplanations": {
+        "0": "Interior excludes boundary points.",
+        "3": "A point cannot be both interior and boundary."
+      },
+      "hint": "Boundary points lie on edges or vertices.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "If you sum lattice points on each edge including both endpoints, how do you adjust to get the number of distinct boundary lattice points for the whole polygon?",
+      "diagram": "Each vertex is included in two edges.",
+      "options": [
+        {
+          "label": "Subtract n (the number of vertices)",
+          "isCode": false
+        },
+        {
+          "label": "Subtract 2n",
+          "isCode": false
+        },
+        {
+          "label": "Do nothing",
+          "isCode": false
+        },
+        {
+          "label": "Add n",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each vertex is counted exactly twice in the edge-sums; subtracting n fixes double-counting.",
+      "wrongExplanations": {
+        "1": "Each vertex is counted twice, not three times.",
+        "2": "Vertices are double-counted in the sum over edges."
+      },
+      "hint": "How many times is each vertex counted across all edges?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Understanding the Problem",
+      "questionText": "If the same polygon's vertices are listed in the opposite order, what happens to the signed sum S = sum over edges of (x_i*y_{i+1} - x_{i+1}*y_i)?",
+      "diagram": "cw vs ccw traversal",
+      "options": [
+        {
+          "label": "S changes sign (negates)",
+          "isCode": false
+        },
+        {
+          "label": "S doubles",
+          "isCode": false
+        },
+        {
+          "label": "S stays the same",
+          "isCode": false
+        },
+        {
+          "label": "S becomes zero",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Reversing edge order reverses orientation, flipping the sign of each cross term, so the total negates.",
+      "wrongExplanations": {
+        "2": "The orientation changes; the magnitude stays, but the sign flips.",
+        "3": "Only degenerate polygons would yield zero."
+      },
+      "hint": "Consider one edge term when you swap endpoints.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "Why is checking every integer point in the polygon’s bounding box infeasible here?",
+      "diagram": "Bounding box width and height up to ~2e9",
+      "options": [
+        {
+          "label": "It is O(range area), which can be about (2e9)^2 checks",
+          "isCode": false
+        },
+        {
+          "label": "It is O(n log n), which is too slow",
+          "isCode": false
+        },
+        {
+          "label": "It is O(n), which is too slow",
+          "isCode": false
+        },
+        {
+          "label": "It is O(1), but memory is the issue",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The grid could have ~1e18 points. We need an approach linear in n.",
+      "wrongExplanations": {
+        "1": "Point-in-polygon per grid point is far worse than n log n here.",
+        "2": "Brute force over grid is not O(n)."
+      },
+      "hint": "Estimate the number of integer grid points in a large box.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "There is a known relation between area A of the polygon, interior lattice points I, and boundary lattice points B. Which equation is correct?",
+      "diagram": "Test on a 1x1 square: A=1, B=4, I=0.",
+      "options": [
+        {
+          "label": "A = I + B/2 - 1",
+          "isCode": false
+        },
+        {
+          "label": "A = I + B - 1",
+          "isCode": false
+        },
+        {
+          "label": "2A = I + B - 1",
+          "isCode": false
+        },
+        {
+          "label": "A = I + B/2 + 1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "For 1x1 square, A=1, B=4, I=0 fits A = I + B/2 - 1. Others do not.",
+      "wrongExplanations": {
+        "1": "Plugging A=1,B=4,I=0 gives 1≠3.",
+        "3": "Plugging A=1,B=4,I=0 gives 1≠3."
+      },
+      "hint": "Check each formula on small rectangles with integer sides.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Exploring Approaches",
+      "questionText": "How can you compute twice the polygon area using only the vertex coordinates?",
+      "diagram": "Sum over edges: x_i*y_{i+1} - x_{i+1}*y_i",
+      "options": [
+        {
+          "label": "Compute S = sum (x_i*y_{i+1} - x_{i+1}*y_i), then use |S| as twice the area",
+          "isCode": false
+        },
+        {
+          "label": "Sum the absolute values |x_i*y_{i+1} - x_{i+1}*y_i|",
+          "isCode": false
+        },
+        {
+          "label": "Compute S = sum (x_i*y_{i+1} + x_{i+1}*y_i), and take S/2",
+          "isCode": false
+        },
+        {
+          "label": "Double the area of each triangle (0,0)-(x_i,y_i)-(x_{i+1},y_{i+1}) and sum absolute values",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The signed sum over consecutive edges yields ±2A; take absolute value for orientation.",
+      "wrongExplanations": {
+        "1": "Taking absolute per term breaks cancellations and overestimates.",
+        "3": "Summing triangle areas w.r.t origin depends on origin placement and signs; direct edge sum is simpler."
+      },
+      "hint": "Use the consecutive edge cross-terms, then take absolute at the end.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Exploring Approaches",
+      "questionText": "For an edge from (x1,y1) to (x2,y2), which expression equals the number of lattice points on that segment minus 1 (i.e., interior points on the segment plus one endpoint)?",
+      "diagram": "dx = |x2-x1|, dy = |y2-y1|",
+      "options": [
+        {
+          "label": "g = gcd(|x2-x1|, |y2-y1|)",
+          "isCode": false
+        },
+        {
+          "label": "g = gcd(|x2-x1|, |y2-y1|) + 1",
+          "isCode": false
+        },
+        {
+          "label": "g = max(|x2-x1|, |y2-y1|)",
+          "isCode": false
+        },
+        {
+          "label": "g = |x2-x1| + |y2-y1|",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The count of lattice points on a segment inclusive is gcd(dx,dy)+1, so minus 1 is gcd(dx,dy).",
+      "wrongExplanations": {
+        "1": "This would be the inclusive count, not minus 1.",
+        "2": "The step count depends on the greatest common step in both directions, not just the larger difference."
+      },
+      "hint": "Think of stepping from one endpoint to the other in equal integer steps.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "For the segment from (0,0) to (6,4), how many lattice points lie on the segment including both endpoints?",
+      "diagram": "dx=6, dy=4",
+      "options": [
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        },
+        {
+          "label": "6",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "gcd(6,4)=3, inclusive count is 3+1=4.",
+      "wrongExplanations": {
+        "0": "This is gcd(dx,dy), not the inclusive count.",
+        "2": "Inclusive count is gcd+1, not gcd plus 2."
+      },
+      "hint": "Inclusive count = gcd(dx,dy) + 1.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "Summing what quantity over all edges gives the total number of distinct boundary lattice points for the polygon?",
+      "diagram": "Avoid double-counting vertices across edges",
+      "options": [
+        {
+          "label": "Sum gcd(|dx|,|dy|) over edges",
+          "isCode": false
+        },
+        {
+          "label": "Sum gcd(|dx|,|dy|)+1 over edges",
+          "isCode": false
+        },
+        {
+          "label": "Sum gcd(|dx|,|dy|)-1 over edges",
+          "isCode": false
+        },
+        {
+          "label": "Sum lcm(|dx|,|dy|) over edges",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Summing gcd over edges yields the boundary count with each vertex naturally counted once.",
+      "wrongExplanations": {
+        "1": "Adding 1 per edge would double-count vertices.",
+        "2": "Subtracting 1 per edge would undercount corners."
+      },
+      "hint": "Recall your adjustment when summing inclusive edge counts.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "Triangle with vertices (0,0),(2,0),(0,2): What is twice the area from the edge sum?",
+      "diagram": "Compute S = x1*y2 - x2*y1 cyclically",
+      "options": [
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "6",
+          "isCode": false
+        },
+        {
+          "label": "8",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "S = 0*0 - 2*0 + 2*2 - 0*0 + 0*0 - 0*0 = 4; |S| = 4.",
+      "wrongExplanations": {
+        "0": "Area is 2, so twice area is 4.",
+        "2": "Check each edge cross term carefully."
+      },
+      "hint": "Compute each term: (0,0)->(2,0), (2,0)->(0,2), (0,2)->(0,0).",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "For the same triangle, boundary count B using gcd sums is what?",
+      "diagram": "Edges: (0,0)-(2,0), (2,0)-(0,2), (0,2)-(0,0)",
+      "options": [
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        },
+        {
+          "label": "6",
+          "isCode": false
+        },
+        {
+          "label": "7",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "gcd(2,0)=2, gcd(2,2)=2, gcd(0,2)=2; sum = 6 total boundary points.",
+      "wrongExplanations": {
+        "0": "That misses some lattice points on the hypotenuse.",
+        "1": "Check gcd along each edge carefully."
+      },
+      "hint": "Remember gcd(|dx|,|dy|) per edge and sum.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Building the Idea",
+      "questionText": "Using A = I + B/2 - 1 and the triangle’s values (twice area = 4, so A=2; B=6), what is I?",
+      "diagram": "A=2, B=6",
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "2 = I + 6/2 - 1 => 2 = I + 3 - 1 => I = 0.",
+      "wrongExplanations": {
+        "1": "Rearrange carefully: I = A - B/2 + 1.",
+        "2": "Plug B and A numerically; it’s small."
+      },
+      "hint": "I = A - B/2 + 1.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q15",
+      "phase": "Building the Idea",
+      "questionText": "Why should we take the absolute value of the sum S = sum(x_i*y_{i+1} - x_{i+1}*y_i) before using it as twice the area?",
+      "diagram": "cw vs ccw traversal gives S or -S",
+      "options": [
+        {
+          "label": "Because S is signed depending on vertex order; area is nonnegative",
+          "isCode": false
+        },
+        {
+          "label": "Because S is always fractional without absolute",
+          "isCode": false
+        },
+        {
+          "label": "To avoid integer overflow",
+          "isCode": false
+        },
+        {
+          "label": "Because absolute removes rounding errors",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Vertex order (orientation) only affects sign, not magnitude. Area should be nonnegative.",
+      "wrongExplanations": {
+        "2": "Python integers don’t overflow here.",
+        "3": "We’re using exact integer arithmetic, not floating points."
+      },
+      "hint": "Your area must not depend on cw vs ccw ordering.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q16",
+      "phase": "Building the Idea",
+      "questionText": "Which integer-only expression yields I directly from twice area (S_abs = |S|) and boundary B?",
+      "diagram": "A = S_abs / 2, I = A - B/2 + 1",
+      "options": [
+        {
+          "label": "I = (S_abs - B + 2) // 2",
+          "isCode": false
+        },
+        {
+          "label": "I = (S_abs + B + 2) // 2",
+          "isCode": false
+        },
+        {
+          "label": "I = (S_abs - B) / 2   (floating division)",
+          "isCode": false
+        },
+        {
+          "label": "I = S_abs/2 - B + 1   (floating intermediate)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "I = A - B/2 + 1 = (S_abs/2) - (B/2) + 1 = (S_abs - B + 2)/2; use integer division.",
+      "wrongExplanations": {
+        "1": "Sign before B is wrong; it would overcount.",
+        "2": "Avoid floating division; integers suffice exactly."
+      },
+      "hint": "Eliminate fractions by multiplying numerator and denominator by 2.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q17",
+      "phase": "Building the Idea",
+      "questionText": "Check on a 3x2 axis-aligned rectangle: width=3, height=2. What are I and B?",
+      "diagram": "Rectangle with corners at (0,0),(3,0),(3,2),(0,2)",
+      "options": [
+        {
+          "label": "I=2, B=10",
+          "isCode": false
+        },
+        {
+          "label": "I=4, B=10",
+          "isCode": false
+        },
+        {
+          "label": "I=3, B=8",
+          "isCode": false
+        },
+        {
+          "label": "I=2, B=8",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Area=6 => S_abs=12. B = 2*(w+h)=10. I=(12-10+2)//2=2.",
+      "wrongExplanations": {
+        "2": "Boundary points on rectangle edges sum to 2*(w+h), not 8 here.",
+        "3": "B must be 10 for width 3 and height 2."
+      },
+      "hint": "Axis-aligned edges have gcd equal to side length.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Start by importing what you need for fast I/O and gcd.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\nfrom math import gcd",
+          "isCode": true
+        },
+        {
+          "label": "from sys import input\nfrom fractions import gcd",
+          "isCode": true
+        },
+        {
+          "label": "import sys\nimport math  # will call math.lcm",
+          "isCode": true
+        },
+        {
+          "label": "from os import read\nfrom math import lcm",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need sys for input and math.gcd; importing gcd directly is convenient.",
+      "wrongExplanations": {
+        "1": "fractions.gcd is removed; and replacing input like this is not helpful.",
+        "3": "We don’t need lcm; we need gcd."
+      },
+      "hint": "Use the standard library gcd for integers.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\nfrom math import gcd",
+      "codeLabel": "Imports"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Read all input efficiently and parse n first.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "data = sys.stdin.read().strip().split()\nit = iter(data)\nn = int(next(it))",
+          "isCode": true
+        },
+        {
+          "label": "n = int(sys.stdin.readline())\n# do not read the rest yet",
+          "isCode": true
+        },
+        {
+          "label": "n = int(input())\ncoords = [int(x) for x in input().split()]",
+          "isCode": true
+        },
+        {
+          "label": "tokens = sys.stdin.read().split()\nn = int(tokens[1])",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Reading all tokens and iterating is robust for up to 1e5 lines.",
+      "wrongExplanations": {
+        "1": "You must also read all coordinate lines; this stops early.",
+        "3": "The first token is n; tokens[1] is the first x."
+      },
+      "hint": "You can iterate over a flat list of tokens.",
+      "isCodeBuilding": true,
+      "codeSnippet": "data = sys.stdin.read().strip().split()\nit = iter(data)\nn = int(next(it))",
+      "codeLabel": "Read and parse n"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Parse the n points into a list of tuples (x,y) using the token iterator.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "pts = [(int(next(it)), int(next(it))) for _ in range(n)]",
+          "isCode": true
+        },
+        {
+          "label": "pts = [(next(it), next(it)) for _ in range(n)]",
+          "isCode": true
+        },
+        {
+          "label": "pts = [(int(next(it)), int(next(it))) for _ in range(n-1)]",
+          "isCode": true
+        },
+        {
+          "label": "pts = [(int(next(it+1)), int(next(it+2))) for _ in range(n)]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need n pairs, each converted to int from the iterator.",
+      "wrongExplanations": {
+        "1": "Tokens are strings; convert to int.",
+        "2": "You must read all n points, not n-1."
+      },
+      "hint": "Each point consumes exactly two tokens.",
+      "isCodeBuilding": true,
+      "codeSnippet": "pts = [(int(next(it)), int(next(it))) for _ in range(n)]",
+      "codeLabel": "Read points"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "Initialize accumulators for twice area and boundary count.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "area2 = 0\nB = 0",
+          "isCode": true
+        },
+        {
+          "label": "area2 = 0.0\nB = 0.0",
+          "isCode": true
+        },
+        {
+          "label": "area2, B = 1, 0",
+          "isCode": true
+        },
+        {
+          "label": "area2 = None\nB = 0",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Use integers to keep exact values; start both at zero.",
+      "wrongExplanations": {
+        "1": "Floating point is unnecessary and can lose precision.",
+        "2": "area2 should start at 0."
+      },
+      "hint": "Keep everything as integers.",
+      "isCodeBuilding": true,
+      "codeSnippet": "area2 = 0\nB = 0",
+      "codeLabel": "Init accumulators"
+    },
+    {
+      "id": "q22",
+      "phase": "Writing the Code",
+      "questionText": "Iterate over edges, including the last-to-first edge, and unpack endpoints.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "for i in range(n):\n    x1, y1 = pts[i]\n    x2, y2 = pts[(i + 1) % n]",
+          "isCode": true
+        },
+        {
+          "label": "for i in range(n-1):\n    x1, y1 = pts[i]\n    x2, y2 = pts[i + 1]",
+          "isCode": true
+        },
+        {
+          "label": "for i in range(n):\n    x1, y1 = pts[i]\n    x2, y2 = pts[i - 1]",
+          "isCode": true
+        },
+        {
+          "label": "for i in range(1, n+1):\n    x1, y1 = pts[i]\n    x2, y2 = pts[(i + 1) % n]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Use modular indexing to wrap from last to first edge.",
+      "wrongExplanations": {
+        "1": "This skips the closing edge from last to first.",
+        "3": "Indexing starts at 0; pts[n] is out of range."
+      },
+      "hint": "Use modulo to connect the last point back to the first.",
+      "isCodeBuilding": true,
+      "codeSnippet": "for i in range(n):\n    x1, y1 = pts[i]\n    x2, y2 = pts[(i + 1) % n]",
+      "codeLabel": "Edge loop and unpack"
+    },
+    {
+      "id": "q23",
+      "phase": "Writing the Code",
+      "questionText": "Accumulate the signed cross term into twice the area inside the loop.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    area2 += x1 * y2 - x2 * y1",
+          "isCode": true
+        },
+        {
+          "label": "    area2 += abs(x1 * y2 - x2 * y1)",
+          "isCode": true
+        },
+        {
+          "label": "    area2 += x1 * y1 - x2 * y2",
+          "isCode": true
+        },
+        {
+          "label": "    area2 = x1 * y2 - x2 * y1",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Sum signed terms and take absolute once at the end. Do not reset inside the loop.",
+      "wrongExplanations": {
+        "1": "Taking abs per term breaks cancellation and yields wrong area.",
+        "3": "This overwrites instead of accumulating."
+      },
+      "hint": "Defer absolute value until after the loop.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    area2 += x1 * y2 - x2 * y1",
+      "codeLabel": "Update area2"
+    },
+    {
+      "id": "q24",
+      "phase": "Writing the Code",
+      "questionText": "Accumulate the boundary count for this edge using integer differences.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    dx = abs(x2 - x1)\n    dy = abs(y2 - y1)\n    B += gcd(dx, dy)",
+          "isCode": true
+        },
+        {
+          "label": "    dx = x2 - x1\n    dy = y2 - y1\n    B += gcd(dx, dy) + 1",
+          "isCode": true
+        },
+        {
+          "label": "    dx = abs(x2 - x1)\n    dy = abs(y2 - y1)\n    B += max(dx, dy)",
+          "isCode": true
+        },
+        {
+          "label": "    dx = (x2 - x1) ** 2\n    dy = (y2 - y1) ** 2\n    B += gcd(dx, dy)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Sum gcd(|dx|,|dy|) per edge. Absolute is needed; do not add 1 here.",
+      "wrongExplanations": {
+        "1": "Adding 1 per edge would double-count vertices overall.",
+        "3": "Squaring changes gcd and yields wrong counts."
+      },
+      "hint": "Inclusive count is gcd+1; we only need gcd here.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    dx = abs(x2 - x1)\n    dy = abs(y2 - y1)\n    B += gcd(dx, dy)",
+      "codeLabel": "Update boundary B"
+    },
+    {
+      "id": "q25",
+      "phase": "Writing the Code",
+      "questionText": "Finalize area sign, compute I using only integers, and print results.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "area2 = abs(area2)\nI = (area2 - B + 2) // 2\nprint(I, B)",
+          "isCode": true
+        },
+        {
+          "label": "I = (area2 - B + 2) // 2\nprint(B, I)",
+          "isCode": true
+        },
+        {
+          "label": "area2 = abs(area2)\nI = area2/2 - B + 1\nprint(I, B)",
+          "isCode": true
+        },
+        {
+          "label": "area2 = abs(area2)\nI = (area2 + B + 2) // 2\nprint(I, B)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Take absolute area, use I=(area2-B+2)//2 to avoid fractions, and print I then B.",
+      "wrongExplanations": {
+        "1": "The output order is interior then boundary; also missing abs may break negative orientation.",
+        "3": "Sign before B should be minus, not plus."
+      },
+      "hint": "Ensure orientation neutrality and integer arithmetic.",
+      "isCodeBuilding": true,
+      "codeSnippet": "area2 = abs(area2)\nI = (area2 - B + 2) // 2\nprint(I, B)",
+      "codeLabel": "Finalize and output"
+    },
+    {
+      "id": "q26",
+      "phase": "Verifying the Solution",
+      "questionText": "If the input is a 3x2 rectangle: 4\\n0 0\\n3 0\\n3 2\\n0 2, what will the program print?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "2 10",
+          "isCode": false
+        },
+        {
+          "label": "4 10",
+          "isCode": false
+        },
+        {
+          "label": "2 8",
+          "isCode": false
+        },
+        {
+          "label": "6 10",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "As computed earlier, I=2 and B=10.",
+      "wrongExplanations": {
+        "1": "I is not simply area; use I=(2A-B+2)/2.",
+        "2": "Boundary on rectangle is 2*(w+h)=10."
+      },
+      "hint": "Re-use the earlier rectangle check.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q27",
+      "phase": "Verifying the Solution",
+      "questionText": "For the triangle 3\\n0 0\\n2 0\\n0 2, what will the program print?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "0 6",
+          "isCode": false
+        },
+        {
+          "label": "1 6",
+          "isCode": false
+        },
+        {
+          "label": "0 5",
+          "isCode": false
+        },
+        {
+          "label": "1 5",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We found B=6 and I=0 for this triangle.",
+      "wrongExplanations": {
+        "1": "Check I = A - B/2 + 1; A=2, B=6.",
+        "2": "Boundary should be 6 from gcd sums."
+      },
+      "hint": "Use previous calculations directly.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q28",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the time complexity of the implemented solution with respect to n (number of vertices)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(1)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We do a single pass over edges with O(1) work per edge.",
+      "wrongExplanations": {
+        "1": "There is no sorting or log factor step.",
+        "2": "We never compare all pairs of vertices."
+      },
+      "hint": "How many times do we touch each vertex?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q29",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the space complexity of the program as written?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n) due to storing all points",
+          "isCode": false
+        },
+        {
+          "label": "O(1), no extra storage beyond a few variables",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2) for adjacency structures",
+          "isCode": false
+        },
+        {
+          "label": "O(log n) for recursion stacks",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We store n points in a list and a few integers; thus O(n).",
+      "wrongExplanations": {
+        "1": "We keep all points to iterate; that’s linear memory.",
+        "2": "We do not build pairwise structures."
+      },
+      "hint": "Count the size of the pts list.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q30",
+      "phase": "Analyzing Complexity",
+      "questionText": "Which of the following edge cases must the implementation handle correctly?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Vertices listed in either clockwise or counterclockwise order",
+          "isCode": false
+        },
+        {
+          "label": "Self-intersecting polygons",
+          "isCode": false
+        },
+        {
+          "label": "Non-integer vertex coordinates",
+          "isCode": false
+        },
+        {
+          "label": "Polygons with repeated consecutive vertices",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Order may be either orientation; we used absolute value of the sum to handle it.",
+      "wrongExplanations": {
+        "1": "Input guarantees simple polygons only.",
+        "2": "Input guarantees integer coordinates."
+      },
+      "hint": "Think about orientation and sign of the sum.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\nfrom math import gcd",
+    "data = sys.stdin.read().strip().split()\nit = iter(data)\nn = int(next(it))",
+    "pts = [(int(next(it)), int(next(it))) for _ in range(n)]",
+    "area2 = 0\nB = 0",
+    "for i in range(n):\n    x1, y1 = pts[i]\n    x2, y2 = pts[(i + 1) % n]",
+    "    area2 += x1 * y2 - x2 * y1",
+    "    dx = abs(x2 - x1)\n    dy = abs(y2 - y1)\n    B += gcd(dx, dy)",
+    "area2 = abs(area2)\nI = (area2 - B + 2) // 2\nprint(I, B)"
+  ],
+  "reasoningChain": [
+    {
+      "question": "How do we count lattice points on a straight edge between two lattice vertices?",
+      "insight": "The number of lattice points on a segment inclusive is gcd(|dx|,|dy|)+1; thus gcd(|dx|,|dy|) is a natural per-edge unit."
+    },
+    {
+      "question": "How do we avoid double-counting vertices across edges when summing boundary points?",
+      "insight": "Summing gcd(|dx|,|dy|) over edges yields the total number of distinct boundary lattice points."
+    },
+    {
+      "question": "How can we compute the polygon's area from its ordered vertices?",
+      "insight": "Compute the signed sum of cross terms over consecutive edges; its absolute value is twice the area."
+    },
+    {
+      "question": "How do we relate area, interior points, and boundary points to get interior count?",
+      "insight": "Use the relation A = I + B/2 - 1, rearranged to I = A - B/2 + 1 and implemented as I = (|S| - B + 2)//2."
+    },
+    {
+      "question": "Why is absolute value applied to the signed sum for area?",
+      "insight": "Vertex order determines sign (cw vs ccw), while area must be nonnegative; take absolute at the end."
+    },
+    {
+      "question": "How do we implement the edge traversal correctly?",
+      "insight": "Iterate i=0..n-1 and pair pts[i] with pts[(i+1)%n] to include the closing edge."
+    },
+    {
+      "question": "Is the approach efficient enough?",
+      "insight": "Both area and boundary sums are single passes over edges, giving O(n) time and O(n) memory for storing points."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1457,
+    "output_tokens": 14481,
+    "input_cost": 0.001821,
+    "output_cost": 0.14481,
+    "total_cost": 0.146631
+  }
+}

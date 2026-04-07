@@ -1,0 +1,958 @@
+{
+  "id": "lines-and-queries-ii-range-active-lines-max-query",
+  "title": "Lines and Queries II",
+  "difficulty": "hard",
+  "tags": [
+    "geometry"
+  ],
+  "estimatedMinutes": 100,
+  "language": "python",
+  "description": "You need to process queries on lines over a fixed x-domain.\n\n- Type 1: Add a line y = a*x + b that is active only for x in [l, r].\n- Type 2: Given x, output the maximum y among all lines that are active at that x.\n\nIf no line is active at the queried x, print \"NO\".\n\nInput format:\n- First line: integer n, the number of queries.\n- Next n lines: either `1 a b l r` or `2 x`.\n\nOutput each answer for type 2 queries on its own line.\n\nExample:\nInput:\n6\n1 1 2 1 3\n2 3\n2 4\n1 0 4 1 5\n2 3\n2 4\n\nOutput:\n5\nNO\n5\n4",
+  "examples": [
+    {
+      "input": "6\n1 1 2 1 3\n2 3\n2 4\n1 0 4 1 5\n2 3\n2 4\n",
+      "output": "5\nNO\n5\n4\n",
+      "explanation": "- After adding y = 1*x + 2 active on [1,3], querying x=3 gives 5; querying x=4 has no active lines.\n- After adding y = 0*x + 4 active on [1,5], at x=3 the max is max(5,4)=5; at x=4 only the second line is active giving 4."
+    }
+  ],
+  "constraints": [
+    "1 ≤ n ≤ 2 * 10^5",
+    "-10^9 ≤ a, b ≤ 10^9",
+    "0 ≤ x ≤ 10^5",
+    "0 ≤ l ≤ r ≤ 10^5",
+    "Time limit: 1.00 s",
+    "Memory limit: 512 MB"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "A single line y = 2*x + 1 is added as active on [1,3]. What should be printed for query `2 0`?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "NO",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "x=0 is outside [1,3], so no line is active at x=0. We must print NO.",
+      "wrongExplanations": {
+        "0": "This is y at x=0 but the line is not active at x=0.",
+        "3": "This assumes y=2 at x=0 but again x=0 is outside the active range."
+      },
+      "hint": "Active means the line counts only if x is within [l, r].",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "Two lines are added: L1: y = 1*x + 2 active on [1,3], L2: y = 0*x + 4 active on [1,5]. What is printed for query `2 3`?",
+      "diagram": "x=3: L1 -> 1*3+2=5; L2 -> 0*3+4=4",
+      "options": [
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        },
+        {
+          "label": "6",
+          "isCode": false
+        },
+        {
+          "label": "NO",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "At x=3 both are active; max(5,4)=5.",
+      "wrongExplanations": {
+        "0": "That's the value of L2 only, but we take the maximum over active lines.",
+        "3": "There are active lines at x=3, so NO is incorrect."
+      },
+      "hint": "Evaluate both lines at x and take the maximum.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "Lines L1: y = -1*x + 10 active on [0,10] and L2: y = 2*x - 1 active on [0,10] are added. What is printed for query `2 10`?",
+      "diagram": "At x=10: L1 -> -10 + 10 = 0; L2 -> 20 - 1 = 19",
+      "options": [
+        {
+          "label": "10",
+          "isCode": false
+        },
+        {
+          "label": "19",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "NO",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Both are active at x=10, values are 0 and 19; maximum is 19.",
+      "wrongExplanations": {
+        "0": "This mixes values at different x; compute at x=10.",
+        "2": "0 is L1's value only; we must take the maximum."
+      },
+      "hint": "Compute values at exactly x=10 for each active line.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "If multiple active lines give the same value at x, what should be printed for `2 x`?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Print the number of lines achieving the max",
+          "isCode": false
+        },
+        {
+          "label": "Print the index of any line achieving the max",
+          "isCode": false
+        },
+        {
+          "label": "Print the common maximum value",
+          "isCode": false
+        },
+        {
+          "label": "Print NO",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "We output the maximum y value; ties do not change the output.",
+      "wrongExplanations": {
+        "0": "The task asks for the value, not a count.",
+        "3": "NO is only for when no line is active at x."
+      },
+      "hint": "The problem asks for the maximum value, not identifiers.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Understanding the Problem",
+      "questionText": "If there are no active lines at x, what is the required output for `2 x`?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "-infinity",
+          "isCode": false
+        },
+        {
+          "label": "NO",
+          "isCode": false
+        },
+        {
+          "label": "Skip printing",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "The problem specifies printing NO when no line is active.",
+      "wrongExplanations": {
+        "0": "0 could be a valid max; it doesn't signal absence.",
+        "1": "We do not print -infinity; we print NO."
+      },
+      "hint": "Check the Output section carefully.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "Consider storing all lines and, for each query `2 x`, scanning all lines to check l ≤ x ≤ r and computing a*x+b to find the max. With up to 2*10^5 queries, will this pass within time?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, because each scan is O(log n)",
+          "isCode": false
+        },
+        {
+          "label": "Yes, if we sort lines by slope",
+          "isCode": false
+        },
+        {
+          "label": "No, scanning all lines per query is O(n) and too slow",
+          "isCode": false
+        },
+        {
+          "label": "No, because it uses too much memory",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Per query O(n) with n up to 2e5 leads to ~4e10 operations in worst-case; too slow.",
+      "wrongExplanations": {
+        "0": "A naive scan is O(n), not O(log n).",
+        "1": "Sorting by slope doesn't avoid scanning for range activity per x."
+      },
+      "hint": "Estimate per-query work and total queries.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "Another idea: maintain an array ans[x] for all x in [0, 1e5]. For each type 1 update, compute a*x+b and update ans[x] for x in [l,r]. What is the worst-case time per update?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(1)",
+          "isCode": false
+        },
+        {
+          "label": "O(log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(r - l + 1) up to 1e5 per update",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "You touch each x in [l,r], so it's linear in interval length, up to 1e5 per update.",
+      "wrongExplanations": {
+        "0": "You must process many positions per update.",
+        "1": "There is no logarithmic shortcut in simple per-x updates."
+      },
+      "hint": "Count the positions touched in the worst case.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Exploring Approaches",
+      "questionText": "We need to avoid touching every x for each update. Which organization over the x-range helps apply updates and answer point queries efficiently?",
+      "diagram": "x-range [0, 100000]",
+      "options": [
+        {
+          "label": "Split the range into halves recursively, forming a binary hierarchy of intervals",
+          "isCode": false
+        },
+        {
+          "label": "Keep a flat array and scan it each time",
+          "isCode": false
+        },
+        {
+          "label": "Split into fixed-size blocks of 1000",
+          "isCode": false
+        },
+        {
+          "label": "Group by slope values only",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "A binary interval hierarchy lets us direct updates and queries in logarithmic steps.",
+      "wrongExplanations": {
+        "2": "Fixed blocks still lead to large per-update work across many blocks.",
+        "3": "Slope alone doesn’t capture where a line wins across x."
+      },
+      "hint": "Think about dividing [0, 1e5] so each point lies along a path.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "At a node covering interval [L, R], suppose it stores a candidate line f(x). When inserting a new line g(x) that applies over this full interval, how can we decide which line to keep at this node and where to continue?",
+      "diagram": "Interval [L,R] with midpoint M = floor((L+R)/2)",
+      "options": [
+        {
+          "label": "Compare at midpoint M: keep the better line at M; push the other towards the side(s) where it may win",
+          "isCode": false
+        },
+        {
+          "label": "Compare only at L and keep the larger there",
+          "isCode": false
+        },
+        {
+          "label": "Compare only slopes; larger slope wins",
+          "isCode": false
+        },
+        {
+          "label": "Always keep both lines at the node",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Midpoint comparison lets one line be kept locally and the other passed to a side where it could dominate.",
+      "wrongExplanations": {
+        "1": "Dominance can change across the interval; L alone is insufficient.",
+        "2": "Slope alone doesn't determine which line is larger on [L,R]."
+      },
+      "hint": "Two lines cross at most once; the midpoint helps decide local storage.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "After ensuring the better-at-midpoint line stays at node [L,R], how do we decide which side to pass the other line to?",
+      "diagram": "Check values at L and R relative to the line stored at the node",
+      "options": [
+        {
+          "label": "Evaluate the other line vs current at L; if better, go left; else if better at R, go right; else stop",
+          "isCode": false
+        },
+        {
+          "label": "Always recurse both sides",
+          "isCode": false
+        },
+        {
+          "label": "Pick the side based on sign of slope only",
+          "isCode": false
+        },
+        {
+          "label": "Randomly choose a side to keep balance",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Where the other line beats the node's line indicates which side might need updates.",
+      "wrongExplanations": {
+        "1": "Unnecessary recursion increases time.",
+        "2": "Slope sign doesn't tell where it wins on this interval."
+      },
+      "hint": "Compare at endpoints L and R.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "What is the natural base case for the interval process over [L,R]?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Stop when L == R (a single x value)",
+          "isCode": false
+        },
+        {
+          "label": "Stop when R - L == 2",
+          "isCode": false
+        },
+        {
+          "label": "Stop when the new line is worse at both L and R",
+          "isCode": false
+        },
+        {
+          "label": "Never stop; continue splitting infinitely",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "When L==R, there’s a single x and no further splitting is possible.",
+      "wrongExplanations": {
+        "2": "We still must keep the best at that point; stopping earlier risks wrong results."
+      },
+      "hint": "A point can't be split further.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "For a line active only on [l,r], how should it be inserted into the hierarchy?",
+      "diagram": "Node interval [L,R] and update range [l,r]",
+      "options": [
+        {
+          "label": "If [L,R] is fully inside [l,r], apply full-interval insertion here; if partial overlap, recurse to children; if no overlap, do nothing",
+          "isCode": false
+        },
+        {
+          "label": "Only insert at leaves x=l and x=r",
+          "isCode": false
+        },
+        {
+          "label": "Insert at the root only",
+          "isCode": false
+        },
+        {
+          "label": "Insert everywhere regardless of overlap",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Full cover uses local logic; partial cover splits; disjoint intervals are skipped.",
+      "wrongExplanations": {
+        "1": "Values at interior points are missed.",
+        "3": "Touching all nodes defeats efficiency."
+      },
+      "hint": "Use overlap tests: disjoint, partial, full.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "To answer `2 x`, which nodes must contribute to the answer?",
+      "diagram": "Path from root to leaf for x",
+      "options": [
+        {
+          "label": "All nodes along the path from root to the leaf interval containing x",
+          "isCode": false
+        },
+        {
+          "label": "Only the root",
+          "isCode": false
+        },
+        {
+          "label": "Only the leaf",
+          "isCode": false
+        },
+        {
+          "label": "All nodes in the tree",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Any line affecting x must have been stored along this path; take the max over them.",
+      "wrongExplanations": {
+        "2": "Some lines may remain stored higher up.",
+        "3": "Traversing all nodes is unnecessary."
+      },
+      "hint": "Where could a line that affects x have been stored?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Building the Idea",
+      "questionText": "For memory efficiency over [0, 100000], how should child nodes be created?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Create child nodes only when needed (lazily)",
+          "isCode": false
+        },
+        {
+          "label": "Precreate all nodes for all intervals",
+          "isCode": false
+        },
+        {
+          "label": "Never create child nodes",
+          "isCode": false
+        },
+        {
+          "label": "Create only left children",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Lazy creation avoids allocating unused parts of the structure.",
+      "wrongExplanations": {
+        "1": "Full precreation wastes memory and time.",
+        "2": "Some recursion requires children."
+      },
+      "hint": "Only build what you touch.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q15",
+      "phase": "Building the Idea",
+      "questionText": "The x-domain is 0 ≤ x ≤ 100000. For updates [l,r] and queries x, what boundary handling is appropriate?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Clamp l and r to [0,100000], and treat the interval as inclusive",
+          "isCode": false
+        },
+        {
+          "label": "Treat [l,r) as half-open",
+          "isCode": false
+        },
+        {
+          "label": "Ignore bounds and assume input always valid",
+          "isCode": false
+        },
+        {
+          "label": "Reject updates partially outside the domain",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The problem defines inclusive ranges; clamping handles any out-of-bound inputs safely.",
+      "wrongExplanations": {
+        "1": "Intervals are inclusive per statement.",
+        "3": "We should still apply the portion within the domain."
+      },
+      "hint": "Remember the domain and inclusive interpretation.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Choose the correct constants and recursion setup for Python, ensuring a safe negative sentinel far below all possible y values.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\nsys.setrecursionlimit(1 << 20)\nNEG_INF = -10**30",
+          "isCode": true
+        },
+        {
+          "label": "import sys\nsys.setrecursionlimit(1000)\nNEG_INF = -10**9",
+          "isCode": true
+        },
+        {
+          "label": "import sys\nsys.setrecursionlimit(1 << 15)\nNEG_INF = -10**12",
+          "isCode": true
+        },
+        {
+          "label": "import sys\nsys.setrecursionlimit(1 << 25)\nNEG_INF = 0",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "-10**30 is safely below any a*x+b (~1e14). A higher recursion limit avoids stack issues.",
+      "wrongExplanations": {
+        "1": "NEG_INF too small in magnitude; real values can be < -1e12.",
+        "3": "NEG_INF=0 would break cases with all negatives."
+      },
+      "hint": "Compute worst-case a*x+b to pick a safe sentinel.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\nsys.setrecursionlimit(1 << 20)\nNEG_INF = -10**30",
+      "codeLabel": "Imports and constants"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Define a Line and a function to evaluate it at x using integers.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "class Line:\n    __slots__ = ('m', 'b')\n    def __init__(self, m, b):\n        self.m = m\n        self.b = b\n\ndef eval_line(line, x):\n    return line.m * x + line.b",
+          "isCode": true
+        },
+        {
+          "label": "class Line:\n    def __init__(self, m, b):\n        self.m = m\n        self.b = b\n\ndef eval_line(line, x):\n    return line.m + x + line.b",
+          "isCode": true
+        },
+        {
+          "label": "class Line:\n    def __init__(self, m, b):\n        self.m = float(m)\n        self.b = float(b)\n\ndef eval_line(line, x):\n    return int(line.m * x) + int(line.b)",
+          "isCode": true
+        },
+        {
+          "label": "class Line:\n    __slots__ = ('m', 'b')\n    def __init__(self, m, b):\n        self.m = m\n        self.b = b\n\ndef eval_line(line, x):\n    return line.m ** x + line.b",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "y = m*x + b with integer arithmetic is required. Avoid adding instead of multiplying or casting unnecessarily.",
+      "wrongExplanations": {
+        "1": "This uses m + x + b, which is not y = m*x + b.",
+        "3": "This uses exponentiation instead of multiplication."
+      },
+      "hint": "Implement y = a*x + b exactly.",
+      "isCodeBuilding": true,
+      "codeSnippet": "class Line:\n    __slots__ = ('m', 'b')\n    def __init__(self, m, b):\n        self.m = m\n        self.b = b\n\ndef eval_line(line, x):\n    return line.m * x + line.b",
+      "codeLabel": "Line and evaluator"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Define a node for the x-interval hierarchy, storing bounds, children, and an optional line.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "class Node:\n    __slots__ = ('l', 'r', 'left', 'right', 'line')\n    def __init__(self, l, r):\n        self.l = l\n        self.r = r\n        self.left = None\n        self.right = None\n        self.line = None",
+          "isCode": true
+        },
+        {
+          "label": "class Node:\n    def __init__(self):\n        self.l = 0\n        self.r = 0\n        self.left = []\n        self.right = []\n        self.line = 0",
+          "isCode": true
+        },
+        {
+          "label": "class Node:\n    def __init__(self, l, r):\n        self.l = l\n        self.r = r\n        self.left = None\n        self.right = None\n        self.line = Line(0, 0)",
+          "isCode": true
+        },
+        {
+          "label": "class Node:\n    __slots__ = ('l', 'r')\n    def __init__(self, l, r):\n        self.l = l\n        self.r = r",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need l,r, left,right, and an optional stored line initialized to None.",
+      "wrongExplanations": {
+        "2": "Defaulting to Line(0,0) hides empty state and biases results.",
+        "3": "Missing children and line fields."
+      },
+      "hint": "Keep children None until needed; line may be absent.",
+      "isCodeBuilding": true,
+      "codeSnippet": "class Node:\n    __slots__ = ('l', 'r', 'left', 'right', 'line')\n    def __init__(self, l, r):\n        self.l = l\n        self.r = r\n        self.left = None\n        self.right = None\n        self.line = None",
+      "codeLabel": "Node definition"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Implement inserting a line over a fully covered node interval: keep the better-at-mid line at the node, propagate the other to a side where it can win.",
+      "diagram": "Node [L,R], mid=(L+R)//2",
+      "options": [
+        {
+          "label": "def add_line(node, new_line):\n    L, R = node.l, node.r\n    mid = (L + R) // 2\n    cur = node.line\n    if cur is None:\n        node.line = new_line\n        return\n    if eval_line(new_line, mid) > eval_line(cur, mid):\n        node.line, new_line = new_line, cur\n        cur = node.line\n    if L == R:\n        return\n    if eval_line(new_line, L) > eval_line(node.line, L):\n        if node.left is None:\n            node.left = Node(L, mid)\n        add_line(node.left, new_line)\n    elif eval_line(new_line, R) > eval_line(node.line, R):\n        if node.right is None:\n            node.right = Node(mid + 1, R)\n        add_line(node.right, new_line)",
+          "isCode": true
+        },
+        {
+          "label": "def add_line(node, new_line):\n    L, R = node.l, node.r\n    mid = (L + R) // 2\n    if node.line is None:\n        node.line = new_line\n        return\n    if eval_line(new_line, mid) < eval_line(node.line, mid):\n        node.line = new_line  # keep worse at mid\n    if L == R:\n        return\n    if eval_line(new_line, L) < eval_line(node.line, L):\n        if node.left is None:\n            node.left = Node(L, mid)\n        add_line(node.left, new_line)\n    else:\n        if node.right is None:\n            node.right = Node(mid + 1, R)\n        add_line(node.right, new_line)",
+          "isCode": true
+        },
+        {
+          "label": "def add_line(node, new_line):\n    L, R = node.l, node.r\n    mid = (L + R) // 2\n    if node.line is None:\n        node.line = new_line\n        return\n    if L == R:\n        # replace regardless\n        node.line = new_line\n        return\n    # always recurse both sides\n    if node.left is None:\n        node.left = Node(L, mid)\n    if node.right is None:\n        node.right = Node(mid + 1, R)\n    add_line(node.left, new_line)\n    add_line(node.right, new_line)",
+          "isCode": true
+        },
+        {
+          "label": "def add_line(node, new_line):\n    L, R = node.l, node.r\n    mid = (L + R + 1) // 2  # ceil mid\n    cur = node.line\n    if cur is None:\n        node.line = new_line\n        return\n    if eval_line(new_line, mid) > eval_line(cur, mid):\n        node.line = new_line\n        # don't propagate anything\n    # no further steps",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Keep the better-at-mid at node; recurse the other to the side where it may win using endpoint checks.",
+      "wrongExplanations": {
+        "1": "It keeps the worse at mid and uses reversed comparisons.",
+        "3": "It doesn't propagate, losing candidates away from mid."
+      },
+      "hint": "Propagate only the line that’s worse at mid, towards where it wins.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def add_line(node, new_line):\n    L, R = node.l, node.r\n    mid = (L + R) // 2\n    cur = node.line\n    if cur is None:\n        node.line = new_line\n        return\n    if eval_line(new_line, mid) > eval_line(cur, mid):\n        node.line, new_line = new_line, cur\n        cur = node.line\n    if L == R:\n        return\n    if eval_line(new_line, L) > eval_line(node.line, L):\n        if node.left is None:\n            node.left = Node(L, mid)\n        add_line(node.left, new_line)\n    elif eval_line(new_line, R) > eval_line(node.line, R):\n        if node.right is None:\n            node.right = Node(mid + 1, R)\n        add_line(node.right, new_line)",
+      "codeLabel": "Insert over full interval"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Implement inserting a line active only on a subrange [ql, qr] within the x-domain.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def add_segment(node, ql, qr, new_line):\n    if qr < node.l or node.r < ql:\n        return\n    if ql <= node.l and node.r <= qr:\n        add_line(node, new_line)\n        return\n    mid = (node.l + node.r) // 2\n    if node.left is None:\n        node.left = Node(node.l, mid)\n    if node.right is None:\n        node.right = Node(mid + 1, node.r)\n    add_segment(node.left, ql, qr, new_line)\n    add_segment(node.right, ql, qr, new_line)",
+          "isCode": true
+        },
+        {
+          "label": "def add_segment(node, ql, qr, new_line):\n    if ql <= node.l and node.r <= qr:\n        node.line = new_line\n        return\n    if node.left is None:\n        mid = (node.l + node.r) // 2\n        node.left = Node(node.l, mid)\n        node.right = Node(mid + 1, node.r)\n    add_segment(node.left, ql, qr, new_line)\n    add_segment(node.right, ql, qr, new_line)",
+          "isCode": true
+        },
+        {
+          "label": "def add_segment(node, ql, qr, new_line):\n    if node.l > qr or node.r < ql:\n        return\n    # always recurse to both children without base case\n    mid = (node.l + node.r) // 2\n    if node.left is None:\n        node.left = Node(node.l, mid)\n    if node.right is None:\n        node.right = Node(mid + 1, node.r)\n    add_segment(node.left, ql, qr, new_line)\n    add_segment(node.right, ql, qr, new_line)",
+          "isCode": true
+        },
+        {
+          "label": "def add_segment(node, ql, qr, new_line):\n    if ql > node.l and node.r > qr:\n        return\n    add_line(node, new_line)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Use disjoint/full/partial overlap handling. Full overlap applies the node-level insert; partial splits to children.",
+      "wrongExplanations": {
+        "1": "Overwrites at full cover, losing existing lines; also missing disjoint check.",
+        "3": "Overlap condition is wrong; it returns in many cases where it should recurse."
+      },
+      "hint": "Handle three overlap cases correctly.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def add_segment(node, ql, qr, new_line):\n    if qr < node.l or node.r < ql:\n        return\n    if ql <= node.l and node.r <= qr:\n        add_line(node, new_line)\n        return\n    mid = (node.l + node.r) // 2\n    if node.left is None:\n        node.left = Node(node.l, mid)\n    if node.right is None:\n        node.right = Node(mid + 1, node.r)\n    add_segment(node.left, ql, qr, new_line)\n    add_segment(node.right, ql, qr, new_line)",
+      "codeLabel": "Insert on a subrange"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "Implement querying the maximum at a point x by walking from the root to the leaf interval and tracking the best value.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def query(node, x):\n    res = NEG_INF\n    cur = node\n    while cur is not None:\n        if cur.line is not None:\n            val = eval_line(cur.line, x)\n            if val > res:\n                res = val\n        if cur.l == cur.r:\n            break\n        mid = (cur.l + cur.r) // 2\n        if x <= mid:\n            cur = cur.left\n        else:\n            cur = cur.right\n    return res",
+          "isCode": true
+        },
+        {
+          "label": "def query(node, x):\n    if node is None:\n        return 0\n    if node.line is None:\n        return 0\n    return eval_line(node.line, x)",
+          "isCode": true
+        },
+        {
+          "label": "def query(node, x):\n    res = 0\n    cur = node\n    while cur is not None:\n        if cur.line is not None:\n            res = max(res, eval_line(cur.line, x))\n        mid = (cur.l + cur.r) // 2\n        if x < mid:\n            cur = cur.left\n        else:\n            cur = cur.right\n    return res",
+          "isCode": true
+        },
+        {
+          "label": "def query(node, x):\n    res = NEG_INF\n    # explore entire tree\n    def dfs(u):\n        nonlocal res\n        if not u:\n            return\n        if u.line:\n            res = max(res, eval_line(u.line, x))\n        dfs(u.left)\n        dfs(u.right)\n    dfs(node)\n    return res",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Accumulate along the root-to-leaf path only; use NEG_INF when no line contributes.",
+      "wrongExplanations": {
+        "1": "Ignores lines stored at ancestors and returns 0 for no line, which is wrong.",
+        "2": "Uses 0 as base; if all values are negative, this returns an incorrect 0."
+      },
+      "hint": "Use the path to x and a safe negative sentinel.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def query(node, x):\n    res = NEG_INF\n    cur = node\n    while cur is not None:\n        if cur.line is not None:\n            val = eval_line(cur.line, x)\n            if val > res:\n                res = val\n        if cur.l == cur.r:\n            break\n        mid = (cur.l + cur.r) // 2\n        if x <= mid:\n            cur = cur.left\n        else:\n            cur = cur.right\n    return res",
+      "codeLabel": "Point query"
+    },
+    {
+      "id": "q22",
+      "phase": "Writing the Code",
+      "questionText": "Write the main function to read input, process queries, clamp ranges, and print answers. Use the hierarchy on x ∈ [0, 100000].",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def main():\n    data = sys.stdin.read().strip().split()\n    if not data:\n        return\n    it = iter(data)\n    n = int(next(it))\n    X_MIN = 0\n    X_MAX = 100000\n    root = Node(X_MIN, X_MAX)\n    out = []\n    for _ in range(n):\n        t = int(next(it))\n        if t == 1:\n            a = int(next(it)); b = int(next(it)); l = int(next(it)); r = int(next(it))\n            if l < X_MIN:\n                l = X_MIN\n            if r > X_MAX:\n                r = X_MAX\n            if l <= r:\n                add_segment(root, l, r, Line(a, b))\n        else:\n            x = int(next(it))\n            if x < X_MIN or x > X_MAX:\n                out.append(\"NO\")\n            else:\n                val = query(root, x)\n                if val == NEG_INF:\n                    out.append(\"NO\")\n                else:\n                    out.append(str(val))\n    sys.stdout.write(\"\\n\".join(out))",
+          "isCode": true
+        },
+        {
+          "label": "def main():\n    import sys\n    n = int(sys.stdin.readline())\n    X_MIN = -10**9\n    X_MAX = 10**9\n    root = Node(X_MIN, X_MAX)\n    for _ in range(n):\n        parts = sys.stdin.readline().split()\n        if parts[0] == '1':\n            a, b, l, r = map(int, parts[1:])\n            add_segment(root, l, r, Line(a, b))\n        else:\n            x = int(parts[1])\n            print(query(root, x))",
+          "isCode": true
+        },
+        {
+          "label": "def main():\n    data = sys.stdin.read().split()\n    it = iter(data)\n    n = int(next(it))\n    root = Node(0, 100000)\n    out = []\n    for _ in range(n):\n        t = int(next(it))\n        if t == 1:\n            a = int(next(it)); b = int(next(it)); l = int(next(it)); r = int(next(it))\n            add_segment(root, l, r, Line(a, b))\n        else:\n            x = int(next(it))\n            val = query(root, x)\n            out.append(str(val))\n    print('\\n'.join(out))",
+          "isCode": true
+        },
+        {
+          "label": "def main():\n    data = sys.stdin.read().strip().split()\n    it = iter(data)\n    n = int(next(it))\n    root = Node(0, 100000)\n    for _ in range(n):\n        t = int(next(it))\n        if t == 1:\n            a = int(next(it)); b = int(next(it)); l = int(next(it)); r = int(next(it))\n            add_segment(root, l, r, Line(a, b))\n        else:\n            x = int(next(it))\n            print(query(root, x) if query(root, x) != 0 else 'NO')",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Clamp to domain, use NEG_INF to detect no-line case, and collect outputs for efficiency.",
+      "wrongExplanations": {
+        "1": "Domain set too large, no clamping, and prints raw values without NO logic.",
+        "3": "Treats 0 as no-line case, which is incorrect; 0 may be a valid answer."
+      },
+      "hint": "Handle NO outputs and clamp ranges to [0,100000].",
+      "isCodeBuilding": true,
+      "codeSnippet": "def main():\n    data = sys.stdin.read().strip().split()\n    if not data:\n        return\n    it = iter(data)\n    n = int(next(it))\n    X_MIN = 0\n    X_MAX = 100000\n    root = Node(X_MIN, X_MAX)\n    out = []\n    for _ in range(n):\n        t = int(next(it))\n        if t == 1:\n            a = int(next(it)); b = int(next(it)); l = int(next(it)); r = int(next(it))\n            if l < X_MIN:\n                l = X_MIN\n            if r > X_MAX:\n                r = X_MAX\n            if l <= r:\n                add_segment(root, l, r, Line(a, b))\n        else:\n            x = int(next(it))\n            if x < X_MIN or x > X_MAX:\n                out.append(\"NO\")\n            else:\n                val = query(root, x)\n                if val == NEG_INF:\n                    out.append(\"NO\")\n                else:\n                    out.append(str(val))\n    sys.stdout.write(\"\\n\".join(out))",
+      "codeLabel": "Main processing"
+    },
+    {
+      "id": "q23",
+      "phase": "Writing the Code",
+      "questionText": "Add the standard main guard to run the solution.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "if __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "if __name__ == \"main\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "if __name__ == \"__init__\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "main()",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The correct Python entry point guard is if __name__ == \"__main__\".",
+      "wrongExplanations": {
+        "1": "The module name is \"__main__\", not \"main\".",
+        "3": "This runs on import, which is not always desired."
+      },
+      "hint": "Standard Python pattern for script entry.",
+      "isCodeBuilding": true,
+      "codeSnippet": "if __name__ == \"__main__\":\n    main()",
+      "codeLabel": "Entry point"
+    },
+    {
+      "id": "q24",
+      "phase": "Verifying the Solution",
+      "questionText": "Run the logic on the sample input. What outputs should be produced, in order?",
+      "diagram": "Input:\n6\n1 1 2 1 3\n2 3\n2 4\n1 0 4 1 5\n2 3\n2 4",
+      "options": [
+        {
+          "label": "5, NO, 5, 4",
+          "isCode": false
+        },
+        {
+          "label": "5, 4, 5, NO",
+          "isCode": false
+        },
+        {
+          "label": "NO, 5, 4, 5",
+          "isCode": false
+        },
+        {
+          "label": "5, NO, 4, 5",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Matches the example: 5, NO, 5, 4.",
+      "wrongExplanations": {
+        "1": "Second query at x=4 has no active line before the second insert.",
+        "3": "After second insert, x=3 yields 5, x=4 yields 4."
+      },
+      "hint": "Track active ranges for each query.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Verifying the Solution",
+      "questionText": "Consider lines: add y = -3*x + 7 active on [0,5], then y = 1*x - 2 active on [3,10]. What is printed for queries `2 2` and `2 4`?",
+      "diagram": "At x=2: only first active -> -6+7=1.\nAt x=4: both active -> max(-12+7=-5, 4-2=2)=2.",
+      "options": [
+        {
+          "label": "1 and 2",
+          "isCode": false
+        },
+        {
+          "label": "-1 and 2",
+          "isCode": false
+        },
+        {
+          "label": "1 and -5",
+          "isCode": false
+        },
+        {
+          "label": "NO and 2",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "At x=2: 1. At x=4: 2.",
+      "wrongExplanations": {
+        "2": "At x=4 the second line gives 2, which is larger than -5.",
+        "3": "At x=2 the first line is active and yields 1."
+      },
+      "hint": "Compute values and take the max, considering activity windows.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Analyzing Complexity",
+      "questionText": "What are the time complexities for adding a line over [l,r] and for answering a query at x in this approach?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Add: O(log X) expected; Query: O(log X)",
+          "isCode": false
+        },
+        {
+          "label": "Add: O(1); Query: O(1)",
+          "isCode": false
+        },
+        {
+          "label": "Add: O(r-l+1); Query: O(1)",
+          "isCode": false
+        },
+        {
+          "label": "Add: O(n); Query: O(n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We touch a logarithmic number of nodes per operation along the hierarchy.",
+      "wrongExplanations": {
+        "2": "We avoid touching every x in [l,r].",
+        "3": "We do not scan all lines or nodes."
+      },
+      "hint": "Each operation follows or affects O(log X) nodes.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\nsys.setrecursionlimit(1 << 20)\nNEG_INF = -10**30",
+    "class Line:\n    __slots__ = ('m', 'b')\n    def __init__(self, m, b):\n        self.m = m\n        self.b = b\n\ndef eval_line(line, x):\n    return line.m * x + line.b",
+    "class Node:\n    __slots__ = ('l', 'r', 'left', 'right', 'line')\n    def __init__(self, l, r):\n        self.l = l\n        self.r = r\n        self.left = None\n        self.right = None\n        self.line = None",
+    "def add_line(node, new_line):\n    L, R = node.l, node.r\n    mid = (L + R) // 2\n    cur = node.line\n    if cur is None:\n        node.line = new_line\n        return\n    if eval_line(new_line, mid) > eval_line(cur, mid):\n        node.line, new_line = new_line, cur\n        cur = node.line\n    if L == R:\n        return\n    if eval_line(new_line, L) > eval_line(node.line, L):\n        if node.left is None:\n            node.left = Node(L, mid)\n        add_line(node.left, new_line)\n    elif eval_line(new_line, R) > eval_line(node.line, R):\n        if node.right is None:\n            node.right = Node(mid + 1, R)\n        add_line(node.right, new_line)",
+    "def add_segment(node, ql, qr, new_line):\n    if qr < node.l or node.r < ql:\n        return\n    if ql <= node.l and node.r <= qr:\n        add_line(node, new_line)\n        return\n    mid = (node.l + node.r) // 2\n    if node.left is None:\n        node.left = Node(node.l, mid)\n    if node.right is None:\n        node.right = Node(mid + 1, node.r)\n    add_segment(node.left, ql, qr, new_line)\n    add_segment(node.right, ql, qr, new_line)",
+    "def query(node, x):\n    res = NEG_INF\n    cur = node\n    while cur is not None:\n        if cur.line is not None:\n            val = eval_line(cur.line, x)\n            if val > res:\n                res = val\n        if cur.l == cur.r:\n            break\n        mid = (cur.l + cur.r) // 2\n        if x <= mid:\n            cur = cur.left\n        else:\n            cur = cur.right\n    return res",
+    "def main():\n    data = sys.stdin.read().strip().split()\n    if not data:\n        return\n    it = iter(data)\n    n = int(next(it))\n    X_MIN = 0\n    X_MAX = 100000\n    root = Node(X_MIN, X_MAX)\n    out = []\n    for _ in range(n):\n        t = int(next(it))\n        if t == 1:\n            a = int(next(it)); b = int(next(it)); l = int(next(it)); r = int(next(it))\n            if l < X_MIN:\n                l = X_MIN\n            if r > X_MAX:\n                r = X_MAX\n            if l <= r:\n                add_segment(root, l, r, Line(a, b))\n        else:\n            x = int(next(it))\n            if x < X_MIN or x > X_MAX:\n                out.append(\"NO\")\n            else:\n                val = query(root, x)\n                if val == NEG_INF:\n                    out.append(\"NO\")\n                else:\n                    out.append(str(val))\n    sys.stdout.write(\"\\n\".join(out))",
+    "if __name__ == \"__main__\":\n    main()"
+  ],
+  "reasoningChain": [
+    {
+      "question": "Why does a query at x outside all active ranges return NO?",
+      "insight": "Active lines only contribute within their [l,r] intervals; if none cover x, there is no value to report."
+    },
+    {
+      "question": "Why is scanning all lines per query too slow here?",
+      "insight": "With up to 2e5 operations, per-query O(n) can lead to ~4e10 checks, which exceeds time limits."
+    },
+    {
+      "question": "How can we organize the x-domain to avoid touching every position on updates?",
+      "insight": "Use a binary interval hierarchy so updates and queries touch only O(log X) nodes relevant to their ranges or points."
+    },
+    {
+      "question": "How do we decide which line to keep at an interval node when inserting?",
+      "insight": "Compare at the midpoint; keep the better line there and pass the other towards the side where it may dominate."
+    },
+    {
+      "question": "How do we insert a line active only on [l,r]?",
+      "insight": "Apply the node-level insertion on fully covered intervals and recurse only into overlapping children; skip disjoint intervals."
+    },
+    {
+      "question": "How is a point query answered efficiently?",
+      "insight": "Walk the path from root to the leaf containing x, evaluating stored lines and taking the maximum among them."
+    },
+    {
+      "question": "What ensures correctness for negative values and ties?",
+      "insight": "Use a very small NEG_INF as a base and return the maximum computed value; ties are naturally handled by taking the max."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1412,
+    "output_tokens": 17941,
+    "input_cost": 0.001765,
+    "output_cost": 0.17941,
+    "total_cost": 0.181175
+  }
+}

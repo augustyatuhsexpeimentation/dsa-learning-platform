@@ -1,0 +1,991 @@
+{
+  "id": "convex-hull-builder",
+  "title": "Convex Hull",
+  "difficulty": "hard",
+  "tags": [
+    "geometry"
+  ],
+  "estimatedMinutes": 75,
+  "language": "python",
+  "description": "Given n distinct points in the plane with positive hull area, compute the convex hull and print all points on the hull. First print k, the number of hull points, then k lines with the coordinates of those points in any order. Include all points that lie on the boundary of the hull (including points along edges).",
+  "examples": [
+    {
+      "input": "6\n2 1\n2 5\n3 3\n4 3\n4 4\n6 3\n",
+      "output": "4\n2 1\n2 5\n4 4\n6 3\n",
+      "explanation": "The hull corners are (2,1), (2,5), (4,4), (6,3). There are no other boundary points along edges."
+    }
+  ],
+  "constraints": [
+    "3 ≤ n ≤ 2·10^5",
+    "-10^9 ≤ x, y ≤ 10^9",
+    "All points are distinct",
+    "Convex hull area is positive"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "What exactly must the output contain?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "First k, the number of hull points; then k lines with the coordinates of all points on the convex hull boundary, in any order.",
+          "isCode": false
+        },
+        {
+          "label": "First k, then only the corner points of the hull in counterclockwise order.",
+          "isCode": false
+        },
+        {
+          "label": "Only the corner points of the hull; exclude points that lie on hull edges.",
+          "isCode": false
+        },
+        {
+          "label": "The indices of hull points in input order.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We must print k and then all points on the convex hull boundary in any order. Points on edges are included; ordering is not constrained.",
+      "wrongExplanations": {
+        "1": "Ordering is not required; also edge points must be included.",
+        "2": "The problem asks to include all boundary points, not just corners."
+      },
+      "hint": "Read the output specification carefully: any order, include all boundary points.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "Given points forming a triangle: (0,0), (2,0), (1,2). Which points are on the convex hull?",
+      "diagram": "• (0,0), • (2,0), • (1,2)",
+      "options": [
+        {
+          "label": "All three points: (0,0), (2,0), (1,2)",
+          "isCode": false
+        },
+        {
+          "label": "Only (0,0) and (2,0)",
+          "isCode": false
+        },
+        {
+          "label": "Only (1,2)",
+          "isCode": false
+        },
+        {
+          "label": "None; hull area is zero",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "A triangle's hull is the triangle itself; all three points are on the hull.",
+      "wrongExplanations": {
+        "1": "The top vertex (1,2) is also on the boundary.",
+        "3": "The three points form a triangle with positive area."
+      },
+      "hint": null,
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "Consider points: (0,0), (2,0), (1,1), (1,0). Is (1,0) part of the required output?",
+      "diagram": "Base: (0,0) ---- (2,0)\nMiddle:      (1,0)\nTop:         (1,1)",
+      "options": [
+        {
+          "label": "Yes, because it lies on the boundary edge from (0,0) to (2,0).",
+          "isCode": false
+        },
+        {
+          "label": "No, only extreme corners should be printed.",
+          "isCode": false
+        },
+        {
+          "label": "No, because it is collinear with (0,0) and (2,0).",
+          "isCode": false
+        },
+        {
+          "label": "Yes, but only if we print points in counterclockwise order.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "All boundary points, including those on edges, must be printed. Ordering is irrelevant.",
+      "wrongExplanations": {
+        "2": "Collinear boundary points are required by the problem.",
+        "3": "Order doesn't affect whether a point is on the hull."
+      },
+      "hint": "Boundary points include points on edges, not just corners.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "Which statement about the order of printed hull points is correct?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "They must be listed in counterclockwise order starting at the leftmost point.",
+          "isCode": false
+        },
+        {
+          "label": "They can be printed in any order.",
+          "isCode": false
+        },
+        {
+          "label": "They must be sorted by x then y.",
+          "isCode": false
+        },
+        {
+          "label": "They must be printed in the same order as input.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Any order is acceptable. There is no requirement on traversal or sorting.",
+      "wrongExplanations": {
+        "0": "This is a common choice but not required here.",
+        "2": "Sorting lexicographically is not required by the output format."
+      },
+      "hint": "Check the output specification: any order is allowed.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Exploring Approaches",
+      "questionText": "A naive idea: for every pair of points, check if all other points lie on one side of the line segment. What is the time complexity?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n^3) because there are O(n^2) pairs and O(n) checks per pair.",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2) because each point is checked once per pair set.",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n) after sorting.",
+          "isCode": false
+        },
+        {
+          "label": "O(n) because each point is visited constantly many times.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "There are ~n^2 pairs and verifying a pair takes up to n checks → O(n^3).",
+      "wrongExplanations": {
+        "1": "Each pair needs up to n checks; pairs are O(n^2).",
+        "2": "Sorting alone doesn't give the hull; naive pair checking is costlier."
+      },
+      "hint": "Count pairs and the per-pair verification cost.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "To systematically sweep the plane, which sorting of points is most useful?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Sort by x, breaking ties by y (lexicographic).",
+          "isCode": false
+        },
+        {
+          "label": "Sort by distance from the origin.",
+          "isCode": false
+        },
+        {
+          "label": "Sort by input order (no sorting).",
+          "isCode": false
+        },
+        {
+          "label": "Sort randomly to avoid bias.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Lexicographic sorting lets us sweep from left to right and build boundary chains consistently.",
+      "wrongExplanations": {
+        "1": "Distance from origin mixes left and right sides unpredictably.",
+        "2": "Input order is arbitrary and breaks the sweep logic."
+      },
+      "hint": "We want to go from leftmost to rightmost in a consistent way.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "Given three points o=(ox,oy), a=(ax,ay), b=(bx,by), which expression gives the signed area (positive/negative indicating turn direction)?",
+      "diagram": "Sign of area(o,a,b) = ?",
+      "options": [
+        {
+          "label": "(ax-ox)*(by-oy) - (ay-oy)*(bx-ox)",
+          "isCode": true
+        },
+        {
+          "label": "(bx-ax)*(oy-ay) - (by-ay)*(ox-ax)",
+          "isCode": true
+        },
+        {
+          "label": "(ox-ax)*(oy-bx) - (oy-ay)*(ox-bx)",
+          "isCode": true
+        },
+        {
+          "label": "(ax+bx-2*ox)*(ay+by-2*oy)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The determinant (ax-ox, ay-oy) x (bx-ox, by-oy) gives the signed area (twice); sign indicates left/right turn.",
+      "wrongExplanations": {
+        "1": "This permutes terms inconsistently; sign and value are not the oriented area from o.",
+        "3": "This is not an area/determinant; it mixes sums and products arbitrarily."
+      },
+      "hint": "Think determinant of vectors oa and ob.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Building the Idea",
+      "questionText": "What does the sign of the signed area area(o,a,b) indicate when scanning from o→a→b?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Positive: left turn; Negative: right turn; Zero: collinear.",
+          "isCode": false
+        },
+        {
+          "label": "Positive: right turn; Negative: left turn; Zero: collinear.",
+          "isCode": false
+        },
+        {
+          "label": "Positive: closer to origin; Negative: farther; Zero: same distance.",
+          "isCode": false
+        },
+        {
+          "label": "Sign has no geometric meaning, only magnitude matters.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The sign indicates orientation: left/right turn or collinearity.",
+      "wrongExplanations": {
+        "1": "This swaps left/right interpretation.",
+        "3": "The sign is crucial to detect turn direction."
+      },
+      "hint": "Right-hand rule for 2D orientation.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "When building a boundary chain in sorted order, what should we do if adding the next point makes a right turn?",
+      "diagram": "Chain ... -> A -> B, next point C makes a right turn at (A,B,C).",
+      "options": [
+        {
+          "label": "Remove the last point from the chain and recheck (keep popping while it's a right turn).",
+          "isCode": false
+        },
+        {
+          "label": "Keep all points; right turns are fine as long as we sort.",
+          "isCode": false
+        },
+        {
+          "label": "Remove the first point in the chain.",
+          "isCode": false
+        },
+        {
+          "label": "Skip adding the new point and move on.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Right turns break convexity; we must backtrack by removing the last chain point until the turn is not right.",
+      "wrongExplanations": {
+        "1": "Right turns would indent the chain inward, breaking convexity.",
+        "3": "Skipping may miss boundary points; we need to adjust the chain."
+      },
+      "hint": "Maintain convexity by keeping turns consistent.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "We must include all points on hull edges. In the popping condition for a chain, which comparison keeps collinear points?",
+      "diagram": "While len(chain)>=2 and area(chain[-2], chain[-1], p) ? 0: pop",
+      "options": [
+        {
+          "label": "Pop while area < 0 (strictly right turn only).",
+          "isCode": false
+        },
+        {
+          "label": "Pop while area <= 0 (right turn or collinear).",
+          "isCode": false
+        },
+        {
+          "label": "Pop while area > 0 (left turns).",
+          "isCode": false
+        },
+        {
+          "label": "Never pop; always append.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Using < 0 removes only right turns, leaving collinear points on the chain (hull edges).",
+      "wrongExplanations": {
+        "1": "This removes collinear points, which we must keep.",
+        "2": "Removing left turns would invert the chain."
+      },
+      "hint": "We want to keep zero-area triples.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "To get the other boundary chain after building one from left to right, how should we traverse the points?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Traverse the sorted points in reverse order to build the other chain.",
+          "isCode": false
+        },
+        {
+          "label": "Use the same left-to-right traversal and just invert the sign test.",
+          "isCode": false
+        },
+        {
+          "label": "Pick random unvisited points until all are used.",
+          "isCode": false
+        },
+        {
+          "label": "Traverse by increasing y only.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Building one chain forward and the other in reverse ensures we cover both sides consistently.",
+      "wrongExplanations": {
+        "1": "Simply inverting a sign with the same order does not properly construct the opposite boundary.",
+        "3": "Sorting by y alone can interleave x positions incorrectly."
+      },
+      "hint": "Think symmetry: one chain left-to-right, the other right-to-left.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "After building two chains, how do we combine them while avoiding duplicate endpoints?",
+      "diagram": "lower: L0 ... Lm, upper: U0 ... Um (L0==Um, Lm==U0)",
+      "options": [
+        {
+          "label": "Concatenate as lower[:-1] + upper[:-1]",
+          "isCode": true
+        },
+        {
+          "label": "Concatenate as lower + upper",
+          "isCode": true
+        },
+        {
+          "label": "Concatenate as lower[1:] + upper[1:]",
+          "isCode": true
+        },
+        {
+          "label": "Concatenate unique sorted set of both chains",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Slicing off the last point of each chain removes the shared endpoints before concatenation.",
+      "wrongExplanations": {
+        "1": "This duplicates the shared endpoints.",
+        "3": "A set loses the chain order and may not preserve all edge points distinctly if mishandled; we will handle uniqueness separately."
+      },
+      "hint": "The first of one chain equals the last of the other, and vice versa.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "Because points collinear with the leftmost/rightmost vertical edges may appear in both chains, how do we ensure we print each boundary point once?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Keep a seen set and build a unique list in the order of concatenation.",
+          "isCode": false
+        },
+        {
+          "label": "Trust slicing; duplicates cannot happen after removing endpoints.",
+          "isCode": false
+        },
+        {
+          "label": "Remove every second point to avoid duplicates.",
+          "isCode": false
+        },
+        {
+          "label": "Sort and then use binary search to avoid duplicates.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "A seen set ensures each boundary point is added once even if it appears in both chains.",
+      "wrongExplanations": {
+        "1": "Collinear stacks at extremes can still duplicate across chains.",
+        "2": "This arbitrarily deletes valid hull points."
+      },
+      "hint": "Deduplicate after concatenating with a hash set.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Writing the Code",
+      "questionText": "Implement the signed area helper and import. Choose the correct code snippet.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\ndef cross(o, a, b):\n    return (a[0]-o[0])*(b[1]-o[1]) - (a[1]-o[1])*(b[0]-o[0])",
+          "isCode": true
+        },
+        {
+          "label": "import sys\ndef cross(o, a, b):\n    return (o[0]-a[0])*(b[1]-a[1]) - (o[1]-a[1])*(b[0]-a[0])",
+          "isCode": true
+        },
+        {
+          "label": "import sys\ndef cross(o, a, b):\n    return (a[0]-o[0])*(b[0]-o[0]) + (a[1]-o[1])*(b[1]-o[1])",
+          "isCode": true
+        },
+        {
+          "label": "import sys\ndef cross(o, a, b):\n    return (b[0]-o[0])*(a[1]-o[1]) - (b[1]-o[1])*(a[0]-o[0])",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need the determinant of vectors oa and ob. The other snippets change the reference point or compute a dot product.",
+      "wrongExplanations": {
+        "2": "That's a dot product, not oriented area.",
+        "3": "This flips a and b, reversing the sign."
+      },
+      "hint": "Use vectors from o to a and from o to b.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\ndef cross(o, a, b):\n    return (a[0]-o[0])*(b[1]-o[1]) - (a[1]-o[1])*(b[0]-o[0])",
+      "codeLabel": "Import and cross()"
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Read all input efficiently and parse n. Pick the correct snippet.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def main():\n    data = sys.stdin.read().strip().split()\n    it = iter(data)\n    n = int(next(it))",
+          "isCode": true
+        },
+        {
+          "label": "def main():\n    n = int(input())\n    it = iter(sys.stdin.read().split())",
+          "isCode": true
+        },
+        {
+          "label": "def main():\n    tokens = sys.stdin.read().splitlines()\n    it = iter(tokens)\n    n = int(next(it))",
+          "isCode": true
+        },
+        {
+          "label": "def main():\n    n = int(sys.stdin.readline().strip().split()[0])\n    it = iter([])",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Read all tokens once, iterate them, and parse n first. Other options either mix methods or leave the iterator empty.",
+      "wrongExplanations": {
+        "2": "Splitting by lines then iterating tokens per line won't provide coordinate tokens directly.",
+        "3": "Iterator is empty; cannot read points."
+      },
+      "hint": "We'll iterate tokens (x and y) after reading n.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def main():\n    data = sys.stdin.read().strip().split()\n    it = iter(data)\n    n = int(next(it))",
+      "codeLabel": "Main and tokenization"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Parse n points and sort them lexicographically.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    pts = [(int(next(it)), int(next(it))) for _ in range(n)]\n    pts.sort()",
+          "isCode": true
+        },
+        {
+          "label": "    pts = [tuple(map(int, next(it))) for _ in range(n)]\n    pts.sort(key=lambda p: p[1])",
+          "isCode": true
+        },
+        {
+          "label": "    pts = [(int(next(it)), int(next(it))) for _ in range(n)]\n    pts.sort(key=lambda p: (p[1], p[0]))",
+          "isCode": true
+        },
+        {
+          "label": "    pts = [(int(next(it)), int(next(it))) for _ in range(n)]\n    # no sort",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We must take x then y tokens and sort by x then y (default tuple sort).",
+      "wrongExplanations": {
+        "2": "Sorting by y then x breaks the left-to-right sweep.",
+        "4": "Without sorting, the sweep logic will fail."
+      },
+      "hint": "Default tuple sort is lexicographic by x then y.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    pts = [(int(next(it)), int(next(it))) for _ in range(n)]\n    pts.sort()",
+      "codeLabel": "Read points and sort"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Build the lower boundary chain (keep collinear points).",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    lower = []\n    for p in pts:\n        while len(lower) >= 2 and cross(lower[-2], lower[-1], p) < 0:\n            lower.pop()\n        lower.append(p)",
+          "isCode": true
+        },
+        {
+          "label": "    lower = []\n    for p in pts:\n        while len(lower) >= 2 and cross(lower[-2], lower[-1], p) <= 0:\n            lower.pop()\n        lower.append(p)",
+          "isCode": true
+        },
+        {
+          "label": "    lower = []\n    for p in pts:\n        if len(lower) >= 2 and cross(lower[-2], lower[-1], p) < 0:\n            continue\n        lower.append(p)",
+          "isCode": true
+        },
+        {
+          "label": "    lower = []\n    for p in pts:\n        while len(lower) >= 2 and cross(lower[-1], lower[-2], p) < 0:\n            lower.pop()\n        lower.append(p)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We pop only on right turns (<0) to preserve collinear boundary points. The pivot order must be (-2, -1, p).",
+      "wrongExplanations": {
+        "1": "Using <= removes collinear points, which we must keep.",
+        "3": "Swapping the last two points changes the orientation test incorrectly."
+      },
+      "hint": "Preserve collinear; pop on right turns only.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    lower = []\n    for p in pts:\n        while len(lower) >= 2 and cross(lower[-2], lower[-1], p) < 0:\n            lower.pop()\n        lower.append(p)",
+      "codeLabel": "Build lower chain"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Build the upper boundary chain by scanning in reverse (keep collinear points).",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    upper = []\n    for p in reversed(pts):\n        while len(upper) >= 2 and cross(upper[-2], upper[-1], p) < 0:\n            upper.pop()\n        upper.append(p)",
+          "isCode": true
+        },
+        {
+          "label": "    upper = []\n    for p in pts:\n        while len(upper) >= 2 and cross(upper[-2], upper[-1], p) < 0:\n            upper.pop()\n        upper.append(p)",
+          "isCode": true
+        },
+        {
+          "label": "    upper = []\n    for p in reversed(pts):\n        while len(upper) >= 2 and cross(upper[-2], upper[-1], p) <= 0:\n            upper.pop()\n        upper.append(p)",
+          "isCode": true
+        },
+        {
+          "label": "    upper = []\n    for p in reversed(pts):\n        while len(upper) >= 2 and cross(upper[-1], upper[-2], p) < 0:\n            upper.pop()\n        upper.append(p)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Reverse traversal and pop on right turns (<0) keeps collinear boundary points.",
+      "wrongExplanations": {
+        "1": "Not reversing builds the same chain twice.",
+        "2": "Using <= removes collinear points from edges."
+      },
+      "hint": "Mirror the lower chain logic but traverse reversed(pts).",
+      "isCodeBuilding": true,
+      "codeSnippet": "    upper = []\n    for p in reversed(pts):\n        while len(upper) >= 2 and cross(upper[-2], upper[-1], p) < 0:\n            upper.pop()\n        upper.append(p)",
+      "codeLabel": "Build upper chain"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Combine the chains while dropping shared endpoints.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    hull = lower[:-1] + upper[:-1]",
+          "isCode": true
+        },
+        {
+          "label": "    hull = lower + upper",
+          "isCode": true
+        },
+        {
+          "label": "    hull = lower[1:] + upper[1:]",
+          "isCode": true
+        },
+        {
+          "label": "    hull = list(set(lower + upper))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Slicing off the last of each avoids duplicating the first/last point. We'll deduplicate other overlaps next.",
+      "wrongExplanations": {
+        "1": "This duplicates the shared endpoints.",
+        "3": "A set discards order and may reorder points unpredictably."
+      },
+      "hint": "Both chains include the endpoints.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    hull = lower[:-1] + upper[:-1]",
+      "codeLabel": "Combine chains"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Deduplicate points that might appear in both chains (e.g., on vertical extremes), preserving a stable order.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    seen = set()\n    unique = []\n    for p in hull:\n        if p not in seen:\n            seen.add(p)\n            unique.append(p)",
+          "isCode": true
+        },
+        {
+          "label": "    unique = list(set(hull))",
+          "isCode": true
+        },
+        {
+          "label": "    unique = []\n    for p in hull:\n        if p not in unique:\n            unique.append(p)",
+          "isCode": true
+        },
+        {
+          "label": "    from collections import Counter\n    unique = [p for p,c in Counter(hull).items()]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "A seen set yields O(n) deduplication with stable order. set(hull) loses order; list 'in' is O(n^2) worst-case.",
+      "wrongExplanations": {
+        "1": "Order is lost; not ideal even if any order is allowed we want consistency.",
+        "2": "Membership is O(n), leading to O(n^2) in worst-case n=2e5."
+      },
+      "hint": "Aim for O(n) and preserve the concatenation order.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    seen = set()\n    unique = []\n    for p in hull:\n        if p not in seen:\n            seen.add(p)\n            unique.append(p)",
+      "codeLabel": "Deduplicate"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "Output the result and wire up main().",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    out = []\n    out.append(str(len(unique)))\n    for x, y in unique:\n        out.append(f\"{x} {y}\")\n    sys.stdout.write(\"\\n\".join(out))\n\nif __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "    print(len(unique))\n    print(unique)\n\nif __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "    out = [len(unique)] + unique\n    sys.stdout.write(\"\\n\".join(out))\n\nif __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "    print(len(unique))\n    for p in unique:\n        print(p)\n\n# no main guard",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We print k, then each point as 'x y', and ensure the program runs via the main guard.",
+      "wrongExplanations": {
+        "1": "Printing the list object doesn't match the required format.",
+        "3": "Printing tuples '(x, y)' is not the specified 'x y' format; also missing main guard."
+      },
+      "hint": "Match the exact output format: one number, then k lines 'x y'.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    out = []\n    out.append(str(len(unique)))\n    for x, y in unique:\n        out.append(f\"{x} {y}\")\n    sys.stdout.write(\"\\n\".join(out))\n\nif __name__ == \"__main__\":\n    main()",
+      "codeLabel": "Output and main"
+    },
+    {
+      "id": "q22",
+      "phase": "Verifying the Solution",
+      "questionText": "Run the algorithm on points: (0,0), (2,0), (1,1), (1,0), (2,2), (0,2). How many hull points should be printed?",
+      "diagram": "Square corners (0,0), (2,0), (2,2), (0,2); plus (1,1) inside; (1,0) on bottom edge.",
+      "options": [
+        {
+          "label": "5 (the four corners plus (1,0))",
+          "isCode": false
+        },
+        {
+          "label": "4 (only the four corners)",
+          "isCode": false
+        },
+        {
+          "label": "6 (all six points)",
+          "isCode": false
+        },
+        {
+          "label": "5 (the four corners plus (1,1))",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Corners plus the boundary point (1,0) are on the hull; (1,1) is strictly inside.",
+      "wrongExplanations": {
+        "1": "We must include points on edges.",
+        "3": "(1,1) is not on the boundary."
+      },
+      "hint": "Include edge points, exclude interior points.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q23",
+      "phase": "Verifying the Solution",
+      "questionText": "For input:\n8\n0 0\n0 1\n0 2\n3 0\n3 1\n3 2\n1 1\n2 1\nHow many unique hull points does the code print?",
+      "diagram": "Two vertical columns x=0 and x=3 from y=0..2; interior points (1,1),(2,1).",
+      "options": [
+        {
+          "label": "6 (all points on the outer rectangle sides: (0,0),(0,1),(0,2),(3,0),(3,1),(3,2))",
+          "isCode": false
+        },
+        {
+          "label": "4 (just the corners)",
+          "isCode": false
+        },
+        {
+          "label": "8 (duplicates included from both chains)",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We keep collinear boundary points and deduplicate across chains, yielding 6 unique hull points.",
+      "wrongExplanations": {
+        "2": "We deduplicate with a seen set; no duplicates remain.",
+        "1": "We must include edge points between corners as well."
+      },
+      "hint": "Vertical edges have three points each; all are on the boundary.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Verifying the Solution",
+      "questionText": "On the sample input from the statement, will the algorithm ever pop on a collinear triple?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "No, because we use '< 0' and only pop on strict right turns.",
+          "isCode": false
+        },
+        {
+          "label": "Yes, because we use '<= 0' and pop collinear too.",
+          "isCode": false
+        },
+        {
+          "label": "Sometimes; depends on floating-point rounding.",
+          "isCode": false
+        },
+        {
+          "label": "It will pop on left turns instead.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We use integer arithmetic and '< 0' so collinear triples are kept.",
+      "wrongExplanations": {
+        "1": "We deliberately avoided '<=' to keep boundary points.",
+        "3": "We never pop on left turns."
+      },
+      "hint": "Check the pop condition used for both chains.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the time complexity of this approach for n points?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n log n) due to sorting; the scans are linear.",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2) due to nested popping loops.",
+          "isCode": false
+        },
+        {
+          "label": "O(n) because each point is visited once.",
+          "isCode": false
+        },
+        {
+          "label": "O(n^3) because we check all pairs and points.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Sorting dominates at O(n log n); each chain is built with amortized O(1) pops per point.",
+      "wrongExplanations": {
+        "1": "The while pops are amortized; total pops ≤ number of appends.",
+        "3": "We do not check all pairs."
+      },
+      "hint": "Consider total number of pops across the whole run.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the additional space complexity (beyond input storage)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n) for the chains and dedup structures.",
+          "isCode": false
+        },
+        {
+          "label": "O(1) extra, in-place.",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2) for pairwise comparisons.",
+          "isCode": false
+        },
+        {
+          "label": "O(log n) for recursion.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We store lower, upper, hull, and sets/lists of size up to O(n).",
+      "wrongExplanations": {
+        "1": "We keep multiple lists of points; not constant space.",
+        "3": "No recursion is used."
+      },
+      "hint": "We build two chains and a deduplicated list.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q27",
+      "phase": "Analyzing Complexity",
+      "questionText": "Which edge case is already guaranteed not to occur by the problem, but would otherwise need handling?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "All points being collinear (hull area zero).",
+          "isCode": false
+        },
+        {
+          "label": "Duplicate points in input.",
+          "isCode": false
+        },
+        {
+          "label": "Coordinates outside 32-bit range.",
+          "isCode": false
+        },
+        {
+          "label": "An empty input file.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The problem guarantees positive area; otherwise special handling is needed for a line segment hull.",
+      "wrongExplanations": {
+        "2": "Python integers handle large coordinates; range is within constraints.",
+        "3": "Input format always has at least n=3 points."
+      },
+      "hint": "Check the guarantee: positive hull area.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\ndef cross(o, a, b):\n    return (a[0]-o[0])*(b[1]-o[1]) - (a[1]-o[1])*(b[0]-o[0])",
+    "def main():\n    data = sys.stdin.read().strip().split()\n    it = iter(data)\n    n = int(next(it))",
+    "    pts = [(int(next(it)), int(next(it))) for _ in range(n)]\n    pts.sort()",
+    "    lower = []\n    for p in pts:\n        while len(lower) >= 2 and cross(lower[-2], lower[-1], p) < 0:\n            lower.pop()\n        lower.append(p)",
+    "    upper = []\n    for p in reversed(pts):\n        while len(upper) >= 2 and cross(upper[-2], upper[-1], p) < 0:\n            upper.pop()\n        upper.append(p)",
+    "    hull = lower[:-1] + upper[:-1]",
+    "    seen = set()\n    unique = []\n    for p in hull:\n        if p not in seen:\n            seen.add(p)\n            unique.append(p)",
+    "    out = []\n    out.append(str(len(unique)))\n    for x, y in unique:\n        out.append(f\"{x} {y}\")\n    sys.stdout.write(\"\\n\".join(out))\n\nif __name__ == \"__main__\":\n    main()"
+  ],
+  "reasoningChain": [
+    {
+      "question": "What exactly must the output contain?",
+      "insight": "We must print all boundary points (including edge collinear points) and order does not matter."
+    },
+    {
+      "question": "To systematically sweep the plane, which sorting of points is most useful?",
+      "insight": "Sorting by x then y allows a left-to-right sweep to build boundary chains."
+    },
+    {
+      "question": "Given three points o, a, b, which expression gives the signed area and orientation?",
+      "insight": "Use the determinant cross product to detect left/right turns and collinearity."
+    },
+    {
+      "question": "When building a chain, what to do on a right turn?",
+      "insight": "Pop the last point until the chain is not making a right turn to maintain convexity."
+    },
+    {
+      "question": "How to include collinear edge points?",
+      "insight": "Use a strict '< 0' condition to pop only right turns, preserving collinear triples."
+    },
+    {
+      "question": "How to form the full hull and avoid duplicates?",
+      "insight": "Build both chains (reverse for the second), slice off endpoints, concatenate, then deduplicate with a set."
+    },
+    {
+      "question": "What is the time complexity and space usage?",
+      "insight": "Sorting dominates O(n log n); chain construction and dedup are linear; extra space is O(n)."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1413,
+    "output_tokens": 15574,
+    "input_cost": 0.001766,
+    "output_cost": 0.15574,
+    "total_cost": 0.157506
+  }
+}

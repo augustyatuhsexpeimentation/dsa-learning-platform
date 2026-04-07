@@ -1,0 +1,948 @@
+{
+  "id": "reachability-queries-guided",
+  "title": "Reachability Queries",
+  "difficulty": "hard",
+  "tags": [
+    "advanced"
+  ],
+  "estimatedMinutes": 75,
+  "language": "python",
+  "description": "You are given a directed graph with n nodes and m edges. Then q queries ask whether there exists a path from node a to node b. Nodes in input are numbered 1..n. For each query (a, b), output YES if b is reachable from a, otherwise NO.\n\nInput format:\n- First line: n m q\n- Next m lines: edges a b meaning a -> b\n- Next q lines: queries a b\n\nOutput one line per query: YES or NO.\n\nConstraints:\n- 1 ≤ n ≤ 5·10^4\n- 1 ≤ m, q ≤ 10^5",
+  "examples": [
+    {
+      "input": "4 4 3\n1 2\n2 3\n3 1\n4 3\n1 3\n1 4\n4 1\n",
+      "output": "YES\nNO\nYES\n",
+      "explanation": "- 1 -> 2 -> 3, so 1 can reach 3.\n- There is no path from 1 to 4.\n- 4 -> 3 -> 1, so 4 can reach 1."
+    }
+  ],
+  "constraints": [
+    "1 ≤ n ≤ 5·10^4",
+    "1 ≤ m, q ≤ 10^5",
+    "Directed graph, no self-loops in input (a ≠ b)"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "Given the example graph with edges: 1→2, 2→3, 3→1, 4→3. For the query (1, 3), what should be printed?",
+      "diagram": "1 -> 2 -> 3 -> 1 (cycle)\n4 -> 3",
+      "options": [
+        {
+          "label": "YES",
+          "isCode": false
+        },
+        {
+          "label": "NO",
+          "isCode": false
+        },
+        {
+          "label": "Depends on m and q",
+          "isCode": false
+        },
+        {
+          "label": "Undefined",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "1 reaches 3 via 1→2→3. Cycles allow multiple paths. The other options ignore the clear path.",
+      "wrongExplanations": {
+        "1": "There is a direct path via 2.",
+        "2": "m and q do not affect reachability for a fixed graph.",
+        "3": "Reachability is well-defined."
+      },
+      "hint": "Trace along directed edges from 1.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "Using the same graph, for the query (1, 4), what should be printed?",
+      "diagram": "1 -> 2 -> 3 -> 1 (cycle)\n4 -> 3",
+      "options": [
+        {
+          "label": "YES, because 1 and 4 are in the same graph",
+          "isCode": false
+        },
+        {
+          "label": "NO, there is no directed path from 1 to 4",
+          "isCode": false
+        },
+        {
+          "label": "YES, through 3",
+          "isCode": false
+        },
+        {
+          "label": "It depends on the order of input lines",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "There is no path from 1 to 4; edges go 4→3, not 3→4. Other options misread direction or overgeneralize.",
+      "wrongExplanations": {
+        "0": "Being in the same graph component undirectedly doesn't imply reachability.",
+        "2": "Edges don't go 3→4.",
+        "3": "Input order doesn't change reachability."
+      },
+      "hint": "Check direction of edges carefully.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "Nodes in input are numbered from 1..n. If you store the graph in 0-indexed arrays, how should you add an edge from input line \"a b\"?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "g[a].append(b)",
+          "isCode": true
+        },
+        {
+          "label": "g[a-1].append(b-1)",
+          "isCode": true
+        },
+        {
+          "label": "g[b-1].append(a-1)",
+          "isCode": true
+        },
+        {
+          "label": "g[a-1].append(b)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Convert 1-based to 0-based for both endpoints. Swapping endpoints or only adjusting one leads to incorrect edges.",
+      "wrongExplanations": {
+        "0": "This treats inputs as 0-based, which is wrong.",
+        "2": "This reverses the direction.",
+        "3": "Only one endpoint converted; inconsistent."
+      },
+      "hint": "Both endpoints should be shifted by -1 for 0-indexing.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "If two nodes are on a directed cycle together, what can you say about queries between them?",
+      "diagram": "u -> ... -> v -> ... -> u",
+      "options": [
+        {
+          "label": "Both u→v and v→u are always YES",
+          "isCode": false
+        },
+        {
+          "label": "At most one direction can be YES",
+          "isCode": false
+        },
+        {
+          "label": "Always NO because cycles break reachability",
+          "isCode": false
+        },
+        {
+          "label": "Depends on other edges, not the cycle",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "On a directed cycle, each node reaches the others. The other options contradict cycle reachability.",
+      "wrongExplanations": {
+        "1": "On a cycle, both directions are possible.",
+        "3": "The cycle itself guarantees reachability."
+      },
+      "hint": "A directed cycle gives a path in both directions along the cycle.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Exploring Approaches",
+      "questionText": "Suppose you handle each query by exploring from a along outgoing edges until you either reach b or exhaust nodes. With q up to 1e5 and m up to 1e5, what can happen in the worst case?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "It can take about O(q + m)",
+          "isCode": false
+        },
+        {
+          "label": "It can take about O(q * m), which is too slow",
+          "isCode": false
+        },
+        {
+          "label": "It is always O(n + m)",
+          "isCode": false
+        },
+        {
+          "label": "It is constant time per query due to caching automatically",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Per-query exploration can touch O(m) edges; repeated q times gives O(q·m), too slow. Others underestimate worst-case.",
+      "wrongExplanations": {
+        "0": "This assumes only one exploration total.",
+        "2": "Per-query exploration isn't amortized across queries without extra work."
+      },
+      "hint": "Think of q distinct sources in a dense reachable graph.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "If you contract each group of nodes that can reach each other into a single node, what property does the resulting graph have?",
+      "diagram": "Groups (super-nodes) with edges only going forward",
+      "options": [
+        {
+          "label": "It has no directed cycles",
+          "isCode": false
+        },
+        {
+          "label": "It has fewer edges than the original always by half",
+          "isCode": false
+        },
+        {
+          "label": "It keeps all original cycles intact",
+          "isCode": false
+        },
+        {
+          "label": "It can have new cycles not in original",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Contracting mutually-reachable groups removes directed cycles between groups. The others are false.",
+      "wrongExplanations": {
+        "2": "Cycles are inside groups and disappear between groups.",
+        "4": "You cannot introduce cycles by contraction."
+      },
+      "hint": "Between different groups there is no way to go around and come back.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "After contracting groups, how can we quickly answer queries (a, b)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Check if a and b are in the same group; otherwise know whether the group of a can reach the group of b",
+          "isCode": false
+        },
+        {
+          "label": "Only check if degrees match",
+          "isCode": false
+        },
+        {
+          "label": "Ignore groups and run exploration per query",
+          "isCode": false
+        },
+        {
+          "label": "Randomly sample paths to guess",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Within a group it's always YES; otherwise reduce to reachability among groups. Others don't address reachability.",
+      "wrongExplanations": {
+        "2": "That returns to the slow approach."
+      },
+      "hint": "Group membership can immediately resolve many queries.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Building the Idea",
+      "questionText": "To find groups of mutually reachable nodes efficiently, which information is useful to track during recursive exploration of edges?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Discovery order, the lowest discovery reachable from a node, and whether a node is on a stack",
+          "isCode": false
+        },
+        {
+          "label": "Only outdegrees",
+          "isCode": false
+        },
+        {
+          "label": "Only a visited flag",
+          "isCode": false
+        },
+        {
+          "label": "Random hash values for nodes",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Tracking discovery index, low values, and a stack lets you detect groups precisely. Others are insufficient.",
+      "wrongExplanations": {
+        "2": "Visited flag alone can't partition nodes into groups."
+      },
+      "hint": "You need to know if a node can reach an ancestor in the current path.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "When does a node u start a new group (and you pop nodes into that group) in the stack-based method?",
+      "diagram": "Maintain ids[u], low[u]; when low[u] == ids[u], pop until u",
+      "options": [
+        {
+          "label": "When low[u] == ids[u]",
+          "isCode": false
+        },
+        {
+          "label": "When low[u] > ids[u]",
+          "isCode": false
+        },
+        {
+          "label": "When all neighbors have higher ids",
+          "isCode": false
+        },
+        {
+          "label": "When degree[u] == 0",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "low[u] == ids[u] indicates u is the root of its group. Other conditions are unrelated.",
+      "wrongExplanations": {
+        "1": "This misses the equality root condition.",
+        "3": "Degree doesn't determine group roots."
+      },
+      "hint": "Equality indicates the earliest ancestor reachable from u is itself.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "After assigning group ids to all nodes, how do you build edges between groups?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "For each original edge u→v, add an edge comp[u]→comp[v] if comp[u] != comp[v]",
+          "isCode": false
+        },
+        {
+          "label": "Connect every pair of groups",
+          "isCode": false
+        },
+        {
+          "label": "Only keep edges from smaller to larger ids",
+          "isCode": false
+        },
+        {
+          "label": "Ignore edges that cross groups",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Cross-group edges induce edges in the group graph. Others lose information or add bogus edges.",
+      "wrongExplanations": {
+        "1": "This creates edges not present in the original graph.",
+        "3": "Cross-group edges are exactly what we need."
+      },
+      "hint": "Map original endpoints to their group ids.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "To accumulate which groups are reachable from each group by propagating information along edges u→v, in what order should you process groups?",
+      "diagram": "We need v's info ready before processing u for each edge u->v",
+      "options": [
+        {
+          "label": "In an order where for every edge u→v, v is processed before u (e.g., by exploring and appending after visiting neighbors)",
+          "isCode": false
+        },
+        {
+          "label": "Arbitrary order; it doesn't matter",
+          "isCode": false
+        },
+        {
+          "label": "From u to v along edges (u before v)",
+          "isCode": false
+        },
+        {
+          "label": "By group id ascending",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need v computed before u to propagate u's reachability as union with v's. Other orders can miss information.",
+      "wrongExplanations": {
+        "2": "Processing u before v would require multiple passes to stabilize."
+      },
+      "hint": "Think of appending a node after exploring its outgoing edges.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "What compact structure enables O(1) query checks after preprocessing on the group graph?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "For each group, a bit mask marking all groups it can reach (including itself)",
+          "isCode": false
+        },
+        {
+          "label": "For each group, a list of paths to all others",
+          "isCode": false
+        },
+        {
+          "label": "A matrix of strings describing paths",
+          "isCode": false
+        },
+        {
+          "label": "Recompute exploration per query",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "A bit mask per group allows constant-time membership checks. The others are too large or slow.",
+      "wrongExplanations": {
+        "1": "Storing all paths is exponential.",
+        "3": "That's the slow approach again."
+      },
+      "hint": "You only need to know if a target group is in the reachable set.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "Given bit masks reach[g], how do you answer query (a, b) with group ids ga, gb?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "YES if ga == gb or the gb-th bit is 1 in reach[ga]",
+          "isCode": false
+        },
+        {
+          "label": "YES if degree[ga] >= degree[gb]",
+          "isCode": false
+        },
+        {
+          "label": "YES if reach[gb] has ga's bit set",
+          "isCode": false
+        },
+        {
+          "label": "YES only if ga == gb",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Same group implies mutual reachability; otherwise check membership of gb in reach[ga]. Others misuse degrees or reverse direction.",
+      "wrongExplanations": {
+        "2": "Direction matters: we need gb in reach of ga."
+      },
+      "hint": "Check the bit corresponding to the target group.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Writing the Code",
+      "questionText": "Read all input fast, build a 0-indexed adjacency list g, and store queries 0-indexed. Which block is correct?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\nsys.setrecursionlimit(1<<20)\ndata = list(map(int, sys.stdin.buffer.read().split()))\nit = iter(data)\nn = next(it); m = next(it); q = next(it)\ng = [[] for _ in range(n)]\nfor _ in range(m):\n    a = next(it); b = next(it)\n    g[a-1].append(b-1)\nqueries = [(next(it)-1, next(it)-1) for _ in range(q)]",
+          "isCode": true
+        },
+        {
+          "label": "import sys\nsys.setrecursionlimit(1<<20)\ndata = list(map(int, sys.stdin.read().split()))\nit = iter(data)\nn = next(it); q = next(it); m = next(it)\ng = [[] for _ in range(n)]\nfor _ in range(m):\n    a = next(it); b = next(it)\n    g[a].append(b)\nqueries = [(next(it), next(it)) for _ in range(q)]",
+          "isCode": true
+        },
+        {
+          "label": "import sys\ndata = sys.stdin.buffer.read().split()\nit = iter(map(int, data))\nn = next(it); m = next(it); q = next(it)\ng = [[] for _ in range(n+1)]\nfor _ in range(m):\n    a = next(it); b = next(it)\n    g[a].append(b)\nqueries = [(next(it), next(it)) for _ in range(q)]",
+          "isCode": true
+        },
+        {
+          "label": "import sys\nsys.setrecursionlimit(1<<20)\ndata = list(map(int, sys.stdin.buffer.read().split()))\nit = iter(data)\nn = next(it); m = next(it); q = next(it)\ng = [[] for _ in range(n)]\nfor _ in range(m):\n    a = next(it); b = next(it)\n    g[b-1].append(a-1)\nqueries = [(next(it)-1, next(it)-1) for _ in range(q)]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need buffered read, correct order n,m,q, 0-index conversion on both ends, and correct direction a→b. Others misread, misindex, or reverse edges.",
+      "wrongExplanations": {
+        "1": "Wrong order and missed 0-index conversion.",
+        "3": "This reverses edge direction."
+      },
+      "hint": "Mind 1-based to 0-based and edge direction.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\nsys.setrecursionlimit(1<<20)\ndata = list(map(int, sys.stdin.buffer.read().split()))\nit = iter(data)\nn = next(it); m = next(it); q = next(it)\ng = [[] for _ in range(n)]\nfor _ in range(m):\n    a = next(it); b = next(it)\n    g[a-1].append(b-1)\nqueries = [(next(it)-1, next(it)-1) for _ in range(q)]",
+      "codeLabel": "I/O and graph building"
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Initialize arrays for group detection and counters.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "ids = [-1]*n\nlow = [0]*n\non = [False]*n\nst = []\ncomp_id = [-1]*n\ncomp_count = 0\nt = 0",
+          "isCode": true
+        },
+        {
+          "label": "ids = [0]*n\nlow = [-1]*n\non = []\nst = set()\ncomp_id = [0]*n\ncomp_count = -1\nt = 1",
+          "isCode": true
+        },
+        {
+          "label": "ids = [None]*n\nlow = [None]*n\non = [0]*n\nst = []\ncomp_id = [None]*n\ncomp_count = 1\nt = 0",
+          "isCode": true
+        },
+        {
+          "label": "ids = [0]*n\nlow = [0]*n\non = [False]*n\nst = []\ncomp_id = [-1]*n\ncomp_count = 0\nt = 0",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "ids starts at -1 (unvisited), low at 0, on-stack flags, stack list, comp ids unknown (-1), and counters start at 0.",
+      "wrongExplanations": {
+        "1": "Using sets for stack and misinitialized arrays breaks logic.",
+        "3": "ids=0 doesn't distinguish unvisited from first visit."
+      },
+      "hint": "Unvisited markers should be distinguishable from valid indices.",
+      "isCodeBuilding": true,
+      "codeSnippet": "ids = [-1]*n\nlow = [0]*n\non = [False]*n\nst = []\ncomp_id = [-1]*n\ncomp_count = 0\nt = 0",
+      "codeLabel": "Init arrays and counters"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Write the recursive function to assign group ids using a stack and low-link style updates.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def visit(u):\n    global t, comp_count\n    ids[u] = low[u] = t; t += 1\n    st.append(u); on[u] = True\n    for v in g[u]:\n        if ids[v] == -1:\n            visit(v)\n            if low[u] > low[v]: low[u] = low[v]\n        elif on[v]:\n            if low[u] > ids[v]: low[u] = ids[v]\n    if low[u] == ids[u]:\n        while True:\n            w = st.pop(); on[w] = False; comp_id[w] = comp_count\n            if w == u: break\n        comp_count += 1",
+          "isCode": true
+        },
+        {
+          "label": "def visit(u):\n    ids[u] = t\n    for v in g[u]:\n        if ids[v] == -1:\n            visit(v)\n    comp_id[u] = comp_count",
+          "isCode": true
+        },
+        {
+          "label": "def visit(u):\n    global t, comp_count\n    ids[u] = t; t += 1\n    for v in g[u]:\n        if ids[v] == -1:\n            visit(v)\n    if low[u] > ids[u]:\n        comp_id[u] = comp_count; comp_count += 1",
+          "isCode": true
+        },
+        {
+          "label": "def visit(u):\n    global t, comp_count\n    ids[u] = low[u] = t\n    for v in g[u]:\n        if ids[v] != -1 and on[v]:\n            low[u] = min(low[u], low[v])\n    on[u] = True\n    st.append(u)\n    if low[u] == ids[u]:\n        comp_id[u] = comp_count; comp_count += 1",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We assign ids/low, push to stack, recurse, update lows, handle back-edges via on-stack, and pop a full group when low==ids[u]. Others miss stack logic or low-link updates.",
+      "wrongExplanations": {
+        "1": "No stack or low updates; cannot find groups.",
+        "3": "Push order and low updates are incorrect; group pop is incomplete."
+      },
+      "hint": "Track a stack of active nodes and update low values from tree and back edges.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def visit(u):\n    global t, comp_count\n    ids[u] = low[u] = t; t += 1\n    st.append(u); on[u] = True\n    for v in g[u]:\n        if ids[v] == -1:\n            visit(v)\n            if low[u] > low[v]: low[u] = low[v]\n        elif on[v]:\n            if low[u] > ids[v]: low[u] = ids[v]\n    if low[u] == ids[u]:\n        while True:\n            w = st.pop(); on[w] = False; comp_id[w] = comp_count\n            if w == u: break\n        comp_count += 1",
+      "codeLabel": "Group discovery function"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Invoke the group discovery so that all nodes are assigned.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "for u in range(n):\n    if ids[u] == -1:\n        visit(u)",
+          "isCode": true
+        },
+        {
+          "label": "for u in range(n):\n    visit(u)",
+          "isCode": true
+        },
+        {
+          "label": "for u in range(n):\n    if comp_id[u] == -1:\n        visit(comp_id[u])",
+          "isCode": true
+        },
+        {
+          "label": "while st:\n    visit(st.pop())",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Start a new exploration only from unvisited nodes. Visiting all regardless repeats work; others misuse variables.",
+      "wrongExplanations": {
+        "1": "This revisits already processed nodes unnecessarily.",
+        "3": "The stack here is used internally by the algorithm, not as a frontier."
+      },
+      "hint": "Use the unvisited marker to start new traversals.",
+      "isCodeBuilding": true,
+      "codeSnippet": "for u in range(n):\n    if ids[u] == -1:\n        visit(u)",
+      "codeLabel": "Run group assignment"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Build the contracted graph of groups (avoid self-edges).",
+      "diagram": null,
+      "options": [
+        {
+          "label": "dag = [set() for _ in range(comp_count)]\nfor u in range(n):\n    cu = comp_id[u]\n    for v in g[u]:\n        cv = comp_id[v]\n        if cu != cv:\n            dag[cu].add(cv)",
+          "isCode": true
+        },
+        {
+          "label": "dag = [[] for _ in range(n)]\nfor u in range(n):\n    for v in g[u]:\n        dag[u].append(v)",
+          "isCode": true
+        },
+        {
+          "label": "dag = [set() for _ in range(comp_count)]\nfor u in range(n):\n    for v in g[u]:\n        dag[comp_id[v]].add(comp_id[u])",
+          "isCode": true
+        },
+        {
+          "label": "dag = [[] for _ in range(comp_count)]\nfor u in range(n):\n    cu = comp_id[u]\n    for v in g[u]:\n        cv = comp_id[v]\n        dag[cv].append(cu)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Map endpoints to their groups, add edge cu→cv when they differ. Other options either keep original graph, reverse direction, or include self-edges carelessly.",
+      "wrongExplanations": {
+        "2": "This reverses direction unintentionally.",
+        "3": "Also reversed and includes duplicates."
+      },
+      "hint": "Edges should go from the source group to the target group.",
+      "isCodeBuilding": true,
+      "codeSnippet": "dag = [set() for _ in range(comp_count)]\nfor u in range(n):\n    cu = comp_id[u]\n    for v in g[u]:\n        cv = comp_id[v]\n        if cu != cv:\n            dag[cu].add(cv)",
+      "codeLabel": "Build group graph"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Prepare an order of groups so that for each edge u→v, v appears before u in the order.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "order = []\nseen = [0]*comp_count\ndef go(u):\n    seen[u] = 1\n    for v in dag[u]:\n        if not seen[v]:\n            go(v)\n    order.append(u)\nfor u in range(comp_count):\n    if not seen[u]:\n        go(u)",
+          "isCode": true
+        },
+        {
+          "label": "order = []\nfor u in range(comp_count):\n    order.append(u)\norder.reverse()",
+          "isCode": true
+        },
+        {
+          "label": "order = list(range(comp_count))",
+          "isCode": true
+        },
+        {
+          "label": "order = []\nseen = [0]*comp_count\ndef go(u):\n    order.append(u)\n    seen[u] = 1\n    for v in dag[u]:\n        if not seen[v]:\n            go(v)\nfor u in range(comp_count):\n    if not seen[u]:\n        go(u)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Appending after exploring outgoing neighbors ensures v is before u for edges u→v. Others don't guarantee the needed dependency order.",
+      "wrongExplanations": {
+        "3": "Appending before exploring makes u appear before its neighbors."
+      },
+      "hint": "Append a node after exploring its neighbors.",
+      "isCodeBuilding": true,
+      "codeSnippet": "order = []\nseen = [0]*comp_count\ndef go(u):\n    seen[u] = 1\n    for v in dag[u]:\n        if not seen[v]:\n            go(v)\n    order.append(u)\nfor u in range(comp_count):\n    if not seen[u]:\n        go(u)",
+      "codeLabel": "Compute processing order"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Propagate reachability bit masks along edges so that each group’s mask includes itself and all groups it can reach.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "reach = [0]*comp_count\nfor u in order:\n    bs = 1 << u\n    for v in dag[u]:\n        bs |= reach[v]\n    reach[u] = bs",
+          "isCode": true
+        },
+        {
+          "label": "reach = [0]*comp_count\nfor u in order:\n    bs = 0\n    for v in dag[u]:\n        reach[v] |= 1 << u\n    reach[u] = bs",
+          "isCode": true
+        },
+        {
+          "label": "reach = [0]*comp_count\nfor u in order:\n    bs = 1 << u\n    for v in dag[u]:\n        bs &= reach[v]\n    reach[u] = bs",
+          "isCode": true
+        },
+        {
+          "label": "reach = [0]*comp_count\nfor u in reversed(order):\n    bs = 1 << u\n    for v in dag[u]:\n        bs |= reach[v]\n    reach[u] = bs",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Iterate in the order where neighbors v are ready; union their masks and include u itself. Others either use wrong direction or wrong operation.",
+      "wrongExplanations": {
+        "3": "Reversing the order processes u before v, leaving reach[v] incomplete."
+      },
+      "hint": "Combine neighbors’ masks with bitwise OR and include the current group bit.",
+      "isCodeBuilding": true,
+      "codeSnippet": "reach = [0]*comp_count\nfor u in order:\n    bs = 1 << u\n    for v in dag[u]:\n        bs |= reach[v]\n    reach[u] = bs",
+      "codeLabel": "Propagate reachability"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "Answer queries using group ids and bit tests, and print results.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "out = []\nfor a, b in queries:\n    ca = comp_id[a]; cb = comp_id[b]\n    if ca == cb or ((reach[ca] >> cb) & 1):\n        out.append(\"YES\")\n    else:\n        out.append(\"NO\")\nsys.stdout.write(\"\\n\".join(out))",
+          "isCode": true
+        },
+        {
+          "label": "for a, b in queries:\n    if (reach[a] >> b) & 1:\n        print(\"YES\")\n    else:\n        print(\"NO\")",
+          "isCode": true
+        },
+        {
+          "label": "out = []\nfor a, b in queries:\n    ca = comp_id[a]; cb = comp_id[b]\n    if ((reach[cb] >> ca) & 1):\n        out.append(\"YES\")\n    else:\n        out.append(\"NO\")\nprint(\"\\n\".join(out))",
+          "isCode": true
+        },
+        {
+          "label": "out = []\nfor a, b in queries:\n    ca = comp_id[a]; cb = comp_id[b]\n    if ca == cb:\n        out.append(\"NO\")\n    elif ((reach[ca] >> cb) & 1):\n        out.append(\"YES\")\n    else:\n        out.append(\"NO\")\nprint(\"\\n\".join(out))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Same group implies YES; otherwise test bit gb in reach[ga]. Others ignore group mapping, reverse direction, or mishandle same-group queries.",
+      "wrongExplanations": {
+        "1": "This uses node indices directly, not group ids.",
+        "3": "Same group should be YES, not NO."
+      },
+      "hint": "Remember to handle same-group queries fast.",
+      "isCodeBuilding": true,
+      "codeSnippet": "out = []\nfor a, b in queries:\n    ca = comp_id[a]; cb = comp_id[b]\n    if ca == cb or ((reach[ca] >> cb) & 1):\n        out.append(\"YES\")\n    else:\n        out.append(\"NO\")\nsys.stdout.write(\"\\n\".join(out))",
+      "codeLabel": "Answer queries"
+    },
+    {
+      "id": "q22",
+      "phase": "Verifying the Solution",
+      "questionText": "For the example graph (1→2, 2→3, 3→1, 4→3), how many groups of mutually reachable nodes are there and which nodes are in them?",
+      "diagram": "1 <-> 2 <-> 3 (cycle), 4 -> 3",
+      "options": [
+        {
+          "label": "Two groups: {1,2,3} and {4}",
+          "isCode": false
+        },
+        {
+          "label": "One group: {1,2,3,4}",
+          "isCode": false
+        },
+        {
+          "label": "Three groups: {1}, {2,3}, {4}",
+          "isCode": false
+        },
+        {
+          "label": "Four groups: {1},{2},{3},{4}",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "1,2,3 can each reach one another; 4 cannot be reached back from others. So {1,2,3} and {4}.",
+      "wrongExplanations": {
+        "1": "4 cannot reach back to 1 or 2; not all in one group.",
+        "3": "1,2,3 are mutually reachable."
+      },
+      "hint": "Group nodes that can reach each other in both directions.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q23",
+      "phase": "Verifying the Solution",
+      "questionText": "In the group graph for the example, which edges exist between groups?",
+      "diagram": "Groups: G0={1,2,3}, G1={4}",
+      "options": [
+        {
+          "label": "G1 → G0",
+          "isCode": false
+        },
+        {
+          "label": "G0 → G1",
+          "isCode": false
+        },
+        {
+          "label": "Both G0→G1 and G1→G0",
+          "isCode": false
+        },
+        {
+          "label": "No edges",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Edge 4→3 maps to G1→G0. There is no edge from {1,2,3} back to 4.",
+      "wrongExplanations": {
+        "1": "There is no original edge from 1,2,3 to 4.",
+        "3": "The edge 4→3 induces G1→G0."
+      },
+      "hint": "Map each original edge to its group endpoints.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Verifying the Solution",
+      "questionText": "Using the computed masks, what are the answers for queries (1,3), (1,4), (4,1)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "YES, NO, YES",
+          "isCode": false
+        },
+        {
+          "label": "YES, YES, NO",
+          "isCode": false
+        },
+        {
+          "label": "NO, NO, YES",
+          "isCode": false
+        },
+        {
+          "label": "YES, NO, NO",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "1 and 3 are in the same group: YES. 1 can't reach 4: NO. 4 reaches {1,2,3}: YES.",
+      "wrongExplanations": {
+        "1": "There is no path from 1 to 4.",
+        "3": "4→3→1 gives YES for (4,1)."
+      },
+      "hint": "Use the group mapping and the group graph edge G1→G0.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the time per query after preprocessing with group masks?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(1): same-group check and a single bit test",
+          "isCode": false
+        },
+        {
+          "label": "O(log n): binary searching neighbors",
+          "isCode": false
+        },
+        {
+          "label": "O(outdegree of a)",
+          "isCode": false
+        },
+        {
+          "label": "O(n): scan all groups",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Answering uses a constant-time equality and bit test. Others re-traverse data.",
+      "wrongExplanations": {
+        "2": "We don't iterate neighbors at query time."
+      },
+      "hint": "Think about a single integer bit check.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Analyzing Complexity",
+      "questionText": "Which resource dominates space usage in the worst case after contraction?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "The array of bit masks: up to about K^2 bits where K is the number of groups",
+          "isCode": false
+        },
+        {
+          "label": "The input edges themselves",
+          "isCode": false
+        },
+        {
+          "label": "Only the recursion stack",
+          "isCode": false
+        },
+        {
+          "label": "The list of queries",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each group’s mask may include many bits; in dense reachability, total can be about K^2 bits. Others are smaller in worst case.",
+      "wrongExplanations": {
+        "2": "The recursion stack is O(n), smaller than O(K^2) bits.",
+        "4": "Queries are up to 1e5, but masks can be much larger."
+      },
+      "hint": "Consider that each group stores a bit per group.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\nsys.setrecursionlimit(1<<20)\ndata = list(map(int, sys.stdin.buffer.read().split()))\nit = iter(data)\nn = next(it); m = next(it); q = next(it)\ng = [[] for _ in range(n)]\nfor _ in range(m):\n    a = next(it); b = next(it)\n    g[a-1].append(b-1)\nqueries = [(next(it)-1, next(it)-1) for _ in range(q)]",
+    "ids = [-1]*n\nlow = [0]*n\non = [False]*n\nst = []\ncomp_id = [-1]*n\ncomp_count = 0\nt = 0",
+    "def visit(u):\n    global t, comp_count\n    ids[u] = low[u] = t; t += 1\n    st.append(u); on[u] = True\n    for v in g[u]:\n        if ids[v] == -1:\n            visit(v)\n            if low[u] > low[v]: low[u] = low[v]\n        elif on[v]:\n            if low[u] > ids[v]: low[u] = ids[v]\n    if low[u] == ids[u]:\n        while True:\n            w = st.pop(); on[w] = False; comp_id[w] = comp_count\n            if w == u: break\n        comp_count += 1",
+    "for u in range(n):\n    if ids[u] == -1:\n        visit(u)",
+    "dag = [set() for _ in range(comp_count)]\nfor u in range(n):\n    cu = comp_id[u]\n    for v in g[u]:\n        cv = comp_id[v]\n        if cu != cv:\n            dag[cu].add(cv)",
+    "order = []\nseen = [0]*comp_count\ndef go(u):\n    seen[u] = 1\n    for v in dag[u]:\n        if not seen[v]:\n            go(v)\n    order.append(u)\nfor u in range(comp_count):\n    if not seen[u]:\n        go(u)",
+    "reach = [0]*comp_count\nfor u in order:\n    bs = 1 << u\n    for v in dag[u]:\n        bs |= reach[v]\n    reach[u] = bs",
+    "out = []\nfor a, b in queries:\n    ca = comp_id[a]; cb = comp_id[b]\n    if ca == cb or ((reach[ca] >> cb) & 1):\n        out.append(\"YES\")\n    else:\n        out.append(\"NO\")\nsys.stdout.write(\"\\n\".join(out))"
+  ],
+  "reasoningChain": [
+    {
+      "question": "What does a query (a, b) ask and how do cycles affect this?",
+      "insight": "Reachability follows directed paths; nodes on the same directed cycle can reach each other."
+    },
+    {
+      "question": "Why is exploring per query too slow with large m and q?",
+      "insight": "Per-query exploration can be linear in edges; repeated q times is prohibitive."
+    },
+    {
+      "question": "How can we simplify the graph structurally?",
+      "insight": "Group nodes that mutually reach each other into a single node to eliminate cycles between groups."
+    },
+    {
+      "question": "How to build and use an order to propagate reachability on the group graph?",
+      "insight": "Process groups so that for each edge u→v, v is processed first; append after exploring neighbors to obtain such an order."
+    },
+    {
+      "question": "What data structure makes query answering fast?",
+      "insight": "A bit mask per group representing all groups reachable from it enables O(1) bit checks."
+    },
+    {
+      "question": "How to implement group detection efficiently?",
+      "insight": "Track discovery indices, lowest reachable discovery, and a stack of active nodes; when low equals discovery, pop a full group."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1418,
+    "output_tokens": 18211,
+    "input_cost": 0.001772,
+    "output_cost": 0.18211,
+    "total_cost": 0.183883
+  }
+}

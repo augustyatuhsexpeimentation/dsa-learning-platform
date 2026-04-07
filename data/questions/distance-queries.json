@@ -1,0 +1,1015 @@
+{
+  "id": "distance-queries-tree-closest-common-ancestor",
+  "title": "Distance Queries",
+  "difficulty": "hard",
+  "tags": [
+    "tree"
+  ],
+  "estimatedMinutes": 70,
+  "language": "python",
+  "description": "You are given a tree consisting of n nodes.\n\nYour task is to process q queries of the form: what is the distance between nodes a and b?\n\nInput:\n- First line: two integers n and q (number of nodes and queries).\n- Next n-1 lines: edges of the tree (two integers a, b per line).\n- Next q lines: queries (two integers a, b per line).\n\nOutput:\n- Print q integers: the answer to each query (number of edges on the path between a and b).",
+  "examples": [
+    {
+      "input": "5 3\n1 2\n1 3\n3 4\n3 5\n1 3\n2 5\n1 4\n",
+      "output": "1\n3\n2\n",
+      "explanation": "Tree edges: 1-2, 1-3, 3-4, 3-5.\n- Distance(1,3)=1 edge.\n- Distance(2,5)=3 edges: 2-1-3-5.\n- Distance(1,4)=2 edges: 1-3-4."
+    }
+  ],
+  "constraints": [
+    "1 ≤ n, q ≤ 2⋅10^5",
+    "1 ≤ a, b ≤ n",
+    "Tree: connected, n-1 edges, undirected"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "Consider a chain tree: 1-2-3 (edges between 1-2 and 2-3). What is the distance between nodes 1 and 3?",
+      "diagram": "1 -- 2 -- 3",
+      "options": [
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Distance is the number of edges on the unique path. Path 1-2-3 has 2 edges.",
+      "wrongExplanations": {
+        "1": "1 counts nodes minus 1 incorrectly for this path.",
+        "3": "Distance from a node to itself is 0, but here nodes differ."
+      },
+      "hint": "Count edges, not nodes.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "In any tree, what is the distance between a node and itself (e.g., distance between 2 and 2)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "Depends on the tree shape",
+          "isCode": false
+        },
+        {
+          "label": "Undefined",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The path from a node to itself has zero edges, so the distance is 0.",
+      "wrongExplanations": {
+        "1": "There is no edge to traverse when starting and ending at the same node."
+      },
+      "hint": null,
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "Trees have a special path property. Between any two nodes a and b in a tree, how many simple paths exist?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Exactly one",
+          "isCode": false
+        },
+        {
+          "label": "At least two",
+          "isCode": false
+        },
+        {
+          "label": "Depends on edges",
+          "isCode": false
+        },
+        {
+          "label": "Zero unless they are connected",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "By definition, a tree is connected and acyclic, so there is exactly one simple path between any two nodes.",
+      "wrongExplanations": {
+        "1": "Cycles would be needed for multiple distinct simple paths.",
+        "3": "A tree is connected, so every pair is connected."
+      },
+      "hint": "Trees are connected and have no cycles.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "Given the tree edges: 1-2, 1-3, 3-4, 3-5, what is the distance between nodes 2 and 5?",
+      "diagram": "2\n \\\n  1 -- 3 -- 4\n        \\\n         5",
+      "options": [
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Path is 2-1-3-5 with 3 edges.",
+      "wrongExplanations": {
+        "1": "2 counts nodes visited minus 1 incorrectly for this specific path.",
+        "3": "There are only 3 edges on the direct path."
+      },
+      "hint": "List the path edges one by one.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Understanding the Problem",
+      "questionText": "Distances in this problem count edges, not nodes. For the pair (1,3) in the same tree above, what is the distance?",
+      "diagram": "1 -- 3 -- 4\n      \\\n       5",
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "There is a single edge 1-3 on the path, so distance is 1.",
+      "wrongExplanations": {
+        "1": "2 would be counting nodes visited (1,3) incorrectly."
+      },
+      "hint": null,
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "A direct approach per query is to traverse from a until reaching b and count steps. What is the worst-case total time for q queries on a tree with n nodes?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(nq)",
+          "isCode": false
+        },
+        {
+          "label": "O(n + q)",
+          "isCode": false
+        },
+        {
+          "label": "O(q log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each traversal may visit O(n) nodes, repeated q times: O(nq).",
+      "wrongExplanations": {
+        "1": "We repeat work per query; it's not just a one-time cost.",
+        "2": "No logarithmic factor arises without extra structure."
+      },
+      "hint": "Think about how many nodes you might need to touch per query in the worst case.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "With n, q up to 2⋅10^5, is an O(nq) approach feasible within 1 second?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "No, it will time out for large cases",
+          "isCode": false
+        },
+        {
+          "label": "Yes, if implemented carefully",
+          "isCode": false
+        },
+        {
+          "label": "Yes, trees are small enough on average",
+          "isCode": false
+        },
+        {
+          "label": "Only if the tree is a star",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "O(4e10) operations is far beyond limits; we need near-logarithmic per query.",
+      "wrongExplanations": {
+        "1": "Constant factors can't save such a large asymptotic bound.",
+        "3": "Worst-case trees can be long chains; we must handle all cases."
+      },
+      "hint": "Estimate 2e5 * 2e5.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Exploring Approaches",
+      "questionText": "What information, precomputed once, would let us answer any distance(a,b) quickly?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Depth of every node from a fixed root and a way to jump upward by powers of two ancestors",
+          "isCode": false
+        },
+        {
+          "label": "Degree of each node (number of neighbors)",
+          "isCode": false
+        },
+        {
+          "label": "Subtree sizes for each node",
+          "isCode": false
+        },
+        {
+          "label": "Sorted adjacency lists",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Depths plus fast upward jumps allow finding a closest shared ancestor and applying a distance formula.",
+      "wrongExplanations": {
+        "1": "Degrees don't provide path lengths between arbitrary nodes.",
+        "2": "Subtree sizes don't directly yield distances between arbitrary pairs."
+      },
+      "hint": "Distance can be expressed using depths and a shared ancestor.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Exploring Approaches",
+      "questionText": "If c is the closest shared ancestor of a and b (with distances counted as edges), which formula gives distance(a,b)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "depth[a] + depth[b] - 2 * depth[c]",
+          "isCode": false
+        },
+        {
+          "label": "depth[a] + depth[b] - depth[c]",
+          "isCode": false
+        },
+        {
+          "label": "|depth[a] - depth[b]|",
+          "isCode": false
+        },
+        {
+          "label": "depth[a] + depth[b] - 2",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The path from a to b goes up to c and down, so subtract both segments to c once each.",
+      "wrongExplanations": {
+        "1": "Subtracting depth[c] only once overcounts by depth[c].",
+        "2": "This only works when one is an ancestor of the other."
+      },
+      "hint": "How many edges from a to c and b to c?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "We will pick a root for the tree to define depths and ancestors. Does the choice of root change the true distance between any two nodes?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "No, distances in the underlying tree are independent of the chosen root",
+          "isCode": false
+        },
+        {
+          "label": "Yes, distances depend on which node is root",
+          "isCode": false
+        },
+        {
+          "label": "Only if the tree is not balanced",
+          "isCode": false
+        },
+        {
+          "label": "Only if root is not node 1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Distances are properties of the undirected tree. Rooting is only for computation convenience.",
+      "wrongExplanations": {
+        "1": "Root affects depth labels but not actual shortest paths."
+      },
+      "hint": "Rooting just orients edges for computation.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "How can we compute depths and immediate parents for all nodes starting from a chosen root, without recursion depth issues?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Use a queue from the root, visiting neighbors by increasing distance and recording parent and depth",
+          "isCode": false
+        },
+        {
+          "label": "Randomly pick parents and adjust later",
+          "isCode": false
+        },
+        {
+          "label": "Sort nodes by index and assign depths by index order",
+          "isCode": false
+        },
+        {
+          "label": "Use deep recursion without limits; trees are small",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "A queue-based level traversal from the root records increasing distances safely without recursion.",
+      "wrongExplanations": {
+        "3": "With up to 2e5 nodes, deep recursion can overflow in Python."
+      },
+      "hint": "Think of visiting nodes in waves from the root using a queue.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "What should we set as the parent of the root to simplify ancestor jumps?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "0 (a sentinel outside 1..n)",
+          "isCode": false
+        },
+        {
+          "label": "The root itself",
+          "isCode": false
+        },
+        {
+          "label": "-1",
+          "isCode": false
+        },
+        {
+          "label": "Leave it uninitialized",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Using 0 ensures any further ancestor of 0 remains 0, simplifying jumps.",
+      "wrongExplanations": {
+        "1": "Self-parenting can create cycles in logic.",
+        "2": "Negative indices would index from the end of arrays in Python."
+      },
+      "hint": "Pick a value that maps to itself when jumping again.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "We need to support jumping up by 1, 2, 4, 8, ... ancestors. How many levels of jumps are needed for n nodes?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "(n).bit_length()",
+          "isCode": false
+        },
+        {
+          "label": "int(log2(n))",
+          "isCode": false
+        },
+        {
+          "label": "A fixed 18 for all n",
+          "isCode": false
+        },
+        {
+          "label": "n",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "(n).bit_length() is the smallest L so that 2^L > n-1, covering any height.",
+      "wrongExplanations": {
+        "1": "int(log2(n)) can be too small when n is a power of two.",
+        "2": "18 fails if n exceeds 2^18 (~262k)."
+      },
+      "hint": "Find the smallest L with 2^L >= n.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Building the Idea",
+      "questionText": "Given anc[k][v] means the 2^k-th ancestor of v, how do we compute anc[k][v] using lower levels?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "anc[k][v] = anc[k-1][ anc[k-1][v] ]",
+          "isCode": false
+        },
+        {
+          "label": "anc[k][v] = anc[k-1][v] + anc[k-1][v]",
+          "isCode": false
+        },
+        {
+          "label": "anc[k][v] = anc[k][ anc[k-1][v] ]",
+          "isCode": false
+        },
+        {
+          "label": "anc[k][v] = anc[k-1][ anc[k][v] ]",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Two jumps of size 2^(k-1) compose to a jump of size 2^k.",
+      "wrongExplanations": {
+        "1": "Ancestors are nodes, not numbers to add.",
+        "2": "This circularly depends on anc[k] and is undefined."
+      },
+      "hint": "Compose two equal half-length jumps.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q15",
+      "phase": "Building the Idea",
+      "questionText": "If anc[k-1][v] = 0 (v has no 2^(k-1)-th ancestor), what should anc[k][v] be?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "v",
+          "isCode": false
+        },
+        {
+          "label": "-1",
+          "isCode": false
+        },
+        {
+          "label": "anc[k-1][v]",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Jumping further from a non-existent ancestor remains non-existent; we keep 0.",
+      "wrongExplanations": {
+        "1": "Self-ancestor is incorrect and breaks jump logic."
+      },
+      "hint": "Apply anc[k][v] = anc[k-1][ anc[k-1][v] ] when anc[k-1][v]=0.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Read all integers fast and start with n and q. Which snippet is correct?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\nfrom collections import deque\n\ndata = list(map(int, sys.stdin.buffer.read().split()))\nit = iter(data)\nn = next(it); q = next(it)",
+          "isCode": true
+        },
+        {
+          "label": "import sys\nfrom collections import deque\n\ndata = sys.stdin.buffer.read().split()\nit = iter(data)\nn = next(it); q = next(it)",
+          "isCode": true
+        },
+        {
+          "label": "import sys\nfrom collections import deque\n\nline = sys.stdin.readline().split()\nn, q = map(int, line)\n# we'll read the rest later from it",
+          "isCode": true
+        },
+        {
+          "label": "import sys\nfrom collections import deque\n\ndata = list(map(int, sys.stdin.read().split()))\n# n and q will be data[0], data[1] but not advanced",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We convert all tokens to ints, create an iterator, and advance to get n and q. Others leave bytes or don't set up iteration for remaining tokens.",
+      "wrongExplanations": {
+        "1": "Tokens are bytes; next(it) returns bytes, causing type errors later.",
+        "2": "Mixing readline for first line with no iterator for the rest complicates and breaks later next(it) calls."
+      },
+      "hint": "We will repeatedly call next(it) for all numbers.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\nfrom collections import deque\n\ndata = list(map(int, sys.stdin.buffer.read().split()))\nit = iter(data)\nn = next(it); q = next(it)",
+      "codeLabel": "Fast input and read n, q"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Build the adjacency list by reading n-1 edges (undirected). Which is correct?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "adj = [[] for _ in range(n+1)]\nfor _ in range(n-1):\n    a = next(it); b = next(it)\n    adj[a].append(b)\n    adj[b].append(a)",
+          "isCode": true
+        },
+        {
+          "label": "adj = [[] for _ in range(n)]\nfor _ in range(n-1):\n    a = next(it); b = next(it)\n    adj[a-1].append(b-1)\n    adj[b-1].append(a-1)",
+          "isCode": true
+        },
+        {
+          "label": "adj = [[] for _ in range(n+1)]\nfor _ in range(n):\n    a = next(it); b = next(it)\n    adj[a].append(b)\n    adj[b].append(a)",
+          "isCode": true
+        },
+        {
+          "label": "adj = [[] for _ in range(n+1)]\nfor _ in range(n-1):\n    a = next(it); b = next(it)\n    adj[a].append(b)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Nodes are 1..n and edges are undirected; we need n-1 edges and add both directions.",
+      "wrongExplanations": {
+        "1": "Switching to 0-based indices complicates other 1-based code.",
+        "2": "Reading n edges will overrun input.",
+        "3": "Missing the reverse edge; the tree is undirected."
+      },
+      "hint": "Keep 1-based indices throughout.",
+      "isCodeBuilding": true,
+      "codeSnippet": "adj = [[] for _ in range(n+1)]\nfor _ in range(n-1):\n    a = next(it); b = next(it)\n    adj[a].append(b)\n    adj[b].append(a)",
+      "codeLabel": "Build adjacency list"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Initialize jump levels and arrays for ancestors and depths. Which is correct?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "LOG = (n).bit_length()\nup = [[0] * (n+1) for _ in range(LOG)]\ndepth = [0] * (n+1)",
+          "isCode": true
+        },
+        {
+          "label": "LOG = int(__import__('math').log2(n))\nup = [[0] * (n+1) for _ in range(LOG)]\ndepth = [0] * (n+1)",
+          "isCode": true
+        },
+        {
+          "label": "LOG = (n).bit_length()\nup = [[0] * LOG for _ in range(n+1)]\ndepth = [0] * n",
+          "isCode": true
+        },
+        {
+          "label": "LOG = 18\nup = [[0] * (n+1) for _ in range(LOG)]\ndepth = [0] * (n+1)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "(n).bit_length() gives enough levels; arrays sized for 1..n. Others may be too small or wrong shape.",
+      "wrongExplanations": {
+        "1": "For powers of two, int(log2(n)) is insufficient; need +1.",
+        "2": "Swapping dimensions breaks up[k][v] indexing."
+      },
+      "hint": "We need up[k][v] to be valid for k in [0..LOG-1] and v in [1..n].",
+      "isCodeBuilding": true,
+      "codeSnippet": "LOG = (n).bit_length()\nup = [[0] * (n+1) for _ in range(LOG)]\ndepth = [0] * (n+1)",
+      "codeLabel": "Init jump levels and arrays"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Initialize the root, its parent, and the queue to traverse and set depths. Which is correct?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "root = 1\ndq = deque([root])\nup[0][root] = 0\ndepth[root] = 0",
+          "isCode": true
+        },
+        {
+          "label": "root = 1\ndq = deque([root])\nup[0][root] = root\ndepth[root] = 1",
+          "isCode": true
+        },
+        {
+          "label": "root = 1\n# no queue needed yet\nup[0][root] = 1\ndepth[root] = 0",
+          "isCode": true
+        },
+        {
+          "label": "root = 1\ndq = deque([])\nup[0][root] = 0\ndepth[root] = 0",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Use a queue seeded with the root, set its parent to 0 sentinel and depth 0.",
+      "wrongExplanations": {
+        "1": "Self-parenting and starting depth at 1 cause wrong ancestors and distances.",
+        "3": "An empty queue means traversal never starts."
+      },
+      "hint": "We want depth[root]=0 and parent 0.",
+      "isCodeBuilding": true,
+      "codeSnippet": "root = 1\ndq = deque([root])\nup[0][root] = 0\ndepth[root] = 0",
+      "codeLabel": "Init traversal"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Fill depths and immediate parents using the queue. Which loop is correct?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "while dq:\n    v = dq.popleft()\n    for to in adj[v]:\n        if to == up[0][v]:\n            continue\n        up[0][to] = v\n        depth[to] = depth[v] + 1\n        dq.append(to)",
+          "isCode": true
+        },
+        {
+          "label": "while dq:\n    v = dq.pop()\n    for to in adj[v]:\n        up[0][to] = v\n        depth[to] = depth[v] + 1\n        dq.appendleft(to)",
+          "isCode": true
+        },
+        {
+          "label": "while dq:\n    v = dq.popleft()\n    for to in adj[v]:\n        if to == v:\n            continue\n        up[0][to] = v\n        depth[to] = depth[v] + 0\n        dq.append(to)",
+          "isCode": true
+        },
+        {
+          "label": "while dq:\n    v = dq.popleft()\n    for to in adj[v]:\n        if up[0][to] != 0:\n            continue\n        up[0][to] = v\n        depth[to] = depth[v] + 1\n        dq.append(to)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Skip revisiting the parent, set child parent to v, and depth +1. That suffices since the graph is a tree.",
+      "wrongExplanations": {
+        "1": "Using pop/appendleft changes order and lacks a parent check, causing wrong parents or repeats.",
+        "2": "Depth increment missing; also to==v check is ineffective.",
+        "3": "This can work if up[0] is all zeros initially, but parent-based skip is simpler and robust."
+      },
+      "hint": "Avoid revisiting the node you came from and increment depths.",
+      "isCodeBuilding": true,
+      "codeSnippet": "while dq:\n    v = dq.popleft()\n    for to in adj[v]:\n        if to == up[0][v]:\n            continue\n        up[0][to] = v\n        depth[to] = depth[v] + 1\n        dq.append(to)",
+      "codeLabel": "Set depths and parents"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "Build the jump table for 2^k ancestors. Which nested loop is correct?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "for k in range(1, LOG):\n    for v in range(1, n+1):\n        up[k][v] = up[k-1][ up[k-1][v] ]",
+          "isCode": true
+        },
+        {
+          "label": "for k in range(LOG):\n    for v in range(1, n+1):\n        up[k][v] = up[k][ up[k-1][v] ]",
+          "isCode": true
+        },
+        {
+          "label": "for k in range(1, LOG):\n    for v in range(n):\n        up[k][v] = up[k-1][ up[k-1][v] ]",
+          "isCode": true
+        },
+        {
+          "label": "for v in range(1, n+1):\n    for k in range(1, LOG):\n        up[v][k] = up[v-1][ up[v-1][k] ]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We compute up[k][v] from up[k-1] values, for k>=1 and v in 1..n.",
+      "wrongExplanations": {
+        "1": "This self-references up[k] and is incorrect.",
+        "2": "v should range 1..n to match 1-based nodes."
+      },
+      "hint": "Indexing is up[level][node].",
+      "isCodeBuilding": true,
+      "codeSnippet": "for k in range(1, LOG):\n    for v in range(1, n+1):\n        up[k][v] = up[k-1][ up[k-1][v] ]",
+      "codeLabel": "Build jump table"
+    },
+    {
+      "id": "q22",
+      "phase": "Writing the Code",
+      "questionText": "Define a helper to move a node up by diff steps using the jump table. Which is correct?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def jump_up(u, diff):\n    k = 0\n    while diff:\n        if diff & 1:\n            u = up[k][u]\n        diff >>= 1\n        k += 1\n    return u",
+          "isCode": true
+        },
+        {
+          "label": "def jump_up(u, diff):\n    for k in range(LOG-1, -1, -1):\n        if diff & (1 << k):\n            u = up[k-1][u]\n    return u",
+          "isCode": true
+        },
+        {
+          "label": "def jump_up(u, diff):\n    k = 0\n    while diff:\n        if diff & 1:\n            u = up[k][u]\n            k += 1\n        diff >>= 1\n    return u",
+          "isCode": true
+        },
+        {
+          "label": "def jump_up(u, diff):\n    for k in range(LOG):\n        if (diff >> k) & 1:\n            u = up[0][u]\n    return u",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Iterate bits of diff from LSB upward, applying up[k] when the bit is set and incrementing k with each shift.",
+      "wrongExplanations": {
+        "1": "Using up[k-1] with k from LOG-1 fails for k=0 and misaligns bits.",
+        "2": "Incrementing k only when a bit is set misaligns k with the current bit position."
+      },
+      "hint": "As you right-shift diff, k should advance every iteration.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def jump_up(u, diff):\n    k = 0\n    while diff:\n        if diff & 1:\n            u = up[k][u]\n        diff >>= 1\n        k += 1\n    return u",
+      "codeLabel": "Jump helper"
+    },
+    {
+      "id": "q23",
+      "phase": "Writing the Code",
+      "questionText": "Define a function to find the closest shared ancestor of two nodes using depths and jumps. Which is correct?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def closest_common_ancestor(a, b):\n    if depth[a] < depth[b]:\n        a, b = b, a\n    a = jump_up(a, depth[a] - depth[b])\n    if a == b:\n        return a\n    for k in range(LOG-1, -1, -1):\n        if up[k][a] != up[k][b]:\n            a = up[k][a]\n            b = up[k][b]\n    return up[0][a]",
+          "isCode": true
+        },
+        {
+          "label": "def closest_common_ancestor(a, b):\n    if depth[a] > depth[b]:\n        a, b = b, a\n    b = jump_up(b, depth[b] - depth[a])\n    if a == b:\n        return b\n    for k in range(LOG):\n        if up[k][a] != up[k][b]:\n            a = up[k][a]\n            b = up[k][b]\n    return up[0][b]",
+          "isCode": true
+        },
+        {
+          "label": "def closest_common_ancestor(a, b):\n    # assume same depth\n    for k in range(LOG-1, -1, -1):\n        if up[k][a] == up[k][b]:\n            a = up[k][a]\n            b = up[k][b]\n    return a",
+          "isCode": true
+        },
+        {
+          "label": "def closest_common_ancestor(a, b):\n    # climb a only\n    while depth[a] > depth[b]:\n        a = up[0][a]\n    return a",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Raise deeper node to match depth, then lift both from highest power down until parents match; return their common parent.",
+      "wrongExplanations": {
+        "1": "The upward loop must go from high to low powers; also returns wrong variable at the end.",
+        "2": "If up[k][a]==up[k][b], you should skip lifting at that k; lifting equals keeps you too high.",
+        "3": "Only equalizes depth; it doesn't converge when nodes differ."
+      },
+      "hint": "After equalizing depths, move both up while they differ at each power.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def closest_common_ancestor(a, b):\n    if depth[a] < depth[b]:\n        a, b = b, a\n    a = jump_up(a, depth[a] - depth[b])\n    if a == b:\n        return a\n    for k in range(LOG-1, -1, -1):\n        if up[k][a] != up[k][b]:\n            a = up[k][a]\n            b = up[k][b]\n    return up[0][a]",
+      "codeLabel": "Closest shared ancestor"
+    },
+    {
+      "id": "q24",
+      "phase": "Writing the Code",
+      "questionText": "Process q queries, compute distances using the closest shared ancestor, and print results. Which is correct?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "out_lines = []\nfor _ in range(q):\n    a = next(it); b = next(it)\n    c = closest_common_ancestor(a, b)\n    d = depth[a] + depth[b] - 2*depth[c]\n    out_lines.append(str(d))\nsys.stdout.write(\"\\n\".join(out_lines))",
+          "isCode": true
+        },
+        {
+          "label": "for _ in range(q):\n    a = next(it); b = next(it)\n    c = closest_common_ancestor(a, b)\n    print(depth[a] + depth[b] - depth[c])",
+          "isCode": true
+        },
+        {
+          "label": "out_lines = []\nfor _ in range(q):\n    a = next(it); b = next(it)\n    c = closest_common_ancestor(a, b)\n    d = abs(depth[a] - depth[b])\n    out_lines.append(str(d))\nprint(\"\\n\".join(out_lines))",
+          "isCode": true
+        },
+        {
+          "label": "out_lines = []\nfor _ in range(q):\n    a = next(it); b = next(it)\n    d = depth[a] + depth[b]\n    out_lines.append(str(d))\nsys.stdout.write(\"\\n\".join(out_lines))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Use the formula depth[a]+depth[b]-2*depth[c] with c as the closest shared ancestor, collect results, and print joined.",
+      "wrongExplanations": {
+        "1": "Subtracting depth[c] only once overcounts the distance.",
+        "2": "Absolute depth difference only works when one is an ancestor of the other."
+      },
+      "hint": "Remember the - 2*depth[c] term.",
+      "isCodeBuilding": true,
+      "codeSnippet": "out_lines = []\nfor _ in range(q):\n    a = next(it); b = next(it)\n    c = closest_common_ancestor(a, b)\n    d = depth[a] + depth[b] - 2*depth[c]\n    out_lines.append(str(d))\nsys.stdout.write(\"\\n\".join(out_lines))",
+      "codeLabel": "Answer queries and print"
+    },
+    {
+      "id": "q25",
+      "phase": "Verifying the Solution",
+      "questionText": "Using the tree 1-2, 1-3, 3-4, 3-5 and root=1, what are the depths depth[1..5]?",
+      "diagram": "2\n \\\n  1 -- 3 -- 4\n        \\\n         5",
+      "options": [
+        {
+          "label": "[0, 1, 1, 2, 2]",
+          "isCode": false
+        },
+        {
+          "label": "[1, 2, 2, 3, 3]",
+          "isCode": false
+        },
+        {
+          "label": "[0, 1, 2, 3, 4]",
+          "isCode": false
+        },
+        {
+          "label": "[0, 1, 2, 2, 3]",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "From root 1: depth[1]=0; neighbors 2,3 at 1; their neighbors 4,5 at 2.",
+      "wrongExplanations": {
+        "1": "This shifts all depths by +1 and is inconsistent with root depth 0."
+      },
+      "hint": "Depth increases by 1 along each edge from the root.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Verifying the Solution",
+      "questionText": "For the same tree, what is distance(2,5) using the formula with c as their closest shared ancestor?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "3 (c = 1, 1+2 - 2*0 = 3)",
+          "isCode": false
+        },
+        {
+          "label": "2 (c = 3, 1+2 - 2*1 = 1)",
+          "isCode": false
+        },
+        {
+          "label": "1 (c = 2, 1+2 - 2*1 = 1)",
+          "isCode": false
+        },
+        {
+          "label": "4 (c = 1, 1+2 - 2*1 = 1)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "depth[2]=1, depth[5]=2, c=1 with depth 0. Distance = 1+2 - 0 = 3.",
+      "wrongExplanations": {
+        "1": "Node 3 is not an ancestor of 2; closest shared ancestor is 1."
+      },
+      "hint": "List ancestors of 2 and 5 and pick the closest common one.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q27",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the overall time complexity of this approach (building structures + answering q queries)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n log n + q log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n + q)",
+          "isCode": false
+        },
+        {
+          "label": "O(nq)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n + q)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Depth/parent building is O(n), jump table is O(n log n), each query is O(log n).",
+      "wrongExplanations": {
+        "1": "Answering queries requires logarithmic jumps per query.",
+        "3": "This ignores the logarithmic cost per query."
+      },
+      "hint": "Consider the nested loops building the table and the per-query jumps.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q28",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the extra space complexity for the ancestor table and depth array (excluding the adjacency list)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n log n) for the ancestor table and O(n) for depths",
+          "isCode": false
+        },
+        {
+          "label": "O(n) total",
+          "isCode": false
+        },
+        {
+          "label": "O(log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The up table stores LOG ancestors per node: O(n log n). Depths are O(n).",
+      "wrongExplanations": {
+        "1": "We store multiple ancestors per node, not just one."
+      },
+      "hint": "Count entries in up[k][v] across all k.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\nfrom collections import deque\n\ndata = list(map(int, sys.stdin.buffer.read().split()))\nit = iter(data)\nn = next(it); q = next(it)",
+    "adj = [[] for _ in range(n+1)]\nfor _ in range(n-1):\n    a = next(it); b = next(it)\n    adj[a].append(b)\n    adj[b].append(a)",
+    "LOG = (n).bit_length()\nup = [[0] * (n+1) for _ in range(LOG)]\ndepth = [0] * (n+1)",
+    "root = 1\ndq = deque([root])\nup[0][root] = 0\ndepth[root] = 0",
+    "while dq:\n    v = dq.popleft()\n    for to in adj[v]:\n        if to == up[0][v]:\n            continue\n        up[0][to] = v\n        depth[to] = depth[v] + 1\n        dq.append(to)",
+    "for k in range(1, LOG):\n    for v in range(1, n+1):\n        up[k][v] = up[k-1][ up[k-1][v] ]",
+    "def jump_up(u, diff):\n    k = 0\n    while diff:\n        if diff & 1:\n            u = up[k][u]\n        diff >>= 1\n        k += 1\n    return u\n\ndef closest_common_ancestor(a, b):\n    if depth[a] < depth[b]:\n        a, b = b, a\n    a = jump_up(a, depth[a] - depth[b])\n    if a == b:\n        return a\n    for k in range(LOG-1, -1, -1):\n        if up[k][a] != up[k][b]:\n            a = up[k][a]\n            b = up[k][b]\n    return up[0][a]",
+    "out_lines = []\nfor _ in range(q):\n    a = next(it); b = next(it)\n    c = closest_common_ancestor(a, b)\n    d = depth[a] + depth[b] - 2*depth[c]\n    out_lines.append(str(d))\nsys.stdout.write(\"\\n\".join(out_lines))"
+  ],
+  "reasoningChain": [
+    {
+      "question": "How many simple paths exist between any two nodes in a tree, and how is distance defined?",
+      "insight": "A tree has exactly one simple path between any two nodes; distance is the number of edges on that path."
+    },
+    {
+      "question": "Is traversing per query feasible for large n and q?",
+      "insight": "Per-query traversal is O(n); with q up to 2e5 this is too slow. We need preprocessing to answer queries faster."
+    },
+    {
+      "question": "How can we precompute to speed up distance queries?",
+      "insight": "Root the tree, compute depths and parents, and prepare fast upward jumps to compare ancestry efficiently."
+    },
+    {
+      "question": "How to build fast upward jumps?",
+      "insight": "For each node, store ancestors at distances 1,2,4,8,... up to (n).bit_length(), filling anc[k][v] from anc[k-1]."
+    },
+    {
+      "question": "How to find the closest shared ancestor and compute distance?",
+      "insight": "Raise the deeper node to equal depth, then lift both up from high powers until parents match; distance is depth[a]+depth[b]-2*depth[c]."
+    },
+    {
+      "question": "How to implement within limits in Python?",
+      "insight": "Use fast input, an iterative queue-based traversal for depths, and avoid recursion; per-query operations use only jumps."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1405,
+    "output_tokens": 16397,
+    "input_cost": 0.001756,
+    "output_cost": 0.16397,
+    "total_cost": 0.165726
+  }
+}

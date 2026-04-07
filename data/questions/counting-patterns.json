@@ -1,0 +1,1099 @@
+{
+  "id": "counting-patterns-aho-like-automaton",
+  "title": "Counting Patterns",
+  "difficulty": "hard",
+  "tags": [
+    "string"
+  ],
+  "estimatedMinutes": 80,
+  "language": "python",
+  "description": "Given a string s and k patterns (lowercase a–z), count for each pattern the number of starting positions where it appears in s. Print one count per pattern in input order.",
+  "examples": [
+    {
+      "input": "aybabtu\n3\nbab\nabc\na\n",
+      "output": "1\n0\n2\n",
+      "explanation": "In \"aybabtu\": \"bab\" appears once (positions 2..4), \"abc\" zero times, and \"a\" twice (positions 1 and 3)."
+    }
+  ],
+  "constraints": [
+    "1 <= n <= 1e5",
+    "1 <= k <= 5e5",
+    "Total length of patterns <= 5e5",
+    "All strings consist of characters a–z"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "Given s = \"aybabtu\" and pattern p = \"a\", how many starting positions of p are in s?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "\"a\" occurs at indices 0 and 2 (0-based), so 2 positions.",
+      "wrongExplanations": {
+        "0": "There are two 'a' characters, not one.",
+        "2": "Only two 'a' characters exist in the string."
+      },
+      "hint": "Scan the string left to right and count 'a'.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "In this problem, are overlapping matches counted? For s = \"aaa\" and p = \"aa\", how many starting positions?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "1 (only \"aa\" at positions 0..1)",
+          "isCode": false
+        },
+        {
+          "label": "2 (positions 0..1 and 1..2)",
+          "isCode": false
+        },
+        {
+          "label": "3 (every index)",
+          "isCode": false
+        },
+        {
+          "label": "0 (overlaps are not counted)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Overlaps count. \"aa\" appears at indices 0 and 1 in \"aaa\".",
+      "wrongExplanations": {
+        "0": "Overlaps are allowed; the example shows two matches.",
+        "2": "Index 2 cannot start a length-2 match."
+      },
+      "hint": "Check all substrings of length 2.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "For s = \"ababab\" and p = \"bab\", how many starting positions of p are in s?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Matches at indices 1 and 3 (0-based): \"bab\" repeats every two characters.",
+      "wrongExplanations": {
+        "0": "There are two valid starting indices: 1 and 3.",
+        "2": "There are only two occurrences within length 6."
+      },
+      "hint": "List all substrings of length 3.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "According to the constraints, can any pattern be empty?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, empty patterns may appear and match at n+1 positions",
+          "isCode": false
+        },
+        {
+          "label": "No, all patterns are non-empty strings of a–z",
+          "isCode": false
+        },
+        {
+          "label": "Only if k = 0",
+          "isCode": false
+        },
+        {
+          "label": "Only the first pattern can be empty",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "All strings consist of characters a–z, so patterns are non-empty.",
+      "wrongExplanations": {
+        "0": "The problem restricts to a–z characters; empty is not allowed."
+      },
+      "hint": "Check the input description carefully.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Understanding the Problem",
+      "questionText": "A naive approach: for each pattern, scan the entire string and count. With total pattern length P and string length n, worst-case time is:",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n * P)",
+          "isCode": false
+        },
+        {
+          "label": "O(n + P)",
+          "isCode": false
+        },
+        {
+          "label": "O(k * n) regardless of lengths",
+          "isCode": false
+        },
+        {
+          "label": "O(max(n, P))",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each pattern of length ℓ scans O(n), totaling O(n*Σℓ) = O(n*P).",
+      "wrongExplanations": {
+        "1": "We must rescan for each pattern; sums multiply.",
+        "3": "Work is not just the maximum; it sums across patterns."
+      },
+      "hint": "Sum over patterns: n * length(p).",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "Given n up to 1e5, k up to 5e5, and total pattern length up to 5e5, which high-level plan is feasible?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Scan the string once while tracking a state that represents all patterns combined",
+          "isCode": false
+        },
+        {
+          "label": "For each pattern, perform a full scan of the string separately",
+          "isCode": false
+        },
+        {
+          "label": "Sort patterns and use binary search in the text",
+          "isCode": false
+        },
+        {
+          "label": "Hash each pattern and slide a window separately for each",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Combining patterns allows a single pass over the text plus linear preprocessing.",
+      "wrongExplanations": {
+        "1": "This is O(n * P), which is too slow for limits.",
+        "3": "Still repeats work per pattern across all positions."
+      },
+      "hint": "Aim for O(n + total pattern length).",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "When following a path of characters for patterns and the next character doesn't match any outgoing edge, the next best state to move to is:",
+      "diagram": "We are at a node representing some prefix X. Next char is c, but edge X->c does not exist.",
+      "options": [
+        {
+          "label": "Always jump back to the root",
+          "isCode": false
+        },
+        {
+          "label": "Go to the parent node (drop the last character of X)",
+          "isCode": false
+        },
+        {
+          "label": "Move to the longest proper suffix of X that also exists as a prefix in the structure",
+          "isCode": false
+        },
+        {
+          "label": "Stay in place and skip this character",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Jump to the longest suffix of X that is also a known prefix; it preserves as much progress as possible.",
+      "wrongExplanations": {
+        "0": "Jumping to root may lose information unnecessarily.",
+        "1": "One parent step may still not allow the next char; we need the longest viable suffix."
+      },
+      "hint": "Think of keeping the longest possible suffix that is also a known prefix.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Exploring Approaches",
+      "questionText": "To avoid looping through many pattern endings at every text character, it's efficient to:",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Increment a visit count for the current state and later add counts up the fallback links",
+          "isCode": false
+        },
+        {
+          "label": "At each step, traverse all fallback links and increment counts for their patterns",
+          "isCode": false
+        },
+        {
+          "label": "Only count when on a leaf node (no children)",
+          "isCode": false
+        },
+        {
+          "label": "Only count the longest match at each step",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Counting visits per state and propagating up later is efficient and covers all suffix matches.",
+      "wrongExplanations": {
+        "1": "Traversing all links per character can be too slow.",
+        "3": "We need counts for all patterns, not only the longest."
+      },
+      "hint": "Think aggregation after the scan.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "What information should each node of the pattern structure store?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "A map of outgoing edges by character, a fallback link, and a list of pattern ids that end here",
+          "isCode": false
+        },
+        {
+          "label": "Only a map of outgoing edges and a count",
+          "isCode": false
+        },
+        {
+          "label": "The entire substring it represents and its parent index",
+          "isCode": false
+        },
+        {
+          "label": "Only its depth in the tree and one child pointer",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need transitions, where to fallback on mismatch, and which patterns end at the node.",
+      "wrongExplanations": {
+        "1": "Without fallback and pattern ids, we can't handle mismatches or output.",
+        "2": "Storing the whole substring is wasteful and unnecessary."
+      },
+      "hint": "Think minimal data to navigate and report matches.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "If the same pattern string appears multiple times in the input (duplicate lines), how should we handle it?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Store all their ids at the same terminal node and later map the node's count to each id",
+          "isCode": false
+        },
+        {
+          "label": "Create separate terminal nodes for each duplicate",
+          "isCode": false
+        },
+        {
+          "label": "Keep only one copy and ignore the duplicates",
+          "isCode": false
+        },
+        {
+          "label": "Count once and multiply by the number of duplicates at the end without mapping nodes",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "All ids end at the same node. Each id needs its count printed separately.",
+      "wrongExplanations": {
+        "1": "This breaks the shared-prefix structure.",
+        "2": "The problem asks for counts per input line."
+      },
+      "hint": "Multiple ids can point to the same end node.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "During fallback link construction, what should the fallback link of any root child be?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "The root",
+          "isCode": false
+        },
+        {
+          "label": "Itself",
+          "isCode": false
+        },
+        {
+          "label": "Its parent",
+          "isCode": false
+        },
+        {
+          "label": "Undefined; it won't be used",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "If a mismatch occurs at depth 1, the longest proper suffix that is a valid prefix is empty (the root).",
+      "wrongExplanations": {
+        "2": "Fallback links point to suffixes that are also prefixes, not to parents."
+      },
+      "hint": "What's the longest proper suffix of a single character?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "Consider patterns: [\"ab\", \"bab\", \"bc\", \"bca\", \"c\", \"caa\"]. What should the fallback link of the node for \"bab\" point to?",
+      "diagram": "Suffixes of \"bab\": \"ab\", \"b\", \"\". Prefixes present in the structure: \"ab\", \"b\", \"c\", ...",
+      "options": [
+        {
+          "label": "Node for \"ab\"",
+          "isCode": false
+        },
+        {
+          "label": "Node for \"b\"",
+          "isCode": false
+        },
+        {
+          "label": "The root",
+          "isCode": false
+        },
+        {
+          "label": "Node for \"bab\" itself",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The longest proper suffix of \"bab\" that exists as a prefix is \"ab\".",
+      "wrongExplanations": {
+        "1": "\"ab\" is longer and exists; we choose the longest.",
+        "2": "Root is chosen only if no proper suffix is a prefix."
+      },
+      "hint": "Pick the longest proper suffix that is also a prefix among patterns.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "When scanning the text, how should we move the current state on a character c that doesn't have an outgoing edge?",
+      "diagram": "Current state v, next char c. Edge v->c missing.",
+      "options": [
+        {
+          "label": "Set v = 0 immediately (root), then check c",
+          "isCode": false
+        },
+        {
+          "label": "While v > 0 and no edge on c, set v = fallback[v]. Then if edge exists, take it, else stay at root",
+          "isCode": false
+        },
+        {
+          "label": "Skip the character and keep v unchanged",
+          "isCode": false
+        },
+        {
+          "label": "Always go to the parent and try again",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Climb fallback links until a c-edge exists or reach root; then take the edge if present, else stay at root.",
+      "wrongExplanations": {
+        "0": "Jumping to root may skip shorter viable suffixes.",
+        "3": "Parent may not be the right suffix to try next."
+      },
+      "hint": "Use the longest available suffix at each step.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Building the Idea",
+      "questionText": "To compute pattern frequencies efficiently after scanning, it's best to:",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Record how many times each state is visited, then add counts from deeper states to their fallback states",
+          "isCode": false
+        },
+        {
+          "label": "During scanning, for each position, walk all fallback links and increment pattern counts",
+          "isCode": false
+        },
+        {
+          "label": "Only record counts for states that correspond to full patterns and ignore others",
+          "isCode": false
+        },
+        {
+          "label": "Record counts for the longest matching state only",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Aggregating from deeper to fallback states accounts for all suffix matches without per-step link walking.",
+      "wrongExplanations": {
+        "1": "Walking all links per character can be too slow.",
+        "3": "We need counts for all matches, not only the longest."
+      },
+      "hint": "Think of a post-order accumulation by depth.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q15",
+      "phase": "Building the Idea",
+      "questionText": "For s = \"aaa\" and patterns [\"a\", \"aa\"], what should the final printed counts be (in order)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "3 and 1",
+          "isCode": false
+        },
+        {
+          "label": "2 and 2",
+          "isCode": false
+        },
+        {
+          "label": "3 and 2",
+          "isCode": false
+        },
+        {
+          "label": "2 and 3",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "\"a\" occurs 3 times; \"aa\" occurs 2 times (overlapping).",
+      "wrongExplanations": {
+        "0": "\"aa\" occurs twice, not once.",
+        "1": "\"a\" occurs 3 times."
+      },
+      "hint": "List all substrings of length 1 and 2.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q16",
+      "phase": "Building the Idea",
+      "questionText": "In what order should nodes be processed when propagating visit counts along fallback links?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "From deepest to shallowest (decreasing depth)",
+          "isCode": false
+        },
+        {
+          "label": "From shallowest to deepest (increasing depth)",
+          "isCode": false
+        },
+        {
+          "label": "Any arbitrary order",
+          "isCode": false
+        },
+        {
+          "label": "Lexicographic order by the represented string",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Add counts from a node to its fallback parent; process deeper nodes first so parents see complete sums.",
+      "wrongExplanations": {
+        "1": "Parents must receive sums after children are processed.",
+        "3": "Lexicographic order doesn’t ensure parents after children."
+      },
+      "hint": "Ensure a node's descendants are processed before it.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Read and parse the input into s, k, and the list of patterns.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\ndata = sys.stdin.read().strip().split()\nit = iter(data)\ns = next(it)\nk = int(next(it))\npatterns = [next(it) for _ in range(k)]",
+          "isCode": true
+        },
+        {
+          "label": "import sys\ns = sys.stdin.readline().strip()\nk = int(sys.stdin.readline())\npatterns = [sys.stdin.readline().strip() for _ in range(k)]",
+          "isCode": true
+        },
+        {
+          "label": "import sys\ntoks = sys.stdin.read().split()\ns = toks[0]\nk = int(toks[2])\npatterns = toks[3:3+k]",
+          "isCode": true
+        },
+        {
+          "label": "import sys\ns = sys.stdin.read().strip()\nk = int(sys.stdin.read())\npatterns = [sys.stdin.read().strip() for _ in range(k)]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Token-based read handles arbitrary line breaks and whitespace safely for this input format.",
+      "wrongExplanations": {
+        "1": "Mixing readline is fine in principle, but stripping and parsing k without handling trailing spaces/newlines carefully can be fragile in token-only pipelines.",
+        "2": "Indexing of toks is wrong: k is at index 1, not 2."
+      },
+      "hint": "All inputs are whitespace-separated tokens without spaces within strings.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\ndata = sys.stdin.read().strip().split()\nit = iter(data)\ns = next(it)\nk = int(next(it))\npatterns = [next(it) for _ in range(k)]",
+      "codeLabel": "Parse input"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Initialize the node structures to store transitions, fallback links, outputs, and pattern end positions.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "nxt = [{}]\nfail = [0]\nout = [[]]\nend = [0]*k",
+          "isCode": true
+        },
+        {
+          "label": "nxt = [{}]*1\nfail = [0]*1\nout = [[]]*1\nend = [0]*k",
+          "isCode": true
+        },
+        {
+          "label": "nxt = []\nfail = []\nout = []\nend = []",
+          "isCode": true
+        },
+        {
+          "label": "nxt = [{}]\nfail = []\nout = [[]]\nend = [0]*k",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Start with a single root node: one dict for edges, fallback 0, and empty output list.",
+      "wrongExplanations": {
+        "1": "Using [obj]*1 is okay here, but using it for multiple nodes would alias inner lists; better to append new objects per node.",
+        "2": "We need at least the root node initialized."
+      },
+      "hint": "There must be exactly one root node to start.",
+      "isCodeBuilding": true,
+      "codeSnippet": "nxt = [{}]\nfail = [0]\nout = [[]]\nend = [0]*k",
+      "codeLabel": "Init structures"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Insert all patterns into the structure and record pattern end nodes.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "for pid, pat in enumerate(patterns):\n    v = 0\n    for ch in pat:\n        c = ord(ch) - 97\n        if c not in nxt[v]:\n            nxt[v][c] = len(nxt)\n            nxt.append({})\n            fail.append(0)\n            out.append([])\n        v = nxt[v][c]\n    out[v].append(pid)\n    end[pid] = v",
+          "isCode": true
+        },
+        {
+          "label": "for pid, pat in enumerate(patterns):\n    v = 0\n    for ch in pat:\n        if ch not in nxt[v]:\n            nxt[v][ch] = len(nxt)\n            nxt.append({})\n            fail.append(0)\n            out.append([])\n        v = nxt[v][ch]\n    out[v] = [pid]\n    end[pid] = v",
+          "isCode": true
+        },
+        {
+          "label": "for pid, pat in enumerate(patterns):\n    v = 0\n    for ch in pat:\n        c = ord(ch) - 97\n        v = nxt[v].setdefault(c, len(nxt))\n    end[pid] = v",
+          "isCode": true
+        },
+        {
+          "label": "for pid, pat in enumerate(patterns):\n    v = 0\n    for ch in pat:\n        c = ord(ch) - 97\n        if c in nxt[v]:\n            v = fail[v]\n        else:\n            nxt[v][c] = len(nxt)\n            nxt.append({})\n            fail.append(0)\n            out.append([])\n            v = nxt[v][c]\n    end[pid] = v",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Create nodes per missing edge, move along edges, and record terminal node and id list.",
+      "wrongExplanations": {
+        "1": "Using raw characters as keys conflicts with integer keys elsewhere; also overwrites out[v] instead of appending.",
+        "2": "setdefault with len(nxt) must also append new node structures; this code omits appending fail/out for new nodes."
+      },
+      "hint": "Use integer keys 0..25 for characters and append new nodes consistently.",
+      "isCodeBuilding": true,
+      "codeSnippet": "for pid, pat in enumerate(patterns):\n    v = 0\n    for ch in pat:\n        c = ord(ch) - 97\n        if c not in nxt[v]:\n            nxt[v][c] = len(nxt)\n            nxt.append({})\n            fail.append(0)\n            out.append([])\n        v = nxt[v][c]\n    out[v].append(pid)\n    end[pid] = v",
+      "codeLabel": "Insert patterns"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Build fallback links and collect nodes in increasing depth order using a queue.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "from collections import deque\nq = deque()\norder = []\nfor c, u in nxt[0].items():\n    q.append(u)\n    fail[u] = 0\nwhile q:\n    v = q.popleft()\n    order.append(v)\n    for c, u in nxt[v].items():\n        q.append(u)\n        f = fail[v]\n        while f and (c not in nxt[f]):\n            f = fail[f]\n        fail[u] = nxt[f].get(c, 0)",
+          "isCode": true
+        },
+        {
+          "label": "from collections import deque\nq = deque([0])\norder = []\nwhile q:\n    v = q.popleft()\n    order.append(v)\n    for c, u in nxt[v].items():\n        q.append(u)\n        fail[u] = fail[v]",
+          "isCode": true
+        },
+        {
+          "label": "order = []\nfor v in range(1, len(nxt)):\n    order.append(v)\n    fail[v] = 0",
+          "isCode": true
+        },
+        {
+          "label": "from collections import deque\nq = deque()\norder = []\nfor c, u in nxt[0].items():\n    q.append(u)\nwhile q:\n    v = q.pop()\n    order.append(v)\n    for c, u in nxt[v].items():\n        q.append(u)\n        fail[u] = 0",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "For each edge v -c-> u, follow fallback from v to find the destination for c and set fail[u] accordingly.",
+      "wrongExplanations": {
+        "1": "Setting fail[u] = fail[v] ignores the need to find the longest valid suffix for the edge character.",
+        "2": "All fail links are not zero; they depend on suffix-prefix matches."
+      },
+      "hint": "Use a queue; process parents before children. For each child, find the best suffix state for its edge.",
+      "isCodeBuilding": true,
+      "codeSnippet": "from collections import deque\nq = deque()\norder = []\nfor c, u in nxt[0].items():\n    q.append(u)\n    fail[u] = 0\nwhile q:\n    v = q.popleft()\n    order.append(v)\n    for c, u in nxt[v].items():\n        q.append(u)\n        f = fail[v]\n        while f and (c not in nxt[f]):\n            f = fail[f]\n        fail[u] = nxt[f].get(c, 0)",
+      "codeLabel": "Build fallback links"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "Scan the text s to count visits to states.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "cnt = [0] * len(nxt)\nv = 0\nfor ch in s:\n    c = ord(ch) - 97\n    while v and (c not in nxt[v]):\n        v = fail[v]\n    if c in nxt[v]:\n        v = nxt[v][c]\n    else:\n        v = 0\n    cnt[v] += 1",
+          "isCode": true
+        },
+        {
+          "label": "cnt = [0] * len(nxt)\nv = 0\nfor ch in s:\n    c = ord(ch) - 97\n    if c in nxt[v]:\n        v = nxt[v][c]\n    else:\n        v = 0\n    cnt[v] += 1",
+          "isCode": true
+        },
+        {
+          "label": "cnt = [0] * len(nxt)\nv = 0\nfor ch in s:\n    c = ord(ch) - 97\n    while v and (c not in nxt[v]):\n        v = 0\n    if c in nxt[v]:\n        v = nxt[v][c]\n    cnt[v] += 1",
+          "isCode": true
+        },
+        {
+          "label": "cnt = [0] * len(nxt)\nv = 0\nfor ch in s:\n    c = ord(ch) - 97\n    while v and (c not in nxt[v]):\n        v = fail[v]\n    if c in nxt[v]:\n        v = fail[v]\n    cnt[v] += 1",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Climb fallback links until an edge exists (or root), then take the edge if possible; count visits to the resulting state.",
+      "wrongExplanations": {
+        "1": "If the edge is missing, you must try fallback links before jumping to root.",
+        "3": "When the edge exists, move along it, not to the fallback."
+      },
+      "hint": "Don't forget to follow fallbacks on mismatch.",
+      "isCodeBuilding": true,
+      "codeSnippet": "cnt = [0] * len(nxt)\nv = 0\nfor ch in s:\n    c = ord(ch) - 97\n    while v and (c not in nxt[v]):\n        v = fail[v]\n    if c in nxt[v]:\n        v = nxt[v][c]\n    else:\n        v = 0\n    cnt[v] += 1",
+      "codeLabel": "Scan text"
+    },
+    {
+      "id": "q22",
+      "phase": "Writing the Code",
+      "questionText": "Propagate visit counts along fallback links so that each terminal node's count includes visits of its descendants.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "for v in reversed(order):\n    cnt[fail[v]] += cnt[v]",
+          "isCode": true
+        },
+        {
+          "label": "for v in order:\n    cnt[fail[v]] += cnt[v]",
+          "isCode": true
+        },
+        {
+          "label": "for v in reversed(order):\n    cnt[v] += cnt[fail[v]]",
+          "isCode": true
+        },
+        {
+          "label": "for v in order:\n    cnt[v] += cnt[fail[v]]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Process from deeper to shallower so parents accumulate counts from children via fallback links.",
+      "wrongExplanations": {
+        "1": "Forward order may use incomplete child counts.",
+        "2": "This direction would double-count and propagate the wrong way."
+      },
+      "hint": "Ensure a node adds to its fallback parent after its own total is known.",
+      "isCodeBuilding": true,
+      "codeSnippet": "for v in reversed(order):\n    cnt[fail[v]] += cnt[v]",
+      "codeLabel": "Propagate counts"
+    },
+    {
+      "id": "q23",
+      "phase": "Writing the Code",
+      "questionText": "Produce answers for each pattern in input order and print them.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "ans = [0] * k\nfor pid in range(k):\n    ans[pid] = cnt[end[pid]]\nsys.stdout.write(\"\\n\".join(str(x) for x in ans))",
+          "isCode": true
+        },
+        {
+          "label": "ans = [0] * k\nfor pid in range(k):\n    ans[pid] = len(out[end[pid]])\nprint(*ans)",
+          "isCode": true
+        },
+        {
+          "label": "for v in range(len(nxt)):\n    print(cnt[v])",
+          "isCode": true
+        },
+        {
+          "label": "ans = cnt\nprint(\"\\n\".join(map(str, ans)))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each pattern id maps to its terminal node; print the count for that node on its own line.",
+      "wrongExplanations": {
+        "1": "The number of ids at a node is not the number of occurrences in the text.",
+        "2": "We need counts for patterns, not for every state."
+      },
+      "hint": "Use the recorded end node per pattern id.",
+      "isCodeBuilding": true,
+      "codeSnippet": "ans = [0] * k\nfor pid in range(k):\n    ans[pid] = cnt[end[pid]]\nsys.stdout.write(\"\\n\".join(str(x) for x in ans))",
+      "codeLabel": "Output answers"
+    },
+    {
+      "id": "q24",
+      "phase": "Writing the Code",
+      "questionText": "Combine all code pieces logically to form the final solution. Which ordering of the above snippets is correct?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Parse input -> Init structures -> Insert patterns -> Build fallback links -> Scan text -> Propagate counts -> Output answers",
+          "isCode": false
+        },
+        {
+          "label": "Init structures -> Parse input -> Insert patterns -> Build fallback links -> Scan text -> Propagate counts -> Output answers",
+          "isCode": false
+        },
+        {
+          "label": "Parse input -> Insert patterns -> Init structures -> Build fallback links -> Scan text -> Propagate counts -> Output answers",
+          "isCode": false
+        },
+        {
+          "label": "Parse input -> Init structures -> Build fallback links -> Insert patterns -> Scan text -> Propagate counts -> Output answers",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We must parse, initialize, insert patterns, then compute fallbacks, scan, propagate, and finally print.",
+      "wrongExplanations": {
+        "1": "We cannot insert patterns before parsing input.",
+        "3": "Fallback links depend on the inserted patterns."
+      },
+      "hint": "Dependencies: fallbacks depend on inserted patterns; scanning depends on built structure.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Verifying the Solution",
+      "questionText": "What output does your program produce for the sample input?\naybabtu\n3\nbab\nabc\na",
+      "diagram": null,
+      "options": [
+        {
+          "label": "1\\n0\\n2",
+          "isCode": false
+        },
+        {
+          "label": "0\\n1\\n2",
+          "isCode": false
+        },
+        {
+          "label": "1\\n1\\n2",
+          "isCode": false
+        },
+        {
+          "label": "1\\n0\\n1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "\"bab\" appears once, \"abc\" zero times, and \"a\" twice.",
+      "wrongExplanations": {
+        "1": "\"abc\" does not appear in the text.",
+        "3": "\"a\" occurs twice (positions 0 and 2, 0-based)."
+      },
+      "hint": "Manually check each pattern against the string.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Verifying the Solution",
+      "questionText": "Test s = \"aaaa\" with patterns [\"aa\", \"aaa\"]. What should be printed?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "3\\n2",
+          "isCode": false
+        },
+        {
+          "label": "2\\n3",
+          "isCode": false
+        },
+        {
+          "label": "2\\n2",
+          "isCode": false
+        },
+        {
+          "label": "3\\n3",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "\"aa\" appears at indices 0,1,2 → 3; \"aaa\" at 0,1 → 2.",
+      "wrongExplanations": {
+        "1": "Order is [\"aa\", \"aaa\"], not reversed.",
+        "3": "\"aaa\" appears only twice in length 4."
+      },
+      "hint": "List all substrings of lengths 2 and 3.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q27",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the overall time complexity in terms of n (text length) and P (total pattern length)? Assume fixed alphabet size.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n + P)",
+          "isCode": false
+        },
+        {
+          "label": "O(n * P)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log P)",
+          "isCode": false
+        },
+        {
+          "label": "O(P^2 + n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Building the structure is O(P); scanning and fallback traversals total O(n).",
+      "wrongExplanations": {
+        "1": "We do not rescan the text for each pattern.",
+        "2": "There is no logarithmic factor in the operations."
+      },
+      "hint": "Each character of the text is processed with a bounded number of fallback steps.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q28",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the space complexity in terms of P, the total length of all patterns?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(P)",
+          "isCode": false
+        },
+        {
+          "label": "O(P * alphabet)",
+          "isCode": false
+        },
+        {
+          "label": "O(n + P)",
+          "isCode": false
+        },
+        {
+          "label": "O(n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We store one node per prefix of the patterns and only existing edges → linear in P.",
+      "wrongExplanations": {
+        "1": "We store only present transitions, not full tables.",
+        "3": "Space does not depend on n except counters, which are sized by nodes."
+      },
+      "hint": "Nodes are created per new character along patterns.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q29",
+      "phase": "Analyzing Complexity",
+      "questionText": "How does the program handle duplicate patterns (identical strings in multiple input lines)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Each input line has its own id mapped to the same terminal node; the same count is printed for each duplicate",
+          "isCode": false
+        },
+        {
+          "label": "Duplicates are merged and counted once, printed only once",
+          "isCode": false
+        },
+        {
+          "label": "Duplicates cause multiple nodes to be created to keep counts separate",
+          "isCode": false
+        },
+        {
+          "label": "Duplicates are ignored to save time",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "All ids end at the same node; we look up the node count for each id when printing.",
+      "wrongExplanations": {
+        "1": "We must print a count for each input line.",
+        "3": "Ignoring duplicates would be incorrect."
+      },
+      "hint": "Each pattern line maps to a terminal node index via an array.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys",
+    "data = sys.stdin.read().strip().split()",
+    "it = iter(data)",
+    "s = next(it)",
+    "k = int(next(it))",
+    "patterns = [next(it) for _ in range(k)]",
+    "nxt = [{}]",
+    "fail = [0]",
+    "out = [[]]",
+    "end = [0]*k",
+    "for pid, pat in enumerate(patterns):",
+    "    v = 0",
+    "    for ch in pat:",
+    "        c = ord(ch) - 97",
+    "        if c not in nxt[v]:",
+    "            nxt[v][c] = len(nxt)",
+    "            nxt.append({})",
+    "            fail.append(0)",
+    "            out.append([])",
+    "        v = nxt[v][c]",
+    "    out[v].append(pid)",
+    "    end[pid] = v",
+    "from collections import deque",
+    "q = deque()",
+    "order = []",
+    "for c, u in nxt[0].items():",
+    "    q.append(u)",
+    "    fail[u] = 0",
+    "while q:",
+    "    v = q.popleft()",
+    "    order.append(v)",
+    "    for c, u in nxt[v].items():",
+    "        q.append(u)",
+    "        f = fail[v]",
+    "        while f and (c not in nxt[f]):",
+    "            f = fail[f]",
+    "        fail[u] = nxt[f].get(c, 0)",
+    "cnt = [0] * len(nxt)",
+    "v = 0",
+    "for ch in s:",
+    "    c = ord(ch) - 97",
+    "    while v and (c not in nxt[v]):",
+    "        v = fail[v]",
+    "    if c in nxt[v]:",
+    "        v = nxt[v][c]",
+    "    else:",
+    "        v = 0",
+    "    cnt[v] += 1",
+    "for v in reversed(order):",
+    "    cnt[fail[v]] += cnt[v]",
+    "ans = [0] * k",
+    "for pid in range(k):",
+    "    ans[pid] = cnt[end[pid]]",
+    "sys.stdout.write(\"\\n\".join(str(x) for x in ans))"
+  ],
+  "reasoningChain": [
+    {
+      "question": "How many matches are there, and are overlaps counted?",
+      "insight": "Matches are counted at all starting positions; overlaps are allowed, so patterns can match at consecutive indices."
+    },
+    {
+      "question": "Is scanning each pattern separately fast enough?",
+      "insight": "Per-pattern scans cost O(n * total pattern length), which is too slow for the given limits."
+    },
+    {
+      "question": "How to process all patterns together in one pass?",
+      "insight": "Build a shared prefix structure for all patterns and traverse the text while maintaining a state that reflects the longest matched prefix."
+    },
+    {
+      "question": "How to handle mismatches while preserving progress?",
+      "insight": "Use fallback links to the longest proper suffix that is also a known prefix; on mismatch, follow links until a transition exists."
+    },
+    {
+      "question": "How to count efficiently without checking all endings at each step?",
+      "insight": "Count visits per state during the scan and then propagate counts from deeper states to their fallback parents."
+    },
+    {
+      "question": "What order to propagate counts?",
+      "insight": "Process nodes from deepest to shallowest so each parent's count includes all contributions from its descendants."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1350,
+    "output_tokens": 16521,
+    "input_cost": 0.001687,
+    "output_cost": 0.16521,
+    "total_cost": 0.166898
+  }
+}

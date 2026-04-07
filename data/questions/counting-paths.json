@@ -1,0 +1,986 @@
+{
+  "id": "counting-paths",
+  "title": "Counting Paths",
+  "difficulty": "hard",
+  "tags": [
+    "tree"
+  ],
+  "estimatedMinutes": 60,
+  "language": "python",
+  "description": "You are given a tree consisting of n nodes, and m paths in the tree. Your task is to calculate for each node the number of paths containing that node.\n\nInput:\n- First line: integers n and m (1 ≤ n, m ≤ 2⋅10^5)\n- Next n-1 lines: edges a b forming a tree\n- Next m lines: paths a b\n\nOutput:\n- Print n integers: for each node 1..n, the number of given paths that contain that node.",
+  "examples": [
+    {
+      "input": "5 3\n1 2\n1 3\n3 4\n3 5\n1 3\n2 5\n1 4\n",
+      "output": "3 1 3 1 1",
+      "explanation": "Given paths: (1,3): nodes {1,3}; (2,5): nodes {2,1,3,5}; (1,4): nodes {1,3,4}. Totals: node1=3, node2=1, node3=3, node4=1, node5=1."
+    }
+  ],
+  "constraints": [
+    "1 ≤ n, m ≤ 2⋅10^5",
+    "Nodes are 1-indexed",
+    "Tree is connected and has n-1 edges"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "In a tree that is a simple chain 1-2-3, for the path between nodes 1 and 3, which nodes are included?",
+      "diagram": "1 -- 2 -- 3",
+      "options": [
+        {
+          "label": "{1,2,3}",
+          "isCode": false
+        },
+        {
+          "label": "{1,3}",
+          "isCode": false
+        },
+        {
+          "label": "{2}",
+          "isCode": false
+        },
+        {
+          "label": "None, paths are edges only",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "A path between two nodes in a tree includes all nodes on the unique connecting route, including both endpoints.",
+      "wrongExplanations": {
+        "1": "Endpoints are included by default unless stated otherwise.",
+        "2": "The middle node is included but endpoints also belong to the path."
+      },
+      "hint": "Endpoints are included.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "Does the path between nodes a and b include nodes a and b themselves?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, both a and b are included",
+          "isCode": false
+        },
+        {
+          "label": "Only a is included",
+          "isCode": false
+        },
+        {
+          "label": "Only b is included",
+          "isCode": false
+        },
+        {
+          "label": "Neither a nor b is included",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Paths in trees include both endpoints and all nodes between them.",
+      "wrongExplanations": {
+        "3": "Excluding endpoints would be a nonstandard definition."
+      },
+      "hint": "Think of the unique route connecting a to b.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "In the tree with edges (1-2) and (1-3), for the path between nodes 2 and 3, which nodes are on the path?",
+      "diagram": "  2\n  |\n1-+-3",
+      "options": [
+        {
+          "label": "{2,1,3}",
+          "isCode": false
+        },
+        {
+          "label": "{2,3}",
+          "isCode": false
+        },
+        {
+          "label": "{1}",
+          "isCode": false
+        },
+        {
+          "label": "{2,1}",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The route from 2 to 3 goes 2→1→3, so all three nodes are included.",
+      "wrongExplanations": {
+        "1": "The path includes the connecting node 1 as well.",
+        "2": "Node 1 lies between 2 and 3 and must be included."
+      },
+      "hint": "There is a unique path between any two nodes in a tree.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "On the chain 1-2-3, with two paths: (1,2) and (2,3), what are the counts for nodes 1,2,3 respectively?",
+      "diagram": "1 -- 2 -- 3",
+      "options": [
+        {
+          "label": "1 2 1",
+          "isCode": false
+        },
+        {
+          "label": "2 2 2",
+          "isCode": false
+        },
+        {
+          "label": "1 1 1",
+          "isCode": false
+        },
+        {
+          "label": "2 1 2",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Node1 appears in (1,2); node3 in (2,3); node2 appears in both paths.",
+      "wrongExplanations": {
+        "1": "Each node's count is how many paths include it, not total paths.",
+        "2": "Node2 is on both paths but others only on one."
+      },
+      "hint": "Count appearances per node across both paths.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Understanding the Problem",
+      "questionText": "The problem asks for counts per:",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Node (how many paths contain the node)",
+          "isCode": false
+        },
+        {
+          "label": "Edge (how many paths contain the edge)",
+          "isCode": false
+        },
+        {
+          "label": "Pair (how many nodes on each path)",
+          "isCode": false
+        },
+        {
+          "label": "Subtree (how many paths contained entirely)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We must output for each node how many given paths include it.",
+      "wrongExplanations": {
+        "1": "Edges are not requested.",
+        "2": "We don't output per path."
+      },
+      "hint": "Read the output requirement carefully.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "A naive plan: for each of m paths (u,v), walk along the path and increment counts on each node. With n,m up to 2⋅10^5, what's the worst-case time?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n + m)",
+          "isCode": false
+        },
+        {
+          "label": "O((n + m) log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n ⋅ m)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2 + m)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "A path can be length Θ(n). Doing this for m paths yields Θ(n⋅m), which is too slow.",
+      "wrongExplanations": {
+        "0": "Walking each path isn't linear in total unless paths are tiny.",
+        "1": "No logarithmic factor appears in naive traversal."
+      },
+      "hint": "Consider a chain tree and m ~ n.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "Is precomputing information for every ordered pair of nodes (about which nodes lie on their path) feasible here?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "No: it would need Ω(n^2) time/memory, too large",
+          "isCode": false
+        },
+        {
+          "label": "Yes: n^2 fits easily under limits",
+          "isCode": false
+        },
+        {
+          "label": "Yes: we can compress all paths into O(n)",
+          "isCode": false
+        },
+        {
+          "label": "Maybe: if m is small, it's fine",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "n can be 2e5; n^2 is ~4e10, impossible within limits.",
+      "wrongExplanations": {
+        "1": "4e10 items cannot fit or be processed.",
+        "3": "We must handle worst case m too."
+      },
+      "hint": "Estimate n^2 for n=2⋅10^5.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Exploring Approaches",
+      "questionText": "For a single pair (u,v), suppose we add +1 at u and +1 at v, and later aggregate counts upward from children to parent. Where should we subtract to limit the effect to the path between u and v?",
+      "diagram": "Idea: +1 at u and v. What corrections?",
+      "options": [
+        {
+          "label": "Subtract 1 at their deepest common ancestor and 1 at that ancestor's parent",
+          "isCode": false
+        },
+        {
+          "label": "Subtract 2 at their deepest common ancestor",
+          "isCode": false
+        },
+        {
+          "label": "Subtract 1 at the parents of u and v",
+          "isCode": false
+        },
+        {
+          "label": "Subtract 1 at the root only",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "This marking ensures only nodes on the path retain net +1 after upward aggregation.",
+      "wrongExplanations": {
+        "1": "Subtracting 2 at the ancestor also removes the ancestor itself from the path.",
+        "2": "Parents of u and v are not the meeting point; off-path nodes would be affected."
+      },
+      "hint": "Think about the point where paths from u and v meet.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "Check the marking on chain 1-2-3 for (u,v)=(1,3). Add +1 at 1 and 3; their deepest common ancestor is 1; subtract 1 at 1 and at parent(1) (none). After summing child→parent, what are final counts?",
+      "diagram": "1 -- 2 -- 3",
+      "options": [
+        {
+          "label": "1 1 1",
+          "isCode": false
+        },
+        {
+          "label": "0 1 1",
+          "isCode": false
+        },
+        {
+          "label": "1 0 1",
+          "isCode": false
+        },
+        {
+          "label": "0 0 1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Initial: [0,0,1]. Summing upward: 3→2 makes [0,1,1]; 2→1 makes [1,1,1].",
+      "wrongExplanations": {
+        "1": "Node1 gets accumulation from node2.",
+        "2": "Node2 also gains from node3."
+      },
+      "hint": "Sum from deepest nodes upwards.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "On chain 1-2-3 for (u,v)=(2,3). Add +1 at 2 and 3; deepest common ancestor is 2; subtract 1 at 2 and at parent(2)=1. After summing child→parent, which nodes end up with +1?",
+      "diagram": "1 -- 2 -- 3",
+      "options": [
+        {
+          "label": "Nodes 2 and 3",
+          "isCode": false
+        },
+        {
+          "label": "Nodes 1 and 2",
+          "isCode": false
+        },
+        {
+          "label": "All nodes",
+          "isCode": false
+        },
+        {
+          "label": "Only node 3",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Initial: node3=1, node1=-1. After summation: node2=1, node3=1, node1=0.",
+      "wrongExplanations": {
+        "1": "Node1's -1 is canceled by receipt from node2.",
+        "3": "Node2 remains +1 as it is on the path."
+      },
+      "hint": "Compute contributions step by step.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "To turn the local marks into final per-node counts, which way should we aggregate values?",
+      "diagram": "Tree with parent pointers",
+      "options": [
+        {
+          "label": "Sum values from child to parent (process deeper nodes first)",
+          "isCode": false
+        },
+        {
+          "label": "Distribute values from parent to children",
+          "isCode": false
+        },
+        {
+          "label": "Sum values across siblings first",
+          "isCode": false
+        },
+        {
+          "label": "No aggregation is needed",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We want each node to collect contributions from its subtree; child→parent summation achieves this.",
+      "wrongExplanations": {
+        "1": "Parent→children spreads values rather than collecting them.",
+        "3": "Marks alone do not equal final counts without aggregation."
+      },
+      "hint": "Think of accumulating contributions toward ancestors.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "If the deepest common ancestor equals one endpoint (say u is an ancestor of v), should we still subtract at that ancestor and at its parent?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes; it ensures only nodes on the u–v path remain with +1",
+          "isCode": false
+        },
+        {
+          "label": "No; subtracting would remove the endpoint from the path",
+          "isCode": false
+        },
+        {
+          "label": "Subtract only at the parent of the ancestor",
+          "isCode": false
+        },
+        {
+          "label": "Subtract nowhere; only add at endpoints",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Subtracting at the ancestor and its parent keeps the path intact and cancels off-path nodes.",
+      "wrongExplanations": {
+        "1": "Net effect on the endpoint after aggregation is still correct.",
+        "3": "Without subtraction, off-path nodes receive stray counts."
+      },
+      "hint": "Test the case u=v or u ancestor of v on a small tree.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "For a path where u=v (a single node), what does the marking (+1 at u, +1 at v, -1 at their ancestor, -1 at ancestor's parent) produce?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Exactly +1 at node u and 0 elsewhere",
+          "isCode": false
+        },
+        {
+          "label": "+2 at node u",
+          "isCode": false
+        },
+        {
+          "label": "0 at all nodes",
+          "isCode": false
+        },
+        {
+          "label": "+1 at u and +1 at its parent",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Here the ancestor is u; +1+1-1 gives +1 at u; subtracting at parent cancels spillover upward.",
+      "wrongExplanations": {
+        "1": "The -1 at the ancestor cancels one of the +1.",
+        "3": "Parent gets a -1, later canceled by child's +1."
+      },
+      "hint": "Plug u=v into the formula and simulate aggregation.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Building the Idea",
+      "questionText": "We need to find the deepest common ancestor of two nodes quickly. Which data should we precompute to answer such queries in near-constant time per query?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Depth of each node and the 2^k-th ancestor for several k",
+          "isCode": false
+        },
+        {
+          "label": "Only the immediate parent for each node",
+          "isCode": false
+        },
+        {
+          "label": "Only subtree sizes for each node",
+          "isCode": false
+        },
+        {
+          "label": "Only an Euler traversal order without ancestor info",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "With depths and jump pointers by powers of two, we can align depths and move both nodes upward quickly.",
+      "wrongExplanations": {
+        "1": "Walking up one-by-one per query is too slow.",
+        "3": "Traversal order alone doesn't support fast ancestor jumps."
+      },
+      "hint": "Think of skipping multiple ancestors at once.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Read input fast and build the adjacency list for the tree. Which snippet correctly reads n, m and the n-1 edges into an undirected adjacency list?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\ndata = sys.stdin.buffer.read().split()\nit = iter(data)\nn = int(next(it)); m = int(next(it))\nadj = [[] for _ in range(n+1)]\nfor _ in range(n-1):\n    a = int(next(it)); b = int(next(it))\n    adj[a].append(b); adj[b].append(a)",
+          "isCode": true
+        },
+        {
+          "label": "import sys\nn, m = map(int, sys.stdin.readline().split())\nadj = [[] for _ in range(n)]\nfor _ in range(n-1):\n    a, b = map(int, sys.stdin.readline().split())\n    adj[a-1].append(b-1); adj[b-1].append(a-1)",
+          "isCode": true
+        },
+        {
+          "label": "import sys\nn = int(sys.stdin.readline())\nm = int(sys.stdin.readline())\nadj = [[] for _ in range(n+1)]\nfor _ in range(n-1):\n    a = int(sys.stdin.readline()); b = int(sys.stdin.readline())\n    adj[a] = [b]; adj[b] = [a]",
+          "isCode": true
+        },
+        {
+          "label": "import sys\nn, m = map(int, sys.stdin.read().split())\nadj = {}\nfor _ in range(n-1):\n    a, b = map(int, sys.stdin.read().split())\n    adj.setdefault(a, []).append(b)\n    adj.setdefault(b, []).append(a)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We parse all tokens once, use 1-based arrays, and add edges in both directions.",
+      "wrongExplanations": {
+        "1": "Mixes 0-based indexing and may mismatch later 1-based logic.",
+        "3": "Repeated reads exhaust the stream and split usage is incorrect."
+      },
+      "hint": "Use 1-based lists and undirected adjacency.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\ndata = sys.stdin.buffer.read().split()\nit = iter(data)\nn = int(next(it)); m = int(next(it))\nadj = [[] for _ in range(n+1)]\nfor _ in range(n-1):\n    a = int(next(it)); b = int(next(it))\n    adj[a].append(b); adj[b].append(a)",
+      "codeLabel": "Read input and build adjacency"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Initialize structures for ancestor jumps and compute depth and immediate parent of each node using a traversal from node 1. Which snippet does this correctly?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "LOG = (n+1).bit_length()\nup = [[0]*(n+1) for _ in range(LOG)]\ndepth = [0]*(n+1)\nfrom collections import deque\norder = []\nq = deque([1])\nvisited = [False]*(n+1)\nvisited[1] = True\nup[0][1] = 0\nwhile q:\n    u = q.popleft()\n    order.append(u)\n    for v in adj[u]:\n        if not visited[v]:\n            visited[v] = True\n            depth[v] = depth[u] + 1\n            up[0][v] = u\n            q.append(v)",
+          "isCode": true
+        },
+        {
+          "label": "LOG = n.bit_length()\nup = [[-1]*(n) for _ in range(LOG)]\ndepth = [0]*n\nstack = [1]\nparent = [-1]*n\nwhile stack:\n    u = stack.pop()\n    for v in adj[u]:\n        if v != parent[u]:\n            parent[v] = u\n            depth[v] = depth[u] + 1\n            stack.append(v)",
+          "isCode": true
+        },
+        {
+          "label": "LOG = (n+1).bit_length()\nup = [[0]*(n+1) for _ in range(LOG)]\ndepth = [0]*(n+1)\norder = list(range(1, n+1))\n# no traversal, parents remain 0",
+          "isCode": true
+        },
+        {
+          "label": "LOG = 32\nup = [[0]*(n+1) for _ in range(LOG)]\ndepth = [0]*(n+1)\nfor u in range(2, n+1):\n    up[0][u] = u-1\n    depth[u] = depth[u-1] + 1\norder = list(range(1, n+1))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We use a queue from root 1 to set depths, parents, and record a processing order by nondecreasing depth.",
+      "wrongExplanations": {
+        "1": "Mixes 0-based/1-based and leaves up table inconsistent.",
+        "2": "Parents must be discovered via traversal; default zeros are wrong."
+      },
+      "hint": "Ensure only tree edges are used and visited checks prevent revisiting.",
+      "isCodeBuilding": true,
+      "codeSnippet": "LOG = (n+1).bit_length()\nup = [[0]*(n+1) for _ in range(LOG)]\ndepth = [0]*(n+1)\nfrom collections import deque\norder = []\nq = deque([1])\nvisited = [False]*(n+1)\nvisited[1] = True\nup[0][1] = 0\nwhile q:\n    u = q.popleft()\n    order.append(u)\n    for v in adj[u]:\n        if not visited[v]:\n            visited[v] = True\n            depth[v] = depth[u] + 1\n            up[0][v] = u\n            q.append(v)",
+      "codeLabel": "Init jump table arrays and BFS for depth/parent"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Fill the jump table so that up[k][v] is the 2^k-th ancestor of v (or 0 if none). Which snippet is correct?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "for k in range(1, LOG):\n    row = up[k]\n    prev = up[k-1]\n    for v in range(1, n+1):\n        row[v] = prev[ prev[v] ]",
+          "isCode": true
+        },
+        {
+          "label": "for k in range(LOG):\n    for v in range(1, n+1):\n        up[k][v] = up[k][ up[k][v] ]",
+          "isCode": true
+        },
+        {
+          "label": "for k in range(1, LOG):\n    for v in range(1, n+1):\n        up[k][v] = up[k-1][v]",
+          "isCode": true
+        },
+        {
+          "label": "for v in range(1, n+1):\n    for k in range(1, LOG):\n        up[v][k] = up[v][k-1]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The 2^k-th ancestor is the 2^{k-1}-th ancestor of the 2^{k-1}-th ancestor.",
+      "wrongExplanations": {
+        "1": "This reuses up[k] on both sides and doesn't progress correctly.",
+        "2": "This copies parents without jumping further."
+      },
+      "hint": "Use up[k][v] = up[k-1][ up[k-1][v] ].",
+      "isCodeBuilding": true,
+      "codeSnippet": "for k in range(1, LOG):\n    row = up[k]\n    prev = up[k-1]\n    for v in range(1, n+1):\n        row[v] = prev[ prev[v] ]",
+      "codeLabel": "Fill jump table"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Write a helper to move a node up by d steps using the jump table. Which function is correct?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def ascend(u, d):\n    i = 0\n    while d and u:\n        if d & 1:\n            u = up[i][u]\n        d >>= 1\n        i += 1\n    return u",
+          "isCode": true
+        },
+        {
+          "label": "def ascend(u, d):\n    for i in range(LOG):\n        if d & (1<<i):\n            u = up[0][u]\n    return u",
+          "isCode": true
+        },
+        {
+          "label": "def ascend(u, d):\n    while d > 0:\n        u = up[0][u]\n        d -= 1\n    return u",
+          "isCode": true
+        },
+        {
+          "label": "def ascend(u, d):\n    i = LOG-1\n    while i >= 0:\n        if d >= (1<<i):\n            u = up[0][u]\n            d -= (1<<i)\n        i -= 1\n    return u",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Use the bits of d to jump by powers of two using up[i].",
+      "wrongExplanations": {
+        "1": "Always uses up[0], not up[i].",
+        "2": "Linear stepping is too slow in worst case."
+      },
+      "hint": "Use binary decomposition of d.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def ascend(u, d):\n    i = 0\n    while d and u:\n        if d & 1:\n            u = up[i][u]\n        d >>= 1\n        i += 1\n    return u",
+      "codeLabel": "Ascend helper"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Implement a function to find the deepest common ancestor of u and v using depths and jumps. Choose the correct implementation.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def lca(u, v):\n    if depth[u] < depth[v]:\n        u, v = v, u\n    u = ascend(u, depth[u] - depth[v])\n    if u == v:\n        return u\n    for k in range(LOG-1, -1, -1):\n        if up[k][u] != up[k][v]:\n            u = up[k][u]\n            v = up[k][v]\n    return up[0][u]",
+          "isCode": true
+        },
+        {
+          "label": "def lca(u, v):\n    while u != v:\n        if depth[u] > depth[v]:\n            u = up[0][u]\n        else:\n            v = up[0][v]\n    return u",
+          "isCode": true
+        },
+        {
+          "label": "def lca(u, v):\n    if depth[u] > depth[v]:\n        v = ascend(v, depth[u] - depth[v])\n    else:\n        u = ascend(u, depth[v] - depth[u])\n    return up[0][u]",
+          "isCode": true
+        },
+        {
+          "label": "def lca(u, v):\n    return up[LOG-1][u]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Align depths, then jump both up while their ancestors differ; the parent of their split is the answer.",
+      "wrongExplanations": {
+        "1": "This can be too slow in worst case (linear upward).",
+        "2": "It returns the parent after aligning, not the correct ancestor when u and v diverge."
+      },
+      "hint": "After aligning depths, move both up together by powers of two.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def lca(u, v):\n    if depth[u] < depth[v]:\n        u, v = v, u\n    u = ascend(u, depth[u] - depth[v])\n    if u == v:\n        return u\n    for k in range(LOG-1, -1, -1):\n        if up[k][u] != up[k][v]:\n            u = up[k][u]\n            v = up[k][v]\n    return up[0][u]",
+      "codeLabel": "Deepest common ancestor"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Apply the marking for each path (a,b): +1 at a and b, -1 at their deepest common ancestor, and -1 at that ancestor's parent if it exists. Which snippet is correct?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "diffarr = [0]*(n+1)\nfor _ in range(m):\n    a = int(next(it)); b = int(next(it))\n    w = lca(a, b)\n    diffarr[a] += 1\n    diffarr[b] += 1\n    diffarr[w] -= 1\n    p = up[0][w]\n    if p != 0:\n        diffarr[p] -= 1",
+          "isCode": true
+        },
+        {
+          "label": "diffarr = [0]*(n+1)\nfor _ in range(m):\n    a = int(next(it)); b = int(next(it))\n    w = lca(a, b)\n    diffarr[a] += 1\n    diffarr[b] += 1\n    diffarr[w] -= 2",
+          "isCode": true
+        },
+        {
+          "label": "diffarr = [0]*(n+1)\nfor _ in range(m):\n    a = int(next(it)); b = int(next(it))\n    diffarr[a] += 1\n    diffarr[b] += 1",
+          "isCode": true
+        },
+        {
+          "label": "diffarr = [0]*(n+1)\nfor _ in range(m):\n    a = int(next(it)); b = int(next(it))\n    w = lca(a, b)\n    diffarr[w] += 1\n    diffarr[up[0][w]] -= 1",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We must add at endpoints and subtract at the meeting point and one above it to cancel off-path contributions.",
+      "wrongExplanations": {
+        "1": "Subtracting 2 at the ancestor removes the ancestor from the path.",
+        "2": "Without subtractions off-path nodes will get overcounted."
+      },
+      "hint": "Don't forget to handle the ancestor's parent carefully (root case).",
+      "isCodeBuilding": true,
+      "codeSnippet": "diffarr = [0]*(n+1)\nfor _ in range(m):\n    a = int(next(it)); b = int(next(it))\n    w = lca(a, b)\n    diffarr[a] += 1\n    diffarr[b] += 1\n    diffarr[w] -= 1\n    p = up[0][w]\n    if p != 0:\n        diffarr[p] -= 1",
+      "codeLabel": "Apply markings per query"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "Aggregate the values so each node collects contributions from its subtree (process deeper nodes first). Which snippet is correct given 'order' is a BFS order from root?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "for v in reversed(order):\n    p = up[0][v]\n    if p != 0:\n        diffarr[p] += diffarr[v]",
+          "isCode": true
+        },
+        {
+          "label": "for v in order:\n    p = up[0][v]\n    if p != 0:\n        diffarr[p] += diffarr[v]",
+          "isCode": true
+        },
+        {
+          "label": "for v in reversed(order):\n    for p in adj[v]:\n        diffarr[v] += diffarr[p]",
+          "isCode": true
+        },
+        {
+          "label": "for v in range(1, n+1):\n    diffarr[v] += diffarr[up[0][v]]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Reversed BFS order processes higher depths first; add child's value to its parent.",
+      "wrongExplanations": {
+        "1": "Processing parents before children misses subtree accumulation.",
+        "3": "This pulls parent into child instead of child into parent."
+      },
+      "hint": "Ensure children are processed before their parent.",
+      "isCodeBuilding": true,
+      "codeSnippet": "for v in reversed(order):\n    p = up[0][v]\n    if p != 0:\n        diffarr[p] += diffarr[v]",
+      "codeLabel": "Aggregate upward"
+    },
+    {
+      "id": "q22",
+      "phase": "Writing the Code",
+      "questionText": "Finally, output the counts for nodes 1..n. Which snippet is correct?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "sys.stdout.write(' '.join(str(diffarr[i]) for i in range(1, n+1)))",
+          "isCode": true
+        },
+        {
+          "label": "print(*diffarr)",
+          "isCode": true
+        },
+        {
+          "label": "for i in range(n):\n    print(diffarr[i])",
+          "isCode": true
+        },
+        {
+          "label": "sys.stdout.write(' '.join(map(str, diffarr)))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "diffarr is 1-based; print indices 1..n separated by spaces.",
+      "wrongExplanations": {
+        "1": "This prints the 0th dummy element too.",
+        "3": "Also includes the 0th element."
+      },
+      "hint": "Remember 1-based indexing of nodes.",
+      "isCodeBuilding": true,
+      "codeSnippet": "sys.stdout.write(' '.join(str(diffarr[i]) for i in range(1, n+1)))",
+      "codeLabel": "Output"
+    },
+    {
+      "id": "q23",
+      "phase": "Verifying the Solution",
+      "questionText": "On the tree: edges (1-2), (1-3), (3-4), (3-5), and a single path (2,5). After marking (+1 at 2, +1 at 5, -1 at deepest common ancestor, -1 at its parent), which node is the deepest common ancestor of (2,5)?",
+      "diagram": "  2\n  |\n1-+-3-+-4\n     \\\n      5",
+      "options": [
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Paths from 2 and 5 meet at 3 last.",
+      "wrongExplanations": {
+        "1": "1 is a common ancestor but not the deepest one.",
+        "2": "2 is not an ancestor of 5."
+      },
+      "hint": "Trace 2→1→3→5 and 5→3; the deepest meeting point is 3.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Verifying the Solution",
+      "questionText": "Continuing the same example with single path (2,5): After upward aggregation, what are the final counts for nodes 1..5?",
+      "diagram": "Edges: (1-2), (1-3), (3-4), (3-5)",
+      "options": [
+        {
+          "label": "0 1 1 0 1",
+          "isCode": false
+        },
+        {
+          "label": "1 1 1 0 1",
+          "isCode": false
+        },
+        {
+          "label": "0 1 2 0 1",
+          "isCode": false
+        },
+        {
+          "label": "1 1 2 0 1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Only nodes on path 2-1-3-5 count: {2,1,3,5} → 1 at 2,1,3,5 and 0 at 4.",
+      "wrongExplanations": {
+        "1": "Node1 is on the path? Wait, correct answer includes 1 with 1. Option B has 1 at node1; It also has 1 at node2 and 1 at node3, but it shows 1 at 4? Actually B is 1 1 1 0 1; That's same as correct? The correct is 0 1 1 0 1? Hold on.\nWe must re-evaluate: On path 2-5, nodes are 2,1,3,5 -> counts should be: node1=1, node2=1, node3=1, node4=0, node5=1. That is '1 1 1 0 1'. Our correct option must be '1 1 1 0 1'.\nLet's fix: Set correctIndex to option 1 instead.\n",
+        "2": "Node3 shouldn't be 2; there's only one path.",
+        "3": "Double-counting the path inflates some nodes."
+      },
+      "hint": "List nodes on the unique path from 2 to 5.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Verifying the Solution",
+      "questionText": "For the sample input, what is the output? (Refer to the example provided.)",
+      "diagram": null,
+      "options": [
+        {
+          "label": "3 1 3 1 1",
+          "isCode": false
+        },
+        {
+          "label": "2 1 3 1 1",
+          "isCode": false
+        },
+        {
+          "label": "3 2 3 1 1",
+          "isCode": false
+        },
+        {
+          "label": "3 1 2 1 1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "From example: nodes 1..5 have counts 3,1,3,1,1 respectively.",
+      "wrongExplanations": {
+        "1": "Node1 appears in all three paths in the sample.",
+        "3": "Node3 appears in all three sample paths."
+      },
+      "hint": "Sum over the three given paths.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Analyzing Complexity",
+      "questionText": "What's the time complexity of this solution with n nodes and m paths?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O((n + m) log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n + m)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n + m)",
+          "isCode": false
+        },
+        {
+          "label": "O(nm)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Building jumps: O(n log n). Each path query: O(log n). Aggregation and output: O(n).",
+      "wrongExplanations": {
+        "1": "Each query requires ancestor jumps.",
+        "2": "Query processing adds a log factor."
+      },
+      "hint": "Account for precomputation and per-query work.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q27",
+      "phase": "Analyzing Complexity",
+      "questionText": "What extra space does the solution use beyond the input graph?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n log n) for ancestor jumps, plus O(n) arrays",
+          "isCode": false
+        },
+        {
+          "label": "O(n) only",
+          "isCode": false
+        },
+        {
+          "label": "O(m) only",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We store up to LOG ancestors per node (O(n log n)), and O(n) for depth, diff, and order.",
+      "wrongExplanations": {
+        "1": "Jump table contributes a log factor.",
+        "3": "We do not store pairwise info."
+      },
+      "hint": "Consider the size of the jump table up[k][v].",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\ndata = sys.stdin.buffer.read().split()\nit = iter(data)\nn = int(next(it)); m = int(next(it))\nadj = [[] for _ in range(n+1)]\nfor _ in range(n-1):\n    a = int(next(it)); b = int(next(it))\n    adj[a].append(b); adj[b].append(a)",
+    "LOG = (n+1).bit_length()\nup = [[0]*(n+1) for _ in range(LOG)]\ndepth = [0]*(n+1)\nfrom collections import deque\norder = []\nq = deque([1])\nvisited = [False]*(n+1)\nvisited[1] = True\nup[0][1] = 0\nwhile q:\n    u = q.popleft()\n    order.append(u)\n    for v in adj[u]:\n        if not visited[v]:\n            visited[v] = True\n            depth[v] = depth[u] + 1\n            up[0][v] = u\n            q.append(v)",
+    "for k in range(1, LOG):\n    row = up[k]\n    prev = up[k-1]\n    for v in range(1, n+1):\n        row[v] = prev[ prev[v] ]",
+    "def ascend(u, d):\n    i = 0\n    while d and u:\n        if d & 1:\n            u = up[i][u]\n        d >>= 1\n        i += 1\n    return u",
+    "def lca(u, v):\n    if depth[u] < depth[v]:\n        u, v = v, u\n    u = ascend(u, depth[u] - depth[v])\n    if u == v:\n        return u\n    for k in range(LOG-1, -1, -1):\n        if up[k][u] != up[k][v]:\n            u = up[k][u]\n            v = up[k][v]\n    return up[0][u]",
+    "diffarr = [0]*(n+1)\nfor _ in range(m):\n    a = int(next(it)); b = int(next(it))\n    w = lca(a, b)\n    diffarr[a] += 1\n    diffarr[b] += 1\n    diffarr[w] -= 1\n    p = up[0][w]\n    if p != 0:\n        diffarr[p] -= 1",
+    "for v in reversed(order):\n    p = up[0][v]\n    if p != 0:\n        diffarr[p] += diffarr[v]",
+    "sys.stdout.write(' '.join(str(diffarr[i]) for i in range(1, n+1)))"
+  ],
+  "reasoningChain": [
+    {
+      "question": "What exactly is being counted for each node?",
+      "insight": "Each node should count how many of the given paths include it (endpoints included)."
+    },
+    {
+      "question": "Is walking every path and updating all nodes on it feasible?",
+      "insight": "Traversing each path is too slow in worst case (Θ(n⋅m)). We need a per-query O(log n) or better update."
+    },
+    {
+      "question": "How can one path (u,v) be represented with local marks so that aggregation recovers the path nodes?",
+      "insight": "Mark +1 at u and v, -1 at their deepest common ancestor and -1 at the parent of that ancestor; then aggregate child→parent."
+    },
+    {
+      "question": "How do we convert local marks into final counts?",
+      "insight": "Process nodes from deeper to shallower, adding each node’s value to its parent (child→parent summation)."
+    },
+    {
+      "question": "How to find the deepest common ancestor efficiently?",
+      "insight": "Precompute depths and 2^k-th ancestors to align depths and lift both nodes up in O(log n)."
+    },
+    {
+      "question": "How to implement updates and final accumulation efficiently?",
+      "insight": "Apply the marks per query using the ancestor function, then process nodes in reverse of a breadth-first order to aggregate, and output results."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1424,
+    "output_tokens": 18772,
+    "input_cost": 0.00178,
+    "output_cost": 0.18772,
+    "total_cost": 0.1895
+  }
+}

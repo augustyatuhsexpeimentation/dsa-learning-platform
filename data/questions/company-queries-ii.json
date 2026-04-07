@@ -1,0 +1,916 @@
+{
+  "id": "company-queries-ii-lca",
+  "title": "Company Queries II",
+  "difficulty": "hard",
+  "tags": [
+    "tree"
+  ],
+  "estimatedMinutes": 75,
+  "language": "python",
+  "description": "You are given a company hierarchy of n employees forming a rooted tree (employee 1 is the general director). For each employee i (2 ≤ i ≤ n), the direct boss e_i is given. Then q queries are asked: for employees a and b, find their lowest common boss (the deepest common ancestor in the tree).\n\nInput:\n- First line: n q\n- Second line: e_2 e_3 ... e_n\n- Next q lines: a b\n\nOutput:\n- For each query, print the lowest common boss of a and b.\n\nThe hierarchy is guaranteed to form a tree.",
+  "examples": [
+    {
+      "input": "5 3\n1 1 3 3\n4 5\n2 5\n1 4",
+      "output": "3\n1\n1",
+      "explanation": "Tree: 1 is boss of 2 and 3, and 3 is boss of 4 and 5. Common bosses: LCA(4,5)=3, LCA(2,5)=1, LCA(1,4)=1."
+    }
+  ],
+  "constraints": [
+    "1 ≤ n, q ≤ 2⋅10^5",
+    "For i=2..n: 1 ≤ e_i ≤ i-1",
+    "1 ≤ a, b ≤ n",
+    "Employee 1 is the root (general director)"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "Given n=5 and bosses e_2..e_5 = [1, 1, 3, 3], what is the chain of bosses from employee 5 up to the root?",
+      "diagram": "1\n├─ 2\n└─ 3\n   ├─ 4\n   └─ 5",
+      "options": [
+        {
+          "label": "5 -> 3 -> 1",
+          "isCode": false
+        },
+        {
+          "label": "5 -> 3 -> 1 -> 0",
+          "isCode": false
+        },
+        {
+          "label": "5 -> 1 -> 3",
+          "isCode": false
+        },
+        {
+          "label": "5 -> 4 -> 3 -> 1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Employee 5's boss is 3, and 3's boss is 1; 1 is the root. No boss beyond 1 exists.",
+      "wrongExplanations": {
+        "1": "There is no boss beyond 1; 0 is not a valid employee.",
+        "3": "4 is not a boss of 5; both 4 and 5 report to 3."
+      },
+      "hint": "Follow e_5 = 3 and then e_3 = 1.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "In the same tree, what is the lowest common boss of employees 4 and 5?",
+      "diagram": "1\n├─ 2\n└─ 3\n   ├─ 4\n   └─ 5",
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Common bosses are {3,1}; the lowest (deepest) is 3.",
+      "wrongExplanations": {
+        "0": "1 is a common boss but not the lowest; 3 is lower.",
+        "2": "4 is not a boss of 5."
+      },
+      "hint": "List bosses of 4 and 5 and pick the deepest common one.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "If one employee is an ancestor (boss) of the other, e.g., employees 3 and 5 in this tree, what is their lowest common boss?",
+      "diagram": "1\n└─ 3\n   └─ 5",
+      "options": [
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "If one is on the path to the root of the other, the ancestor itself is the lowest common boss.",
+      "wrongExplanations": {
+        "1": "1 is a boss of both, but 3 is lower (closer to them).",
+        "2": "5 is not a boss of 3."
+      },
+      "hint": "Check if one lies on the other’s path to the root.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "If the query asks for the lowest common boss of (4, 4), what should the answer be?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "parent of 4",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "Undefined",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "An employee is a boss of themselves in the sense of ancestor relation; the answer is 4.",
+      "wrongExplanations": {
+        "1": "We look for the deepest common ancestor; it's the node itself.",
+        "3": "The problem defines a tree; LCA for identical nodes exists."
+      },
+      "hint": "Consider the path from 4 to root intersected with itself.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Exploring Approaches",
+      "questionText": "A straightforward method is: collect all bosses of a up to the root in a set, then walk bosses of b until you hit one in the set. In the worst case (a chain), what is the per-query time?",
+      "diagram": "Chain: 1-2-3-...-n",
+      "options": [
+        {
+          "label": "O(1)",
+          "isCode": false
+        },
+        {
+          "label": "O(log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(height) which can be O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(q)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "In a chain, height is n, so this is O(n) per query.",
+      "wrongExplanations": {
+        "1": "No logarithmic skipping is used in that method.",
+        "0": "You traverse up potentially many steps."
+      },
+      "hint": "Consider the path lengths in the worst shape (a line).",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "With n and q up to 2⋅10^5, will the straightforward per-query O(n) approach pass within 1 second in Python?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "No, it can take too many steps overall.",
+          "isCode": false
+        },
+        {
+          "label": "Yes, because average height is small.",
+          "isCode": false
+        },
+        {
+          "label": "Yes, if we use recursion.",
+          "isCode": false
+        },
+        {
+          "label": "Yes, if we sort queries.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "In worst cases there can be ~4e10 ancestor steps—too slow.",
+      "wrongExplanations": {
+        "1": "We must handle worst-case inputs, not only average.",
+        "2": "Recursion does not change complexity and risks stack issues."
+      },
+      "hint": "Estimate worst-case total steps: q × n.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "We need to jump up many levels quickly. Which precomputation best supports fast jumps upward to find lowest common bosses?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "For each employee v and k, precompute the boss after 2^k steps.",
+          "isCode": false
+        },
+        {
+          "label": "For each pair (a,b), precompute their lowest common boss.",
+          "isCode": false
+        },
+        {
+          "label": "Precompute only the depth for each node.",
+          "isCode": false
+        },
+        {
+          "label": "Sort queries by nodes to reuse work.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "A table of bosses after 1,2,4,8,... steps enables fast lifting by combining jumps.",
+      "wrongExplanations": {
+        "1": "All-pairs precomputation is O(n^2) memory/time and infeasible.",
+        "2": "Depth alone is not enough to jump multiple levels efficiently."
+      },
+      "hint": "Think of decomposing a big jump into powers of two.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Building the Idea",
+      "questionText": "How many jump levels (values of k) are sufficient for n nodes when storing 2^k-step bosses?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Up to the smallest k with 2^k ≥ n (about bit length of n).",
+          "isCode": false
+        },
+        {
+          "label": "Up to k where 2^k > q.",
+          "isCode": false
+        },
+        {
+          "label": "Exactly floor(log2(n)).",
+          "isCode": false
+        },
+        {
+          "label": "Exactly ceil(log2(n)) - 1.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need k from 0 to ⌈log2(n)⌉−1 inclusive; using bit_length() gives that count.",
+      "wrongExplanations": {
+        "2": "We need one more than floor(log2(n)) to cover exact powers of two.",
+        "3": "Off by one: we must include the highest power that reaches n."
+      },
+      "hint": "Ensure you can jump from any node to the root in ≤ sum of powers of two.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "Given jump[v][0] = immediate boss of v (or 0 for root), how do we compute jump[v][k] for k ≥ 1?",
+      "diagram": "jump[v][k] = boss after 2^k steps",
+      "options": [
+        {
+          "label": "jump[v][k] = jump[ jump[v][k-1] ][k-1]",
+          "isCode": false
+        },
+        {
+          "label": "jump[v][k] = jump[v][k-1] + jump[v][k-1]",
+          "isCode": false
+        },
+        {
+          "label": "jump[v][k] = jump[ jump[v][k-1] ][k]",
+          "isCode": false
+        },
+        {
+          "label": "jump[v][k] = jump[ parent[v] ][k-1]",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Two 2^{k−1} jumps chained give a 2^k jump.",
+      "wrongExplanations": {
+        "1": "Adding indices has no meaning here; we need composition of jumps.",
+        "3": "This misses cases where the intermediate ancestor itself has higher jumps."
+      },
+      "hint": "Use the 2^{k−1} ancestor of the 2^{k−1} ancestor.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "We must compute depths and jump[v][0] for all nodes. Which approach is safest for n up to 2⋅10^5?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Iteratively traverse children from the root using a queue.",
+          "isCode": false
+        },
+        {
+          "label": "Use deep recursion from root to leaves.",
+          "isCode": false
+        },
+        {
+          "label": "Process nodes 1..n in index order and assume parent index is smaller.",
+          "isCode": false
+        },
+        {
+          "label": "Randomly pick nodes and update until stable.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "An iterative queue avoids recursion limits and respects parent-before-child updates.",
+      "wrongExplanations": {
+        "1": "Recursion depth can be n (2e5), risking stack overflow in Python.",
+        "2": "Index order may not match tree traversal order for depth updates."
+      },
+      "hint": "We need parent info ready before children; think breadthwise but without naming it.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "To equalize depths of a and b, what is an efficient method using precomputed jumps?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Raise the deeper node by combining powers-of-two jumps according to the depth difference bits.",
+          "isCode": false
+        },
+        {
+          "label": "Raise both nodes one step at a time until depths match.",
+          "isCode": false
+        },
+        {
+          "label": "Raise the shallower node to match the deeper node.",
+          "isCode": false
+        },
+        {
+          "label": "Always raise a until it hits b or the root.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Using the bit representation of the depth difference lets us jump in O(log n).",
+      "wrongExplanations": {
+        "1": "One-by-one steps are too slow in worst case.",
+        "2": "We should move the deeper node upward, not the shallower downward."
+      },
+      "hint": "Express the depth difference as a sum of powers of two.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "After making depths equal, if a == b, what should we return?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Return a (or b).",
+          "isCode": false
+        },
+        {
+          "label": "Return the parent of a.",
+          "isCode": false
+        },
+        {
+          "label": "Continue lifting both further.",
+          "isCode": false
+        },
+        {
+          "label": "Return the root (1).",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "If they coincide, that node is the lowest common boss.",
+      "wrongExplanations": {
+        "1": "That would be too high; the node itself is common and lowest.",
+        "2": "No need to lift further; we already found the answer."
+      },
+      "hint": "Equal nodes mean their paths coincide at that point.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "If a and b are at the same depth but not equal, how do we find their lowest common boss using the jump table?",
+      "diagram": "Check from largest jump downwards:\n- if up[a][j] != up[b][j], move both up by 2^j\n- at the end, parent is the answer",
+      "options": [
+        {
+          "label": "From largest j down to 0, if up[a][j] != up[b][j], lift both by 2^j; finally return up[a][0].",
+          "isCode": false
+        },
+        {
+          "label": "From j=0 up to largest, if up[a][j] == up[b][j], lift both by 2^j; return a.",
+          "isCode": false
+        },
+        {
+          "label": "Lift a by the largest j where up[a][j] != 0; then return a.",
+          "isCode": false
+        },
+        {
+          "label": "Return up[a][LOG-1] immediately.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Lift both while their 2^j-ancestors differ; then their parents coincide and are the LCA.",
+      "wrongExplanations": {
+        "1": "Lifting when equal would overshoot; we need to stop before they meet.",
+        "3": "A fixed large jump may skip past the correct ancestor."
+      },
+      "hint": "We want the highest level where their ancestors differ.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Writing the Code",
+      "questionText": "Choose the correct code to read input efficiently and build the children list from e_2..e_n.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\nfrom collections import deque\n\ndata = list(map(int, sys.stdin.buffer.read().split()))\nit = iter(data)\nn = next(it); q = next(it)\nparent = [0]*(n+1)\nfor i in range(2, n+1):\n    parent[i] = next(it)\nchildren = [[] for _ in range(n+1)]\nfor i in range(2, n+1):\n    children[parent[i]].append(i)",
+          "isCode": true
+        },
+        {
+          "label": "import sys\nfrom collections import deque\n\ndata = sys.stdin.read().split()\nit = iter(map(int, data))\nn = int(next(it)); q = int(next(it))\nparent = [0]*n\nfor i in range(2, n+1):\n    parent[i-1] = int(next(it))\nchildren = [[] for _ in range(n)]\nfor i in range(2, n+1):\n    children[parent[i-1]].append(i)",
+          "isCode": true
+        },
+        {
+          "label": "import sys\n\ndata = list(map(int, sys.stdin.read().split()))\nit = iter(data)\nq = next(it); n = next(it)\nparent = [0]*(n+1)\nfor i in range(2, n):\n    parent[i] = next(it)\nchildren = [[] for _ in range(n+1)]\nfor i in range(1, n):\n    children[i].append(parent[i])",
+          "isCode": true
+        },
+        {
+          "label": "import sys\n\ndata = list(map(int, sys.stdin.buffer.read().split()))\nit = iter(data)\nn = next(it); q = next(it)\nparent = [0]*(n+1)\nfor i in range(1, n+1):\n    parent[i] = next(it)\nchildren = [[] for _ in range(n+1)]\nfor i in range(2, n+1):\n    children[i].append(parent[i])",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We read all ints, assign parents for 2..n, and build children by linking parent -> child.",
+      "wrongExplanations": {
+        "1": "Off-by-one indexing: parent size and children indices are wrong.",
+        "3": "This adds edges child->parent instead of parent->child and reads too many parents."
+      },
+      "hint": "Children list should have edges from boss to subordinate.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\nfrom collections import deque\n\ndata = list(map(int, sys.stdin.buffer.read().split()))\nit = iter(data)\nn = next(it); q = next(it)\nparent = [0]*(n+1)\nfor i in range(2, n+1):\n    parent[i] = next(it)\nchildren = [[] for _ in range(n+1)]\nfor i in range(2, n+1):\n    children[parent[i]].append(i)",
+      "codeLabel": "Read input and build children"
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Choose the correct way to set the number of jump levels and initialize tables.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "LOG = (n).bit_length()\nup = [[0]*LOG for _ in range(n+1)]\ndepth = [0]*(n+1)",
+          "isCode": true
+        },
+        {
+          "label": "import math\nLOG = math.ceil(math.log2(n))\nup = [[0]*(LOG-1) for _ in range(n+1)]\ndepth = [0]*n",
+          "isCode": true
+        },
+        {
+          "label": "LOG = 32\nup = [[0]*LOG for _ in range(n)]\ndepth = [0]*(n+1)",
+          "isCode": true
+        },
+        {
+          "label": "LOG = (n-1).bit_length() - 1\nup = [[0]*LOG for _ in range(n+1)]\ndepth = [0]*(n+1)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "bit_length gives the count of bits to represent n, which matches needed jump levels; arrays sized n+1 for 1-based nodes.",
+      "wrongExplanations": {
+        "1": "Off-by-one errors: LOG might be too small and arrays mismatched.",
+        "2": "Fixed 32 may be insufficient or wasteful; also wrong n sizing."
+      },
+      "hint": "We need enough levels so that 2^(LOG-1) ≥ highest needed jump.",
+      "isCodeBuilding": true,
+      "codeSnippet": "LOG = (n).bit_length()\nup = [[0]*LOG for _ in range(n+1)]\ndepth = [0]*(n+1)",
+      "codeLabel": "Allocate jump table and depth"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Select the correct iterative traversal that fills depths and all jump levels for each node.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "dq = deque([1])\nup[1][0] = 0\ndepth[1] = 0\nwhile dq:\n    v = dq.popleft()\n    for j in range(1, LOG):\n        up[v][j] = up[ up[v][j-1] ][j-1]\n    for u in children[v]:\n        up[u][0] = v\n        depth[u] = depth[v] + 1\n        dq.append(u)",
+          "isCode": true
+        },
+        {
+          "label": "dq = deque([1])\ndepth[1] = 0\nwhile dq:\n    v = dq.popleft()\n    for j in range(LOG):\n        up[v][j] = up[ up[v][j] ][j]\n    for u in children[v]:\n        depth[u] = depth[v] + 1\n        dq.append(v)",
+          "isCode": true
+        },
+        {
+          "label": "dq = deque([1])\nup[1][0] = 1\ndepth[1] = 0\nwhile dq:\n    v = dq.pop()\n    for j in range(0, LOG):\n        up[v][j] = up[ up[v][j] ][j]\n    for u in children[v]:\n        up[u][0] = u\n        depth[u] = depth[v]\n        dq.appendleft(u)",
+          "isCode": true
+        },
+        {
+          "label": "dq = deque([1])\nwhile dq:\n    v = dq.popleft()\n    for u in children[v]:\n        up[v][0] = u\n        depth[v] = depth[u] + 1\n        dq.append(u)\n    for j in range(1, LOG):\n        up[v][j] = up[ up[v][j-1] ][j-1]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We set parent for children, compute depth, and then fill higher jumps for current node using its lower-level jumps.",
+      "wrongExplanations": {
+        "1": "Uses wrong indices and appends v again; also miscomputes jumps.",
+        "3": "Sets child as ancestor of v and updates depth backwards."
+      },
+      "hint": "Process a node: first compute its higher jumps, then push its children with up[u][0]=v and depth[u]=depth[v]+1.",
+      "isCodeBuilding": true,
+      "codeSnippet": "dq = deque([1])\nup[1][0] = 0\ndepth[1] = 0\nwhile dq:\n    v = dq.popleft()\n    for j in range(1, LOG):\n        up[v][j] = up[ up[v][j-1] ][j-1]\n    for u in children[v]:\n        up[u][0] = v\n        depth[u] = depth[v] + 1\n        dq.append(u)",
+      "codeLabel": "Iterative traversal to fill depth and jumps"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Pick the correct helper to lift a node upward by an exact number of steps using the jump table.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def lift(a, diff):\n    i = 0\n    while diff:\n        if diff & 1:\n            a = up[a][i]\n        diff >>= 1\n        i += 1\n    return a",
+          "isCode": true
+        },
+        {
+          "label": "def lift(a, diff):\n    for i in range(LOG-1, -1, -1):\n        if diff & (1 << i):\n            a = up[a][0]\n    return a",
+          "isCode": true
+        },
+        {
+          "label": "def lift(a, diff):\n    i = 0\n    while i < LOG:\n        if diff & 1:\n            a = up[a][0]\n        diff >>= 1\n        i += 1\n    return a",
+          "isCode": true
+        },
+        {
+          "label": "def lift(a, diff):\n    while diff > 0:\n        a = up[a][diff]\n        diff = 0\n    return a",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "This processes diff bit by bit, applying the corresponding 2^i jump when needed.",
+      "wrongExplanations": {
+        "1": "Always uses up[a][0], ignoring higher jumps.",
+        "3": "Indexing up[a][diff] is invalid; diff can exceed available levels."
+      },
+      "hint": "Use the binary representation of diff to decide which 2^i jumps to apply.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def lift(a, diff):\n    i = 0\n    while diff:\n        if diff & 1:\n            a = up[a][i]\n        diff >>= 1\n        i += 1\n    return a",
+      "codeLabel": "Lift helper"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Choose the correct function to compute the lowest common boss using depth equalization and simultaneous lifting.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def lca(a, b):\n    if depth[a] < depth[b]:\n        a, b = b, a\n    a = lift(a, depth[a] - depth[b])\n    if a == b:\n        return a\n    for j in range(LOG-1, -1, -1):\n        if up[a][j] != up[b][j]:\n            a = up[a][j]\n            b = up[b][j]\n    return up[a][0]",
+          "isCode": true
+        },
+        {
+          "label": "def lca(a, b):\n    if depth[a] > depth[b]:\n        a, b = b, a\n    b = lift(b, depth[b] - depth[a])\n    for j in range(LOG):\n        if up[a][j] == up[b][j]:\n            a = up[a][j]\n            b = up[b][j]\n    return a",
+          "isCode": true
+        },
+        {
+          "label": "def lca(a, b):\n    if depth[a] < depth[b]:\n        a, b = b, a\n    a = lift(a, depth[b] - depth[a])\n    for j in range(LOG-1, -1, -1):\n        if up[a][j] == up[b][j]:\n            a = up[a][j]\n    return up[a][0]",
+          "isCode": true
+        },
+        {
+          "label": "def lca(a, b):\n    while a != b:\n        a = up[a][0]\n        b = up[b][0]\n    return a",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We lift the deeper node, check equality, then lift both from high to low levels while ancestors differ; parent is the answer.",
+      "wrongExplanations": {
+        "1": "Lifting when ancestors are equal moves both up too far and may miss the LCA.",
+        "3": "Moving both up one step at a time can be O(n) per query."
+      },
+      "hint": "After equalizing, find the highest level where their ancestors differ and step both up.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def lca(a, b):\n    if depth[a] < depth[b]:\n        a, b = b, a\n    a = lift(a, depth[a] - depth[b])\n    if a == b:\n        return a\n    for j in range(LOG-1, -1, -1):\n        if up[a][j] != up[b][j]:\n            a = up[a][j]\n            b = up[b][j]\n    return up[a][0]",
+      "codeLabel": "LCA function"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Select the correct loop to process all q queries using the iterator and collect answers.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "out = []\nfor _ in range(q):\n    a = next(it); b = next(it)\n    out.append(str(lca(a, b)))",
+          "isCode": true
+        },
+        {
+          "label": "out = []\nfor _ in range(q):\n    a, b = map(int, input().split())\n    out.append(lca(a, b))",
+          "isCode": true
+        },
+        {
+          "label": "out = ''\nfor i in range(q):\n    a = next(it)\n    out += str(lca(a, next(it))) + '\\n'",
+          "isCode": true
+        },
+        {
+          "label": "for _ in range(q):\n    a = next(it); b = next(it)\n    print(lca(a, b))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We continue using the pre-read iterator for speed and collect strings to join once.",
+      "wrongExplanations": {
+        "1": "Mixing input() with pre-read data can cause blocking or mismatched reads.",
+        "3": "Repeated prints are slower; we already have an iterator for speed."
+      },
+      "hint": "Stick with the same input reading strategy for consistency and performance.",
+      "isCodeBuilding": true,
+      "codeSnippet": "out = []\nfor _ in range(q):\n    a = next(it); b = next(it)\n    out.append(str(lca(a, b)))",
+      "codeLabel": "Process queries"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Choose the correct final output step.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "sys.stdout.write(\"\\n\".join(out))",
+          "isCode": true
+        },
+        {
+          "label": "print(out)",
+          "isCode": true
+        },
+        {
+          "label": "sys.stdout.write(out)",
+          "isCode": true
+        },
+        {
+          "label": "print(\"\\n\").join(out)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Join answers with newlines and write once is efficient and correct.",
+      "wrongExplanations": {
+        "1": "Printing the list literal won't match required output format.",
+        "2": "out is a list, not a string."
+      },
+      "hint": "Outputs must be one per line with no extra brackets or commas.",
+      "isCodeBuilding": true,
+      "codeSnippet": "sys.stdout.write(\"\\n\".join(out))",
+      "codeLabel": "Write output"
+    },
+    {
+      "id": "q21",
+      "phase": "Verifying the Solution",
+      "questionText": "Run the code conceptually on the example:\nInput:\n5 3\n1 1 3 3\n4 5\n2 5\n1 4\nWhat is the exact output?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "3\\n1\\n1",
+          "isCode": false
+        },
+        {
+          "label": "1\\n3\\n1",
+          "isCode": false
+        },
+        {
+          "label": "3\\n3\\n1",
+          "isCode": false
+        },
+        {
+          "label": "1\\n1\\n3",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "LCA(4,5)=3, LCA(2,5)=1, LCA(1,4)=1.",
+      "wrongExplanations": {
+        "2": "Second query (2,5) has LCA 1, not 3."
+      },
+      "hint": "Use the earlier reasoning on the sample tree.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q22",
+      "phase": "Verifying the Solution",
+      "questionText": "Consider n=3, e_2..e_3 = [1, 2] (1 is boss of 2, 2 is boss of 3). Queries:\n2 3\n1 3\nWhat outputs should the program print?",
+      "diagram": "1\n└─ 2\n   └─ 3",
+      "options": [
+        {
+          "label": "2\\n1",
+          "isCode": false
+        },
+        {
+          "label": "1\\n2",
+          "isCode": false
+        },
+        {
+          "label": "3\\n1",
+          "isCode": false
+        },
+        {
+          "label": "2\\n3",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "LCA(2,3)=2 (ancestor), and LCA(1,3)=1 (root ancestor).",
+      "wrongExplanations": {
+        "1": "Order matters: first query is (2,3), second is (1,3)."
+      },
+      "hint": "One node is an ancestor in each query.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q23",
+      "phase": "Analyzing Complexity",
+      "questionText": "What are the time complexities for preprocessing and per query with the implemented approach?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Preprocessing O(n log n), per query O(log n)",
+          "isCode": false
+        },
+        {
+          "label": "Preprocessing O(n), per query O(1)",
+          "isCode": false
+        },
+        {
+          "label": "Preprocessing O(n^2), per query O(1)",
+          "isCode": false
+        },
+        {
+          "label": "Preprocessing O(n), per query O(log n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We fill a table of size n×log n, and each query performs O(log n) lifts.",
+      "wrongExplanations": {
+        "1": "Per query is not constant; we check multiple jump levels.",
+        "3": "Filling all jump levels for all nodes is not linear."
+      },
+      "hint": "Count table size and loop ranges used in queries.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the additional space used by the data structures besides the input tree?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n log n) for the jump table plus O(n) for depth",
+          "isCode": false
+        },
+        {
+          "label": "O(n) total",
+          "isCode": false
+        },
+        {
+          "label": "O(log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The jump table stores LOG ancestors per node, and depth is linear.",
+      "wrongExplanations": {
+        "1": "The jump table dominates with n×log n entries.",
+        "3": "We do not store all pairs."
+      },
+      "hint": "Think about the dimensions of up[v][j].",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Analyzing Complexity",
+      "questionText": "Which edge-case handling is important for correctness and safety?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Ensure the root's ancestors are set to 0 so lookups do not go out of range.",
+          "isCode": false
+        },
+        {
+          "label": "Avoid using a queue because it is too slow.",
+          "isCode": false
+        },
+        {
+          "label": "Use recursion for traversal to simplify code.",
+          "isCode": false
+        },
+        {
+          "label": "Skip building the children list to save memory.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Setting up[1][0]=0 and propagating zeros keeps indexing valid when climbing above the root.",
+      "wrongExplanations": {
+        "2": "Recursion risks exceeding Python's call stack for deep trees.",
+        "3": "We need children to traverse from root and set depths."
+      },
+      "hint": "Consider what happens when asking for higher ancestors of the root.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\nfrom collections import deque\n\ndata = list(map(int, sys.stdin.buffer.read().split()))\nit = iter(data)\nn = next(it); q = next(it)\nparent = [0]*(n+1)\nfor i in range(2, n+1):\n    parent[i] = next(it)\nchildren = [[] for _ in range(n+1)]\nfor i in range(2, n+1):\n    children[parent[i]].append(i)",
+    "LOG = (n).bit_length()\nup = [[0]*LOG for _ in range(n+1)]\ndepth = [0]*(n+1)",
+    "dq = deque([1])\nup[1][0] = 0\ndepth[1] = 0\nwhile dq:\n    v = dq.popleft()\n    for j in range(1, LOG):\n        up[v][j] = up[ up[v][j-1] ][j-1]\n    for u in children[v]:\n        up[u][0] = v\n        depth[u] = depth[v] + 1\n        dq.append(u)",
+    "def lift(a, diff):\n    i = 0\n    while diff:\n        if diff & 1:\n            a = up[a][i]\n        diff >>= 1\n        i += 1\n    return a",
+    "def lca(a, b):\n    if depth[a] < depth[b]:\n        a, b = b, a\n    a = lift(a, depth[a] - depth[b])\n    if a == b:\n        return a\n    for j in range(LOG-1, -1, -1):\n        if up[a][j] != up[b][j]:\n            a = up[a][j]\n            b = up[b][j]\n    return up[a][0]",
+    "out = []\nfor _ in range(q):\n    a = next(it); b = next(it)\n    out.append(str(lca(a, b)))",
+    "sys.stdout.write(\"\\n\".join(out))"
+  ],
+  "reasoningChain": [
+    {
+      "question": "What exactly is the lowest common boss and how does it behave in simple cases (siblings, ancestor cases, identical nodes)?",
+      "insight": "It is the deepest common ancestor; if one is ancestor of the other, it is that node; if same nodes, it's the node itself."
+    },
+    {
+      "question": "Is the straightforward ancestor-walking approach fast enough for up to 2e5 nodes and queries?",
+      "insight": "No; per-query linear walks are too slow in worst cases."
+    },
+    {
+      "question": "How can we enable fast upward jumps to answer queries efficiently?",
+      "insight": "Precompute for each node its bosses at distances 1,2,4,8,... to allow logarithmic jumps."
+    },
+    {
+      "question": "How do we compute depths and fill the jump table reliably for large n?",
+      "insight": "Traverse iteratively from the root using a queue, setting depth and immediate parent, then fill higher jumps via composition."
+    },
+    {
+      "question": "How do we answer a query using the jumps after preprocessing?",
+      "insight": "Lift the deeper node by the depth difference using power-of-two jumps; if equal return; otherwise lift both from high to low levels until their parents match."
+    },
+    {
+      "question": "How to implement this efficiently and safely in Python?",
+      "insight": "Use fast I/O, avoid recursion, pre-read all input, collect outputs to print once; handle root ancestors as 0."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1436,
+    "output_tokens": 14162,
+    "input_cost": 0.001795,
+    "output_cost": 0.14162,
+    "total_cost": 0.143415
+  }
+}

@@ -1,0 +1,989 @@
+{
+  "id": "substring-reversals-implicit-split-merge",
+  "title": "Substring Reversals",
+  "difficulty": "hard",
+  "tags": [
+    "advanced",
+    "strings",
+    "range-operations",
+    "binary-tree"
+  ],
+  "estimatedMinutes": 90,
+  "language": "python",
+  "description": "Given a string of length n and m operations, each operation reverses the substring from a to b (1-indexed). Compute the final string after all operations.\n\nInput:\n- First line: two integers n and m\n- Second line: a string s of length n using characters A–Z\n- Next m lines: each has two integers a b to reverse s[a..b]\n\nOutput:\n- The final string after performing all m reversals.",
+  "examples": [
+    {
+      "input": "7 2\nAYBABTU\n3 4\n4 7\n",
+      "output": "AYAUTBB",
+      "explanation": "After reversing [3,4]: AYABBTU. After reversing [4,7]: AYAUTBB."
+    }
+  ],
+  "constraints": [
+    "1 <= n, m <= 2 * 10^5",
+    "1 <= a <= b <= n",
+    "Time Limit: 1.00 s",
+    "Memory Limit: 512 MB"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "Start with s = AYBABTU. After reversing positions [3,4], what is the string?",
+      "diagram": "Positions: 1 A, 2 Y, 3 B, 4 A, 5 B, 6 T, 7 U\nReverse s[3..4]: \"BA\" -> \"AB\"",
+      "options": [
+        {
+          "label": "AYABBTU",
+          "isCode": false
+        },
+        {
+          "label": "AYBABTU",
+          "isCode": false
+        },
+        {
+          "label": "AYBBATU",
+          "isCode": false
+        },
+        {
+          "label": "AYBATBU",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Positions 3..4 are B,A; reversed to A,B. So AYABBTU. Others swap wrong ranges or do nothing.",
+      "wrongExplanations": {
+        "1": "This is the original string; reversing [3,4] changes it.",
+        "2": "This swaps 3..5 or misplaces characters; only 3..4 should change."
+      },
+      "hint": "Only characters at positions 3 and 4 swap.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "Continuing from AYABBTU, reverse positions [4,7]. What is the final string?",
+      "diagram": "AYABBTU\ns[4..7] = \"BBTU\" -> reversed is \"UTBB\"",
+      "options": [
+        {
+          "label": "AYAUTBB",
+          "isCode": false
+        },
+        {
+          "label": "AYAUTBB",
+          "isCode": false
+        },
+        {
+          "label": "AYABTBU",
+          "isCode": false
+        },
+        {
+          "label": "AYABBTU",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Keep first 3 as AYA; reverse last 4 to UTBB; result AYAUTBB. Others have misplaced letters.",
+      "wrongExplanations": {
+        "1": "There is an extra Y; check the reversed segment carefully.",
+        "3": "This is the state before the second reversal."
+      },
+      "hint": "Write the last 4 characters reversed and append to the first 3.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "Consider s = abcd. Do operations [2,3] then [1,2] yield the same result as doing [1,2] then [2,3]?",
+      "diagram": "Path 1: abcd -> reverse [2,3] => acbd -> reverse [1,2] => cabd\nPath 2: abcd -> reverse [1,2] => bacd -> reverse [2,3] => bcad",
+      "options": [
+        {
+          "label": "No, the final strings are generally different",
+          "isCode": false
+        },
+        {
+          "label": "Yes, reversing segments always commutes",
+          "isCode": false
+        },
+        {
+          "label": "They are the same only if the segments have the same length",
+          "isCode": false
+        },
+        {
+          "label": "They are the same only if the segments share at least one endpoint",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Order matters for overlapping ranges; shown example yields cabd vs bcad. Commutation does not hold in general.",
+      "wrongExplanations": {
+        "1": "Reversals do not generally commute.",
+        "3": "Sharing endpoints does not guarantee same result."
+      },
+      "hint": "Try small strings and swap the order of overlapping reversals.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "If you reverse each substring directly on a Python list or string slice, what is the worst-case total time for m operations on a string of length n?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n * m)",
+          "isCode": false
+        },
+        {
+          "label": "O(m log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n + m)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log m)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Reversing a substring can be O(n) in the worst case; m such operations cost O(n*m).",
+      "wrongExplanations": {
+        "1": "There is no logarithmic factor with plain slices.",
+        "2": "Each operation can touch many elements, not just O(1)."
+      },
+      "hint": "Consider reversing almost the entire string m times.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Understanding the Problem",
+      "questionText": "What is the effect of reversing a substring [a,a] (length 1)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "No change to the string",
+          "isCode": false
+        },
+        {
+          "label": "The character at a is removed",
+          "isCode": false
+        },
+        {
+          "label": "The entire string is reversed",
+          "isCode": false
+        },
+        {
+          "label": "The character at a is duplicated",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "A single character reversed is itself; nothing changes.",
+      "wrongExplanations": {
+        "1": "Operations do not remove characters.",
+        "2": "Only the selected range is affected."
+      },
+      "hint": "Reversing one element doesn't change order.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "With n = m = 2*10^5, why is the direct slice-reverse approach too slow?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "It can do around 4*10^10 element moves in the worst case",
+          "isCode": false
+        },
+        {
+          "label": "It uses too much memory for the string",
+          "isCode": false
+        },
+        {
+          "label": "Input parsing dominates the time",
+          "isCode": false
+        },
+        {
+          "label": "Reversals on strings are constant time in Python",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each reversal can touch O(n) elements; m such operations lead to ~n*m = 4e10 moves.",
+      "wrongExplanations": {
+        "1": "Memory is not the main bottleneck here.",
+        "3": "Python slicing creates copies; it's not constant time."
+      },
+      "hint": "Compute n*m for n=m=2e5.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "To handle many reversals efficiently, which sequence operation support is most useful?",
+      "diagram": "Goal: isolate s[0..a-2], s[a-1..b-1], s[b..n-1]; reverse middle quickly; then join.",
+      "options": [
+        {
+          "label": "Cut the sequence at positions and glue segments back in order",
+          "isCode": false
+        },
+        {
+          "label": "Only swap the endpoints of each range",
+          "isCode": false
+        },
+        {
+          "label": "Track for each index how many times it's reversed",
+          "isCode": false
+        },
+        {
+          "label": "Sort the characters after all reversals",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Cut at a-1 and b to isolate [a,b], reverse that block logically, then rejoin.",
+      "wrongExplanations": {
+        "1": "Reversing a range does more than swap endpoints.",
+        "2": "Counts per index ignore relative order changes."
+      },
+      "hint": "Think in terms of splitting into three parts and recombining.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Exploring Approaches",
+      "questionText": "Is it enough to store, for each position, the parity of how many ranges covered it and then rebuild the final string from that?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "No, because reversals change relative order within covered ranges",
+          "isCode": false
+        },
+        {
+          "label": "Yes, because parity fully determines the final order",
+          "isCode": false
+        },
+        {
+          "label": "Yes, but only if all ranges have odd length",
+          "isCode": false
+        },
+        {
+          "label": "Yes, but only if ranges are disjoint",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Relative order flips inside ranges; parity per index can't reconstruct the sequence.",
+      "wrongExplanations": {
+        "1": "Parity does not tell where each character moves.",
+        "3": "Disjoint ranges still reorder internally."
+      },
+      "hint": "Two elements inside a reversed range swap positions regardless of coverage parity.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "We will represent the string as nodes in a binary tree where in-order traversal yields the sequence. What should each node store to support fast splits, joins, and segment reversals?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Character, left/right pointers, subtree size, a random key, and a boolean 'reversed' flag",
+          "isCode": false
+        },
+        {
+          "label": "Character and its index only",
+          "isCode": false
+        },
+        {
+          "label": "Character, frequency count, and parent pointer",
+          "isCode": false
+        },
+        {
+          "label": "Character, left/right pointers, and depth only",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Subtree size enables index-based splits; random key helps balancing; a flag lets us mark segments as reversed.",
+      "wrongExplanations": {
+        "1": "Indices change after cuts/joins; not enough for operations.",
+        "3": "Depth alone doesn't support index-based cuts."
+      },
+      "hint": "We need to locate k-th element and mark whole segments without visiting all nodes.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "How can we find the k-th character (0-indexed) in such a tree efficiently?",
+      "diagram": "At node t: let L = size(left). If k < L, go left; if k == L, it's here; else go right with k' = k - L - 1.",
+      "options": [
+        {
+          "label": "Use subtree sizes to decide going left or right while descending",
+          "isCode": false
+        },
+        {
+          "label": "Scan in-order from the beginning every time",
+          "isCode": false
+        },
+        {
+          "label": "Use the stored depth to pick the side",
+          "isCode": false
+        },
+        {
+          "label": "Binary search on character values",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Subtree sizes tell how many elements are on the left, allowing directed descent.",
+      "wrongExplanations": {
+        "1": "Scanning is O(n) per query, too slow.",
+        "3": "Character values are irrelevant to position."
+      },
+      "hint": "Knowing how many are on the left helps decide where k falls.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "We want to reverse a whole segment without touching all its nodes immediately. What's an efficient way?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Store a boolean on the segment’s root that indicates it is reversed and swap children when needed",
+          "isCode": false
+        },
+        {
+          "label": "Traverse the whole segment and swap every pair of nodes right away",
+          "isCode": false
+        },
+        {
+          "label": "Only toggle a flag on the parent of the segment",
+          "isCode": false
+        },
+        {
+          "label": "Store only the length of the segment and ignore structure",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "A reversal flag defers work: swap children at the node and propagate the flag down when visiting.",
+      "wrongExplanations": {
+        "1": "Touching all nodes defeats performance goals.",
+        "2": "The flag must be on the segment’s root to reflect its boundaries."
+      },
+      "hint": "Deferring updates until necessary keeps each operation small.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "When we see a node with its 'reversed' flag set during traversal or updates, what should we do?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Clear its flag, swap its left and right children, and toggle the flag on each child",
+          "isCode": false
+        },
+        {
+          "label": "Clear its flag and do nothing else",
+          "isCode": false
+        },
+        {
+          "label": "Swap the node with its parent",
+          "isCode": false
+        },
+        {
+          "label": "Rebuild the entire subtree rooted at that node",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Swapping children realizes the reversal; toggling children's flags preserves nested reversals.",
+      "wrongExplanations": {
+        "1": "Doing nothing loses the reversal information.",
+        "3": "Full rebuild is unnecessary and too slow."
+      },
+      "hint": "Think how to push the reversal effect one level down.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "How do we split the tree into [0..k-1] and [k..end] by position k?",
+      "diagram": "At node t after applying pending flags: if size(left) >= k, split left; else split right with k' = k - size(left) - 1.",
+      "options": [
+        {
+          "label": "Push flags, compare k with left size; recurse left or right and reattach, updating sizes",
+          "isCode": false
+        },
+        {
+          "label": "Do an in-order traversal building two new trees",
+          "isCode": false
+        },
+        {
+          "label": "Remove the k-th node and make it the new root",
+          "isCode": false
+        },
+        {
+          "label": "Binary search characters to decide split",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Use left subtree size to decide where to cut, reattaching the other side and updating size fields.",
+      "wrongExplanations": {
+        "1": "Traversal rebuilding is O(n); we want faster.",
+        "3": "Character order has nothing to do with positions."
+      },
+      "hint": "The left subtree size tells how many nodes are before the current node.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Building the Idea",
+      "questionText": "How do we join two trees L and R, where all elements of L must come before all elements of R?",
+      "diagram": "Pick one root based on a stored random key, push flags, attach the other as a child, and update sizes.",
+      "options": [
+        {
+          "label": "Choose root by comparing random keys; attach and update while pushing flags",
+          "isCode": false
+        },
+        {
+          "label": "Always make R the right child of L without any condition",
+          "isCode": false
+        },
+        {
+          "label": "Always make L the left child of R without any condition",
+          "isCode": false
+        },
+        {
+          "label": "Concatenate by rebuilding from scratch",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Using a stored random key to pick the root keeps the tree balanced on average; push flags and update sizes.",
+      "wrongExplanations": {
+        "1": "Always choosing the same side can make the tree very skewed.",
+        "3": "Rebuilding is too slow for many operations."
+      },
+      "hint": "We need to keep the tree reasonably balanced without heavy rebalancing.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q15",
+      "phase": "Building the Idea",
+      "questionText": "Given an operation [a,b], which sequence of cuts and joins isolates and reverses s[a..b] (1-indexed) correctly?",
+      "diagram": "Cut at a-1 => (L, M+R). Cut M+R at (b-a+1) => (M, R). Mark M reversed. Join L with M, then with R.",
+      "options": [
+        {
+          "label": "Split at a-1, then split the second at (b-a+1), toggle reversed on the middle, then merge back left+middle+right",
+          "isCode": false
+        },
+        {
+          "label": "Split at b, then split the first at a-1, toggle reversed on the rightmost, then merge",
+          "isCode": false
+        },
+        {
+          "label": "Only toggle the reversed flag on the whole tree",
+          "isCode": false
+        },
+        {
+          "label": "Extract s[a..b] by traversing and reversing it, then rebuild",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Two cuts isolate [a,b]; toggling its reversed flag and rejoining preserves the rest unchanged.",
+      "wrongExplanations": {
+        "1": "Splitting at b first complicates lengths; indexing becomes error-prone.",
+        "2": "This reverses the entire string, not just [a,b]."
+      },
+      "hint": "Think in zero-based indices after converting a to a-1.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Start with imports and recursion limit setup.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\nimport random\nsys.setrecursionlimit(1 << 25)",
+          "isCode": true
+        },
+        {
+          "label": "import math\nimport random\nsys.setrecursionlimit(1000)",
+          "isCode": true
+        },
+        {
+          "label": "from collections import deque\nsys.setrecursionlimit(1 << 10)",
+          "isCode": true
+        },
+        {
+          "label": "import sys\nsys.setrecursionlimit(10)\nimport random",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need sys and random; deep recursion may occur, so raise recursion limit significantly.",
+      "wrongExplanations": {
+        "1": "We need sys for I/O and a higher recursion limit.",
+        "2": "deque isn't used; recursion limit is too low."
+      },
+      "hint": "We will use recursion in split/merge.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\nimport random\nsys.setrecursionlimit(1 << 25)",
+      "codeLabel": "Imports and recursion limit"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Define the node structure and basic helpers for subtree size and updating.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "class Node:\n    __slots__ = ('ch','prio','left','right','size','rev')\n    def __init__(self, ch):\n        self.ch = ch\n        self.prio = random.randint(1, 1 << 30)\n        self.left = None\n        self.right = None\n        self.size = 1\n        self.rev = False\n\ndef sz(t):\n    return t.size if t else 0\n\ndef upd(t):\n    if t:\n        t.size = 1 + sz(t.left) + sz(t.right)",
+          "isCode": true
+        },
+        {
+          "label": "class Node:\n    def __init__(self, ch):\n        self.ch = ch\n        self.left = None\n        self.right = None\n        self.size = 0\n\ndef sz(t):\n    return 0\n\ndef upd(t):\n    pass",
+          "isCode": true
+        },
+        {
+          "label": "class Node:\n    __slots__ = ('ch','left','right','rev')\n    def __init__(self, ch):\n        self.ch = ch\n        self.left = None\n        self.right = None\n        self.rev = False\n\ndef sz(t):\n    return 1\n\ndef upd(t):\n    pass",
+          "isCode": true
+        },
+        {
+          "label": "class Node:\n    __slots__ = ('ch','prio','left','right','size')\n    def __init__(self, ch):\n        self.ch = ch\n        self.prio = 0\n        self.left = None\n        self.right = None\n        self.size = 1\n\ndef sz(t):\n    return t.size\n\ndef upd(t):\n    t.size += 1",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We store char, random key, children, subtree size, and reversal flag; sz/upd maintain sizes correctly.",
+      "wrongExplanations": {
+        "1": "Size must reflect subtree size and be updated; not fixed 0.",
+        "3": "Priority should be random; upd must recompute from children."
+      },
+      "hint": "We need size for split-by-index and a flag for reversals.",
+      "isCodeBuilding": true,
+      "codeSnippet": "class Node:\n    __slots__ = ('ch','prio','left','right','size','rev')\n    def __init__(self, ch):\n        self.ch = ch\n        self.prio = random.randint(1, 1 << 30)\n        self.left = None\n        self.right = None\n        self.size = 1\n        self.rev = False\n\ndef sz(t):\n    return t.size if t else 0\n\ndef upd(t):\n    if t:\n        t.size = 1 + sz(t.left) + sz(t.right)",
+      "codeLabel": "Node and size helpers"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Implement the function that applies and propagates the 'reversed' flag at a node.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def push(t):\n    if t and t.rev:\n        t.rev = False\n        t.left, t.right = t.right, t.left\n        if t.left:\n            t.left.rev ^= True\n        if t.right:\n            t.right.rev ^= True",
+          "isCode": true
+        },
+        {
+          "label": "def push(t):\n    if t:\n        t.rev = False\n        if t.left:\n            t.left, t.right = t.right, t.left",
+          "isCode": true
+        },
+        {
+          "label": "def push(t):\n    if not t:\n        return\n    t.left, t.right = t.right, t.left",
+          "isCode": true
+        },
+        {
+          "label": "def push(t):\n    pass",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "When flagged, swap children, clear the flag, and toggle children's flags so nested reversals are preserved.",
+      "wrongExplanations": {
+        "1": "Must only act when flagged and propagate to children.",
+        "2": "This swaps on every call and loses the flag state."
+      },
+      "hint": "Toggling children's flags avoids traversing them immediately.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def push(t):\n    if t and t.rev:\n        t.rev = False\n        t.left, t.right = t.right, t.left\n        if t.left:\n            t.left.rev ^= True\n        if t.right:\n            t.right.rev ^= True",
+      "codeLabel": "Reversal propagation"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Implement splitting the tree by position k (left has k nodes).",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def split(t, k):\n    if not t:\n        return (None, None)\n    push(t)\n    if sz(t.left) >= k:\n        l, r = split(t.left, k)\n        t.left = r\n        upd(t)\n        return (l, t)\n    else:\n        l, r = split(t.right, k - sz(t.left) - 1)\n        t.right = l\n        upd(t)\n        return (t, r)",
+          "isCode": true
+        },
+        {
+          "label": "def split(t, k):\n    if not t:\n        return (None, None)\n    if sz(t.left) > k:\n        l, r = split(t.left, k-1)\n        t.left = r\n        upd(t)\n        return (l, t)\n    else:\n        l, r = split(t.right, k)\n        t.right = l\n        upd(t)\n        return (t, r)",
+          "isCode": true
+        },
+        {
+          "label": "def split(t, k):\n    if not t:\n        return (None, None)\n    push(t)\n    if sz(t.left) == k:\n        r = t.right\n        t.right = None\n        upd(t)\n        return (t, r)\n    else:\n        l = t.left\n        t.left = None\n        upd(t)\n        return (l, t)",
+          "isCode": true
+        },
+        {
+          "label": "def split(t, k):\n    return (t, None)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Compare k with left size; recurse, reattach, and update. 'push' ensures correct child order with flags.",
+      "wrongExplanations": {
+        "1": "Off-by-one and missing push cause incorrect splits.",
+        "2": "Only handles a special case; not general."
+      },
+      "hint": "Remember to subtract left size + 1 when going right.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def split(t, k):\n    if not t:\n        return (None, None)\n    push(t)\n    if sz(t.left) >= k:\n        l, r = split(t.left, k)\n        t.left = r\n        upd(t)\n        return (l, t)\n    else:\n        l, r = split(t.right, k - sz(t.left) - 1)\n        t.right = l\n        upd(t)\n        return (t, r)",
+      "codeLabel": "Split by index"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Implement joining two trees a (left) and b (right) preserving order.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def merge(a, b):\n    if not a or not b:\n        return a or b\n    if a.prio > b.prio:\n        push(a)\n        a.right = merge(a.right, b)\n        upd(a)\n        return a\n    else:\n        push(b)\n        b.left = merge(a, b.left)\n        upd(b)\n        return b",
+          "isCode": true
+        },
+        {
+          "label": "def merge(a, b):\n    if not a:\n        return b\n    a.right = b\n    upd(a)\n    return a",
+          "isCode": true
+        },
+        {
+          "label": "def merge(a, b):\n    if not b:\n        return a\n    b.left = a\n    upd(b)\n    return b",
+          "isCode": true
+        },
+        {
+          "label": "def merge(a, b):\n    if not a and not b:\n        return None\n    return a if a.prio < b.prio else b",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Choose root by random key, push flags, recurse, and update sizes to keep structure correct.",
+      "wrongExplanations": {
+        "1": "Always attaching b to the right can create a skewed tree.",
+        "3": "This doesn't combine the subtrees; it discards one."
+      },
+      "hint": "Pick the higher random key as root.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def merge(a, b):\n    if not a or not b:\n        return a or b\n    if a.prio > b.prio:\n        push(a)\n        a.right = merge(a.right, b)\n        upd(a)\n        return a\n    else:\n        push(b)\n        b.left = merge(a, b.left)\n        upd(b)\n        return b",
+      "codeLabel": "Merge preserving order"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "Write helpers to build from the input string and to collect the final string by in-order traversal, and read the input.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def build_from_string(s):\n    root = None\n    for ch in s:\n        root = merge(root, Node(ch))\n    return root\n\ndef inorder(t, out):\n    if not t:\n        return\n    push(t)\n    inorder(t.left, out)\n    out.append(t.ch)\n    inorder(t.right, out)\n\ndata = sys.stdin.read().strip().split()\nif not data:\n    print()\n    raise SystemExit\nit = iter(data)\nn = int(next(it)); m = int(next(it))\ns = next(it)\nroot = build_from_string(s)",
+          "isCode": true
+        },
+        {
+          "label": "def build_from_string(s):\n    return None\n\ndef inorder(t, out):\n    pass\n\ndata = sys.stdin.read().split()\nroot = None",
+          "isCode": true
+        },
+        {
+          "label": "def build_from_string(s):\n    return [c for c in s]\n\ndef inorder(t, out):\n    out.extend(t)\n\ndata = sys.stdin.read().split()\nn = int(data[0]); m = int(data[1]); s = data[2]\nroot = s",
+          "isCode": true
+        },
+        {
+          "label": "def build_from_string(s):\n    root = None\n    for ch in s:\n        root = Node(ch)\n    return root\n\ndef inorder(t, out):\n    out.append(t.ch)\n\ndata = sys.stdin.read().split()\nn = int(data[0]); m = int(data[1])\ns = data[2]\nroot = build_from_string(s)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Build by successive joins; in-order traversal with push collects characters; read all tokens efficiently.",
+      "wrongExplanations": {
+        "3": "This overwrites root instead of joining nodes; traversal misses children."
+      },
+      "hint": "Use merge to extend the sequence one character at a time.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def build_from_string(s):\n    root = None\n    for ch in s:\n        root = merge(root, Node(ch))\n    return root\n\ndef inorder(t, out):\n    if not t:\n        return\n    push(t)\n    inorder(t.left, out)\n    out.append(t.ch)\n    inorder(t.right, out)\n\ndata = sys.stdin.read().strip().split()\nif not data:\n    print()\n    raise SystemExit\nit = iter(data)\nn = int(next(it)); m = int(next(it))\ns = next(it)\nroot = build_from_string(s)",
+      "codeLabel": "Build and traversal, input read"
+    },
+    {
+      "id": "q22",
+      "phase": "Writing the Code",
+      "questionText": "Implement the loop applying each reversal [a,b] using two splits and a join.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "for _ in range(m):\n    a = int(next(it)); b = int(next(it))\n    left, mid_right = split(root, a - 1)\n    mid, right = split(mid_right, b - a + 1)\n    if mid:\n        mid.rev ^= True\n    root = merge(left, merge(mid, right))",
+          "isCode": true
+        },
+        {
+          "label": "for _ in range(m):\n    a = int(next(it)); b = int(next(it))\n    left, mid_right = split(root, b)\n    mid, right = split(left, a - 1)\n    if right:\n        right.rev ^= True\n    root = merge(mid, merge(right, mid_right))",
+          "isCode": true
+        },
+        {
+          "label": "for _ in range(m):\n    a = int(next(it)); b = int(next(it))\n    mid, rest = split(root, b - a + 1)\n    if mid:\n        mid.rev = True\n    root = merge(mid, rest)",
+          "isCode": true
+        },
+        {
+          "label": "for _ in range(m):\n    a = int(next(it)); b = int(next(it))\n    left, mid_right = split(root, a)\n    mid, right = split(mid_right, b - a)\n    if mid:\n        mid.rev ^= True\n    root = merge(merge(left, right), mid)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Cut before a, then cut length (b-a+1) to isolate [a,b]; toggle its flag; rejoin as left + mid + right.",
+      "wrongExplanations": {
+        "1": "First split at b misaligns the second split; segments get mixed.",
+        "3": "Splitting at a and length b-a misses endpoints."
+      },
+      "hint": "First k = a-1 nodes go to left; next len = b-a+1 to mid.",
+      "isCodeBuilding": true,
+      "codeSnippet": "for _ in range(m):\n    a = int(next(it)); b = int(next(it))\n    left, mid_right = split(root, a - 1)\n    mid, right = split(mid_right, b - a + 1)\n    if mid:\n        mid.rev ^= True\n    root = merge(left, merge(mid, right))",
+      "codeLabel": "Apply operations"
+    },
+    {
+      "id": "q23",
+      "phase": "Writing the Code",
+      "questionText": "Finally, output the resulting string collected by in-order traversal.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "out = []\ninorder(root, out)\nsys.stdout.write(''.join(out))",
+          "isCode": true
+        },
+        {
+          "label": "print(root)",
+          "isCode": true
+        },
+        {
+          "label": "print(''.join(inorder(root)))",
+          "isCode": true
+        },
+        {
+          "label": "sys.stdout.write(out)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Traverse to collect characters and join into a string to print.",
+      "wrongExplanations": {
+        "1": "Printing the object won't show the string.",
+        "2": "inorder as defined appends to a list; it doesn't return a string."
+      },
+      "hint": "Use the traversal helper to build the final list of characters.",
+      "isCodeBuilding": true,
+      "codeSnippet": "out = []\ninorder(root, out)\nsys.stdout.write(''.join(out))",
+      "codeLabel": "Output result"
+    },
+    {
+      "id": "q24",
+      "phase": "Verifying the Solution",
+      "questionText": "Test mentally: s = ABCDE. Apply [2,4] then [1,5]. What final string should the program print?",
+      "diagram": "ABCDE -> [2,4]: A D C B E -> [1,5]: E B C D A",
+      "options": [
+        {
+          "label": "EBCDA",
+          "isCode": false
+        },
+        {
+          "label": "ABCDE",
+          "isCode": false
+        },
+        {
+          "label": "EDCBA",
+          "isCode": false
+        },
+        {
+          "label": "ADBCE",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "First reverse BCD to DCB: ADCBE. Then reverse entire string to EBCDA.",
+      "wrongExplanations": {
+        "1": "That's the initial string; operations do change it.",
+        "2": "Only the second operation reverses entire string, not both."
+      },
+      "hint": "Carefully reverse the specified segments in order.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Verifying the Solution",
+      "questionText": "Edge check: s = XYZ. Apply [1,1] then [3,3]. What should be printed?",
+      "diagram": "Both ranges are length 1; no change.",
+      "options": [
+        {
+          "label": "XYZ",
+          "isCode": false
+        },
+        {
+          "label": "ZYX",
+          "isCode": false
+        },
+        {
+          "label": "XZY",
+          "isCode": false
+        },
+        {
+          "label": "YXZ",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Reversing single positions does nothing; the string stays XYZ.",
+      "wrongExplanations": {
+        "1": "That would require reversing the whole string.",
+        "2": "Only position 2 would change for [2,3], not here."
+      },
+      "hint": "Length-1 reversals do not change the string.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the expected time per reversal operation with this approach?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(log n) on average, proportional to the tree height",
+          "isCode": false
+        },
+        {
+          "label": "O(1) always",
+          "isCode": false
+        },
+        {
+          "label": "O(n) because we touch every element",
+          "isCode": false
+        },
+        {
+          "label": "O(sqrt(n)) on average",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Splits and joins descend a balanced-by-randomness tree, touching height many nodes.",
+      "wrongExplanations": {
+        "1": "We need to descend the tree; it's not constant.",
+        "2": "We avoid visiting all nodes in a segment."
+      },
+      "hint": "Consider how many nodes are visited in split/merge.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q27",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the extra memory used by this approach (excluding input/output buffers)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n) nodes plus small recursion overhead",
+          "isCode": false
+        },
+        {
+          "label": "O(1) regardless of n",
+          "isCode": false
+        },
+        {
+          "label": "O(m) for storing all operations",
+          "isCode": false
+        },
+        {
+          "label": "O(n + m) for building arrays of segments",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "One node per character; temporary recursion stack is small relative to n.",
+      "wrongExplanations": {
+        "1": "We need a node per character.",
+        "2": "We process operations on the fly; no need to store all."
+      },
+      "hint": "We represent the entire string as a dynamic tree of nodes.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\nimport random\nsys.setrecursionlimit(1 << 25)",
+    "class Node:\n    __slots__ = ('ch','prio','left','right','size','rev')\n    def __init__(self, ch):\n        self.ch = ch\n        self.prio = random.randint(1, 1 << 30)\n        self.left = None\n        self.right = None\n        self.size = 1\n        self.rev = False\n\ndef sz(t):\n    return t.size if t else 0\n\ndef upd(t):\n    if t:\n        t.size = 1 + sz(t.left) + sz(t.right)",
+    "def push(t):\n    if t and t.rev:\n        t.rev = False\n        t.left, t.right = t.right, t.left\n        if t.left:\n            t.left.rev ^= True\n        if t.right:\n            t.right.rev ^= True",
+    "def split(t, k):\n    if not t:\n        return (None, None)\n    push(t)\n    if sz(t.left) >= k:\n        l, r = split(t.left, k)\n        t.left = r\n        upd(t)\n        return (l, t)\n    else:\n        l, r = split(t.right, k - sz(t.left) - 1)\n        t.right = l\n        upd(t)\n        return (t, r)",
+    "def merge(a, b):\n    if not a or not b:\n        return a or b\n    if a.prio > b.prio:\n        push(a)\n        a.right = merge(a.right, b)\n        upd(a)\n        return a\n    else:\n        push(b)\n        b.left = merge(a, b.left)\n        upd(b)\n        return b",
+    "def build_from_string(s):\n    root = None\n    for ch in s:\n        root = merge(root, Node(ch))\n    return root\n\ndef inorder(t, out):\n    if not t:\n        return\n    push(t)\n    inorder(t.left, out)\n    out.append(t.ch)\n    inorder(t.right, out)\n\ndata = sys.stdin.read().strip().split()\nif not data:\n    print()\n    raise SystemExit\nit = iter(data)\nn = int(next(it)); m = int(next(it))\ns = next(it)\nroot = build_from_string(s)",
+    "for _ in range(m):\n    a = int(next(it)); b = int(next(it))\n    left, mid_right = split(root, a - 1)\n    mid, right = split(mid_right, b - a + 1)\n    if mid:\n        mid.rev ^= True\n    root = merge(left, merge(mid, right))",
+    "out = []\ninorder(root, out)\nsys.stdout.write(''.join(out))"
+  ],
+  "reasoningChain": [
+    {
+      "question": "What happens when reversing substrings on small examples, and does order matter for overlapping ranges?",
+      "insight": "Reversals change relative order within ranges and do not commute; we must process in sequence."
+    },
+    {
+      "question": "Why is naive in-place reversal for each operation too slow for n,m up to 2e5?",
+      "insight": "Each reversal can be linear; m operations lead to O(n*m) worst-case, far beyond limits."
+    },
+    {
+      "question": "What operations on the sequence would allow efficient range reversal?",
+      "insight": "Ability to cut the sequence at positions (split) and glue segments (merge), isolating the range to reverse."
+    },
+    {
+      "question": "How to represent the sequence to support split/merge by index and segment reversal?",
+      "insight": "A binary tree with node fields: char, left/right, subtree size, a random key to keep balance, and a boolean reversal flag."
+    },
+    {
+      "question": "How to implement segment reversal without touching all nodes immediately?",
+      "insight": "Use a flag on the segment root that swaps children and propagates to children when visited (deferred application)."
+    },
+    {
+      "question": "How to apply one [a,b] operation using these primitives?",
+      "insight": "Split at a-1, then at length b-a+1 to isolate the middle; toggle its reverse flag; then merge back left, middle, right."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1384,
+    "output_tokens": 15633,
+    "input_cost": 0.00173,
+    "output_cost": 0.15633,
+    "total_cost": 0.15806
+  }
+}
