@@ -1,0 +1,913 @@
+{
+  "id": "room-allocation-mcq-chain",
+  "title": "Room Allocation",
+  "difficulty": "intermediate",
+  "tags": [
+    "sorting",
+    "two-pointer",
+    "binary-search"
+  ],
+  "estimatedMinutes": 35,
+  "language": "python",
+  "description": "There is a large hotel, and n customers will arrive soon. Each customer wants to have a single room.\n\nYou know each customer's arrival and departure day. Two customers can stay in the same room if the departure day of the first customer is earlier than the arrival day of the second customer.\n\nFind the minimum number of rooms needed to accommodate all customers and output one valid allocation.\n\nInput:\n- First line: integer n, the number of customers.\n- Next n lines: two integers a and b, the arrival and departure day for each customer.\n\nOutput:\n- First, print an integer k: the minimum number of rooms required.\n- Then, print a line with n integers: the room number for each customer in the same order as in the input. Rooms are numbered 1..k. Any valid solution is accepted.",
+  "examples": [
+    {
+      "input": "3\n1 2\n2 4\n4 4\n",
+      "output": "2\n1 2 1\n",
+      "explanation": "Customer 1 (1–2) and customer 2 (2–4) cannot share because 2 is not earlier than 2. Customer 3 (4–4) can reuse room 1 since 2 < 4."
+    }
+  ],
+  "constraints": [
+    "1 ≤ n ≤ 2 · 10^5",
+    "1 ≤ a ≤ b ≤ 10^9",
+    "Time limit: 1.00 s",
+    "Memory limit: 512 MB"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "Two customers have intervals (1,1) and (1,1). What is the minimum number of rooms required?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "It depends on which one arrives first",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "They cannot share because the first must depart earlier than the second arrives, and 1 is not earlier than 1. So 2 rooms.",
+      "wrongExplanations": {
+        "0": "Sharing would require 1 < 1, which is false.",
+        "2": "Order does not change that 1 is not earlier than 1."
+      },
+      "hint": "The condition is strictly earlier: departure < arrival.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "Two customers: (1,2) and (3,3). What is the minimum number of rooms required?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "It depends on implementation",
+          "isCode": false
+        },
+        {
+          "label": "Cannot be determined",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "2 < 3, so the second customer can reuse the first customer's room. Only 1 room is needed.",
+      "wrongExplanations": {
+        "1": "They do not overlap under the strict rule, so 2 rooms are unnecessary."
+      },
+      "hint": "Check if 2 < 3.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "Given the sample input: 3 customers: (1,2), (2,4), (4,4). What is the minimum k?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "Depends on output order",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "(1,2) and (2,4) need separate rooms since 2 is not earlier than 2. (4,4) can reuse one. So k = 2.",
+      "wrongExplanations": {
+        "0": "You cannot place (1,2) and (2,4) in the same room due to strict inequality.",
+        "2": "Three rooms are unnecessary; (4,4) can reuse."
+      },
+      "hint": "Check sharing rules pairwise.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "We must print room numbers in the same order as the input. If we process customers sorted by arrival time and print in that processed order, is it acceptable?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Always acceptable",
+          "isCode": false
+        },
+        {
+          "label": "Acceptable only if the input is already sorted by arrival time",
+          "isCode": false
+        },
+        {
+          "label": "Not acceptable under any circumstances",
+          "isCode": false
+        },
+        {
+          "label": "Acceptable if k equals n",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Output must align with input order. Printing processed order is valid only if input was already sorted by arrival.",
+      "wrongExplanations": {
+        "0": "The problem explicitly requires input order.",
+        "2": "It can be acceptable if arrival order equals input order."
+      },
+      "hint": "Store original indices to map back to input order.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Exploring Approaches",
+      "questionText": "Is it feasible to check all pairs of customers to see if they overlap, for n up to 2·10^5?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, O(n^2) is fine for 2·10^5",
+          "isCode": false
+        },
+        {
+          "label": "No, O(n^2) is too slow for 2·10^5",
+          "isCode": false
+        },
+        {
+          "label": "Only if implemented in C++",
+          "isCode": false
+        },
+        {
+          "label": "Only if days are small",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "O(n^2) ~ 4e10 comparisons is too slow. We need near O(n log n).",
+      "wrongExplanations": {
+        "0": "4e10 operations will not fit in 1 s.",
+        "2": "Language choice does not change asymptotic cost."
+      },
+      "hint": "Compare 4e10 to typical operation limits.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "Which order of processing customers simplifies deciding when a room can be reused?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Input order",
+          "isCode": false
+        },
+        {
+          "label": "Sort by arrival day",
+          "isCode": false
+        },
+        {
+          "label": "Sort by departure day",
+          "isCode": false
+        },
+        {
+          "label": "Sort by interval length (b - a)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Processing by non-decreasing arrival day lets us decide reuse based on current earliest departure among rooms in use.",
+      "wrongExplanations": {
+        "0": "Input order may be arbitrary and hard to reuse rooms optimally.",
+        "2": "Sorting by departure complicates tracking new arrivals."
+      },
+      "hint": "Think: when the next customer arrives, what matters about existing rooms?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "While processing customers by increasing arrival day, what information about current room allocations is sufficient to decide reuse for the next arrival?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "The maximum departure day among current rooms",
+          "isCode": false
+        },
+        {
+          "label": "The earliest departure day and which room has it",
+          "isCode": false
+        },
+        {
+          "label": "The median of departure days",
+          "isCode": false
+        },
+        {
+          "label": "Only how many rooms are used so far",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "If the earliest departure is earlier than the arrival, that room is reusable; otherwise none are.",
+      "wrongExplanations": {
+        "0": "The latest finisher doesn't help decide if any room is free.",
+        "3": "Count alone doesn't tell whether a room is free for this arrival."
+      },
+      "hint": "If the earliest end isn't before the new arrival, none are.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Building the Idea",
+      "questionText": "Let E be the smallest current departure day and A be the next customer's arrival. When can we reuse that room?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "If E ≤ A",
+          "isCode": false
+        },
+        {
+          "label": "If E < A",
+          "isCode": false
+        },
+        {
+          "label": "If A < E",
+          "isCode": false
+        },
+        {
+          "label": "Only if E == A",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "The problem requires strictly earlier: reuse only if E < A.",
+      "wrongExplanations": {
+        "0": "Equality is not allowed by the problem statement.",
+        "2": "A < E means the room isn't yet free."
+      },
+      "hint": "The rule uses the word 'earlier'.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "If E < A, how should we update our tracking for the new customer with interval [A, B]?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Remove (E, R), assign the new customer to room R, and track (B, R)",
+          "isCode": false
+        },
+        {
+          "label": "Keep (E, R), also track (B, R), and assign to R",
+          "isCode": false
+        },
+        {
+          "label": "Remove (E, R), assign a fresh room id, track (B, new_id)",
+          "isCode": false
+        },
+        {
+          "label": "Only record the output; no tracking is needed",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We reuse the room R and update its next free time to B.",
+      "wrongExplanations": {
+        "1": "Keeping (E,R) duplicates a room and corrupts availability.",
+        "2": "We should reuse the available room instead of creating a new one."
+      },
+      "hint": "We must not track a room twice.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "Before assigning the current arrival A, do we need to remove all rooms with end < A from our tracking?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, remove all such rooms to keep only busy rooms",
+          "isCode": false
+        },
+        {
+          "label": "No, removing just one such room is enough for this customer",
+          "isCode": false
+        },
+        {
+          "label": "No, remove none and still reuse",
+          "isCode": false
+        },
+        {
+          "label": "It depends on B",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "For the current assignment, freeing one eligible room is enough. Others can be reused for future arrivals when needed.",
+      "wrongExplanations": {
+        "0": "Full cleanup isn't necessary for correctness or minimality.",
+        "2": "If no room is removed, there's nothing to reuse now."
+      },
+      "hint": "You're assigning one customer at a time.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "We sort customers by arrival. How do we still print room ids in input order?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Store each customer's original index and write result into res[index]",
+          "isCode": false
+        },
+        {
+          "label": "Use a stable sort and hope it's enough",
+          "isCode": false
+        },
+        {
+          "label": "Re-sort the output by arrival",
+          "isCode": false
+        },
+        {
+          "label": "Print in the processed (sorted) order",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Keep (arrival, departure, original_index) and fill res[original_index] when assigned.",
+      "wrongExplanations": {
+        "1": "Stability doesn't ensure the same order as input when we reorder by arrival.",
+        "3": "The problem demands input order."
+      },
+      "hint": "Augment each interval with its position in the input.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "If multiple rooms have end < A (all free before A), which choice ensures minimal rooms for the current customer?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Any room whose last departure < A",
+          "isCode": false
+        },
+        {
+          "label": "Only the one with the smallest end",
+          "isCode": false
+        },
+        {
+          "label": "Only the one with the largest end",
+          "isCode": false
+        },
+        {
+          "label": "Always allocate a new room",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Any already-free room works; minimal rooms is unaffected as long as you reuse one.",
+      "wrongExplanations": {
+        "1": "Smallest end is a convenient pick, but not required for minimality at this step.",
+        "3": "Reusing avoids unnecessarily increasing the room count."
+      },
+      "hint": "Free is free: end < A means reusable.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Writing the Code",
+      "questionText": "Choose the correct imports and function header for our solution.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\nimport heapq\ndef main():",
+          "isCode": true
+        },
+        {
+          "label": "from sys import stdin as sys\nfrom heapq import *\ndef main(n):",
+          "isCode": true
+        },
+        {
+          "label": "import io\nimport bisect\ndef main():",
+          "isCode": true
+        },
+        {
+          "label": "import sys\nimport math\ndef Main():",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We use sys for I/O and heapq for the structure, and define main() with no parameters.",
+      "wrongExplanations": {
+        "1": "This changes names used later (e.g., next code references heapq.* and main()).",
+        "3": "Function name and imports won't match later usage."
+      },
+      "hint": "We will call main() at the end and reference heapq.heappush.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\nimport heapq\ndef main():",
+      "codeLabel": "Imports and main()"
+    },
+    {
+      "id": "q14",
+      "phase": "Writing the Code",
+      "questionText": "Read all input tokens and parse n safely.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    data = sys.stdin.read().strip().split()\n    if not data:\n        return\n    it = iter(data)\n    n = int(next(it))",
+          "isCode": true
+        },
+        {
+          "label": "    data = sys.stdin.readline().split()\n    it = iter(data)\n    n = int(next(it))",
+          "isCode": true
+        },
+        {
+          "label": "    n = int(sys.stdin.readline())\n    it = sys.stdin.read().split()",
+          "isCode": true
+        },
+        {
+          "label": "    tokens = sys.stdin.read().splitlines()\n    n = int(tokens[0]); it = iter(tokens)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Reading all tokens handles large input; we guard empty input and create an iterator for sequential parsing.",
+      "wrongExplanations": {
+        "1": "Only reads the first line; subsequent lines are ignored.",
+        "3": "Iterating lines won't split a and b into separate tokens properly later."
+      },
+      "hint": "We need a token stream to call next(it) for a and b.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    data = sys.stdin.read().strip().split()\n    if not data:\n        return\n    it = iter(data)\n    n = int(next(it))",
+      "codeLabel": "Read tokens and n"
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Build the list of customers with their original indices.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    arr = []\n    for i in range(n):\n        a = int(next(it)); b = int(next(it))\n        arr.append((a, b, i))",
+          "isCode": true
+        },
+        {
+          "label": "    arr = []\n    for i in range(n):\n        b = int(next(it)); a = int(next(it))\n        arr.append((a, b))",
+          "isCode": true
+        },
+        {
+          "label": "    arr = [None]*n\n    for i in range(n):\n        a = int(next(it)); b = int(next(it))\n        arr[i] = (b, a, i)",
+          "isCode": true
+        },
+        {
+          "label": "    arr = []\n    for i in range(n+1):\n        a = int(next(it)); b = int(next(it))\n        arr.append((a, b, i))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We collect (arrival, departure, original_index) for each customer.",
+      "wrongExplanations": {
+        "1": "Loses the index and may swap a/b.",
+        "3": "Iterates n+1 times and will overrun input."
+      },
+      "hint": "Keep (a, b, i) together for sorting and output.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    arr = []\n    for i in range(n):\n        a = int(next(it)); b = int(next(it))\n        arr.append((a, b, i))",
+      "codeLabel": "Read intervals with indices"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Sort by arrival and initialize tracking structures.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    arr.sort(key=lambda x: x[0])\n    heap = []  # (end, room_id)\n    res = [0] * n\n    room_count = 0",
+          "isCode": true
+        },
+        {
+          "label": "    arr.sort(key=lambda x: x[1])\n    heap = []\n    res = []\n    room_count = n",
+          "isCode": true
+        },
+        {
+          "label": "    # no sort needed\n    heap = []\n    res = [None] * n\n    room_count = 0",
+          "isCode": true
+        },
+        {
+          "label": "    arr.sort()\n    heap = {}\n    res = [0] * n\n    room_count = 0",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We must process by arrival; initialize an empty structure, results array, and room counter.",
+      "wrongExplanations": {
+        "1": "Sorting by departure breaks the arrival-based processing, and res must be sized.",
+        "3": "A dict isn't suitable here; we need an ordered retrieval by smallest end."
+      },
+      "hint": "We need to quickly find the smallest current end later.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    arr.sort(key=lambda x: x[0])\n    heap = []  # (end, room_id)\n    res = [0] * n\n    room_count = 0",
+      "codeLabel": "Sort and initialize"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Write the loop header and the condition to decide reuse, along with removing one reusable room.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    for a, b, idx in arr:\n        if heap and heap[0][0] < a:\n            end, rid = heapq.heappop(heap)",
+          "isCode": true
+        },
+        {
+          "label": "    for idx, a, b in arr:\n        if heap and heap[0][0] <= a:\n            end, rid = heapq.heappop(heap)",
+          "isCode": true
+        },
+        {
+          "label": "    for a, b, idx in arr:\n        if heap and heap[0][1] < a:\n            rid, end = heapq.heappop(heap)",
+          "isCode": true
+        },
+        {
+          "label": "    for a, b, idx in arr:\n        if not heap or heap[0][0] < a:\n            end, rid = heapq.heappop(heap)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We iterate (a,b,idx) and check strict < with the smallest end; then remove that one to reuse.",
+      "wrongExplanations": {
+        "1": "Using <= would allow reuse when end == a, which is not allowed.",
+        "3": "When heap is empty, we cannot pop; we must go to the else branch (new room)."
+      },
+      "hint": "Pay attention to strictness and tuple ordering.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    for a, b, idx in arr:\n        if heap and heap[0][0] < a:\n            end, rid = heapq.heappop(heap)",
+      "codeLabel": "Loop and reuse check"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Fill the body for reusing a room once popped.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "            res[idx] = rid\n            heapq.heappush(heap, (b, rid))",
+          "isCode": true
+        },
+        {
+          "label": "            res[b] = rid\n            heapq.heappush(heap, (a, rid))",
+          "isCode": true
+        },
+        {
+          "label": "            res[idx] = end\n            heapq.heappush(heap, (b, idx))",
+          "isCode": true
+        },
+        {
+          "label": "            # nothing to update here",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Assign the current customer to rid and update the room's next free day to b.",
+      "wrongExplanations": {
+        "1": "res should be indexed by original input index, and we must push the new departure b.",
+        "3": "We must update both the assignment and future availability."
+      },
+      "hint": "Store the room id in res at the original index; update availability with new end.",
+      "isCodeBuilding": true,
+      "codeSnippet": "            res[idx] = rid\n            heapq.heappush(heap, (b, rid))",
+      "codeLabel": "Reuse branch body"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Fill the body for allocating a new room when reuse is not possible.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "        else:\n            room_count += 1\n            rid = room_count\n            res[idx] = rid\n            heapq.heappush(heap, (b, rid))",
+          "isCode": true
+        },
+        {
+          "label": "        else:\n            rid = room_count\n            res[idx] = rid\n            heapq.heappush(heap, (b, rid))",
+          "isCode": true
+        },
+        {
+          "label": "        else:\n            room_count += 1\n            rid = room_count\n            res[b] = rid\n            heapq.heappush(heap, (a, rid))",
+          "isCode": true
+        },
+        {
+          "label": "        else:\n            room_count = 1\n            rid = room_count\n            res[idx] = rid\n            heapq.heappush(heap, (b, rid))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We create a new room id, assign it, and track its end b.",
+      "wrongExplanations": {
+        "1": "Without incrementing, multiple customers would reuse the same id incorrectly.",
+        "2": "Wrong indices and pushing wrong end will corrupt the tracking."
+      },
+      "hint": "Increase the total number of rooms when you need a new one.",
+      "isCodeBuilding": true,
+      "codeSnippet": "        else:\n            room_count += 1\n            rid = room_count\n            res[idx] = rid\n            heapq.heappush(heap, (b, rid))",
+      "codeLabel": "New room branch"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Write the output and call main.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    out = []\n    out.append(str(room_count))\n    out.append(\" \".join(map(str, res)))\n    sys.stdout.write(\"\\n\".join(out))\n\nif __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "    print(\" \".join(map(str, res)))\n    print(room_count)\n\nif __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "    sys.stdout.write(\" \".join(map(str, res)) + \"\\n\" + str(room_count))\n\nif __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "    out = [str(room_count), \" \".join(map(str, res))]\n    print(\"\\n\".join(out))\n\nif __name__ == \"__main__\":\n    main(room_count)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We print k first, then the per-customer rooms in input order, and call main() correctly.",
+      "wrongExplanations": {
+        "1": "Order is reversed; the problem requires k first.",
+        "3": "main() should be called with no arguments; room_count is not a parameter."
+      },
+      "hint": "Follow the exact output format: k on the first line.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    out = []\n    out.append(str(room_count))\n    out.append(\" \".join(map(str, res)))\n    sys.stdout.write(\"\\n\".join(out))\n\nif __name__ == \"__main__\":\n    main()",
+      "codeLabel": "Output and entry point"
+    },
+    {
+      "id": "q21",
+      "phase": "Verifying the Solution",
+      "questionText": "Trace the algorithm on 5 customers:\n1) (1,3)\n2) (2,2)\n3) (3,5)\n4) (1,1)\n5) (6,7)\nWhat is the minimum number of rooms k?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Processing by arrival: (1,3)->R1; (1,1)->R2; (2,2) overlaps with (1,3), needs R3; (3,5) can't reuse R1 (3 is not < 3), reuse R2 (1<3)->R2; (6,7) reuse R1 or R2/R3. Max active rooms = 3.",
+      "wrongExplanations": {
+        "0": "At time 2, we need a third room because (1,3) and (1,1) are occupying two rooms already.",
+        "3": "Some intervals overlap; one room is impossible."
+      },
+      "hint": "Sort by arrival: (1,3),(1,1),(2,2),(3,5),(6,7)."
+    },
+    {
+      "id": "q22",
+      "phase": "Verifying the Solution",
+      "questionText": "Using the same 5 customers and the algorithm, which is a valid assignment in input order (rooms numbered starting from 1)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "1 2 3 2 1",
+          "isCode": false
+        },
+        {
+          "label": "1 2 2 1 2",
+          "isCode": false
+        },
+        {
+          "label": "1 1 2 2 3",
+          "isCode": false
+        },
+        {
+          "label": "2 1 3 2 1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "One valid run yields: 1:(1,3)->R1; 4:(1,1)->R2; 2:(2,2)->R3; 3:(3,5) reuses R2; 5:(6,7) reuses R1. In input order: 1 3rd? mapping is 1:R1,2:R3,3:R2,4:R2,5:R1 => 1 3 2 2 1; but with different tie choices, 1 2 3 2 1 is also valid. Any valid minimal assignment is acceptable.",
+      "wrongExplanations": {
+        "1": "This suggests (2,2) reuses R2 although (1,1) occupies R2 during day 1 only; tie choices may differ but must respect strictly earlier rule.",
+        "3": "This changes the room for the first customer from 1 to 2 without cause."
+      },
+      "hint": "Any assignment consistent with the rules and minimal k is valid."
+    },
+    {
+      "id": "q23",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the overall time complexity of the approach?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(log n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Sorting by arrival is O(n log n). Each assignment does O(log n) work, totaling O(n log n).",
+      "wrongExplanations": {
+        "0": "We avoid pairwise comparisons.",
+        "2": "Sorting dominates; it's not linear."
+      },
+      "hint": "Consider sorting and the per-customer updates."
+    },
+    {
+      "id": "q24",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the extra space complexity (excluding input storage)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(1)",
+          "isCode": false
+        },
+        {
+          "label": "O(log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(k)",
+          "isCode": false
+        },
+        {
+          "label": "O(n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 3,
+      "explanation": "We store res of size n and a structure that can grow up to k ≤ n; overall O(n).",
+      "wrongExplanations": {
+        "0": "We store results for all customers.",
+        "2": "k can be up to n; res is size n regardless."
+      },
+      "hint": "Count res plus the data structure tracking rooms."
+    },
+    {
+      "id": "q25",
+      "phase": "Analyzing Complexity",
+      "questionText": "Which edge case must be handled carefully with the reuse condition?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "When a customer has a = b; reuse requires E < A still",
+          "isCode": false
+        },
+        {
+          "label": "When n = 0; print nothing",
+          "isCode": false
+        },
+        {
+          "label": "When days are negative",
+          "isCode": false
+        },
+        {
+          "label": "When two arrivals are equal; we must stop",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Even if a = b, the strict rule remains: reuse only if E < A. Equal endpoints cannot share.",
+      "wrongExplanations": {
+        "1": "n ≥ 1 per constraints.",
+        "2": "Days are within 1..1e9."
+      },
+      "hint": "Equality of end and next start is not enough to reuse."
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\nimport heapq\ndef main():",
+    "    data = sys.stdin.read().strip().split()\n    if not data:\n        return\n    it = iter(data)\n    n = int(next(it))",
+    "    arr = []\n    for i in range(n):\n        a = int(next(it)); b = int(next(it))\n        arr.append((a, b, i))",
+    "    arr.sort(key=lambda x: x[0])\n    heap = []  # (end, room_id)\n    res = [0] * n\n    room_count = 0",
+    "    for a, b, idx in arr:\n        if heap and heap[0][0] < a:\n            end, rid = heapq.heappop(heap)",
+    "            res[idx] = rid\n            heapq.heappush(heap, (b, rid))",
+    "        else:\n            room_count += 1\n            rid = room_count\n            res[idx] = rid\n            heapq.heappush(heap, (b, rid))",
+    "    out = []\n    out.append(str(room_count))\n    out.append(\" \".join(map(str, res)))\n    sys.stdout.write(\"\\n\".join(out))\n\nif __name__ == \"__main__\":\n    main()"
+  ],
+  "reasoningChain": [
+    {
+      "question": "q3",
+      "insight": "Strict reuse condition implies some adjacent intervals cannot share; understand minimal rooms for sample."
+    },
+    {
+      "question": "q6",
+      "insight": "Processing customers by arrival day simplifies reuse decisions."
+    },
+    {
+      "question": "q7",
+      "insight": "Tracking only the earliest current departure (and its room id) is sufficient to decide reuse."
+    },
+    {
+      "question": "q8",
+      "insight": "The reuse condition is strict: reuse only if earliest end < new arrival."
+    },
+    {
+      "question": "q11",
+      "insight": "Store original indices to output room numbers in input order after sorting."
+    },
+    {
+      "question": "q17",
+      "insight": "Implement the core decision: check earliest end and branch to reuse or allocate new."
+    },
+    {
+      "question": "q18",
+      "insight": "Update tracking correctly when reusing a room: assign and push new end."
+    },
+    {
+      "question": "q23",
+      "insight": "Analyze overall time complexity dominated by sorting and per-customer updates."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1448,
+    "output_tokens": 15466,
+    "input_cost": 0.00181,
+    "output_cost": 0.15466,
+    "total_cost": 0.15647
+  }
+}

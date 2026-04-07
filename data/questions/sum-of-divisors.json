@@ -1,0 +1,968 @@
+{
+  "id": "sum-of-divisors-summatory",
+  "title": "Sum of Divisors",
+  "difficulty": "intermediate",
+  "tags": [
+    "math"
+  ],
+  "estimatedMinutes": 45,
+  "language": "python",
+  "description": "Let σ(n) denote the sum of divisors of an integer n. For example, σ(12) = 1 + 2 + 3 + 4 + 6 + 12 = 28.\n\nTask: Compute S(n) = ∑_{i=1}^n σ(i) modulo 10^9+7.\n\nInput: A single integer n.\n\nOutput: Print S(n) modulo 10^9+7.\n\nConstraints:\n- 1 ≤ n ≤ 10^{12}",
+  "examples": [
+    {
+      "input": "5",
+      "output": "21",
+      "explanation": "σ(1)+σ(2)+σ(3)+σ(4)+σ(5) = 1 + 3 + 4 + 7 + 6 = 21."
+    }
+  ],
+  "constraints": [
+    "1 ≤ n ≤ 10^12",
+    "Time Limit: 1.00 s",
+    "Memory Limit: 512 MB"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "What is σ(6)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "12",
+          "isCode": false
+        },
+        {
+          "label": "6",
+          "isCode": false
+        },
+        {
+          "label": "10",
+          "isCode": false
+        },
+        {
+          "label": "18",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Divisors of 6 are 1,2,3,6 → sum = 12.",
+      "wrongExplanations": {
+        "1": "6 counts only the number itself, not all divisors.",
+        "2": "10 misses one of the divisors.",
+        "3": "18 double counts or includes non-divisors."
+      },
+      "hint": "List all divisors of 6 and sum them.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "For input n = 5, what should the program output?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "21",
+          "isCode": false
+        },
+        {
+          "label": "15",
+          "isCode": false
+        },
+        {
+          "label": "28",
+          "isCode": false
+        },
+        {
+          "label": "20",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "σ(1..5) = 1 + 3 + 4 + 7 + 6 = 21.",
+      "wrongExplanations": {
+        "1": "15 sums 1+2+3+4+5, not σ(i).",
+        "2": "28 is σ(12) from the statement example.",
+        "3": "20 is close but misses one divisor contribution."
+      },
+      "hint": "Compute σ(i) for i = 1..5 and sum.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "If n = 1, what is the correct output?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "10",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "S(1) = σ(1) = 1.",
+      "wrongExplanations": {
+        "0": "σ(1) is 1, not 0.",
+        "2": "σ(1) is not 2.",
+        "3": "10 is unrelated here."
+      },
+      "hint": "σ(1) sums divisors of 1.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "Consider computing each σ(i) by checking all j from 1..i for divisibility, for i=1..n. Which statement is accurate for n up to 10^{12}?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "This is far too slow; it performs about n^2/2 checks in the worst case.",
+          "isCode": false
+        },
+        {
+          "label": "It's fine because modern CPUs can handle ~10^{12} iterations in 1 second.",
+          "isCode": false
+        },
+        {
+          "label": "Skipping even numbers makes it fast enough for 10^{12}.",
+          "isCode": false
+        },
+        {
+          "label": "Modulo arithmetic reduces the number of checks significantly.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "A double loop up to i is quadratic and infeasible for 10^{12}.",
+      "wrongExplanations": {
+        "1": "10^{12} iterations is too many; even 10^9 is near the edge.",
+        "2": "Skipping even numbers does not change the asymptotic cost.",
+        "3": "Modulo only affects arithmetic, not loop counts."
+      },
+      "hint": "Estimate number of iterations of the naive approach.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Exploring Approaches",
+      "questionText": "Which identity correctly rewrites ∑_{i=1}^n σ(i) by counting each divisor's contribution across 1..n?",
+      "diagram": "Think: each divisor d divides multiples d, 2d, 3d, ... ≤ n.",
+      "options": [
+        {
+          "label": "∑_{d=1}^n d × ⌊n/d⌋",
+          "isCode": false
+        },
+        {
+          "label": "∑_{d=1}^n ⌊n/d⌋",
+          "isCode": false
+        },
+        {
+          "label": "∑_{d=1}^n d × ⌊d/n⌋",
+          "isCode": false
+        },
+        {
+          "label": "n × σ(n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each d appears once for every multiple ≤ n, i.e., ⌊n/d⌋ times.",
+      "wrongExplanations": {
+        "1": "Missing the weight d for each occurrence.",
+        "2": "⌊d/n⌋ is zero for most d < n.",
+        "3": "σ(n) is only for n, not the entire range."
+      },
+      "hint": "Count how many numbers ≤ n are divisible by a fixed d.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "Using the identity from the previous question, for n = 5, how many times does divisor d = 3 contribute to the sum?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "⌊5/3⌋ = 1 → 3 contributes once.",
+      "wrongExplanations": {
+        "1": "There is only one multiple of 3 ≤ 5 (3).",
+        "3": "3 divides 3, so it contributes at least once."
+      },
+      "hint": "Count multiples of 3 up to 5.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "Summing d × ⌊n/d⌋ for all d = 1..n is still too slow. What structural property helps reduce the number of iterations drastically?",
+      "diagram": "As d increases, ⌊n/d⌋ changes only at certain d.",
+      "options": [
+        {
+          "label": "Group consecutive d where ⌊n/d⌋ is the same and process the entire block at once.",
+          "isCode": false
+        },
+        {
+          "label": "Precompute all primes up to n and use them to speed divisor checks.",
+          "isCode": false
+        },
+        {
+          "label": "Randomly sample divisors and extrapolate the rest.",
+          "isCode": false
+        },
+        {
+          "label": "Use recursion to split the interval until singletons.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "⌊n/d⌋ is piecewise-constant over ranges; summing by ranges avoids visiting each d.",
+      "wrongExplanations": {
+        "1": "Prime sieves to 10^{12} are infeasible and not needed here.",
+        "3": "Recursion without exploiting constancy doesn't help the count."
+      },
+      "hint": "How does ⌊n/d⌋ change as d moves through integers?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Building the Idea",
+      "questionText": "Let k = ⌊n/d⌋ for current d. What is the largest r ≥ d such that ⌊n/x⌋ = k for all x in [d, r]?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "r = n // k",
+          "isCode": false
+        },
+        {
+          "label": "r = n // (k + 1)",
+          "isCode": false
+        },
+        {
+          "label": "r = k",
+          "isCode": false
+        },
+        {
+          "label": "r = d + k",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "By definition of k, all x ∈ [d, n//k] give ⌊n/x⌋ = k; beyond that, it drops.",
+      "wrongExplanations": {
+        "1": "n//(k+1) is the last position where quotient is ≥ k+1.",
+        "2": "r measures a position in 1..n, not the quotient itself."
+      },
+      "hint": "Solve k ≤ n/x < k+1 for integer x.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "For n = 20 and d = 7, what is r as defined above?",
+      "diagram": "k = ⌊20/7⌋ = 2. Find the largest r with ⌊20/r⌋ = 2.",
+      "options": [
+        {
+          "label": "7",
+          "isCode": false
+        },
+        {
+          "label": "9",
+          "isCode": false
+        },
+        {
+          "label": "10",
+          "isCode": false
+        },
+        {
+          "label": "11",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "k=2 → r = 20//2 = 10, and ⌊20/x⌋ = 2 for x ∈ [7,10].",
+      "wrongExplanations": {
+        "1": "⌊20/9⌋ = 2, but it's not the largest r.",
+        "3": "⌊20/11⌋ = 1, already dropped below 2."
+      },
+      "hint": "Compute n//k with k = 2.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "What is a correct closed form for ∑_{x=d}^{r} x?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "(d + r) * (r - d + 1) // 2",
+          "isCode": false
+        },
+        {
+          "label": "(r * (r + 1) // 2) - (d * (d + 1) // 2)",
+          "isCode": false
+        },
+        {
+          "label": "(r - d + 1) * (r - d + 2) // 2",
+          "isCode": false
+        },
+        {
+          "label": "(r + d) * (r - d) // 2",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Sum of arithmetic series from d to r is (first + last) * count / 2.",
+      "wrongExplanations": {
+        "1": "Should subtract (d-1)*d/2, not d*(d+1)/2.",
+        "3": "Missing +1 in the count factor; off by one."
+      },
+      "hint": "First + last times how many terms, divided by 2.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "When computing the series sum modulo M = 10^9+7, how should you handle division by 2?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Multiply by (M + 1) // 2 (the modular inverse of 2 mod M).",
+          "isCode": false
+        },
+        {
+          "label": "Do integer division by 2 after taking modulo.",
+          "isCode": false
+        },
+        {
+          "label": "Only divide by 2 if (d + r) and (r - d + 1) are both even.",
+          "isCode": false
+        },
+        {
+          "label": "You cannot divide by 2 under modulo M.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "For odd prime M, 2 × ((M+1)//2) ≡ 1, so it undoes multiplication by 2.",
+      "wrongExplanations": {
+        "1": "Integer division loses information when values are odd.",
+        "3": "Division by 2 is possible via the inverse since M is odd."
+      },
+      "hint": "Find x such that 2·x ≡ 1 (mod M).",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "For a block [d..r] with k = ⌊n/d⌋, what total should be added to the answer?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "k × ∑_{x=d}^{r} x",
+          "isCode": false
+        },
+        {
+          "label": "(n//(d+1)) × ∑_{x=d}^{r} x",
+          "isCode": false
+        },
+        {
+          "label": "r × ∑_{x=d}^{r} x",
+          "isCode": false
+        },
+        {
+          "label": "k × (r - d + 1)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each x in [d..r] contributes k, so sum is k times the sum of x over the block.",
+      "wrongExplanations": {
+        "1": "n//(d+1) is the next quotient, not constant over [d..r].",
+        "3": "This sums counts, not the weighted sum by x."
+      },
+      "hint": "Each x in the range has the same ⌊n/x⌋ = k.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "After processing the block [d..r], what should the next d be?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "d = r + 1",
+          "isCode": false
+        },
+        {
+          "label": "d = r",
+          "isCode": false
+        },
+        {
+          "label": "d = d + 1",
+          "isCode": false
+        },
+        {
+          "label": "d = k + 1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "All d up to r are accounted for; continue from r+1.",
+      "wrongExplanations": {
+        "1": "Would double-count r.",
+        "2": "Skips the rest of the current block.",
+        "3": "k indexes quotient values, not positions d."
+      },
+      "hint": "Avoid reprocessing already included indices.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Writing the Code",
+      "questionText": "Choose the correct imports and constants setup.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\nMOD = 10**9 + 7\nINV2 = 2",
+          "isCode": true
+        },
+        {
+          "label": "import sys\nMOD = 1e9 + 7\nINV2 = (MOD + 1) // 2",
+          "isCode": true
+        },
+        {
+          "label": "import sys\nMOD = 10**9 + 7\nINV2 = (MOD + 1) // 2",
+          "isCode": true
+        },
+        {
+          "label": "import sys\nMOD = 10**9 + 7\nINV2 = (MOD - 1) // 2",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "MOD must be an integer; (MOD+1)//2 is the inverse of 2 modulo MOD.",
+      "wrongExplanations": {
+        "1": "1e9+7 is a float; modulo needs integers.",
+        "0": "INV2 must satisfy 2*INV2 ≡ 1 (mod MOD), not 2.",
+        "3": "(MOD-1)//2 is not the inverse of 2."
+      },
+      "hint": "10**9+7 should be an int; pick the modular inverse of 2.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\nMOD = 10**9 + 7\nINV2 = (MOD + 1) // 2",
+      "codeLabel": "Imports and constants"
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Implement a helper to compute the sum of integers from a to b modulo MOD.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def sum_range(a, b):\n    a_mod = a % MOD\n    b_mod = b % MOD\n    cnt = (b - a + 1) % MOD\n    return ((a_mod + b_mod) % MOD) * cnt % MOD * INV2 % MOD",
+          "isCode": true
+        },
+        {
+          "label": "def sum_range(a, b):\n    a_mod = a % MOD\n    b_mod = b % MOD\n    cnt = (b - a) % MOD\n    return ((a_mod + b_mod) % MOD) * cnt % MOD * INV2 % MOD",
+          "isCode": true
+        },
+        {
+          "label": "def sum_range(a, b):\n    a_mod = a % MOD\n    b_mod = b % MOD\n    cnt = (b - a + 1) % MOD\n    return ((a_mod + b_mod) % MOD) * cnt % MOD // 2",
+          "isCode": true
+        },
+        {
+          "label": "def sum_range(a, b):\n    a_mod = a % MOD\n    b_mod = b % MOD\n    cnt = (b - a + 1) % MOD\n    return ((a_mod + b_mod) % MOD) * cnt % MOD",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Use (a+b)*count/2 with modular inverse of 2. Include +1 in count.",
+      "wrongExplanations": {
+        "1": "Count must be b - a + 1.",
+        "2": "//2 under modulo is wrong for odd values.",
+        "3": "Missing division by 2 entirely."
+      },
+      "hint": "Combine first+last and number of terms, then multiply by INV2.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def sum_range(a, b):\n    a_mod = a % MOD\n    b_mod = b % MOD\n    cnt = (b - a + 1) % MOD\n    return ((a_mod + b_mod) % MOD) * cnt % MOD * INV2 % MOD",
+      "codeLabel": "Sum of range helper"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Read input n robustly in main(). Pick the correct snippet.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def main():\n    data = sys.stdin.read().strip().split()\n    if not data:\n        return\n    n = int(data[0])",
+          "isCode": true
+        },
+        {
+          "label": "def main():\n    data = sys.stdin.readline().split()\n    n = int(data[1])",
+          "isCode": true
+        },
+        {
+          "label": "def main():\n    data = sys.stdin.read().strip().split()\n    if not data:\n        return\n    n = int(data)",
+          "isCode": true
+        },
+        {
+          "label": "def main():\n    parts = sys.stdin.read().strip()\n    if not parts:\n        return\n    n = int(parts[1])",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Read all tokens, check nonempty, and parse the first token to int.",
+      "wrongExplanations": {
+        "1": "Using data[1] reads the second token; input has a single integer.",
+        "3": "Indexing a string by [1] gives a character, not the whole number."
+      },
+      "hint": "sys.stdin.read().split() returns a list of strings.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def main():\n    data = sys.stdin.read().strip().split()\n    if not data:\n        return\n    n = int(data[0])",
+      "codeLabel": "Main header and input"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Initialize variables before the loop.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    ans = 0\n    d = 1",
+          "isCode": true
+        },
+        {
+          "label": "    ans = 0\n    d = 0",
+          "isCode": true
+        },
+        {
+          "label": "    ans = 0\n    d = n",
+          "isCode": true
+        },
+        {
+          "label": "    ans = 1\n    d = 1",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Start from d=1 and accumulate into ans starting at 0.",
+      "wrongExplanations": {
+        "1": "d=0 would cause division by zero.",
+        "2": "Starting at d=n misses earlier d.",
+        "3": "ans should start at 0, not 1."
+      },
+      "hint": "We sum contributions from d=1 upwards.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    ans = 0\n    d = 1",
+      "codeLabel": "Init accumulators"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Write the main loop and compute k and r for the current block.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    while d <= n:\n        k = n // d\n        r = n // k",
+          "isCode": true
+        },
+        {
+          "label": "    while d < n:\n        k = n // d\n        r = n // (k + 1)",
+          "isCode": true
+        },
+        {
+          "label": "    while d <= n:\n        k = n / d\n        r = n // k",
+          "isCode": true
+        },
+        {
+          "label": "    while d <= n:\n        k = d // n\n        r = n // k",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Use integer division for k and r as k = ⌊n/d⌋ and r = ⌊n/k⌋.",
+      "wrongExplanations": {
+        "1": "r should be n//k; using k+1 breaks the block boundary.",
+        "2": "n/d produces a float, breaking integer math.",
+        "3": "d//n is 0 for most d, making r invalid."
+      },
+      "hint": "All divisions must be integer flooring.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    while d <= n:\n        k = n // d\n        r = n // k",
+      "codeLabel": "Block loop and bounds"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Accumulate the contribution of the current block [d..r].",
+      "diagram": null,
+      "options": [
+        {
+          "label": "        s = sum_range(d, r)\n        ans = (ans + (k % MOD) * s) % MOD",
+          "isCode": true
+        },
+        {
+          "label": "        s = sum_range(1, r)\n        ans = (ans + k * s) % MOD",
+          "isCode": true
+        },
+        {
+          "label": "        s = sum_range(d, r)\n        ans = ans + k * s",
+          "isCode": true
+        },
+        {
+          "label": "        s = sum_range(d, r)\n        ans = (ans + s) % MOD",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Sum x over [d..r], multiply by k, and keep the result modulo MOD.",
+      "wrongExplanations": {
+        "1": "Starts from 1 instead of d; overcounts earlier blocks.",
+        "2": "Needs modulo to avoid overflow and to respect problem's modulus.",
+        "3": "Missing the multiplier k from ⌊n/x⌋."
+      },
+      "hint": "k is constant over the block and must weight the sum.",
+      "isCodeBuilding": true,
+      "codeSnippet": "        s = sum_range(d, r)\n        ans = (ans + (k % MOD) * s) % MOD",
+      "codeLabel": "Block contribution"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Advance to the next block correctly.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "        d = r + 1",
+          "isCode": true
+        },
+        {
+          "label": "        d = r",
+          "isCode": true
+        },
+        {
+          "label": "        d += 1",
+          "isCode": true
+        },
+        {
+          "label": "        d = k + 1",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "After handling [d..r], continue from r+1.",
+      "wrongExplanations": {
+        "1": "Would reprocess r.",
+        "2": "Skips the rest of the current block incorrectly.",
+        "3": "k indexes quotient values, not positions."
+      },
+      "hint": "Do not overlap processed indices.",
+      "isCodeBuilding": true,
+      "codeSnippet": "        d = r + 1",
+      "codeLabel": "Advance pointer"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "Finish by printing the answer and wiring the entry point.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    print(ans % MOD)\n\nif __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "    print(ans)\n\nif __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "    return ans % MOD\n\nif __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "    print(ans % MOD)\n\nif __name__ == '__main__':\n    pass",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Print modulo and ensure main() is called under the usual guard.",
+      "wrongExplanations": {
+        "1": "Problem requires modulo output.",
+        "2": "Returning the value from main does not print it.",
+        "3": "Does not call main(), so nothing runs."
+      },
+      "hint": "Conform to the required modulo and typical Python entry guard.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    print(ans % MOD)\n\nif __name__ == \"__main__\":\n    main()",
+      "codeLabel": "Output and entry"
+    },
+    {
+      "id": "q22",
+      "phase": "Verifying the Solution",
+      "questionText": "Using the derived method, what is S(6) = ∑_{i=1}^6 σ(i)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "33",
+          "isCode": false
+        },
+        {
+          "label": "28",
+          "isCode": false
+        },
+        {
+          "label": "36",
+          "isCode": false
+        },
+        {
+          "label": "32",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "σ: 1,3,4,7,6,12 → sum = 33.",
+      "wrongExplanations": {
+        "1": "28 is σ(12) from the example.",
+        "2": "Double-check σ(8) and σ(9) are not in this range.",
+        "3": "Sum is slightly larger; check σ(6)=12."
+      },
+      "hint": "Compute σ(1..6) explicitly or trust the formula’s correctness.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q23",
+      "phase": "Verifying the Solution",
+      "questionText": "What is S(10) = ∑_{i=1}^{10} σ(i)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "90",
+          "isCode": false
+        },
+        {
+          "label": "87",
+          "isCode": false
+        },
+        {
+          "label": "88",
+          "isCode": false
+        },
+        {
+          "label": "95",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "σ: 1,3,4,7,6,12,8,15,13,18 → sum = 87.",
+      "wrongExplanations": {
+        "0": "Overestimates; recompute σ(7..10).",
+        "2": "Close but off; re-check σ(9)=13.",
+        "3": "Too large; verify each σ(i)."
+      },
+      "hint": "Compute σ for 7..10 if unsure.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the time complexity of the main loop that advances by blocks where ⌊n/d⌋ is constant?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(√n)",
+          "isCode": false
+        },
+        {
+          "label": "O(log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "The number of distinct values of ⌊n/d⌋ is about 2√n.",
+      "wrongExplanations": {
+        "0": "We skip ranges, not individual d.",
+        "2": "Distinct quotients are not logarithmic in n."
+      },
+      "hint": "How many distinct values can ⌊n/d⌋ take?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the extra space used by the algorithm (excluding input)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(1)",
+          "isCode": false
+        },
+        {
+          "label": "O(√n)",
+          "isCode": false
+        },
+        {
+          "label": "O(log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Only a few integer variables are used.",
+      "wrongExplanations": {
+        "1": "We don't store arrays of size √n.",
+        "3": "No arrays over n are kept."
+      },
+      "hint": "Count the number of variables held at any time.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Analyzing Complexity",
+      "questionText": "Why is multiplying by (MOD + 1) // 2 a valid way to divide by 2 modulo MOD (where MOD = 10^9+7)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Because 2 × ((MOD + 1) // 2) ≡ 1 (mod MOD), so it is the inverse of 2.",
+          "isCode": false
+        },
+        {
+          "label": "Because (MOD + 1) // 2 is equal to 0.5 in modular arithmetic.",
+          "isCode": false
+        },
+        {
+          "label": "Because MOD is even.",
+          "isCode": false
+        },
+        {
+          "label": "Because it works only when the multiplied value is even.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "MOD is an odd prime; (MOD+1)//2 is the unique value satisfying 2x ≡ 1 mod MOD.",
+      "wrongExplanations": {
+        "1": "There's no notion of real fractions mod MOD; we use inverses.",
+        "2": "MOD is odd (10^9+7).",
+        "3": "It works regardless of parity of the value."
+      },
+      "hint": "Find x such that 2x ≡ 1 mod MOD.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\nMOD = 10**9 + 7\nINV2 = (MOD + 1) // 2",
+    "def sum_range(a, b):\n    a_mod = a % MOD\n    b_mod = b % MOD\n    cnt = (b - a + 1) % MOD\n    return ((a_mod + b_mod) % MOD) * cnt % MOD * INV2 % MOD",
+    "def main():\n    data = sys.stdin.read().strip().split()\n    if not data:\n        return\n    n = int(data[0])",
+    "    ans = 0\n    d = 1",
+    "    while d <= n:\n        k = n // d\n        r = n // k",
+    "        s = sum_range(d, r)\n        ans = (ans + (k % MOD) * s) % MOD",
+    "        d = r + 1",
+    "    print(ans % MOD)\n\nif __name__ == \"__main__\":\n    main()"
+  ],
+  "reasoningChain": [
+    {
+      "question": "How can we re-express ∑_{i=1}^n σ(i) by counting each divisor’s contribution across 1..n?",
+      "insight": "Sum equals ∑_{d=1}^n d × ⌊n/d⌋ since each divisor d appears for every multiple ≤ n."
+    },
+    {
+      "question": "How to avoid iterating all d individually?",
+      "insight": "Group consecutive d where ⌊n/d⌋ is constant and process blocks instead of single indices."
+    },
+    {
+      "question": "Given k = ⌊n/d⌋, what is the last index r sharing this k?",
+      "insight": "The block is [d..r] with r = ⌊n/k⌋; beyond r the quotient decreases."
+    },
+    {
+      "question": "How do we quickly sum indices in a block?",
+      "insight": "Use the arithmetic series sum: ∑_{x=d}^{r} x = (d + r)(r − d + 1)/2, computed modulo MOD."
+    },
+    {
+      "question": "How to handle division by 2 under modulo 10^9+7?",
+      "insight": "Multiply by the modular inverse of 2, which is (MOD+1)//2 since MOD is an odd prime."
+    },
+    {
+      "question": "How does the final loop compute the answer efficiently?",
+      "insight": "Iterate blocks: k = ⌊n/d⌋, r = ⌊n/k⌋, add k × sum_range(d,r), and move d to r+1; runs in about O(√n)."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1324,
+    "output_tokens": 17824,
+    "input_cost": 0.001655,
+    "output_cost": 0.17824,
+    "total_cost": 0.179895
+  }
+}

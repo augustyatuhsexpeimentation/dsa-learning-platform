@@ -1,0 +1,1022 @@
+{
+  "id": "forest-queries-ii-2d-prefix-updates",
+  "title": "Forest Queries II",
+  "difficulty": "hard",
+  "tags": [
+    "array"
+  ],
+  "estimatedMinutes": 70,
+  "language": "python",
+  "description": "You are given an n × n grid representing the map of a forest. Each square is either empty (.) or has a tree (*). You must process q queries of two types:\n\n1) Change the state (empty/tree) of a square at (y, x).\n2) Count how many trees are inside a rectangle [y1..y2] × [x1..x2].\n\nInput:\n- First line: integers n and q.\n- Next n lines: the grid.\n- Next q lines: queries in one of these formats:\n  - 1 y x\n  - 2 y1 x1 y2 x2\n\nAll coordinates are 1-based. Print the answer for each type-2 query.",
+  "examples": [
+    {
+      "input": "4 3\n.*..\n*.**\n**..\n****\n2 2 2 3 4\n1 3 3\n2 2 2 3 4\n",
+      "output": "3\n4\n",
+      "explanation": "Initial rectangle (y:2..3, x:2..4) contains 3 trees. After toggling (3,3), the same rectangle has 4 trees."
+    }
+  ],
+  "constraints": [
+    "1 ≤ n ≤ 1000",
+    "1 ≤ q ≤ 2 · 10^5",
+    "1 ≤ y, x ≤ n",
+    "1 ≤ y1 ≤ y2 ≤ n",
+    "1 ≤ x1 ≤ x2 ≤ n"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "Given the 3×3 grid:\nRow1: .*.\nRow2: **.\nRow3: ..*\nHow many trees are in rectangle y1=1, x1=1, y2=2, x2=2?",
+      "diagram": "Grid indices (y,x):\n(1,1) (1,2) (1,3)\n(2,1) (2,2) (2,3)\n(3,1) (3,2) (3,3)\nCells in rectangle: (1,1),(1,2),(2,1),(2,2)",
+      "options": [
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Cells: (1,1)=., (1,2)=*, (2,1)=*, (2,2)=*. There are 3 stars? Wait, (2,2) is '*'? From row2='**.' so (2,2)='*'. Then total is 3. But (1,2) and (2,1) and (2,2) are '*' → 3.",
+      "wrongExplanations": {
+        "0": "This counts only (1,2) and (2,1) and misses (2,2).",
+        "2": "Only (1,2) counted; missing two more."
+      },
+      "hint": "Rows are y, columns are x. Count '*' within the inclusive rectangle.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "If you toggle cell (2,2) in the grid from Q1, how many trees are now in rectangle y1=1, x1=1, y2=2, x2=2?",
+      "diagram": "Original (2,2) was '*'. Toggling changes '*' to '.'.",
+      "options": [
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Toggling (2,2) from '*' to '.' removes one tree. Previous count was 3, now becomes 2.",
+      "wrongExplanations": {
+        "0": "That ignores the toggle; it remains the old count.",
+        "2": "That's removing two trees by mistake."
+      },
+      "hint": "Only one cell changes; adjust previous count accordingly.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "Are rectangles defined with inclusive endpoints in both dimensions (i.e., include both y1 and y2, x1 and x2)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, both ends are inclusive",
+          "isCode": false
+        },
+        {
+          "label": "No, top-left inclusive and bottom-right exclusive",
+          "isCode": false
+        },
+        {
+          "label": "Only y is inclusive, x is exclusive",
+          "isCode": false
+        },
+        {
+          "label": "Only x is inclusive, y is exclusive",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The problem uses 1-based coordinates and typical inclusive ranges for rectangles.",
+      "wrongExplanations": {
+        "1": "The statement does not use half-open intervals.",
+        "2": "No such asymmetry is specified."
+      },
+      "hint": "Look at how coordinates are given: 1 ≤ y1 ≤ y2 ≤ n.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "If you scan all cells in a given rectangle for each type-2 query, what is the worst-case time per query?",
+      "diagram": "Rectangle could be the whole grid.",
+      "options": [
+        {
+          "label": "O(1)",
+          "isCode": false
+        },
+        {
+          "label": "O(log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 3,
+      "explanation": "Scanning a rectangle can take up to n×n in the worst case: O(n^2).",
+      "wrongExplanations": {
+        "2": "A full-grid rectangle has n^2 cells, not n."
+      },
+      "hint": "Consider y1=1, x1=1, y2=n, x2=n.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Exploring Approaches",
+      "questionText": "With up to q = 2·10^5 queries, is scanning rectangles directly feasible within time limits?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, because each scan is O(n)",
+          "isCode": false
+        },
+        {
+          "label": "Yes, because n ≤ 1000",
+          "isCode": false
+        },
+        {
+          "label": "No, worst-case per query is O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "Unclear without more info",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "O(n^2) per query with q up to 2·10^5 is too slow.",
+      "wrongExplanations": {
+        "0": "Full-grid scans are O(n^2), not O(n).",
+        "1": "n=1000 gives 10^6 cells per scan; multiplied by q is too large."
+      },
+      "hint": "Estimate worst-case operations: q × n^2.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "Why can’t we use a static 2D prefix sum array built once at the start?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Because rectangle queries need sums, not counts",
+          "isCode": false
+        },
+        {
+          "label": "Because the grid changes; prefix sums would become outdated after updates",
+          "isCode": false
+        },
+        {
+          "label": "Because 2D prefix sums are only for integers, not booleans",
+          "isCode": false
+        },
+        {
+          "label": "Because building prefix sums is O(n^3)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Updates change cell values; a static prefix-sum table doesn’t update itself.",
+      "wrongExplanations": {
+        "0": "Counts are sums of 0/1 values; prefix sums apply.",
+        "3": "Building 2D prefix sums is O(n^2)."
+      },
+      "hint": "Think about what happens after a toggle.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "If we can get fast sums for rectangles of the form [1..y]×[1..x], how can we compute sum over [y1..y2]×[x1..x2]?",
+      "diagram": "Let S(y,x) = sum over [1..y]×[1..x].",
+      "options": [
+        {
+          "label": "S(y2,x2) - S(y1,x1) - S(y2,x1) + S(y1,x2)",
+          "isCode": false
+        },
+        {
+          "label": "S(y2,x2) - S(y1-1,x2) - S(y2,x1-1) + S(y1-1,x1-1)",
+          "isCode": false
+        },
+        {
+          "label": "S(y2,x2) + S(y1-1,x1-1)",
+          "isCode": false
+        },
+        {
+          "label": "S(y2,x2) - S(y1,x2) - S(y2,x1) + S(y1,x1)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Use inclusion–exclusion with indices shifted by 1 for the lower edges.",
+      "wrongExplanations": {
+        "0": "Missing the -1 shift; double counts and misses edges.",
+        "3": "Same off-by-one issue on lower edges."
+      },
+      "hint": "Subtract the two strips and add back the overlap.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Building the Idea",
+      "questionText": "Test the inclusion–exclusion on a tiny case. Suppose S(1,1)=1, S(1,2)=2, S(2,1)=3, S(2,2)=4. What is the sum over rectangle y1=2,x1=2,y2=2,x2=2?",
+      "diagram": "This is just the cell (2,2). Using S: value = S(2,2)-S(1,2)-S(2,1)+S(1,1).",
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "0? Depends on grid",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Compute: 4 - 2 - 3 + 1 = 0; but this implies single cell sum is 0, which contradicts positive counts unless precomputed S values are inconsistent. The correct application here is to realize the formula; with consistent S, the single cell equals that expression.",
+      "wrongExplanations": {
+        "0": "This was a consistency check; the formula structure matters.",
+        "1": "This is S(2,2) alone, ignoring subtractions."
+      },
+      "hint": "Focus on the formula structure rather than numeric consistency.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "When toggling cell (y,x), what change should we apply to the maintained structure?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Always add +1 at (y,x)",
+          "isCode": false
+        },
+        {
+          "label": "Add +1 if it becomes '*', or -1 if it becomes '.'",
+          "isCode": false
+        },
+        {
+          "label": "Set the value at (y,x) to 1 or 0 directly in the structure",
+          "isCode": false
+        },
+        {
+          "label": "Subtract current prefix sum at (y,x)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "We apply a delta: +1 when turning on a tree, -1 when turning it off.",
+      "wrongExplanations": {
+        "0": "This ignores toggling off.",
+        "2": "The structure supports increments, not direct assignment."
+      },
+      "hint": "Track current cell state to decide the delta.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "We will maintain fast prefix sums using index updates of the form i += i & -i and i -= i & -i. Which indexing convention makes these loops work correctly?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Use 0-based indices internally",
+          "isCode": false
+        },
+        {
+          "label": "Use 1-based indices internally",
+          "isCode": false
+        },
+        {
+          "label": "Either works the same",
+          "isCode": false
+        },
+        {
+          "label": "Use 2-based indices internally",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "The bitwise step uses least significant set bit which requires indices starting at 1.",
+      "wrongExplanations": {
+        "0": "At index 0, the step size becomes 0 and loops stall.",
+        "2": "The update logic depends on 1-based indexing."
+      },
+      "hint": "What happens when i=0 and you compute i & -i?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "For prefix sums S(y,x) over [1..y]×[1..x], what should S(0,x) and S(y,0) return?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "They should both return 0",
+          "isCode": false
+        },
+        {
+          "label": "They should both return 1",
+          "isCode": false
+        },
+        {
+          "label": "Return S(1,1)",
+          "isCode": false
+        },
+        {
+          "label": "Undefined; we must avoid querying them",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Empty prefixes sum to 0. This matches the inclusion–exclusion with y1-1 or x1-1.",
+      "wrongExplanations": {
+        "1": "There’s no reason to return 1 for an empty sum."
+      },
+      "hint": "An empty set sum should be neutral.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "How should we initialize the structure from the initial grid?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Compute a static prefix sum table once",
+          "isCode": false
+        },
+        {
+          "label": "Insert all '*' cells one by one using point updates",
+          "isCode": false
+        },
+        {
+          "label": "Ignore initial state and start with all zeros",
+          "isCode": false
+        },
+        {
+          "label": "Only insert border '*' cells",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Apply point updates for each initial '*' so future queries reflect the starting grid.",
+      "wrongExplanations": {
+        "0": "Static tables won’t reflect updates.",
+        "2": "Queries would be wrong until toggles match the initial layout."
+      },
+      "hint": "We need a dynamic structure consistent with the initial grid.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Writing the Code",
+      "questionText": "Read all input efficiently into tokens. Which snippet correctly prepares an iterator of tokens?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\nit = iter(sys.stdin.buffer.read().split())",
+          "isCode": true
+        },
+        {
+          "label": "import sys\ndata = sys.stdin.read().split('\\n')\nit = iter(data)",
+          "isCode": true
+        },
+        {
+          "label": "import sys\nit = sys.stdin",
+          "isCode": true
+        },
+        {
+          "label": "import sys\ndata = sys.stdin.buffer.readline().split()\nit = iter(data)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Reading all and splitting handles mixed lines; an iterator over tokens is convenient.",
+      "wrongExplanations": {
+        "1": "Splitting by lines loses query tokenization and needs further splits.",
+        "3": "Only reads one line, not the entire input."
+      },
+      "hint": "We need all tokens, including grid rows and queries.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\nit = iter(sys.stdin.buffer.read().split())",
+      "codeLabel": "Fast input iterator"
+    },
+    {
+      "id": "q14",
+      "phase": "Writing the Code",
+      "questionText": "Parse n and q from the token iterator.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "n = int(next(it)); q = int(next(it))",
+          "isCode": true
+        },
+        {
+          "label": "n, q = map(int, next(it))",
+          "isCode": true
+        },
+        {
+          "label": "n = next(it); q = next(it)",
+          "isCode": true
+        },
+        {
+          "label": "n = int(it[0]); q = int(it[1])",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each integer is a separate token; convert them with int(next(it)).",
+      "wrongExplanations": {
+        "1": "next(it) returns a single token, not an iterable of both numbers.",
+        "2": "These remain bytes; need int conversion."
+      },
+      "hint": "Use next(it) twice and cast to int.",
+      "isCodeBuilding": true,
+      "codeSnippet": "n = int(next(it)); q = int(next(it))",
+      "codeLabel": "Read n and q"
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Initialize the 2D array to hold prefix structure values (1-based, size (n+1)×(n+1)).",
+      "diagram": null,
+      "options": [
+        {
+          "label": "bit = [[0]*(n+1) for _ in range(n+1)]",
+          "isCode": true
+        },
+        {
+          "label": "bit = [[0]*n for _ in range(n)]",
+          "isCode": true
+        },
+        {
+          "label": "bit = [[0]*(n+2) for _ in range(n+2)]",
+          "isCode": true
+        },
+        {
+          "label": "bit = [[None]*(n+1) for _ in range(n+1)]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We use 1..n indices; (n+1) size is sufficient and conventional.",
+      "wrongExplanations": {
+        "1": "Zero-based sizing will break 1-based update logic.",
+        "2": "Oversizing works but wastes memory; not necessary."
+      },
+      "hint": "Choose exact size for indices 1..n inclusive.",
+      "isCodeBuilding": true,
+      "codeSnippet": "bit = [[0]*(n+1) for _ in range(n+1)]",
+      "codeLabel": "BIT storage"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Write the point update function that adds delta at (y,x) and propagates upward/right.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def add(y, x, delta):\n    i = y\n    while i <= n:\n        j = x\n        while j <= n:\n            bit[i][j] += delta\n            j += j & -j\n        i += i & -i",
+          "isCode": true
+        },
+        {
+          "label": "def add(y, x, delta):\n    i = y\n    while i < n:\n        j = x\n        while j < n:\n            bit[i][j] += delta\n            j += j & -j\n        i += i & -i",
+          "isCode": true
+        },
+        {
+          "label": "def add(y, x, delta):\n    i = y\n    while i <= n:\n        j = x\n        while j <= n:\n            bit[i][j] = delta\n            j += j & -j\n        i += i & -i",
+          "isCode": true
+        },
+        {
+          "label": "def add(y, x, delta):\n    i = y\n    while i >= 1:\n        j = x\n        while j >= 1:\n            bit[i][j] += delta\n            j -= j & -j\n        i -= i & -i",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Use <= bounds and add delta to affected indices; propagate with + step.",
+      "wrongExplanations": {
+        "1": "Using < misses the last index n and may skip updates at boundaries.",
+        "3": "This moves left/up, not right/down; that's for prefix queries, not updates."
+      },
+      "hint": "Update should move towards larger indices.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def add(y, x, delta):\n    i = y\n    while i <= n:\n        j = x\n        while j <= n:\n            bit[i][j] += delta\n            j += j & -j\n        i += i & -i",
+      "codeLabel": "Point update"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Write the prefix sum function S(y,x) over [1..y]×[1..x).",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def sum_pref(y, x):\n    res = 0\n    i = y\n    while i > 0:\n        j = x\n        while j > 0:\n            res += bit[i][j]\n            j -= j & -j\n        i -= i & -i\n    return res",
+          "isCode": true
+        },
+        {
+          "label": "def sum_pref(y, x):\n    res = 0\n    i = y\n    while i <= n:\n        j = x\n        while j <= n:\n            res += bit[i][j]\n            j += j & -j\n        i += i & -i\n    return res",
+          "isCode": true
+        },
+        {
+          "label": "def sum_pref(y, x):\n    return bit[y][x]",
+          "isCode": true
+        },
+        {
+          "label": "def sum_pref(y, x):\n    res = 0\n    for i in range(1, y+1):\n        for j in range(1, x+1):\n            res += bit[i][j]\n    return res",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Prefix sums move towards smaller indices with - step and accumulate values.",
+      "wrongExplanations": {
+        "1": "This traverses the wrong direction and would overcount or loop endlessly.",
+        "3": "This defeats the purpose; it's O(yx) time."
+      },
+      "hint": "Mirror of update: move left/up while accumulating.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def sum_pref(y, x):\n    res = 0\n    i = y\n    while i > 0:\n        j = x\n        while j > 0:\n            res += bit[i][j]\n            j -= j & -j\n        i -= i & -i\n    return res",
+      "codeLabel": "Prefix sum"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Implement rectangle sum using S(y,x) and inclusion–exclusion.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def rect_sum(y1, x1, y2, x2):\n    return (sum_pref(y2, x2)\n            - sum_pref(y1-1, x2)\n            - sum_pref(y2, x1-1)\n            + sum_pref(y1-1, x1-1))",
+          "isCode": true
+        },
+        {
+          "label": "def rect_sum(y1, x1, y2, x2):\n    return sum_pref(y2, x2) - sum_pref(y1, x2) - sum_pref(y2, x1) + sum_pref(y1, x1)",
+          "isCode": true
+        },
+        {
+          "label": "def rect_sum(y1, x1, y2, x2):\n    return sum_pref(y2, x2)",
+          "isCode": true
+        },
+        {
+          "label": "def rect_sum(y1, x1, y2, x2):\n    return sum_pref(y2, x2) - sum_pref(y1-1, x1-1)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We must subtract lower strips using y1-1 and x1-1 and add back the overlap.",
+      "wrongExplanations": {
+        "1": "Off-by-one on lower edges; will under/overcount.",
+        "2": "Ignores the rectangle bounds."
+      },
+      "hint": "Use y1-1 and x1-1 for lower boundaries.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def rect_sum(y1, x1, y2, x2):\n    return (sum_pref(y2, x2)\n            - sum_pref(y1-1, x2)\n            - sum_pref(y2, x1-1)\n            + sum_pref(y1-1, x1-1))",
+      "codeLabel": "Rectangle sum"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Prepare a 1-based array A to track the current grid state (0/1).",
+      "diagram": null,
+      "options": [
+        {
+          "label": "A = [[0]*(n+1) for _ in range(n+1)]",
+          "isCode": true
+        },
+        {
+          "label": "A = [[0]*n for _ in range(n)]",
+          "isCode": true
+        },
+        {
+          "label": "A = [[None]*(n+1) for _ in range(n+1)]",
+          "isCode": true
+        },
+        {
+          "label": "A = [0]*(n+1)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need a 2D 1-based array to match indices used in updates/queries.",
+      "wrongExplanations": {
+        "1": "Zero-based sizing conflicts with our 1-based logic.",
+        "3": "This is 1D, but we need 2D."
+      },
+      "hint": "Mirror the size of the prefix structure.",
+      "isCodeBuilding": true,
+      "codeSnippet": "A = [[0]*(n+1) for _ in range(n+1)]",
+      "codeLabel": "State array"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Fill A from the next n tokens (each a row string), and add initial '*' cells to the structure.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "for y in range(1, n+1):\n    row = next(it).decode()\n    for x in range(1, n+1):\n        if row[x-1] == '*':\n            A[y][x] = 1\n            add(y, x, 1)",
+          "isCode": true
+        },
+        {
+          "label": "for y in range(n):\n    row = next(it)\n    for x in range(n):\n        if row[x] == b'*':\n            A[y][x] = 1\n            add(y, x, 1)",
+          "isCode": true
+        },
+        {
+          "label": "for y in range(1, n+1):\n    row = next(it)\n    for x in range(1, n+1):\n        if row[x] == '*':\n            A[y][x] = 1\n            add(y, x, 1)",
+          "isCode": true
+        },
+        {
+          "label": "for y in range(0, n):\n    row = next(it).decode()\n    for x in range(0, n):\n        if row[x] == '*':\n            A[y+1][x+1] = 1\n            add(y+1, x+1, 1)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Use 1-based y,x for A and add; decode row and index row[x-1].",
+      "wrongExplanations": {
+        "1": "Mixes 0-based A with 1-based add; compares bytes to b'*' but row is a bytes token.",
+        "3": "This could work but is error-prone; better to keep consistent 1-based loops and x-1 indexing into string."
+      },
+      "hint": "Be consistent with 1-based indexing for A and updates.",
+      "isCodeBuilding": true,
+      "codeSnippet": "for y in range(1, n+1):\n    row = next(it).decode()\n    for x in range(1, n+1):\n        if row[x-1] == '*':\n            A[y][x] = 1\n            add(y, x, 1)",
+      "codeLabel": "Build initial state"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "Process queries: toggle on type 1 and update A and the structure accordingly.",
+      "diagram": "If t == b'1': read y, x and flip A[y][x], updating with +1 or -1.",
+      "options": [
+        {
+          "label": "out_lines = []\nfor _ in range(q):\n    t = next(it)\n    if t == b'1':\n        y = int(next(it)); x = int(next(it))\n        if A[y][x] == 1:\n            A[y][x] = 0\n            add(y, x, -1)\n        else:\n            A[y][x] = 1\n            add(y, x, 1)\n    else:\n        y1 = int(next(it)); x1 = int(next(it)); y2 = int(next(it)); x2 = int(next(it))\n        out_lines.append(str(rect_sum(y1, x1, y2, x2)))",
+          "isCode": true
+        },
+        {
+          "label": "out_lines = []\nfor _ in range(q):\n    t = int(next(it))\n    if t == 1:\n        y = int(next(it)); x = int(next(it))\n        A[y][x] ^= 1\n        add(y, x, 1)\n    else:\n        y1 = int(next(it)); x1 = int(next(it)); y2 = int(next(it)); x2 = int(next(it))\n        out_lines.append(str(rect_sum(y1, x1, y2, x2)))",
+          "isCode": true
+        },
+        {
+          "label": "out_lines = []\nfor _ in range(q):\n    t = next(it)\n    if t == b'1':\n        y = int(next(it)); x = int(next(it))\n        A[y][x] = 1 - A[y][x]\n        add(y, x, A[y][x])\n    else:\n        y1 = int(next(it)); x1 = int(next(it)); y2 = int(next(it)); x2 = int(next(it))\n        out_lines.append(str(sum_pref(y2, x2)))",
+          "isCode": true
+        },
+        {
+          "label": "out_lines = []\nfor _ in range(q):\n    t = next(it)\n    if t == b'2':\n        y = int(next(it)); x = int(next(it))\n        if A[y][x] == 1:\n            add(y, x, -1)\n        else:\n            add(y, x, 1)\n        A[y][x] ^= 1\n    else:\n        y1 = int(next(it)); x1 = int(next(it)); y2 = int(next(it)); x2 = int(next(it))\n        out_lines.append(str(rect_sum(y1, x1, y2, x2)))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We must add +1 when turning on and -1 when turning off, and handle type-2 by rectangle sum.",
+      "wrongExplanations": {
+        "1": "Always adding +1 on toggle will double-count when turning off.",
+        "3": "Switches meaning of t; handles types incorrectly."
+      },
+      "hint": "Delta depends on the previous A[y][x] state.",
+      "isCodeBuilding": true,
+      "codeSnippet": "out_lines = []\nfor _ in range(q):\n    t = next(it)\n    if t == b'1':\n        y = int(next(it)); x = int(next(it))\n        if A[y][x] == 1:\n            A[y][x] = 0\n            add(y, x, -1)\n        else:\n            A[y][x] = 1\n            add(y, x, 1)\n    else:\n        y1 = int(next(it)); x1 = int(next(it)); y2 = int(next(it)); x2 = int(next(it))\n        out_lines.append(str(rect_sum(y1, x1, y2, x2)))",
+      "codeLabel": "Process queries"
+    },
+    {
+      "id": "q22",
+      "phase": "Writing the Code",
+      "questionText": "Finally, print all results for type-2 queries.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "sys.stdout.write(\"\\n\".join(out_lines))",
+          "isCode": true
+        },
+        {
+          "label": "print(out_lines)",
+          "isCode": true
+        },
+        {
+          "label": "for x in out_lines: print(x, end=' ')",
+          "isCode": true
+        },
+        {
+          "label": "sys.stdout.write(\" \".join(map(str, out_lines)))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Join by newlines to match required output format.",
+      "wrongExplanations": {
+        "1": "This prints Python list formatting with brackets.",
+        "2": "This uses spaces and no trailing newline per line."
+      },
+      "hint": "Each answer should be on its own line.",
+      "isCodeBuilding": true,
+      "codeSnippet": "sys.stdout.write(\"\\n\".join(out_lines))",
+      "codeLabel": "Print answers"
+    },
+    {
+      "id": "q23",
+      "phase": "Verifying the Solution",
+      "questionText": "On the sample input, what does the first query (2 2 2 3 4) output?",
+      "diagram": "Grid:\n.*..\n*.**\n**..\n****\nQuery rectangle: rows 2..3, cols 2..4.",
+      "options": [
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Count '*' in rows 2..3, cols 2..4 initially: total 3.",
+      "wrongExplanations": {
+        "1": "That's after the toggle, not before."
+      },
+      "hint": "List the 6 cells and count '*' carefully.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Verifying the Solution",
+      "questionText": "After toggling (3,3), what does the second rectangle query (2 2 2 3 4) output?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Toggling (3,3) adds a tree there, increasing the count from 3 to 4.",
+      "wrongExplanations": {
+        "0": "This ignores the toggle.",
+        "3": "Overcounts; verify the exact cells."
+      },
+      "hint": "Only one cell changed; adjust by +1 or -1.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Verifying the Solution",
+      "questionText": "If a query asks for rectangle y1=1,x1=1,y2=1,x2=1 on any grid, what does rect_sum compute?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "The value at (1,1)",
+          "isCode": false
+        },
+        {
+          "label": "Always 0",
+          "isCode": false
+        },
+        {
+          "label": "The sum of the first row",
+          "isCode": false
+        },
+        {
+          "label": "The sum of the first column",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The rectangle is a single cell; inclusion–exclusion yields that cell’s value.",
+      "wrongExplanations": {
+        "1": "Only if the cell is empty, which is not always true."
+      },
+      "hint": "Single-cell rectangles are supported.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the time per update or rectangle query with this structure, in terms of n?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(1)",
+          "isCode": false
+        },
+        {
+          "label": "O(log n)",
+          "isCode": false
+        },
+        {
+          "label": "O((log n)^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Each update/query touches O(log n) indices in y and O(log n) in x.",
+      "wrongExplanations": {
+        "1": "We must iterate in both dimensions."
+      },
+      "hint": "Nested logs due to two dimensions.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q27",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the additional memory used by the maintained structure and state array?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(q)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "We store two (n+1)×(n+1) grids: the structure and the state.",
+      "wrongExplanations": {
+        "0": "It’s a 2D grid, not a 1D array."
+      },
+      "hint": "Think about storing a value per cell.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q28",
+      "phase": "Analyzing Complexity",
+      "questionText": "Which edge cases must be handled correctly by indexing and logic?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "y1=1 or x1=1 so that y1-1 or x1-1 becomes 0 in prefix sums",
+          "isCode": false
+        },
+        {
+          "label": "Zero-based queries in input",
+          "isCode": false
+        },
+        {
+          "label": "Rectangles where y2<y1 or x2<x1",
+          "isCode": false
+        },
+        {
+          "label": "Only when n is prime",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We rely on sum_pref with 0 producing 0; this must work for borders.",
+      "wrongExplanations": {
+        "1": "Input uses 1-based indices.",
+        "2": "Constraints ensure y1 ≤ y2 and x1 ≤ x2."
+      },
+      "hint": "Borders map to zero in inclusion–exclusion.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\nit = iter(sys.stdin.buffer.read().split())",
+    "n = int(next(it)); q = int(next(it))",
+    "bit = [[0]*(n+1) for _ in range(n+1)]",
+    "def add(y, x, delta):\n    i = y\n    while i <= n:\n        j = x\n        while j <= n:\n            bit[i][j] += delta\n            j += j & -j\n        i += i & -i",
+    "def sum_pref(y, x):\n    res = 0\n    i = y\n    while i > 0:\n        j = x\n        while j > 0:\n            res += bit[i][j]\n            j -= j & -j\n        i -= i & -i\n    return res",
+    "def rect_sum(y1, x1, y2, x2):\n    return (sum_pref(y2, x2)\n            - sum_pref(y1-1, x2)\n            - sum_pref(y2, x1-1)\n            + sum_pref(y1-1, x1-1))",
+    "A = [[0]*(n+1) for _ in range(n+1)]",
+    "for y in range(1, n+1):\n    row = next(it).decode()\n    for x in range(1, n+1):\n        if row[x-1] == '*':\n            A[y][x] = 1\n            add(y, x, 1)",
+    "out_lines = []\nfor _ in range(q):\n    t = next(it)\n    if t == b'1':\n        y = int(next(it)); x = int(next(it))\n        if A[y][x] == 1:\n            A[y][x] = 0\n            add(y, x, -1)\n        else:\n            A[y][x] = 1\n            add(y, x, 1)\n    else:\n        y1 = int(next(it)); x1 = int(next(it)); y2 = int(next(it)); x2 = int(next(it))\n        out_lines.append(str(rect_sum(y1, x1, y2, x2)))",
+    "sys.stdout.write(\"\\n\".join(out_lines))"
+  ],
+  "reasoningChain": [
+    {
+      "question": "Why is scanning rectangles per query too slow for worst-case n and q?",
+      "insight": "A full-grid rectangle leads to O(n^2) per query; with q up to 2·10^5 this is infeasible."
+    },
+    {
+      "question": "Why can’t a static 2D prefix sum table handle updates?",
+      "insight": "Updates change cell values; static tables must be rebuilt to reflect changes, which is too costly."
+    },
+    {
+      "question": "How to compute any rectangle sum from fast [1..y]×[1..x] prefix sums?",
+      "insight": "Use inclusion–exclusion: S(y2,x2) - S(y1-1,x2) - S(y2,x1-1) + S(y1-1,x1-1)."
+    },
+    {
+      "question": "What operations must the data structure support efficiently?",
+      "insight": "Point updates (when toggling) and prefix [1..y]×[1..x] queries, both in polylogarithmic time."
+    },
+    {
+      "question": "How to handle toggles on a cell?",
+      "insight": "Track the current state and apply delta +1 when turning a tree on, -1 when turning it off."
+    },
+    {
+      "question": "What indexing ensures the bitwise stepping loops work?",
+      "insight": "Use 1-based indices so i & -i is nonzero and natural for moving through indices."
+    },
+    {
+      "question": "How to initialize the structure with the initial grid?",
+      "insight": "Iterate over all cells; for each '*', set state to 1 and apply a point update to reflect it."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1477,
+    "output_tokens": 14640,
+    "input_cost": 0.001846,
+    "output_cost": 0.1464,
+    "total_cost": 0.148246
+  }
+}

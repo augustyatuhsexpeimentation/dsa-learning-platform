@@ -1,0 +1,920 @@
+{
+  "id": "graph-paths-i-matrix-power",
+  "title": "Graph Paths I",
+  "difficulty": "intermediate",
+  "tags": [
+    "math",
+    "graphs"
+  ],
+  "estimatedMinutes": 60,
+  "language": "python",
+  "description": "Consider a directed graph with n nodes and m edges. Count the number of walks from node 1 to node n that use exactly k edges. Nodes are numbered 1..n. Multiple edges between the same nodes may exist. Print the answer modulo 10^9+7.\n\nInput:\n- First line: n m k\n- Next m lines: a b meaning an edge from a to b\n\nOutput:\n- One integer: number of walks of length exactly k from 1 to n, modulo 10^9+7.",
+  "examples": [
+    {
+      "input": "3 4 8\n1 2\n2 3\n3 1\n3 2",
+      "output": "2",
+      "explanation": "There are exactly two directed walks of length 8 from node 1 to node 3 in this graph; count is modulo 10^9+7."
+    }
+  ],
+  "constraints": [
+    "1 <= n <= 100",
+    "1 <= m <= n(n-1)",
+    "1 <= k <= 10^9",
+    "1 <= a,b <= n",
+    "Output modulo 1e9+7"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "Graph:\n1 -> 2\n2 -> 3\nHow many walks of exactly 2 edges from node 1 to node 3?",
+      "diagram": "1 -> 2 -> 3",
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Only 1->2->3 is possible, so exactly one walk.",
+      "wrongExplanations": {
+        "0": "There is a clear 2-edge walk 1->2->3.",
+        "2": "No alternative routes exist in this tiny graph."
+      },
+      "hint": "A walk is a sequence of edges obeying direction; nodes may repeat unless forbidden (not here).",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "Graph:\n1 <-> 2 (i.e., edges 1->2 and 2->1).\nHow many walks of exactly 2 edges from node 1 to node 1?",
+      "diagram": "1 -> 2 -> 1",
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "Depends on n",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Walk 1->2->1 exists and is unique here.",
+      "wrongExplanations": {
+        "0": "You can go 1->2 and back to 1.",
+        "2": "There aren’t two distinct 2-edge walks here."
+      },
+      "hint": "You can revisit nodes; only length matters.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "Graph with parallel edges:\n- Two edges 1->2\n- One edge 2->3\nHow many walks of exactly 2 edges from 1 to 3?",
+      "diagram": "1 ==>> 2 -> 3",
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "It’s undefined with parallel edges",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Two choices for the first hop (two 1->2 edges), then 2->3. Total 2.",
+      "wrongExplanations": {
+        "0": "Parallel edges count as distinct choices in walks.",
+        "2": "There isn’t any alternative after 2->3; only first hop multiplies choices."
+      },
+      "hint": "Each edge occurrence is a distinct option for the walk.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "Graph:\n1->2, 2->3, 3->2. How many walks of exactly 3 edges from 1 to 2?",
+      "diagram": "1 -> 2 -> 3 -> 2",
+      "options": [
+        {
+          "label": "0 (walks cannot repeat nodes)",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "1->2->3->2 is a valid 3-edge walk. Repeats are allowed, so answer is 1.",
+      "wrongExplanations": {
+        "0": "The problem doesn’t forbid revisiting nodes.",
+        "2": "There is only one route of length 3 ending at 2 in this graph."
+      },
+      "hint": "Trace all possible 3-edge sequences starting at 1 and ending at 2.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Exploring Approaches",
+      "questionText": "If you try to enumerate all walks of length k by expanding edges at each step, what is the worst-case number of walks to explore?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(m)",
+          "isCode": false
+        },
+        {
+          "label": "O(k * m)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^k)",
+          "isCode": false
+        },
+        {
+          "label": "O(k * n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Worst-case branching up to n at each step, so growth like n^k. That’s infeasible for large k.",
+      "wrongExplanations": {
+        "0": "This ignores k-length expansions.",
+        "1": "Multiplying by k and m is far too small; branching dominates."
+      },
+      "hint": "At each step, you may have up to n choices in a dense graph.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "Let A be the n×n matrix where A[i][j] is the number of edges from i to j. What does the entry (A×A)[i][j] represent?",
+      "diagram": "C = A×A, C[i][j] = sum over t of A[i][t]*A[t][j]",
+      "options": [
+        {
+          "label": "Number of walks from i to j using at most 2 edges",
+          "isCode": false
+        },
+        {
+          "label": "Number of walks from i to j using exactly 2 edges",
+          "isCode": false
+        },
+        {
+          "label": "1 if there exists a path from i to j",
+          "isCode": false
+        },
+        {
+          "label": "Length of the shortest path from i to j",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Each intermediate t contributes walks i->t and t->j; summing gives count of exactly-2-edge walks.",
+      "wrongExplanations": {
+        "0": "It’s exactly 2 edges, not up to 2.",
+        "2": "Entries count walks, not just existence."
+      },
+      "hint": "Each term A[i][t]*A[t][j] pairs a first edge sequence and a second.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "Given A as defined, which value equals the number of walks of exactly k edges from node 1 to node n?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "(A^k)[1][n]",
+          "isCode": false
+        },
+        {
+          "label": "Sum of row 1 in A^k",
+          "isCode": false
+        },
+        {
+          "label": "Sum of column n in A^k",
+          "isCode": false
+        },
+        {
+          "label": "(A^(k-1))[1][n]",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "By repeated multiplication, (A^k)[i][j] counts length-k walks from i to j, so pick (1,n).",
+      "wrongExplanations": {
+        "1": "Row 1 sum counts walks to all destinations, not just n.",
+        "3": "k edges are required, not k-1."
+      },
+      "hint": "Think: A gives 1-edge walks; multiplying k times composes k choices.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Building the Idea",
+      "questionText": "Directly multiplying A by itself k times is too slow. If we compute powers by squaring and combining as needed, how many matrix multiplications are required relative to k?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Proportional to k",
+          "isCode": false
+        },
+        {
+          "label": "Proportional to log2(k)",
+          "isCode": false
+        },
+        {
+          "label": "Proportional to n",
+          "isCode": false
+        },
+        {
+          "label": "Proportional to m",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Using repeated squaring and selecting powers needs O(log k) multiplications.",
+      "wrongExplanations": {
+        "0": "We avoid linear repetition by squaring.",
+        "2": "n doesn’t drive the count of power steps."
+      },
+      "hint": "Consider the number of bits in k.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "When building A^k by combining squared powers based on bits of k, what should the initial accumulator matrix be?",
+      "diagram": "acc starts as ?; for each bit set in k: acc = acc × current_power",
+      "options": [
+        {
+          "label": "Zero matrix",
+          "isCode": false
+        },
+        {
+          "label": "Identity matrix",
+          "isCode": false
+        },
+        {
+          "label": "A",
+          "isCode": false
+        },
+        {
+          "label": "All-ones matrix",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Identity is the neutral element for multiplication, so acc starts as I.",
+      "wrongExplanations": {
+        "0": "Zero would annihilate multiplication.",
+        "2": "Starting with A shifts the exponent handling and breaks k=0."
+      },
+      "hint": "Multiplying by it leaves other matrices unchanged.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "We must take results modulo 1,000,000,007. Where should we apply the modulo in matrix multiplication to be safe and fast?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Only once after computing the full A^k",
+          "isCode": false
+        },
+        {
+          "label": "After finishing each row of the product",
+          "isCode": false
+        },
+        {
+          "label": "After each addition of a product term inside the loops",
+          "isCode": false
+        },
+        {
+          "label": "Only after each multiplication (a*b), not after additions",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Reducing after each update keeps numbers small and correct. It’s standard to mod each accumulation.",
+      "wrongExplanations": {
+        "0": "Intermediate values can overflow and be slow.",
+        "3": "Additions can overflow too; mod both."
+      },
+      "hint": "Keep all intermediate entries bounded by the modulus.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "When reading edges, if the same edge a b appears multiple times, how should we update A[a][b]?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Set A[a][b] = 1",
+          "isCode": false
+        },
+        {
+          "label": "Increment: A[a][b] += 1 (modulo applied as needed)",
+          "isCode": false
+        },
+        {
+          "label": "Ignore duplicates",
+          "isCode": false
+        },
+        {
+          "label": "Set A[a][b] = max(A[a][b], 1)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Each duplicate edge adds another choice, so increment the count.",
+      "wrongExplanations": {
+        "0": "This loses multiplicity information.",
+        "2": "Duplicates matter for walk counts."
+      },
+      "hint": "Parallel edges multiply choices along a step.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "Nodes are labeled 1..n in input, but Python lists are 0-indexed. How should we map an input edge (a,b)?",
+      "diagram": "Input a,b in [1..n]",
+      "options": [
+        {
+          "label": "Use A[a][b] directly",
+          "isCode": false
+        },
+        {
+          "label": "Use A[a-1][b-1]",
+          "isCode": false
+        },
+        {
+          "label": "Use A[a-1][b]",
+          "isCode": false
+        },
+        {
+          "label": "Use A[a][b-1]",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Convert both endpoints from 1-based to 0-based: a-1 and b-1.",
+      "wrongExplanations": {
+        "0": "This will index out of bounds for a==n or b==n.",
+        "2": "Both ends must shift, not just one."
+      },
+      "hint": "Subtract 1 from both indices before using them.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "What should A^0 be for any square matrix A?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Zero matrix",
+          "isCode": false
+        },
+        {
+          "label": "Identity matrix",
+          "isCode": false
+        },
+        {
+          "label": "A",
+          "isCode": false
+        },
+        {
+          "label": "Not defined",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "By definition, A^0 is the identity. This also makes k=0 give 1 when start=end.",
+      "wrongExplanations": {
+        "0": "Zero breaks basic exponent rules.",
+        "3": "It is defined and useful."
+      },
+      "hint": "Think of exponents as repeated multiplication; what value leaves A unchanged?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Writing the Code",
+      "questionText": "Read input efficiently and set the modulus.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\nMOD = 10**9 + 7\ndata = list(map(int, sys.stdin.buffer.read().split()))\nit = iter(data)\nn = next(it); m = next(it); k = next(it)",
+          "isCode": true
+        },
+        {
+          "label": "MOD = 1e9 + 7\nn, m, k = map(int, input().split())\ndata = []",
+          "isCode": true
+        },
+        {
+          "label": "import sys\nMOD = 10**9 + 7\ns = sys.stdin.read().split('\\n')\nn, m, k = map(int, s[0].split())",
+          "isCode": true
+        },
+        {
+          "label": "from sys import stdin\nMOD = 10**9 + 7\ndata = stdin.read().split(); it = iter(data)\nn = int(next(it)); m = int(next(it)); k = next(it)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Reads all integers as ints and initializes MOD correctly. Others mix strings/floats or partial reads.",
+      "wrongExplanations": {
+        "1": "1e9+7 is a float; also leaves tokens unused.",
+        "3": "k remains a string; mixing types will break arithmetic."
+      },
+      "hint": "Use buffer and parse all ints at once for speed.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\n\nMOD = 10**9 + 7\n\ndata = list(map(int, sys.stdin.buffer.read().split()))\nit = iter(data)\nn = next(it); m = next(it); k = next(it)",
+      "codeLabel": "Read input and MOD"
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Initialize an n×n adjacency matrix A with zeros.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "A = [[0]*n for _ in range(n)]",
+          "isCode": true
+        },
+        {
+          "label": "A = [[0]*n]*n",
+          "isCode": true
+        },
+        {
+          "label": "A = [[0]*(n+1) for _ in range(n+1)]",
+          "isCode": true
+        },
+        {
+          "label": "A = [0]*n",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "List comprehension creates distinct rows of length n. The repeated-list form aliases rows.",
+      "wrongExplanations": {
+        "1": "All rows reference the same list; updates leak across rows.",
+        "3": "This is a 1D array, not a matrix."
+      },
+      "hint": "Avoid aliasing rows; each row must be independent.",
+      "isCodeBuilding": true,
+      "codeSnippet": "A = [[0]*n for _ in range(n)]",
+      "codeLabel": "Adjacency matrix"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Fill the adjacency matrix from m directed edges (1-based input). Handle parallel edges and modulo.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "for _ in range(m):\n    a = next(it); b = next(it)\n    A[a-1][b-1] = (A[a-1][b-1] + 1) % MOD",
+          "isCode": true
+        },
+        {
+          "label": "for _ in range(m):\n    a = next(it); b = next(it)\n    A[a-1][b-1] = 1",
+          "isCode": true
+        },
+        {
+          "label": "for _ in range(m):\n    a = next(it); b = next(it)\n    A[b-1][a-1] = (A[b-1][a-1] + 1) % MOD",
+          "isCode": true
+        },
+        {
+          "label": "for _ in range(m):\n    a = next(it); b = next(it)\n    A[a][b] = (A[a][b] + 1) % MOD",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Correctly maps 1-based to 0-based, increments for parallel edges, and applies modulo.",
+      "wrongExplanations": {
+        "1": "Overwrites counts; loses multiplicity.",
+        "2": "Reverses edge direction."
+      },
+      "hint": "Remember to subtract 1 from both a and b.",
+      "isCodeBuilding": true,
+      "codeSnippet": "for _ in range(m):\n    a = next(it); b = next(it)\n    A[a-1][b-1] = (A[a-1][b-1] + 1) % MOD",
+      "codeLabel": "Fill edges"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Implement matrix multiplication (n×n) under modulo efficiently (skip zeros).",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def mat_mul(X, Y):\n    n = len(X)\n    Z = [[0]*n for _ in range(n)]\n    for i in range(n):\n        Zi = Z[i]\n        Xi = X[i]\n        for k in range(n):\n            x = Xi[k]\n            if x:\n                Yk = Y[k]\n                for j in range(n):\n                    y = Yk[j]\n                    if y:\n                        Zi[j] = (Zi[j] + x * y) % MOD\n    return Z",
+          "isCode": true
+        },
+        {
+          "label": "def mat_mul(X, Y):\n    n = len(X)\n    Z = [[0]*n for _ in range(n)]\n    for i in range(n):\n        for j in range(n):\n            for k in range(n):\n                Z[i][j] += X[i][k] * Y[j][k]\n    return Z",
+          "isCode": true
+        },
+        {
+          "label": "def mat_mul(X, Y):\n    n = len(X)\n    Z = [[0]*n for _ in range(n)]\n    for i in range(n):\n        for k in range(n):\n            for j in range(n):\n                Z[i][j] = (Z[i][j] + X[i][k] * Y[k][j])\n    return Z",
+          "isCode": true
+        },
+        {
+          "label": "def mat_mul(X, Y):\n    n = len(X)\n    Z = [[0]*n for _ in range(n)]\n    for i in range(n):\n        for j in range(n):\n            Z[i][j] = sum(X[i][k] * Y[k][j] % MOD for k in range(n))\n    return Z",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Correct indices and modulo per update; skips zero contributions. Others mis-index or miss modulo.",
+      "wrongExplanations": {
+        "1": "Uses Y[j][k] instead of Y[k][j]; also no modulo.",
+        "3": "Applying % inside sum still leaves sum unmodded until the end and is slower."
+      },
+      "hint": "Z[i][j] += X[i][k] * Y[k][j], with modulo and some zero-skipping.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def mat_mul(X, Y):\n    n = len(X)\n    Z = [[0]*n for _ in range(n)]\n    for i in range(n):\n        Zi = Z[i]\n        Xi = X[i]\n        for k in range(n):\n            x = Xi[k]\n            if x:\n                Yk = Y[k]\n                for j in range(n):\n                    y = Yk[j]\n                    if y:\n                        Zi[j] = (Zi[j] + x * y) % MOD\n    return Z",
+      "codeLabel": "Matrix multiply"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Create an identity matrix of size n.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def identity(n):\n    I = [[0]*n for _ in range(n)]\n    for i in range(n):\n        I[i][i] = 1\n    return I",
+          "isCode": true
+        },
+        {
+          "label": "def identity(n):\n    return [[1]*n for _ in range(n)]",
+          "isCode": true
+        },
+        {
+          "label": "def identity(n):\n    I = [[0]*n for _ in range(n)]\n    for i in range(n):\n        I[0][i] = 1\n    return I",
+          "isCode": true
+        },
+        {
+          "label": "def identity(n):\n    I = [[0]*n for _ in range(n)]\n    return I",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Identity has ones on the diagonal and zeros elsewhere.",
+      "wrongExplanations": {
+        "1": "All-ones is not the multiplicative identity.",
+        "3": "All zeros would annihilate multiplication."
+      },
+      "hint": "I[i][i] should be 1 for all i.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def identity(n):\n    I = [[0]*n for _ in range(n)]\n    for i in range(n):\n        I[i][i] = 1\n    return I",
+      "codeLabel": "Identity matrix"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Implement fast powering of a matrix A to exponent e using the identity accumulator.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def mat_pow(A, e):\n    n = len(A)\n    R = identity(n)\n    B = A\n    while e > 0:\n        if e & 1:\n            R = mat_mul(R, B)\n        B = mat_mul(B, B)\n        e >>= 1\n    return R",
+          "isCode": true
+        },
+        {
+          "label": "def mat_pow(A, e):\n    n = len(A)\n    R = identity(n)\n    while e > 0:\n        R = mat_mul(R, A)\n        e -= 1\n    return R",
+          "isCode": true
+        },
+        {
+          "label": "def mat_pow(A, e):\n    n = len(A)\n    R = A\n    B = A\n    while e > 1:\n        if e & 1:\n            R = mat_mul(B, R)\n        B = mat_mul(B, B)\n        e >>= 1\n    return R",
+          "isCode": true
+        },
+        {
+          "label": "def mat_pow(A, e):\n    n = len(A)\n    R = identity(n)\n    B = A\n    while e > 0:\n        B = mat_mul(B, B)\n        if e & 1:\n            R = mat_mul(R, B)\n        e >>= 1\n    return R",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Accumulate when the lowest bit is 1, square each step, and shift e. Others perform linear loops or mis-order updates.",
+      "wrongExplanations": {
+        "1": "This takes O(e) multiplications; too slow for large k.",
+        "4": "Squaring before checking bits skips the current power for the least significant bit."
+      },
+      "hint": "Process bits from least significant to most: if bit set, multiply by current power.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def mat_pow(A, e):\n    n = len(A)\n    R = identity(n)\n    B = A\n    while e > 0:\n        if e & 1:\n            R = mat_mul(R, B)\n        B = mat_mul(B, B)\n        e >>= 1\n    return R",
+      "codeLabel": "Matrix power"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Compute A^k and print the number of walks from node 1 to node n.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Ak = mat_pow(A, k)\nprint(Ak[0][n-1] % MOD)",
+          "isCode": true
+        },
+        {
+          "label": "Ak = mat_pow(A, k)\nprint(Ak[n-1][0] % MOD)",
+          "isCode": true
+        },
+        {
+          "label": "print((A ** k)[0][n-1] % MOD)",
+          "isCode": true
+        },
+        {
+          "label": "Ak = mat_pow(A, k)\nprint(sum(Ak[0]) % MOD)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Entry (0, n-1) is walks from node 1 to node n (0-based indices).",
+      "wrongExplanations": {
+        "1": "This would give walks from node n to node 1.",
+        "3": "Row sum counts walks from 1 to all nodes, not just n."
+      },
+      "hint": "Start is index 0, end is index n-1.",
+      "isCodeBuilding": true,
+      "codeSnippet": "Ak = mat_pow(A, k)\nprint(Ak[0][n-1] % MOD)",
+      "codeLabel": "Compute and print"
+    },
+    {
+      "id": "q21",
+      "phase": "Verifying the Solution",
+      "questionText": "Check on a small cycle: edges 1->2, 2->3, 3->1. How many walks of exactly 3 edges from 1 to 1?",
+      "diagram": "1 -> 2 -> 3 -> 1",
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Only 1->2->3->1 using the directed cycle. So (A^3)[1][1] = 1.",
+      "wrongExplanations": {
+        "0": "There is a directed cycle completing in 3 steps.",
+        "3": "There aren’t extra edges to create more walks."
+      },
+      "hint": "There is exactly one choice at each step on this cycle.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q22",
+      "phase": "Verifying the Solution",
+      "questionText": "Graph: two edges 1->2 and a self-loop 2->2. How many walks of exactly 2 edges from 1 to 2?",
+      "diagram": "1 ==>> 2 ↺",
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Two choices for the first step (two 1->2 edges), then must take 2->2. Total 2.",
+      "wrongExplanations": {
+        "0": "Parallel first-step edges produce two distinct walks.",
+        "3": "No branching after reaching 2."
+      },
+      "hint": "Multiply choices along each step.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q23",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the time complexity of one n×n matrix multiplication as implemented?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^3)",
+          "isCode": false
+        },
+        {
+          "label": "O(m)",
+          "isCode": false
+        },
+        {
+          "label": "O(log n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Triple nested loops give O(n^3) in the worst case.",
+      "wrongExplanations": {
+        "0": "We traverse three indices (i,k,j).",
+        "2": "m counts edges; multiplication depends on n."
+      },
+      "hint": "Count nested loops in mat_mul.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Analyzing Complexity",
+      "questionText": "How many matrix multiplications are performed to compute A^k using the squaring-and-combining approach?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(k)",
+          "isCode": false
+        },
+        {
+          "label": "O(log k)",
+          "isCode": false
+        },
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(m log k)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "We square and occasionally multiply into the result based on bits, so O(log k).",
+      "wrongExplanations": {
+        "0": "Squaring avoids linear repetition.",
+        "3": "m doesn’t factor into the number of multiplications."
+      },
+      "hint": "Think in terms of the number of bits in k.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the space complexity of this approach?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^3)",
+          "isCode": false
+        },
+        {
+          "label": "O(m)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "We store a few n×n matrices (A, powers, result), so O(n^2).",
+      "wrongExplanations": {
+        "0": "Each matrix is 2D with n^2 entries.",
+        "3": "We don’t store edges individually; we store a dense matrix."
+      },
+      "hint": "Consider the size of the adjacency and result matrices.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\n\nMOD = 10**9 + 7\n\ndata = list(map(int, sys.stdin.buffer.read().split()))\nit = iter(data)\nn = next(it); m = next(it); k = next(it)",
+    "A = [[0]*n for _ in range(n)]",
+    "for _ in range(m):\n    a = next(it); b = next(it)\n    A[a-1][b-1] = (A[a-1][b-1] + 1) % MOD",
+    "def mat_mul(X, Y):\n    n = len(X)\n    Z = [[0]*n for _ in range(n)]\n    for i in range(n):\n        Zi = Z[i]\n        Xi = X[i]\n        for k in range(n):\n            x = Xi[k]\n            if x:\n                Yk = Y[k]\n                for j in range(n):\n                    y = Yk[j]\n                    if y:\n                        Zi[j] = (Zi[j] + x * y) % MOD\n    return Z",
+    "def identity(n):\n    I = [[0]*n for _ in range(n)]\n    for i in range(n):\n        I[i][i] = 1\n    return I",
+    "def mat_pow(A, e):\n    n = len(A)\n    R = identity(n)\n    B = A\n    while e > 0:\n        if e & 1:\n            R = mat_mul(R, B)\n        B = mat_mul(B, B)\n        e >>= 1\n    return R",
+    "Ak = mat_pow(A, k)\nprint(Ak[0][n-1] % MOD)"
+  ],
+  "reasoningChain": [
+    {
+      "question": "What exactly is being counted in the problem?",
+      "insight": "We count directed walks of length exactly k; revisiting nodes and edges is allowed, and parallel edges multiply choices."
+    },
+    {
+      "question": "How can we represent and combine 1-step transitions?",
+      "insight": "Use an adjacency matrix A where A[i][j] is the number of edges i->j; then A^k encodes counts of k-edge walks."
+    },
+    {
+      "question": "How do we make computation feasible for very large k?",
+      "insight": "Compute A^k by repeatedly squaring and multiplying selected powers according to the bits of k, needing O(log k) matrix multiplications."
+    },
+    {
+      "question": "What are the key elements of correct multiplication?",
+      "insight": "Perform Z[i][j] += X[i][k]*Y[k][j] with modulo after each update; optionally skip zeros to save work."
+    },
+    {
+      "question": "How do we initialize and index correctly?",
+      "insight": "Start with the identity matrix as the accumulator, and convert input indices from 1-based to 0-based; handle duplicate edges by incrementing counts."
+    },
+    {
+      "question": "What do we output after exponentiation?",
+      "insight": "The answer is the (0, n-1) entry of A^k (modulo 1e9+7), corresponding to walks from node 1 to node n."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1390,
+    "output_tokens": 14007,
+    "input_cost": 0.001737,
+    "output_cost": 0.14007,
+    "total_cost": 0.141808
+  }
+}

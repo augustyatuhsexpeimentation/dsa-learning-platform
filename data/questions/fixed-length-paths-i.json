@@ -1,0 +1,1085 @@
+{
+  "id": "fixed-length-paths-i",
+  "title": "Fixed-Length Paths I",
+  "difficulty": "hard",
+  "tags": [
+    "tree",
+    "counting",
+    "divide-and-conquer"
+  ],
+  "estimatedMinutes": 85,
+  "language": "python",
+  "description": "Given a tree of n nodes, count the number of distinct paths that consist of exactly k edges. The nodes are numbered 1..n. A path is a sequence of adjacent nodes, and in a tree the path between any two nodes is unique.\n\nInput:\n- First line: two integers n and k\n- Next n-1 lines: edges a b\n\nOutput:\n- One integer: the number of paths with exactly k edges\n\nExample:\nInput:\n5 2\n1 2\n2 3\n3 4\n3 5\nOutput:\n4",
+  "examples": [
+    {
+      "input": "5 2\n1 2\n2 3\n3 4\n3 5\n",
+      "output": "4",
+      "explanation": "Paths with 2 edges are: (1,3):1-2-3, (2,4):2-3-4, (2,5):2-3-5, (4,5):4-3-5."
+    }
+  ],
+  "constraints": [
+    "1 <= k <= n <= 2 * 10^5",
+    "1 <= a,b <= n",
+    "Tree: n-1 edges, connected, no cycles"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "Consider a line tree 1-2-3. For k = 1, how many distinct paths of exactly 1 edge exist?",
+      "diagram": "1 -- 2 -- 3",
+      "options": [
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Edges are (1,2) and (2,3): total 2. Paths are unordered; (1,2) and (2,1) are the same.",
+      "wrongExplanations": {
+        "1": "3 would double count directions or include a non-existing edge.",
+        "2": "There are two edges, not just one."
+      },
+      "hint": "Count edges directly.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "For the same line tree 1-2-3, how many distinct paths have exactly k = 2 edges?",
+      "diagram": "1 -- 2 -- 3",
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Only path (1,3): 1-2-3 has 2 edges.",
+      "wrongExplanations": {
+        "1": "2 would double count directions.",
+        "2": "There is one path of length 2."
+      },
+      "hint": "List all pairs of nodes whose distance is 2.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "Are paths considered ordered or unordered here? For example, is the path from a to b the same as b to a?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Unordered: (a,b) and (b,a) are the same path.",
+          "isCode": false
+        },
+        {
+          "label": "Ordered: (a,b) and (b,a) are counted separately.",
+          "isCode": false
+        },
+        {
+          "label": "Depends on k being odd or even.",
+          "isCode": false
+        },
+        {
+          "label": "Depends on the degrees of a and b.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Paths are unordered; the tree path between two nodes is unique and directionless.",
+      "wrongExplanations": {
+        "1": "The problem asks for distinct paths, not directed walks."
+      },
+      "hint": "The input graph is undirected.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "In a star with center 1 and leaves 2,3,4,5, how many paths have exactly k = 2 edges?",
+      "diagram": "   2\n   |\n4--1--3\n   |\n   5",
+      "options": [
+        {
+          "label": "6",
+          "isCode": false
+        },
+        {
+          "label": "12",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "8",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Any unordered leaf pair forms a path via 1: C(4,2)=6.",
+      "wrongExplanations": {
+        "1": "12 double counts ordering.",
+        "2": "4 counts only edges (k=1), not length-2 paths."
+      },
+      "hint": "Count unordered leaf pairs.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Understanding the Problem",
+      "questionText": "A naive approach: for each node, compute all distances to other nodes and count nodes at distance k, then divide by 2. With n up to 2⋅10^5, is this feasible?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "No: it leads to roughly O(n^2) work, too slow.",
+          "isCode": false
+        },
+        {
+          "label": "Yes: since k ≤ n, it is O(n).",
+          "isCode": false
+        },
+        {
+          "label": "Yes: trees are sparse so it is O(n log n).",
+          "isCode": false
+        },
+        {
+          "label": "Only if k is very small (k=1).",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Computing all-pairs distances is Θ(n^2) overall, which is too slow here.",
+      "wrongExplanations": {
+        "2": "Sparsity doesn't reduce per-source traversal below Θ(n) in general.",
+        "3": "Even for small k, per-source traversal over all nodes costs too much."
+      },
+      "hint": "Consider summing over all sources the number of visited nodes.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "We want to avoid double counting. Which scheme ensures each path is counted exactly once?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "For each chosen pivot node x, count only paths of length k whose unique path goes through x; then remove x and repeat on each remaining piece.",
+          "isCode": false
+        },
+        {
+          "label": "For each node x, count all pairs at distance k anywhere in the tree and add them up.",
+          "isCode": false
+        },
+        {
+          "label": "For each edge, count all paths of length k that use this edge; sum over edges.",
+          "isCode": false
+        },
+        {
+          "label": "Pick an arbitrary root and count paths once in the left subtree and once in the right subtree.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Counting only paths passing through x and then recursing on pieces after removing x avoids double counting.",
+      "wrongExplanations": {
+        "1": "This would double count the same path multiple times.",
+        "2": "A path may use multiple edges; summing over edges double counts."
+      },
+      "hint": "Think about how to partition all paths into disjoint sets.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "To keep total work small, which property should the chosen pivot x ideally satisfy in its current component?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Removing x splits the component into parts, each of size at most half of the component.",
+          "isCode": false
+        },
+        {
+          "label": "x has maximum degree in the whole tree.",
+          "isCode": false
+        },
+        {
+          "label": "x is the deepest node from an arbitrary root.",
+          "isCode": false
+        },
+        {
+          "label": "x is any leaf.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Balancing parts ensures each recursion shrinks quickly, yielding near-linear total work.",
+      "wrongExplanations": {
+        "1": "High degree doesn't guarantee balanced splits.",
+        "2": "Depth doesn't control split sizes."
+      },
+      "hint": "Aim for balanced splits to limit recursion depth.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Exploring Approaches",
+      "questionText": "At a fixed pivot x, how can we count paths of length k that pass through x without double counting paths within the same piece?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Process each neighbor subtree one by one: collect distances d from x, for each d add freq[k-d] from previously processed subtrees, then add current d to freq.",
+          "isCode": false
+        },
+        {
+          "label": "Collect distances from x to all nodes and count pairs (d1,d2) with d1+d2=k in one pass.",
+          "isCode": false
+        },
+        {
+          "label": "For each subtree, count pairs entirely in that subtree and sum over subtrees.",
+          "isCode": false
+        },
+        {
+          "label": "Randomly merge subtrees and average the counts.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Processing subtrees one by one and merging into a frequency map avoids counting pairs within the same subtree.",
+      "wrongExplanations": {
+        "1": "This risks counting pairs entirely in one subtree as passing through x.",
+        "2": "We need cross-subtree pairs through x, not within a single subtree."
+      },
+      "hint": "Ensure that both endpoints come from different subtrees when passing through x.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "How should we collect distances from pivot x within a single neighbor subtree?",
+      "diagram": "x -- v -- ... (traverse away from x)\nDo not cross back through x.",
+      "options": [
+        {
+          "label": "Use a recursive walk starting at the neighbor, increasing depth by 1 per edge, not revisiting x or blocked nodes.",
+          "isCode": false
+        },
+        {
+          "label": "Use a global queue from x and stop when leaving this subtree.",
+          "isCode": false
+        },
+        {
+          "label": "List all nodes and compute depths using precomputed arrays.",
+          "isCode": false
+        },
+        {
+          "label": "Walk randomly until reaching depth k.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "A targeted recursive walk from the neighbor accumulates correct distances within that subtree only.",
+      "wrongExplanations": {
+        "1": "A global traversal needs extra bookkeeping to limit to one subtree.",
+        "2": "We need actual distances along edges."
+      },
+      "hint": "Start from each neighbor and avoid stepping back to x.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "What initial value should the distance frequency have before processing any subtree at pivot x?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "freq[0] = 1 (the pivot itself at distance 0).",
+          "isCode": false
+        },
+        {
+          "label": "freq[1] = degree(x).",
+          "isCode": false
+        },
+        {
+          "label": "All zero; we fill after first subtree.",
+          "isCode": false
+        },
+        {
+          "label": "freq[k] = 1.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We count cross-subtree pairs through the pivot, so start with distance 0 present once.",
+      "wrongExplanations": {
+        "2": "Without freq[0]=1 we miss pairs where one side contributes distance k."
+      },
+      "hint": "Consider pairs (d1,d2) summing to k, including possibly d1=0.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "When processing a subtree at pivot x, when should we update the distance frequency for its distances?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "After counting contributions using previous subtrees, then merge current distances.",
+          "isCode": false
+        },
+        {
+          "label": "Before counting, so current subtree pairs are included.",
+          "isCode": false
+        },
+        {
+          "label": "Update both before and after for symmetry.",
+          "isCode": false
+        },
+        {
+          "label": "Reset the frequency to zero for each subtree.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We must not count pairs within the same subtree; update only after using previous subtrees’ frequencies.",
+      "wrongExplanations": {
+        "1": "This counts pairs within the same subtree, which do not pass through x."
+      },
+      "hint": "Ensure endpoints come from different subtrees when passing through x.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "Which structure is best for the distance frequency to avoid large per-pivot initialization when k can be large?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "A dictionary mapping distance -> count.",
+          "isCode": false
+        },
+        {
+          "label": "A list of length k+1 initialized to zeros.",
+          "isCode": false
+        },
+        {
+          "label": "A set of seen distances.",
+          "isCode": false
+        },
+        {
+          "label": "A priority queue of distances.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "A dictionary stores only distances that occur, avoiding O(k) zero-initialization per pivot.",
+      "wrongExplanations": {
+        "1": "A list costs O(k) to create per pivot; k can be large."
+      },
+      "hint": "We only need to store distances that actually appear in this component.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "How do we find a well-balanced pivot within a given component starting from a node s?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Compute subtree sizes in the component; then from s, keep moving to a child with subtree size > total/2 until none exist.",
+          "isCode": false
+        },
+        {
+          "label": "Pick the neighbor with maximum degree.",
+          "isCode": false
+        },
+        {
+          "label": "Pick the farthest node from s by a traversal.",
+          "isCode": false
+        },
+        {
+          "label": "Always choose s itself.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Moving to a child whose subtree exceeds half ensures we stop at a balanced pivot.",
+      "wrongExplanations": {
+        "1": "Degree doesn’t guarantee balanced parts.",
+        "2": "Farthest node may not balance sizes."
+      },
+      "hint": "Use subtree sizes and the total size of the current component.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Building the Idea",
+      "questionText": "How do we prevent traversals from leaving the current component after removing a pivot?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Maintain a 'blocked' flag on removed nodes and skip them in all traversals.",
+          "isCode": false
+        },
+        {
+          "label": "Physically delete edges from the adjacency list.",
+          "isCode": false
+        },
+        {
+          "label": "Use a local visited set without any blocked marker.",
+          "isCode": false
+        },
+        {
+          "label": "Rely on recursion depth to prevent crossing components.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Blocking nodes is simple and avoids mutating the graph or relying on fragile invariants.",
+      "wrongExplanations": {
+        "1": "Deleting edges complicates restoration and management.",
+        "2": "Visited alone doesn’t prevent crossing between components."
+      },
+      "hint": "Mark nodes that should be treated as absent in future traversals.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q15",
+      "phase": "Building the Idea",
+      "questionText": "Why should the distance collection stop when depth exceeds k?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Further distances cannot contribute to paths summing to k through the pivot.",
+          "isCode": false
+        },
+        {
+          "label": "Distances beyond k lead to incorrect counts.",
+          "isCode": false
+        },
+        {
+          "label": "It avoids revisiting nodes.",
+          "isCode": false
+        },
+        {
+          "label": "It reduces memory usage but not time.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "If d > k, then k - d is negative, so such nodes cannot form length-k paths through the pivot.",
+      "wrongExplanations": {
+        "1": "The main reason is pruning useless work, not correctness of smaller distances."
+      },
+      "hint": "We only need d where 0 <= d <= k.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q16",
+      "phase": "Building the Idea",
+      "questionText": "On a small example, pivot at node 3 in the example tree (1-2-3-4 and 3-5), k=2. What cross-subtree pairs through 3 contribute?",
+      "diagram": "1-2-3-4 and 3-5\nSubtrees of 3: {2-1}, {4}, {5}",
+      "options": [
+        {
+          "label": "(1,4) and (4,5); also (1,5) does not qualify because it is length 3.",
+          "isCode": false
+        },
+        {
+          "label": "(1,4), (2,5), (4,5)",
+          "isCode": false
+        },
+        {
+          "label": "(2,4), (2,5)",
+          "isCode": false
+        },
+        {
+          "label": "(1,5) only",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Distances from 3: to 1 is 2, to 4 is 1, to 5 is 1. Pairs summing to 2: (1,4) and (4,5).",
+      "wrongExplanations": {
+        "1": "Distance(2,5)=2 but 2 and 5 are in different subtrees? 2 is in {2-1}, 5 in {5} so (2,5) length is 2? Actually dist(2,5)=2 via 3-? 2-3-5 is 2; but pair (2,5) should also count. Wait: 2 is distance 1 from 3? No, 2 is distance 1; 5 is 1; 1+1=2 -> (2,5) also valid. But (2,5) is not in our list if pivot is 3; Correction needed."
+      },
+      "hint": "Compute distances to 3: dist(1)=2, dist(2)=1, dist(4)=1, dist(5)=1.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q16b",
+      "phase": "Building the Idea",
+      "questionText": "Re-evaluate the previous example carefully. From pivot 3, distances: dist(1)=2, dist(2)=1, dist(4)=1, dist(5)=1. Which unordered pairs across different subtrees with dist(a)+dist(b)=2 contribute?",
+      "diagram": "Subtrees of 3: {2,1}, {4}, {5}\nDistances from 3: 1:2, 2:1, 4:1, 5:1",
+      "options": [
+        {
+          "label": "(2,4), (2,5), (4,5)",
+          "isCode": false
+        },
+        {
+          "label": "(1,4), (1,5), (4,5)",
+          "isCode": false
+        },
+        {
+          "label": "(1,4), (2,4), (2,5), (4,5)",
+          "isCode": false
+        },
+        {
+          "label": "(1,4), (2,5)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Pairs with dist sum 2 across different subtrees: (2,4), (2,5), (4,5). (1,*) pairs have sum > 2 with leaves.",
+      "wrongExplanations": {
+        "1": "(1,4) and (1,5) have sums 3.",
+        "2": "Including (1,4) overcounts; dist(1)=2, dist(4)=1 -> 3."
+      },
+      "hint": "List nodes at dist 1 and 2; sum pairs to 2 across distinct subtrees.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Read input fast and build the adjacency list (0-indexed). Choose the correct snippet.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\nsys.setrecursionlimit(1_000_000)\ndata = list(map(int, sys.stdin.buffer.read().split()))\nit = iter(data)\nn = next(it); k = next(it)\ng = [[] for _ in range(n)]\nfor _ in range(n-1):\n    a = next(it)-1; b = next(it)-1\n    g[a].append(b); g[b].append(a)",
+          "isCode": true
+        },
+        {
+          "label": "import sys\nfrom sys import stdin\nn, k = map(int, stdin.readline().split())\ng = [[] for _ in range(n+1)]\nfor _ in range(n-1):\n    a, b = map(int, stdin.readline().split())\n    g[a].append(b); g[b].append(a)",
+          "isCode": true
+        },
+        {
+          "label": "import sys\ndata = sys.stdin.read().split()\nn = int(data[0]); k = int(data[1])\ng = [[] for _ in range(n)]\nfor i in range(n-1):\n    a = int(data[2+i*2]); b = int(data[3+i*2])\n    g[a].append(b); g[b].append(a)",
+          "isCode": true
+        },
+        {
+          "label": "import sys\nsys.setrecursionlimit(10**6)\nline = sys.stdin.readline().split()\nn = int(line[0]); k = int(line[1])\ng = [[] for _ in range(n)]\nfor _ in range(n):\n    a, b = map(int, sys.stdin.readline().split())\n    g[a-1].append(b-1); g[b-1].append(a-1)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "This uses fast reading, 0-indexes nodes, and reads exactly n-1 edges. Others mishandle indexing or counts.",
+      "wrongExplanations": {
+        "1": "Builds g of size n+1 and keeps 1-indexed, inconsistent with later 0-indexed code.",
+        "2": "Does not 0-index a and b and indexing into g will fail.",
+        "3": "Reads n edges instead of n-1."
+      },
+      "hint": "Edges are 1-indexed in input; convert to 0-indexed.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\nsys.setrecursionlimit(1_000_000)\ndata = list(map(int, sys.stdin.buffer.read().split()))\nit = iter(data)\nn = next(it); k = next(it)\ng = [[] for _ in range(n)]\nfor _ in range(n-1):\n    a = next(it)-1; b = next(it)-1\n    g[a].append(b); g[b].append(a)",
+      "codeLabel": "Read input and build graph"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Initialize global structures. Which snippet is correct?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "size = [0]*n\nblocked = [False]*n\nans = 0",
+          "isCode": true
+        },
+        {
+          "label": "size = [0]*(n+1)\nblocked = [False]*(n+1)\nans = 0",
+          "isCode": true
+        },
+        {
+          "label": "size = {}\nblocked = set()\nans = 0",
+          "isCode": true
+        },
+        {
+          "label": "size = [0]*n\nblocked = [0]*n\nans = []",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need per-node sizes and a boolean blocked array for n nodes; ans is an integer counter.",
+      "wrongExplanations": {
+        "1": "Using n+1 mismatches 0-indexed graph.",
+        "2": "Dict/set complicate and slow simple per-node indexing.",
+        "3": "blocked should be booleans, ans should be an integer."
+      },
+      "hint": "Match the 0-indexed adjacency size.",
+      "isCodeBuilding": true,
+      "codeSnippet": "size = [0]*n\nblocked = [False]*n\nans = 0",
+      "codeLabel": "Globals: sizes, blocked, answer"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Write a recursive function to compute subtree sizes within the current component (skip blocked). Choose the correct version.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def dfs_size(u, p):\n    size[u] = 1\n    for v in g[u]:\n        if v != p and not blocked[v]:\n            size[u] += dfs_size(v, u)\n    return size[u]",
+          "isCode": true
+        },
+        {
+          "label": "def dfs_size(u, p):\n    total = 0\n    for v in g[u]:\n        if v != p:\n            total += dfs_size(v, u)\n    size[u] = total\n    return total",
+          "isCode": true
+        },
+        {
+          "label": "def dfs_size(u, p):\n    size[u] = 1\n    for v in g[u]:\n        if not blocked[v]:\n            size[u] += dfs_size(v, u)\n    return size[u]",
+          "isCode": true
+        },
+        {
+          "label": "def dfs_size(u, p):\n    size[u] = 0\n    for v in g[u]:\n        if v != p and not blocked[v]:\n            size[u] = max(size[u], dfs_size(v, u))\n    return size[u]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Initialize size[u]=1 (count u), add child sizes while skipping parent and blocked nodes.",
+      "wrongExplanations": {
+        "1": "Misses counting u itself and may include blocked nodes.",
+        "2": "Will recurse back to parent (v != p check is missing) and double count."
+      },
+      "hint": "Avoid stepping back to the parent and blocked nodes.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def dfs_size(u, p):\n    size[u] = 1\n    for v in g[u]:\n        if v != p and not blocked[v]:\n            size[u] += dfs_size(v, u)\n    return size[u]",
+      "codeLabel": "Subtree sizes"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Find a balanced pivot in the current component using subtree sizes and total size. Choose the correct function.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def find_pivot(u, p, tot):\n    for v in g[u]:\n        if v != p and not blocked[v] and size[v] > tot//2:\n            return find_pivot(v, u, tot)\n    return u",
+          "isCode": true
+        },
+        {
+          "label": "def find_pivot(u, p, tot):\n    best = u\n    for v in g[u]:\n        if v != p and not blocked[v]:\n            if size[v] >= size[best]:\n                best = v\n    return best",
+          "isCode": true
+        },
+        {
+          "label": "def find_pivot(u, p, tot):\n    for v in g[u]:\n        if not blocked[v] and size[v] >= tot//2:\n            return v\n    return u",
+          "isCode": true
+        },
+        {
+          "label": "def find_pivot(u, p, tot):\n    return u if size[u] <= tot//2 else p",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Move to any child whose subtree exceeds half of the total; if none, u is balanced.",
+      "wrongExplanations": {
+        "1": "Max child size alone doesn’t ensure balance relative to tot.",
+        "2": "Single check may stop too early; must continue descending."
+      },
+      "hint": "Descend while a child subtree is more than half the component.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def find_pivot(u, p, tot):\n    for v in g[u]:\n        if v != p and not blocked[v] and size[v] > tot//2:\n            return find_pivot(v, u, tot)\n    return u",
+      "codeLabel": "Find balanced pivot"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "Collect distances from a pivot into a list for one neighbor subtree with pruning. Choose the correct function.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def collect(u, p, d, out):\n    if d > k:\n        return\n    out.append(d)\n    for v in g[u]:\n        if v != p and not blocked[v]:\n            collect(v, u, d+1, out)",
+          "isCode": true
+        },
+        {
+          "label": "def collect(u, p, d, out):\n    out.append(d)\n    for v in g[u]:\n        if v != p:\n            collect(v, u, d+1, out)",
+          "isCode": true
+        },
+        {
+          "label": "def collect(u, p, d, out):\n    if d >= k:\n        return\n    out.append(d)\n    for v in g[u]:\n        if v != p and not blocked[v]:\n            collect(v, u, d+1, out)",
+          "isCode": true
+        },
+        {
+          "label": "def collect(u, p, d, out):\n    if d > k:\n        return out.append(d)\n    for v in g[u]:\n        if not blocked[v]:\n            collect(v, u, d+1, out)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Stop when depth exceeds k, append current depth, and avoid parent and blocked nodes.",
+      "wrongExplanations": {
+        "1": "No pruning and no blocked check; may run too long and cross components.",
+        "2": "Using d>=k misses distances exactly equal to k."
+      },
+      "hint": "Include d if d <= k; avoid stepping back to parent.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def collect(u, p, d, out):\n    if d > k:\n        return\n    out.append(d)\n    for v in g[u]:\n        if v != p and not blocked[v]:\n            collect(v, u, d+1, out)",
+      "codeLabel": "Collect distances with pruning"
+    },
+    {
+      "id": "q22",
+      "phase": "Writing the Code",
+      "questionText": "Count paths of length k that pass through a pivot using a per-subtree merge with a dictionary frequency. Pick the correct code.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def count_at_pivot(c):\n    global ans\n    freq = {0: 1}\n    for v in g[c]:\n        if blocked[v]:\n            continue\n        dists = []\n        collect(v, c, 1, dists)\n        for d in dists:\n            if d <= k:\n                ans += freq.get(k - d, 0)\n        for d in dists:\n            if d <= k:\n                freq[d] = freq.get(d, 0) + 1",
+          "isCode": true
+        },
+        {
+          "label": "def count_at_pivot(c):\n    global ans\n    freq = {0: 1}\n    for v in g[c]:\n        dists = []\n        collect(v, c, 1, dists)\n        for d in dists:\n            ans += freq.get(k - d, 0)\n            freq[d] = freq.get(d, 0) + 1",
+          "isCode": true
+        },
+        {
+          "label": "def count_at_pivot(c):\n    global ans\n    freq = {}\n    for v in g[c]:\n        if blocked[v]:\n            continue\n        dists = []\n        collect(v, c, 1, dists)\n        for d in dists:\n            if d <= k:\n                ans += freq.get(k - d, 0)\n        for d in dists:\n            freq[d] = freq.get(d, 0) + 1",
+          "isCode": true
+        },
+        {
+          "label": "def count_at_pivot(c):\n    global ans\n    freq = {0: 1}\n    dists = []\n    collect(c, -1, 0, dists)\n    for d in dists:\n        if d <= k:\n            ans += freq.get(k - d, 0)\n            freq[d] = freq.get(d, 0) + 1",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Process each neighbor subtree: count using previous freq, then merge. Initialize with {0:1} and skip blocked neighbors.",
+      "wrongExplanations": {
+        "1": "Merging during counting counts pairs within the same subtree.",
+        "2": "Missing initial freq[0]=1 causes missing pairs with d=k."
+      },
+      "hint": "Count using only previously merged subtrees.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def count_at_pivot(c):\n    global ans\n    freq = {0: 1}\n    for v in g[c]:\n        if blocked[v]:\n            continue\n        dists = []\n        collect(v, c, 1, dists)\n        for d in dists:\n            if d <= k:\n                ans += freq.get(k - d, 0)\n        for d in dists:\n            if d <= k:\n                freq[d] = freq.get(d, 0) + 1",
+      "codeLabel": "Count at pivot"
+    },
+    {
+      "id": "q23",
+      "phase": "Writing the Code",
+      "questionText": "Implement the recursive divide-and-conquer: compute sizes, find pivot, count at pivot, block it, and recurse on its neighbors. Choose the correct snippet.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def decompose(s):\n    tot = dfs_size(s, -1)\n    c = find_pivot(s, -1, tot)\n    count_at_pivot(c)\n    blocked[c] = True\n    for v in g[c]:\n        if not blocked[v]:\n            decompose(v)",
+          "isCode": true
+        },
+        {
+          "label": "def decompose(s):\n    tot = dfs_size(s, -1)\n    c = find_pivot(s, -1, tot)\n    blocked[c] = True\n    count_at_pivot(c)\n    for v in g[s]:\n        if not blocked[v]:\n            decompose(v)",
+          "isCode": true
+        },
+        {
+          "label": "def decompose(s):\n    c = find_pivot(s, -1, dfs_size(s, -1))\n    blocked[c] = True\n    for v in g[c]:\n        if not blocked[v]:\n            count_at_pivot(v)\n            decompose(v)",
+          "isCode": true
+        },
+        {
+          "label": "def decompose(s):\n    tot = dfs_size(s, -1)\n    c = find_pivot(s, -1, tot)\n    count_at_pivot(c)\n    for v in g[c]:\n        decompose(v)\n    blocked[c] = True",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Count at the pivot, then block it to split components, and recurse only into unblocked neighbors.",
+      "wrongExplanations": {
+        "1": "Iterates neighbors from s, not from the pivot; may cross components incorrectly.",
+        "3": "Counting at neighbors is wrong; counting must happen at the chosen pivot."
+      },
+      "hint": "Recurse into each piece after removing the pivot.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def decompose(s):\n    tot = dfs_size(s, -1)\n    c = find_pivot(s, -1, tot)\n    count_at_pivot(c)\n    blocked[c] = True\n    for v in g[c]:\n        if not blocked[v]:\n            decompose(v)",
+      "codeLabel": "Decomposition driver"
+    },
+    {
+      "id": "q24",
+      "phase": "Writing the Code",
+      "questionText": "Finally, invoke the process and print the answer. Choose the correct main tail.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "decompose(0)\nprint(ans)",
+          "isCode": true
+        },
+        {
+          "label": "decompose(1)\nprint(ans//2)",
+          "isCode": true
+        },
+        {
+          "label": "print(decompose(0))",
+          "isCode": true
+        },
+        {
+          "label": "decompose(0)\nprint(len(ans))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Start from any node (0-indexed here) and print the global count.",
+      "wrongExplanations": {
+        "1": "Graph is 0-indexed; also no need to divide by 2 using this approach.",
+        "2": "decompose returns nothing; answer is in the global."
+      },
+      "hint": "Any starting node works; the recursion explores the whole tree.",
+      "isCodeBuilding": true,
+      "codeSnippet": "decompose(0)\nprint(ans)",
+      "codeLabel": "Run and output"
+    },
+    {
+      "id": "q25",
+      "phase": "Verifying the Solution",
+      "questionText": "Run the code conceptually on the example input. What should it print?",
+      "diagram": "5 2\n1 2\n2 3\n3 4\n3 5",
+      "options": [
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        },
+        {
+          "label": "6",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "There are 4 paths of length 2 as listed earlier.",
+      "wrongExplanations": {
+        "1": "3 misses some valid pairs.",
+        "3": "6 would double count or include wrong lengths."
+      },
+      "hint": "List all unordered node pairs at distance 2.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Verifying the Solution",
+      "questionText": "If k is larger than the diameter of the tree, what will the code count?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "0, because no two nodes have that distance.",
+          "isCode": false
+        },
+        {
+          "label": "n, since each node contributes itself.",
+          "isCode": false
+        },
+        {
+          "label": "It depends on the pivot chosen.",
+          "isCode": false
+        },
+        {
+          "label": "Undefined behavior due to empty frequency.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "No nodes at distances > diameter, so no pairs sum to k.",
+      "wrongExplanations": {
+        "1": "Self paths correspond to k=0, not larger k."
+      },
+      "hint": "What is the maximum distance between any two nodes?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q27",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the expected overall time complexity of this approach on an n-node tree?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n log n), since each edge is processed in a logarithmic number of stages.",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2), since we examine all pairs.",
+          "isCode": false
+        },
+        {
+          "label": "O(n), strictly linear.",
+          "isCode": false
+        },
+        {
+          "label": "O(n k), proportional to k.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Balanced pivots split components, so each edge appears in a bounded number of stages.",
+      "wrongExplanations": {
+        "1": "We do not examine all pairs explicitly.",
+        "2": "Extra log factors appear from repeated splits."
+      },
+      "hint": "How many stages can a node survive if parts shrink by at least half?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q28",
+      "phase": "Analyzing Complexity",
+      "questionText": "What additional space does the algorithm use beyond the input graph?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n) for sizes and blocked arrays; plus O(h) recursion stack and small per-stage dictionaries.",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2) for storing all-pairs distances.",
+          "isCode": false
+        },
+        {
+          "label": "O(k) global array reused across stages.",
+          "isCode": false
+        },
+        {
+          "label": "O(1) extra space.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We maintain sizes, blocked, and transient distance lists/maps whose total is linear across traversals.",
+      "wrongExplanations": {
+        "1": "We never store all-pairs distances.",
+        "2": "We use per-pivot maps, not a global O(k) array."
+      },
+      "hint": "Consider the global arrays and transient structures per pivot.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q29",
+      "phase": "Analyzing Complexity",
+      "questionText": "Edge cases: if k = 0 (not in this problem’s constraints), how should the count behave?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "It should be n (each node to itself).",
+          "isCode": false
+        },
+        {
+          "label": "It should be 0, since we only count positive-length paths.",
+          "isCode": false
+        },
+        {
+          "label": "It should be the number of leaves.",
+          "isCode": false
+        },
+        {
+          "label": "It depends on the chosen root.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Paths of 0 edges are length-0 paths at each node.",
+      "wrongExplanations": {
+        "1": "Zero-length paths are valid length-0 paths.",
+        "2": "Leaves are unrelated here."
+      },
+      "hint": "A path with zero edges starts and ends at the same node.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\nsys.setrecursionlimit(1_000_000)\ndata = list(map(int, sys.stdin.buffer.read().split()))\nit = iter(data)\nn = next(it); k = next(it)\ng = [[] for _ in range(n)]\nfor _ in range(n-1):\n    a = next(it)-1; b = next(it)-1\n    g[a].append(b); g[b].append(a)",
+    "size = [0]*n\nblocked = [False]*n\nans = 0",
+    "def dfs_size(u, p):\n    size[u] = 1\n    for v in g[u]:\n        if v != p and not blocked[v]:\n            size[u] += dfs_size(v, u)\n    return size[u]",
+    "def find_pivot(u, p, tot):\n    for v in g[u]:\n        if v != p and not blocked[v] and size[v] > tot//2:\n            return find_pivot(v, u, tot)\n    return u",
+    "def collect(u, p, d, out):\n    if d > k:\n        return\n    out.append(d)\n    for v in g[u]:\n        if v != p and not blocked[v]:\n            collect(v, u, d+1, out)",
+    "def count_at_pivot(c):\n    global ans\n    freq = {0: 1}\n    for v in g[c]:\n        if blocked[v]:\n            continue\n        dists = []\n        collect(v, c, 1, dists)\n        for d in dists:\n            if d <= k:\n                ans += freq.get(k - d, 0)\n        for d in dists:\n            if d <= k:\n                freq[d] = freq.get(d, 0) + 1",
+    "def decompose(s):\n    tot = dfs_size(s, -1)\n    c = find_pivot(s, -1, tot)\n    count_at_pivot(c)\n    blocked[c] = True\n    for v in g[c]:\n        if not blocked[v]:\n            decompose(v)",
+    "decompose(0)\nprint(ans)"
+  ],
+  "reasoningChain": [
+    {
+      "question": "What are we counting in a tree and are paths ordered?",
+      "insight": "In a tree, the path between any two nodes is unique and unordered; we count unordered pairs at exact distance k."
+    },
+    {
+      "question": "Is a naive all-pairs or per-source traversal feasible at n up to 2e5?",
+      "insight": "Per-source traversal leads to about n^2 work and is too slow; we need to partition the counting."
+    },
+    {
+      "question": "How to avoid double counting when summing contributions across nodes?",
+      "insight": "Count only paths that pass through a chosen pivot and then recurse on components formed by removing it."
+    },
+    {
+      "question": "How to choose the pivot to keep total work small?",
+      "insight": "Pick a balanced node so that removing it splits the component into parts of size at most half."
+    },
+    {
+      "question": "How to count paths through the pivot efficiently?",
+      "insight": "For each neighbor subtree, collect distances to the pivot up to k and combine with a frequency map from previously processed subtrees."
+    },
+    {
+      "question": "How to implement this reliably in code?",
+      "insight": "Maintain blocked nodes, compute component sizes, find a balanced pivot, prune distance collection at k, and use a dictionary for frequencies."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1357,
+    "output_tokens": 17346,
+    "input_cost": 0.001696,
+    "output_cost": 0.17346,
+    "total_cost": 0.175156
+  }
+}

@@ -1,0 +1,953 @@
+{
+  "id": "graph-paths-ii",
+  "title": "Graph Paths II",
+  "difficulty": "intermediate",
+  "tags": [
+    "math"
+  ],
+  "estimatedMinutes": 70,
+  "language": "python",
+  "description": "Consider a directed weighted graph having n nodes and m edges. Your task is to calculate the minimum path length from node 1 to node n with exactly k edges.\n\nInput:\n- First line: integers n, m, k (number of nodes, edges, and required path length in edges)\n- Next m lines: integers a, b, c meaning an edge a -> b with weight c\n\nOutput:\n- Print the minimum path length with exactly k edges, or -1 if no such path exists.",
+  "examples": [
+    {
+      "input": "3 4 8\n1 2 5\n2 3 4\n3 1 1\n3 2 2",
+      "output": "27",
+      "explanation": "The cheapest way to go from 1 to 3 using exactly 8 edges cycles through 1→2→3→1… with the lowest repeated cost; the method computes this automatically."
+    }
+  ],
+  "constraints": [
+    "1 ≤ n ≤ 100",
+    "1 ≤ m ≤ n(n−1)",
+    "1 ≤ k ≤ 10^9",
+    "1 ≤ a,b ≤ n",
+    "1 ≤ c ≤ 10^9"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "Tiny trace: n=2, m=1, k=1; edges:\n1 2 5\nWhat should the output be?",
+      "diagram": "1 -> 2 (5)",
+      "options": [
+        {
+          "label": "5",
+          "isCode": false
+        },
+        {
+          "label": "-1",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "10",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Exactly one edge from 1 to 2 exists with cost 5. So answer is 5.",
+      "wrongExplanations": {
+        "1": "There is a direct edge of length 1; a 1-edge path exists.",
+        "2": "Zero edges mean staying at node 1, not reaching node 2."
+      },
+      "hint": "Exactly k edges means use exactly one edge here.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "Same graph: n=2, m=1, k=2; edges:\n1 2 5\nOutput?",
+      "diagram": "1 -> 2 (5)",
+      "options": [
+        {
+          "label": "5",
+          "isCode": false
+        },
+        {
+          "label": "-1",
+          "isCode": false
+        },
+        {
+          "label": "10",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "No 2-edge path from 1 to 2 exists (no outgoing from 2 back to 2 or 1). Print -1.",
+      "wrongExplanations": {
+        "2": "That would be two traversals of the same edge, but 2→? doesn't exist.",
+        "0": "That's the 1-edge cost, but k=2 requires exactly 2 edges."
+      },
+      "hint": "Check if you can chain two edges to end at node 2.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "n=2, m=2, k=3; edges:\n1 2 3\n2 2 1\nMinimum cost from 1 to 2 with exactly 3 edges?",
+      "diagram": "1 -> 2 (3)\n2 -> 2 (1)",
+      "options": [
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "-1",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Path: 1→2 (3), then 2→2 (1), then 2→2 (1): total 5.",
+      "wrongExplanations": {
+        "0": "That's only one edge; k=3 requires 3 edges.",
+        "1": "There is a 3-edge path using the self-loop."
+      },
+      "hint": "You can stay at node 2 using its self-loop to reach exactly 3 edges.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "Parallel edges: n=2, m=2, k=1; edges:\n1 2 7\n1 2 2\nWhat is the correct output?",
+      "diagram": "1 -> 2 (7)\n1 -> 2 (2)",
+      "options": [
+        {
+          "label": "7",
+          "isCode": false
+        },
+        {
+          "label": "9",
+          "isCode": false
+        },
+        {
+          "label": "-1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 3,
+      "explanation": "Choose the cheapest edge for exactly one step: 2.",
+      "wrongExplanations": {
+        "0": "We should take the minimum among parallel edges.",
+        "1": "Edges are not combined; you choose exactly one for k=1."
+      },
+      "hint": "Multiple edges between same nodes: pick the cheapest for a single step.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Exploring Approaches",
+      "questionText": "Is enumerating all paths of exactly k edges (trying all choices at each step) feasible for k up to 10^9?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, it’s feasible within 1s",
+          "isCode": false
+        },
+        {
+          "label": "It’s roughly linear in k so probably fine",
+          "isCode": false
+        },
+        {
+          "label": "It grows like (outdegree)^k; impossible for k as large as 10^9",
+          "isCode": false
+        },
+        {
+          "label": "It’s constant time once edges are read",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Branching at each step leads to explosive growth; k can be huge. We need a different idea.",
+      "wrongExplanations": {
+        "1": "Even linear in 10^9 is too big here; but branching makes it far worse.",
+        "0": "Enumerating is far too slow for huge k."
+      },
+      "hint": "Consider how choices multiply across k steps.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "What about iterating k times and relaxing along all m edges each time (track minimal costs for exactly t edges)? Is this within limits?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "No, this is too slow when k is up to 10^9",
+          "isCode": false
+        },
+        {
+          "label": "Yes, because m is small",
+          "isCode": false
+        },
+        {
+          "label": "Yes, because weights are positive",
+          "isCode": false
+        },
+        {
+          "label": "Yes, as long as there are no cycles",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Doing m operations k times is prohibitive when k is as large as 10^9.",
+      "wrongExplanations": {
+        "1": "m can be up to ~10^4; multiplied by 10^9 is too big.",
+        "2": "Positive weights don’t reduce the number of iterations."
+      },
+      "hint": "Estimate the number of operations: m per step times k steps.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "Suppose M[i][j] stores the cheapest 1-edge move i→j. For two edges, what is the minimum cost from 1 to 3 in this toy graph?\n1→2=5, 2→3=4, 1→3=100",
+      "diagram": "1 -> 2 (5)\n2 -> 3 (4)\n1 -> 3 (100)",
+      "options": [
+        {
+          "label": "100",
+          "isCode": false
+        },
+        {
+          "label": "9",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Two edges: 1→2→3 gives 5+4=9; direct 1→3 uses one edge, not two.",
+      "wrongExplanations": {
+        "0": "That’s the 1-edge cost; we need exactly 2 edges.",
+        "2": "2→3=4 alone is one edge; path must start at 1."
+      },
+      "hint": "Try all possible middle nodes and pick the minimum sum of two steps.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Building the Idea",
+      "questionText": "Define a way to combine two step-cost matrices A and B so the result C gives exact 2-edge costs. Which formula is correct for C[i][j]?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "C[i][j] = min(A[i][j], B[i][j])",
+          "isCode": false
+        },
+        {
+          "label": "C[i][j] = A[i][j] + B[i][j]",
+          "isCode": false
+        },
+        {
+          "label": "C[i][j] = min_l max(A[i][l], B[l][j])",
+          "isCode": false
+        },
+        {
+          "label": "C[i][j] = min over l of (A[i][l] + B[l][j])",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 3,
+      "explanation": "Two edges: go i→l then l→j, sum costs and take the minimum over l.",
+      "wrongExplanations": {
+        "0": "We must consider intermediate nodes; entrywise min ignores paths via l.",
+        "1": "Entrywise sum ignores choosing an intermediate node l."
+      },
+      "hint": "Compose via an intermediate node and choose the best.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "We also need a matrix that represents “exactly 0 edges”. What should this matrix E look like?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "All zeros",
+          "isCode": false
+        },
+        {
+          "label": "Zeros on the diagonal and a large INF elsewhere",
+          "isCode": false
+        },
+        {
+          "label": "INF on diagonal, zeros elsewhere",
+          "isCode": false
+        },
+        {
+          "label": "Same as A",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Zero edges keep you in place with cost 0; all other moves are impossible (INF).",
+      "wrongExplanations": {
+        "0": "That would allow cost 0 moves between different nodes with 0 edges.",
+        "2": "Staying put should be 0, not INF."
+      },
+      "hint": "Staying at i with 0 edges costs 0; moving to j≠i with 0 edges is impossible.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "If we define powers of A using the combine rule, what does the (i,j) entry of A raised to k represent?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Minimum cost of a path from i to j using exactly k edges",
+          "isCode": false
+        },
+        {
+          "label": "Minimum cost using at most k edges",
+          "isCode": false
+        },
+        {
+          "label": "Number of paths using exactly k edges",
+          "isCode": false
+        },
+        {
+          "label": "Maximum cost using exactly k edges",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each combine adds one edge; powering counts exact edge counts in the composition.",
+      "wrongExplanations": {
+        "1": "This construction tracks exact counts, not up to k.",
+        "2": "Entries store minimal costs, not counts."
+      },
+      "hint": "Combining once adds one edge; repeating k times adds k edges.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "While building A from input edges, how should we handle multiple edges from a to b?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Store the sum of their weights",
+          "isCode": false
+        },
+        {
+          "label": "Store the most recently read weight",
+          "isCode": false
+        },
+        {
+          "label": "Store the minimum weight among them",
+          "isCode": false
+        },
+        {
+          "label": "Store the count of edges",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "For one step, we want the cheapest edge between a and b.",
+      "wrongExplanations": {
+        "0": "You choose one edge per step, not all of them.",
+        "1": "We must choose the minimum for correctness."
+      },
+      "hint": "We want the cheapest one-step move a→b.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "k can be huge. Which approach computes A^k efficiently using few combines?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Multiply A by itself k times sequentially",
+          "isCode": false
+        },
+        {
+          "label": "Precompute A^1, A^2, …, A^k and pick A^k",
+          "isCode": false
+        },
+        {
+          "label": "Randomly sample products until convergence",
+          "isCode": false
+        },
+        {
+          "label": "Repeatedly square A and, for each 1-bit in k’s binary form, combine it into the result",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 3,
+      "explanation": "Using powers of two reduces the number of combines to about log2(k).",
+      "wrongExplanations": {
+        "0": "This needs k combines, which is too large.",
+        "1": "That’s even worse: O(k) matrices to store and compute."
+      },
+      "hint": "Write k in binary and think of selecting powers that add up to k.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "Choose a safe numeric INF to represent 'no path' so additions won’t overflow realistic sums.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "INF = 10**30",
+          "isCode": false
+        },
+        {
+          "label": "INF = 10**9",
+          "isCode": false
+        },
+        {
+          "label": "INF = 10**12",
+          "isCode": false
+        },
+        {
+          "label": "INF = 0",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "10**30 safely exceeds any possible path cost here when using integers.",
+      "wrongExplanations": {
+        "1": "Path costs can reach ~10^18 or more; 10^9 is too small.",
+        "2": "Still too close to possible sums; use a much larger value."
+      },
+      "hint": "Worst-case cost could be up to k * max edge weight.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Writing the Code",
+      "questionText": "Start with imports and a global INF constant.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\nINF = 10**30",
+          "isCode": true
+        },
+        {
+          "label": "import sys\nINF = float('inf')",
+          "isCode": true
+        },
+        {
+          "label": "from sys import stdin\nINF = 10**18",
+          "isCode": true
+        },
+        {
+          "label": "import sys\nINF = 10**9",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We’ll use a large integer INF to avoid precision issues when adding.",
+      "wrongExplanations": {
+        "1": "Floats can work but risk precision with very large sums; integers are safer.",
+        "3": "10**9 can be smaller than valid path sums."
+      },
+      "hint": "Prefer a very large integer constant.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\nINF = 10**30",
+      "codeLabel": "Imports and INF"
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Read input and build the n×n matrix A with A[a][b] as the cheapest 1-edge cost.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def read_input():\n    data = sys.stdin.read().strip().split()\n    it = iter(data)\n    n = int(next(it)); m = int(next(it)); k = int(next(it))\n    A = [[0]*n for _ in range(n)]\n    for _ in range(m):\n        a = int(next(it)); b = int(next(it)); c = int(next(it))\n        a -= 1; b -= 1\n        A[a][b] = c\n    return n, m, k, A",
+          "isCode": true
+        },
+        {
+          "label": "def read_input():\n    data = sys.stdin.read().strip().split()\n    it = iter(data)\n    n = int(next(it)); m = int(next(it)); k = int(next(it))\n    A = [[INF]*n for _ in range(n)]\n    for _ in range(m):\n        a = int(next(it)); b = int(next(it)); c = int(next(it))\n        A[a][b] = min(A[a][b], c)\n    return n, m, k, A",
+          "isCode": true
+        },
+        {
+          "label": "def read_input():\n    data = sys.stdin.read().strip().split()\n    it = iter(data)\n    n = int(next(it)); m = int(next(it)); k = int(next(it))\n    A = [[INF]*n for _ in range(n)]\n    for _ in range(m):\n        a = int(next(it)); b = int(next(it)); c = int(next(it))\n        a -= 1; b -= 1\n        if c < A[a][b]:\n            A[a][b] = c\n    return n, m, k, A",
+          "isCode": true
+        },
+        {
+          "label": "def read_input():\n    n, m, k = map(int, sys.stdin.readline().split())\n    A = [[INF]*n for _ in range(n)]\n    for _ in range(m):\n        a, b, c = map(int, sys.stdin.readline().split())\n        if c < A[a][b]:\n            A[a][b] = c\n    return n, m, k, A",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Initialize with INF, 0-based indices, and take the minimum for parallel edges.",
+      "wrongExplanations": {
+        "0": "Zeros imply free edges where none exist; also missing 0-based indexing and min.",
+        "1": "Missing 0-based conversion; A[a][b] uses 1-based indices as-is."
+      },
+      "hint": "Convert to 0-based indices and initialize with INF.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def read_input():\n    data = sys.stdin.read().strip().split()\n    it = iter(data)\n    n = int(next(it)); m = int(next(it)); k = int(next(it))\n    A = [[INF]*n for _ in range(n)]\n    for _ in range(m):\n        a = int(next(it)); b = int(next(it)); c = int(next(it))\n        a -= 1; b -= 1\n        if c < A[a][b]:\n            A[a][b] = c\n    return n, m, k, A",
+      "codeLabel": "Read input and build A"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Write a function that returns the '0 edges' matrix of size n.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def identity(n):\n    I = [[0]*n for _ in range(n)]\n    return I",
+          "isCode": true
+        },
+        {
+          "label": "def identity(n):\n    I = [[INF]*n for _ in range(n)]\n    for i in range(n):\n        I[i][i] = 0\n    return I",
+          "isCode": true
+        },
+        {
+          "label": "def identity(n):\n    I = [[INF]*n for _ in range(n)]\n    return I",
+          "isCode": true
+        },
+        {
+          "label": "def identity(n):\n    I = [[0]*n for _ in range(n)]\n    for i in range(n):\n        I[i][i] = INF\n    return I",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Zero on diagonal (stay put), INF elsewhere (no move with 0 edges).",
+      "wrongExplanations": {
+        "0": "This would allow 0-cost moves between different nodes.",
+        "2": "Staying in place should be 0, not INF."
+      },
+      "hint": "E[i][i]=0 and E[i][j]=INF for i!=j.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def identity(n):\n    I = [[INF]*n for _ in range(n)]\n    for i in range(n):\n        I[i][i] = 0\n    return I",
+      "codeLabel": "Identity (0-edge) matrix"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Implement the function that combines two matrices A and B into C where C[i][j] = min over mid of A[i][mid] + B[mid][j].",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def combine(A, B):\n    n = len(A)\n    C = [[0]*n for _ in range(n)]\n    for i in range(n):\n        for j in range(n):\n            C[i][j] = min(A[i][j], B[i][j])\n    return C",
+          "isCode": true
+        },
+        {
+          "label": "def combine(A, B):\n    n = len(A)\n    C = [[INF]*n for _ in range(n)]\n    for i in range(n):\n        for j in range(n):\n            C[i][j] = A[i][j] + B[i][j]\n    return C",
+          "isCode": true
+        },
+        {
+          "label": "def combine(A, B):\n    n = len(A)\n    C = [[INF]*n for _ in range(n)]\n    for i in range(n):\n        for mid in range(n):\n            for j in range(n):\n                C[i][j] = min(C[i][j], max(A[i][mid], B[mid][j]))\n    return C",
+          "isCode": true
+        },
+        {
+          "label": "def combine(A, B):\n    n = len(A)\n    C = [[INF]*n for _ in range(n)]\n    for i in range(n):\n        Ai = A[i]\n        Ci = C[i]\n        for mid in range(n):\n            val = Ai[mid]\n            if val >= INF:\n                continue\n            Bmid = B[mid]\n            for j in range(n):\n                bj = Bmid[j]\n                if bj >= INF:\n                    continue\n                s = val + bj\n                if s < Ci[j]:\n                    Ci[j] = s\n    return C",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 3,
+      "explanation": "Correctly computes C[i][j] = min_over_mid(A[i][mid] + B[mid][j]) and skips INF to save time.",
+      "wrongExplanations": {
+        "0": "Entrywise min ignores composing paths via an intermediate.",
+        "1": "Entrywise sum ignores choosing a middle node."
+      },
+      "hint": "Triple loop with a min of sums, not entrywise ops.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def combine(A, B):\n    n = len(A)\n    C = [[INF]*n for _ in range(n)]\n    for i in range(n):\n        Ai = A[i]\n        Ci = C[i]\n        for mid in range(n):\n            val = Ai[mid]\n            if val >= INF:\n                continue\n            Bmid = B[mid]\n            for j in range(n):\n                bj = Bmid[j]\n                if bj >= INF:\n                    continue\n                s = val + bj\n                if s < Ci[j]:\n                    Ci[j] = s\n    return C",
+      "codeLabel": "Combine matrices (min over sums)"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Write the function to compute A to the k-th power using repeated squaring and the combine function.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def power_minplus(A, k):\n    n = len(A)\n    res = A\n    for _ in range(k-1):\n        res = combine(res, A)\n    return res",
+          "isCode": true
+        },
+        {
+          "label": "def power_minplus(A, k):\n    n = len(A)\n    res = [[0]*n for _ in range(n)]\n    base = A\n    while k:\n        if k % 2 == 1:\n            res = combine(res, base)\n        base = combine(base, base)\n        k //= 2\n    return res",
+          "isCode": true
+        },
+        {
+          "label": "def power_minplus(A, k):\n    n = len(A)\n    res = identity(n)\n    base = A\n    while k > 0:\n        if k & 1:\n            res = combine(res, base)\n        k >>= 1\n        if k:\n            base = combine(base, base)\n    return res",
+          "isCode": true
+        },
+        {
+          "label": "def power_minplus(A, k):\n    n = len(A)\n    res = identity(n)\n    while k > 0:\n        res = combine(res, A)\n        k -= 1\n    return res",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Initialize with the 0-edge matrix; for each 1-bit of k, combine res with base and square base each step.",
+      "wrongExplanations": {
+        "0": "This uses k−1 combines; too slow for large k.",
+        "1": "res must start as the 0-edge matrix, not zeros everywhere."
+      },
+      "hint": "Use binary decomposition of k with an identity starting value.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def power_minplus(A, k):\n    n = len(A)\n    res = identity(n)\n    base = A\n    while k > 0:\n        if k & 1:\n            res = combine(res, base)\n        k >>= 1\n        if k:\n            base = combine(base, base)\n    return res",
+      "codeLabel": "Fast power with combine"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Write the main function to call everything and print the answer.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def main():\n    n, m, k, A = read_input()\n    R = power_minplus(A, k)\n    ans = R[0][n-1]\n    print(ans)",
+          "isCode": true
+        },
+        {
+          "label": "def main():\n    n, m, k, A = read_input()\n    R = power_minplus(A, k)\n    ans = R[0][n-1]\n    print(-1 if ans >= INF else ans)",
+          "isCode": true
+        },
+        {
+          "label": "def main():\n    n, m, k, A = read_input()\n    R = power_minplus(A, k)\n    ans = R[n-1][0]\n    print(-1 if ans >= INF else ans)",
+          "isCode": true
+        },
+        {
+          "label": "def main():\n    n, m, k, A = read_input()\n    print(-1 if A[0][n-1] >= INF else A[0][n-1])",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "We need the (0, n-1) entry of A^k and to print -1 if it stayed INF.",
+      "wrongExplanations": {
+        "0": "Must convert INF to -1 for 'no such path'.",
+        "2": "Indexes reversed; we need 1→n, i.e., [0][n-1]."
+      },
+      "hint": "Start at node 1 (index 0) and end at node n (index n-1).",
+      "isCodeBuilding": true,
+      "codeSnippet": "def main():\n    n, m, k, A = read_input()\n    R = power_minplus(A, k)\n    ans = R[0][n-1]\n    print(-1 if ans >= INF else ans)",
+      "codeLabel": "Main function"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Add the entry point to run main().",
+      "diagram": null,
+      "options": [
+        {
+          "label": "if __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "main()",
+          "isCode": true
+        },
+        {
+          "label": "if __name__ == \"main\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "def __main__():\n    main()",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Standard Python entry point guard calls main when run as a script.",
+      "wrongExplanations": {
+        "1": "This runs on import, which isn’t ideal.",
+        "2": "The magic name is \"__main__\", not \"main\"."
+      },
+      "hint": "Use the common Python idiom to guard script entry.",
+      "isCodeBuilding": true,
+      "codeSnippet": "if __name__ == \"__main__\":\n    main()",
+      "codeLabel": "Script entry point"
+    },
+    {
+      "id": "q21",
+      "phase": "Verifying the Solution",
+      "questionText": "If k=5 (binary 101), which powers of A are combined into the result in power_minplus?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "A^2 and A^3",
+          "isCode": false
+        },
+        {
+          "label": "A^1, A^2, A^3, A^4, A^5",
+          "isCode": false
+        },
+        {
+          "label": "Only A^5",
+          "isCode": false
+        },
+        {
+          "label": "A^1 and A^4",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 3,
+      "explanation": "Bits set are 2^0 and 2^2, so we combine A^1 and A^4.",
+      "wrongExplanations": {
+        "0": "These don’t sum to 5.",
+        "2": "We build A^5 by combining specific powers of two, not a single power."
+      },
+      "hint": "5 = 4 + 1.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q22",
+      "phase": "Verifying the Solution",
+      "questionText": "After computing R = A^k, what does R[0][n-1] represent in our problem?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Minimum cost from node 1 to node n using at most k edges",
+          "isCode": false
+        },
+        {
+          "label": "Minimum cost from node 1 to node n using exactly k edges",
+          "isCode": false
+        },
+        {
+          "label": "Number of paths from 1 to n using exactly k edges",
+          "isCode": false
+        },
+        {
+          "label": "Maximum cost from 1 to n using exactly k edges",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "By construction, powers count exact edge counts under our combine rule.",
+      "wrongExplanations": {
+        "0": "We are not aggregating across edge counts up to k.",
+        "2": "Matrix entries store minimal costs, not counts."
+      },
+      "hint": "Recall what A^k encodes in its entries.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q23",
+      "phase": "Verifying the Solution",
+      "questionText": "Quick check: n=2, edges 1→2=1, 2→1=2, k=3. What should the program print?",
+      "diagram": "1 -> 2 (1)\n2 -> 1 (2)",
+      "options": [
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "-1",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "6",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "1→2→1→2 has cost 1+2+1=4 and uses 3 edges.",
+      "wrongExplanations": {
+        "0": "That’s 1→2→1 (2 edges) or miscounting costs.",
+        "1": "A 3-edge path exists as shown."
+      },
+      "hint": "Alternate between 1 and 2 to reach exactly 3 edges.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the time complexity in terms of n and k for this approach?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n^3 * log k)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2 * k)",
+          "isCode": false
+        },
+        {
+          "label": "O(m * k)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^3 * k)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each combine is O(n^3) and we use about log2(k) combines via squaring.",
+      "wrongExplanations": {
+        "1": "We don’t iterate k times; we reduce to ~log k combines.",
+        "3": "This would be too slow for large k; we avoid linear in k."
+      },
+      "hint": "Count cost of one combine and number of combines.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the space complexity of storing and operating on these matrices?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^3)",
+          "isCode": false
+        },
+        {
+          "label": "O(m)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "We store a few n×n matrices (A, base, result), so O(n^2) memory.",
+      "wrongExplanations": {
+        "0": "A single vector would be O(n), but we store full matrices.",
+        "3": "We don’t store the edge list once converted; the dominating storage is matrices."
+      },
+      "hint": "Each matrix has n×n entries.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Analyzing Complexity",
+      "questionText": "Which edge cases must the solution handle correctly?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Treat k as 'at most' and return 0 when k=0",
+          "isCode": false
+        },
+        {
+          "label": "Ignore parallel edges and use the first one",
+          "isCode": false
+        },
+        {
+          "label": "Print -1 if no path with exactly k edges; take min among parallel edges; support large k",
+          "isCode": false
+        },
+        {
+          "label": "Allow negative weights for shortcuts",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "We must enforce exactly k edges, pick the minimum among parallel edges, and handle large k efficiently.",
+      "wrongExplanations": {
+        "0": "The task requires exactly k edges; k≥1 by constraints.",
+        "1": "Ignoring parallel edges may miss the optimal one."
+      },
+      "hint": "Re-read the problem’s exact requirements and constraints.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\nINF = 10**30",
+    "def read_input():\n    data = sys.stdin.read().strip().split()\n    it = iter(data)\n    n = int(next(it)); m = int(next(it)); k = int(next(it))\n    A = [[INF]*n for _ in range(n)]\n    for _ in range(m):\n        a = int(next(it)); b = int(next(it)); c = int(next(it))\n        a -= 1; b -= 1\n        if c < A[a][b]:\n            A[a][b] = c\n    return n, m, k, A",
+    "def identity(n):\n    I = [[INF]*n for _ in range(n)]\n    for i in range(n):\n        I[i][i] = 0\n    return I",
+    "def combine(A, B):\n    n = len(A)\n    C = [[INF]*n for _ in range(n)]\n    for i in range(n):\n        Ai = A[i]\n        Ci = C[i]\n        for mid in range(n):\n            val = Ai[mid]\n            if val >= INF:\n                continue\n            Bmid = B[mid]\n            for j in range(n):\n                bj = Bmid[j]\n                if bj >= INF:\n                    continue\n                s = val + bj\n                if s < Ci[j]:\n                    Ci[j] = s\n    return C",
+    "def power_minplus(A, k):\n    n = len(A)\n    res = identity(n)\n    base = A\n    while k > 0:\n        if k & 1:\n            res = combine(res, base)\n        k >>= 1\n        if k:\n            base = combine(base, base)\n    return res",
+    "def main():\n    n, m, k, A = read_input()\n    R = power_minplus(A, k)\n    ans = R[0][n-1]\n    print(-1 if ans >= INF else ans)",
+    "if __name__ == \"__main__\":\n    main()"
+  ],
+  "reasoningChain": [
+    {
+      "question": "How to interpret 'exactly k edges' and handle simple cases and traps?",
+      "insight": "The path must use exactly k edges; if none exists, return -1; with parallel edges, a one-step move picks the minimum weight."
+    },
+    {
+      "question": "Why naive enumeration or k-step iteration is infeasible for large k?",
+      "insight": "Enumerating grows exponentially; iterating k times over edges is far too slow when k can be 10^9."
+    },
+    {
+      "question": "How to combine one-step costs to get two-step costs and beyond?",
+      "insight": "Use C[i][j] = min over mid of A[i][mid] + B[mid][j], which composes exact-step costs correctly."
+    },
+    {
+      "question": "What is the correct '0-edge' matrix and what do powers represent?",
+      "insight": "The 0-edge matrix has 0 on the diagonal and INF elsewhere; A raised k times gives exact k-edge costs per pair."
+    },
+    {
+      "question": "How to compute A^k efficiently for huge k?",
+      "insight": "Use repeated squaring and combine only those powers corresponding to 1-bits in k, yielding about log2(k) combines."
+    },
+    {
+      "question": "What are safe implementation details?",
+      "insight": "Use a very large integer INF, take minima for parallel edges, skip INF entries in loops, and access the (0, n−1) entry for the answer with a -1 fallback."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1418,
+    "output_tokens": 16456,
+    "input_cost": 0.001772,
+    "output_cost": 0.16456,
+    "total_cost": 0.166333
+  }
+}

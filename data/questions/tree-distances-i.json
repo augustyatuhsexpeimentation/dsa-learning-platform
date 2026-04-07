@@ -1,0 +1,883 @@
+{
+  "id": "tree-distances-i-guided",
+  "title": "Tree Distances I",
+  "difficulty": "hard",
+  "tags": [
+    "tree"
+  ],
+  "estimatedMinutes": 75,
+  "language": "python",
+  "description": "You are given a tree consisting of n nodes. Your task is to determine, for each node, the maximum distance to another node.\n\nInput:\n- First line: integer n (number of nodes). Nodes are numbered 1..n.\n- Next n-1 lines: two integers a b, indicating an edge between a and b.\n\nOutput:\n- Print n integers: for each node 1..n, the maximum distance to another node.\n\nDistance is measured as the number of edges on the unique simple path between nodes.",
+  "examples": [
+    {
+      "input": "5\n1 2\n1 3\n3 4\n3 5\n",
+      "output": "2 3 2 3 3",
+      "explanation": "The farthest nodes from 1..5 have distances: 1->2, 2->3, 3->2, 4->3, 5->3."
+    }
+  ],
+  "constraints": [
+    "1 ≤ n ≤ 2·10^5",
+    "1 ≤ a,b ≤ n",
+    "n-1 edges; the input graph is a tree"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "Consider the path tree 1–2–3. What is the maximum distance from node 2 to any other node?",
+      "diagram": "1 -- 2 -- 3",
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Node 2 is adjacent to both 1 and 3, each at distance 1. The maximum is 1.\nDistances: d(2,1)=1, d(2,3)=1.",
+      "wrongExplanations": {
+        "1": "2 would be the length from 1 to 3, not from 2.",
+        "0": "0 would mean node 2 is the only node."
+      },
+      "hint": "Distance is number of edges on the path.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "In a star with center 1 connected to 2, 3, 4, what is the maximum distance from leaf node 2?",
+      "diagram": "  2\n  |\n4-1-3",
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "It depends on which leaf you choose",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "From 2 to 3 (or 4) is 2 edges via 1. So the maximum is 2.",
+      "wrongExplanations": {
+        "0": "1 is the distance to the center only.",
+        "3": "All leaves are symmetric; the max is the same for any leaf."
+      },
+      "hint": "The path 2→1→3 has length 2.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "In a tree, how many simple paths exist between any two distinct nodes?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Exactly one",
+          "isCode": false
+        },
+        {
+          "label": "Zero unless they are in the same connected component",
+          "isCode": false
+        },
+        {
+          "label": "Multiple if there are cycles",
+          "isCode": false
+        },
+        {
+          "label": "It depends on the degrees of the nodes",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "A tree is connected and acyclic, so there is exactly one simple path between any two nodes.",
+      "wrongExplanations": {
+        "1": "A tree is connected; there is always a path.",
+        "2": "Trees have no cycles."
+      },
+      "hint": "Use the definition of a tree: connected and acyclic.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "Given the tree with edges: 1–2, 1–3, 3–4, 3–5, which nodes are farthest from node 2?",
+      "diagram": "2\n \\\n  1\n   \\\n    3\n   / \\\n  4   5",
+      "options": [
+        {
+          "label": "{4, 5}",
+          "isCode": false
+        },
+        {
+          "label": "{3, 5}",
+          "isCode": false
+        },
+        {
+          "label": "{4}",
+          "isCode": false
+        },
+        {
+          "label": "{4, 5, 1}",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "d(2,4)=3 and d(2,5)=3 are the maximum; other nodes are closer.",
+      "wrongExplanations": {
+        "1": "3 is at distance 2, less than distance to 4 or 5.",
+        "3": "1 is at distance 1; it's not farthest."
+      },
+      "hint": "Trace paths: 2→1→3→4 and 2→1→3→5.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Exploring Approaches",
+      "questionText": "A naive plan: for each node, explore the whole tree to compute distances to all other nodes, and take the maximum. If each full exploration visits all nodes and edges, what is the overall time complexity?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^3)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Doing a full traversal from each of n nodes costs ~O(n) each on a tree, totaling O(n^2).",
+      "wrongExplanations": {
+        "1": "There's no log factor in a full traversal.",
+        "2": "You would do n traversals, not just one."
+      },
+      "hint": "A tree has n−1 edges; a full traversal is linear.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "Let p and q be two nodes whose distance is the longest among all pairs in the tree. Which statement is true for any node x?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "The farthest node from x is either p or q.",
+          "isCode": false
+        },
+        {
+          "label": "The farthest node from x is always p.",
+          "isCode": false
+        },
+        {
+          "label": "The farthest node from x may differ, but max distance equals min(distance to p, distance to q).",
+          "isCode": false
+        },
+        {
+          "label": "Knowing p and q is not useful for distances from x.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Any farthest node lies on some longest path; its endpoints are p and q, so max distance is achieved by one of them.",
+      "wrongExplanations": {
+        "1": "x may be closer to p than q, but farthest could be q.",
+        "2": "We need the larger of the two distances, not the smaller."
+      },
+      "hint": "Consider where a farthest node must lie relative to the longest path.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "How can we find nodes p and q (the endpoints of a longest path) efficiently without checking all pairs?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Pick two nodes with the highest degrees.",
+          "isCode": false
+        },
+        {
+          "label": "Start at an arbitrary node, move to the nearest node; repeat.",
+          "isCode": false
+        },
+        {
+          "label": "Start from a leaf if known; otherwise, try all leaves.",
+          "isCode": false
+        },
+        {
+          "label": "Start from any node s, explore to find the farthest node a; then explore from a to find the farthest node b. Take p=a and q=b.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 3,
+      "explanation": "From an arbitrary start, the farthest reached node is an endpoint of a longest path; repeating from it finds the opposite endpoint.",
+      "wrongExplanations": {
+        "0": "High degree does not imply endpoints of the longest path.",
+        "1": "Moving to nearest nodes doesn't help find extremes."
+      },
+      "hint": "Think in terms of reaching extremes from an arbitrary node.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Building the Idea",
+      "questionText": "After exploring from a start node s and selecting the farthest node a found, what can we guarantee about a?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "a is an endpoint of some longest path in the tree.",
+          "isCode": false
+        },
+        {
+          "label": "a must be the center of the tree.",
+          "isCode": false
+        },
+        {
+          "label": "a is arbitrary; it tells nothing about longest paths.",
+          "isCode": false
+        },
+        {
+          "label": "a is a leaf only if s has degree 1.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "From any start, the farthest reachable node lies at an extreme; it's an endpoint of a longest path.",
+      "wrongExplanations": {
+        "1": "The farthest node is generally not the center.",
+        "2": "It specifically identifies an extreme, not arbitrary."
+      },
+      "hint": "Consider the longest simple path passing through s.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "Let a and b be the endpoints found by the two explorations. For any node x, what value should we output?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "min(distance(a, x), distance(b, x))",
+          "isCode": false
+        },
+        {
+          "label": "distance(a, x) + distance(b, x)",
+          "isCode": false
+        },
+        {
+          "label": "max(distance(a, x), distance(b, x))",
+          "isCode": false
+        },
+        {
+          "label": "distance(a, x) if degree(x) ≥ degree of neighbors, else distance(b, x)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "The farthest node from x is either a or b, so take the larger of the two distances.",
+      "wrongExplanations": {
+        "0": "The smaller distance underestimates the farthest distance.",
+        "1": "Sum does not represent distance to a single node."
+      },
+      "hint": "We need the farthest distance from x to any node.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "If n = 1 (single node with no edges), what is the correct output for that node?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "-1",
+          "isCode": false
+        },
+        {
+          "label": "It is undefined",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The only node has distance 0 to itself and no other nodes; the maximum distance to another node is 0.",
+      "wrongExplanations": {
+        "1": "There is no edge; no distance of 1 exists.",
+        "2": "Distances are non-negative."
+      },
+      "hint": "There are no other nodes to reach.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "For a path 1–2–3–4, suppose the endpoints found are a=1 and b=4. What is the output for node 3 using max(distance(a,3), distance(b,3))?",
+      "diagram": "1 -- 2 -- 3 -- 4",
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "distance(1,3)=2 and distance(4,3)=1; the maximum is 2.",
+      "wrongExplanations": {
+        "0": "0 would be distance to itself, not the farthest node.",
+        "2": "3 is the distance between 1 and 4, not from 3 to a single node."
+      },
+      "hint": "Count edges along the unique path.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Writing the Code",
+      "questionText": "Initialize imports and the main function, and read all input tokens efficiently.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\nfrom collections import deque\n\ndef main():\n    data = sys.stdin.read().strip().split()\n    if not data:\n        return\n    it = iter(data)",
+          "isCode": true
+        },
+        {
+          "label": "import sys\n\ndef main():\n    data = sys.stdin.readline().split()\n    if not data:\n        return\n    it = iter(data)",
+          "isCode": true
+        },
+        {
+          "label": "from collections import deque\n\ndef main():\n    data = sys.stdin.read()\n    it = data.split()",
+          "isCode": true
+        },
+        {
+          "label": "import deque\n\ndef main():\n    data = sys.stdin.read().split()\n    it = iter(data)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need sys and deque; read all tokens at once and create an iterator for next(it).",
+      "wrongExplanations": {
+        "1": "readline() reads only one line; edges are on multiple lines.",
+        "2": "it must be an iterator for next(it); a list won't work with next()."
+      },
+      "hint": "We'll use next(it) repeatedly to parse integers.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\nfrom collections import deque\n\ndef main():\n    data = sys.stdin.read().strip().split()\n    if not data:\n        return\n    it = iter(data)",
+      "codeLabel": "Imports and input reader"
+    },
+    {
+      "id": "q13",
+      "phase": "Writing the Code",
+      "questionText": "Read n and build an undirected adjacency list with 0-based indices.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    n = int(next(it))\n    adj = [[] for _ in range(n)]\n    for _ in range(n - 1):\n        a = int(next(it)) - 1\n        b = int(next(it)) - 1\n        adj[a].append(b)\n        adj[b].append(a)",
+          "isCode": true
+        },
+        {
+          "label": "    n = int(next(it))\n    adj = [[] for _ in range(n+1)]\n    for _ in range(n):\n        a = int(next(it))\n        b = int(next(it))\n        adj[a].append(b)\n        adj[b].append(a)",
+          "isCode": true
+        },
+        {
+          "label": "    n = int(next(it))\n    adj = [[] for _ in range(n)]\n    for _ in range(n - 1):\n        a = int(next(it)) - 1\n        b = int(next(it)) - 1\n        adj[a].append(b)",
+          "isCode": true
+        },
+        {
+          "label": "    n = int(next(it))\n    adj = [[] for _ in range(n)]\n    for _ in range(n - 1):\n        a = int(next(it))\n        b = int(next(it))\n        adj[a-1].append(b)\n        adj[b-1].append(a)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need 0-based indices and to append edges in both directions for an undirected tree.",
+      "wrongExplanations": {
+        "2": "This creates a directed adjacency; we need both directions.",
+        "1": "Adjacency size and edge count are off; also indices not converted to 0-based."
+      },
+      "hint": "Convert inputs to 0-based and add both adjacencies.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    n = int(next(it))\n    adj = [[] for _ in range(n)]\n    for _ in range(n - 1):\n        a = int(next(it)) - 1\n        b = int(next(it)) - 1\n        adj[a].append(b)\n        adj[b].append(a)",
+      "codeLabel": "Build adjacency"
+    },
+    {
+      "id": "q14",
+      "phase": "Writing the Code",
+      "questionText": "Define a helper to compute all distances from a start node and track the farthest node found (initialization part).",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    def distances_from(start):\n        dist = [-1] * n\n        dq = deque([start])\n        dist[start] = 0\n        far = start",
+          "isCode": true
+        },
+        {
+          "label": "    def distances_from(start):\n        dist = [0] * n\n        dq = deque([start])\n        far = -1",
+          "isCode": true
+        },
+        {
+          "label": "    def distances_from(start):\n        dist = [-1] * n\n        dq = deque([])\n        dist[start] = 0\n        far = start",
+          "isCode": true
+        },
+        {
+          "label": "    def distances_from(start):\n        dist = [float('inf')] * n\n        dq = deque([start])\n        dist[start] = 1\n        far = start",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Use -1 as unvisited, set start distance to 0, and initialize the queue with start and far=start.",
+      "wrongExplanations": {
+        "1": "0 can't mark unvisited since start has distance 0; also far=-1 is not a valid node.",
+        "2": "Queue must contain start initially to begin traversal."
+      },
+      "hint": "We will increase distances by +1 from neighbors.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    def distances_from(start):\n        dist = [-1] * n\n        dq = deque([start])\n        dist[start] = 0\n        far = start",
+      "codeLabel": "distances_from: init"
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Complete the traversal loop and return both the distances array and the farthest node.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "        while dq:\n            u = dq.popleft()\n            if dist[u] > dist[far]:\n                far = u\n            for v in adj[u]:\n                if dist[v] == -1:\n                    dist[v] = dist[u] + 1\n                    dq.append(v)\n        return dist, far",
+          "isCode": true
+        },
+        {
+          "label": "        while dq:\n            u = dq.popleft()\n            for v in adj[u]:\n                if dist[v] == 0:\n                    dist[v] = dist[u] + 1\n                    dq.append(v)\n        return far",
+          "isCode": true
+        },
+        {
+          "label": "        while dq:\n            u = dq.pop()\n            if dist[u] < dist[far]:\n                far = u\n            for v in adj[u]:\n                if dist[v] == -1:\n                    dist[v] = dist[u] + 1\n                    dq.appendleft(v)\n        return dist, far",
+          "isCode": true
+        },
+        {
+          "label": "        while dq:\n            u = dq.popleft()\n            for v in adj[u]:\n                if dist[v] == -1:\n                    dist[v] = 1\n                    dq.append(v)\n        return dist, far",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We process nodes in queue order, set neighbor distances as dist[u]+1, update far when a larger distance appears, and return both.",
+      "wrongExplanations": {
+        "1": "Using 0 as unvisited conflicts with the start node; also returns only far.",
+        "2": "Mixing pop/appendleft changes order; and far update uses the wrong comparison."
+      },
+      "hint": "Check for unvisited with -1 and increment distance by 1 along edges.",
+      "isCodeBuilding": true,
+      "codeSnippet": "        while dq:\n            u = dq.popleft()\n            if dist[u] > dist[far]:\n                far = u\n            for v in adj[u]:\n                if dist[v] == -1:\n                    dist[v] = dist[u] + 1\n                    dq.append(v)\n        return dist, far",
+      "codeLabel": "distances_from: traverse"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Find one extreme by exploring from an arbitrary node (use index 0 for node 1).",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    dist0, a = distances_from(0)",
+          "isCode": true
+        },
+        {
+          "label": "    dist0, a = distances_from(1)",
+          "isCode": true
+        },
+        {
+          "label": "    a, dist0 = distances_from(0)",
+          "isCode": true
+        },
+        {
+          "label": "    a = distances_from(0)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Internal indices are 0-based, so node 1 is index 0. The helper returns (dist, far).",
+      "wrongExplanations": {
+        "1": "Using 1 refers to node 2; we want an arbitrary valid start like 0.",
+        "2": "distances_from returns (dist, far) in that order."
+      },
+      "hint": "We'll use both the farthest node and distances only to get the farthest node.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    dist0, a = distances_from(0)",
+      "codeLabel": "First extreme"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Find the opposite extreme and both distance arrays from these extremes.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    dista, b = distances_from(a)\n    distb, _ = distances_from(b)",
+          "isCode": true
+        },
+        {
+          "label": "    dista, b = distances_from(0)\n    distb, _ = distances_from(b)",
+          "isCode": true
+        },
+        {
+          "label": "    b, dista = distances_from(a)\n    _, distb = distances_from(b)",
+          "isCode": true
+        },
+        {
+          "label": "    dista, b = distances_from(a)\n    distb, _ = distances_from(a)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Explore from a to get b and distances from a; then explore from b to get distances from b.",
+      "wrongExplanations": {
+        "1": "The second exploration must start from a, not 0 again.",
+        "3": "We need distances from b as well, not from a twice."
+      },
+      "hint": "Two explorations: from a, then from b.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    dista, b = distances_from(a)\n    distb, _ = distances_from(b)",
+      "codeLabel": "Second and third explorations"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Compute the result for all nodes and output them space-separated on one line.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    res = [str(max(dista[i], distb[i])) for i in range(n)]\n    sys.stdout.write(\" \".join(res))",
+          "isCode": true
+        },
+        {
+          "label": "    res = [str(dista[i] + distb[i]) for i in range(n)]\n    sys.stdout.write(\" \".join(res))",
+          "isCode": true
+        },
+        {
+          "label": "    res = [max(dista[i], distb[i]) for i in range(1, n+1)]\n    print(*res)",
+          "isCode": true
+        },
+        {
+          "label": "    res = [max(dista[i], distb[i]) for i in range(n)]\n    sys.stdout.write(\" \".join(res))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need the max of the two distances and to join strings; indices go from 0 to n-1.",
+      "wrongExplanations": {
+        "1": "Sum of distances does not represent the farthest distance to a single node.",
+        "2": "Indexing from 1..n goes out of range and skips index 0."
+      },
+      "hint": "Remember to convert numbers to strings before joining.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    res = [str(max(dista[i], distb[i])) for i in range(n)]\n    sys.stdout.write(\" \".join(res))",
+      "codeLabel": "Compute and print"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Add the usual entry point to run main().",
+      "diagram": null,
+      "options": [
+        {
+          "label": "if __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "if __name__ = \"__main__\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "if __name__ == '__main__':\n    main",
+          "isCode": true
+        },
+        {
+          "label": "main()",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Use the standard guard and call main().",
+      "wrongExplanations": {
+        "1": "Single '=' is assignment, not comparison.",
+        "2": "Referencing main without parentheses does not execute it."
+      },
+      "hint": "This allows safe importing without running main.",
+      "isCodeBuilding": true,
+      "codeSnippet": "if __name__ == \"__main__\":\n    main()",
+      "codeLabel": "Entry point"
+    },
+    {
+      "id": "q20",
+      "phase": "Verifying the Solution",
+      "questionText": "On the sample tree (edges: 1–2, 1–3, 3–4, 3–5), what is the output value for node 2?",
+      "diagram": "2\n \\\n  1\n   \\\n    3\n   / \\\n  4   5",
+      "options": [
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Node 2's farthest nodes are 4 and 5 at distance 3; thus output is 3.",
+      "wrongExplanations": {
+        "0": "2 is distance to node 3; there are farther nodes 4/5.",
+        "2": "1 is the distance to node 1 only."
+      },
+      "hint": "Trace 2→1→3→4.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q21",
+      "phase": "Verifying the Solution",
+      "questionText": "For a 2-node tree (edge: 1–2), what should the program output?",
+      "diagram": "1 -- 2",
+      "options": [
+        {
+          "label": "0 0",
+          "isCode": false
+        },
+        {
+          "label": "1 1",
+          "isCode": false
+        },
+        {
+          "label": "0 1",
+          "isCode": false
+        },
+        {
+          "label": "1 2",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Each node is at distance 1 from the other; outputs are 1 1.",
+      "wrongExplanations": {
+        "0": "0 would imply no edges.",
+        "2": "Distances are symmetric here."
+      },
+      "hint": "There is a single edge connecting both nodes.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q22",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the overall time complexity of this approach on a tree with n nodes?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(log n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Building the adjacency list is O(n), and each of the three full traversals is O(n); constants aside, total is O(n).",
+      "wrongExplanations": {
+        "1": "There is no sorting or logarithmic factor in a full traversal.",
+        "2": "We avoid the naive quadratic approach."
+      },
+      "hint": "Each node and edge is processed a constant number of times.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q23",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the additional space complexity (excluding input storage) for queues and distance arrays?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(1)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We store adjacency (O(n)), two distance arrays (O(n)), and a queue up to O(n) elements.",
+      "wrongExplanations": {
+        "1": "We need arrays of size n; not constant space."
+      },
+      "hint": "Consider dista, distb, and the queue.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Analyzing Complexity",
+      "questionText": "Why is it safer to avoid deep recursion when traversing the tree in Python for n up to 2·10^5?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Python's default recursion limit can be exceeded by long paths, causing a runtime error.",
+          "isCode": false
+        },
+        {
+          "label": "Recursion is always slower than iteration in any case.",
+          "isCode": false
+        },
+        {
+          "label": "Recursion uses more memory than iteration even for shallow trees.",
+          "isCode": false
+        },
+        {
+          "label": "Recursive traversal cannot compute distances correctly.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "A long path can be near n deep, which can exceed Python's recursion limit; using an explicit queue avoids this.",
+      "wrongExplanations": {
+        "1": "Performance alone isn't the main issue; depth is.",
+        "3": "Recursion can compute distances, but depth may be unsafe."
+      },
+      "hint": "Think about worst-case path length.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\nfrom collections import deque\n\ndef main():\n    data = sys.stdin.read().strip().split()\n    if not data:\n        return\n    it = iter(data)",
+    "    n = int(next(it))\n    adj = [[] for _ in range(n)]\n    for _ in range(n - 1):\n        a = int(next(it)) - 1\n        b = int(next(it)) - 1\n        adj[a].append(b)\n        adj[b].append(a)",
+    "    def distances_from(start):\n        dist = [-1] * n\n        dq = deque([start])\n        dist[start] = 0\n        far = start",
+    "        while dq:\n            u = dq.popleft()\n            if dist[u] > dist[far]:\n                far = u\n            for v in adj[u]:\n                if dist[v] == -1:\n                    dist[v] = dist[u] + 1\n                    dq.append(v)\n        return dist, far",
+    "    dist0, a = distances_from(0)",
+    "    dista, b = distances_from(a)\n    distb, _ = distances_from(b)",
+    "    res = [str(max(dista[i], distb[i])) for i in range(n)]\n    sys.stdout.write(\" \".join(res))",
+    "if __name__ == \"__main__\":\n    main()"
+  ],
+  "reasoningChain": [
+    {
+      "question": "What unique path property of trees helps define distances?",
+      "insight": "There is exactly one simple path between any two nodes, so distance is well-defined by counting edges on that path."
+    },
+    {
+      "question": "How can we reduce computing farthest distances for all nodes to considering just two special nodes?",
+      "insight": "If p and q are endpoints of a longest path, the farthest node from any node x is either p or q; thus we only need distances from p and q."
+    },
+    {
+      "question": "How do we find the two endpoints of a longest path without checking all pairs?",
+      "insight": "From any start node, the farthest reached node is an endpoint; starting from that endpoint, the farthest reached node is the opposite endpoint."
+    },
+    {
+      "question": "Given endpoints a and b, how to compute each node’s answer?",
+      "insight": "Compute distances from a and from b to all nodes; for each node x, output max(dist_a[x], dist_b[x])."
+    },
+    {
+      "question": "How to implement distance computation efficiently and safely in Python for large n?",
+      "insight": "Use an explicit queue-based traversal to compute distances iteratively, avoiding deep recursion and running in O(n)."
+    },
+    {
+      "question": "How to handle indexing and edge cases in code?",
+      "insight": "Convert inputs to 0-based indices, build undirected adjacency, handle n=1 gracefully, and print space-separated results."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1369,
+    "output_tokens": 14619,
+    "input_cost": 0.001711,
+    "output_cost": 0.14619,
+    "total_cost": 0.147901
+  }
+}

@@ -1,0 +1,969 @@
+{
+  "id": "dice-combinations-mcq-chain",
+  "title": "Dice Combinations",
+  "difficulty": "intermediate",
+  "tags": [
+    "dp"
+  ],
+  "estimatedMinutes": 45,
+  "language": "python",
+  "description": "Your task is to count the number of ways to construct sum n by throwing a dice one or more times. Each throw produces an outcome between 1 and 6. Print the number of ways modulo 10^9+7.\n\nFor example, if n=3, there are 4 ways:\n- 1+1+1\n- 1+2\n- 2+1\n- 3\n\nInput: A single integer n.\nOutput: The number of ways modulo 10^9+7.",
+  "examples": [
+    {
+      "input": "3",
+      "output": "4",
+      "explanation": "Sequences summing to 3: 1+1+1, 1+2, 2+1, 3."
+    }
+  ],
+  "constraints": [
+    "1 ≤ n ≤ 10^6",
+    "Answer modulo 1,000,000,007 (10^9+7)",
+    "Time limit: 1s",
+    "Memory limit: 512 MB"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "If n=1, how many sequences of dice outcomes sum to 1?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "6",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Only one sequence: 1.",
+      "wrongExplanations": {
+        "1": "There is one valid sequence (1).",
+        "2": "1 can’t be formed in two different ways with outcomes 1..6.",
+        "3": "6 is the number of faces, not the number of sequences summing to 1."
+      },
+      "hint": "List all sequences of 1..6 that sum to 1."
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "If n=2, how many sequences of dice outcomes sum to 2?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "6",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Sequences: 1+1 and 2.",
+      "wrongExplanations": {
+        "0": "You missed either 1+1 or 2.",
+        "2": "There are only two sequences: 1+1 and 2."
+      },
+      "hint": "List sequences using 1..6 that add to 2."
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "Are sequences 1+2 and 2+1 considered different for n=3?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, they are different sequences.",
+          "isCode": false
+        },
+        {
+          "label": "No, they are the same because they use the same numbers.",
+          "isCode": false
+        },
+        {
+          "label": "They are the same only if the dice is fair.",
+          "isCode": false
+        },
+        {
+          "label": "They are different only if multiple dice are rolled at once.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Order matters; different sequences are counted separately.",
+      "wrongExplanations": {
+        "1": "This would be true if order didn’t matter, but here order does.",
+        "2": "Fairness doesn’t affect whether order counts.",
+        "3": "We roll one die multiple times; order still matters."
+      },
+      "hint": "Check the example list for n=3."
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "Which list correctly includes all unique sequences that sum to 3?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "[1+1+1, 1+2, 2+1, 3]",
+          "isCode": false
+        },
+        {
+          "label": "[1+2, 2+1, 3]",
+          "isCode": false
+        },
+        {
+          "label": "[3, 2+1, 1+2, 1+1+1, 2+1+0]",
+          "isCode": false
+        },
+        {
+          "label": "[1+1+1, 3]",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "All four are valid sequences; no other sums to 3 with outcomes 1..6.",
+      "wrongExplanations": {
+        "1": "Missing 1+1+1.",
+        "2": "Includes an invalid 0 outcome.",
+        "3": "Missing sequences 1+2 and 2+1."
+      },
+      "hint": "Only outcomes 1..6 are allowed."
+    },
+    {
+      "id": "q5",
+      "phase": "Understanding the Problem",
+      "questionText": "For building up counts, we will consider sum 0 as a starting point. How many ways are there to reach sum 0 using zero throws?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "1 (the empty sequence)",
+          "isCode": false
+        },
+        {
+          "label": "0 (no throws are allowed by the problem)",
+          "isCode": false
+        },
+        {
+          "label": "Depends on n",
+          "isCode": false
+        },
+        {
+          "label": "6 (one for each face)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We treat the empty sequence as one way to reach 0; this is a useful base for building larger sums.",
+      "wrongExplanations": {
+        "1": "Even if input n≥1, the base for constructing sums uses the empty sequence.",
+        "3": "Faces don’t matter for sum 0; zero throws form the base."
+      },
+      "hint": "Think of it as the starting count before any throws."
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "Suppose we are computing the number of sequences for total i, and the last throw is 4. Which smaller count should we add?",
+      "diagram": "i  <--last throw 4--  i-4",
+      "options": [
+        {
+          "label": "The number of sequences for total i-4",
+          "isCode": false
+        },
+        {
+          "label": "The number of sequences for total i",
+          "isCode": false
+        },
+        {
+          "label": "The number of sequences for total 4",
+          "isCode": false
+        },
+        {
+          "label": "The number of sequences for total i-1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "If the last throw is 4, the previous total must be i-4; add ways(i-4).",
+      "wrongExplanations": {
+        "2": "ways(4) is unrelated unless i=8.",
+        "3": "i-1 corresponds to last throw 1, not 4."
+      },
+      "hint": "Remove the last 4 from the total."
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "Which recurrence correctly counts sequences for total i (i≥1)?",
+      "diagram": "ways(i) = ways(i-1) + ways(i-2) + ... + ways(i-6) for valid indices",
+      "options": [
+        {
+          "label": "ways(i) = sum of ways(i-k) for k in 1..6 where i-k ≥ 0",
+          "isCode": false
+        },
+        {
+          "label": "ways(i) = 6 * ways(i-1)",
+          "isCode": false
+        },
+        {
+          "label": "ways(i) = ways(i-1) + ways(i-2)",
+          "isCode": false
+        },
+        {
+          "label": "ways(i) = ways(i-6)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each last throw k∈{1..6} contributes ways(i-k) when i-k≥0.",
+      "wrongExplanations": {
+        "1": "Overcounts sequences by assuming 6 choices at each step regardless of sum.",
+        "2": "Only considers last throws 1 and 2; misses others.",
+        "3": "Only considers one last throw size."
+      },
+      "hint": "Consider all possible last throws 1..6."
+    },
+    {
+      "id": "q8",
+      "phase": "Exploring Approaches",
+      "questionText": "Is trying to enumerate all sequences feasible for n=50 within time limits?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "No, the number of sequences grows too fast to enumerate",
+          "isCode": false
+        },
+        {
+          "label": "Yes, because there are at most 6 throws",
+          "isCode": false
+        },
+        {
+          "label": "Yes, because n is small",
+          "isCode": false
+        },
+        {
+          "label": "It depends on the programming language",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The number grows exponentially; counting via smaller totals is needed.",
+      "wrongExplanations": {
+        "1": "There can be many throws; only the total sum is limited.",
+        "2": "n can be up to 1e6; even 50 is too large for enumeration."
+      },
+      "hint": "How many sequences exist of length up to ~n with 6 choices each?"
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "Using ways(0)=1 and the recurrence, what is ways(1)?",
+      "diagram": "ways(1) = ways(0)",
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "6",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "ways(1)=ways(0)=1 via last throw 1.",
+      "wrongExplanations": {
+        "1": "ways(0)=1 contributes via last throw 1.",
+        "2": "Only one last throw (1) fits to reach 1."
+      },
+      "hint": "Only k=1 is valid for sum 1."
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "Using the same recurrence, what is ways(2)?",
+      "diagram": "ways(2) = ways(1) + ways(0)",
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "ways(2)=ways(1)+ways(0)=1+1=2 (1+1 and 2).",
+      "wrongExplanations": {
+        "0": "You missed one of the sequences.",
+        "2": "There are only two sequences for 2."
+      },
+      "hint": "Valid last throws: 1 and 2."
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "Using the recurrence step-by-step, what is ways(5)?",
+      "diagram": "ways(5)=ways(4)+ways(3)+ways(2)+ways(1)+ways(0)",
+      "options": [
+        {
+          "label": "13",
+          "isCode": false
+        },
+        {
+          "label": "15",
+          "isCode": false
+        },
+        {
+          "label": "16",
+          "isCode": false
+        },
+        {
+          "label": "21",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "ways(1)=1, ways(2)=2, ways(3)=4, ways(4)=8 ⇒ sum=16.",
+      "wrongExplanations": {
+        "0": "This undercounts; check sum of ways(1..4) plus ways(0).",
+        "1": "Double-check ways(4)=8 and sum precisely."
+      },
+      "hint": "Use known values: 1,2,4,8."
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "How should we handle terms where i-k < 0 in the sum for ways(i)?",
+      "diagram": "Skip contributions for invalid indices",
+      "options": [
+        {
+          "label": "Ignore those terms (treat them as 0)",
+          "isCode": false
+        },
+        {
+          "label": "Treat them as 1",
+          "isCode": false
+        },
+        {
+          "label": "Use negative indexing to wrap around",
+          "isCode": false
+        },
+        {
+          "label": "Subtract those terms",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Only valid previous totals (i-k ≥ 0) contribute; others contribute 0.",
+      "wrongExplanations": {
+        "2": "Negative indices would reference unrelated values in Python.",
+        "1": "There is no reason to treat invalid predecessors as 1."
+      },
+      "hint": "We only add valid subproblems."
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "In what order should we compute the counts up to n so that each needed smaller total is already available?",
+      "diagram": "Compute 0,1,2,... sequentially",
+      "options": [
+        {
+          "label": "From 0 up to n (increasing order)",
+          "isCode": false
+        },
+        {
+          "label": "From n down to 0 (decreasing order)",
+          "isCode": false
+        },
+        {
+          "label": "Compute in random order",
+          "isCode": false
+        },
+        {
+          "label": "Only compute multiples of 6",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each ways(i) depends on smaller totals; fill in increasing order.",
+      "wrongExplanations": {
+        "1": "Then needed smaller totals wouldn’t be ready.",
+        "2": "You can’t rely on required values being computed."
+      },
+      "hint": "ways(i) depends on ways(i-1..i-6)."
+    },
+    {
+      "id": "q14",
+      "phase": "Building the Idea",
+      "questionText": "For each i≥1, how many previous totals can contribute to the sum for ways(i)?",
+      "diagram": "i-1, i-2, ..., i-6 (when ≥0)",
+      "options": [
+        {
+          "label": "Exactly 6 or fewer (up to 6)",
+          "isCode": false
+        },
+        {
+          "label": "Exactly i",
+          "isCode": false
+        },
+        {
+          "label": "Exactly 1",
+          "isCode": false
+        },
+        {
+          "label": "Exactly 3",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "At most six previous totals (i-1..i-6), skipping negatives.",
+      "wrongExplanations": {
+        "1": "We only consider last throws up to 6.",
+        "2": "Many last throws are possible, not just one."
+      },
+      "hint": "Dice outcomes are 1..6."
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Set the modulo constant to 10^9+7.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "MOD = 10**9 + 7",
+          "isCode": true
+        },
+        {
+          "label": "MOD = 1e9 + 7",
+          "isCode": true
+        },
+        {
+          "label": "MOD = 10**9 - 7",
+          "isCode": true
+        },
+        {
+          "label": "MOD = 1_000_000_006",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "10**9 + 7 exactly defines the required modulus as an integer.",
+      "wrongExplanations": {
+        "1": "1e9+7 is a float; modulus should be an integer.",
+        "2": "Minus 7 is a different modulus."
+      },
+      "hint": "Avoid floating-point values for modulo.",
+      "isCodeBuilding": true,
+      "codeSnippet": "MOD = 10**9 + 7",
+      "codeLabel": "Define MOD"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Read the integer n from standard input.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "n = int(input())",
+          "isCode": true
+        },
+        {
+          "label": "n = input()",
+          "isCode": true
+        },
+        {
+          "label": "n = int(sys.stdin.readline())  # without importing sys",
+          "isCode": true
+        },
+        {
+          "label": "n = float(input())",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need an integer n; input() then int(...) is sufficient.",
+      "wrongExplanations": {
+        "1": "This leaves n as a string.",
+        "2": "This would error without importing sys."
+      },
+      "hint": "Ensure the value is an int.",
+      "isCodeBuilding": true,
+      "codeSnippet": "n = int(input())",
+      "codeLabel": "Read input"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Initialize an array to store counts for all totals up to n.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "dp = [0] * (n + 1)",
+          "isCode": true
+        },
+        {
+          "label": "dp = [0] * n",
+          "isCode": true
+        },
+        {
+          "label": "dp = [1] * (n + 1)",
+          "isCode": true
+        },
+        {
+          "label": "dp = [None] * (n + 1)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need n+1 slots for indices 0..n, initialized to 0.",
+      "wrongExplanations": {
+        "1": "This lacks space for index n.",
+        "2": "Only dp[0] should start as 1; others start at 0."
+      },
+      "hint": "Index 0..n inclusive.",
+      "isCodeBuilding": true,
+      "codeSnippet": "dp = [0] * (n + 1)",
+      "codeLabel": "Init array"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Set the base count for total 0.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "dp[0] = 1",
+          "isCode": true
+        },
+        {
+          "label": "dp[0] = 0",
+          "isCode": true
+        },
+        {
+          "label": "dp[1] = 1",
+          "isCode": true
+        },
+        {
+          "label": "dp[-1] = 1",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Base: one way to have sum 0 (empty sequence).",
+      "wrongExplanations": {
+        "1": "This would make all counts 0.",
+        "2": "Base is for sum 0, not 1."
+      },
+      "hint": "Empty sequence for sum 0.",
+      "isCodeBuilding": true,
+      "codeSnippet": "dp[0] = 1",
+      "codeLabel": "Base case"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Write the outer loop to compute counts from 1 to n.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "for i in range(1, n + 1):",
+          "isCode": true
+        },
+        {
+          "label": "for i in range(1, n):",
+          "isCode": true
+        },
+        {
+          "label": "for i in range(n + 1):",
+          "isCode": true
+        },
+        {
+          "label": "for i in range(0, n):",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need to fill dp[1]..dp[n], inclusive.",
+      "wrongExplanations": {
+        "1": "This stops at n-1, missing dp[n].",
+        "2": "This includes i=0 redundantly and misses i=n if not careful."
+      },
+      "hint": "Inclusive range up to n.",
+      "isCodeBuilding": true,
+      "codeSnippet": "for i in range(1, n + 1):",
+      "codeLabel": "Outer loop"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Write the inner loop to try last throws from 1 to 6.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    for k in range(1, 7):",
+          "isCode": true
+        },
+        {
+          "label": "    for k in range(6):",
+          "isCode": true
+        },
+        {
+          "label": "    for k in range(1, 6):",
+          "isCode": true
+        },
+        {
+          "label": "    for k in [1,2,3,4,5]:",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "range(1,7) iterates 1..6 inclusive.",
+      "wrongExplanations": {
+        "1": "range(6) iterates 0..5; 0 is invalid and 6 is missed.",
+        "2": "range(1,6) excludes 6."
+      },
+      "hint": "Include 6 in the loop.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    for k in range(1, 7):",
+      "codeLabel": "Inner loop"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "Add a guard to skip invalid previous totals.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "        if i - k >= 0:",
+          "isCode": true
+        },
+        {
+          "label": "        if i - k > 0:",
+          "isCode": true
+        },
+        {
+          "label": "        if i >= k + 1:",
+          "isCode": true
+        },
+        {
+          "label": "        if k <= 6:",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We only add from dp[i-k] when i-k is a valid index (≥0).",
+      "wrongExplanations": {
+        "1": "This would skip the case i-k=0 which is needed.",
+        "3": "This condition is always true in the loop and doesn’t check indices."
+      },
+      "hint": "Allow i-k=0.",
+      "isCodeBuilding": true,
+      "codeSnippet": "        if i - k >= 0:",
+      "codeLabel": "Bounds check"
+    },
+    {
+      "id": "q22",
+      "phase": "Writing the Code",
+      "questionText": "Update dp[i] by adding contributions and keeping it within the modulus.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "            dp[i] = (dp[i] + dp[i - k]) % MOD",
+          "isCode": true
+        },
+        {
+          "label": "            dp[i] = dp[i] + dp[i - k] % MOD",
+          "isCode": true
+        },
+        {
+          "label": "            dp[i] = (dp[i - 1] + dp[i - k]) % MOD",
+          "isCode": true
+        },
+        {
+          "label": "            dp[i] += dp[i - k]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Add dp[i-k] to dp[i] and reduce modulo to control size.",
+      "wrongExplanations": {
+        "1": "Operator precedence applies % only to dp[i-k], not the sum.",
+        "3": "Without modulo, values can grow very large."
+      },
+      "hint": "Apply % to the entire sum.",
+      "isCodeBuilding": true,
+      "codeSnippet": "            dp[i] = (dp[i] + dp[i - k]) % MOD",
+      "codeLabel": "Accumulate"
+    },
+    {
+      "id": "q23",
+      "phase": "Writing the Code",
+      "questionText": "Print the final answer.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "print(dp[n] % MOD)",
+          "isCode": true
+        },
+        {
+          "label": "print(dp[n-1])",
+          "isCode": true
+        },
+        {
+          "label": "print(sum(dp) % MOD)",
+          "isCode": true
+        },
+        {
+          "label": "print(n % MOD)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need the number of sequences for total n, reduced modulo.",
+      "wrongExplanations": {
+        "1": "dp[n-1] is the count for total n-1.",
+        "2": "We don’t sum all entries; only dp[n] is needed."
+      },
+      "hint": "Use the result for total n.",
+      "isCodeBuilding": true,
+      "codeSnippet": "print(dp[n] % MOD)",
+      "codeLabel": "Output"
+    },
+    {
+      "id": "q24",
+      "phase": "Verifying the Solution",
+      "questionText": "If n=3, what value does the program print?",
+      "diagram": "dp[0]=1\n\ndp[1]=dp[0]=1\n\ndp[2]=dp[1]+dp[0]=1+1=2\n\ndp[3]=dp[2]+dp[1]+dp[0]=2+1+1=4",
+      "options": [
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "6",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "dp[3]=4 as in the example.",
+      "wrongExplanations": {
+        "1": "You missed one sequence.",
+        "2": "This overcounts; check contributions."
+      },
+      "hint": "List contributions from dp[2], dp[1], dp[0]."
+    },
+    {
+      "id": "q25",
+      "phase": "Verifying the Solution",
+      "questionText": "For n=7, what is dp[7]?",
+      "diagram": "dp[1]=1, dp[2]=2, dp[3]=4, dp[4]=8, dp[5]=16, dp[6]=32\n\ndp[7]=dp[6]+dp[5]+dp[4]+dp[3]+dp[2]+dp[1]",
+      "options": [
+        {
+          "label": "63",
+          "isCode": false
+        },
+        {
+          "label": "64",
+          "isCode": false
+        },
+        {
+          "label": "32",
+          "isCode": false
+        },
+        {
+          "label": "48",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Sum: 32+16+8+4+2+1=63.",
+      "wrongExplanations": {
+        "1": "64 would be 2^6, but we sum specific previous values.",
+        "2": "That’s dp[6], not dp[7]."
+      },
+      "hint": "Add dp[1]..dp[6] as shown."
+    },
+    {
+      "id": "q26",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the time complexity of this approach in terms of n?",
+      "diagram": "Two nested loops: i = 1..n, k = 1..6",
+      "options": [
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(6^n)",
+          "isCode": false
+        },
+        {
+          "label": "O(log n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each i does a constant (up to 6) amount of work.",
+      "wrongExplanations": {
+        "1": "Inner loop is constant, not proportional to i.",
+        "3": "We don’t divide the range."
+      },
+      "hint": "How many iterations run for each i?"
+    },
+    {
+      "id": "q27",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the space complexity of the implemented approach?",
+      "diagram": "Array dp of size n+1",
+      "options": [
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(1)",
+          "isCode": false
+        },
+        {
+          "label": "O(log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We store dp[0..n], which is linear in n.",
+      "wrongExplanations": {
+        "1": "We could optimize to a small window, but this implementation uses an array.",
+        "3": "We don’t store a matrix."
+      },
+      "hint": "How many entries in dp?"
+    },
+    {
+      "id": "q28",
+      "phase": "Analyzing Complexity",
+      "questionText": "Which edge-case handling is necessary for correctness here?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Set dp[0]=1 and skip contributions where i-k<0",
+          "isCode": false
+        },
+        {
+          "label": "Allow outcomes of 0 to handle sum 0",
+          "isCode": false
+        },
+        {
+          "label": "Special-case all n<6 values manually",
+          "isCode": false
+        },
+        {
+          "label": "Use floating-point arithmetic for large numbers",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "These ensure valid base and avoid invalid indices; others are unnecessary or incorrect.",
+      "wrongExplanations": {
+        "1": "Outcomes are 1..6; 0 is invalid.",
+        "2": "The recurrence already handles n<6 correctly."
+      },
+      "hint": "Think about base and invalid indices."
+    }
+  ],
+  "finalCodeSnippets": [
+    "MOD = 10**9 + 7",
+    "n = int(input())",
+    "dp = [0] * (n + 1)",
+    "dp[0] = 1",
+    "for i in range(1, n + 1):",
+    "    for k in range(1, 7):",
+    "        if i - k >= 0:",
+    "            dp[i] = (dp[i] + dp[i - k]) % MOD",
+    "print(dp[n] % MOD)"
+  ],
+  "reasoningChain": [
+    {
+      "question": "Are 1+2 and 2+1 different sequences for the same total?",
+      "insight": "Order matters; we count ordered sequences (compositions) using outcomes 1..6."
+    },
+    {
+      "question": "If the last throw is k, what subcount contributes to total i?",
+      "insight": "Each possible last throw k contributes the count for total i−k when i−k≥0."
+    },
+    {
+      "question": "What is the base value for total 0?",
+      "insight": "Treat the empty sequence as one way to reach 0: ways(0)=1, enabling construction of larger totals."
+    },
+    {
+      "question": "How to compute counts up to n systematically?",
+      "insight": "Compute totals in increasing order, summing contributions from up to six previous totals for each i."
+    },
+    {
+      "question": "How to keep numbers bounded and within limits?",
+      "insight": "Apply modulo 1e9+7 to the accumulated sum during updates and when printing."
+    },
+    {
+      "question": "Is this efficient for n up to 1e6?",
+      "insight": "Yes: each i aggregates up to 6 terms, giving O(n) time and O(n) space."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1311,
+    "output_tokens": 12422,
+    "input_cost": 0.001639,
+    "output_cost": 0.12422,
+    "total_cost": 0.125859
+  }
+}

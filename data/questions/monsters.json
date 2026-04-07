@@ -1,0 +1,1019 @@
+{
+  "id": "monsters-escape-path",
+  "title": "Monsters",
+  "difficulty": "intermediate",
+  "tags": [
+    "graph"
+  ],
+  "estimatedMinutes": 75,
+  "language": "python",
+  "description": "You and some monsters are in a labyrinth. When taking a step to some direction in the labyrinth, each monster may simultaneously take one as well. Your goal is to reach one of the boundary squares without ever sharing a square with a monster.\n\nFind whether it is possible to reach the boundary safely in any situation (monsters know your path). If possible, print any such path.\n\nInput: First line has two integers n and m. Then n lines of the map with characters '.', '#', 'A', 'M'. Exactly one 'A'.\n\nOutput: Print \"YES\" and a valid path (its length and the sequence of moves using D, U, L, R) or \"NO\" if impossible. The path length must be at most n*m.",
+  "examples": [
+    {
+      "input": "5 8\n########\n#M..A..#\n#.#.M#.#\n#M#..#..\n#.######\n",
+      "output": "YES\n5\nRRDDR\n",
+      "explanation": "A path exists that reaches the boundary before any monster can reach the same squares."
+    }
+  ],
+  "constraints": [
+    "1 <= n, m <= 1000",
+    "Map contains '.', '#', exactly one 'A', and zero or more 'M'",
+    "You must never be on the same square as a monster at the same time"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "Which squares count as valid exits from the labyrinth?",
+      "diagram": "Grid coordinates: row indices 0..n-1, column indices 0..m-1.",
+      "options": [
+        {
+          "label": "Any square with row = 0 or row = n-1 or col = 0 or col = m-1",
+          "isCode": false
+        },
+        {
+          "label": "Only corner squares (0,0), (0,m-1), (n-1,0), (n-1,m-1)",
+          "isCode": false
+        },
+        {
+          "label": "Any '.' square adjacent to a wall '#'",
+          "isCode": false
+        },
+        {
+          "label": "Any square with '.' on the outer border and not next to a monster",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "An exit is any boundary square regardless of its neighbors. Corners are a subset. Being next to a wall or monster is irrelevant for being an exit.",
+      "wrongExplanations": {
+        "1": "Corners are exits, but edges excluding corners are also valid exits.",
+        "2": "Adjacency to a wall has nothing to do with being an exit."
+      },
+      "hint": "Think: squares that touch the outer frame of the grid.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "When you move and monsters move simultaneously, is it allowed to step into a square at the same time a monster arrives there?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "No, you must never be in the same square at the same time as any monster",
+          "isCode": false
+        },
+        {
+          "label": "Yes, as long as you leave it in the next step",
+          "isCode": false
+        },
+        {
+          "label": "Yes, but only if the monster just left that square",
+          "isCode": false
+        },
+        {
+          "label": "No, unless the square is on the boundary",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Sharing a square at any time is forbidden. Arrival at the same time is a collision. Boundary squares have no special exception for this rule.",
+      "wrongExplanations": {
+        "1": "Colliding for one step is still disallowed.",
+        "2": "If the monster can be there at that time, you cannot share it."
+      },
+      "hint": "Simultaneous arrival still means both occupy the square at that time step.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "Consider this 3x3 grid:\n\nRow0: \"...\"\nRow1: \".A.\"\nRow2: \"M..\"\n\nAt t=0, A at (1,1) and a monster at (2,0). If you move LEFT to (1,0) at t=1, is that move safe?",
+      "diagram": "Coords: (row,col). Monster can move up/down/left/right each step, same as you.",
+      "options": [
+        {
+          "label": "No, unsafe: the monster can move from (2,0) to (1,0) at t=1 too",
+          "isCode": false
+        },
+        {
+          "label": "Yes, safe: you arrive first because you started moving sooner",
+          "isCode": false
+        },
+        {
+          "label": "Yes, safe: the monster must avoid you since it knows your path",
+          "isCode": false
+        },
+        {
+          "label": "No, unsafe: walls block you (even though there are none here)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "At t=1 both could occupy (1,0), which is not allowed. Simultaneous arrival is a collision.",
+      "wrongExplanations": {
+        "1": "Movement is simultaneous; you do not arrive before the monster.",
+        "2": "Monsters may choose moves; your plan must work even if they try to collide."
+      },
+      "hint": "Check if the monster can also reach (1,0) in exactly one step.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "If A starts on a boundary square and no monster is initially on that square, what is the correct output path length?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "0, with an empty path string",
+          "isCode": false
+        },
+        {
+          "label": "1, with any direction that stays in the grid",
+          "isCode": false
+        },
+        {
+          "label": "0, but you must still print at least one move",
+          "isCode": false
+        },
+        {
+          "label": "It depends on where the nearest monster is",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Already at an exit at t=0, so length 0 is valid. No move is needed.",
+      "wrongExplanations": {
+        "1": "A move would leave the boundary, not required.",
+        "3": "Starting on the boundary means you are done immediately."
+      },
+      "hint": "You are already at the goal with no steps taken.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Exploring Approaches",
+      "questionText": "To guarantee safety against any monster movement, what information should you precompute for each cell?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "The earliest time any monster can reach that cell",
+          "isCode": false
+        },
+        {
+          "label": "The Euclidean distance from A to that cell",
+          "isCode": false
+        },
+        {
+          "label": "Whether the cell is closer to A than to any monster",
+          "isCode": false
+        },
+        {
+          "label": "The number of monsters adjacent to the cell",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Earliest monster arrival time lets you avoid any cell at or before that time. Distances from A alone are insufficient.",
+      "wrongExplanations": {
+        "1": "Your distance doesn't capture when monsters arrive.",
+        "2": "Comparing closeness is not enough; exact timings matter."
+      },
+      "hint": "You need to know when monsters could occupy a cell at the earliest.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "How can you compute the earliest monster arrival time for all cells efficiently?",
+      "diagram": "Think of all monster positions at time 0 and expanding outward step by step.",
+      "options": [
+        {
+          "label": "Start from all monster cells at time 0 and expand to neighbors one step at a time",
+          "isCode": false
+        },
+        {
+          "label": "Start from A and expand, updating monster times as you go",
+          "isCode": false
+        },
+        {
+          "label": "Scan the grid repeatedly and update times when neighbors change",
+          "isCode": false
+        },
+        {
+          "label": "Sort cells by row+col and fill times in that order",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Expanding from all monsters simultaneously by steps gives the minimal time to each cell.",
+      "wrongExplanations": {
+        "1": "Starting from A doesn't capture monster arrival times correctly.",
+        "3": "Row+col order has no guarantee to reflect minimal steps."
+      },
+      "hint": "Initialize a queue with all monsters and process neighbors in increasing step count.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "Suppose your current time is t at cell (x,y). For a neighbor (nx,ny), when is it safe to step there at time t+1 based on the earliest monster time Tm[nx][ny]?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "If Tm[nx][ny] > t+1",
+          "isCode": false
+        },
+        {
+          "label": "If Tm[nx][ny] >= t+1",
+          "isCode": false
+        },
+        {
+          "label": "If Tm[nx][ny] < t+1",
+          "isCode": false
+        },
+        {
+          "label": "If Tm[nx][ny] != t+1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "You must arrive strictly before any monster could: Tm > t+1. Equality would be a collision at the same time.",
+      "wrongExplanations": {
+        "1": ">= allows equal times, which is unsafe.",
+        "3": "\"Not equal\" still allows Tm < t+1, which is unsafe."
+      },
+      "hint": "Avoid equal-time arrival to the same cell.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Building the Idea",
+      "questionText": "Can you ever step onto a cell that initially contains 'M' at any later time?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "No, because the earliest monster time there is 0, so you'd need t < 0",
+          "isCode": false
+        },
+        {
+          "label": "Yes, if the monster moves away from it later",
+          "isCode": false
+        },
+        {
+          "label": "Yes, but only if you arrive strictly earlier than time 0",
+          "isCode": false
+        },
+        {
+          "label": "Yes, if you wait for two steps before moving",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Initial 'M' cells have earliest time 0, so Tm > t must hold; no non-negative t can satisfy t < 0.",
+      "wrongExplanations": {
+        "1": "Even if the monster moves, the earliest time remains 0.",
+        "3": "Waiting only increases your time, making it worse."
+      },
+      "hint": "Earliest monster time at 'M' is 0 forever.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "Which cells should be considered blocked for both you and monsters when expanding moves?",
+      "diagram": "Characters: '.' floor, '#' wall, 'A' start, 'M' monster.",
+      "options": [
+        {
+          "label": "Only '#' are blocked; '.' and 'A' are passable; 'M' is passable only for monsters at t=0",
+          "isCode": false
+        },
+        {
+          "label": "Both '#' and 'M' are blocked for everyone",
+          "isCode": false
+        },
+        {
+          "label": "Only '#' are blocked; both you and monsters treat 'M' as '.' for movement",
+          "isCode": false
+        },
+        {
+          "label": "You can pass '#', monsters cannot",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Walls block movement. Monsters start on 'M' at t=0 then move like floor; you can never enter 'M' because its earliest time is 0.",
+      "wrongExplanations": {
+        "1": "'M' is a starting position, not a permanent wall for monsters.",
+        "3": "Both are constrained by walls."
+      },
+      "hint": "Treat walls as impassable; other squares as passable with timing rules.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "For cells unreachable by any monster, what value should you store as their earliest monster time?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "A very large number (representing infinity)",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "-1",
+          "isCode": false
+        },
+        {
+          "label": "The Manhattan distance from A",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "A large value indicates the monster can't reach there, making comparisons Tm > t straightforward.",
+      "wrongExplanations": {
+        "1": "0 would incorrectly mark it as immediately dangerous.",
+        "2": "-1 complicates comparisons and doesn't represent 'unreachable' in timing."
+      },
+      "hint": "You want Tm > t to be true for any finite t if unreachable by monsters.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "While expanding your moves from 'A', how will you detect success?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "When you first reach any boundary cell with arrival time t satisfying Tm[cell] > t",
+          "isCode": false
+        },
+        {
+          "label": "When you first reach a cell closest to any monster",
+          "isCode": false
+        },
+        {
+          "label": "When you visit all cells that are not walls",
+          "isCode": false
+        },
+        {
+          "label": "When the number of steps equals n*m",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Reaching a boundary with safe timing solves the problem. Other criteria don't guarantee a valid exit.",
+      "wrongExplanations": {
+        "1": "Closeness to monsters is irrelevant; boundary matters.",
+        "2": "You don't need to explore all cells to find a valid exit."
+      },
+      "hint": "Combine boundary position and timing safety.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "How should you record moves to later reconstruct a path string of 'D','U','L','R'?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "For each visited cell, store its parent cell coordinates and the move character used to enter it",
+          "isCode": false
+        },
+        {
+          "label": "Store only the step count at each cell",
+          "isCode": false
+        },
+        {
+          "label": "Store the full path string at each cell",
+          "isCode": false
+        },
+        {
+          "label": "Store only the last move character globally",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Parent pointers with move chars allow backtracking and building the path. Storing full strings per cell is memory-heavy.",
+      "wrongExplanations": {
+        "1": "Step counts don't tell you the actual path.",
+        "3": "A single global move is insufficient."
+      },
+      "hint": "You need to reconstruct by walking backward from the exit.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Writing the Code",
+      "questionText": "Read input efficiently and parse n, m.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "from collections import deque\nimport sys\ndata = sys.stdin.read().strip().split()\nit = iter(data)\nn = int(next(it)); m = int(next(it))",
+          "isCode": true
+        },
+        {
+          "label": "from collections import deque\nn, m = map(int, input().split())\ndata = [input().strip() for _ in range(n)]",
+          "isCode": true
+        },
+        {
+          "label": "import sys\nn = int(sys.stdin.readline()); m = int(sys.stdin.readline())",
+          "isCode": true
+        },
+        {
+          "label": "from collections import deque\nimport sys\ndata = sys.stdin.read().split('\\n')\nn, m = map(int, data[0].split())",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Tokenizing the whole input handles large grids and whitespace robustly. Other options either don't parse the grid yet or risk line endings issues.",
+      "wrongExplanations": {
+        "1": "Mixing input methods later can be error-prone for large inputs.",
+        "3": "Splitting by lines then tokens can break if trailing spaces or empty lines appear."
+      },
+      "hint": "Use a token iterator to uniformly parse all values.",
+      "isCodeBuilding": true,
+      "codeSnippet": "from collections import deque\nimport sys\ndata = sys.stdin.read().strip().split()\nit = iter(data)\nn = int(next(it)); m = int(next(it))",
+      "codeLabel": "Read tokens"
+    },
+    {
+      "id": "q14",
+      "phase": "Writing the Code",
+      "questionText": "Build the grid and locate 'A' and all 'M' positions.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "grid = []\nax = ay = -1\nmonsters = []\nfor i in range(n):\n    row = list(next(it).strip())\n    for j, ch in enumerate(row):\n        if ch == 'A':\n            ax, ay = i, j\n        elif ch == 'M':\n            monsters.append((i, j))\n    grid.append(row)",
+          "isCode": true
+        },
+        {
+          "label": "grid = []\nax = ay = -1\nmonsters = []\nfor i in range(n):\n    row = next(it)\n    for j, ch in enumerate(row):\n        if ch == 'A':\n            ax, ay = i, j\n        elif ch == 'M':\n            monsters.append((i, j))\n    grid.append(row)",
+          "isCode": true
+        },
+        {
+          "label": "grid = []\nax = ay = -1\nmonsters = []\nfor i in range(n):\n    row = list(next(it).strip())\n    for j in range(m):\n        if row[j] == 'M':\n            ax, ay = i, j\n        elif row[j] == 'A':\n            monsters.append((i, j))\n    grid.append(row)",
+          "isCode": true
+        },
+        {
+          "label": "grid = []\nax = ay = -1\nmonsters = []\nfor i in range(n):\n    row = list(next(it).strip())\n    grid.append(row)\n# find A and M later",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Convert each line to a list and record positions while reading. Swapping 'A'/'M' or delaying detection can complicate later steps.",
+      "wrongExplanations": {
+        "1": "Not converting to list may still work, but consistency helps; also lacks .strip() safety for tokens.",
+        "2": "Swapped roles of 'A' and 'M' causing wrong positions."
+      },
+      "hint": "Record A and M as you parse to avoid extra passes.",
+      "isCodeBuilding": true,
+      "codeSnippet": "grid = []\nax = ay = -1\nmonsters = []\nfor i in range(n):\n    row = list(next(it).strip())\n    for j, ch in enumerate(row):\n        if ch == 'A':\n            ax, ay = i, j\n        elif ch == 'M':\n            monsters.append((i, j))\n    grid.append(row)",
+      "codeLabel": "Parse grid, find A and M"
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Initialize the earliest monster time grid and queue with all monsters at time 0.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "INF = 10**9\nmon_time = [[INF]*m for _ in range(n)]\ndq = deque()\nfor x, y in monsters:\n    mon_time[x][y] = 0\n    dq.append((x, y))",
+          "isCode": true
+        },
+        {
+          "label": "INF = 10**3\nmon_time = [[0]*m for _ in range(n)]\ndq = deque(monsters)",
+          "isCode": true
+        },
+        {
+          "label": "INF = 10**9\nmon_time = [[-1]*m for _ in range(n)]\ndq = deque()\nfor x, y in monsters:\n    mon_time[x][y] = 1\n    dq.append((x, y))",
+          "isCode": true
+        },
+        {
+          "label": "mon_time = [[0]*m for _ in range(n)]\ndq = deque()\nfor x, y in monsters:\n    dq.append((x, y, 0))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Use a large INF for unreachable, set monster starts to 0, and enqueue them. Other initializations break comparisons or times.",
+      "wrongExplanations": {
+        "1": "INF too small and defaulting times to 0 marks all cells as unsafe.",
+        "3": "Storing time in the queue but not in the grid complicates logic."
+      },
+      "hint": "Default is 'very late'; starting monsters are at time 0.",
+      "isCodeBuilding": true,
+      "codeSnippet": "INF = 10**9\nmon_time = [[INF]*m for _ in range(n)]\ndq = deque()\nfor x, y in monsters:\n    mon_time[x][y] = 0\n    dq.append((x, y))",
+      "codeLabel": "Init monster times"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Expand from all monsters to fill earliest arrival times for neighbors.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "dirs = [(-1,0,'U'), (1,0,'D'), (0,-1,'L'), (0,1,'R')]\n# expand from monsters\nwhile dq:\n    x, y = dq.popleft()\n    t = mon_time[x][y]\n    for dx, dy, _ in dirs:\n        nx, ny = x + dx, y + dy\n        if 0 <= nx < n and 0 <= ny < m and grid[nx][ny] != '#' and mon_time[nx][ny] > t + 1:\n            mon_time[nx][ny] = t + 1\n            dq.append((nx, ny))",
+          "isCode": true
+        },
+        {
+          "label": "dirs = [(-1,0,'U'), (1,0,'D'), (0,-1,'L'), (0,1,'R')]\nwhile dq:\n    x, y = dq.pop()\n    t = mon_time[x][y]\n    for dx, dy, _ in dirs:\n        nx, ny = x + dx, y + dy\n        if 0 <= nx < n and 0 <= ny < m and grid[nx][ny] != '#' and mon_time[nx][ny] >= t + 1:\n            mon_time[nx][ny] = t + 1\n            dq.append((nx, ny))",
+          "isCode": true
+        },
+        {
+          "label": "dirs = [(-1,0), (1,0), (0,-1), (0,1)]\nwhile dq:\n    x, y = dq.popleft()\n    t = mon_time[x][y]\n    for dx, dy in dirs:\n        nx, ny = x + dx, y + dy\n        if grid[nx][ny] != '#' and mon_time[nx][ny] > t + 1:\n            mon_time[nx][ny] = t + 1\n            dq.append((nx, ny))",
+          "isCode": true
+        },
+        {
+          "label": "dirs = [(-1,0,'U'), (1,0,'D'), (0,-1,'L'), (0,1,'R')]\n# expand from monsters\nfor x in range(n):\n    for y in range(m):\n        if mon_time[x][y] == 0:\n            for dx, dy, _ in dirs:\n                nx, ny = x + dx, y + dy\n                if 0 <= nx < n and 0 <= ny < m and grid[nx][ny] != '#':\n                    mon_time[nx][ny] = min(mon_time[nx][ny], 1)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Process in increasing step count using a FIFO queue, update only if you find a strictly earlier time. Avoid walls.",
+      "wrongExplanations": {
+        "1": "Using pop() with >= can break the increasing-time guarantee and equality allows collisions.",
+        "2": "Missing bounds checks will crash on edges."
+      },
+      "hint": "Use popleft and only relax when you improve the time.",
+      "isCodeBuilding": true,
+      "codeSnippet": "dirs = [(-1,0,'U'), (1,0,'D'), (0,-1,'L'), (0,1,'R')]\n# expand from monsters\nwhile dq:\n    x, y = dq.popleft()\n    t = mon_time[x][y]\n    for dx, dy, _ in dirs:\n        nx, ny = x + dx, y + dy\n        if 0 <= nx < n and 0 <= ny < m and grid[nx][ny] != '#' and mon_time[nx][ny] > t + 1:\n            mon_time[nx][ny] = t + 1\n            dq.append((nx, ny))",
+      "codeLabel": "Fill monster times"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Early exit if A is already on the boundary.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "if ax == 0 or ax == n-1 or ay == 0 or ay == m-1:\n    print(\"YES\")\n    print(0)\n    print()\n    sys.exit(0)",
+          "isCode": true
+        },
+        {
+          "label": "if ax == 0 and ay == 0:\n    print(\"YES\\n0\\n\")\n    sys.exit(0)",
+          "isCode": true
+        },
+        {
+          "label": "if ax in (0, n-1) and ay in (0, m-1):\n    print(\"YES\")\n    print(0)\n    sys.exit(0)",
+          "isCode": true
+        },
+        {
+          "label": "if ax == 0 or ay == 0:\n    print(\"YES\")\n    print(0)\n    print()",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Check all four edges and output a zero-length path. Other conditions miss edges or skip printing the path line.",
+      "wrongExplanations": {
+        "1": "Covers only the top-left corner, not all edges.",
+        "3": "Covers only top row and left column, missing bottom/right."
+      },
+      "hint": "A boundary means row is 0 or n-1, or col is 0 or m-1.",
+      "isCodeBuilding": true,
+      "codeSnippet": "if ax == 0 or ax == n-1 or ay == 0 or ay == m-1:\n    print(\"YES\")\n    print(0)\n    print()\n    sys.exit(0)",
+      "codeLabel": "Early boundary exit"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Initialize structures for your expansion from A and ensure the starting cell is safe at t=0.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "dist = [[-1]*m for _ in range(n)]\npar = [[None]*m for _ in range(n)]\ndq = deque()\ndq.append((ax, ay))\ndist[ax][ay] = 0\n# ensure start is safe at t=0\nif mon_time[ax][ay] == 0:\n    print(\"NO\")\n    sys.exit(0)",
+          "isCode": true
+        },
+        {
+          "label": "dist = [[0]*m for _ in range(n)]\npar = [[None]*m for _ in range(n)]\ndq = deque([(ax, ay)])\n# no need to check start safety",
+          "isCode": true
+        },
+        {
+          "label": "dist = [[-1]*m for _ in range(n)]\npar = [[None]*m for _ in range(n)]\ndq = deque()\n# ensure start is safe\nif mon_time[ax][ay] >= 0:\n    print(\"NO\"); sys.exit(0)",
+          "isCode": true
+        },
+        {
+          "label": "par = [[None]*m for _ in range(n)]\ndq = deque()\ndq.append((ax, ay))\n# delay setting dist until moving",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Initialize distance with -1 (unvisited), set start to 0, and reject only if a monster is already there at t=0 (shouldn't happen, but safe).",
+      "wrongExplanations": {
+        "1": "Marking all as 0 confuses visited status.",
+        "2": "Rejecting when mon_time >= 0 would always reject."
+      },
+      "hint": "Use -1 for unvisited and check for mon_time equal to 0 only.",
+      "isCodeBuilding": true,
+      "codeSnippet": "dist = [[-1]*m for _ in range(n)]\npar = [[None]*m for _ in range(n)]\ndq = deque()\ndq.append((ax, ay))\ndist[ax][ay] = 0\n# ensure start is safe at t=0\nif mon_time[ax][ay] == 0:\n    print(\"NO\")\n    sys.exit(0)",
+      "codeLabel": "Init A structures"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Implement your expansion from A with the safety check and detect when you reach the boundary.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "found = None\nwhile dq:\n    x, y = dq.popleft()\n    t = dist[x][y]\n    for dx, dy, ch in dirs:\n        nx, ny = x + dx, y + dy\n        if 0 <= nx < n and 0 <= ny < m and grid[nx][ny] != '#' and dist[nx][ny] == -1:\n            nt = t + 1\n            if mon_time[nx][ny] > nt:\n                dist[nx][ny] = nt\n                par[nx][ny] = (x, y, ch)\n                dq.append((nx, ny))\n                if nx == 0 or nx == n-1 or ny == 0 or ny == m-1:\n                    found = (nx, ny)\n                    dq.clear()\n                    break",
+          "isCode": true
+        },
+        {
+          "label": "found = None\nwhile dq:\n    x, y = dq.popleft()\n    t = dist[x][y]\n    for dx, dy, ch in dirs:\n        nx, ny = x + dx, y + dy\n        if 0 <= nx < n and 0 <= ny < m and grid[nx][ny] != '#':\n            nt = t + 1\n            if mon_time[nx][ny] >= nt:\n                dist[nx][ny] = nt\n                par[nx][ny] = (x, y, ch)\n                dq.append((nx, ny))\n                if nx == 0 or ny == 0:\n                    found = (nx, ny)\n                    break",
+          "isCode": true
+        },
+        {
+          "label": "found = None\nwhile dq:\n    x, y = dq.pop()\n    t = dist[x][y]\n    for dx, dy, ch in dirs:\n        nx, ny = x + dx, y + dy\n        if 0 <= nx < n and 0 <= ny < m and grid[nx][ny] != '#' and dist[nx][ny] == -1:\n            nt = t + 1\n            if mon_time[nx][ny] > nt:\n                dist[nx][ny] = nt\n                par[nx][ny] = (x, y, ch)\n                dq.appendleft((nx, ny))",
+          "isCode": true
+        },
+        {
+          "label": "found = None\nfor x in range(n):\n    for y in range(m):\n        if grid[x][y] != '#' and mon_time[x][y] > 0:\n            dist[x][y] = 0\n            par[x][y] = None\n            if x == 0 or y == 0:\n                found = (x, y)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Process neighbors once, enforce mon_time > arrival time, and stop when you first safely reach a boundary. Equality is unsafe.",
+      "wrongExplanations": {
+        "1": "Using >= allows collisions and boundary check is incomplete.",
+        "2": "Using pop reverses order and may not find shortest path to boundary."
+      },
+      "hint": "Only enqueue safe, unvisited neighbors and stop early when you hit any edge.",
+      "isCodeBuilding": true,
+      "codeSnippet": "found = None\nwhile dq:\n    x, y = dq.popleft()\n    t = dist[x][y]\n    for dx, dy, ch in dirs:\n        nx, ny = x + dx, y + dy\n        if 0 <= nx < n and 0 <= ny < m and grid[nx][ny] != '#' and dist[nx][ny] == -1:\n            nt = t + 1\n            if mon_time[nx][ny] > nt:\n                dist[nx][ny] = nt\n                par[nx][ny] = (x, y, ch)\n                dq.append((nx, ny))\n                if nx == 0 or nx == n-1 or ny == 0 or ny == m-1:\n                    found = (nx, ny)\n                    dq.clear()\n                    break",
+      "codeLabel": "Expand from A and detect boundary"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Finish by printing NO if no path found, or reconstruct and print the path otherwise.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "if not found:\n    print(\"NO\")\nelse:\n    x, y = found\n    path = []\n    while (x, y) != (ax, ay):\n        px, py, ch = par[x][y]\n        path.append(ch)\n        x, y = px, py\n    path.reverse()\n    print(\"YES\")\n    print(len(path))\n    print(''.join(path))",
+          "isCode": true
+        },
+        {
+          "label": "if not found:\n    print(\"NO\")\nelse:\n    x, y = found\n    path = []\n    while (x, y) != (ax, ay):\n        px, py, ch = par[x][y]\n        path.append(ch)\n        x, y = px, py\n    print(\"YES\")\n    print(len(path))\n    print(''.join(path))",
+          "isCode": true
+        },
+        {
+          "label": "if not found:\n    print(\"NO\")\nelse:\n    x, y = found\n    path = []\n    while par[x][y]:\n        px, py, ch = par[x][y]\n        path.append(ch)\n        x, y = px, py\n    path.reverse()\n    print(\"YES\")\n    print(len(path) - 1)\n    print(''.join(path))",
+          "isCode": true
+        },
+        {
+          "label": "if found is None:\n    print(\"NO\")\nelse:\n    print(\"YES\")\n    print(0)\n    print()",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Backtrack using parent pointers, reverse the collected moves, and print length and path. Don't forget to reverse.",
+      "wrongExplanations": {
+        "1": "Missing reverse prints the path reversed.",
+        "3": "Always printing length 0 ignores the actual path."
+      },
+      "hint": "You collected moves from end to start.",
+      "isCodeBuilding": true,
+      "codeSnippet": "if not found:\n    print(\"NO\")\nelse:\n    x, y = found\n    path = []\n    while (x, y) != (ax, ay):\n        px, py, ch = par[x][y]\n        path.append(ch)\n        x, y = px, py\n    path.reverse()\n    print(\"YES\")\n    print(len(path))\n    print(''.join(path))",
+      "codeLabel": "Output result"
+    },
+    {
+      "id": "q21",
+      "phase": "Verifying the Solution",
+      "questionText": "Given grid:\n3 4\nRow0: \"A...\"\nRow1: \".#M.\"\nRow2: \"....\"\nWhat is the earliest monster time at cell (0,3)?",
+      "diagram": "Monster at (1,2). Walls '#' at (1,1).",
+      "options": [
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "Infinity (unreachable)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Path: (1,2)->(1,3)->(0,3). Two steps, so time 2.",
+      "wrongExplanations": {
+        "1": "Check shortest path avoiding the wall; two steps is enough.",
+        "2": "Direct neighbor is (1,3) or (0,2), not (0,3) in one step."
+      },
+      "hint": "Count the minimal number of up/right/left/down moves from (1,2) to (0,3).",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q22",
+      "phase": "Verifying the Solution",
+      "questionText": "With the same grid, is stepping from A at (0,0) to (0,1) at t=1 safe? (Monster at (1,2))",
+      "diagram": "Compute Tm[0][1].",
+      "options": [
+        {
+          "label": "Yes, safe because Tm[0][1] = 2 > 1",
+          "isCode": false
+        },
+        {
+          "label": "No, unsafe because Tm[0][1] = 1",
+          "isCode": false
+        },
+        {
+          "label": "No, unsafe because Tm[0][1] = 0",
+          "isCode": false
+        },
+        {
+          "label": "Yes, safe because it is a boundary",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Monster needs two steps: (1,2)->(0,2)->(0,1). Arriving at t=1 is safe since 2 > 1.",
+      "wrongExplanations": {
+        "1": "Recompute carefully; the wall blocks shortcuts via (1,1).",
+        "3": "Boundary status does not override timing safety."
+      },
+      "hint": "Find the minimal steps from (1,2) to (0,1).",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q23",
+      "phase": "Verifying the Solution",
+      "questionText": "During path reconstruction, why do we reverse the collected move characters?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Because we collected moves from the end to the start by backtracking",
+          "isCode": false
+        },
+        {
+          "label": "Because reversing ensures lexicographically smallest path",
+          "isCode": false
+        },
+        {
+          "label": "To convert left/right into right/left",
+          "isCode": false
+        },
+        {
+          "label": "Because the path must end with the first move",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Backtracking yields moves in reverse order; reversing restores start-to-end order.",
+      "wrongExplanations": {
+        "1": "We are not optimizing lexicographic order.",
+        "2": "Directions remain the same; reversing order is about sequence."
+      },
+      "hint": "You traverse parents from the target back to the start.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the time complexity of the overall algorithm in terms of n and m?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n*m)",
+          "isCode": false
+        },
+        {
+          "label": "O((n*m)^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(n + m)",
+          "isCode": false
+        },
+        {
+          "label": "O(n*m*log(n*m))",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each cell is processed a constant number of times in both expansions, so linear in the grid size.",
+      "wrongExplanations": {
+        "1": "We do not perform nested reprocessing proportional to cells squared.",
+        "3": "No sorting or priority structure introduces log factors."
+      },
+      "hint": "Both expansions touch each cell at most a few times.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the space complexity of the implementation?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n*m) for grids like mon_time, dist, par, and the queue",
+          "isCode": false
+        },
+        {
+          "label": "O(1), using only a few variables",
+          "isCode": false
+        },
+        {
+          "label": "O(n + m)",
+          "isCode": false
+        },
+        {
+          "label": "O((n*m)^2)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We store multiple n-by-m arrays and a queue that can hold O(n*m) cells.",
+      "wrongExplanations": {
+        "1": "We store arrays proportional to the grid size.",
+        "2": "n+m does not reflect a 2D grid's memory usage."
+      },
+      "hint": "Count the large arrays explicitly.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Analyzing Complexity",
+      "questionText": "If there are no monsters ('M' absent), what happens with the earliest monster time grid and path finding?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "All non-wall cells have Tm = INF, so you just find a shortest path to any boundary",
+          "isCode": false
+        },
+        {
+          "label": "All cells have Tm = 0, so no path is possible",
+          "isCode": false
+        },
+        {
+          "label": "You must wait until monsters spawn before moving",
+          "isCode": false
+        },
+        {
+          "label": "You should ignore the grid and just print NO",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "With Tm = INF on floor cells, the safety check always passes, reducing to a shortest path to the boundary.",
+      "wrongExplanations": {
+        "1": "We initialize Tm with INF, not 0, unless there are monsters.",
+        "2": "There is no waiting mechanism; you can move immediately."
+      },
+      "hint": "Think about how you initialize Tm when monsters list is empty.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "from collections import deque",
+    "import sys",
+    "data = sys.stdin.read().strip().split()",
+    "it = iter(data)",
+    "n = int(next(it)); m = int(next(it))",
+    "grid = []",
+    "ax = ay = -1",
+    "monsters = []",
+    "for i in range(n):",
+    "    row = list(next(it).strip())",
+    "    for j, ch in enumerate(row):",
+    "        if ch == 'A':",
+    "            ax, ay = i, j",
+    "        elif ch == 'M':",
+    "            monsters.append((i, j))",
+    "    grid.append(row)",
+    "INF = 10**9",
+    "mon_time = [[INF]*m for _ in range(n)]",
+    "dq = deque()",
+    "for x, y in monsters:",
+    "    mon_time[x][y] = 0",
+    "    dq.append((x, y))",
+    "dirs = [(-1,0,'U'), (1,0,'D'), (0,-1,'L'), (0,1,'R')]",
+    "# expand from monsters",
+    "while dq:",
+    "    x, y = dq.popleft()",
+    "    t = mon_time[x][y]",
+    "    for dx, dy, _ in dirs:",
+    "        nx, ny = x + dx, y + dy",
+    "        if 0 <= nx < n and 0 <= ny < m and grid[nx][ny] != '#' and mon_time[nx][ny] > t + 1:",
+    "            mon_time[nx][ny] = t + 1",
+    "            dq.append((nx, ny))",
+    "if ax == 0 or ax == n-1 or ay == 0 or ay == m-1:",
+    "    print(\"YES\")",
+    "    print(0)",
+    "    print()",
+    "    sys.exit(0)",
+    "dist = [[-1]*m for _ in range(n)]",
+    "par = [[None]*m for _ in range(n)]",
+    "dq = deque()",
+    "dq.append((ax, ay))",
+    "dist[ax][ay] = 0",
+    "# ensure start is safe at t=0",
+    "if mon_time[ax][ay] == 0:",
+    "    print(\"NO\")",
+    "    sys.exit(0)",
+    "found = None",
+    "while dq:",
+    "    x, y = dq.popleft()",
+    "    t = dist[x][y]",
+    "    for dx, dy, ch in dirs:",
+    "        nx, ny = x + dx, y + dy",
+    "        if 0 <= nx < n and 0 <= ny < m and grid[nx][ny] != '#' and dist[nx][ny] == -1:",
+    "            nt = t + 1",
+    "            if mon_time[nx][ny] > nt:",
+    "                dist[nx][ny] = nt",
+    "                par[nx][ny] = (x, y, ch)",
+    "                dq.append((nx, ny))",
+    "                if nx == 0 or nx == n-1 or ny == 0 or ny == m-1:",
+    "                    found = (nx, ny)",
+    "                    dq.clear()",
+    "                    break",
+    "if not found:",
+    "    print(\"NO\")",
+    "else:",
+    "    x, y = found",
+    "    path = []",
+    "    while (x, y) != (ax, ay):",
+    "        px, py, ch = par[x][y]",
+    "        path.append(ch)",
+    "        x, y = px, py",
+    "    path.reverse()",
+    "    print(\"YES\")",
+    "    print(len(path))",
+    "    print(''.join(path))"
+  ],
+  "reasoningChain": [
+    {
+      "question": "What exactly counts as an exit and when is sharing a square with a monster forbidden?",
+      "insight": "Exits are any boundary squares; you must never be on a square at the same time as a monster, including simultaneous arrival."
+    },
+    {
+      "question": "How to plan against worst-case monster movement?",
+      "insight": "Compute the earliest time any monster can reach every cell, then ensure your arrival time is strictly less than that."
+    },
+    {
+      "question": "How to compute earliest monster times efficiently for the whole grid?",
+      "insight": "Start from all monster positions at time 0 and expand step by step over passable cells to fill minimal arrival times."
+    },
+    {
+      "question": "How to find your path while respecting safety?",
+      "insight": "Expand moves from A, only stepping into cells where your next time is strictly less than the cell’s earliest monster time, and stop when reaching any boundary."
+    },
+    {
+      "question": "How to reconstruct and output the path?",
+      "insight": "Store parent cell and move character for each visited cell, backtrack from the reached boundary to A, reverse the moves, and print."
+    },
+    {
+      "question": "What are the complexities and edge cases?",
+      "insight": "Both expansions touch each cell a constant number of times, giving O(n*m) time and space; handle starting on boundary and absence of monsters."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1492,
+    "output_tokens": 17396,
+    "input_cost": 0.001865,
+    "output_cost": 0.17396,
+    "total_cost": 0.175825
+  }
+}

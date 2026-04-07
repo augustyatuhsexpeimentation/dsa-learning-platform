@@ -1,0 +1,943 @@
+{
+  "id": "collecting-numbers-ii-mcq-chain",
+  "title": "Collecting Numbers II",
+  "difficulty": "intermediate",
+  "tags": [
+    "sorting",
+    "two-pointer",
+    "binary-search"
+  ],
+  "estimatedMinutes": 60,
+  "language": "python",
+  "description": "You are given an array that contains each number between 1…n exactly once. Your task is to collect the numbers from 1 to n in increasing order.\n\nOn each round, you go through the array from left to right and collect as many numbers as possible.\n\nGiven m operations that swap two numbers in the array, your task is to report the number of rounds after each operation.\n\nInput:\n- First line: two integers n and m.\n- Second line: n integers x_1,…,x_n.\n- Next m lines: each has two integers a and b, meaning you swap the numbers at positions a and b.\n\nOutput:\n- Print m integers: the number of rounds after each swap, one per line.",
+  "examples": [
+    {
+      "input": "5 3\n4 2 1 5 3\n2 3\n1 5\n2 3\n",
+      "output": "2\n3\n4\n",
+      "explanation": "Initial rounds are 3. After swaps: (2,3) -> 2 rounds; (1,5) -> 3 rounds; (2,3) -> 4 rounds."
+    }
+  ],
+  "constraints": [
+    "1 ≤ n, m ≤ 2·10^5",
+    "1 ≤ a, b ≤ n",
+    "Array is a permutation of 1..n"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "Array: [2, 1, 3]. How many rounds to collect 1→2→3 when scanning left to right each round?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Round 1: collect 1 at index 2, cannot collect 2 (it is left of 1). Round 2: collect 2 then 3. Total 2.",
+      "wrongExplanations": {
+        "0": "You cannot collect 2 in the same pass because it appears before 1.",
+        "2": "There is no need for a third pass; 2 and 3 are collected in the second pass."
+      },
+      "hint": "After collecting 1, can you still collect 2 in the same pass?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "Array: [3, 1, 2, 4]. How many rounds?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Round 1: collect 1 at index 2, then 2 at index 3. 3 is before them, so stop. Round 2: collect 3 and then 4.",
+      "wrongExplanations": {
+        "1": "A third round isn't needed; both 3 and 4 are collected in the second round."
+      },
+      "hint": "Trace the pass: after picking 1, look to the right for 2.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "Array: [1, 2, 3, 4]. How many rounds?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "It depends on n",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Already in order; one left-to-right pass collects all numbers.",
+      "wrongExplanations": {
+        "2": "Only one pass is needed for a sorted array."
+      },
+      "hint": "If every next number is to the right of the previous, they all get collected in one pass.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "Array: [4, 3, 2, 1]. How many rounds?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 3,
+      "explanation": "Each required next number lies to the left, so each number is collected in its own pass: 4 rounds.",
+      "wrongExplanations": {
+        "1": "You cannot collect 2 after 1 in the same pass because 2 is to the left of where 1 was.",
+        "2": "Similarly, 3 also requires a separate pass."
+      },
+      "hint": "After collecting 1 in the first pass, where is 2 located?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Exploring Approaches",
+      "questionText": "Let pos[x] be the index of value x in the array. Which formula gives the number of rounds?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "1 + count of i in [2..n] such that pos[i] < pos[i-1]",
+          "isCode": false
+        },
+        {
+          "label": "count of i in [2..n] such that pos[i] > pos[i-1]",
+          "isCode": false
+        },
+        {
+          "label": "count of increasing runs in pos[1..n]",
+          "isCode": false
+        },
+        {
+          "label": "1 + count of i in [1..n-1] such that pos[i] > pos[i+1]",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each time a next value appears before its previous (pos[i] < pos[i-1]), a new pass is needed. Start with 1 pass.",
+      "wrongExplanations": {
+        "1": "This excludes the initial pass and flips the condition.",
+        "3": "Off-by-one: compares (i, i+1) rather than (i-1, i)."
+      },
+      "hint": "A new pass is needed exactly when i appears to the left of i−1.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "Swapping positions a and b with values va and vb may change the count of i with pos[i] < pos[i−1]. Which indices i can be affected?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "{va, vb, va+1, vb+1} (bounded to 2..n when checking)",
+          "isCode": false
+        },
+        {
+          "label": "{va−1, va, vb−1, vb} only",
+          "isCode": false
+        },
+        {
+          "label": "All i in [1..n] because any swap can affect everything",
+          "isCode": false
+        },
+        {
+          "label": "{va, vb} only",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Pairs (i−1,i) that involve va or vb are (va−1,va), (va,va+1), (vb−1,vb), (vb,vb+1). These correspond to i in {va, va+1, vb, vb+1}.",
+      "wrongExplanations": {
+        "1": "You miss (va,va+1) and (vb,vb+1) when using i-based checks.",
+        "3": "You also need to consider i = va+1 and vb+1 for pairs ending at those i."
+      },
+      "hint": "Consider pairs (i−1,i) that include va or vb.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "If we recompute rounds from scratch after each swap by scanning all i=2..n, what is the total time across m swaps?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n + m)",
+          "isCode": false
+        },
+        {
+          "label": "O(nm)",
+          "isCode": false
+        },
+        {
+          "label": "O(m log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log m)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Each recomputation is O(n), done m times: O(nm), which is too slow for 2e5.",
+      "wrongExplanations": {
+        "0": "Recomputing each time is not linear overall.",
+        "2": "There's no logarithmic factor if you scan all elements each time."
+      },
+      "hint": "Count work per swap and multiply by m.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Building the Idea",
+      "questionText": "Suppose n=5 and pos = [_, 4, 2, 5, 1, 3] (ignore index 0). How many rounds?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Breaks at i=2 (2<4) and i=4 (1<5). Rounds = 1 + 2 = 3.",
+      "wrongExplanations": {
+        "0": "You missed at least one break where a value appears before its predecessor."
+      },
+      "hint": "Check i=2..5 whether pos[i] < pos[i−1].",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "If a swap specifies a=b (same position), how does the number of rounds change?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "It stays the same",
+          "isCode": false
+        },
+        {
+          "label": "It always increases by 1",
+          "isCode": false
+        },
+        {
+          "label": "It always decreases by 1",
+          "isCode": false
+        },
+        {
+          "label": "It changes only if the value is 1 or n",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Swapping the same position does nothing; positions and rounds remain unchanged.",
+      "wrongExplanations": {
+        "1": "No elements are moved, so nothing changes."
+      },
+      "hint": "Does any position of any number change when a=b?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "To update rounds after a swap, which set of i should we evaluate for the condition pos[i] < pos[i−1] both before and after the swap?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "{va, vb, va+1, vb+1} (filter i to 2..n)",
+          "isCode": false
+        },
+        {
+          "label": "{va−1, va, vb−1, vb} only",
+          "isCode": false
+        },
+        {
+          "label": "All i in [2..n]",
+          "isCode": false
+        },
+        {
+          "label": "{va, vb} only",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "These i correspond to pairs (va−1,va), (va,va+1), (vb−1,vb), (vb,vb+1). Others are unaffected.",
+      "wrongExplanations": {
+        "1": "You miss i=va+1 and i=vb+1 pairs.",
+        "2": "We only need to check a constant number of indices, not all."
+      },
+      "hint": "Focus on pairs that include va or vb.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "When updating rounds around affected i, what is the correct sequence?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Subtract old contributions for affected i, perform swap and update pos, then add new contributions",
+          "isCode": false
+        },
+        {
+          "label": "Perform swap and update pos, then subtract old contributions, then add new contributions",
+          "isCode": false
+        },
+        {
+          "label": "Only add new contributions; old ones cancel automatically",
+          "isCode": false
+        },
+        {
+          "label": "Subtract old contributions, add new contributions, then perform swap",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "You must remove old counts based on old positions, then apply the swap, then count based on new positions.",
+      "wrongExplanations": {
+        "1": "Subtracting after the swap mixes old and new states.",
+        "2": "Old contributions persist unless explicitly removed."
+      },
+      "hint": "Think state-before vs. state-after.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "If va+1 == vb (or vb+1 == va), how should we handle the affected i set?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Use a set to avoid double counting the same i",
+          "isCode": false
+        },
+        {
+          "label": "Count duplicates twice to be safe",
+          "isCode": false
+        },
+        {
+          "label": "Ignore i = va+1 or vb+1 in that case",
+          "isCode": false
+        },
+        {
+          "label": "Add extra checks for all neighbors of va and vb",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "A set deduplicates i so each affected pair is adjusted exactly once.",
+      "wrongExplanations": {
+        "1": "Double counting will inflate or deflate rounds incorrectly."
+      },
+      "hint": "We want to adjust each pair once.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "Define a helper broken(i) that returns 1 if pos[i] < pos[i−1] and 0 otherwise. What should it return for i ≤ 1 or i > n?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "Raise an error",
+          "isCode": false
+        },
+        {
+          "label": "Depends on pos[0]",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Pairs are defined only for i in [2..n], so outside that range contribute 0.",
+      "wrongExplanations": {
+        "1": "There is no valid pair for i ≤ 1 or i > n.",
+        "2": "We should handle boundaries gracefully without exceptions."
+      },
+      "hint": "The condition only applies for i from 2 to n.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Writing the Code",
+      "questionText": "Read all input fast and prepare an integer iterator.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\ndata = sys.stdin.buffer.read().split()\nit = iter(map(int, data))\nn = next(it); m = next(it)",
+          "isCode": true
+        },
+        {
+          "label": "import sys\ndata = sys.stdin.buffer.read().split()\nit = iter(data)\nn = int(next(it)); m = int(next(it))",
+          "isCode": true
+        },
+        {
+          "label": "n, m = map(int, input().split())\n# read rest later with input()",
+          "isCode": true
+        },
+        {
+          "label": "import sys\nints = map(int, sys.stdin.buffer.read().split())\n# use 'ints' directly later",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We create an int iterator and read n, m. Other options either mix bytes with ints or leave variables inconsistent with later code.",
+      "wrongExplanations": {
+        "1": "Later next(it) would yield bytes, not ints.",
+        "3": "Later code uses 'it', not 'ints'."
+      },
+      "hint": "We will repeatedly call next(it) to fetch integers.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\ndata = sys.stdin.buffer.read().split()\nit = iter(map(int, data))\nn = next(it); m = next(it)",
+      "codeLabel": "Read input"
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Initialize arrays and read the permutation while filling positions.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "arr = [0]*(n+1)\npos = [0]*(n+1)\nfor i in range(1, n+1):\n    x = next(it)\n    arr[i] = x\n    pos[x] = i",
+          "isCode": true
+        },
+        {
+          "label": "arr = [0]*n\npos = [0]*n\nfor i in range(n):\n    x = next(it)\n    arr[i] = x\n    pos[i] = x",
+          "isCode": true
+        },
+        {
+          "label": "arr = []\npos = [0]*(n+1)\nfor i in range(1, n+1):\n    x = next(it)\n    arr.append(x)\n    pos[i] = x",
+          "isCode": true
+        },
+        {
+          "label": "arr = [0]*(n+1)\npos = [0]*(n+1)\nfor i in range(1, n+1):\n    x = next(it)\n    arr[i] = i\n    pos[i] = x",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Use 1-based arrays and map value x to its index i in pos. Other options use wrong indexing or fill wrong mappings.",
+      "wrongExplanations": {
+        "1": "This makes arrays 0-based and misassigns pos.",
+        "3": "arr should store values from input, not i."
+      },
+      "hint": "pos[x] should equal i where x appears.",
+      "isCodeBuilding": true,
+      "codeSnippet": "arr = [0]*(n+1)\npos = [0]*(n+1)\nfor i in range(1, n+1):\n    x = next(it)\n    arr[i] = x\n    pos[x] = i",
+      "codeLabel": "Init arrays and positions"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Define a helper to detect a break and compute the initial rounds.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def is_break(i):\n    if i <= 1 or i > n:\n        return 0\n    return 1 if pos[i] < pos[i-1] else 0\n\nrounds = 1\nfor i in range(2, n+1):\n    rounds += is_break(i)",
+          "isCode": true
+        },
+        {
+          "label": "def is_break(i):\n    return 1 if pos[i] <= pos[i-1] else 0\n\nrounds = 0\nfor i in range(1, n):\n    rounds += is_break(i)",
+          "isCode": true
+        },
+        {
+          "label": "def is_break(i):\n    if i < 1 or i >= n:\n        return 0\n    return 1 if pos[i+1] < pos[i] else 0\n\nrounds = 0\nfor i in range(1, n):\n    rounds += is_break(i)",
+          "isCode": true
+        },
+        {
+          "label": "def is_break(i):\n    if i <= 1:\n        return 1\n    return 1 if pos[i] < pos[i-1] else 0\n\nrounds = 0\nfor i in range(2, n+1):\n    rounds += is_break(i)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We only count i in [2..n] where pos[i] < pos[i−1], and start from 1 round.",
+      "wrongExplanations": {
+        "1": "Using <= counts equal positions (impossible) and wrong ranges.",
+        "3": "Returning 1 for i<=1 inflates the count."
+      },
+      "hint": "Remember to start with 1 round and only add when pos[i] < pos[i−1].",
+      "isCodeBuilding": true,
+      "codeSnippet": "def is_break(i):\n    if i <= 1 or i > n:\n        return 0\n    return 1 if pos[i] < pos[i-1] else 0\n\nrounds = 1\nfor i in range(2, n+1):\n    rounds += is_break(i)",
+      "codeLabel": "Break helper and initial rounds"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Start processing swaps and read a, b for each operation.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "out_lines = []\nfor _ in range(m):\n    a = next(it); b = next(it)\n    va = arr[a]; vb = arr[b]",
+          "isCode": true
+        },
+        {
+          "label": "for _ in range(m):\n    a, b = next(it)\n    va = a; vb = b",
+          "isCode": true
+        },
+        {
+          "label": "out_lines = []\nfor _ in range(m):\n    a = next(it); b = next(it)\n    va = a; vb = b",
+          "isCode": true
+        },
+        {
+          "label": "out_lines = []\nfor _ in range(m):\n    a = next(it); b = next(it)\n    va = pos[a]; vb = pos[b]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We read positions a,b and fetch values va=arr[a], vb=arr[b]. Other options misread or misuse values.",
+      "wrongExplanations": {
+        "2": "va and vb are values at positions a and b, not the indices themselves.",
+        "3": "pos[a] is the index of value a, not the value at index a."
+      },
+      "hint": "We need both the positions and the values at those positions.",
+      "isCodeBuilding": true,
+      "codeSnippet": "out_lines = []\nfor _ in range(m):\n    a = next(it); b = next(it)\n    va = arr[a]; vb = arr[b]",
+      "codeLabel": "Read swaps"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Choose how to build the affected set and subtract old contributions.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "affected = {va, vb, va+1, vb+1}\nfor i in affected:\n    rounds -= is_break(i)",
+          "isCode": true
+        },
+        {
+          "label": "affected = [va, vb, va-1, vb-1]\nfor i in affected:\n    rounds -= is_break(i)",
+          "isCode": true
+        },
+        {
+          "label": "affected = {va, vb}\nfor i in range(2, n+1):\n    rounds -= is_break(i)",
+          "isCode": true
+        },
+        {
+          "label": "affected = {va, vb, va+1, vb+1}\nfor i in affected:\n    rounds += is_break(i)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We must subtract prior contributions for i in {va, vb, va+1, vb+1} before the swap.",
+      "wrongExplanations": {
+        "1": "You miss the (x, x+1) pairs.",
+        "3": "You should subtract old contributions first, not add."
+      },
+      "hint": "Subtract contributions based on the old positions first.",
+      "isCodeBuilding": true,
+      "codeSnippet": "affected = {va, vb, va+1, vb+1}\nfor i in affected:\n    rounds -= is_break(i)",
+      "codeLabel": "Subtract old contributions"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Swap the values, update positions, then add new contributions and record the answer.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "arr[a], arr[b] = arr[b], arr[a]\npos[va], pos[vb] = b, a\nfor i in affected:\n    rounds += is_break(i)\nout_lines.append(str(rounds))",
+          "isCode": true
+        },
+        {
+          "label": "arr[a], arr[b] = arr[b], arr[a]\npos[a], pos[b] = vb, va\nfor i in affected:\n    rounds += is_break(i)\nout_lines.append(str(rounds))",
+          "isCode": true
+        },
+        {
+          "label": "pos[va], pos[vb] = b, a\narr[a], arr[b] = arr[b], arr[a]\nfor i in affected:\n    rounds += is_break(i)\nout_lines.append(str(rounds))",
+          "isCode": true
+        },
+        {
+          "label": "arr[a], arr[b] = arr[b], arr[a]\n# no pos update\nfor i in affected:\n    rounds += is_break(i)\nout_lines.append(str(rounds))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Swap arr values, then set pos[va]=b and pos[vb]=a, then add new contributions and append rounds.",
+      "wrongExplanations": {
+        "1": "pos maps values to indices, not indices to values.",
+        "3": "You must update pos to reflect the swap."
+      },
+      "hint": "pos[x] should always be the current index of value x.",
+      "isCodeBuilding": true,
+      "codeSnippet": "arr[a], arr[b] = arr[b], arr[a]\npos[va], pos[vb] = b, a\nfor i in affected:\n    rounds += is_break(i)\nout_lines.append(str(rounds))",
+      "codeLabel": "Apply swap and add contributions"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Finally, print all answers.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "sys.stdout.write(\"\\n\".join(out_lines))",
+          "isCode": true
+        },
+        {
+          "label": "print(\"\\n\".join(out_lines))",
+          "isCode": true
+        },
+        {
+          "label": "for x in out_lines:\n    print(x, end=' ')",
+          "isCode": true
+        },
+        {
+          "label": "for x in out_lines:\n    sys.stdout.write(x + \"\\n\"); sys.stdout.flush()",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Writing once is efficient and matches expected line-separated output.",
+      "wrongExplanations": {
+        "2": "Outputs a single line with spaces, not separate lines.",
+        "3": "Flushing per line is unnecessary and slower."
+      },
+      "hint": "We need one number per line.",
+      "isCodeBuilding": true,
+      "codeSnippet": "sys.stdout.write(\"\\n\".join(out_lines))",
+      "codeLabel": "Output"
+    },
+    {
+      "id": "q21",
+      "phase": "Verifying the Solution",
+      "questionText": "Sample input: n=5, arr=4 2 1 5 3. After swap (2,3), what is the number of rounds?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "After swap, arr=4 1 2 5 3. Breaks at i=4 only; rounds = 1+1=2.",
+      "wrongExplanations": {
+        "1": "Re-evaluate pos after the swap; only (4,5) is a break."
+      },
+      "hint": "Compute pos and count pos[i] < pos[i−1] for i=2..5.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q22",
+      "phase": "Verifying the Solution",
+      "questionText": "Continuing the sample, after next swap (1,5), how many rounds?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Array becomes 3 1 2 5 4. Breaks at i=3 and i=5 → rounds = 3.",
+      "wrongExplanations": {
+        "0": "There are two breaks after this swap, not one."
+      },
+      "hint": "Update pos and count again after the swap.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q23",
+      "phase": "Verifying the Solution",
+      "questionText": "Continuing the sample, after final swap (2,3), how many rounds?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Array becomes 3 2 1 5 4. Breaks at i=2, i=3, i=5 → rounds = 4.",
+      "wrongExplanations": {
+        "0": "Count all i with pos[i] < pos[i−1]; there are three breaks."
+      },
+      "hint": "Check i=2..5 systematically.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the time per swap using the update strategy that checks only affected i?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(1)",
+          "isCode": false
+        },
+        {
+          "label": "O(log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(√n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We check a constant-sized set of i and do O(1) updates.",
+      "wrongExplanations": {
+        "2": "We avoid scanning all i for each swap."
+      },
+      "hint": "How many i do we check per swap?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Analyzing Complexity",
+      "questionText": "What extra space is used by the algorithm (besides input)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n) for arr and pos",
+          "isCode": false
+        },
+        {
+          "label": "O(1)",
+          "isCode": false
+        },
+        {
+          "label": "O(m)",
+          "isCode": false
+        },
+        {
+          "label": "O(n + m)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We maintain arr and pos of size n; outputs are streamed.",
+      "wrongExplanations": {
+        "1": "We store position arrays of size n.",
+        "3": "We do not store all queries."
+      },
+      "hint": "Consider sizes of arr and pos.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Analyzing Complexity",
+      "questionText": "Edge case: n=1. What is the number of rounds after any swap operations?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Always 1",
+          "isCode": false
+        },
+        {
+          "label": "Depends on swaps",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "Increases with each swap",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "With a single value, it's collected in one pass; swaps do nothing.",
+      "wrongExplanations": {
+        "1": "No swap changes the single-element array."
+      },
+      "hint": "There is only one number to collect.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\ndata = sys.stdin.buffer.read().split()\nit = iter(map(int, data))\nn = next(it); m = next(it)",
+    "arr = [0]*(n+1)\npos = [0]*(n+1)\nfor i in range(1, n+1):\n    x = next(it)\n    arr[i] = x\n    pos[x] = i",
+    "def is_break(i):\n    if i <= 1 or i > n:\n        return 0\n    return 1 if pos[i] < pos[i-1] else 0\n\nrounds = 1\nfor i in range(2, n+1):\n    rounds += is_break(i)",
+    "out_lines = []\nfor _ in range(m):\n    a = next(it); b = next(it)\n    va = arr[a]; vb = arr[b]",
+    "affected = {va, vb, va+1, vb+1}\nfor i in affected:\n    rounds -= is_break(i)",
+    "arr[a], arr[b] = arr[b], arr[a]\npos[va], pos[vb] = b, a\nfor i in affected:\n    rounds += is_break(i)\nout_lines.append(str(rounds))",
+    "sys.stdout.write(\"\\n\".join(out_lines))"
+  ],
+  "reasoningChain": [
+    {
+      "question": "How many passes does a small example need when scanning left to right, collecting in order?",
+      "insight": "The process collects in order within a pass until the next needed value lies to the left; each such event forces a new pass."
+    },
+    {
+      "question": "How to express the number of passes using positions of values in the array?",
+      "insight": "If pos[i] < pos[i−1], value i lies before i−1, creating a pass boundary. Rounds = 1 + number of such i."
+    },
+    {
+      "question": "Which parts of this count can change after swapping two positions?",
+      "insight": "Only pairs (i−1,i) that involve the swapped values can change: i in {va, vb, va+1, vb+1}."
+    },
+    {
+      "question": "How to update the count efficiently after a swap?",
+      "insight": "Subtract old contributions for affected i, perform the swap and position updates, then add new contributions for the same i."
+    },
+    {
+      "question": "What about duplicates in the affected set and boundaries?",
+      "insight": "Use a set to avoid double counting and treat i outside [2..n] as contributing 0."
+    },
+    {
+      "question": "How to implement this efficiently in code for large inputs?",
+      "insight": "Use fast input, 1-based arrays for arr and pos, a small helper to check breaks, and append outputs to print at the end."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1441,
+    "output_tokens": 14980,
+    "input_cost": 0.001801,
+    "output_cost": 0.1498,
+    "total_cost": 0.151601
+  }
+}

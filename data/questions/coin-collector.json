@@ -1,0 +1,979 @@
+{
+  "id": "coin-collector-guided-mcqs",
+  "title": "Coin Collector",
+  "difficulty": "intermediate",
+  "tags": [
+    "graph"
+  ],
+  "estimatedMinutes": 60,
+  "language": "python",
+  "description": "A game has n rooms and m tunnels between them. Each room has a certain number of coins. What is the maximum number of coins you can collect while moving through the tunnels when you can freely choose your starting and ending room?\n\nInput:\n- First line: two integers n and m (number of rooms and tunnels).\n- Second line: n integers k_1..k_n (coins in each room).\n- Next m lines: each has two integers a b indicating a one-way tunnel from a to b.\n\nOutput:\n- Print one integer: the maximum number of coins you can collect.\n\nNotes:\n- Rooms are numbered 1..n.\n- You collect coins from each room at most once.",
+  "examples": [
+    {
+      "input": "4 4\n4 5 2 7\n1 2\n2 1\n1 3\n2 4",
+      "output": "16",
+      "explanation": "Rooms 1 and 2 form a cycle; you can collect 4+5=9 there. Then from 1 you can reach 3 (2) or 4 via 2->4 (7). Best is 9+7=16."
+    }
+  ],
+  "constraints": [
+    "1 ≤ n ≤ 10^5",
+    "1 ≤ m ≤ 2⋅10^5",
+    "1 ≤ k_i ≤ 10^9",
+    "1 ≤ a, b ≤ n"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "If there is 1 room with 5 coins and no tunnels, what is the maximum number of coins you can collect?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        },
+        {
+          "label": "Undefined because there are no tunnels",
+          "isCode": false
+        },
+        {
+          "label": "Infinite, because you can stay in the room",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "You can start and end in that room and collect its coins once.",
+      "wrongExplanations": {
+        "0": "You can start in the room and collect its coins.",
+        "3": "You collect each room's coins at most once."
+      },
+      "hint": "You can choose any starting and ending room.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "Two rooms: 1 -> 2. Coins: k1=4, k2=7. What is the maximum coins you can collect?",
+      "diagram": "1(4) --> 2(7)",
+      "options": [
+        {
+          "label": "7 (start at room 2)",
+          "isCode": false
+        },
+        {
+          "label": "4 (start at room 1 and end there)",
+          "isCode": false
+        },
+        {
+          "label": "11 (start at 1, go to 2)",
+          "isCode": false
+        },
+        {
+          "label": "0 (no cycles, so nothing)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Start at 1, move to 2, collect 4+7=11. You can choose start and end freely.",
+      "wrongExplanations": {
+        "0": "You can start at 1 and move to 2 for more.",
+        "1": "You are not required to stay; you can move to 2."
+      },
+      "hint": "You can start in 1 and then move to 2.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "Two rooms with a cycle: 1 <-> 2. Coins: k1=3, k2=10. Can you get more by looping many times?",
+      "diagram": "1(3) <--> 2(10)",
+      "options": [
+        {
+          "label": "13 (collect room 1 and 2 once)",
+          "isCode": false
+        },
+        {
+          "label": "Infinite (loop to collect again and again)",
+          "isCode": false
+        },
+        {
+          "label": "10 (best is just room 2)",
+          "isCode": false
+        },
+        {
+          "label": "3 (best is just room 1)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "You collect coins in each room at most once, so 3+10=13.",
+      "wrongExplanations": {
+        "1": "Revisiting rooms does not give more coins.",
+        "2": "You can visit both rooms since there is a cycle."
+      },
+      "hint": "Coins are collected per room, not per visit.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "Graph: 1 -> 2, 2 <-> 3 (2->3 and 3->2). Coins: k1=5, k2=100, k3=1. What's the maximum?",
+      "diagram": "1(5) --> 2(100) <--> 3(1)",
+      "options": [
+        {
+          "label": "101 (just the cycle 2-3)",
+          "isCode": false
+        },
+        {
+          "label": "5 (just room 1)",
+          "isCode": false
+        },
+        {
+          "label": "106 (start at 1, then collect 2 and 3)",
+          "isCode": false
+        },
+        {
+          "label": "105 (some overlap counted twice)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "You can start at 1, then reach the 2-3 cycle and collect 5+100+1=106.",
+      "wrongExplanations": {
+        "0": "Starting at 1 adds more coins before entering the cycle."
+      },
+      "hint": "You can choose any starting room and then move along tunnels.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Understanding the Problem",
+      "questionText": "True or false: By revisiting the same room multiple times, you can collect its coins multiple times.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "True, each visit gives coins",
+          "isCode": false
+        },
+        {
+          "label": "False, each room's coins are collected at most once",
+          "isCode": false
+        },
+        {
+          "label": "True only if the room has an outgoing edge",
+          "isCode": false
+        },
+        {
+          "label": "Depends on the path length",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Coins are taken per room, not per visit. Revisits don't add.",
+      "wrongExplanations": {
+        "0": "Problem does not grant coins per visit."
+      },
+      "hint": "Consider the cycle example: you can't get infinite coins.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "With n up to 10^5 and m up to 2⋅10^5, is it feasible to try all possible paths and sum coins?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, because each edge is processed once",
+          "isCode": false
+        },
+        {
+          "label": "No, there can be exponentially many paths",
+          "isCode": false
+        },
+        {
+          "label": "Yes, if we start at room 1 only",
+          "isCode": false
+        },
+        {
+          "label": "Yes, if we limit path length to n",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Enumerating paths is exponential in worst cases; constraints are large.",
+      "wrongExplanations": {
+        "0": "Enumerating paths is not linear in edges.",
+        "3": "Limiting to n still doesn't handle cycles cleanly."
+      },
+      "hint": "Graphs with many branches have huge path counts.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "Inside any group of rooms where each can reach each other (a cycle-rich region), how many coins can you guarantee to collect if you enter it?",
+      "diagram": "Think of mutually reachable rooms with positive coins.",
+      "options": [
+        {
+          "label": "Only the largest room's coins in that group",
+          "isCode": false
+        },
+        {
+          "label": "Sum of all rooms in that group (each once)",
+          "isCode": false
+        },
+        {
+          "label": "No coins unless you exit the group",
+          "isCode": false
+        },
+        {
+          "label": "It depends on the entry point only",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Within mutually reachable rooms, you can traverse to visit all, collecting each once.",
+      "wrongExplanations": {
+        "0": "You can reach the others too within the group."
+      },
+      "hint": "You can freely start and end; positive coins let you visit all within reach.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Exploring Approaches",
+      "questionText": "If you merge each mutually reachable group into one super-room with sum of its coins, what property does the resulting graph of super-rooms have?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "It still may contain cycles",
+          "isCode": false
+        },
+        {
+          "label": "It has no directed cycles",
+          "isCode": false
+        },
+        {
+          "label": "It has exactly one path between any two nodes",
+          "isCode": false
+        },
+        {
+          "label": "It is undirected",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Merging mutually reachable nodes removes cycles among them; remaining edges cannot form a cycle.",
+      "wrongExplanations": {
+        "0": "Any remaining cycle would imply a larger mutually reachable group."
+      },
+      "hint": "If a cycle remained, those nodes were mutually reachable and should have been merged.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "After merging, each super-room has a coin sum. How can we compute the maximum coins along any directed path in this acyclic graph efficiently?",
+      "diagram": "Process nodes with no incoming edges first and propagate best totals forward.",
+      "options": [
+        {
+          "label": "Start from nodes with no incoming edges, keep a best total for each node, and update successors with best[current] + node_sum",
+          "isCode": false
+        },
+        {
+          "label": "Pick an arbitrary order and re-scan until values stop changing",
+          "isCode": false
+        },
+        {
+          "label": "Always start from the super-room with the most coins",
+          "isCode": false
+        },
+        {
+          "label": "Try all paths starting from every node",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Processing nodes with no incoming edges and propagating best totals computes the maximum sum along any path.",
+      "wrongExplanations": {
+        "1": "Convergence is not guaranteed quickly and is inefficient.",
+        "2": "Largest coin node might not lead to the best path."
+      },
+      "hint": "Think of accumulating the best total when all predecessors are handled.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "Consider an acyclic graph of super-rooms: A(5) -> B(3) -> D(10); A(5) -> C(7) -> D(10). What is the maximum coins along a path?",
+      "diagram": "A(5)\n | \\\n v  v\nB(3) C(7)\n  \\   /\n    v\n   D(10)",
+      "options": [
+        {
+          "label": "5 + 3 + 10 = 18",
+          "isCode": false
+        },
+        {
+          "label": "5 + 7 + 10 = 22",
+          "isCode": false
+        },
+        {
+          "label": "5 + 3 + 7 + 10 = 25",
+          "isCode": false
+        },
+        {
+          "label": "10 (just D)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Best path is A->C->D: 5+7+10=22. Paths can't merge to count both B and C.",
+      "wrongExplanations": {
+        "2": "You can't traverse both B and C in one directed path."
+      },
+      "hint": "Pick one branch to D for a single directed path.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "We need to find groups of mutually reachable rooms. Which high-level two-step process will correctly identify these groups?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "First, explore finishing order on the original graph; second, explore nodes on the reversed graph in decreasing finishing order, grouping visited nodes",
+          "isCode": false
+        },
+        {
+          "label": "Explore the reversed graph first; then the original graph in any order",
+          "isCode": false
+        },
+        {
+          "label": "Run a single pass from room 1 and group whatever is visited",
+          "isCode": false
+        },
+        {
+          "label": "Pick random starts until all rooms are grouped",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Compute a finishing order on original edges, then use reversed edges in that order to group mutually reachable rooms.",
+      "wrongExplanations": {
+        "1": "Order matters: reversing first misses correct grouping.",
+        "2": "Starting at room 1 may miss other groups."
+      },
+      "hint": "Think: finish times first; then reversed exploration.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "Why do we explore on the reversed graph in the second pass?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Because reversed edges ensure we stay inside a mutually reachable group when starting from a highest finishing node",
+          "isCode": false
+        },
+        {
+          "label": "To avoid counting edges twice",
+          "isCode": false
+        },
+        {
+          "label": "Because the original graph cannot be explored twice",
+          "isCode": false
+        },
+        {
+          "label": "Because reversed graph has fewer edges",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Reversed edges connect nodes that can reach each other in the original; the order guarantees grouping remains inside.",
+      "wrongExplanations": {
+        "1": "The purpose isn't de-duplication.",
+        "3": "Edge counts are the same; property of reachability matters."
+      },
+      "hint": "Consider how reversed edges traverse predecessors.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "When building the super-graph between groups, should we keep multiple identical edges between the same pair of groups?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, they are required to be accurate",
+          "isCode": false
+        },
+        {
+          "label": "No, removing duplicates is safe and avoids extra work",
+          "isCode": false
+        },
+        {
+          "label": "No, but removing them breaks correctness",
+          "isCode": false
+        },
+        {
+          "label": "Yes, otherwise we lose path counts",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Duplicate edges don't change reachability; removing them avoids redundant processing.",
+      "wrongExplanations": {
+        "0": "They don't change the maximum total.",
+        "3": "We only need reachability and totals, not counts of parallel edges."
+      },
+      "hint": "We care about maximum totals, not the number of distinct edges.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Building the Idea",
+      "questionText": "When accumulating best totals in the super-graph, what initial value should each group's best total have?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "0 for all groups",
+          "isCode": false
+        },
+        {
+          "label": "Its own coin sum for each group",
+          "isCode": false
+        },
+        {
+          "label": "Infinity for groups with no incoming edges",
+          "isCode": false
+        },
+        {
+          "label": "Sum of all groups' coins",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "A path can start in any group, so the best total at start is that group's own sum.",
+      "wrongExplanations": {
+        "0": "This would ignore starting directly at that group."
+      },
+      "hint": "You can start anywhere; include the group's own coins.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Set up input reading and build both the adjacency list and its reverse (0-based indexing). Choose the correct snippet.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\nfrom collections import deque\n\ndef main():\n    data = sys.stdin.read().strip().split()\n    it = iter(data)\n    n = int(next(it)); m = int(next(it))\n    coins = [int(next(it)) for _ in range(n)]\n    g = [[] for _ in range(n)]\n    gr = [[] for _ in range(n)]\n    for _ in range(m):\n        a = int(next(it)) - 1\n        b = int(next(it)) - 1\n        g[a].append(b)\n        gr[b].append(a)",
+          "isCode": true
+        },
+        {
+          "label": "import sys\nfrom collections import deque\n\ndef main():\n    data = sys.stdin.read().split()\n    it = iter(data)\n    n = int(next(it)); m = int(next(it))\n    coins = [int(next(it)) for _ in range(n)]\n    g = [[] for _ in range(n)]\n    gr = [[] for _ in range(n)]\n    for _ in range(m):\n        a = int(next(it))\n        b = int(next(it))\n        g[a].append(b)\n        gr[b].append(a)",
+          "isCode": true
+        },
+        {
+          "label": "import sys\nfrom collections import deque\n\ndef main():\n    n, m = map(int, sys.stdin.readline().split())\n    coins = list(map(int, sys.stdin.readline().split()))\n    g = [[] for _ in range(n)]\n    gr = [[] for _ in range(n)]\n    for _ in range(m):\n        a, b = map(int, sys.stdin.readline().split())\n        g[a-1].append(b-1)\n        gr[a-1].append(b-1)",
+          "isCode": true
+        },
+        {
+          "label": "import sys\nfrom collections import deque\n\ndef main():\n    data = sys.stdin.read().strip().split()\n    it = iter(data)\n    n = int(next(it)); m = int(next(it))\n    coins = [0]*n\n    for i in range(n):\n        coins[i] = int(next(it))\n    g = [[] for _ in range(n)]\n    for _ in range(m):\n        a = int(next(it)) - 1\n        b = int(next(it)) - 1\n        g[b].append(a)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We must subtract 1 from input nodes and build both g and gr: g[a].append(b), gr[b].append(a).",
+      "wrongExplanations": {
+        "1": "Missing -1 shift; indices go out of range.",
+        "2": "Built reverse graph incorrectly (used gr[a-1].append(b-1)).",
+        "3": "Missing reverse graph gr; also building g backwards."
+      },
+      "hint": "Remember to store both the original and reversed edges.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\nfrom collections import deque\n\ndef main():\n    data = sys.stdin.read().strip().split()\n    it = iter(data)\n    n = int(next(it)); m = int(next(it))\n    coins = [int(next(it)) for _ in range(n)]\n    g = [[] for _ in range(n)]\n    gr = [[] for _ in range(n)]\n    for _ in range(m):\n        a = int(next(it)) - 1\n        b = int(next(it)) - 1\n        g[a].append(b)\n        gr[b].append(a)",
+      "codeLabel": "Read input & build graphs"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Add recursion limit and the first exploration to record finishing order on g.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    sys.setrecursionlimit(1 << 25)\n    vis = [False] * n\n    order = []\n    def dfs1(u):\n        vis[u] = True\n        for v in g[u]:\n            if not vis[v]:\n                dfs1(v)\n        order.append(u)",
+          "isCode": true
+        },
+        {
+          "label": "    sys.setrecursionlimit(1 << 10)\n    vis = [False] * n\n    order = []\n    def dfs1(u):\n        order.append(u)\n        for v in gr[u]:\n            if not vis[v]:\n                vis[v] = True\n                dfs1(v)",
+          "isCode": true
+        },
+        {
+          "label": "    vis = [False] * n\n    order = []\n    def dfs1(u):\n        for v in g[u]:\n            if not vis[v]:\n                dfs1(v)\n        vis[u] = True\n        order.append(u)",
+          "isCode": true
+        },
+        {
+          "label": "    sys.setrecursionlimit(1 << 25)\n    vis = [False] * n\n    order = []\n    def dfs1(u):\n        vis[u] = True\n        for v in gr[u]:\n            if not vis[v]:\n                dfs1(v)\n        order.append(u)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need a deep recursion limit, traverse g, and append after exploring children.",
+      "wrongExplanations": {
+        "1": "Too small limit and uses gr instead of g.",
+        "3": "First pass must use g, not gr."
+      },
+      "hint": "Append after visiting neighbors; use the original edges.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    sys.setrecursionlimit(1 << 25)\n    vis = [False] * n\n    order = []\n    def dfs1(u):\n        vis[u] = True\n        for v in g[u]:\n            if not vis[v]:\n                dfs1(v)\n        order.append(u)",
+      "codeLabel": "First pass (finish order)"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Run the first pass from all unvisited nodes to fill the order list.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    for u in range(n):\n        if not vis[u]:\n            dfs1(u)",
+          "isCode": true
+        },
+        {
+          "label": "    for u in range(1, n+1):\n        if not vis[u]:\n            dfs1(u)",
+          "isCode": true
+        },
+        {
+          "label": "    for u in reversed(range(n)):\n        dfs1(u)",
+          "isCode": true
+        },
+        {
+          "label": "    while True:\n        dfs1(0)\n        break",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We must start from every node not yet visited using 0-based indices.",
+      "wrongExplanations": {
+        "1": "This uses 1-based indices on 0-based arrays.",
+        "2": "This ignores visited checks and may re-run dfs1 unnecessarily."
+      },
+      "hint": "Ensure you don't miss disconnected nodes.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    for u in range(n):\n        if not vis[u]:\n            dfs1(u)",
+      "codeLabel": "Run first pass"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Define structures for component IDs and a second exploration on gr that returns the sum of coins in the current group.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    comp_id = [-1] * n\n    comp_sum = []\n    def dfs2(u, cid):\n        comp_id[u] = cid\n        total = coins[u]\n        for v in gr[u]:\n            if comp_id[v] == -1:\n                total += dfs2(v, cid)\n        return total",
+          "isCode": true
+        },
+        {
+          "label": "    comp_id = [0] * n\n    comp_sum = []\n    def dfs2(u, cid):\n        total = coins[u]\n        for v in g[u]:\n            if comp_id[v] == 0:\n                total += dfs2(v, cid)\n        comp_id[u] = cid\n        return total",
+          "isCode": true
+        },
+        {
+          "label": "    comp_id = [-1] * n\n    comp_sum = []\n    def dfs2(u, cid):\n        comp_id[u] = cid\n        total = coins[u]\n        for v in gr[u]:\n            if comp_id[v] != -1:\n                total += dfs2(v, cid)\n        return total",
+          "isCode": true
+        },
+        {
+          "label": "    comp_id = [-1] * n\n    comp_sum = []\n    def dfs2(u, cid):\n        total = 0\n        for v in g[u]:\n            if comp_id[v] == -1:\n                comp_id[v] = cid\n                total += coins[v]\n        return total",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Second pass traverses gr, marks comp_id immediately, and accumulates coins via recursion.",
+      "wrongExplanations": {
+        "1": "Traverses g, not gr, and comp_id initialization/conditions are inconsistent.",
+        "3": "Doesn't traverse all nodes in the group; ignores u's own coins."
+      },
+      "hint": "Use the reversed edges; mark before recursing; sum all reachable in this pass.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    comp_id = [-1] * n\n    comp_sum = []\n    def dfs2(u, cid):\n        comp_id[u] = cid\n        total = coins[u]\n        for v in gr[u]:\n            if comp_id[v] == -1:\n                total += dfs2(v, cid)\n        return total",
+      "codeLabel": "Second pass (component sum)"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Use the finishing order to create components and record each group's coin sum.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    for u in reversed(order):\n        if comp_id[u] == -1:\n            cid = len(comp_sum)\n            comp_sum.append(dfs2(u, cid))",
+          "isCode": true
+        },
+        {
+          "label": "    for u in order:\n        if comp_id[u] == -1:\n            cid = len(comp_sum)\n            comp_sum.append(dfs2(u, cid))",
+          "isCode": true
+        },
+        {
+          "label": "    for u in reversed(order):\n        if vis[u] == False:\n            cid = len(comp_sum)\n            comp_sum.append(dfs2(u, cid))",
+          "isCode": true
+        },
+        {
+          "label": "    for u in range(n):\n        cid = len(comp_sum)\n        comp_sum.append(dfs2(u, cid))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Traverse nodes in reversed finishing order and start a new group only if unassigned.",
+      "wrongExplanations": {
+        "1": "Order must be reversed.",
+        "2": "Check comp_id, not the vis array from the first pass."
+      },
+      "hint": "Use reversed finishing order and comp_id guard.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    for u in reversed(order):\n        if comp_id[u] == -1:\n            cid = len(comp_sum)\n            comp_sum.append(dfs2(u, cid))",
+      "codeLabel": "Create components"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Build the super-graph between components and indegree array, avoiding duplicate edges.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    C = len(comp_sum)\n    cg = [[] for _ in range(C)]\n    indeg = [0] * C\n    seen_edge = set()\n    for u in range(n):\n        for v in g[u]:\n            cu = comp_id[u]\n            cv = comp_id[v]\n            if cu != cv and (cu, cv) not in seen_edge:\n                seen_edge.add((cu, cv))\n                cg[cu].append(cv)\n                indeg[cv] += 1",
+          "isCode": true
+        },
+        {
+          "label": "    C = len(comp_sum)\n    cg = [[] for _ in range(C)]\n    indeg = [0] * C\n    for u in range(n):\n        for v in gr[u]:\n            cu = comp_id[u]\n            cv = comp_id[v]\n            if cu != cv:\n                cg[cv].append(cu)\n                indeg[cu] += 1",
+          "isCode": true
+        },
+        {
+          "label": "    C = len(comp_sum)\n    cg = [[] for _ in range(C)]\n    indeg = [0] * C\n    for u in range(n):\n        for v in g[u]:\n            cu = comp_id[u]\n            cv = comp_id[v]\n            if cu != cv:\n                cg[cu].append(cv)\n                indeg[cv] += 1\n                indeg[cv] += 1",
+          "isCode": true
+        },
+        {
+          "label": "    C = len(comp_sum)\n    cg = [[] for _ in range(C)]\n    indeg = [0] * C\n    seen_edge = set()\n    for u in range(n):\n        for v in g[u]:\n            cu = comp_id[u]\n            cv = comp_id[v]\n            if (cu, cv) not in seen_edge:\n                seen_edge.add((cu, cv))\n                cg[cv].append(cu)\n                indeg[cu] += 1",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Use edges of g between different components; add cu->cv, increase indegree of cv; avoid duplicates.",
+      "wrongExplanations": {
+        "1": "Uses gr and reverses direction.",
+        "3": "Reverses direction when adding to cg."
+      },
+      "hint": "Edge direction in the super-graph follows the original direction.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    C = len(comp_sum)\n    cg = [[] for _ in range(C)]\n    indeg = [0] * C\n    seen_edge = set()\n    for u in range(n):\n        for v in g[u]:\n            cu = comp_id[u]\n            cv = comp_id[v]\n            if cu != cv and (cu, cv) not in seen_edge:\n                seen_edge.add((cu, cv))\n                cg[cu].append(cv)\n                indeg[cv] += 1",
+      "codeLabel": "Build super-graph"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "Propagate maximum totals along the super-graph from groups with indegree 0.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    dist = comp_sum[:]  # start with own component sum\n    dq = deque(i for i in range(C) if indeg[i] == 0)\n    while dq:\n        u = dq.popleft()\n        for v in cg[u]:\n            if dist[v] < dist[u] + comp_sum[v]:\n                dist[v] = dist[u] + comp_sum[v]\n            indeg[v] -= 1\n            if indeg[v] == 0:\n                dq.append(v)",
+          "isCode": true
+        },
+        {
+          "label": "    dist = [0] * C\n    dq = deque(range(C))\n    while dq:\n        u = dq.popleft()\n        for v in cg[u]:\n            dist[v] = max(dist[v], dist[u])\n            dq.append(v)",
+          "isCode": true
+        },
+        {
+          "label": "    dist = comp_sum[:]\n    dq = deque(i for i in range(C) if indeg[i] > 0)\n    while dq:\n        u = dq.popleft()\n        for v in cg[u]:\n            dist[v] = max(dist[v], dist[u] + dist[v])",
+          "isCode": true
+        },
+        {
+          "label": "    dist = comp_sum[:]\n    dq = deque(i for i in range(C))\n    while dq:\n        u = dq.popleft()\n        for v in cg[u]:\n            dist[v] = dist[u] + comp_sum[v]\n            indeg[v] -= 1",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Initialize with own sums, start from indegree-0 groups, and update successors with best[u] + their sum.",
+      "wrongExplanations": {
+        "1": "Starts with zeros and revisits nodes without respecting prerequisites.",
+        "3": "Overwrites dist[v] without taking maximum and ignores starting points."
+      },
+      "hint": "Only push a node when all predecessors have been processed.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    dist = comp_sum[:]  # start with own component sum\n    dq = deque(i for i in range(C) if indeg[i] == 0)\n    while dq:\n        u = dq.popleft()\n        for v in cg[u]:\n            if dist[v] < dist[u] + comp_sum[v]:\n                dist[v] = dist[u] + comp_sum[v]\n            indeg[v] -= 1\n            if indeg[v] == 0:\n                dq.append(v)",
+      "codeLabel": "Propagate best totals"
+    },
+    {
+      "id": "q22",
+      "phase": "Writing the Code",
+      "questionText": "Finish by printing the final answer and the main guard.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    print(max(dist) if dist else 0)\n\nif __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "    print(sum(dist))\n\nif __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "    print(max(comp_sum))\n\nif __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "    print(dist[-1])\n\nif __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The answer is the maximum best total over all groups; handle the empty case.",
+      "wrongExplanations": {
+        "1": "Sum of bests double counts across different endpoints.",
+        "3": "The last element isn't necessarily the maximum."
+      },
+      "hint": "We need the maximum path total over all endpoints.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    print(max(dist) if dist else 0)\n\nif __name__ == \"__main__\":\n    main()",
+      "codeLabel": "Output & guard"
+    },
+    {
+      "id": "q23",
+      "phase": "Verifying the Solution",
+      "questionText": "Run your reasoning on the sample:\n4 4\n4 5 2 7\n1 2\n2 1\n1 3\n2 4\nWhat components and final answer do you expect?",
+      "diagram": "SCCs: {1,2} sum=9; {3} sum=2; {4} sum=7. Edges: {1,2}->3, {1,2}->4.",
+      "options": [
+        {
+          "label": "Components sums [9,2,7]; maximum path 9+7=16",
+          "isCode": false
+        },
+        {
+          "label": "Components sums [4,5,2,7]; maximum path 4+5+2+7=18",
+          "isCode": false
+        },
+        {
+          "label": "Components sums [9,2,7]; maximum path 9+2+7=18",
+          "isCode": false
+        },
+        {
+          "label": "Components sums [4,5,2,7]; maximum path 7",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Cycle {1,2} sums to 9. Best path goes to 4: 9+7=16.",
+      "wrongExplanations": {
+        "2": "3 and 4 are separate branches; you can't take both in one path."
+      },
+      "hint": "From {1,2} you must choose either 3 or 4.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Verifying the Solution",
+      "questionText": "3 rooms with a cycle: 1->2, 2->3, 3->1. Coins 1,2,3. What should the program output?",
+      "diagram": "1(1) -> 2(2) -> 3(3) -> 1(1)",
+      "options": [
+        {
+          "label": "6",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "Infinite",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "All three are mutually reachable, so you can collect 1+2+3=6.",
+      "wrongExplanations": {
+        "1": "You can traverse the whole cycle.",
+        "3": "Coins aren't collected per visit."
+      },
+      "hint": "Treat the cycle as one group.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the overall time complexity of this approach (two explorations + building super-graph + propagation)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n + m)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(m^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n + m log m)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each edge and node is processed a constant number of times overall.",
+      "wrongExplanations": {
+        "1": "We don't do nested loops over all node pairs."
+      },
+      "hint": "Count how many times each edge is seen across all steps.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the auxiliary space complexity (besides input storage)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n + m)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(1)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We store graphs, reverse graph, arrays for visits, order, components, and the super-graph.",
+      "wrongExplanations": {
+        "3": "Graphs and arrays require memory proportional to nodes/edges."
+      },
+      "hint": "We keep adjacency lists and several arrays.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q27",
+      "phase": "Analyzing Complexity",
+      "questionText": "Which edge cases must be handled carefully in the implementation?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "1-indexed input converted to 0-based; large recursion depth; graphs with no edges",
+          "isCode": false
+        },
+        {
+          "label": "Only graphs with exactly one cycle",
+          "isCode": false
+        },
+        {
+          "label": "Rooms with zero coins",
+          "isCode": false
+        },
+        {
+          "label": "Negative coin counts",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Adjust indices, ensure recursion limit is high, and handle when super-graph has no nodes.",
+      "wrongExplanations": {
+        "2": "All coins are positive per constraints.",
+        "4": "Negative coins are not allowed by constraints."
+      },
+      "hint": "Revisit constraints and input format.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\nfrom collections import deque\n\ndef main():\n    data = sys.stdin.read().strip().split()\n    it = iter(data)\n    n = int(next(it)); m = int(next(it))\n    coins = [int(next(it)) for _ in range(n)]\n    g = [[] for _ in range(n)]\n    gr = [[] for _ in range(n)]\n    for _ in range(m):\n        a = int(next(it)) - 1\n        b = int(next(it)) - 1\n        g[a].append(b)\n        gr[b].append(a)",
+    "    sys.setrecursionlimit(1 << 25)\n    vis = [False] * n\n    order = []\n    def dfs1(u):\n        vis[u] = True\n        for v in g[u]:\n            if not vis[v]:\n                dfs1(v)\n        order.append(u)",
+    "    for u in range(n):\n        if not vis[u]:\n            dfs1(u)",
+    "    comp_id = [-1] * n\n    comp_sum = []\n    def dfs2(u, cid):\n        comp_id[u] = cid\n        total = coins[u]\n        for v in gr[u]:\n            if comp_id[v] == -1:\n                total += dfs2(v, cid)\n        return total",
+    "    for u in reversed(order):\n        if comp_id[u] == -1:\n            cid = len(comp_sum)\n            comp_sum.append(dfs2(u, cid))",
+    "    C = len(comp_sum)\n    cg = [[] for _ in range(C)]\n    indeg = [0] * C\n    seen_edge = set()\n    for u in range(n):\n        for v in g[u]:\n            cu = comp_id[u]\n            cv = comp_id[v]\n            if cu != cv and (cu, cv) not in seen_edge:\n                seen_edge.add((cu, cv))\n                cg[cu].append(cv)\n                indeg[cv] += 1",
+    "    dist = comp_sum[:]  # start with own component sum\n    dq = deque(i for i in range(C) if indeg[i] == 0)\n    while dq:\n        u = dq.popleft()\n        for v in cg[u]:\n            if dist[v] < dist[u] + comp_sum[v]:\n                dist[v] = dist[u] + comp_sum[v]\n            indeg[v] -= 1\n            if indeg[v] == 0:\n                dq.append(v)",
+    "    print(max(dist) if dist else 0)\n\nif __name__ == \"__main__\":\n    main()"
+  ],
+  "reasoningChain": [
+    {
+      "question": "What happens inside a cycle regarding coin collection?",
+      "insight": "You can collect each room's coins at most once, so entering a mutually reachable set allows collecting the sum of its rooms once."
+    },
+    {
+      "question": "How to simplify the graph using this fact?",
+      "insight": "Merge each mutually reachable set into a single node with weight equal to the sum of its rooms; the resulting graph has no directed cycles."
+    },
+    {
+      "question": "After merging, what problem remains?",
+      "insight": "Find the maximum sum along any directed path in the acyclic graph where each node has a weight."
+    },
+    {
+      "question": "How to find mutually reachable sets efficiently?",
+      "insight": "Run one exploration to record finishing order on original edges, then explore the reversed edges in decreasing finishing order to group nodes."
+    },
+    {
+      "question": "How to compute the maximum path sum on the acyclic graph?",
+      "insight": "Initialize each node's best total with its own weight, process nodes with no incoming edges first, and update successors with best[current] + their weight."
+    },
+    {
+      "question": "What implementation details matter for constraints?",
+      "insight": "Use 0-based indices, increase recursion limit for deep recursion, and avoid redundant edges to keep processing linear."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1440,
+    "output_tokens": 16117,
+    "input_cost": 0.0018,
+    "output_cost": 0.16117,
+    "total_cost": 0.16297
+  }
+}

@@ -1,0 +1,947 @@
+{
+  "id": "josephus-queries-kth-elimination",
+  "title": "Josephus Queries",
+  "difficulty": "intermediate",
+  "tags": [
+    "math"
+  ],
+  "estimatedMinutes": 50,
+  "language": "python",
+  "description": "Consider a game where there are n children (numbered 1,2,\\dots,n) in a circle. During the game, every second child is removed from the circle, until there are no children left.\n\nYour task is to process q queries of the form: \"when there are n children, who is the k th child that will be removed?\"\n\nInput:\n- The first line has an integer q: the number of queries.\n- After this, there are q lines that describe the queries. Each line has two integers n and k: the number of children and the position of the child.\n\nOutput:\n- Print q integers: the answer for each query.",
+  "examples": [
+    {
+      "input": "4\n7 1\n7 3\n2 2\n1337 1313\n",
+      "output": "2\n6\n1\n1107\n",
+      "explanation": "For n=7, the elimination order is [2,4,6,1,5,3,7]. For n=2 it's [2,1]. The last case follows the derived method."
+    }
+  ],
+  "constraints": [
+    "1 <= q <= 1e5",
+    "1 <= k <= n <= 1e9"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "For n=5, what are the first three children removed when every second child is eliminated?",
+      "diagram": "Circle: 1 2 3 4 5 -> remove 2 -> [1 3 4 5], remove 4 -> [1 3 5], remove 1 -> ...",
+      "options": [
+        {
+          "label": "[2, 4, 1]",
+          "isCode": false
+        },
+        {
+          "label": "[2, 3, 4]",
+          "isCode": false
+        },
+        {
+          "label": "[1, 3, 5]",
+          "isCode": false
+        },
+        {
+          "label": "[2, 4, 6]",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We remove every second: 2, 4, then from [1,3,5] the next is 1. Others ignore circle wrap or step size.",
+      "wrongExplanations": {
+        "1": "This assumes linear removal without proper stepping and wrap.",
+        "2": "This lists the remaining odds, not the removal order."
+      },
+      "hint": "Simulate step-by-step and wrap around the circle.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "For n=4, which child is removed 3rd?",
+      "diagram": "Sequence: [1,2,3,4] -> remove 2 -> [1,3,4] -> remove 4 -> [1,3] -> next remove?",
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Order is [2,4,1,3]. The 3rd is 1. Many expect 3rd to be 3 due to alternating pattern, but wrap matters.",
+      "wrongExplanations": {
+        "1": "3 is the 4th removal, not the 3rd."
+      },
+      "hint": "After removing 4, the circle is [1,3], and the next removed is the second from the current pointer.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "Edge case: if n=1 and k=1, which child is removed?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "Undefined",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Only child 1 exists and is removed first.",
+      "wrongExplanations": {
+        "0": "Numbering starts from 1, not 0.",
+        "2": "It's well-defined: remove the only child."
+      },
+      "hint": "There is only one child; who else could it be?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "When n is even, what are the first n/2 removed children (in order)?",
+      "diagram": "Example n=8 -> ?",
+      "options": [
+        {
+          "label": "All even-numbered children in increasing order",
+          "isCode": false
+        },
+        {
+          "label": "All odd-numbered children in increasing order",
+          "isCode": false
+        },
+        {
+          "label": "Even numbers in decreasing order",
+          "isCode": false
+        },
+        {
+          "label": "Alternating odd, even starting from 1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Every second removal from the start removes 2,4,6,... in order. Others mismatch the stepping.",
+      "wrongExplanations": {
+        "1": "Odds are not removed until after all evens are gone (for even n).",
+        "2": "Removals proceed forward, not backward."
+      },
+      "hint": "Simulate n=6 or n=8 quickly to see the pattern.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Exploring Approaches",
+      "questionText": "With q up to 1e5 and n up to 1e9, is simulating the process by storing/removing children feasible per query?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, using a list and popping elements",
+          "isCode": false
+        },
+        {
+          "label": "Yes, using a linked list representation",
+          "isCode": false
+        },
+        {
+          "label": "No, it's too slow and memory-heavy",
+          "isCode": false
+        },
+        {
+          "label": "Yes, if we precompute all answers up to 1e9",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "We need to avoid O(n) per query. Memory also disallows holding up to 1e9 elements.",
+      "wrongExplanations": {
+        "0": "Popping in a large list is costly; cannot handle n up to 1e9.",
+        "1": "Even with linked structures, creating 1e9 nodes is infeasible."
+      },
+      "hint": "Think about per-query time and memory with the largest n.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "For any n, what is the k-th removed child when k ≤ floor(n/2)?",
+      "diagram": "First wave removes the evens.",
+      "options": [
+        {
+          "label": "2k - 1",
+          "isCode": false
+        },
+        {
+          "label": "k",
+          "isCode": false
+        },
+        {
+          "label": "2k",
+          "isCode": false
+        },
+        {
+          "label": "n - k + 1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "The first floor(n/2) removals are 2,4,6,... => 2k.",
+      "wrongExplanations": {
+        "0": "Odd numbers are not removed in the first wave.",
+        "1": "This ignores the 'every second' rule."
+      },
+      "hint": "Look back at Q4.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "For n=5 after removing evens [2,4], the remaining circle is [1,3,5]. In which order will these odds be removed next?",
+      "diagram": "After evens: [1,3,5]; the next removal counts every second continuing from the current pointer.",
+      "options": [
+        {
+          "label": "[1, 5, 3]",
+          "isCode": false
+        },
+        {
+          "label": "[3, 1, 5]",
+          "isCode": false
+        },
+        {
+          "label": "[5, 3, 1]",
+          "isCode": false
+        },
+        {
+          "label": "[3, 5, 1]",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Simulation gives [1,5,3]. The start for the next phase is at 1 in this case.",
+      "wrongExplanations": {
+        "1": "This would start eliminating at 3, which doesn't match the continued counting.",
+        "3": "This reverses parts of the order incorrectly."
+      },
+      "hint": "Continue from the position after the last removed even (wrap to 1).",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Building the Idea",
+      "questionText": "After removing all evens from n children, how many children remain?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "n // 2",
+          "isCode": false
+        },
+        {
+          "label": "n - (n // 2)",
+          "isCode": false
+        },
+        {
+          "label": "(n - 1) // 2",
+          "isCode": false
+        },
+        {
+          "label": "n - 1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Remaining are the odds: count is ceil(n/2) = n - floor(n/2).",
+      "wrongExplanations": {
+        "0": "This is correct only for even n.",
+        "2": "This undercounts for odd n."
+      },
+      "hint": "For odd n, there is one more odd than even.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "Let L be the elimination order (by positions 1..r) for a circle of size r = ceil(n/2). How is the elimination order among the remaining odds related to L?",
+      "diagram": "Example r=3: L (standard) = [2,1,3]; observed odds order = [1,3,2].",
+      "options": [
+        {
+          "label": "Exactly L as-is",
+          "isCode": false
+        },
+        {
+          "label": "Reverse of L",
+          "isCode": false
+        },
+        {
+          "label": "L rotated left by 1 position",
+          "isCode": false
+        },
+        {
+          "label": "L rotated right by 1 position",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "After evens, counting continues so the next removal corresponds to a left rotation by 1.",
+      "wrongExplanations": {
+        "0": "This misses the shift in the starting point.",
+        "3": "The shift direction is opposite; check r=3 example."
+      },
+      "hint": "Compare Q7 with the standard order for r=3: [2,1,3].",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "Suppose k > floor(n/2). Let k' = k - floor(n/2) and r = ceil(n/2). What is the index (1..r) in the smaller circle we should use to get the next removed odd?",
+      "diagram": "We need to rotate L left by 1.",
+      "options": [
+        {
+          "label": "k'",
+          "isCode": false
+        },
+        {
+          "label": "k' + 1 (wrapping to 1 if k' = r)",
+          "isCode": false
+        },
+        {
+          "label": "r - k' + 1",
+          "isCode": false
+        },
+        {
+          "label": "(k' - 1) % r + 1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Left rotation by 1 shifts k' to k'+1, with wrap to 1 when k'=r.",
+      "wrongExplanations": {
+        "0": "This ignores the rotation by 1.",
+        "3": "This undoes the 1-step rotation."
+      },
+      "hint": "Take r=3 and k'=1: the index should be 2, not 1.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "If s is the elimination index (1..r) in the smaller circle, what is the original label of that removed odd?",
+      "diagram": "Odds are [1,3,5,...].",
+      "options": [
+        {
+          "label": "s",
+          "isCode": false
+        },
+        {
+          "label": "2*s - 1",
+          "isCode": false
+        },
+        {
+          "label": "2*s",
+          "isCode": false
+        },
+        {
+          "label": "2*s + 1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "The s-th odd number is 2*s - 1.",
+      "wrongExplanations": {
+        "2": "2*s gives even numbers, which have already been removed."
+      },
+      "hint": "1st odd is 1; 2nd odd is 3; what's the formula?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "What base case ensures the recurrence stops?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Return 0 when n == 0",
+          "isCode": false
+        },
+        {
+          "label": "Return k when n == 1",
+          "isCode": false
+        },
+        {
+          "label": "Return 1 when n == 1",
+          "isCode": false
+        },
+        {
+          "label": "Return n when k == 1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "For n=1, the only child removed is 1.",
+      "wrongExplanations": {
+        "1": "k is always 1 in this case but returning k obscures the meaning; be explicit about the label 1.",
+        "3": "For k==1 with n>1, the first removed is 2, not n."
+      },
+      "hint": "See Q3.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "Using the derived steps, what is the 4th removed child when n=5?",
+      "diagram": "We know the full order for n=5 is [2,4,1,5,3].",
+      "options": [
+        {
+          "label": "5",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "After [2,4], we handle odds with the rotation rule, giving [1,5,3]. The 4th is 5.",
+      "wrongExplanations": {
+        "1": "1 is the 3rd removed.",
+        "2": "3 is the 5th removed."
+      },
+      "hint": "First two are the evens: [2,4], then odds [1,5,3].",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Writing the Code",
+      "questionText": "Start the solution file with import and the function header.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\n\ndef kth_removed(n, k):",
+          "isCode": true
+        },
+        {
+          "label": "def kth_removed(n, k):\nimport sys",
+          "isCode": true
+        },
+        {
+          "label": "import sys\n\ndef kth_removed(n):",
+          "isCode": true
+        },
+        {
+          "label": "import sys\n\ndef kth_removed(k, n):",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need sys for fast IO and a header with parameters (n, k).",
+      "wrongExplanations": {
+        "1": "Placing import unindented right after a function header would leave the function with no indented body.",
+        "2": "The function needs both n and k."
+      },
+      "hint": "Follow standard Python structure: imports, then function definition.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\n\ndef kth_removed(n, k):",
+      "codeLabel": "Import and function header"
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Write the base case and compute m = n // 2 inside the function.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    if k == 1:\n        return 1\n    m = n // 2",
+          "isCode": true
+        },
+        {
+          "label": "    if n <= 1:\n        return 0\n    m = n // 2",
+          "isCode": true
+        },
+        {
+          "label": "    if n == 1:\n        return 1\n    m = (n + 1) // 2",
+          "isCode": true
+        },
+        {
+          "label": "    if n == 1:\n        return 1\n    m = n // 2",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 3,
+      "explanation": "For n==1 return 1. We need m = n // 2 (floor).",
+      "wrongExplanations": {
+        "0": "If n>1 and k==1, returning 1 is wrong (first removed is 2).",
+        "2": "Using (n+1)//2 here misclassifies how many even removals there are."
+      },
+      "hint": "Recall Q3 and that the first batch count is floor(n/2).",
+      "isCodeBuilding": true,
+      "codeSnippet": "    if n == 1:\n        return 1\n    m = n // 2",
+      "codeLabel": "Base case and m"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Handle the first batch of removals when k ≤ m.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    if k <= m:\n        return 2 * k",
+          "isCode": true
+        },
+        {
+          "label": "    if k < m:\n        return 2 * k",
+          "isCode": true
+        },
+        {
+          "label": "    if k <= m:\n        return 2 * k - 1",
+          "isCode": true
+        },
+        {
+          "label": "    if k <= m:\n        return m * 2",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The first m removals are evens: 2,4,... so return 2*k.",
+      "wrongExplanations": {
+        "1": "k can be equal to m and still be in the first batch.",
+        "2": "2*k - 1 gives odds, not the first batch."
+      },
+      "hint": "Q6 established it's 2k for k up to m.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    if k <= m:\n        return 2 * k",
+      "codeLabel": "First batch"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Compute r, k', and the rotated index idx into the smaller circle.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    r = n - m\n    kp = k - m\n    idx = kp + 1\n    if idx > r:\n        idx = 1",
+          "isCode": true
+        },
+        {
+          "label": "    r = n // 2\n    kp = k - m\n    idx = kp\n    if idx >= r:\n        idx = 1",
+          "isCode": true
+        },
+        {
+          "label": "    r = n - m\n    kp = k - m\n    idx = ((kp - 1) % r) + 1",
+          "isCode": true
+        },
+        {
+          "label": "    r = n - m\n    kp = k - m\n    idx = kp + 1\n    if idx >= r:\n        idx = 1",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "r = ceil(n/2) = n - m; rotate left by 1: idx = kp+1 with wrap when idx > r.",
+      "wrongExplanations": {
+        "1": "r is not floor(n/2); and no rotation is applied.",
+        "3": "Using >= miswraps when idx == r (it should be r, not 1)."
+      },
+      "hint": "From Q10: index is k' + 1 with wrap; and r = n - floor(n/2).",
+      "isCodeBuilding": true,
+      "codeSnippet": "    r = n - m\n    kp = k - m\n    idx = kp + 1\n    if idx > r:\n        idx = 1",
+      "codeLabel": "Reduce to smaller circle"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Map the smaller-circle result back to the original labels.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    s = kth_removed(r, idx)\n    return 2 * s - 1",
+          "isCode": true
+        },
+        {
+          "label": "    s = kth_removed(n, idx)\n    return 2 * s - 1",
+          "isCode": true
+        },
+        {
+          "label": "    s = kth_removed(r, idx)\n    return 2 * s + 1",
+          "isCode": true
+        },
+        {
+          "label": "    s = kth_removed(r, idx)\n    return s",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Compute within the reduced size r, then map to odds as 2*s - 1.",
+      "wrongExplanations": {
+        "1": "We must recurse on r elements, not on n.",
+        "2": "2*s+1 skips the first odd and goes out of bounds."
+      },
+      "hint": "Q11 says the odd label is 2*s - 1.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    s = kth_removed(r, idx)\n    return 2 * s - 1",
+      "codeLabel": "Recurse and map to odd label"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Write the main function’s input reading prelude.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def main():\n    data = sys.stdin.read().strip().split()\n    if not data:\n        return\n    it = iter(data)\n    q = int(next(it))\n    out_lines = []",
+          "isCode": true
+        },
+        {
+          "label": "def main():\n    pass",
+          "isCode": true
+        },
+        {
+          "label": "def main():\n    data = sys.stdin.read().splitlines()\n    q = int(data[0])\n    it = iter(data[1:])\n    out_lines = []",
+          "isCode": true
+        },
+        {
+          "label": "def main():\n    data = sys.stdin.readline().split()\n    if not data:\n        return\n    q = int(next(it))\n    out_lines = []",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Tokenize all integers once, create an iterator, read q, and prepare output.",
+      "wrongExplanations": {
+        "2": "Iterating over lines won't split n and k tokens; it will break on multi-token lines.",
+        "3": "Uses 'it' without defining it and reads only one line."
+      },
+      "hint": "We need to process up to 1e5 pairs efficiently.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def main():\n    data = sys.stdin.read().strip().split()\n    if not data:\n        return\n    it = iter(data)\n    q = int(next(it))\n    out_lines = []",
+      "codeLabel": "Main: read and prepare"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Write the loop to process queries and output the results.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    for _ in range(q):\n        n = int(next(it)); k = int(next(it))\n        out_lines.append(str(kth_removed(n, k)))\n    sys.stdout.write(\"\\n\".join(out_lines))",
+          "isCode": true
+        },
+        {
+          "label": "    for _ in range(q):\n        n, k = map(int, next(it).split())\n        out_lines.append(str(kth_removed(n, k)))\n    sys.stdout.write(\"\\n\".join(out_lines))",
+          "isCode": true
+        },
+        {
+          "label": "    for _ in range(q):\n        n = int(next(it)); k = int(next(it))\n        out_lines.append(str(kth_removed(k, n)))\n    sys.stdout.write(\"\\n\".join(out_lines))",
+          "isCode": true
+        },
+        {
+          "label": "    for _ in range(q):\n        n = int(next(it)); k = int(next(it))\n        out_lines.append(str(kth_removed(n, k)))\n    sys.stdout.write(\" \".join(out_lines))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Read tokens in pairs, call with (n,k), and join by newlines.",
+      "wrongExplanations": {
+        "1": "next(it) returns a single token, not a full line to split.",
+        "2": "Swapped arguments changes the meaning.",
+        "3": "Output must be one answer per line."
+      },
+      "hint": "The iterator yields one token at a time.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    for _ in range(q):\n        n = int(next(it)); k = int(next(it))\n        out_lines.append(str(kth_removed(n, k)))\n    sys.stdout.write(\"\\n\".join(out_lines))",
+      "codeLabel": "Main: loop and output"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "Add the standard guard to run main.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "if __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "main()",
+          "isCode": true
+        },
+        {
+          "label": "if __name__ == \"main\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "if __name__ == \"__main__\":\n    pass",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "This runs main when the script is executed directly.",
+      "wrongExplanations": {
+        "1": "This executes main even if imported, which is not ideal.",
+        "3": "It never runs main."
+      },
+      "hint": "Use the dunder-name guard.",
+      "isCodeBuilding": true,
+      "codeSnippet": "if __name__ == \"__main__\":\n    main()",
+      "codeLabel": "Run main"
+    },
+    {
+      "id": "q22",
+      "phase": "Verifying the Solution",
+      "questionText": "What is the output of the program for the sample input?\n\n4\n7 1\n7 3\n2 2\n1337 1313",
+      "diagram": null,
+      "options": [
+        {
+          "label": "2\\n6\\n1\\n1107",
+          "isCode": false
+        },
+        {
+          "label": "2\\n4\\n2\\n1107",
+          "isCode": false
+        },
+        {
+          "label": "1\\n6\\n2\\n1107",
+          "isCode": false
+        },
+        {
+          "label": "2\\n6\\n1\\n1337",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Matches the provided sample output.",
+      "wrongExplanations": {
+        "1": "Second answer assumes k=2 -> 4, but it's k=3 -> 6.",
+        "4": "Last answer wrongly prints n for the last query."
+      },
+      "hint": "Check the example in the statement.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q23",
+      "phase": "Verifying the Solution",
+      "questionText": "For n=10, what is the 6th removed child according to the program?",
+      "diagram": "First 5 are evens: [2,4,6,8,10]. Remaining odds r=5. Standard order for r=5 (positions) is [2,4,1,5,3]; rotated left by 1 => [4,1,5,3,2] => labels [7,1,9,5,3].",
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "7",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "6th is the first odd removed after evens, which is 7.",
+      "wrongExplanations": {
+        "0": "1 is the 7th removed in this sequence."
+      },
+      "hint": "List the first 5 evens, then apply the rotated order to odds.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the time per query of this approach?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(1)",
+          "isCode": false
+        },
+        {
+          "label": "O(log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(k)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Each step halves n, giving logarithmic depth.",
+      "wrongExplanations": {
+        "0": "There are a few recursive steps; not constant time.",
+        "2": "We never iterate over all n elements."
+      },
+      "hint": "How many times can you halve n?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the extra space used per query by this program?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(1)",
+          "isCode": false
+        },
+        {
+          "label": "O(log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(q)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "The recursion depth is proportional to log n.",
+      "wrongExplanations": {
+        "0": "An iterative version could be O(1), but this code uses recursion."
+      },
+      "hint": "Consider the depth of nested calls.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Analyzing Complexity",
+      "questionText": "Which edge case must be explicitly handled to avoid an infinite call?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "n = 1",
+          "isCode": false
+        },
+        {
+          "label": "k = 1",
+          "isCode": false
+        },
+        {
+          "label": "n = 0",
+          "isCode": false
+        },
+        {
+          "label": "k = n",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "For n=1, return 1 immediately; otherwise the reduction may loop.",
+      "wrongExplanations": {
+        "1": "k=1 is common but not a termination condition by itself."
+      },
+      "hint": "See Q12 and Q3.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\n\ndef kth_removed(n, k):",
+    "    if n == 1:\n        return 1\n    m = n // 2",
+    "    if k <= m:\n        return 2 * k",
+    "    r = n - m\n    kp = k - m\n    idx = kp + 1\n    if idx > r:\n        idx = 1",
+    "    s = kth_removed(r, idx)\n    return 2 * s - 1",
+    "def main():\n    data = sys.stdin.read().strip().split()\n    if not data:\n        return\n    it = iter(data)\n    q = int(next(it))\n    out_lines = []",
+    "    for _ in range(q):\n        n = int(next(it)); k = int(next(it))\n        out_lines.append(str(kth_removed(n, k)))\n    sys.stdout.write(\"\\n\".join(out_lines))",
+    "if __name__ == \"__main__\":\n    main()"
+  ],
+  "reasoningChain": [
+    {
+      "question": "What happens first? Identify the initial removal pattern.",
+      "insight": "The first floor(n/2) removals are the even-numbered children in increasing order."
+    },
+    {
+      "question": "How many remain after removing evens?",
+      "insight": "Remaining count is r = ceil(n/2) = n - floor(n/2), consisting of all odds."
+    },
+    {
+      "question": "How does elimination continue among the odds?",
+      "insight": "Among odds, the elimination order corresponds to the order for r items, but rotated left by one position due to continuation."
+    },
+    {
+      "question": "How to map k > floor(n/2) to the smaller circle?",
+      "insight": "Let k' = k - floor(n/2). The index in the smaller circle is s_index = k' + 1 (wrapping to 1 if k' = r)."
+    },
+    {
+      "question": "How to map back from the smaller circle to original labels?",
+      "insight": "If s is the label in the smaller circle (1..r), the original label is 2*s - 1 (the s-th odd)."
+    },
+    {
+      "question": "What base case and complexity do we get?",
+      "insight": "Base case n=1 returns 1; each step halves n, giving O(log n) time and O(log n) stack space per query."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1392,
+    "output_tokens": 18851,
+    "input_cost": 0.00174,
+    "output_cost": 0.18851,
+    "total_cost": 0.19025
+  }
+}

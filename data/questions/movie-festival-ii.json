@@ -1,0 +1,883 @@
+{
+  "id": "movie-festival-ii-guided-mcqs",
+  "title": "Movie Festival II",
+  "difficulty": "intermediate",
+  "tags": [
+    "sorting",
+    "two-pointer",
+    "binary-search"
+  ],
+  "estimatedMinutes": 65,
+  "language": "python",
+  "description": "You are given n movies with start and end times and k club members who will attend the festival. Each member can watch any number of movies but only one at a time, and must watch each chosen movie entirely. Movies that end at time t and start at time t do not overlap.\n\nTask: Compute the maximum total number of movies the k members can collectively watch if they act optimally.\n\nInput:\n- First line: two integers n and k\n- Next n lines: two integers a b per movie (start a, end b), with 1 ≤ a < b ≤ 1e9\n\nOutput:\n- One integer: the maximum total number of movies.",
+  "examples": [
+    {
+      "input": "5 2\n1 5\n8 10\n3 6\n2 5\n6 9\n",
+      "output": "4",
+      "explanation": "One optimal assignment: Member A: (1,5) and (6,9); Member B: (2,5) and (8,10). Total = 4."
+    }
+  ],
+  "constraints": [
+    "1 ≤ k ≤ n ≤ 2 · 10^5",
+    "1 ≤ a < b ≤ 10^9",
+    "Time limit: 1.00 s",
+    "Memory limit: 512 MB"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "For k=1 and movies [(1,3), (3,5)], what is the maximum number of movies that can be watched entirely?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "It depends on whether equal endpoints are allowed",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "A movie ending at time t and another starting at time t do not overlap, so both can be watched. Hence 2.",
+      "wrongExplanations": {
+        "0": "You can schedule both since (1,3) and (3,5) do not overlap.",
+        "3": "Equal endpoints are allowed and do not cause overlap here."
+      },
+      "hint": "End=t and start=t do not overlap.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "With k=1 and movies [(1,4), (2,3), (3,6)], what is the maximum total number of movies?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Pick (2,3) then (3,6) for 2 movies. (1,4) overlaps with both others.",
+      "wrongExplanations": {
+        "2": "All three cannot fit for a single member due to overlaps.",
+        "1": "You can fit two by taking (2,3) then (3,6)."
+      },
+      "hint": "Try ordering by finish times and see what fits.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "With k=2 and movies [(1,5), (2,3), (3,4)], what is the maximum total number of movies?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 3,
+      "explanation": "One member watches (1,5). The other watches (2,3) and then (3,4). Total = 3.",
+      "wrongExplanations": {
+        "2": "There are only 3 movies available.",
+        "1": "You can chain two movies for the second member."
+      },
+      "hint": "Assign overlapping intervals to different members to maximize total.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "Can a movie be split among multiple members to count as watched entirely?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, as long as together they cover the whole interval",
+          "isCode": false
+        },
+        {
+          "label": "No, a single member must watch the entire movie",
+          "isCode": false
+        },
+        {
+          "label": "Only if more than half is watched by one member",
+          "isCode": false
+        },
+        {
+          "label": "Only if the split happens exactly at integer times",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "A movie counts only if a single member watches it from start to end without overlap.",
+      "wrongExplanations": {
+        "0": "Splitting across members is not allowed by the problem statement."
+      },
+      "hint": "Think of each member's personal schedule.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Exploring Approaches",
+      "questionText": "If you try every way to assign or skip each movie for each of k members, what is the rough number of possibilities?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "n log n",
+          "isCode": false
+        },
+        {
+          "label": "n · k",
+          "isCode": false
+        },
+        {
+          "label": "(k+1)^n",
+          "isCode": false
+        },
+        {
+          "label": "n^2",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Each movie could be assigned to any of k members or skipped, giving about (k+1)^n possibilities—far too many.",
+      "wrongExplanations": {
+        "1": "n·k implies linear in assignments, which underestimates branching.",
+        "0": "n log n is sorting cost, not assignment enumeration."
+      },
+      "hint": "For each movie: k choices to assign + 1 to skip.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "To leave room for future movies, which processing order for the movies is more promising?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Sort by earliest start time first",
+          "isCode": false
+        },
+        {
+          "label": "Sort by earliest end time first",
+          "isCode": false
+        },
+        {
+          "label": "Sort by longest duration first",
+          "isCode": false
+        },
+        {
+          "label": "Keep the input order",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Finishing earlier tends to free a member sooner for future movies, maximizing opportunities.",
+      "wrongExplanations": {
+        "0": "Earliest start doesn’t prioritize freeing members for future intervals."
+      },
+      "hint": "Finishing times determine when a member becomes free.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "When considering a movie [a,b], among members who are free by time a (their last finish ≤ a), which one should take it?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "The one who finished the earliest among eligible",
+          "isCode": false
+        },
+        {
+          "label": "Any eligible member; it makes no difference",
+          "isCode": false
+        },
+        {
+          "label": "None; skip the movie to save room",
+          "isCode": false
+        },
+        {
+          "label": "The one who finished the latest among eligible",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 3,
+      "explanation": "Choosing the latest eligible finish keeps earlier-finishing members available for earlier-starting movies.",
+      "wrongExplanations": {
+        "0": "Taking the earliest eligible can block earlier-starting movies later.",
+        "1": "The choice does affect future availability."
+      },
+      "hint": "Keep options open for as many future movies as possible.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Building the Idea",
+      "questionText": "What information should we maintain while scanning movies in increasing end time?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "A sorted list of the current finish times of members who are busy",
+          "isCode": false
+        },
+        {
+          "label": "An unsorted list of all start times seen so far",
+          "isCode": false
+        },
+        {
+          "label": "Only the smallest finish time so far",
+          "isCode": false
+        },
+        {
+          "label": "Only how many movies we have already counted",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need to quickly find a member whose finish time is ≤ a and update it to b; sorting enables fast predecessor checks.",
+      "wrongExplanations": {
+        "2": "We need more than the minimum to find the best eligible member.",
+        "1": "Start times alone don’t tell who is free by a."
+      },
+      "hint": "We must find, among finish times, the largest ≤ a efficiently.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "Given a sorted list ends of current finish times, how can you determine if there exists a t in ends with t ≤ a efficiently?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Compare a with ends[0]; if a ≥ ends[0] then one exists",
+          "isCode": false
+        },
+        {
+          "label": "Compare a with ends[-1]; if a ≥ ends[-1] then one exists",
+          "isCode": false
+        },
+        {
+          "label": "Find the index where a would be inserted on the right; if index>0, ends[index-1] ≤ a",
+          "isCode": false
+        },
+        {
+          "label": "Scan ends linearly until you find t ≤ a",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Use the insertion position on the right to locate the rightmost value ≤ a in a sorted list.",
+      "wrongExplanations": {
+        "0": "ends[0] is the smallest, not necessarily the closest to a from below.",
+        "1": "If a < ends[-1], there could still be smaller eligible times."
+      },
+      "hint": "Think: where would you insert a to keep ends sorted?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "If no current finish time is ≤ a but fewer than k members are in use, what should we do with movie [a,b]?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Skip this movie to save capacity for later",
+          "isCode": false
+        },
+        {
+          "label": "Assign it to a currently unused member (increase active count)",
+          "isCode": false
+        },
+        {
+          "label": "Replace the member with the largest finish time",
+          "isCode": false
+        },
+        {
+          "label": "Delay the movie until some member becomes free",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "If we still have free members, assign the movie and add its finish time to ends.",
+      "wrongExplanations": {
+        "2": "Replacing a member with larger finish time wastes already counted movies."
+      },
+      "hint": "We can have at most k simultaneous commitments.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "When we assign [a,b] to a member with finish time t ≤ a, how should ends be updated?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Append b to ends and keep t as well",
+          "isCode": false
+        },
+        {
+          "label": "Replace the smallest value in ends with b",
+          "isCode": false
+        },
+        {
+          "label": "Insert b and then remove the largest value in ends",
+          "isCode": false
+        },
+        {
+          "label": "Remove t from ends and insert b, keeping ends sorted",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 3,
+      "explanation": "We reassign that member, so we should remove their old finish and insert the new finish.",
+      "wrongExplanations": {
+        "0": "Keeping both overcounts active commitments.",
+        "1": "We must remove the specific t that was used."
+      },
+      "hint": "One member’s finish time changes from t to b.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "If multiple t in ends satisfy t ≤ a, which t should be chosen for assignment?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "The smallest among them",
+          "isCode": false
+        },
+        {
+          "label": "Any of them; it doesn’t matter",
+          "isCode": false
+        },
+        {
+          "label": "The largest among them",
+          "isCode": false
+        },
+        {
+          "label": "Pick randomly to avoid bias",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Using the largest eligible t keeps smaller finish times available for earlier-starting movies.",
+      "wrongExplanations": {
+        "0": "Choosing the smallest can block future early-start movies.",
+        "1": "The choice affects future availability."
+      },
+      "hint": "Prefer the t that is as close to a as possible from below.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Writing the Code",
+      "questionText": "Import the modules needed for fast input and locating insertion positions in a sorted list.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\nfrom bisect import bisect_right, insort",
+          "isCode": true
+        },
+        {
+          "label": "import sys\nfrom bisect import bisect_left, insort",
+          "isCode": true
+        },
+        {
+          "label": "from bisect import bisect_right as br",
+          "isCode": true
+        },
+        {
+          "label": "import sys",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We will use sys.stdin for fast input and bisect_right/insort to manage a sorted list.",
+      "wrongExplanations": {
+        "1": "bisect_left changes predecessor logic; we need the right-side insertion index.",
+        "3": "We also need functions to manage sorted insertion."
+      },
+      "hint": "We need both fast input and sorted insertion utilities.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\nfrom bisect import bisect_right, insort",
+      "codeLabel": "Imports"
+    },
+    {
+      "id": "q14",
+      "phase": "Writing the Code",
+      "questionText": "Set up main() and read n, k efficiently.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def main():\n    n, k = map(int, input().split())",
+          "isCode": true
+        },
+        {
+          "label": "def main():\n    data = sys.stdin.read().split()\n    n = int(data[0]); k = int(data[1]); it = iter(data[2:])",
+          "isCode": true
+        },
+        {
+          "label": "def main():\n    data = sys.stdin.read().split()\n    it = iter(data)\n    n = int(next(it)); k = int(next(it))",
+          "isCode": true
+        },
+        {
+          "label": "def main():\n    it = sys.stdin",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Reading all tokens and iterating is concise and fast for large input.",
+      "wrongExplanations": {
+        "0": "Line-by-line input may be slower and we also need to read all movie lines.",
+        "3": "This doesn’t parse integers or advance through tokens."
+      },
+      "hint": "Use sys.stdin.read().split() and an iterator.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def main():\n    data = sys.stdin.read().split()\n    it = iter(data)\n    n = int(next(it)); k = int(next(it))",
+      "codeLabel": "Read n, k"
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Read the movies and store them so sorting by the first element sorts by end time.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    movies = []\n    for _ in range(n):\n        a = int(next(it)); b = int(next(it))\n        movies.append((a, b))",
+          "isCode": true
+        },
+        {
+          "label": "    movies = []\n    for _ in range(n):\n        a = int(next(it)); b = int(next(it))\n        movies.append((b, a))",
+          "isCode": true
+        },
+        {
+          "label": "    movies = [tuple(map(int, next(it).split())) for _ in range(n)]",
+          "isCode": true
+        },
+        {
+          "label": "    movies = []\n    for i in range(k):\n        a = int(next(it)); b = int(next(it))\n        movies.append((b, a))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Storing as (end, start) lets default sorting order process by end time first.",
+      "wrongExplanations": {
+        "0": "This stores (start, end) and requires a different sort key or reordering.",
+        "3": "It incorrectly reads only k lines, not n."
+      },
+      "hint": "We want tuples ordered by end time without extra keys.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    movies = []\n    for _ in range(n):\n        a = int(next(it)); b = int(next(it))\n        movies.append((b, a))",
+      "codeLabel": "Read movies"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Sort the movies so that we process earliest finishing first.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    movies.sort(key=lambda x: x[1])",
+          "isCode": true
+        },
+        {
+          "label": "    movies = sorted(movies, key=lambda x: x[1])",
+          "isCode": true
+        },
+        {
+          "label": "    movies.reverse()",
+          "isCode": true
+        },
+        {
+          "label": "    movies.sort()",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 3,
+      "explanation": "Since movies are stored as (end, start), the default sort suffices.",
+      "wrongExplanations": {
+        "0": "This would sort by start instead of end for our chosen representation.",
+        "2": "Reversing without sorting doesn’t order by end times."
+      },
+      "hint": "We already arranged tuples as (end, start).",
+      "isCodeBuilding": true,
+      "codeSnippet": "    movies.sort()",
+      "codeLabel": "Sort movies"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Initialize the structure of current finish times and the answer counter.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    ends = []\n    count = 0",
+          "isCode": true
+        },
+        {
+          "label": "    ends = [0] * k\n    count = 0",
+          "isCode": true
+        },
+        {
+          "label": "    ends = set()\n    count = 0",
+          "isCode": true
+        },
+        {
+          "label": "    ends = []\n    count = 1",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We start with no active commitments and zero movies counted. We’ll add up to k finishes as we assign movies.",
+      "wrongExplanations": {
+        "1": "Pre-filling with zeros changes the logic and ordering.",
+        "2": "A set doesn’t preserve order for predecessor lookups."
+      },
+      "hint": "Start empty and grow as you assign movies.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    ends = []\n    count = 0",
+      "codeLabel": "Init state"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Process each movie, find the rightmost finish ≤ start, update ends, and count the assignment.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    for b, a in movies:\n        idx = bisect_left(ends, a)\n        if idx > 0:\n            ends.pop(idx)\n            insort(ends, b)\n            count += 1\n        elif len(ends) < k:\n            insort(ends, b)\n            count += 1",
+          "isCode": true
+        },
+        {
+          "label": "    for b, a in movies:\n        idx = bisect_right(ends, a)\n        if idx > 0:\n            ends.pop(idx - 1)\n            insort(ends, b)\n            count += 1\n        elif len(ends) < k:\n            insort(ends, b)\n            count += 1",
+          "isCode": true
+        },
+        {
+          "label": "    for b, a in movies:\n        idx = bisect_right(ends, b)\n        if idx > 0:\n            ends.pop(0)\n            insort(ends, b)\n            count += 1\n        elif len(ends) < k:\n            insort(ends, a)\n            count += 1",
+          "isCode": true
+        },
+        {
+          "label": "    for a, b in movies:\n        idx = bisect_right(ends, a)\n        if idx >= 0:\n            ends.pop(idx - 1)\n            insort(ends, b)\n            count += 1",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Use the right-side insertion index for a, remove the predecessor (idx-1), insert b, else add if we still have capacity.",
+      "wrongExplanations": {
+        "0": "bisect_left and popping idx removes the wrong element; we need the predecessor at idx-1.",
+        "2": "Searching with b is wrong; also removes the smallest regardless of eligibility."
+      },
+      "hint": "We need the rightmost value ≤ a; then replace it with b.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    for b, a in movies:\n        idx = bisect_right(ends, a)\n        if idx > 0:\n            ends.pop(idx - 1)\n            insort(ends, b)\n            count += 1\n        elif len(ends) < k:\n            insort(ends, b)\n            count += 1",
+      "codeLabel": "Core loop"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Output the final count after processing all movies.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    print(len(ends))",
+          "isCode": true
+        },
+        {
+          "label": "    print(n - len(ends))",
+          "isCode": true
+        },
+        {
+          "label": "    print(count)",
+          "isCode": true
+        },
+        {
+          "label": "    for x in ends: print(x)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "We counted each successful assignment in count; print that.",
+      "wrongExplanations": {
+        "0": "len(ends) is how many are currently busy, not total watched.",
+        "3": "We need a single integer result."
+      },
+      "hint": "Each accepted movie increments exactly one counter.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    print(count)",
+      "codeLabel": "Print result"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Add the standard entry point to run main().",
+      "diagram": null,
+      "options": [
+        {
+          "label": "if __main__:\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "if __name__ == '__main__':\n    run()",
+          "isCode": true
+        },
+        {
+          "label": "main()",
+          "isCode": true
+        },
+        {
+          "label": "if __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 3,
+      "explanation": "This is the conventional guard for running main in Python.",
+      "wrongExplanations": {
+        "0": "The variable is __name__, not __main__.",
+        "1": "The function we defined is main(), not run()."
+      },
+      "hint": "Use the guard that checks __name__ equals a magic string.",
+      "isCodeBuilding": true,
+      "codeSnippet": "if __name__ == \"__main__\":\n    main()",
+      "codeLabel": "Entry point"
+    },
+    {
+      "id": "q21",
+      "phase": "Verifying the Solution",
+      "questionText": "Run your approach on the sample:\n5 2\n1 5\n8 10\n3 6\n2 5\n6 9\nWhat total should be printed?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "An optimal schedule reaches 4 total movies, matching the sample output.",
+      "wrongExplanations": {
+        "1": "You can schedule four by reusing members as they finish."
+      },
+      "hint": "Sort by end time and simulate with ends.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q22",
+      "phase": "Verifying the Solution",
+      "questionText": "Consider k=1, movies: (1,4), (4,7), (2,5), (5,6). What total does the algorithm produce?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Process by end: (1,4) ✓, (2,5) ✗, (5,6) ✓, (4,7) ✗ → total 2.",
+      "wrongExplanations": {
+        "0": "Only two fit without overlaps for a single member.",
+        "2": "All four cannot be watched by one member."
+      },
+      "hint": "Track the single finish time as you go.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q23",
+      "phase": "Analyzing Complexity",
+      "questionText": "Assuming we can find the rightmost ≤ a and insert/remove in logarithmic time in the active set of size up to k, what is the overall time complexity?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n · k)",
+          "isCode": false
+        },
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n + n log k)",
+          "isCode": false
+        },
+        {
+          "label": "O(log n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Sorting is O(n log n); each of n steps does a logarithmic update in the active set: O(n log k).",
+      "wrongExplanations": {
+        "0": "We avoid scanning all k each time.",
+        "1": "Sorting alone already costs more than linear."
+      },
+      "hint": "Combine sorting cost with per-movie update cost.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Analyzing Complexity",
+      "questionText": "If ends is a Python list kept sorted, what are the costs per operation when updating it (inserting/removing at an arbitrary position)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(1) on average",
+          "isCode": false
+        },
+        {
+          "label": "O(log k) for both insert and remove",
+          "isCode": false
+        },
+        {
+          "label": "O(k) due to shifting elements",
+          "isCode": false
+        },
+        {
+          "label": "O(n) because we touch all movies",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Finding positions can be logarithmic, but list insert/remove in the middle may shift elements: O(k).",
+      "wrongExplanations": {
+        "1": "Insertion/removal in lists isn’t logarithmic in general.",
+        "0": "There’s no constant-time insertion/removal in the middle of a Python list."
+      },
+      "hint": "Think about how many elements move when you insert into a list.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\nfrom bisect import bisect_right, insort",
+    "def main():\n    data = sys.stdin.read().split()\n    it = iter(data)\n    n = int(next(it)); k = int(next(it))",
+    "    movies = []\n    for _ in range(n):\n        a = int(next(it)); b = int(next(it))\n        movies.append((b, a))",
+    "    movies.sort()",
+    "    ends = []\n    count = 0",
+    "    for b, a in movies:\n        idx = bisect_right(ends, a)\n        if idx > 0:\n            ends.pop(idx - 1)\n            insort(ends, b)\n            count += 1\n        elif len(ends) < k:\n            insort(ends, b)\n            count += 1",
+    "    print(count)",
+    "if __name__ == \"__main__\":\n    main()"
+  ],
+  "reasoningChain": [
+    {
+      "question": "Why process movies in increasing order of their finishing time?",
+      "insight": "Finishing earlier frees a member sooner, leaving more room for future movies."
+    },
+    {
+      "question": "Given a movie [a,b], how do we decide if some member can take it?",
+      "insight": "We need a member whose last finish time is ≤ a; among those, choose the one with the largest such finish."
+    },
+    {
+      "question": "What state do we maintain to make this decision fast?",
+      "insight": "Keep a sorted multiset/list of current finish times of active members."
+    },
+    {
+      "question": "How do we check and pick the best eligible member quickly?",
+      "insight": "Find the right-side insertion index of a in the sorted finishes; the predecessor (if any) is the best eligible."
+    },
+    {
+      "question": "What if no one is eligible but we have fewer than k active members?",
+      "insight": "Assign the movie to a free member by inserting b into the active finishes."
+    },
+    {
+      "question": "How do we update after assigning a movie?",
+      "insight": "Remove the chosen old finish time and insert the new finish, keeping the structure sorted; count the movie."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1398,
+    "output_tokens": 15007,
+    "input_cost": 0.001747,
+    "output_cost": 0.15007,
+    "total_cost": 0.151818
+  }
+}

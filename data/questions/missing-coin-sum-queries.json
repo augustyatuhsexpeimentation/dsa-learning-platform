@@ -1,0 +1,892 @@
+{
+  "id": "missing-coin-sum-queries-mcqs",
+  "title": "Missing Coin Sum Queries",
+  "difficulty": "hard",
+  "tags": [
+    "array"
+  ],
+  "estimatedMinutes": 90,
+  "language": "python",
+  "description": "You have n coins with positive integer values. There are q queries; each query gives a segment a..b (1-indexed), and you may use only coins with indices in that segment. For each query, output the smallest positive sum that cannot be formed using any subset of those coins.\n\nInput:\n- First line: n q\n- Second line: x_1 x_2 ... x_n\n- Next q lines: a b (1 ≤ a ≤ b ≤ n)\n\nOutput:\n- For each query, print the answer for that segment.\n\nExample:\nInput:\n5 3\n2 9 1 2 7\n2 4\n4 4\n1 5\nOutput:\n4\n1\n6",
+  "examples": [
+    {
+      "input": "5 3\n2 9 1 2 7\n2 4\n4 4\n1 5",
+      "output": "4\n1\n6",
+      "explanation": "For [2..4] -> {9,1,2} sorted {1,2,9}: reachable sums cover 1..3, then 4 is missing. For [4..4] -> {2}: 1 is missing. For [1..5] -> {2,9,1,2,7} sorted {1,2,2,7,9}: reachable cover 1..5, then 6 is missing."
+    }
+  ],
+  "constraints": [
+    "1 ≤ n, q ≤ 2⋅10^5",
+    "1 ≤ x_i ≤ 10^9",
+    "1 ≤ a ≤ b ≤ n",
+    "Time limit: 1.00 s",
+    "Memory limit: 512 MB"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "Given coins [2,1,2], what is the smallest positive sum you cannot produce using any subset?",
+      "diagram": "Sort -> [1,2,2]\nneed = 1\n1 <= 1 -> need = 2\n2 <= 2 -> need = 4\n2 <= 4 -> need = 6\nAnswer = 6",
+      "options": [
+        {
+          "label": "6",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Scan sorted values increasing: if v <= need, extend need by v; else need is the answer. Here all fit, final need becomes 6.",
+      "wrongExplanations": {
+        "1": "4 is reachable (2+2).",
+        "3": "1 is reachable (1)."
+      },
+      "hint": "Sort and grow a running 'need' starting at 1."
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "For coins [2,2] (no coin of value 1), what is the smallest sum you cannot form?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "If the smallest coin is >1, you cannot form 1. So answer is 1.",
+      "wrongExplanations": {
+        "1": "2 is reachable using one coin 2."
+      },
+      "hint": "If the smallest coin > 1, 1 is immediately impossible."
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "For coins [1,4], what is the smallest sum you cannot form?",
+      "diagram": "Sorted [1,4]\nneed=1: take 1 -> need=2\nNext 4>2 -> stop, answer=2",
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "After taking 1, you need 2 next; 4 is too large to bridge 2, so 2 is missing.",
+      "wrongExplanations": {
+        "0": "1 is reachable (1).",
+        "3": "5 is sum of all coins; smaller sums can be missing earlier."
+      },
+      "hint": "After taking 1, check if the next coin can bridge 'need'."
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "Is the smallest missing sum always equal to (sum of coins + 1)?",
+      "diagram": "Counterexample: [2,5]\nSum=7, sum+1=8 but answer is 1",
+      "options": [
+        {
+          "label": "No, e.g., with [2,5] the answer is 1",
+          "isCode": false
+        },
+        {
+          "label": "Yes, always",
+          "isCode": false
+        },
+        {
+          "label": "Only if all values are distinct",
+          "isCode": false
+        },
+        {
+          "label": "Only if the array is sorted",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The answer depends on gaps at the start; if no 1 exists, answer is 1 regardless of total sum.",
+      "wrongExplanations": {
+        "1": "Total sum doesn't guarantee small sums like 1..k are all formable."
+      },
+      "hint": "Consider a set with no coin of value 1."
+    },
+    {
+      "id": "q5",
+      "phase": "Understanding the Problem",
+      "questionText": "For a query on subarray a..b, which information determines the answer?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "The multiset of values in positions a..b (order within the subarray doesn't matter)",
+          "isCode": false
+        },
+        {
+          "label": "The exact positions of coins inside a..b",
+          "isCode": false
+        },
+        {
+          "label": "Only the minimum and maximum coin in a..b",
+          "isCode": false
+        },
+        {
+          "label": "Only the total sum of coins in a..b",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The greedy rule depends only on the sorted values, i.e., the multiset.",
+      "wrongExplanations": {
+        "3": "Total sum alone cannot detect missing small sums like 1."
+      },
+      "hint": "If you sort a..b, the answer is unaffected by positions."
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "Naively, answering each query by sorting the subarray and scanning takes what total time in the worst case?",
+      "diagram": "n,q up to 2e5; sorting length ~n per query",
+      "options": [
+        {
+          "label": "O(n q log n)",
+          "isCode": false
+        },
+        {
+          "label": "O((n+q) log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(q log q)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each query sorts up to n elements: O(n log n) per query, repeated q times.",
+      "wrongExplanations": {
+        "1": "This would imply a single sort; but we need to sort per query."
+      },
+      "hint": "How much work is sorting a subarray per query, repeated q times?"
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "When we modify which coins are included, what should we maintain to later compute the smallest missing sum?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Counts for each distinct value present",
+          "isCode": false
+        },
+        {
+          "label": "Just the running total sum",
+          "isCode": false
+        },
+        {
+          "label": "Only the number of distinct values",
+          "isCode": false
+        },
+        {
+          "label": "Only the current smallest and largest value",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The greedy rule needs the distribution of values, not just totals or extremes.",
+      "wrongExplanations": {
+        "1": "Total sum cannot detect gaps at the start (e.g., missing 1)."
+      },
+      "hint": "Think of replicating the behavior of scanning sorted values."
+    },
+    {
+      "id": "q8",
+      "phase": "Exploring Approaches",
+      "questionText": "Values can be up to 1e9. How can we index counts efficiently without huge arrays while preserving order comparisons?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Map the sorted unique values to indices 0..m-1 and use those indices",
+          "isCode": false
+        },
+        {
+          "label": "Use the original values directly as array indices",
+          "isCode": false
+        },
+        {
+          "label": "Store values modulo a large prime",
+          "isCode": false
+        },
+        {
+          "label": "Truncate values to fit into a fixed small range",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Relabel unique values in sorted order to 0..m-1; comparisons by value are preserved.",
+      "wrongExplanations": {
+        "1": "You cannot index arrays up to 1e9.",
+        "2": "Modulo breaks ordering, which the greedy process needs."
+      },
+      "hint": "We only need to preserve relative order among distinct values."
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "To reduce query cost, we will process queries in an order that reuses most of the current segment. Which ordering keeps left endpoints in blocks and alternates the direction of right endpoints to limit movement?",
+      "diagram": "Sort by block of a; for even blocks, sort b ascending; for odd blocks, sort b descending.",
+      "options": [
+        {
+          "label": "Sort by (a//B, b if (a//B) % 2 == 0 else -b)",
+          "isCode": false
+        },
+        {
+          "label": "Sort by (a, b) increasing",
+          "isCode": false
+        },
+        {
+          "label": "Sort by (b//B, a)",
+          "isCode": false
+        },
+        {
+          "label": "Sort by (a//B, -b) always",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Grouping by left blocks and alternating b direction reduces total add/remove changes.",
+      "wrongExplanations": {
+        "1": "Plain lexicographic order causes larger jumps for b.",
+        "3": "Always descending for b ignores parity trick that reduces oscillations."
+      },
+      "hint": "Group by left blocks; zig-zag the right endpoint."
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "We maintain counts per value index and also a sum per value-block. How should we compute the smallest missing sum 'need' using these blocks?",
+      "diagram": "Process blocks in increasing value range:\n- If need > block_max_value: need += block_sum\n- Else: scan values in this block in order, applying greedy check",
+      "options": [
+        {
+          "label": "For each block in order: if need <= block_max, scan values in that block in order; otherwise add block_sum to need",
+          "isCode": false
+        },
+        {
+          "label": "Add all block sums first, then return total+1",
+          "isCode": false
+        },
+        {
+          "label": "Scan only values equal to need; if none, return need",
+          "isCode": false
+        },
+        {
+          "label": "Pick the largest value <= need across all blocks, add once, repeat",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Skip whole blocks when all their values are already ≤ need; otherwise drill down and apply the greedy check.",
+      "wrongExplanations": {
+        "1": "Summing all values ignores the early stopping condition when a value > need appears.",
+        "3": "Always picking the largest breaks the correctness of the greedy rule."
+      },
+      "hint": "Only dive into the first block that may contain a value > need."
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "Inside a block, how do we update 'need' for values with count c at value v?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "If v > need, return need; else need += v * c",
+          "isCode": false
+        },
+        {
+          "label": "If v >= need, return need; else need += v",
+          "isCode": false
+        },
+        {
+          "label": "Always need += c",
+          "isCode": false
+        },
+        {
+          "label": "If v > need, skip v; else need += v",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We can use up to c copies if v ≤ need; they add v*c to the coverage. If v > need, we stop.",
+      "wrongExplanations": {
+        "1": "Using v >= need stops even when v equals need, which should be allowed.",
+        "3": "Skipping v when it is > need produces a wrong answer; we must stop there."
+      },
+      "hint": "Duplicates add multiple times to coverage."
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "Suppose current block has values [1(count=1), 2(count=1), 5(count=1)], and need starts at 1. What is the resulting need after scanning this block?",
+      "diagram": "need=1: v=1 -> need=2; v=2 -> need=4; v=5 (>4?) 5 > 4, so stop and return 4",
+      "options": [
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "8",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "After 1 and 2, need becomes 4; then 5>4 so you stop and return 4.",
+      "wrongExplanations": {
+        "1": "You cannot add 5 because it exceeds need.",
+        "3": "After adding 1, you can still add 2."
+      },
+      "hint": "Stop at the first v that exceeds need."
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "Why do we also keep a sum per value-block in addition to per-value counts?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "So we can skip whole blocks by doing need += block_sum when all values in the block are ≤ need",
+          "isCode": false
+        },
+        {
+          "label": "Because sums per block are enough and we can discard per-value counts",
+          "isCode": false
+        },
+        {
+          "label": "To track the number of queries hitting that block",
+          "isCode": false
+        },
+        {
+          "label": "To sort values inside the block faster at runtime",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The block sum lets us jump over blocks in O(1) when safe; per-value counts are still needed inside candidate blocks.",
+      "wrongExplanations": {
+        "1": "We still need per-value counts to apply the greedy check inside a block."
+      },
+      "hint": "We want to avoid scanning all values per query."
+    },
+    {
+      "id": "q14",
+      "phase": "Writing the Code",
+      "questionText": "Read input and build the base arrays and queries (0-based indices). Choose the correct snippet.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\n\ndef main():\n    import sys\n    data = sys.stdin.read().strip().split()\n    it = iter(data)\n    n = int(next(it)); q = int(next(it))\n    arr = [int(next(it)) for _ in range(n)]\n    queries = []\n    for idx in range(q):\n        a = int(next(it)) - 1\n        b = int(next(it)) - 1\n        queries.append((a, b, idx))",
+          "isCode": true
+        },
+        {
+          "label": "import sys\n\ndef main():\n    data = sys.stdin.read().split()\n    n = int(data[0]); q = int(data[1])\n    arr = list(map(int, data[2:2+n]))\n    queries = []\n    p = 2+n\n    for idx in range(q):\n        a = int(data[p]); b = int(data[p+1])\n        queries.append((a, b, idx))\n        p += 2",
+          "isCode": true
+        },
+        {
+          "label": "def main():\n    import sys\n    n, q = map(int, sys.stdin.readline().split())\n    arr = list(map(int, sys.stdin.readline().split()))\n    queries = []\n    for idx in range(q):\n        a, b = map(int, sys.stdin.readline().split())\n        queries.append((a, b, idx))",
+          "isCode": true
+        },
+        {
+          "label": "def main():\n    import sys\n    data = sys.stdin.read().strip().split()\n    it = iter(data)\n    n = int(next(it)); q = int(next(it))\n    arr = [int(next(it)) for _ in range(n)]\n    queries = [(int(next(it)), int(next(it)), i) for i in range(q)]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We parse all tokens and convert to 0-based indices for a..b. Other options keep 1-based or mis-handle indices.",
+      "wrongExplanations": {
+        "2": "Indices are kept 1-based; we need to subtract 1.",
+        "3": "Also 1-based indices; subtract 1 is missing."
+      },
+      "hint": "Remember to convert a and b from 1-based to 0-based.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\n\ndef main():\n    import sys\n    data = sys.stdin.read().strip().split()\n    it = iter(data)\n    n = int(next(it)); q = int(next(it))\n    arr = [int(next(it)) for _ in range(n)]\n    queries = []\n    for idx in range(q):\n        a = int(next(it)) - 1\n        b = int(next(it)) - 1\n        queries.append((a, b, idx))",
+      "codeLabel": "Parse input"
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Compress values to 0..m-1 preserving order. Choose the correct snippet.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    vals = sorted(set(arr))\n    m = len(vals)\n    idx_of = {v: i for i, v in enumerate(vals)}\n    comp = [idx_of[v] for v in arr]",
+          "isCode": true
+        },
+        {
+          "label": "    vals = sorted(arr)\n    m = len(vals)\n    idx_of = {v: i for i, v in enumerate(vals)}\n    comp = [idx_of[v] for v in arr]",
+          "isCode": true
+        },
+        {
+          "label": "    vals = list(set(arr))\n    m = len(vals)\n    idx_of = {v: i for i, v in enumerate(vals)}\n    comp = [idx_of[v] for v in arr]",
+          "isCode": true
+        },
+        {
+          "label": "    vals = sorted(set(arr))\n    m = len(arr)\n    idx_of = {v: i for i, v in enumerate(vals)}\n    comp = [i for i in range(n)]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need sorted unique values; map each original value to its index in that sorted unique list.",
+      "wrongExplanations": {
+        "1": "Using all arr values breaks uniqueness; duplicates map inconsistently.",
+        "2": "Not sorting breaks value order.",
+        "3": "comp should map each arr value to its index, not just positions 0..n-1."
+      },
+      "hint": "Use sorted(set(arr)) and map each value to its rank.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    vals = sorted(set(arr))\n    m = len(vals)\n    idx_of = {v: i for i, v in enumerate(vals)}\n    comp = [idx_of[v] for v in arr]",
+      "codeLabel": "Compress values"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Prepare the ordering for queries to minimize movement by grouping left endpoints into blocks and alternating right direction.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    import math\n    block = max(1, int(n ** 0.5))\n    def key_fn(qu):\n        a, b, qi = qu\n        block_id = a // block\n        return (block_id, b if block_id % 2 == 0 else -b)\n    queries.sort(key=key_fn)",
+          "isCode": true
+        },
+        {
+          "label": "    block = 1\n    def key_fn(qu):\n        a, b, qi = qu\n        return (a, b)\n    queries.sort(key=key_fn)",
+          "isCode": true
+        },
+        {
+          "label": "    import math\n    block = max(1, int(q ** 0.5))\n    def key_fn(qu):\n        a, b, qi = qu\n        return (a // block, b)\n    queries.sort(key=key_fn)",
+          "isCode": true
+        },
+        {
+          "label": "    import math\n    block = max(1, int(n ** 0.5))\n    def key_fn(qu):\n        a, b, qi = qu\n        block_id = a // block\n        return (block_id, -b)\n    queries.sort(key=key_fn)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We group by block of a and alternate sorting of b by block parity.",
+      "wrongExplanations": {
+        "2": "Using q for block size and always sorting b ascending increases right-end oscillations.",
+        "3": "Always descending for b misses the parity trick."
+      },
+      "hint": "Use n for block size and zig-zag b by block parity.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    import math\n    block = max(1, int(n ** 0.5))\n    def key_fn(qu):\n        a, b, qi = qu\n        block_id = a // block\n        return (block_id, b if block_id % 2 == 0 else -b)\n    queries.sort(key=key_fn)",
+      "codeLabel": "Order queries"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Initialize value-block parameters and state arrays for counts and block sums.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    B = int(math.sqrt(m)) + 1\n    nb = (m + B - 1) // B\n    cnt = [0] * m\n    bucket_sum = [0] * nb\n    vals_list = vals",
+          "isCode": true
+        },
+        {
+          "label": "    B = int(math.sqrt(n)) + 1\n    nb = (n + B - 1) // B\n    cnt = [0] * n\n    bucket_sum = [0] * nb\n    vals_list = vals",
+          "isCode": true
+        },
+        {
+          "label": "    B = 1\n    nb = m\n    cnt = [0] * m\n    bucket_sum = [0] * nb\n    vals_list = arr",
+          "isCode": true
+        },
+        {
+          "label": "    B = int(math.sqrt(m))\n    nb = (m + B - 1) // B\n    cnt = [0] * m\n    bucket_sum = [0] * nb\n    vals_list = vals",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Block size based on m (distinct values) and per-value arrays sized by m. We also keep vals_list for quick lookup.",
+      "wrongExplanations": {
+        "1": "Blocks should be over distinct values m, not positions n.",
+        "3": "Without +1, B can be 0 when m is small; safer to add 1."
+      },
+      "hint": "Blocks are over the compressed value indices, not positions.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    B = int(math.sqrt(m)) + 1\n    nb = (m + B - 1) // B\n    cnt = [0] * m\n    bucket_sum = [0] * nb\n    vals_list = vals",
+      "codeLabel": "Init value blocks"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Implement adding a position to the current set (update count and bucket sum). Choose the correct snippet.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    def add_pos(pos):\n        i = comp[pos]\n        cnt[i] += 1\n        bucket_sum[i // B] += vals_list[i]",
+          "isCode": true
+        },
+        {
+          "label": "    def add_pos(pos):\n        i = comp[pos]\n        cnt[i] = 1\n        bucket_sum[i // B] += vals_list[i] * cnt[i]",
+          "isCode": true
+        },
+        {
+          "label": "    def add_pos(pos):\n        i = comp[pos]\n        cnt[i] += 1\n        bucket_sum[i // B] += 1",
+          "isCode": true
+        },
+        {
+          "label": "    def add_pos(pos):\n        i = comp[pos]\n        cnt[i] += 1\n        bucket_sum[i] += vals_list[i]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Increase count for that value index and add the value once to its bucket's sum.",
+      "wrongExplanations": {
+        "1": "Overwrites existing counts and double-multiplies the addition.",
+        "2": "Bucket sum must add the coin's value, not just 1."
+      },
+      "hint": "Each occurrence adds exactly its value to the bucket sum.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    def add_pos(pos):\n        i = comp[pos]\n        cnt[i] += 1\n        bucket_sum[i // B] += vals_list[i]",
+      "codeLabel": "Add position"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Implement removing a position from the current set (update count and bucket sum). Choose the correct snippet.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    def remove_pos(pos):\n        i = comp[pos]\n        cnt[i] -= 1\n        bucket_sum[i // B] -= vals_list[i]",
+          "isCode": true
+        },
+        {
+          "label": "    def remove_pos(pos):\n        i = comp[pos]\n        cnt[i] = 0\n        bucket_sum[i // B] -= vals_list[i] * cnt[i]",
+          "isCode": true
+        },
+        {
+          "label": "    def remove_pos(pos):\n        i = comp[pos]\n        cnt[i] -= 1\n        bucket_sum[i] -= vals_list[i]",
+          "isCode": true
+        },
+        {
+          "label": "    def remove_pos(pos):\n        i = comp[pos]\n        bucket_sum[i // B] -= 1\n        cnt[i] -= 1",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Decrease count and subtract the value once from its bucket's sum.",
+      "wrongExplanations": {
+        "1": "This zeroes counts and multiplies by cnt, which is now zero.",
+        "3": "Bucket sums track values, not counts; subtract value, not 1."
+      },
+      "hint": "Mirror the add operation but with subtraction.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    def remove_pos(pos):\n        i = comp[pos]\n        cnt[i] -= 1\n        bucket_sum[i // B] -= vals_list[i]",
+      "codeLabel": "Remove position"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Implement the function to compute the smallest missing sum using blocks and counts.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    def smallest_missing():\n        need = 1\n        j = 0\n        while j < nb:\n            l = j * B\n            r = min((j + 1) * B, m)\n            max_in_bucket = vals_list[r - 1]\n            if need <= max_in_bucket:\n                for i in range(l, r):\n                    c = cnt[i]\n                    if c == 0:\n                        continue\n                    v = vals_list[i]\n                    if v > need:\n                        return need\n                    need += v * c\n                j += 1\n            else:\n                need += bucket_sum[j]\n                j += 1\n        return need",
+          "isCode": true
+        },
+        {
+          "label": "    def smallest_missing():\n        total = 0\n        for j in range(nb):\n            total += bucket_sum[j]\n        return total + 1",
+          "isCode": true
+        },
+        {
+          "label": "    def smallest_missing():\n        need = 1\n        for i in range(m):\n            if cnt[i] > 0:\n                need += vals_list[i]\n        return need",
+          "isCode": true
+        },
+        {
+          "label": "    def smallest_missing():\n        need = 1\n        j = 0\n        while j < nb:\n            l = j * B\n            r = min((j + 1) * B, m)\n            for i in range(l, r):\n                v = vals_list[i]\n                if v >= need:\n                    return need\n                need += v\n            j += 1\n        return need",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We skip whole blocks when safe and scan within candidate blocks, using counts and stopping at first v > need.",
+      "wrongExplanations": {
+        "1": "Sum of all values +1 is not the answer in general.",
+        "3": "Must compare strictly v > need and multiply by count; using v >= need and +v is wrong."
+      },
+      "hint": "Use the greedy rule with block skipping and counts.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    def smallest_missing():\n        need = 1\n        j = 0\n        while j < nb:\n            l = j * B\n            r = min((j + 1) * B, m)\n            max_in_bucket = vals_list[r - 1]\n            if need <= max_in_bucket:\n                for i in range(l, r):\n                    c = cnt[i]\n                    if c == 0:\n                        continue\n                    v = vals_list[i]\n                    if v > need:\n                        return need\n                    need += v * c\n                j += 1\n            else:\n                need += bucket_sum[j]\n                j += 1\n        return need",
+      "codeLabel": "Compute missing sum"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "Process the ordered queries by expanding/contracting the current segment and collect answers. Choose the correct snippet.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    ans = [0] * q\n    curL = 0\n    curR = -1\n    for a, b, qi in queries:\n        while curL > a:\n            curL -= 1\n            add_pos(curL)\n        while curR < b:\n            curR += 1\n            add_pos(curR)\n        while curL < a:\n            remove_pos(curL)\n            curL += 1\n        while curR > b:\n            remove_pos(curR)\n            curR -= 1\n        ans[qi] = smallest_missing()\n    print(\"\\n\".join(map(str, ans)))\n\nif __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "    ans = []\n    curL = 0\n    curR = -1\n    for a, b, qi in queries:\n        while curL < a:\n            curL += 1\n            add_pos(curL)\n        while curR > b:\n            curR -= 1\n            remove_pos(curR)\n        ans.append(smallest_missing())\n    print(\"\\n\".join(map(str, ans)))\n\nif __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "    ans = [0] * q\n    curL = 0\n    curR = -1\n    for a, b, qi in queries:\n        while curL > a:\n            add_pos(curL)\n            curL -= 1\n        while curR < b:\n            add_pos(curR)\n            curR += 1\n        while curL < a:\n            curL += 1\n            remove_pos(curL)\n        while curR > b:\n            curR -= 1\n            remove_pos(curR)\n        ans[qi] = smallest_missing()\n    print(\"\\n\".join(map(str, ans)))\n\nif __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "    curL = 0\n    curR = -1\n    res = {}\n    for a, b, qi in queries:\n        while curL > a:\n            curL -= 1\n            add_pos(curL)\n        while curR < b:\n            curR += 1\n            add_pos(curR)\n        while curL < a:\n            remove_pos(curL)\n            curL += 1\n        while curR > b:\n            remove_pos(curR)\n            curR -= 1\n        res[qi] = smallest_missing()\n    for i in range(q):\n        print(res[i])\n\nif __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We carefully move endpoints and apply add/remove before changing indices in the right direction, storing answers in original order.",
+      "wrongExplanations": {
+        "2": "Order of add/remove and index moves is wrong; e.g., add before incrementing curR uses old index.",
+        "3": "Equivalent logic but more verbose; acceptable, but we will use the array ans for clarity."
+      },
+      "hint": "Adjust curL/curR and apply add/remove on the index that enters/leaves the window.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    ans = [0] * q\n    curL = 0\n    curR = -1\n    for a, b, qi in queries:\n        while curL > a:\n            curL -= 1\n            add_pos(curL)\n        while curR < b:\n            curR += 1\n            add_pos(curR)\n        while curL < a:\n            remove_pos(curL)\n            curL += 1\n        while curR > b:\n            remove_pos(curR)\n            curR -= 1\n        ans[qi] = smallest_missing()\n    print(\"\\n\".join(map(str, ans)))\n\nif __name__ == \"__main__\":\n    main()",
+      "codeLabel": "Process queries and output"
+    },
+    {
+      "id": "q22",
+      "phase": "Verifying the Solution",
+      "questionText": "Run the built algorithm on the sample input:\n5 3\n2 9 1 2 7\n2 4\n4 4\n1 5\nWhat is the output?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "4\\n1\\n6",
+          "isCode": false
+        },
+        {
+          "label": "6\\n1\\n4",
+          "isCode": false
+        },
+        {
+          "label": "4\\n2\\n6",
+          "isCode": false
+        },
+        {
+          "label": "1\\n4\\n6",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "For [2,4]: 4; for [4,4]: 1; for [1,5]: 6, matching the sample.",
+      "wrongExplanations": {
+        "2": "Single coin 2 at [4,4] cannot form 2? It can; the missing is 1."
+      },
+      "hint": "We already reasoned these in the example."
+    },
+    {
+      "id": "q23",
+      "phase": "Verifying the Solution",
+      "questionText": "Suppose a query segment contains coins [1,2,2]. What does smallest_missing() return?",
+      "diagram": "need=1 -> +1 => 2; v=2 -> +2 => 4; v=2 -> +2 => 6; return 6",
+      "options": [
+        {
+          "label": "6",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Greedy accumulation yields 6.",
+      "wrongExplanations": {
+        "2": "4 is reachable (2+2).",
+        "1": "5 is reachable (1+2+2)."
+      },
+      "hint": "Recall the sorted scan logic."
+    },
+    {
+      "id": "q24",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the time to compute one answer smallest_missing() using value blocks when counts are maintained?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(sqrt(m)) where m is the number of distinct values",
+          "isCode": false
+        },
+        {
+          "label": "O(m)",
+          "isCode": false
+        },
+        {
+          "label": "O(log m)",
+          "isCode": false
+        },
+        {
+          "label": "O(1)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We skip whole blocks and scan at most one block in detail, giving O(#blocks + block_size) ≈ O(sqrt(m)).",
+      "wrongExplanations": {
+        "2": "We do not use a logarithmic-time tree here; we scan blocks."
+      },
+      "hint": "We scan at most one block in detail."
+    },
+    {
+      "id": "q25",
+      "phase": "Analyzing Complexity",
+      "questionText": "Overall, with ordered queries and O(1) add/remove updates (amortized) plus O(sqrt(m)) per answer, what is the rough total time?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O((n + q) * sqrt(n) + q * sqrt(m))",
+          "isCode": false
+        },
+        {
+          "label": "O(nq log n)",
+          "isCode": false
+        },
+        {
+          "label": "O((n + q) log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(q * log m)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Moving the window costs roughly O((n+q)*block_size) with block_size≈sqrt(n); each answer costs O(sqrt(m)).",
+      "wrongExplanations": {
+        "1": "This is the naive approach we ruled out.",
+        "3": "Per-answer time is not logarithmic with this setup."
+      },
+      "hint": "Combine window movement and per-answer costs."
+    },
+    {
+      "id": "q26",
+      "phase": "Analyzing Complexity",
+      "questionText": "Edge cases: which of the following is always true for any segment?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "If the segment has no coin of value 1, the answer is 1",
+          "isCode": false
+        },
+        {
+          "label": "If the segment sum is S, the answer is S+1",
+          "isCode": false
+        },
+        {
+          "label": "If the segment has the coin 1, the answer is always 2",
+          "isCode": false
+        },
+        {
+          "label": "If the segment has only large coins (≥2), the answer is ≥2",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Without a 1, you cannot form 1, so answer is 1.",
+      "wrongExplanations": {
+        "3": "If all coins ≥2, the answer is 1, not ≥2."
+      },
+      "hint": "Start with need=1."
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\n\ndef main():\n    import sys\n    data = sys.stdin.read().strip().split()\n    it = iter(data)\n    n = int(next(it)); q = int(next(it))\n    arr = [int(next(it)) for _ in range(n)]\n    queries = []\n    for idx in range(q):\n        a = int(next(it)) - 1\n        b = int(next(it)) - 1\n        queries.append((a, b, idx))",
+    "    vals = sorted(set(arr))\n    m = len(vals)\n    idx_of = {v: i for i, v in enumerate(vals)}\n    comp = [idx_of[v] for v in arr]",
+    "    import math\n    block = max(1, int(n ** 0.5))\n    def key_fn(qu):\n        a, b, qi = qu\n        block_id = a // block\n        return (block_id, b if block_id % 2 == 0 else -b)\n    queries.sort(key=key_fn)",
+    "    B = int(math.sqrt(m)) + 1\n    nb = (m + B - 1) // B\n    cnt = [0] * m\n    bucket_sum = [0] * nb\n    vals_list = vals",
+    "    def add_pos(pos):\n        i = comp[pos]\n        cnt[i] += 1\n        bucket_sum[i // B] += vals_list[i]",
+    "    def remove_pos(pos):\n        i = comp[pos]\n        cnt[i] -= 1\n        bucket_sum[i // B] -= vals_list[i]",
+    "    def smallest_missing():\n        need = 1\n        j = 0\n        while j < nb:\n            l = j * B\n            r = min((j + 1) * B, m)\n            max_in_bucket = vals_list[r - 1]\n            if need <= max_in_bucket:\n                for i in range(l, r):\n                    c = cnt[i]\n                    if c == 0:\n                        continue\n                    v = vals_list[i]\n                    if v > need:\n                        return need\n                    need += v * c\n                j += 1\n            else:\n                need += bucket_sum[j]\n                j += 1\n        return need",
+    "    ans = [0] * q\n    curL = 0\n    curR = -1\n    for a, b, qi in queries:\n        while curL > a:\n            curL -= 1\n            add_pos(curL)\n        while curR < b:\n            curR += 1\n            add_pos(curR)\n        while curL < a:\n            remove_pos(curL)\n            curL += 1\n        while curR > b:\n            remove_pos(curR)\n            curR -= 1\n        ans[qi] = smallest_missing()\n    print(\"\\n\".join(map(str, ans)))\n\nif __name__ == \"__main__\":\n    main()"
+  ],
+  "reasoningChain": [
+    {
+      "question": "How do we compute the smallest missing sum for a single set of coins?",
+      "insight": "Sort values increasing and grow a 'need' starting at 1; if the next value exceeds need, answer is need; otherwise add value (times its count) to need."
+    },
+    {
+      "question": "For a subarray query, what matters?",
+      "insight": "Only the multiset of values within the segment affects the answer, not their positions."
+    },
+    {
+      "question": "How to handle many queries efficiently?",
+      "insight": "Process queries in an order that minimizes how much the active segment changes, updating a dynamic multiset by adding/removing endpoints."
+    },
+    {
+      "question": "How to store the dynamic multiset over large values?",
+      "insight": "Relabel unique values to 0..m-1 in sorted order and maintain counts per value index."
+    },
+    {
+      "question": "How to answer each query fast from counts?",
+      "insight": "Partition value indices into blocks; keep sum per block so we can skip whole blocks when their values are all ≤ current 'need' and only scan inside one block when necessary."
+    },
+    {
+      "question": "What are the core updates?",
+      "insight": "Adding/removing a position increments/decrements the count for that value and updates the corresponding block sum by the value."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1413,
+    "output_tokens": 21672,
+    "input_cost": 0.001766,
+    "output_cost": 0.21672,
+    "total_cost": 0.218486
+  }
+}

@@ -1,0 +1,883 @@
+{
+  "id": "counting-towers-mcq-guide",
+  "title": "Counting Towers",
+  "difficulty": "intermediate",
+  "tags": [
+    "dp"
+  ],
+  "estimatedMinutes": 60,
+  "language": "python",
+  "description": "Time limit: 1.00 s  Memory limit: 512 MB\n\nYour task is to build a tower whose width is 2 and height is n. You have an unlimited supply of blocks whose width and height are integers.\n\nMirrored and rotated towers are counted separately if they look different.\n\nInput\n- The first input line contains an integer t: the number of tests.\n- After this, there are t lines, and each line contains an integer n: the height of the tower.\n\nOutput\n- For each test, print the number of towers modulo 10^9+7.\n",
+  "examples": [
+    {
+      "input": "3\n2\n6\n1337\n",
+      "output": "8\n2864\n640403945\n",
+      "explanation": "Counts the number of different 2×n towers for each n, modulo 1e9+7."
+    }
+  ],
+  "constraints": [
+    "1 ≤ t ≤ 100",
+    "1 ≤ n ≤ 10^6",
+    "Answer modulo 1e9+7"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "For n = 1, how many different towers of width 2 and height 1 can you build?",
+      "diagram": "Width=2, Height=1\n- Either one 2x1 block across\n- Or two 1x1 blocks side by side",
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "There are two: a single 2×1 block, or two 1×1 blocks side by side.",
+      "wrongExplanations": {
+        "0": "You are missing the arrangement with two 1×1 blocks.",
+        "2": "Double counting or including invalid shapes."
+      },
+      "hint": "Enumerate all rectangle partitions of a 2×1 area.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "The statement says: \"Mirrored and rotated towers are counted separately if they look different.\" If you swap the left and right columns of a non-symmetric tower, how is it counted?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "As a different tower (counted separately).",
+          "isCode": false
+        },
+        {
+          "label": "As the same tower (not counted separately).",
+          "isCode": false
+        },
+        {
+          "label": "It depends on the heights used, not on the shape.",
+          "isCode": false
+        },
+        {
+          "label": "Only rotations are counted separately, mirrors are not.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Mirrored and rotated shapes that look different are counted separately, so left-right swaps of non-symmetric towers are distinct.",
+      "wrongExplanations": {
+        "1": "The problem explicitly counts mirrored shapes separately.",
+        "3": "Both mirrored and rotated versions are counted separately if they differ."
+      },
+      "hint": "The problem explicitly mentions mirrors and rotations.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "Which blocks can appear in a valid partition of a 2×n tower?",
+      "diagram": "The tower is 2 units wide, so a block's width is 1 or 2; heights are positive integers.",
+      "options": [
+        {
+          "label": "Only 1×1 and 2×1 blocks.",
+          "isCode": false
+        },
+        {
+          "label": "Only blocks whose height is 1 (width 1 or 2).",
+          "isCode": false
+        },
+        {
+          "label": "Only blocks of width 2 and any positive height.",
+          "isCode": false
+        },
+        {
+          "label": "Blocks of width 1 or 2 and any positive integer height.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 3,
+      "explanation": "Width can be 1 or 2; height can be any positive integer. All such rectangles are allowed.",
+      "wrongExplanations": {
+        "0": "Heights can be >1 too.",
+        "2": "Blocks of width 1 are also allowed."
+      },
+      "hint": "Width must be ≤ 2; height has no upper bound other than n.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "For n = 2, how many different towers are there?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "5",
+          "isCode": false
+        },
+        {
+          "label": "6",
+          "isCode": false
+        },
+        {
+          "label": "8",
+          "isCode": false
+        },
+        {
+          "label": "10",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Given in the sample: the answer for n=2 is 8.",
+      "wrongExplanations": {
+        "0": "Too small; misses several valid partitions.",
+        "3": "Too large; includes invalid or duplicate patterns."
+      },
+      "hint": "Use the sample I/O as a check.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Understanding the Problem",
+      "questionText": "Suppose we split the count into two categories A[n] and B[n], representing two distinct top-boundary shapes. Which relationship with the total count F[n] is correct?",
+      "diagram": "Let F[n] be the total number of towers of height n.",
+      "options": [
+        {
+          "label": "F[n] = A[n] × B[n]",
+          "isCode": false
+        },
+        {
+          "label": "F[n] = A[n] + B[n]",
+          "isCode": false
+        },
+        {
+          "label": "F[n] = max(A[n], B[n])",
+          "isCode": false
+        },
+        {
+          "label": "F[n] = A[n] − B[n] (if A[n] ≥ B[n])",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "A[n] and B[n] are disjoint categories covering all cases, so they add.",
+      "wrongExplanations": {
+        "0": "They are not independent factors; categories are mutually exclusive.",
+        "2": "We need all ways, not just the larger of the two."
+      },
+      "hint": "Think disjoint union of cases.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "To grow towers from height n−1 to n, what's the minimal information about the current top we need to carry?",
+      "diagram": "We care about the shape at the boundary between the two columns at the current top.",
+      "options": [
+        {
+          "label": "Exact heights of the last three blocks in both columns.",
+          "isCode": false
+        },
+        {
+          "label": "Which specific block sizes were used so far.",
+          "isCode": false
+        },
+        {
+          "label": "Whether the top is flat (columns aligned) or has a single step between columns.",
+          "isCode": false
+        },
+        {
+          "label": "No information; counts depend only on n.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "We only need to distinguish two top shapes: flat vs one-step ‘stair’.",
+      "wrongExplanations": {
+        "0": "History beyond the current boundary shape isn’t needed.",
+        "3": "Transitions depend on the current boundary shape."
+      },
+      "hint": "Focus on the boundary shape, not full history.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "Let A[n] be ways with a flat top at height n, and B[n] be ways with a one-step top at height n (either side). Which recurrence fits the case analysis of adding the last unit of height?",
+      "diagram": "From height n−1:\n- Flat → Flat: several options.\n- Step → Flat: certain options.\n- Flat → Step, Step → Step: certain options.",
+      "options": [
+        {
+          "label": "A[n] = 2A[n−1] + B[n−1],  B[n] = A[n−1] + B[n−1]",
+          "isCode": false
+        },
+        {
+          "label": "A[n] = 4A[n−1] + B[n−1],  B[n] = A[n−1] + 2B[n−1]",
+          "isCode": false
+        },
+        {
+          "label": "A[n] = 3A[n−1] + 2B[n−1],  B[n] = 2A[n−1] + B[n−1]",
+          "isCode": false
+        },
+        {
+          "label": "A[n] = 4A[n−1] + 2B[n−1],  B[n] = 2A[n−1] + B[n−1]",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "There are four ways from flat→flat and one from step→flat; one from flat→step and two from step→step, giving A[n]=4A[n−1]+B[n−1], B[n]=A[n−1]+2B[n−1].",
+      "wrongExplanations": {
+        "0": "Undercounts flat→flat and step→step transitions.",
+        "3": "Overcounts step→flat and flat→step relative to case analysis."
+      },
+      "hint": "Count how many distinct last-layer patterns lead to each top shape.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Building the Idea",
+      "questionText": "Using F[1] = 2 and F[2] = 8, and the recurrences A[n] = 4A[n−1] + B[n−1], B[n] = A[n−1] + 2B[n−1], what are A[1] and B[1]?",
+      "diagram": "We have: F[n]=A[n]+B[n]. So A[1]+B[1]=2 and A[2]+B[2]=8.\nCompute A[2]=4A[1]+B[1], B[2]=A[1]+2B[1].",
+      "options": [
+        {
+          "label": "A[1] = 1, B[1] = 1",
+          "isCode": false
+        },
+        {
+          "label": "A[1] = 2, B[1] = 0",
+          "isCode": false
+        },
+        {
+          "label": "A[1] = 0, B[1] = 2",
+          "isCode": false
+        },
+        {
+          "label": "A[1] = 3, B[1] = −1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Solve: A1+B1=2 and (4A1+B1)+(A1+2B1)=8 ⇒ 5A1+3B1=8 ⇒ B1=1, A1=1.",
+      "wrongExplanations": {
+        "1": "Then A2=8, B2=2 ⇒ F2=10, not 8.",
+        "2": "Then A2=2, B2=4 ⇒ F2=6, not 8."
+      },
+      "hint": "Set up two equations in two unknowns from F[1] and F[2].",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "Compute F[3] = A[3] + B[3] using A[1]=1, B[1]=1 and the recurrences.",
+      "diagram": "A2=4*1+1=5, B2=1+2*1=3.\nA3=4*5+3, B3=5+2*3.",
+      "options": [
+        {
+          "label": "30",
+          "isCode": false
+        },
+        {
+          "label": "32",
+          "isCode": false
+        },
+        {
+          "label": "36",
+          "isCode": false
+        },
+        {
+          "label": "34",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 3,
+      "explanation": "A3=23, B3=11 ⇒ F3=34.",
+      "wrongExplanations": {
+        "0": "Check B3=5+2*3=11; 23+11=34.",
+        "2": "Arithmetic slip; recompute A3=4*5+3."
+      },
+      "hint": "Carefully compute A2,B2 first, then A3,B3.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "Compute F[4] = A[4] + B[4] from previous values.",
+      "diagram": "We have A3=23, B3=11.\nA4=4*23+11, B4=23+2*11.",
+      "options": [
+        {
+          "label": "142",
+          "isCode": false
+        },
+        {
+          "label": "150",
+          "isCode": false
+        },
+        {
+          "label": "148",
+          "isCode": false
+        },
+        {
+          "label": "154",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "A4=103, B4=45 ⇒ F4=148.",
+      "wrongExplanations": {
+        "0": "Recheck: 4*23=92; 92+11=103 and 23+22=45.",
+        "1": "Adds an extra 2 by mistake."
+      },
+      "hint": "Recompute A4 and B4 separately, then add.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "Given n can be up to 10^6, should we apply modulo 1e9+7 at each step of the recurrence?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, take modulo after each update to keep numbers small.",
+          "isCode": false
+        },
+        {
+          "label": "No, only take modulo at the very end.",
+          "isCode": false
+        },
+        {
+          "label": "Only take modulo in A[n], not in B[n].",
+          "isCode": false
+        },
+        {
+          "label": "Only if the number exceeds 64-bit range.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Taking modulo each step avoids overflow and keeps performance reliable.",
+      "wrongExplanations": {
+        "1": "Intermediate values can grow huge; better to reduce early.",
+        "3": "We shouldn’t rely on overflow detection."
+      },
+      "hint": "Keep values bounded throughout the iteration.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "We have up to 100 queries with n up to 10^6. What's the best plan to answer all queries fast?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Recompute from scratch for each test case.",
+          "isCode": false
+        },
+        {
+          "label": "Use recursion without caching for each query.",
+          "isCode": false
+        },
+        {
+          "label": "Compute values on demand for each query separately.",
+          "isCode": false
+        },
+        {
+          "label": "Precompute A[i], B[i] up to max n among queries once, then answer each in O(1).",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 3,
+      "explanation": "One precomputation up to max n gives O(max n + t) time overall.",
+      "wrongExplanations": {
+        "0": "That multiplies work by t unnecessarily.",
+        "2": "Still repeats work across queries."
+      },
+      "hint": "Reuse shared prefixes across all queries.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Writing the Code",
+      "questionText": "Start with imports and the modulo constant.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import math\nMOD = 10**9 + 7",
+          "isCode": true
+        },
+        {
+          "label": "from collections import deque\nMOD = 1000000007",
+          "isCode": true
+        },
+        {
+          "label": "import sys\nMOD = 10**9 + 7",
+          "isCode": true
+        },
+        {
+          "label": "import sys\nMOD = 10**9",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "We need sys for fast input and MOD = 10**9 + 7.",
+      "wrongExplanations": {
+        "0": "math isn’t needed here; input handling uses sys.",
+        "3": "Modulo must be 1,000,000,007."
+      },
+      "hint": "Pick the correct module and modulo value.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\nMOD = 10**9 + 7",
+      "codeLabel": "Imports and MOD"
+    },
+    {
+      "id": "q14",
+      "phase": "Writing the Code",
+      "questionText": "Read all integers from stdin and split into t and the list of n values.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "data = list(map(int, input().split()))\nt = data[0]\nns = data[1:]",
+          "isCode": true
+        },
+        {
+          "label": "data = sys.stdin.read().split()\nt = int(data[0])\nns = list(map(int, data[1:]))",
+          "isCode": true
+        },
+        {
+          "label": "data = list(map(int, sys.stdin.read().strip().split()))\nt = data[0] if data else 0\nns = data[1:] if len(data) > 1 else []",
+          "isCode": true
+        },
+        {
+          "label": "t = int(sys.stdin.readline())\nns = [int(sys.stdin.readline()) for _ in range(t)]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Reading all at once is simple and robust; handle empty defensively.",
+      "wrongExplanations": {
+        "0": "Only reads a single line; we need all lines.",
+        "3": "Also fine, but we’ll standardize on reading all at once here."
+      },
+      "hint": "Use sys.stdin.read() and split, then map to ints.",
+      "isCodeBuilding": true,
+      "codeSnippet": "data = list(map(int, sys.stdin.read().strip().split()))\nt = data[0] if data else 0\nns = data[1:] if len(data) > 1 else []",
+      "codeLabel": "Read input"
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Compute the maximum n across all test cases (or 0 if none).",
+      "diagram": null,
+      "options": [
+        {
+          "label": "maxn = max(data)",
+          "isCode": true
+        },
+        {
+          "label": "maxn = max(ns) if ns else 0",
+          "isCode": true
+        },
+        {
+          "label": "maxn = t and max(ns)",
+          "isCode": true
+        },
+        {
+          "label": "maxn = ns[-1]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "We want the max over the list ns, guarding against emptiness.",
+      "wrongExplanations": {
+        "0": "data includes t as well; we only want the n values.",
+        "3": "Inputs aren’t guaranteed sorted."
+      },
+      "hint": "Use max on the list of n values.",
+      "isCodeBuilding": true,
+      "codeSnippet": "maxn = max(ns) if ns else 0",
+      "codeLabel": "Find max n"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Initialize arrays for A and B up to maxn and set base values.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "a = [0] * maxn\nb = [0] * maxn\na[0] = 1\nb[0] = 1",
+          "isCode": true
+        },
+        {
+          "label": "a = [1] * (maxn + 1)\nb = [1] * (maxn + 1)",
+          "isCode": true
+        },
+        {
+          "label": "a = {}\nb = {}\na[1] = 1\nb[1] = 1",
+          "isCode": true
+        },
+        {
+          "label": "a = [0] * (maxn + 1)\nb = [0] * (maxn + 1)\nif maxn >= 1:\n    a[1] = 1\n    b[1] = 1",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 3,
+      "explanation": "We need arrays of length maxn+1 and base A[1]=B[1]=1 when applicable.",
+      "wrongExplanations": {
+        "0": "Off-by-one and wrong base indices.",
+        "1": "Fills everything with 1; not correct."
+      },
+      "hint": "Index from 0..maxn and set base at index 1.",
+      "isCodeBuilding": true,
+      "codeSnippet": "a = [0] * (maxn + 1)\nb = [0] * (maxn + 1)\nif maxn >= 1:\n    a[1] = 1\n    b[1] = 1",
+      "codeLabel": "Init arrays and base"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Fill the arrays using the derived recurrences, taking modulo each step.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "for i in range(1, maxn + 1):\n    a[i] = (2 * a[i - 1] + b[i - 1]) % MOD\n    b[i] = (a[i - 1] + b[i - 1]) % MOD",
+          "isCode": true
+        },
+        {
+          "label": "for i in range(2, maxn + 1):\n    a[i] = (4 * a[i - 1] + b[i - 1]) % MOD\n    b[i] = (a[i - 1] + 2 * b[i - 1]) % MOD",
+          "isCode": true
+        },
+        {
+          "label": "for i in range(2, maxn + 1):\n    a[i] = 4 * a[i - 1] + b[i - 1]\n    b[i] = a[i - 1] + 2 * b[i - 1]",
+          "isCode": true
+        },
+        {
+          "label": "for i in range(2, maxn + 2):\n    a[i] = (4 * a[i - 1] + b[i - 1]) % MOD\n    b[i] = (a[i - 1] + 2 * b[i - 1]) % MOD",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Loop from 2..maxn and apply A[n]=4A[n−1]+B[n−1], B[n]=A[n−1]+2B[n−1] with modulo.",
+      "wrongExplanations": {
+        "0": "Wrong coefficients and off-by-one at i=1 uses a[0], b[0] incorrectly.",
+        "2": "Missing modulo; risk overflow and wrong outputs."
+      },
+      "hint": "Start at i=2 and use the exact coefficients.",
+      "isCodeBuilding": true,
+      "codeSnippet": "for i in range(2, maxn + 1):\n    a[i] = (4 * a[i - 1] + b[i - 1]) % MOD\n    b[i] = (a[i - 1] + 2 * b[i - 1]) % MOD",
+      "codeLabel": "Fill recurrences"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Collect answers for each query n using F[n] = A[n] + B[n] (modulo MOD).",
+      "diagram": null,
+      "options": [
+        {
+          "label": "out = []\nfor n in ns:\n    out.append(str((a[n] + b[n]) % MOD))",
+          "isCode": true
+        },
+        {
+          "label": "out = []\nfor n in ns:\n    out.append(a[n] + b[n])",
+          "isCode": true
+        },
+        {
+          "label": "out = [str(a[n] + b[n]) % MOD for n in ns]",
+          "isCode": true
+        },
+        {
+          "label": "out = [a[n] + b[n] % MOD for n in ns]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Sum with modulo and convert to strings for printing.",
+      "wrongExplanations": {
+        "1": "Missing modulo can overflow and break modulo requirement.",
+        "3": "Operator precedence yields a[n] + (b[n] % MOD), not (a+b)%MOD."
+      },
+      "hint": "Remember to apply modulo to the sum.",
+      "isCodeBuilding": true,
+      "codeSnippet": "out = []\nfor n in ns:\n    out.append(str((a[n] + b[n]) % MOD))",
+      "codeLabel": "Build outputs"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Print each answer on its own line.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "print(out)",
+          "isCode": true
+        },
+        {
+          "label": "print(\" \".join(out))",
+          "isCode": true
+        },
+        {
+          "label": "print(\"\\n\".join(out))",
+          "isCode": true
+        },
+        {
+          "label": "for x in out: print(x, end=\" \")",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Join with newline to match the required output format.",
+      "wrongExplanations": {
+        "0": "This prints a Python list representation, not line-separated numbers.",
+        "1": "Spaces between answers are not allowed; each must be on its own line."
+      },
+      "hint": "Use newline separators.",
+      "isCodeBuilding": true,
+      "codeSnippet": "print(\"\\n\".join(out))",
+      "codeLabel": "Print results"
+    },
+    {
+      "id": "q20",
+      "phase": "Verifying the Solution",
+      "questionText": "Given the sample input:\n3\n2\n6\n1337\nwhat does the program output?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "8\\n3000\\n640403945",
+          "isCode": false
+        },
+        {
+          "label": "8\\n2864\\n640403945",
+          "isCode": false
+        },
+        {
+          "label": "8 2864 640403945",
+          "isCode": false
+        },
+        {
+          "label": "7\\n2864\\n640403945",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Matches the example: 8, 2864, 640403945 on separate lines.",
+      "wrongExplanations": {
+        "2": "Output must be line-separated, not space-separated.",
+        "3": "The first value must be 8 for n=2."
+      },
+      "hint": "Check the sample output exactly.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q21",
+      "phase": "Verifying the Solution",
+      "questionText": "For a single test n = 6, what should the program print?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "2864",
+          "isCode": false
+        },
+        {
+          "label": "2021",
+          "isCode": false
+        },
+        {
+          "label": "843",
+          "isCode": false
+        },
+        {
+          "label": "3001",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "A[6]=2021, B[6]=843, so F[6]=2864.",
+      "wrongExplanations": {
+        "1": "This is A[6] only, not the total.",
+        "2": "This is B[6] only, not the total."
+      },
+      "hint": "Total is A[6]+B[6].",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q22",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the time complexity of this solution for t test cases and maximum n = N?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(t * N)",
+          "isCode": false
+        },
+        {
+          "label": "O(N^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(t + log N)",
+          "isCode": false
+        },
+        {
+          "label": "O(N + t)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 3,
+      "explanation": "Precompute up to N once (O(N)), then answer t queries in O(1) each.",
+      "wrongExplanations": {
+        "0": "We don’t recompute per test case.",
+        "1": "There is only a single linear pass."
+      },
+      "hint": "Separate precomputation from query answering.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q23",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the space complexity with maximum n = N?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(1)",
+          "isCode": false
+        },
+        {
+          "label": "O(t)",
+          "isCode": false
+        },
+        {
+          "label": "O(N)",
+          "isCode": false
+        },
+        {
+          "label": "O(N + t)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "We store two arrays of size N+1, which is O(N) space.",
+      "wrongExplanations": {
+        "0": "Arrays grow with N.",
+        "3": "t doesn’t affect asymptotic memory here."
+      },
+      "hint": "Count the arrays needed for A and B.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Analyzing Complexity",
+      "questionText": "If all tests have n = 1, what ensures the program prints correct results without entering the main fill loop?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Starting the loop from i = 1 instead of 2.",
+          "isCode": false
+        },
+        {
+          "label": "Setting base values A[1] = 1 and B[1] = 1 when maxn ≥ 1.",
+          "isCode": false
+        },
+        {
+          "label": "Computing values lazily during output.",
+          "isCode": false
+        },
+        {
+          "label": "Using recursion for small n.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "We initialize A[1] and B[1] if maxn ≥ 1; the loop is skipped safely.",
+      "wrongExplanations": {
+        "0": "We don’t need to process i=1 in the loop if base is set.",
+        "2": "We still need correct base values explicitly set."
+      },
+      "hint": "Base initialization should cover n=1.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\nMOD = 10**9 + 7",
+    "data = list(map(int, sys.stdin.read().strip().split()))\nt = data[0] if data else 0\nns = data[1:] if len(data) > 1 else []",
+    "maxn = max(ns) if ns else 0",
+    "a = [0] * (maxn + 1)\nb = [0] * (maxn + 1)\nif maxn >= 1:\n    a[1] = 1\n    b[1] = 1",
+    "for i in range(2, maxn + 1):\n    a[i] = (4 * a[i - 1] + b[i - 1]) % MOD\n    b[i] = (a[i - 1] + 2 * b[i - 1]) % MOD",
+    "out = []\nfor n in ns:\n    out.append(str((a[n] + b[n]) % MOD))",
+    "print(\"\\n\".join(out))"
+  ],
+  "reasoningChain": [
+    {
+      "question": "Why can we split the total count into two categories based on the top shape?",
+      "insight": "Knowing whether the current top is flat or a single step is enough to describe how to extend towers by one unit of height."
+    },
+    {
+      "question": "What transitions are possible when adding the final unit of height?",
+      "insight": "Counting distinct top-layer patterns yields A[n] = 4A[n−1] + B[n−1] and B[n] = A[n−1] + 2B[n−1]."
+    },
+    {
+      "question": "How do we determine base values?",
+      "insight": "Using F[1]=2 and F[2]=8 with the recurrences gives A[1]=1 and B[1]=1."
+    },
+    {
+      "question": "How do we efficiently answer multiple queries up to n = 10^6?",
+      "insight": "Precompute A[i], B[i] up to the maximum n among queries, then answer each query in O(1)."
+    },
+    {
+      "question": "Where to apply modulo?",
+      "insight": "Apply modulo 1e9+7 at every update to avoid overflow and keep values bounded."
+    },
+    {
+      "question": "What are the final outputs?",
+      "insight": "For each n, the answer is (A[n] + B[n]) mod 1e9+7, printed one per line."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1368,
+    "output_tokens": 19701,
+    "input_cost": 0.00171,
+    "output_cost": 0.19701,
+    "total_cost": 0.19872
+  }
+}

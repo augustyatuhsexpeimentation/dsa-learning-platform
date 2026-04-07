@@ -1,0 +1,986 @@
+{
+  "id": "towers-minimum-towers",
+  "title": "Towers",
+  "difficulty": "intermediate",
+  "tags": [
+    "sorting",
+    "two-pointer",
+    "binary-search"
+  ],
+  "estimatedMinutes": 45,
+  "language": "python",
+  "description": "You are given n cubes in a certain order, and your task is to build towers using them. Whenever two cubes are one on top of the other, the upper cube must be smaller than the lower cube.\n\nYou must process the cubes in the given order. You can always either place the cube on top of an existing tower, or begin a new tower. What is the minimum possible number of towers?\n\nInput:\n- The first input line contains an integer n: the number of cubes.\n- The next line contains n integers k_1, k_2, ..., k_n: the sizes of the cubes.\n\nOutput:\nPrint one integer: the minimum number of towers.",
+  "examples": [
+    {
+      "input": "5\n3 8 2 1 5\n",
+      "output": "2\n",
+      "explanation": "Process in order: [3] -> new tower; 8 -> cannot go on 3, new tower; 2 -> can go on top of 3; 1 -> can go on top of 2; 5 -> can go on top of 8. Final towers: [3,2,1] and [8,5], so 2 towers."
+    }
+  ],
+  "constraints": [
+    "1 <= n <= 2 * 10^5",
+    "1 <= k_i <= 10^9",
+    "Process cubes in given order",
+    "Upper cube must be strictly smaller than lower cube"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "You start with the first cube size 3. How many towers exist after placing it?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "1 (one tower with top 3)",
+          "isCode": false
+        },
+        {
+          "label": "0 (no towers until we see more cubes)",
+          "isCode": false
+        },
+        {
+          "label": "2 (split the cube into two towers)",
+          "isCode": false
+        },
+        {
+          "label": "Depends on the next cube",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The first cube must start a new tower, so there is exactly one tower. There is no choice or dependency on future cubes.",
+      "wrongExplanations": {
+        "1": "You must place the cube immediately; towers exist as you process.",
+        "3": "You decide immediately per cube; future cubes don't affect the current count yet."
+      },
+      "hint": null,
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "Next cube is 8. The rule says the upper cube must be smaller than the lower cube. What is a valid action for cube 8 given current tower top is 3?",
+      "diagram": "Current towers: [3]\nIncoming cube: 8",
+      "options": [
+        {
+          "label": "Place 8 on top of 3",
+          "isCode": false
+        },
+        {
+          "label": "Start a new tower with 8",
+          "isCode": false
+        },
+        {
+          "label": "Place 8 below 3 in the same tower",
+          "isCode": false
+        },
+        {
+          "label": "Skip cube 8 for later",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "8 cannot go on 3 since upper must be smaller. You cannot reorder cubes or place below, so start a new tower.",
+      "wrongExplanations": {
+        "0": "Upper must be smaller; 8 > 3 violates the rule.",
+        "2": "You must process cubes in order; no rearranging within a tower."
+      },
+      "hint": "Upper < lower must hold for any placement.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "Is it allowed to place a cube of size x on top of a cube of the same size x?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, if it is on a different tower",
+          "isCode": false
+        },
+        {
+          "label": "Yes, equal sizes are fine anywhere",
+          "isCode": false
+        },
+        {
+          "label": "No, the upper must be strictly smaller than the lower",
+          "isCode": false
+        },
+        {
+          "label": "Only if this creates fewer towers",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "The rule is strict: upper < lower. Equal sizes cannot stack. Starting a new tower is always allowed, but equal on equal is not.",
+      "wrongExplanations": {
+        "1": "Equal sizes violate the rule; 'smaller' is strict.",
+        "3": "Validity doesn't depend on tower count; the rule must be satisfied."
+      },
+      "hint": "Compare the words 'smaller' vs 'smaller or equal' in the statement.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "After processing cubes [3, 8, 2] in order, what is the minimum number of towers?",
+      "diagram": "Step 1: [3]\nStep 2: [3], [8]\nStep 3: Place 2 on top of 3 or 8; either way towers remain two.",
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "Cannot be determined without future cubes",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "3 -> tower1; 8 -> tower2; 2 can go on 3 or 8, but tower count stays 2.",
+      "wrongExplanations": {
+        "0": "At least two towers are needed since 8 cannot go on 3.",
+        "3": "We can decide now; future cubes don't affect past placements."
+      },
+      "hint": "Try both placements for 2 and count towers.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Exploring Approaches",
+      "questionText": "To decide if the current cube x can go on a tower, which property of that tower is relevant?",
+      "diagram": "Tower structure:\nBase ... [top]\nOnly the top interacts with the next cube.",
+      "options": [
+        {
+          "label": "The tower's height (number of cubes)",
+          "isCode": false
+        },
+        {
+          "label": "The tower's base cube size",
+          "isCode": false
+        },
+        {
+          "label": "The tower's top cube size",
+          "isCode": false
+        },
+        {
+          "label": "The sum of all cube sizes in the tower",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Only the top limits placement: x can go on a tower if top > x. Other properties don't constrain the rule.",
+      "wrongExplanations": {
+        "0": "Height doesn't affect the size comparison rule.",
+        "1": "Only the top directly touches the new cube."
+      },
+      "hint": "Placement compares the new cube with exactly one cube on the tower.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "If multiple towers have top > x, which tower should you place x on to leave the most room for future cubes?",
+      "diagram": "Available tops (sorted): t1 < t2 < t3\nAll t1, t2, t3 are > x",
+      "options": [
+        {
+          "label": "Pick the tower with the largest top (> x)",
+          "isCode": false
+        },
+        {
+          "label": "Pick the tower with the smallest top that is > x",
+          "isCode": false
+        },
+        {
+          "label": "Pick a random tower among those with top > x",
+          "isCode": false
+        },
+        {
+          "label": "Start a new tower anyway",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Replacing the smallest top > x with x keeps other larger tops available for bigger cubes later.",
+      "wrongExplanations": {
+        "0": "Using the largest top early may block future larger cubes.",
+        "3": "Starting a new tower increases the count unnecessarily."
+      },
+      "hint": "Try a small example and compare the effect of different choices.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "If no tower has top > x, what should you do with cube x?",
+      "diagram": "Current tops: [1, 2, 5]\nIncoming x = 7\nNo top > 7.",
+      "options": [
+        {
+          "label": "Place x on the tower with the largest top ≤ x",
+          "isCode": false
+        },
+        {
+          "label": "Start a new tower with x",
+          "isCode": false
+        },
+        {
+          "label": "Remove the tower with the smallest top",
+          "isCode": false
+        },
+        {
+          "label": "Reorder the cubes to fit x somewhere",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "You cannot place x on any tower since upper must be smaller than lower (top must be > x). Start a new tower.",
+      "wrongExplanations": {
+        "0": "Placing on top ≤ x violates the rule (upper must be smaller than lower).",
+        "3": "Reordering is not allowed; process in given order."
+      },
+      "hint": "Check the strict inequality and the processing order constraint.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Building the Idea",
+      "questionText": "Simulate the strategy: maintain tower tops and, for each x, place it on the tower with the smallest top > x, otherwise start a new tower. For [3, 8, 2, 1, 5], how many towers at the end?",
+      "diagram": "Step-by-step tops:\n- 3 -> [3]\n- 8 -> [3,8]\n- 2 -> replace 3 with 2: [2,8]\n- 1 -> replace 2 with 1: [1,8]\n- 5 -> replace 8 with 5: [1,5]\nCount = 2",
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "The tops end as [1,5]; count is 2.",
+      "wrongExplanations": {
+        "0": "At least two towers were needed after placing 8.",
+        "3": "There is no step that increases towers beyond 2 here."
+      },
+      "hint": "Write the tops after each cube.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "For input [2, 2, 2], what is the minimum number of towers produced by the strategy?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "Depends on the order of equal values",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Equal sizes cannot stack (upper must be smaller), so each must start a new tower: 3.",
+      "wrongExplanations": {
+        "0": "You cannot stack equal sizes under the strict rule.",
+        "1": "Two towers still leave one cube unplaced under the rule."
+      },
+      "hint": "Try placing the second 2: can it go on top of 2?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "Why is it helpful to keep the list of tower tops sorted as you process cubes?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "To quickly find the leftmost top that is greater than x",
+          "isCode": false
+        },
+        {
+          "label": "To quickly compute the sum of tops",
+          "isCode": false
+        },
+        {
+          "label": "Sorting reduces memory usage",
+          "isCode": false
+        },
+        {
+          "label": "It is not helpful; unsorted is fine",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "A sorted list lets you locate the first top > x efficiently and update it. Other reasons are unrelated.",
+      "wrongExplanations": {
+        "3": "Without ordering, finding the target top is slower."
+      },
+      "hint": "Placement needs the smallest top that is > x.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "In an ascending list L of tops, which index do we need for cube x?",
+      "diagram": "L = [t0, t1, t2, ...], ascending\nFind i such that L[i] > x and i is as small as possible.",
+      "options": [
+        {
+          "label": "Leftmost index with L[i] >= x",
+          "isCode": false
+        },
+        {
+          "label": "Leftmost index with L[i] > x",
+          "isCode": false
+        },
+        {
+          "label": "Rightmost index with L[i] < x",
+          "isCode": false
+        },
+        {
+          "label": "Rightmost index with L[i] <= x",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "We need the first top that is strictly greater than x to stack x on it. Using >= would allow equal sizes, which is invalid.",
+      "wrongExplanations": {
+        "0": "Equal is not allowed; we must find strictly greater.",
+        "3": "This index plus one equals the leftmost > x; but we directly need the leftmost > x."
+      },
+      "hint": "The rule is strict: upper < lower means lower > upper.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "After finding index i of the leftmost top > x in L, how should we update L?",
+      "diagram": "Before: L[i] = t > x\nAfter placing x on that tower: new top becomes x",
+      "options": [
+        {
+          "label": "Replace L[i] with x",
+          "isCode": false
+        },
+        {
+          "label": "Insert x just before i (shift elements right)",
+          "isCode": false
+        },
+        {
+          "label": "Remove L[i] from L",
+          "isCode": false
+        },
+        {
+          "label": "Append x to L",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "You placed x on that tower; its top becomes x. Replacing keeps the count of towers unchanged and the list sorted.",
+      "wrongExplanations": {
+        "1": "Inserting incorrectly increases the length, changing tower count.",
+        "3": "Appending would start a new tower; not needed here."
+      },
+      "hint": "We are updating an existing tower, not creating a new one.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "If no top is greater than x (i.e., all tops ≤ x), how do we update L?",
+      "diagram": "L = [t0, t1, ...], and max(L) ≤ x",
+      "options": [
+        {
+          "label": "Append x to L",
+          "isCode": false
+        },
+        {
+          "label": "Insert x at the front of L",
+          "isCode": false
+        },
+        {
+          "label": "Replace the last element of L with x",
+          "isCode": false
+        },
+        {
+          "label": "Discard x",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "No tower can accept x, so x starts a new tower, which we represent by appending x to the tops.",
+      "wrongExplanations": {
+        "2": "Replacing the last top doesn't reflect starting a new tower.",
+        "3": "You must place every cube; discarding is not allowed."
+      },
+      "hint": "Starting a new tower increases the number of tops by one.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Writing the Code",
+      "questionText": "Choose the correct imports to support fast input and searching the first top > x in a sorted list.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys; from bisect import bisect_right",
+          "isCode": true
+        },
+        {
+          "label": "import sys; from bisect import bisect_left",
+          "isCode": true
+        },
+        {
+          "label": "from bisect import bisect_right; import os",
+          "isCode": true
+        },
+        {
+          "label": "import bisect; import sys",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "bisect_right finds the leftmost index with value > x in a sorted list. We also need sys for input.",
+      "wrongExplanations": {
+        "1": "bisect_left finds first >= x, which would allow equal tops.",
+        "3": "Using import bisect requires calling bisect.bisect_right; later code uses bisect_right directly."
+      },
+      "hint": "We need the function that finds first value strictly greater than x.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys; from bisect import bisect_right",
+      "codeLabel": "Imports"
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Read all tokens from standard input robustly.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "data = sys.stdin.read().strip().split()",
+          "isCode": true
+        },
+        {
+          "label": "data = sys.stdin.readline().split()",
+          "isCode": true
+        },
+        {
+          "label": "data = input().split()",
+          "isCode": true
+        },
+        {
+          "label": "data = sys.stdin.read().split()",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Reading the whole input and splitting after stripping handles both lines and trailing whitespace.",
+      "wrongExplanations": {
+        "1": "This reads only one line; the numbers may span multiple lines.",
+        "2": "Reads only the first line; we need all numbers."
+      },
+      "hint": "The numbers are on the next line; but robust code should read the entire stream.",
+      "isCodeBuilding": true,
+      "codeSnippet": "data = sys.stdin.read().strip().split()",
+      "codeLabel": "Read tokens"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Handle the case of empty input safely.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "if not data: print(0); sys.exit()",
+          "isCode": true
+        },
+        {
+          "label": "if data is None: print(0); sys.exit()",
+          "isCode": true
+        },
+        {
+          "label": "if len(data) < 2: print(0); sys.exit()",
+          "isCode": true
+        },
+        {
+          "label": "if not data: pass",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "If there are no tokens, output 0 towers and exit. data is a list, not None.",
+      "wrongExplanations": {
+        "1": "data is a list; it won't be None.",
+        "3": "Doing nothing will lead to errors when accessing tokens."
+      },
+      "hint": "Guard before accessing tokens.",
+      "isCodeBuilding": true,
+      "codeSnippet": "if not data: print(0); sys.exit()",
+      "codeLabel": "Empty input guard"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Create an integer iterator and read n from it.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "it = iter(map(int, data)); n = next(it)",
+          "isCode": true
+        },
+        {
+          "label": "it = iter(data); n = next(it)",
+          "isCode": true
+        },
+        {
+          "label": "n = int(data[0]); it = iter(map(int, data))",
+          "isCode": true
+        },
+        {
+          "label": "it = map(int, data); n = data[0]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Map to ints, then consume n as the first integer via the iterator.",
+      "wrongExplanations": {
+        "1": "This iterates strings; n would be a string.",
+        "3": "n must be an int; data[0] is a string."
+      },
+      "hint": "You need numerical values to compare sizes.",
+      "isCodeBuilding": true,
+      "codeSnippet": "it = iter(map(int, data)); n = next(it)",
+      "codeLabel": "Iterator and n"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Read the next n integers as the cube sizes.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "arr = [next(it) for _ in range(n)]",
+          "isCode": true
+        },
+        {
+          "label": "arr = list(it)",
+          "isCode": true
+        },
+        {
+          "label": "arr = [int(x) for x in data[1:n+1]]",
+          "isCode": true
+        },
+        {
+          "label": "arr = [next(it) for _ in range(n-1)]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Consume exactly n integers from the iterator to form the sizes array.",
+      "wrongExplanations": {
+        "1": "This would also include numbers beyond the first n sizes.",
+        "3": "Off-by-one: it reads fewer than n sizes."
+      },
+      "hint": "Use the count n to control how many sizes to read.",
+      "isCodeBuilding": true,
+      "codeSnippet": "arr = [next(it) for _ in range(n)]",
+      "codeLabel": "Read sizes"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Initialize the list of tower tops.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "tops = []",
+          "isCode": true
+        },
+        {
+          "label": "tops = [0] * n",
+          "isCode": true
+        },
+        {
+          "label": "tops = list(set(arr))",
+          "isCode": true
+        },
+        {
+          "label": "tops = None",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Start with no towers: an empty list of tops.",
+      "wrongExplanations": {
+        "1": "Preallocating with zeros wrongly assumes towers exist and breaks ordering.",
+        "2": "Using set loses order and does not represent current tops."
+      },
+      "hint": "Begin with zero towers.",
+      "isCodeBuilding": true,
+      "codeSnippet": "tops = []",
+      "codeLabel": "Init tops"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Write the processing loop and the one-line body that finds placement and updates tops correctly.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "for x in arr: i = bisect_right(tops, x); if i == len(tops): tops.append(x); else: tops[i] = x",
+          "isCode": true
+        },
+        {
+          "label": "for x in arr: i = bisect_left(tops, x); if i == len(tops): tops.append(x); else: tops[i] = x",
+          "isCode": true
+        },
+        {
+          "label": "for x in arr: i = bisect_right(arr, x); if i == len(tops): tops.append(x); else: tops[i] = x",
+          "isCode": true
+        },
+        {
+          "label": "for x in arr: i = bisect_right(tops, x); if i <= len(tops): tops.append(x); else: tops[i] = x",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Use bisect_right on tops to find the first index with value > x, then replace or append accordingly.",
+      "wrongExplanations": {
+        "1": "bisect_left yields first >= x, which would allow equal sizes and violate the rule.",
+        "3": "Using <= causes unnecessary appends, inflating tower count."
+      },
+      "hint": "Search on tops, and ensure strictness: pick the first top strictly greater than x.",
+      "isCodeBuilding": true,
+      "codeSnippet": "for x in arr: i = bisect_right(tops, x); if i == len(tops): tops.append(x); else: tops[i] = x",
+      "codeLabel": "Main loop"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "Output the final answer.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "print(len(tops))",
+          "isCode": true
+        },
+        {
+          "label": "print(tops)",
+          "isCode": true
+        },
+        {
+          "label": "print(n - len(tops))",
+          "isCode": true
+        },
+        {
+          "label": "print(sum(tops))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The number of towers equals the count of tops stored.",
+      "wrongExplanations": {
+        "1": "Printing the list itself does not match the required format.",
+        "2": "Subtracting is unrelated; we need the count of towers."
+      },
+      "hint": "How does the tops list represent towers?",
+      "isCodeBuilding": true,
+      "codeSnippet": "print(len(tops))",
+      "codeLabel": "Output"
+    },
+    {
+      "id": "q22",
+      "phase": "Verifying the Solution",
+      "questionText": "Run the logic on the example input:\nInput:\n5\n3 8 2 1 5\nWhat is the printed output?",
+      "diagram": "Tops evolution:\n[] -> [3] -> [3,8] -> [2,8] -> [1,8] -> [1,5]",
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Final tops: [1,5], so there are 2 towers.",
+      "wrongExplanations": {
+        "0": "We need at least 2 towers due to 8 after 3.",
+        "3": "Never equals the number of cubes unless strictly increasing."
+      },
+      "hint": "Step through and record tops after each cube.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q23",
+      "phase": "Verifying the Solution",
+      "questionText": "Test a decreasing sequence: n=6, sizes = [6, 5, 4, 3, 2, 1]. What is the output?",
+      "diagram": "Tops evolution:\n[] -> [6] -> [5] -> [4] -> [3] -> [2] -> [1]\n(Always replace the single top)",
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "6",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "All cubes stack on one tower since each next cube is smaller than the current top.",
+      "wrongExplanations": {
+        "3": "This happens for strictly increasing sequences, not decreasing."
+      },
+      "hint": "Each cube can go on the existing tower’s top since it is smaller.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Verifying the Solution",
+      "questionText": "Test an increasing sequence: n=4, sizes = [1, 2, 3, 4]. What is the output?",
+      "diagram": "Tops evolution:\n[] -> [1] -> [1,2] -> [1,2,3] -> [1,2,3,4]",
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 3,
+      "explanation": "No cube can go on a smaller top; each starts a new tower. Count equals n = 4.",
+      "wrongExplanations": {
+        "0": "Only decreasing sequences yield 1 tower."
+      },
+      "hint": "Upper must be smaller than lower; here each new cube is larger than any top.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Analyzing Complexity",
+      "questionText": "Assuming the list of tops is kept sorted and we locate the first top > x using a logarithmic-time search, what is the overall time complexity for n cubes?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(log n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Each cube requires a logarithmic search and O(1) update, so total is O(n log n).",
+      "wrongExplanations": {
+        "0": "We do not scan the list linearly for each cube.",
+        "2": "Search per cube is not constant-time here."
+      },
+      "hint": "Multiply per-cube cost by n.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the space complexity in terms of n?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(1)",
+          "isCode": false
+        },
+        {
+          "label": "O(log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "The tops list can grow to at most the number of towers, which in the worst case equals n.",
+      "wrongExplanations": {
+        "0": "We store up to n tops; not constant.",
+        "1": "Space does not grow logarithmically with n here."
+      },
+      "hint": "Worst case is all cubes increasing, each starts a new tower.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q27",
+      "phase": "Analyzing Complexity",
+      "questionText": "Which sequence of cubes maximizes the number of towers?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Strictly increasing sizes (e.g., 1,2,3,4,...)",
+          "isCode": false
+        },
+        {
+          "label": "Strictly decreasing sizes (e.g., 10,9,8,...)",
+          "isCode": false
+        },
+        {
+          "label": "All equal sizes (e.g., 5,5,5,...)",
+          "isCode": false
+        },
+        {
+          "label": "Alternating high and low sizes (e.g., 5,1,5,1,...)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each cube is larger than any current top, so none can stack; towers = n.",
+      "wrongExplanations": {
+        "1": "Decreasing yields 1 tower.",
+        "3": "Alternating allows stacking on larger tops and often fewer towers."
+      },
+      "hint": "Consider the strict rule and that larger cubes cannot be placed on smaller tops.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys; from bisect import bisect_right",
+    "data = sys.stdin.read().strip().split()",
+    "if not data: print(0); sys.exit()",
+    "it = iter(map(int, data)); n = next(it)",
+    "arr = [next(it) for _ in range(n)]",
+    "tops = []",
+    "for x in arr: i = bisect_right(tops, x); if i == len(tops): tops.append(x); else: tops[i] = x",
+    "print(len(tops))"
+  ],
+  "reasoningChain": [
+    {
+      "question": "What part of a tower determines whether the next cube can be placed?",
+      "insight": "Only the top matters: a cube x can be placed on a tower if the tower’s top is strictly greater than x."
+    },
+    {
+      "question": "If multiple towers can accept x, which should we choose?",
+      "insight": "Choose the tower with the smallest top greater than x to preserve flexibility for future larger cubes."
+    },
+    {
+      "question": "How can we represent towers during processing?",
+      "insight": "Maintain a sorted list of current tower tops; this is sufficient to decide placements."
+    },
+    {
+      "question": "How do we update the list of tops when placing x?",
+      "insight": "Find the leftmost top > x; replace it with x. If none exists, append x to start a new tower."
+    },
+    {
+      "question": "How to implement the search efficiently?",
+      "insight": "Use a function that returns the insertion index after all elements ≤ x (i.e., the first index with value > x) on the sorted tops list."
+    },
+    {
+      "question": "What are the algorithm’s complexity characteristics?",
+      "insight": "Each step uses logarithmic-time search and constant-time update, leading to O(n log n) time and O(n) space."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1387,
+    "output_tokens": 15092,
+    "input_cost": 0.001734,
+    "output_cost": 0.15092,
+    "total_cost": 0.152654
+  }
+}

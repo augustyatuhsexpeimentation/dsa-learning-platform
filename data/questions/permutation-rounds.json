@@ -1,0 +1,954 @@
+{
+  "id": "permutation-rounds-lcm-cycles",
+  "title": "Permutation Rounds",
+  "difficulty": "intermediate",
+  "tags": [
+    "math",
+    "number-theory",
+    "permutation"
+  ],
+  "estimatedMinutes": 60,
+  "language": "python",
+  "description": "There is a sorted array [1,2,\\dots,n] and a permutation p_1,p_2,\\dots,p_n. On each round, all elements move according to the permutation: the element at position i moves to position p_i.\n\nAfter how many rounds is the array sorted again for the first time?\n\nInput:\n- The first line has an integer n.\n- The next line contains n integers p_1,p_2,\\dots,p_n.\n\nOutput:\nPrint the number of rounds modulo 10^9+7.",
+  "examples": [
+    {
+      "input": "8\n5 3 2 6 4 1 8 7\n",
+      "output": "4\n",
+      "explanation": "Cycle lengths are 4 (1→5→4→6→1), 2 (2↔3), and 2 (7↔8). The first time all cycles align is lcm(4,2,2)=4."
+    }
+  ],
+  "constraints": [
+    "1 ≤ n ≤ 2⋅10^5",
+    "p is a permutation of {1,2,...,n}",
+    "Output modulo 10^9+7"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "For n=3 and p = [2,1,3], starting from [1,2,3], what is the array after one round?\nRule: the element at position i moves to position p_i.",
+      "diagram": "Positions: 1  2  3\nValues:    1  2  3\np:         2  1  3",
+      "options": [
+        {
+          "label": "[2, 1, 3]",
+          "isCode": false
+        },
+        {
+          "label": "[1, 3, 2]",
+          "isCode": false
+        },
+        {
+          "label": "[3, 2, 1]",
+          "isCode": false
+        },
+        {
+          "label": "[1, 2, 3]",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "A'[p_i] = A[i]. So A'[2]=1, A'[1]=2, A'[3]=3 → [2,1,3]. The other options misinterpret the direction or keep it unchanged.",
+      "wrongExplanations": {
+        "1": "This treats p_i as the incoming source index for i, reversing the mapping.",
+        "3": "That would require p to be the identity."
+      },
+      "hint": "Place each current element i at index p_i in the new array.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "Using the same n=3, p=[2,1,3], what is the array after two rounds?",
+      "diagram": "After 1 round: [2,1,3]",
+      "options": [
+        {
+          "label": "[2, 1, 3]",
+          "isCode": false
+        },
+        {
+          "label": "[1, 3, 2]",
+          "isCode": false
+        },
+        {
+          "label": "[1, 2, 3]",
+          "isCode": false
+        },
+        {
+          "label": "[3, 2, 1]",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Applying the same mapping again swaps positions 1 and 2 back. So it returns to [1,2,3].",
+      "wrongExplanations": {
+        "0": "That is the state after one round, not two.",
+        "1": "This is a different permutation effect; not what p does twice."
+      },
+      "hint": "Apply the same move rule to [2,1,3] once more.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "Suppose the permutation splits into two disjoint cycles: (1 2 3) and (4 5). What is the smallest k > 0 such that the array is sorted again?",
+      "diagram": "Cycle lengths: 3 and 2",
+      "options": [
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        },
+        {
+          "label": "6",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Each cycle returns in its length. Both align first at lcm(3,2)=6.",
+      "wrongExplanations": {
+        "0": "After 3 rounds the 2-cycle is not yet back.",
+        "1": "5 is neither a multiple of 3 nor 2; cycles won't both align."
+      },
+      "hint": "Both cycles must simultaneously return to start.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "When is the array sorted again for the first time?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "When p applied k times maps every position back to itself (identity).",
+          "isCode": false
+        },
+        {
+          "label": "When p applied k times is increasing (p^k_1 < p^k_2 < ...).",
+          "isCode": false
+        },
+        {
+          "label": "When the multiset of values equals {1..n}, regardless of positions.",
+          "isCode": false
+        },
+        {
+          "label": "When k equals n.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Starting from [1..n], only the identity mapping yields the sorted array again. Increasing mapping doesn't guarantee identity.",
+      "wrongExplanations": {
+        "1": "Increasing indices of images doesn't ensure each element returns to its original position.",
+        "3": "k=n is not generally necessary nor sufficient."
+      },
+      "hint": "Sorted again means each value is back at its original index.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Understanding the Problem",
+      "questionText": "If a permutation has two disjoint cycles of lengths 2 and 4, the first k when both are back at start is:",
+      "diagram": "Cycle A: length 2\nCycle B: length 4",
+      "options": [
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "6",
+          "isCode": false
+        },
+        {
+          "label": "8",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "The 2-cycle aligns at multiples of 2; the 4-cycle at multiples of 4. First common is 4.",
+      "wrongExplanations": {
+        "0": "At 2, the 4-cycle has only completed half a turn.",
+        "2": "6 is not a multiple of 4."
+      },
+      "hint": "Find the smallest common multiple of 2 and 4.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "Is simulating round by round until the array is sorted again feasible for n ≤ 2⋅10^5?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes; the number of rounds is at most n.",
+          "isCode": false
+        },
+        {
+          "label": "Yes; the number of rounds is at most 10^9+7.",
+          "isCode": false
+        },
+        {
+          "label": "No; the required rounds can be astronomically large (far beyond any practical loop).",
+          "isCode": false
+        },
+        {
+          "label": "Yes; the number of rounds equals the sum of cycle lengths.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "The first return time is the lcm of cycle lengths and can be huge; direct simulation is impractical.",
+      "wrongExplanations": {
+        "0": "A permutation can have a cycle longer than n? No, but lcm over many cycles can be huge.",
+        "3": "Sum doesn’t capture simultaneous alignment."
+      },
+      "hint": "Consider lcm(1,2,3,...,k) growth.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "Which aggregate of the cycle lengths gives the first k when the whole permutation returns to identity?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Sum of cycle lengths",
+          "isCode": false
+        },
+        {
+          "label": "Product of cycle lengths",
+          "isCode": false
+        },
+        {
+          "label": "Maximum cycle length",
+          "isCode": false
+        },
+        {
+          "label": "Least common multiple of cycle lengths",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 3,
+      "explanation": "Each cycle repeats on its own period; they align first at their least common multiple.",
+      "wrongExplanations": {
+        "0": "Sum doesn’t ensure simultaneous positions match.",
+        "2": "The max cycle returns but shorter cycles may be out of sync."
+      },
+      "hint": "Find when all cycle clocks tick to zero together.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Exploring Approaches",
+      "questionText": "How can we find all cycle lengths of the permutation efficiently?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "From each unvisited index i, follow p[i] repeatedly until returning to a seen index; mark visited and count steps.",
+          "isCode": false
+        },
+        {
+          "label": "Sort the permutation and read off cycle lengths from sorted positions.",
+          "isCode": false
+        },
+        {
+          "label": "Count inversions; the number of inversions equals the largest cycle length.",
+          "isCode": false
+        },
+        {
+          "label": "Scan once and count how many i satisfy p_i = i; those are the cycle lengths.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Following the mapping i→p_i visits each disjoint cycle exactly once when using a visited array.",
+      "wrongExplanations": {
+        "1": "Sorting destroys the mapping structure.",
+        "3": "p_i = i only finds fixed points, not general cycles."
+      },
+      "hint": "Treat the permutation as directed edges i → p_i.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "Given p = [2,3,1,5,4] (1-indexed), what are the cycle lengths?",
+      "diagram": "1→2→3→1 and 4↔5",
+      "options": [
+        {
+          "label": "[3, 2]",
+          "isCode": false
+        },
+        {
+          "label": "[3, 1, 1]",
+          "isCode": false
+        },
+        {
+          "label": "[5]",
+          "isCode": false
+        },
+        {
+          "label": "[2, 2, 1]",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Cycle (1 2 3) has length 3; cycle (4 5) has length 2.",
+      "wrongExplanations": {
+        "2": "This would mean a single 5-cycle, which is not the mapping here."
+      },
+      "hint": "Trace from 1 and from 4 separately.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "For cycle lengths [3, 2], what is the first k when the array is sorted again?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "6",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "k = lcm(3,2) = 6.",
+      "wrongExplanations": {
+        "0": "The 2-cycle hasn’t returned at k=3.",
+        "2": "The 3-cycle hasn’t returned at k=2."
+      },
+      "hint": "Find the smallest number divisible by both 3 and 2.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "Why not compute the lcm by multiplying all cycle lengths directly and taking modulo at the end?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Because multiplication changes the answer under modulo.",
+          "isCode": false
+        },
+        {
+          "label": "Because the raw lcm value can be far larger than standard integer limits; we need a safe way.",
+          "isCode": false
+        },
+        {
+          "label": "Because lcm equals the maximum cycle length, so multiplication is unnecessary.",
+          "isCode": false
+        },
+        {
+          "label": "Because modulo 10^9+7 is not defined for products.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "The lcm can be enormous; computing via prime exponents avoids overflow and yields the correct value modulo M.",
+      "wrongExplanations": {
+        "0": "Modulo doesn’t change multiplication’s validity; overflow is the issue.",
+        "2": "lcm is not just the maximum in general."
+      },
+      "hint": "Think of lcm(1,2,...,k) growth and integer limits.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "How can we compute the lcm of many numbers safely and then output it modulo 10^9+7?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Track the maximum exponent of each prime across all cycle lengths, then multiply p^exp modulo 10^9+7.",
+          "isCode": false
+        },
+        {
+          "label": "Multiply all cycle lengths in 64-bit and then mod.",
+          "isCode": false
+        },
+        {
+          "label": "Use floating-point logs to estimate and round.",
+          "isCode": false
+        },
+        {
+          "label": "Pairwise lcm(a,b)=a*b/gcd(a,b) entirely under modulo.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "LCM prime factorization uses max exponents per prime; modular exponentiation gives the result modulo M without overflow.",
+      "wrongExplanations": {
+        "3": "gcd and lcm formulas don’t work under modulo arithmetic directly."
+      },
+      "hint": "LCM of numbers uses prime powers that appear in any number.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "To factor cycle lengths up to n (≤ 2⋅10^5) efficiently, what should we precompute?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "The smallest prime factor for every integer up to n.",
+          "isCode": false
+        },
+        {
+          "label": "A list of all divisors for every integer up to n.",
+          "isCode": false
+        },
+        {
+          "label": "Nothing; trial divide by all integers up to n for each length.",
+          "isCode": false
+        },
+        {
+          "label": "Random primes and hope they hit factors.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "With the smallest prime factor array, each factorization is fast (divide by primes in O(log n)).",
+      "wrongExplanations": {
+        "2": "Trial division up to n per length is too slow in the worst case."
+      },
+      "hint": "Think of reusing work across many factorization queries.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Building the Idea",
+      "questionText": "If a cycle length is 12, what is its prime factorization?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "2^2 × 3^1",
+          "isCode": false
+        },
+        {
+          "label": "2^3 × 3^1",
+          "isCode": false
+        },
+        {
+          "label": "2^2 × 3^2",
+          "isCode": false
+        },
+        {
+          "label": "2^1 × 3^2",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "12=4×3=2^2×3. The others have wrong exponents.",
+      "wrongExplanations": {
+        "1": "2^3 × 3 = 24, not 12.",
+        "3": "2 × 9 = 18, not 12."
+      },
+      "hint": "Divide by 2 repeatedly, then by 3.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Add imports and the modulus constant.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\nMOD = 10**9 + 9",
+          "isCode": true
+        },
+        {
+          "label": "import sys\nMOD = 10**9 + 7",
+          "isCode": true
+        },
+        {
+          "label": "from sys import stdin\nMOD = 10**9 + 7",
+          "isCode": true
+        },
+        {
+          "label": "import sys\nMOD = (10**9 + 7) % 2",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "We need sys for input and MOD = 10**9+7. Other constants or imports are incorrect for our usage.",
+      "wrongExplanations": {
+        "0": "Wrong modulus; must be 10^9+7.",
+        "2": "We use sys.stdin.read(); importing only stdin as a name breaks 'sys' usage later."
+      },
+      "hint": "Use the standard modulus 1,000,000,007.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\nMOD = 10**9 + 7",
+      "codeLabel": "Imports and MOD"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Parse input robustly into n and 0-based permutation p inside main(). Choose the correct snippet.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def main():\n    data = sys.stdin.read().split()\n    if not data:\n        return\n    n = int(data[0])\n    p = list(map(int, data[1:1+n]))\n    # p remains 1-based here",
+          "isCode": true
+        },
+        {
+          "label": "def main():\n    data = list(map(int, sys.stdin.read().strip().split()))\n    if not data:\n        return\n    it = iter(data)\n    n = next(it)\n    p = [next(it) for _ in range(n)]\n    p = [x - 1 for x in p]",
+          "isCode": true
+        },
+        {
+          "label": "def main():\n    n = int(input().strip())\n    p = [int(x) for x in input().split()]\n    # assume exactly n numbers\n    # keep as 1-based indices",
+          "isCode": true
+        },
+        {
+          "label": "def main():\n    tokens = sys.stdin.read().split()\n    it = iter(tokens)\n    p = [int(x)-1 for x in it]\n    n = len(p)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "We read all ints, extract n, then read n values and convert to 0-based. Other options either keep 1-based or mis-parse.",
+      "wrongExplanations": {
+        "0": "Leaves p as 1-based; later indexing will be wrong.",
+        "3": "This treats the entire stream as p and sets n to its length, ignoring the first token n."
+      },
+      "hint": "Subtract 1 from each p_i to use 0-based indices.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def main():\n    data = list(map(int, sys.stdin.read().strip().split()))\n    if not data:\n        return\n    it = iter(data)\n    n = next(it)\n    p = [next(it) for _ in range(n)]\n    p = [x - 1 for x in p]",
+      "codeLabel": "Parse input"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Fill in the code to compute all cycle lengths of p (0-based). Choose the correct snippet to place inside main().",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    visited = [False] * n\n    lengths = []\n    for i in range(n):\n        if not visited[i]:\n            cur = i\n            cnt = 0\n            while not visited[cur]:\n                visited[cur] = True\n                cur = p[cur]\n                cnt += 1\n            lengths.append(cnt)",
+          "isCode": true
+        },
+        {
+          "label": "    visited = [False] * n\n    lengths = []\n    for i in range(n):\n        if visited[i]:\n            continue\n        cur = p[i]\n        cnt = 0\n        while not visited[cur]:\n            visited[i] = True\n            cur = p[cur]\n            cnt += 1\n        lengths.append(cnt)",
+          "isCode": true
+        },
+        {
+          "label": "    lengths = []\n    for i in range(n):\n        cur = i\n        cnt = 0\n        while p[cur] != i:\n            cur = p[cur]\n            cnt += 1\n        lengths.append(cnt)",
+          "isCode": true
+        },
+        {
+          "label": "    visited = [False] * n\n    lengths = []\n    for i in range(n):\n        if not visited[i]:\n            cur = i\n            cnt = 0\n            while True:\n                visited[cur] = True\n                cur = p[cur]\n                cnt += 1\n                if visited[cur]:\n                    break\n            if cnt:\n                lengths.append(cnt-1)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Start from each unvisited i, walk until a visited node, counting steps. This yields the cycle length and marks nodes visited.",
+      "wrongExplanations": {
+        "1": "It marks visited[i] instead of visited[cur], and starts from p[i], missing the start node.",
+        "3": "Subtracting 1 undercounts the cycle length by one."
+      },
+      "hint": "Mark visited for the current node before jumping to p[cur].",
+      "isCodeBuilding": true,
+      "codeSnippet": "    visited = [False] * n\n    lengths = []\n    for i in range(n):\n        if not visited[i]:\n            cur = i\n            cnt = 0\n            while not visited[cur]:\n                visited[cur] = True\n                cur = p[cur]\n                cnt += 1\n            lengths.append(cnt)",
+      "codeLabel": "Find cycle lengths"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Add a smallest prime factor (spf) precomputation up to n. Choose the correct snippet inside main().",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    maxN = n\n    spf = list(range(maxN + 1))\n    for i in range(2, int(maxN ** 0.5) + 1):\n        if spf[i] == i:\n            step = i\n            for j in range(i * i, maxN + 1, step):\n                if spf[j] == j:\n                    spf[j] = i",
+          "isCode": true
+        },
+        {
+          "label": "    spf = []\n    for x in range(2, n+1):\n        if all(x % d for d in range(2, int(x**0.5)+1)):\n            spf.append(x)",
+          "isCode": true
+        },
+        {
+          "label": "    spf = [0]*(n+1)\n    for i in range(2, n+1):\n        for j in range(i, n+1, i):\n            spf[j] = i",
+          "isCode": true
+        },
+        {
+          "label": "    spf = list(range(n))\n    for i in range(2, n):\n        if spf[i] == 0:\n            for j in range(i*i, n, i):\n                spf[j] = i",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Initialize spf[i]=i and update with the smallest prime factor using a sieve. The others don’t produce correct smallest prime factors.",
+      "wrongExplanations": {
+        "2": "This stores the largest divisor, not the smallest prime factor.",
+        "1": "This collects primes but doesn’t map smallest factors for all numbers."
+      },
+      "hint": "spf[x] should end up as the smallest prime dividing x.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    maxN = n\n    spf = list(range(maxN + 1))\n    for i in range(2, int(maxN ** 0.5) + 1):\n        if spf[i] == i:\n            step = i\n            for j in range(i * i, maxN + 1, step):\n                if spf[j] == j:\n                    spf[j] = i",
+      "codeLabel": "SPF sieve"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Fill in the code to accumulate the maximum exponent of each prime across all cycle lengths using spf.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    from collections import defaultdict\n    maxPow = defaultdict(int)\n    for L in lengths:\n        x = L\n        while x > 1:\n            prime = spf[x]\n            cnt = 0\n            while x % prime == 0:\n                x //= prime\n                cnt += 1\n            if cnt > maxPow[prime]:\n                maxPow[prime] = cnt",
+          "isCode": true
+        },
+        {
+          "label": "    maxPow = {}\n    for L in lengths:\n        x = L\n        while x > 1:\n            prime = spf[x]\n            maxPow[prime] = maxPow.get(prime, 0) + 1\n            x //= prime",
+          "isCode": true
+        },
+        {
+          "label": "    from collections import defaultdict\n    maxPow = defaultdict(int)\n    for L in lengths:\n        for prime in range(2, L+1):\n            cnt = 0\n            while L % prime == 0:\n                L //= prime\n                cnt += 1\n            maxPow[prime] = max(maxPow[prime], cnt)",
+          "isCode": true
+        },
+        {
+          "label": "    maxPow = {}\n    for L in lengths:\n        maxPow[L] = 1",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We factor each L using spf and track the maximum exponent per prime. Other options either sum exponents, refactor incorrectly, or ignore factors.",
+      "wrongExplanations": {
+        "1": "It adds 1 per division step, not the maximum exponent across all lengths.",
+        "3": "This treats each length as a prime power of itself, which is wrong."
+      },
+      "hint": "For each prime p dividing L, count how many times it divides and take the max across all lengths.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    from collections import defaultdict\n    maxPow = defaultdict(int)\n    for L in lengths:\n        x = L\n        while x > 1:\n            prime = spf[x]\n            cnt = 0\n            while x % prime == 0:\n                x //= prime\n                cnt += 1\n            if cnt > maxPow[prime]:\n                maxPow[prime] = cnt",
+      "codeLabel": "Collect prime exponents"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Compute the final answer from max prime exponents and print it modulo MOD.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    ans = 1\n    for prime, exp in maxPow.items():\n        ans = (ans * pow(prime, exp, MOD)) % MOD\n    print(ans)",
+          "isCode": true
+        },
+        {
+          "label": "    ans = 1\n    for L in lengths:\n        ans = (ans * L) % MOD\n    print(ans)",
+          "isCode": true
+        },
+        {
+          "label": "    from math import gcd\n    ans = 1\n    for L in lengths:\n        ans = (ans * L // gcd(ans, L)) % MOD\n    print(ans)",
+          "isCode": true
+        },
+        {
+          "label": "    ans = 0\n    for prime, exp in maxPow.items():\n        ans = (ans + pow(prime, exp, MOD)) % MOD\n    print(ans)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Multiply prime powers modulo MOD to reconstruct the lcm under the modulus. The others compute the wrong quantity.",
+      "wrongExplanations": {
+        "2": "Integer division before modulo can overflow and mixing gcd with modulo like this is unsafe.",
+        "1": "Product of lengths is not the lcm."
+      },
+      "hint": "Rebuild lcm from its prime power decomposition.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    ans = 1\n    for prime, exp in maxPow.items():\n        ans = (ans * pow(prime, exp, MOD)) % MOD\n    print(ans)",
+      "codeLabel": "Compute and print answer"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "Add the standard Python entry point to run main(). Choose the correct snippet.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "if __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "main()",
+          "isCode": true
+        },
+        {
+          "label": "if __main__:\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "if __name__ == '__main__':\n    pass",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Use the standard guard to call main when executed as a script.",
+      "wrongExplanations": {
+        "1": "Calling main unconditionally may be undesirable on import.",
+        "3": "Does nothing; main is never called."
+      },
+      "hint": "Use the canonical Python pattern for entry points.",
+      "isCodeBuilding": true,
+      "codeSnippet": "if __name__ == \"__main__\":\n    main()",
+      "codeLabel": "Entry point"
+    },
+    {
+      "id": "q22",
+      "phase": "Verifying the Solution",
+      "questionText": "Run the algorithm conceptually on the sample:\nn=8, p=[5,3,2,6,4,1,8,7]. What is the output?",
+      "diagram": "Cycles: (1 5 4 6) length 4; (2 3) length 2; (7 8) length 2",
+      "options": [
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "6",
+          "isCode": false
+        },
+        {
+          "label": "8",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "lcm(4,2,2)=4. So print 4.",
+      "wrongExplanations": {
+        "0": "2 doesn’t align the 4-cycle.",
+        "2": "6 is not a multiple of 4."
+      },
+      "hint": "Compute lcm of 4,2,2.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q23",
+      "phase": "Verifying the Solution",
+      "questionText": "Check another input:\nn=6\np=[2,3,1,5,6,4]\nWhat does the program print?",
+      "diagram": "Cycles: (1 2 3) length 3; (4 5 6) length 3",
+      "options": [
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "6",
+          "isCode": false
+        },
+        {
+          "label": "9",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "lcm(3,3)=3. So the array returns after 3 rounds.",
+      "wrongExplanations": {
+        "1": "6 is a multiple of 3 but not the first time.",
+        "3": "Only if p is identity, which it is not."
+      },
+      "hint": "Both cycles complete together every 3 steps.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the time complexity of the approach (cycle finding + spf precomputation + factoring lengths)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(log n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Cycle finding is O(n). SPF sieve is ~O(n log log n). Factoring lengths is near-linear overall. Dominated by O(n log log n).",
+      "wrongExplanations": {
+        "0": "We never do nested loops over n-sized ranges.",
+        "2": "The sieve is faster than n log n."
+      },
+      "hint": "Consider the sieve’s cost.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the space complexity of the solution?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(1)",
+          "isCode": false
+        },
+        {
+          "label": "O(log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "We store p (O(n)), visited (O(n)), spf up to n (O(n)).",
+      "wrongExplanations": {
+        "0": "We store multiple arrays proportional to n.",
+        "1": "We store arrays linear in n, not logarithmic."
+      },
+      "hint": "Consider arrays: p, visited, spf.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Analyzing Complexity",
+      "questionText": "Edge case check: For n=1 and p=[1], what should the program output?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "10^9+7",
+          "isCode": false
+        },
+        {
+          "label": "Undefined",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Only one element stays in place; the array is always sorted. The first positive k is 1.",
+      "wrongExplanations": {
+        "0": "k must be positive.",
+        "2": "We output k modulo MOD, not MOD itself."
+      },
+      "hint": "A single fixed point forms a cycle of length 1.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\nMOD = 10**9 + 7",
+    "def main():\n    data = list(map(int, sys.stdin.read().strip().split()))\n    if not data:\n        return\n    it = iter(data)\n    n = next(it)\n    p = [next(it) for _ in range(n)]\n    p = [x - 1 for x in p]",
+    "    visited = [False] * n\n    lengths = []\n    for i in range(n):\n        if not visited[i]:\n            cur = i\n            cnt = 0\n            while not visited[cur]:\n                visited[cur] = True\n                cur = p[cur]\n                cnt += 1\n            lengths.append(cnt)",
+    "    maxN = n\n    spf = list(range(maxN + 1))\n    for i in range(2, int(maxN ** 0.5) + 1):\n        if spf[i] == i:\n            step = i\n            for j in range(i * i, maxN + 1, step):\n                if spf[j] == j:\n                    spf[j] = i",
+    "    from collections import defaultdict\n    maxPow = defaultdict(int)\n    for L in lengths:\n        x = L\n        while x > 1:\n            prime = spf[x]\n            cnt = 0\n            while x % prime == 0:\n                x //= prime\n                cnt += 1\n            if cnt > maxPow[prime]:\n                maxPow[prime] = cnt",
+    "    ans = 1\n    for prime, exp in maxPow.items():\n        ans = (ans * pow(prime, exp, MOD)) % MOD\n    print(ans)",
+    "if __name__ == \"__main__\":\n    main()"
+  ],
+  "reasoningChain": [
+    {
+      "question": "What does one round do to positions and when is the array sorted again?",
+      "insight": "Each round applies the permutation to positions; sorted again means p^k is the identity mapping."
+    },
+    {
+      "question": "How does a permutation’s structure determine return time?",
+      "insight": "A permutation decomposes into disjoint cycles; each item returns after its cycle length."
+    },
+    {
+      "question": "How to combine cycle return times?",
+      "insight": "The first time all cycles align is the least common multiple of their lengths."
+    },
+    {
+      "question": "Why avoid simulating rounds?",
+      "insight": "The required k (an lcm) can be huge; simulation is infeasible. Compute cycle lengths directly."
+    },
+    {
+      "question": "How to compute the lcm safely modulo 10^9+7?",
+      "insight": "Use prime factorization of cycle lengths and keep the maximum exponent per prime, then multiply p^exp modulo MOD."
+    },
+    {
+      "question": "How to factor many lengths efficiently?",
+      "insight": "Precompute smallest prime factors up to n for fast factorizations."
+    },
+    {
+      "question": "How to implement end-to-end?",
+      "insight": "Read input, convert to 0-based, find cycles, build spf, aggregate prime exponents, and compute the modular product."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1349,
+    "output_tokens": 17426,
+    "input_cost": 0.001686,
+    "output_cost": 0.17426,
+    "total_cost": 0.175946
+  }
+}

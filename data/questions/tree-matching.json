@@ -1,0 +1,963 @@
+{
+  "id": "tree-matching-maximum-size",
+  "title": "Tree Matching",
+  "difficulty": "hard",
+  "tags": [
+    "tree"
+  ],
+  "estimatedMinutes": 75,
+  "language": "python",
+  "description": "You are given a tree consisting of n nodes (1-indexed). A matching is a set of edges where each node is an endpoint of at most one edge. Find the maximum number of edges in a matching.\n\nInput:\n- First line: integer n\n- Next n-1 lines: edges a b indicating an edge between nodes a and b\n\nOutput:\n- Print one integer: the maximum number of pairs (edges) in a matching.",
+  "examples": [
+    {
+      "input": "5\n1 2\n1 3\n3 4\n3 5\n",
+      "output": "2\n",
+      "explanation": "One optimal matching: edges (1,2) and (3,4)."
+    }
+  ],
+  "constraints": [
+    "1 ≤ n ≤ 2 · 10^5",
+    "1 ≤ a,b ≤ n",
+    "Tree: connected, n-1 edges"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "Consider the path 1–2–3.\nWhat is the maximum number of edges in a matching?",
+      "diagram": "1 -- 2 -- 3",
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Only one edge can be chosen because edges share node 2. Choosing either (1,2) or (2,3) gives 1.",
+      "wrongExplanations": {
+        "2": "Choosing both (1,2) and (2,3) is invalid because node 2 would be in two chosen edges."
+      },
+      "hint": "A node can be incident to at most one chosen edge.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "Consider a star: 1 is connected to 2,3,4.\nWhat is the maximum matching size?",
+      "diagram": "  2\n  |\n3-1-4",
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Node 1 can be matched to at most one leaf, so at most 1 edge.",
+      "wrongExplanations": {
+        "2": "Leaves are not connected to each other, so you cannot pick two disjoint edges without reusing node 1."
+      },
+      "hint": "Edges cannot share node 1.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "For the tree:\n1–2, 1–3, 3–4, 3–5.\nWhat is the maximum matching size?",
+      "diagram": "2\n \\\n  1 - 3 - 4\n      \\\n       5",
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Pick (1,2) and (3,4) for total 2. Any third edge would conflict with 1 or 3.",
+      "wrongExplanations": {
+        "2": "If you chose 3, you'd need three disjoint edges; impossible in this structure."
+      },
+      "hint": "Try listing disjoint edges without shared nodes.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "Does summing floor(degree/2) over all nodes always give the correct answer?\nConsider a star with center degree 4 (node 1) and 4 leaves.",
+      "diagram": "    2\n    |\n4 -- 1 -- 3\n    |\n    5",
+      "options": [
+        {
+          "label": "Yes, it always equals the maximum matching.",
+          "isCode": false
+        },
+        {
+          "label": "It always underestimates.",
+          "isCode": false
+        },
+        {
+          "label": "It can overestimate: here it gives 2 while the maximum is 1.",
+          "isCode": false
+        },
+        {
+          "label": "It equals 1 for this star, so it's correct here.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "floor(4/2)=2 at the center; leaves contribute 0 → total 2, but the max matching is 1. So it can overestimate.",
+      "wrongExplanations": {
+        "3": "The sum equals 2, not 1, on this star. Maximum matching is only 1."
+      },
+      "hint": "Check the center’s degree contribution carefully.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Exploring Approaches",
+      "questionText": "Why is trying all subsets of edges infeasible for n up to 2·10^5?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "It takes O(n) time, which is fine.",
+          "isCode": false
+        },
+        {
+          "label": "It takes O(n log n) time, which is fine.",
+          "isCode": false
+        },
+        {
+          "label": "It takes about O(2^n) subsets (actually 2^(n−1)), which is astronomically large.",
+          "isCode": false
+        },
+        {
+          "label": "It takes O(n^2) time, which is borderline.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "There are 2^(n−1) edge subsets. Exhaustive checking is impossible for n≈2e5.",
+      "wrongExplanations": {
+        "3": "O(n^2) is far smaller than the true exponential count; the real growth is much worse."
+      },
+      "hint": "A tree has n−1 edges; consider all edge subsets.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "If you remove an edge in a tree, it splits into two components. How does the maximum matching of the whole relate to those components (if no edge between them is allowed)?",
+      "diagram": "Component A  --X--  Component B",
+      "options": [
+        {
+          "label": "It equals the sum of the maxima in the components.",
+          "isCode": false
+        },
+        {
+          "label": "It equals the maximum of the component maxima.",
+          "isCode": false
+        },
+        {
+          "label": "It equals the minimum of the component maxima.",
+          "isCode": false
+        },
+        {
+          "label": "It equals the product of the component maxima.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Disjoint components have independent choices, so counts add.",
+      "wrongExplanations": {
+        "1": "You can take edges in both components simultaneously since they’re disjoint."
+      },
+      "hint": "No matching can include edges across the removed edge.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "Root the tree at 1. To combine a node with its children, what information about the node’s relation to its parent is essential?",
+      "diagram": "parent p\n   |\n   u\n  / \\\n v1 v2",
+      "options": [
+        {
+          "label": "Whether the edge (parent, u) is chosen or not.",
+          "isCode": false
+        },
+        {
+          "label": "The degree of u.",
+          "isCode": false
+        },
+        {
+          "label": "The depth of u.",
+          "isCode": false
+        },
+        {
+          "label": "How many leaf children u has.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Whether u is already matched to its parent determines if it can match a child.",
+      "wrongExplanations": {
+        "1": "Degree alone doesn’t tell if u is already used by the parent edge."
+      },
+      "hint": "A node can be matched to at most one edge total.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Building the Idea",
+      "questionText": "Choose precise meanings for two values for each node u:\nA[u] and B[u].",
+      "diagram": null,
+      "options": [
+        {
+          "label": "A[u]: max matching in u’s subtree when the edge to parent is NOT chosen; B[u]: max matching when the edge to parent IS chosen.",
+          "isCode": false
+        },
+        {
+          "label": "A[u]: number of children of u; B[u]: number of leaves under u.",
+          "isCode": false
+        },
+        {
+          "label": "A[u]: max matching when u is matched to a child; B[u]: max matching when u is unmatched.",
+          "isCode": false
+        },
+        {
+          "label": "A[u]: max matching in the whole tree; B[u]: number of edges incident to u.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Tracking whether the parent edge is chosen controls whether u can match a child.",
+      "wrongExplanations": {
+        "2": "This mixes two different conditions and ignores the parent relation."
+      },
+      "hint": "Relate A[u], B[u] to whether u is free to use a child edge.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "Base case: for a leaf u, what are A[u] and B[u]?",
+      "diagram": "parent - u (leaf)",
+      "options": [
+        {
+          "label": "A[u] = 0, B[u] = 0",
+          "isCode": false
+        },
+        {
+          "label": "A[u] = 1, B[u] = 0",
+          "isCode": false
+        },
+        {
+          "label": "A[u] = 0, B[u] = 1",
+          "isCode": false
+        },
+        {
+          "label": "A[u] = 1, B[u] = 1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Leaf has no child edges to pick. Whether parent edge is chosen or not, contribution below is 0.",
+      "wrongExplanations": {
+        "2": "B[u]=1 would imply picking an edge within the subtree, but leaf has none."
+      },
+      "hint": "Count edges strictly within the subtree rooted at u.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "If the edge (parent,u) IS chosen, what is B[u] in terms of the children v of u?",
+      "diagram": "p - u - v1, v2, ... (p-u chosen so u cannot use child edges)",
+      "options": [
+        {
+          "label": "B[u] = sum over children v of A[v]",
+          "isCode": false
+        },
+        {
+          "label": "B[u] = sum over children v of B[v]",
+          "isCode": false
+        },
+        {
+          "label": "B[u] = max over children v of A[v]",
+          "isCode": false
+        },
+        {
+          "label": "B[u] = 1 + sum over children v of A[v]",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "u cannot use child edges, and each child sees its parent edge not chosen → A[v].",
+      "wrongExplanations": {
+        "1": "B[v] assumes the child’s parent edge is chosen, which it is not (u-v isn’t chosen)."
+      },
+      "hint": "When (p,u) is chosen, none of (u,child) are chosen.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "If the edge (parent,u) is NOT chosen, consider the case where u doesn’t match any child. What is the total from children?",
+      "diagram": "p   u   children v1,v2,... (u-child edges not chosen)",
+      "options": [
+        {
+          "label": "S0 = sum over children v of A[v]",
+          "isCode": false
+        },
+        {
+          "label": "S0 = sum over children v of B[v]",
+          "isCode": false
+        },
+        {
+          "label": "S0 = sum over children v of max(A[v], B[v])",
+          "isCode": false
+        },
+        {
+          "label": "S0 = 0",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each child sees its parent edge not chosen → use A[v] for each; sum them.",
+      "wrongExplanations": {
+        "2": "We are not free to choose child-parent edges; they are fixed as not chosen here."
+      },
+      "hint": "The parent-to-child edges are fixed as not chosen in this case.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "Still with (parent,u) NOT chosen: if u matches exactly one child v, what is the total in terms of A and B?",
+      "diagram": "Pick edge (u,v): contributes 1, v’s parent edge is chosen",
+      "options": [
+        {
+          "label": "1 + B[v] + sum over other children w≠v of A[w]",
+          "isCode": false
+        },
+        {
+          "label": "1 + A[v] + sum over other children w≠v of B[w]",
+          "isCode": false
+        },
+        {
+          "label": "1 + B[v] + sum over other children w≠v of B[w]",
+          "isCode": false
+        },
+        {
+          "label": "1 + A[v] + sum over other children w≠v of A[w]",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Choosing (u,v) adds 1 and forces v into B[v]; others have parent edge not chosen → A[w].",
+      "wrongExplanations": {
+        "1": "If (u,v) is chosen, v’s parent edge is chosen → use B[v], not A[v]."
+      },
+      "hint": "Only v’s parent edge changes to chosen.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "Let S0 = sum A[v] over children. Show an efficient way to compute A[u]: choose the best child v to match (or none). What gain should we maximize?",
+      "diagram": "gain(v) = (1 + B[v]) - A[v]",
+      "options": [
+        {
+          "label": "gain(v) = 1 + B[v] - A[v], and A[u] = S0 + max(0, max_v gain(v))",
+          "isCode": false
+        },
+        {
+          "label": "gain(v) = 1 + A[v] - B[v], and A[u] = S0 + max_v gain(v)",
+          "isCode": false
+        },
+        {
+          "label": "gain(v) = B[v] - A[v], and A[u] = S0 + max_v gain(v)",
+          "isCode": false
+        },
+        {
+          "label": "gain(v) = 1 + B[v] + A[v], and A[u] = S0 + max_v gain(v)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Matching v replaces A[v] with (1+B[v]) in sum, so the increase is 1+B[v]−A[v]. Don’t match if all gains ≤0.",
+      "wrongExplanations": {
+        "1": "Swapping A and B reverses roles; it miscomputes the benefit of choosing (u,v)."
+      },
+      "hint": "Compare S0 vs choosing v: (S0 − A[v]) + (1 + B[v]).",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Building the Idea",
+      "questionText": "For the root (no parent), which value is the final answer?",
+      "diagram": "root r has no parent edge",
+      "options": [
+        {
+          "label": "A[root]",
+          "isCode": false
+        },
+        {
+          "label": "B[root]",
+          "isCode": false
+        },
+        {
+          "label": "max(A[root], B[root])",
+          "isCode": false
+        },
+        {
+          "label": "A[root] + B[root]",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The root has no parent edge, so use the case where the parent edge is not chosen: A[root].",
+      "wrongExplanations": {
+        "2": "B[root] assumes an edge to a parent exists; it doesn’t."
+      },
+      "hint": "Which case applies to a node with no parent?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Set up imports, recursion limit, and the main function header.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\nsys.setrecursionlimit(1 << 20)\n\ndef main():",
+          "isCode": true
+        },
+        {
+          "label": "import sys\n# no recursion limit needed\n\ndef main():",
+          "isCode": true
+        },
+        {
+          "label": "from sys import *\nsetrecursionlimit(1000)\n\ndef main():",
+          "isCode": true
+        },
+        {
+          "label": "import sys\nsys.setrecursionlimit(1000)\n\ndef main(arg):",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Deep trees need a high recursion limit. Define main() with no args.",
+      "wrongExplanations": {
+        "2": "Default 1000 may overflow on deep trees (~2e5 depth)."
+      },
+      "hint": "Python default recursion depth is small.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\nsys.setrecursionlimit(1 << 20)\n\ndef main():",
+      "codeLabel": "Imports and main header"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Read all input tokens and get n safely.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    data = sys.stdin.read().strip().split()\n    if not data:\n        return\n    it = iter(data)\n    n = int(next(it))",
+          "isCode": true
+        },
+        {
+          "label": "    n = int(sys.stdin.readline())\n    it = sys.stdin",
+          "isCode": true
+        },
+        {
+          "label": "    tokens = input().split()\n    n = int(tokens[0])\n    it = tokens[1:]",
+          "isCode": true
+        },
+        {
+          "label": "    data = sys.stdin.read().split()\n    it = iter(data)\n    n = next(it)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Reading all tokens is robust; convert to int and handle empty input.",
+      "wrongExplanations": {
+        "3": "next(it) returns a string; must convert to int."
+      },
+      "hint": "You will read 2*(n-1) more integers after n.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    data = sys.stdin.read().strip().split()\n    if not data:\n        return\n    it = iter(data)\n    n = int(next(it))",
+      "codeLabel": "Read tokens and n"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Build the adjacency list and read n−1 edges (undirected).",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    g = [[] for _ in range(n + 1)]\n    for _ in range(n - 1):\n        a = int(next(it)); b = int(next(it))\n        g[a].append(b); g[b].append(a)",
+          "isCode": true
+        },
+        {
+          "label": "    g = [[] for _ in range(n)]\n    for _ in range(n):\n        a = int(next(it)); b = int(next(it))\n        g[a].append(b)",
+          "isCode": true
+        },
+        {
+          "label": "    g = [[] for _ in range(n + 1)]\n    for _ in range(n - 1):\n        a = int(next(it)); b = int(next(it))\n        g[a].append(b)",
+          "isCode": true
+        },
+        {
+          "label": "    g = [[0]*(n+1) for _ in range(n+1)]\n    for _ in range(n - 1):\n        a = int(next(it)); b = int(next(it))\n        g[a][b] = g[b][a] = 1",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Use 1-based adjacency with both directions because edges are undirected.",
+      "wrongExplanations": {
+        "2": "Missing the reverse edge makes the graph directed, which is wrong here."
+      },
+      "hint": "There are exactly n−1 edges in a tree.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    g = [[] for _ in range(n + 1)]\n    for _ in range(n - 1):\n        a = int(next(it)); b = int(next(it))\n        g[a].append(b); g[b].append(a)",
+      "codeLabel": "Adjacency list"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Start the depth-first function with parent parameter and loop neighbors, skipping the parent.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    def dfs(u, p):\n        S0 = 0\n        best = 0\n        for v in g[u]:\n            if v == p:\n                continue",
+          "isCode": true
+        },
+        {
+          "label": "    def dfs(u):\n        S0 = 0\n        best = 0\n        for v in g[u]:\n            continue",
+          "isCode": true
+        },
+        {
+          "label": "    def dfs(u, p):\n        S0 = 0\n        best = 0\n        for v in g[u]:\n            if v != p:\n                pass",
+          "isCode": true
+        },
+        {
+          "label": "    def dfs(u, p):\n        S0 = 0\n        best = 0\n        for v in g[p]:\n            if v == u:\n                continue",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Pass parent to avoid revisiting it and causing infinite recursion.",
+      "wrongExplanations": {
+        "1": "Without a parent parameter or skip, recursion will bounce back and forth."
+      },
+      "hint": "The tree is undirected; you must avoid going back to the parent.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    def dfs(u, p):\n        S0 = 0\n        best = 0\n        for v in g[u]:\n            if v == p:\n                continue",
+      "codeLabel": "dfs header and neighbor loop"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Inside the loop, recurse and update S0 and the best gain.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "            a, b = dfs(v, u)\n            S0 += a\n            gain = 1 + b - a\n            if gain > best:\n                best = gain",
+          "isCode": true
+        },
+        {
+          "label": "            a, b = dfs(u, v)\n            S0 += max(a, b)\n            gain = 1 + a - b\n            if gain > best:\n                best = gain",
+          "isCode": true
+        },
+        {
+          "label": "            a = dfs(v, u)\n            S0 += a\n            gain = 1 + a\n            if gain > best:\n                best = gain",
+          "isCode": true
+        },
+        {
+          "label": "            a, b = dfs(v, u)\n            S0 += b\n            gain = 1 + b - a\n            if gain >= best:\n                best = gain",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need both A[v] and B[v]; S0 sums A[v]; gain is 1 + B[v] − A[v].",
+      "wrongExplanations": {
+        "1": "dfs arguments reversed and S0 should sum A[v], not max(a,b) in this case."
+      },
+      "hint": "Recall S0 = sum A[v]; gain replaces A[v] by 1+B[v].",
+      "isCodeBuilding": true,
+      "codeSnippet": "            a, b = dfs(v, u)\n            S0 += a\n            gain = 1 + b - a\n            if gain > best:\n                best = gain",
+      "codeLabel": "dfs body updates"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "After the loop, compute A and B for node u and return them.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "        A = S0 + (best if best > 0 else 0)\n        B = S0\n        return A, B",
+          "isCode": true
+        },
+        {
+          "label": "        A = S0\n        B = S0 + (best if best > 0 else 0)\n        return A, B",
+          "isCode": true
+        },
+        {
+          "label": "        A = S0 + best\n        B = 0\n        return A, B",
+          "isCode": true
+        },
+        {
+          "label": "        A = max(S0, best)\n        B = S0\n        return A, B",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "A[u] = S0 + max(0, best_gain); B[u] = S0 (sum of A over children).",
+      "wrongExplanations": {
+        "2": "B[u] is not 0; it’s the sum of A[v] since u can’t use child edges when parent edge is chosen."
+      },
+      "hint": "B[u] doesn’t include any +1 edge from u to a child.",
+      "isCodeBuilding": true,
+      "codeSnippet": "        A = S0 + (best if best > 0 else 0)\n        B = S0\n        return A, B",
+      "codeLabel": "Compute A,B and return"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "Call the search from root 1 and print the correct answer.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    Aroot, Broot = dfs(1, 0)\n    print(Aroot)",
+          "isCode": true
+        },
+        {
+          "label": "    Aroot, Broot = dfs(1, -1)\n    print(max(Aroot, Broot))",
+          "isCode": true
+        },
+        {
+          "label": "    res = dfs(1, 0)\n    print(res)",
+          "isCode": true
+        },
+        {
+          "label": "    Aroot, Broot = dfs(1, 1)\n    print(Broot)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Root has no parent, so parent index 0 is fine. Print A[root].",
+      "wrongExplanations": {
+        "1": "max(A,B) equals A here, but printing it hides the intended meaning and can mask bugs."
+      },
+      "hint": "Which value corresponds to ‘parent edge not chosen’ at the root?",
+      "isCodeBuilding": true,
+      "codeSnippet": "    Aroot, Broot = dfs(1, 0)\n    print(Aroot)",
+      "codeLabel": "Invoke dfs and print"
+    },
+    {
+      "id": "q22",
+      "phase": "Writing the Code",
+      "questionText": "Finish with the main guard to run main().",
+      "diagram": null,
+      "options": [
+        {
+          "label": "if __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "if __name__ == '__main__':\n    main(0)",
+          "isCode": true
+        },
+        {
+          "label": "if __name__ == '__main__':\n    print(main)",
+          "isCode": true
+        },
+        {
+          "label": "main()",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Standard guard calls main with no arguments.",
+      "wrongExplanations": {
+        "3": "Calling main() at import time is not ideal for some judges and testing."
+      },
+      "hint": "Use the conventional Python entry point check.",
+      "isCodeBuilding": true,
+      "codeSnippet": "if __name__ == \"__main__\":\n    main()",
+      "codeLabel": "Main guard"
+    },
+    {
+      "id": "q23",
+      "phase": "Verifying the Solution",
+      "questionText": "Run the program on the sample input:\n5\n1 2\n1 3\n3 4\n3 5\nWhat does it print?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "As reasoned earlier, an optimal matching has 2 edges.",
+      "wrongExplanations": {
+        "2": "Three disjoint edges cannot fit in this tree."
+      },
+      "hint": "Consider edges (1,2) and (3,4).",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Verifying the Solution",
+      "questionText": "Test another tree:\n6\n1 2\n1 3\n2 4\n2 5\n3 6\nWhat is the output?",
+      "diagram": "    1\n   / \\\n  2   3\n / \\   \\\n4   5   6",
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Match (2,4) and (3,6) for total 2. Any third edge would conflict.",
+      "wrongExplanations": {
+        "2": "Three disjoint edges would require 6 distinct nodes without conflicts; not possible here."
+      },
+      "hint": "Try matching leaves first and check conflicts.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the time complexity of this approach?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(2^n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each edge is processed once from each side; overall linear work.",
+      "wrongExplanations": {
+        "1": "There is no sorting or logarithmic factor; it’s a single pass over the tree."
+      },
+      "hint": "Each node/edge contributes a constant amount of work.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the space complexity (including recursion stack and adjacency list)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(1)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Adjacency list is O(n); recursion stack can be O(n) in a path.",
+      "wrongExplanations": {
+        "2": "You must store the whole tree; constant space is impossible."
+      },
+      "hint": "Worst-case tree is a chain.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q27",
+      "phase": "Analyzing Complexity",
+      "questionText": "Edge case: n=1 (no edges). What does the program print?",
+      "diagram": "Single node",
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "It crashes due to recursion.",
+          "isCode": false
+        },
+        {
+          "label": "Undefined behavior.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "No edges means a matching size of 0. The code handles this by returning (0,0) at the root.",
+      "wrongExplanations": {
+        "2": "The DFS visits only the root and returns; no deep recursion occurs."
+      },
+      "hint": "A matching counts edges, not nodes.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\nsys.setrecursionlimit(1 << 20)\n\ndef main():",
+    "    data = sys.stdin.read().strip().split()\n    if not data:\n        return\n    it = iter(data)\n    n = int(next(it))",
+    "    g = [[] for _ in range(n + 1)]\n    for _ in range(n - 1):\n        a = int(next(it)); b = int(next(it))\n        g[a].append(b); g[b].append(a)",
+    "    def dfs(u, p):\n        S0 = 0\n        best = 0\n        for v in g[u]:\n            if v == p:\n                continue",
+    "            a, b = dfs(v, u)\n            S0 += a\n            gain = 1 + b - a\n            if gain > best:\n                best = gain",
+    "        A = S0 + (best if best > 0 else 0)\n        B = S0\n        return A, B",
+    "    Aroot, Broot = dfs(1, 0)\n    print(Aroot)",
+    "if __name__ == \"__main__\":\n    main()"
+  ],
+  "reasoningChain": [
+    {
+      "question": "What constraints does a matching impose on adjacent edges?",
+      "insight": "Adjacent edges cannot both be chosen; a node can be incident to at most one chosen edge."
+    },
+    {
+      "question": "How can a tree be handled by breaking at edges?",
+      "insight": "Removing an edge splits the tree; totals from separate parts add, enabling bottom-up combination."
+    },
+    {
+      "question": "What information about a node relative to its parent is essential?",
+      "insight": "Whether the parent edge is chosen determines if the node can use any child edge."
+    },
+    {
+      "question": "How to define values per node to combine children?",
+      "insight": "Define A[u] for when the parent edge isn’t chosen and B[u] for when it is; leaves have A=B=0."
+    },
+    {
+      "question": "How to derive formulas for A[u] and B[u] efficiently?",
+      "insight": "B[u]=sum A[v]; A[u]=S0+max(0, max_v(1+B[v]-A[v])) where S0=sum A[v]."
+    },
+    {
+      "question": "How to implement this reliably on large trees?",
+      "insight": "Use a DFS with a parent parameter and raise recursion limit; process each edge once."
+    },
+    {
+      "question": "What to output for the root?",
+      "insight": "The root has no parent, so the answer is A[root]."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1361,
+    "output_tokens": 17261,
+    "input_cost": 0.001701,
+    "output_cost": 0.17261,
+    "total_cost": 0.174311
+  }
+}

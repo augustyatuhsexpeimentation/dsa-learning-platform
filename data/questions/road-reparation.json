@@ -1,0 +1,989 @@
+{
+  "id": "road-reparation-min-cost-connectivity",
+  "title": "Road Reparation",
+  "difficulty": "intermediate",
+  "tags": [
+    "graph"
+  ],
+  "estimatedMinutes": 45,
+  "language": "python",
+  "description": "You are given n cities and m undirected roads with reparation costs. You must repair a subset of roads so every pair of cities has a route using repaired roads, and the total cost is as small as possible.\n\nInput:\n- First line: two integers n and m\n- Next m lines: three integers a b c, meaning a road between cities a and b with cost c\n\nOutput:\n- Print the minimum total reparation cost to make all cities mutually reachable using repaired roads\n- If it is impossible to connect all cities, print IMPOSSIBLE\n\nNotes:\n- Cities are 1-indexed\n- At most one road exists between any pair\n- Roads are two-way",
+  "examples": [
+    {
+      "input": "5 6\n1 2 3\n2 3 5\n2 4 2\n3 4 8\n5 1 7\n5 4 4",
+      "output": "14",
+      "explanation": "Repair a set of 4 roads connecting all 5 cities with minimum total cost; one optimal set sums to 14."
+    }
+  ],
+  "constraints": [
+    "1 <= n <= 1e5",
+    "1 <= m <= 2e5",
+    "1 <= a,b <= n",
+    "1 <= c <= 1e9",
+    "At most one road between a pair of cities"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "What does a \"decent route between any two cities\" require?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "There is a direct repaired road between every pair of distinct cities.",
+          "isCode": false
+        },
+        {
+          "label": "There exists a path using only repaired roads between any two cities.",
+          "isCode": false
+        },
+        {
+          "label": "Each city has at least one repaired road incident to it.",
+          "isCode": false
+        },
+        {
+          "label": "All roads must be repaired.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "We need the repaired roads to form a connected network: a path between any two cities. Direct roads between every pair or repairing all roads is unnecessary.",
+      "wrongExplanations": {
+        "0": "Direct roads between all pairs is stronger than necessary; paths can use multiple roads.",
+        "3": "Repairing all roads may connect cities but doesn't minimize cost."
+      },
+      "hint": "Think in terms of reachability, not necessarily direct adjacency.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "If it is possible to connect all n cities with repaired roads and we avoid loops, what is the minimum number of roads we must repair?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "n",
+          "isCode": false
+        },
+        {
+          "label": "n - 1",
+          "isCode": false
+        },
+        {
+          "label": "m",
+          "isCode": false
+        },
+        {
+          "label": "Depends on costs; could be fewer than n - 1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Connecting n nodes without loops uses exactly n-1 roads. Fewer can't connect all cities; more introduces loops.",
+      "wrongExplanations": {
+        "0": "n roads add at least one loop.",
+        "3": "No set of roads can connect n cities with fewer than n-1 edges."
+      },
+      "hint": "Consider the smallest connected structure with no loops.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "Small check. n=3 and roads:\n1-2:5, 2-3:1, 1-3:9. What is the minimum total cost to connect all cities?",
+      "diagram": "Cities: 1--5--2--1--3 and 1--9--3",
+      "options": [
+        {
+          "label": "5 + 1 = 6",
+          "isCode": false
+        },
+        {
+          "label": "9 + 1 = 10",
+          "isCode": false
+        },
+        {
+          "label": "5 + 9 = 14",
+          "isCode": false
+        },
+        {
+          "label": "Only 1 is needed: 2-3",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Pick the two cheapest roads that connect all cities without a loop: 1-2 and 2-3. Using 1-3 with 2-3 is costlier; one road cannot connect all three.",
+      "wrongExplanations": {
+        "1": "2-3 and 1-3 connect all cities but cost 10, not minimal.",
+        "3": "A single road cannot connect all 3 cities."
+      },
+      "hint": "You need exactly two roads for three cities, and avoid loops.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "If we simply pick roads in increasing cost order and take them all, what problem can occur?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "We might include roads that form a loop, adding unnecessary cost.",
+          "isCode": false
+        },
+        {
+          "label": "We might miss the overall cheapest road.",
+          "isCode": false
+        },
+        {
+          "label": "We can end up with fewer than n-1 roads.",
+          "isCode": false
+        },
+        {
+          "label": "We will never connect all cities.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Taking all roads blindly creates loops. We must check whether a road connects two previously separate parts before adding it.",
+      "wrongExplanations": {
+        "2": "Taking all roads gives more than n-1, not fewer.",
+        "3": "Taking all roads certainly connects all cities, but it's not minimal."
+      },
+      "hint": "Avoid wasting cost on cycles.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Exploring Approaches",
+      "questionText": "Which statement is a necessary (but not sufficient) condition for being able to connect all cities?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "m >= n - 1",
+          "isCode": false
+        },
+        {
+          "label": "Every city already has at least one road listed.",
+          "isCode": false
+        },
+        {
+          "label": "The sum of the cheapest n-1 roads is minimal.",
+          "isCode": false
+        },
+        {
+          "label": "All roads' costs are distinct.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "At least n-1 roads must exist to even hope to connect n cities. This alone doesn't guarantee connectivity.",
+      "wrongExplanations": {
+        "1": "A city with one incident road can still be part of a disconnected component.",
+        "2": "Minimization requires structure, not just taking the cheapest n-1."
+      },
+      "hint": "Count how many edges a connected, loop-free structure must have.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "When considering a road (a, b, c) in increasing cost order, what check ensures we avoid creating a loop?",
+      "diagram": "Think: Are a and b already connected via earlier chosen roads?",
+      "options": [
+        {
+          "label": "Only add it if a and b currently belong to different connected groups.",
+          "isCode": false
+        },
+        {
+          "label": "Only add it if c is less than the current total.",
+          "isCode": false
+        },
+        {
+          "label": "Only add it if neither a nor b has degree exceeding 2.",
+          "isCode": false
+        },
+        {
+          "label": "Only add it if we haven't seen this exact road before.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Add a road only if it connects two different groups; otherwise it forms a loop. Cost comparison and degrees don't detect loops.",
+      "wrongExplanations": {
+        "1": "Cost relative to total doesn't indicate a loop.",
+        "2": "Degree limits don't guarantee no loop in general graphs."
+      },
+      "hint": "Track which cities are already connected together.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "If you add roads only when they connect two different groups, how many roads will you have when all n cities become connected?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Exactly n - 1",
+          "isCode": false
+        },
+        {
+          "label": "At most m",
+          "isCode": false
+        },
+        {
+          "label": "Depends on costs; could be fewer than n - 1",
+          "isCode": false
+        },
+        {
+          "label": "Exactly n",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Connecting n cities without loops uses exactly n-1 roads. Adding more would create a loop.",
+      "wrongExplanations": {
+        "2": "You cannot connect n cities with fewer than n-1 roads.",
+        "3": "n roads exceed the minimum and imply a loop."
+      },
+      "hint": "Recall the minimal connected structure size.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Building the Idea",
+      "questionText": "We need to know whether two cities are already in the same connected group during selection. Which approach is efficient for this?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Maintain for each city a pointer to a group representative and merge groups when a connecting road is added.",
+          "isCode": false
+        },
+        {
+          "label": "After each road, run a full search from a to check reachability to b.",
+          "isCode": false
+        },
+        {
+          "label": "Keep a boolean visited flag per city.",
+          "isCode": false
+        },
+        {
+          "label": "Track degrees of cities and compare.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Representative pointers let us quickly check if two cities are in the same group and merge groups efficiently.",
+      "wrongExplanations": {
+        "1": "Running full searches after each road is too slow at scale.",
+        "3": "Degrees don't capture connectivity between arbitrary nodes."
+      },
+      "hint": "Think group IDs that change when groups merge.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "How do we check if cities a and b are already in the same connected group using representative pointers?",
+      "diagram": "parent[x] points to representative; following pointers reaches a root.",
+      "options": [
+        {
+          "label": "Follow parent pointers from a and b to their roots; compare roots.",
+          "isCode": false
+        },
+        {
+          "label": "Check if parent[a] == b or parent[b] == a.",
+          "isCode": false
+        },
+        {
+          "label": "Compare degrees of a and b.",
+          "isCode": false
+        },
+        {
+          "label": "Compare costs of roads incident to a and b.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Two cities are in the same group iff their roots (representatives) are the same. Direct parent equality or degrees are irrelevant.",
+      "wrongExplanations": {
+        "1": "Immediate parent equality doesn't imply same group.",
+        "3": "Road costs don't indicate connectivity."
+      },
+      "hint": "Use the ultimate representative for each node as the group's ID.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "In what order should you examine roads to achieve minimal total repair cost, given you add a road only if it joins two separate groups?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Sort roads by cost increasing and examine in that order.",
+          "isCode": false
+        },
+        {
+          "label": "Sort roads by cost decreasing.",
+          "isCode": false
+        },
+        {
+          "label": "Examine in input order.",
+          "isCode": false
+        },
+        {
+          "label": "Group roads by city index and examine lower indices first.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Considering roads from smallest cost up ensures any added road is the cheapest way to connect two groups at that moment.",
+      "wrongExplanations": {
+        "1": "Starting from largest costs risks unnecessary expense.",
+        "2": "Input order ignores cost and can miss a cheaper connection."
+      },
+      "hint": "Make the cheapest connection available at each step.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "Suppose n=4 and roads (cost, a, b): (1,1,2), (2,2,3), (2,1,3), (10,3,4). Processing in increasing cost and adding only if a and b are in different groups, which roads get added?",
+      "diagram": "Sorted costs: (1,1,2), (2,2,3), (2,1,3), (10,3,4)",
+      "options": [
+        {
+          "label": "(1,1,2), (2,2,3), (10,3,4)",
+          "isCode": false
+        },
+        {
+          "label": "(1,1,2), (2,1,3), (10,3,4)",
+          "isCode": false
+        },
+        {
+          "label": "(1,1,2), (2,2,3), (2,1,3), (10,3,4)",
+          "isCode": false
+        },
+        {
+          "label": "(2,2,3), (2,1,3), (10,3,4)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "After (1,1,2) and (2,2,3), 1-2-3 are connected; (2,1,3) would form a loop, so skip it; (10,3,4) connects 4.",
+      "wrongExplanations": {
+        "2": "Including (2,1,3) creates a loop among 1-2-3.",
+        "3": "Skipping the cheapest (1,1,2) is suboptimal."
+      },
+      "hint": "Skip any road whose endpoints are already connected via earlier choices.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "After processing all roads in increasing cost and adding only those that connect different groups, what final condition determines the output?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "If the number of added roads equals n-1, print the total; otherwise print IMPOSSIBLE.",
+          "isCode": false
+        },
+        {
+          "label": "If any group size equals n, print the total; otherwise print IMPOSSIBLE.",
+          "isCode": false
+        },
+        {
+          "label": "If the total equals the sum of the n-1 cheapest roads, print it; otherwise IMPOSSIBLE.",
+          "isCode": false
+        },
+        {
+          "label": "If m >= n-1, print the total; otherwise IMPOSSIBLE.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need exactly n-1 added roads for full connectivity without loops. Otherwise, we couldn't connect all cities.",
+      "wrongExplanations": {
+        "1": "Group size n implies connectivity but tracking counts via added roads is reliable and required.",
+        "3": "m >= n-1 is necessary but not sufficient for connectivity."
+      },
+      "hint": "Count how many roads you successfully added.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Writing the Code",
+      "questionText": "Read input efficiently and start main. Choose the best snippet.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\n\ndef main():\n    data = sys.stdin.read().split()\n    it = iter(data)\n    n = int(next(it)); m = int(next(it))",
+          "isCode": true
+        },
+        {
+          "label": "def main():\n    n, m = map(int, input().split())\n    tokens = []\n    for _ in range(m):\n        tokens.append(input().split())",
+          "isCode": true
+        },
+        {
+          "label": "import sys\n\ndef main():\n    line = sys.stdin.readline().split()\n    n = int(line[0]); m = int(line[1])\n    it = sys.stdin.read()",
+          "isCode": true
+        },
+        {
+          "label": "def main():\n    s = ''\n    while True:\n        try:\n            s += input() + ' '\n        except:\n            break\n    parts = s\n    n = int(parts[0]); m = int(parts[1])",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Reading all tokens and iterating is fast and robust. Other options either mix reading approaches incorrectly or mishandle tokenization.",
+      "wrongExplanations": {
+        "2": "Mixing readline and read without consistent token iteration leaves edge lines unread.",
+        "3": "Concatenating input lines without splitting produces a single string; parts isn't tokenized."
+      },
+      "hint": "Use sys.stdin.read().split() to get all integers reliably.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\n\ndef main():\n    data = sys.stdin.read().split()\n    it = iter(data)\n    n = int(next(it)); m = int(next(it))",
+      "codeLabel": "Input reading and main start"
+    },
+    {
+      "id": "q14",
+      "phase": "Writing the Code",
+      "questionText": "Build the edges list with zero-based city indices and store cost first for sorting.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    edges = []\n    for _ in range(m):\n        a = int(next(it)); b = int(next(it)); c = int(next(it))\n        edges.append((c, a - 1, b - 1))",
+          "isCode": true
+        },
+        {
+          "label": "    edges = []\n    for _ in range(m):\n        a = int(next(it)); b = int(next(it)); c = int(next(it))\n        edges.append((a, b, c))",
+          "isCode": true
+        },
+        {
+          "label": "    edges = []\n    for _ in range(m):\n        a = int(next(it)); b = int(next(it)); c = int(next(it))\n        edges.append((a - 1, b - 1, c))",
+          "isCode": true
+        },
+        {
+          "label": "    edges = []\n    for _ in range(m):\n        c = int(next(it)); a = int(next(it)); b = int(next(it))\n        edges.append((c, a, b))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Store cost first and convert cities to zero-based for array indexing. Other orders complicate sorting or miss zero-based conversion.",
+      "wrongExplanations": {
+        "2": "This stores (a,b,c); sorting by cost needs a different key and cities aren't zero-based.",
+        "3": "Reading in wrong order will misinterpret input lines."
+      },
+      "hint": "We want (cost, u, v) with u and v in [0..n-1].",
+      "isCodeBuilding": true,
+      "codeSnippet": "    edges = []\n    for _ in range(m):\n        a = int(next(it)); b = int(next(it)); c = int(next(it))\n        edges.append((c, a - 1, b - 1))",
+      "codeLabel": "Parse edges"
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Sort roads by increasing cost.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    edges.sort(key=lambda x: x[0])",
+          "isCode": true
+        },
+        {
+          "label": "    edges = sorted(edges, key=lambda x: x[1])",
+          "isCode": true
+        },
+        {
+          "label": "    edges.sort()",
+          "isCode": true
+        },
+        {
+          "label": "    edges = sorted(edges, reverse=True)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Cost is at index 0, so sort by x[0]. Default sort or sorting by x[1] can produce wrong order.",
+      "wrongExplanations": {
+        "2": "Default sort compares tuples lexicographically; it's okay here but relies on exact tuple order and may be unclear.",
+        "3": "reverse=True sorts by tuples descending; that's opposite of needed."
+      },
+      "hint": "We stored cost at index 0 for a reason.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    edges.sort(key=lambda x: x[0])",
+      "codeLabel": "Sort edges"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Initialize structures to track connected groups.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    parent = list(range(n))\n    size = [1] * n",
+          "isCode": true
+        },
+        {
+          "label": "    parent = [-1] * n\n    size = [0] * n",
+          "isCode": true
+        },
+        {
+          "label": "    parent = list(range(m))\n    size = [1] * m",
+          "isCode": true
+        },
+        {
+          "label": "    parent = {}\n    size = {}",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each city initially points to itself; each group size starts at 1. Using m or dicts complicates and is incorrect here.",
+      "wrongExplanations": {
+        "2": "Groups are per city, not per road.",
+        "3": "Dicts add overhead without benefit here."
+      },
+      "hint": "Start with n separate groups.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    parent = list(range(n))\n    size = [1] * n",
+      "codeLabel": "Group arrays"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Implement a function to find the representative (root) of a city, compressing paths for efficiency.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    def find(x):\n        while parent[x] != x:\n            parent[x] = parent[parent[x]]\n            x = parent[x]\n        return x",
+          "isCode": true
+        },
+        {
+          "label": "    def find(x):\n        if parent[x] == x:\n            return parent[x]\n        return parent[x]",
+          "isCode": true
+        },
+        {
+          "label": "    def find(x):\n        while True:\n            x = parent[x]\n            if parent[x] == x:\n                return parent[x]",
+          "isCode": true
+        },
+        {
+          "label": "    def find(x):\n        return parent[x]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Follow parent pointers until root, updating parent[x] to skip levels. Other versions fail to reach roots or lack compression.",
+      "wrongExplanations": {
+        "1": "Returns parent[x] even when not at root; it doesn't traverse.",
+        "3": "Returns immediate parent without finding the root."
+      },
+      "hint": "Loop until a node points to itself; update pointers along the way.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    def find(x):\n        while parent[x] != x:\n            parent[x] = parent[parent[x]]\n            x = parent[x]\n        return x",
+      "codeLabel": "find() with path halving"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Implement a function to join two groups if they are different, and indicate whether a merge happened.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    def unite(a, b):\n        ra = find(a); rb = find(b)\n        if ra == rb:\n            return False\n        if size[ra] < size[rb]:\n            ra, rb = rb, ra\n        parent[rb] = ra\n        size[ra] += size[rb]\n        return True",
+          "isCode": true
+        },
+        {
+          "label": "    def unite(a, b):\n        ra = find(a); rb = find(b)\n        if ra != rb:\n            return False\n        parent[rb] = ra\n        size[ra] += size[rb]\n        return True",
+          "isCode": true
+        },
+        {
+          "label": "    def unite(a, b):\n        ra = find(a); rb = find(b)\n        parent[rb] = ra\n        return True",
+          "isCode": true
+        },
+        {
+          "label": "    def unite(a, b):\n        if a == b:\n            return False\n        parent[b] = a\n        return True",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Merge only if roots differ; attach smaller to larger for balance; update size. Other options merge incorrectly or skip checks.",
+      "wrongExplanations": {
+        "1": "Condition inverted: it refuses merges when roots differ, which is when you must merge.",
+        "3": "Comparing raw indices a and b doesn't reflect their group roots."
+      },
+      "hint": "Use roots; return True only when you connect two different groups.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    def unite(a, b):\n        ra = find(a); rb = find(b)\n        if ra == rb:\n            return False\n        if size[ra] < size[rb]:\n            ra, rb = rb, ra\n        parent[rb] = ra\n        size[ra] += size[rb]\n        return True",
+      "codeLabel": "unite() groups"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Scan edges, add those that connect different groups, and accumulate total cost and count.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    total = 0\n    used = 0\n    for c, u, v in edges:\n        if unite(u, v):\n            total += c\n            used += 1",
+          "isCode": true
+        },
+        {
+          "label": "    total = 0\n    used = 0\n    for c, u, v in edges:\n        total += c\n        used += 1",
+          "isCode": true
+        },
+        {
+          "label": "    total = 0\n    used = 0\n    for u, v, c in edges:\n        if unite(u, v):\n            total += c\n            used += 1",
+          "isCode": true
+        },
+        {
+          "label": "    total = 0\n    used = 0\n    for c, u, v in edges:\n        if find(u) == find(v):\n            total += c\n            used += 1",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Accumulate only when unite succeeds (it connects different groups). Be careful with tuple order and the condition.",
+      "wrongExplanations": {
+        "2": "This unpacks as (u, v, c), but we stored (c, u, v); the order is wrong.",
+        "3": "Adding when roots are equal means you add loops rather than connections."
+      },
+      "hint": "Use unite's boolean to decide whether to include a road.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    total = 0\n    used = 0\n    for c, u, v in edges:\n        if unite(u, v):\n            total += c\n            used += 1",
+      "codeLabel": "Process edges"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Finish with the correct output based on the number of used roads.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    if used == n - 1:\n        print(total)\n    else:\n        print(\"IMPOSSIBLE\")",
+          "isCode": true
+        },
+        {
+          "label": "    if used == m:\n        print(total)\n    else:\n        print(\"IMPOSSIBLE\")",
+          "isCode": true
+        },
+        {
+          "label": "    if total > 0:\n        print(total)\n    else:\n        print(\"IMPOSSIBLE\")",
+          "isCode": true
+        },
+        {
+          "label": "    if used >= n - 1:\n        print(total)\n    else:\n        print(\"IMPOSSIBLE\")",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need exactly n-1 added roads for a connected loop-free network. More implies a loop; fewer implies disconnected.",
+      "wrongExplanations": {
+        "1": "Using all edges isn't required and rarely minimal.",
+        "4": "used >= n-1 allows loops; we require exactly n-1."
+      },
+      "hint": "Recall the minimal number of roads needed.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    if used == n - 1:\n        print(total)\n    else:\n        print(\"IMPOSSIBLE\")",
+      "codeLabel": "Output result"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "Add the standard entry point to run main.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "if __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "main()",
+          "isCode": true
+        },
+        {
+          "label": "if __name__ == \"__main__\":\n    main\n",
+          "isCode": true
+        },
+        {
+          "label": "if __name__ == \"__main__\":\n    print(main())",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Call main under the standard guard. Other options either bypass the guard, don't call the function, or print None.",
+      "wrongExplanations": {
+        "1": "Calling main unconditionally is fine but the guard is standard practice for import safety.",
+        "3": "main() returns nothing; printing it outputs None."
+      },
+      "hint": "Use the common Python script pattern.",
+      "isCodeBuilding": true,
+      "codeSnippet": "if __name__ == \"__main__\":\n    main()",
+      "codeLabel": "Entry point"
+    },
+    {
+      "id": "q22",
+      "phase": "Verifying the Solution",
+      "questionText": "On the sample input, how many roads are added by the algorithm?",
+      "diagram": "n=5, sorted costs: 2,3,4,5,7,8",
+      "options": [
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        },
+        {
+          "label": "6",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "A connected network of 5 cities without loops uses exactly 4 roads.",
+      "wrongExplanations": {
+        "2": "Adding 5 roads introduces a loop; minimal is n-1.",
+        "0": "Fewer than n-1 roads cannot connect all cities."
+      },
+      "hint": "Recall the minimal count required to connect n cities.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q23",
+      "phase": "Verifying the Solution",
+      "questionText": "What does the program print for the given example?",
+      "diagram": "Costs chosen sum to 14",
+      "options": [
+        {
+          "label": "12",
+          "isCode": false
+        },
+        {
+          "label": "14",
+          "isCode": false
+        },
+        {
+          "label": "15",
+          "isCode": false
+        },
+        {
+          "label": "IMPOSSIBLE",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Following the selection rule yields total cost 14 for 4 roads connecting all 5 cities.",
+      "wrongExplanations": {
+        "3": "The graph is connectable; IMPOSSIBLE is incorrect.",
+        "0": "12 is too low; it omits necessary connections."
+      },
+      "hint": "Check the sum of chosen roads under the rule.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Verifying the Solution",
+      "questionText": "Consider n=3, m=1 and the single road 1 2 5. What does the program print?",
+      "diagram": "Cities: 1--5--2 and city 3 isolated",
+      "options": [
+        {
+          "label": "5",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "IMPOSSIBLE",
+          "isCode": false
+        },
+        {
+          "label": "10",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "You cannot connect city 3 with only one road available; fewer than n-1 roads means it's impossible.",
+      "wrongExplanations": {
+        "0": "Total cost 5 repairs one road but doesn't connect all cities.",
+        "1": "0 is not applicable; the network isn't connected."
+      },
+      "hint": "Check whether used equals n-1 at the end.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Analyzing Complexity",
+      "questionText": "What dominates the running time of the solution?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Sorting the m roads by cost (about O(m log m)).",
+          "isCode": false
+        },
+        {
+          "label": "Reading input (O(n + m)).",
+          "isCode": false
+        },
+        {
+          "label": "Checking and merging groups (strictly O(m^2)).",
+          "isCode": false
+        },
+        {
+          "label": "Printing the result (O(1)).",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Sorting m roads by cost dominates. Group checks and merges are near-linear overall with efficient pointers.",
+      "wrongExplanations": {
+        "2": "Group operations are far faster than O(m^2) when implemented with efficient pointers.",
+        "3": "Printing is negligible compared to sorting."
+      },
+      "hint": "Focus on the most expensive step among sorting, scanning, and merging.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the space usage of this approach?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n + m): edges list plus two arrays for groups.",
+          "isCode": false
+        },
+        {
+          "label": "O(m^2): a full reachability matrix.",
+          "isCode": false
+        },
+        {
+          "label": "O(n): only group arrays.",
+          "isCode": false
+        },
+        {
+          "label": "O(1): constant extra space.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We store all edges and maintain two arrays of length n. No reachability matrix is used.",
+      "wrongExplanations": {
+        "2": "We also store the edges, which is O(m).",
+        "3": "Edges list requires O(m) space."
+      },
+      "hint": "Count the edges list and the per-city structures.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q27",
+      "phase": "Analyzing Complexity",
+      "questionText": "Edge case: n=1, m=0 (one city, no roads). What should the program print?",
+      "diagram": "Single city; already trivially connected",
+      "options": [
+        {
+          "label": "IMPOSSIBLE",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "Depends on input format",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Zero roads are needed when there is only one city. used == n-1 equals 0, so print 0.",
+      "wrongExplanations": {
+        "0": "Connectivity is satisfied with no roads for a single city.",
+        "2": "Cost is a sum of chosen roads; it's 0 when none are needed."
+      },
+      "hint": "How many roads do you need to connect one city?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\n\ndef main():\n    data = sys.stdin.read().split()\n    it = iter(data)\n    n = int(next(it)); m = int(next(it))",
+    "    edges = []\n    for _ in range(m):\n        a = int(next(it)); b = int(next(it)); c = int(next(it))\n        edges.append((c, a - 1, b - 1))",
+    "    edges.sort(key=lambda x: x[0])",
+    "    parent = list(range(n))\n    size = [1] * n",
+    "    def find(x):\n        while parent[x] != x:\n            parent[x] = parent[parent[x]]\n            x = parent[x]\n        return x",
+    "    def unite(a, b):\n        ra = find(a); rb = find(b)\n        if ra == rb:\n            return False\n        if size[ra] < size[rb]:\n            ra, rb = rb, ra\n        parent[rb] = ra\n        size[ra] += size[rb]\n        return True",
+    "    total = 0\n    used = 0\n    for c, u, v in edges:\n        if unite(u, v):\n            total += c\n            used += 1",
+    "    if used == n - 1:\n        print(total)\n    else:\n        print(\"IMPOSSIBLE\")",
+    "if __name__ == \"__main__\":\n    main()"
+  ],
+  "reasoningChain": [
+    {
+      "question": "What does a 'decent route' mean here?",
+      "insight": "We need repaired roads to form a connected network: a path between any two cities."
+    },
+    {
+      "question": "How many roads are minimally needed without loops?",
+      "insight": "A loop-free connected network over n cities uses exactly n-1 roads."
+    },
+    {
+      "question": "How to choose roads to minimize cost while ensuring connectivity?",
+      "insight": "Consider roads in increasing cost order, adding a road only if it connects two previously separate groups."
+    },
+    {
+      "question": "How to detect if two cities are already connected?",
+      "insight": "Maintain group representatives per city; two cities are in the same group if their representatives match."
+    },
+    {
+      "question": "What final condition determines success vs impossibility?",
+      "insight": "If the number of added roads equals n-1, we connected all cities; otherwise it's impossible."
+    },
+    {
+      "question": "What are performance characteristics?",
+      "insight": "Sorting roads by cost dominates time; storing edges and per-city arrays uses O(n+m) space."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1494,
+    "output_tokens": 14038,
+    "input_cost": 0.001868,
+    "output_cost": 0.14038,
+    "total_cost": 0.142247
+  }
+}

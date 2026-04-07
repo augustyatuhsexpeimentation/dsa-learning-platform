@@ -1,0 +1,963 @@
+{
+  "id": "subtree-queries-euler-prefix",
+  "title": "Subtree Queries",
+  "difficulty": "hard",
+  "tags": [
+    "tree",
+    "range-queries"
+  ],
+  "estimatedMinutes": 70,
+  "language": "python",
+  "description": "You are given a rooted tree with n nodes (1 is the root). Each node i has a value v_i.\n\nYou must process q queries of two types:\n- 1 s x: change the value of node s to x\n- 2 s: print the sum of values in the subtree of node s\n\nInput:\n- First line: n q\n- Second line: v_1 ... v_n\n- Next n-1 lines: edges a b (undirected)\n- Next q lines: queries\n\nOutput:\n- For each query of type 2, print the answer on a new line.",
+  "examples": [
+    {
+      "input": "5 3\n4 2 5 2 1\n1 2\n1 3\n3 4\n3 5\n2 3\n1 5 3\n2 3\n",
+      "output": "8\n10\n",
+      "explanation": "Initially, subtree(3) includes nodes {3,4,5} with sum 5+2+1=8. After updating node 5 to 3, subtree(3) sum becomes 5+2+3=10."
+    }
+  ],
+  "constraints": [
+    "1 ≤ n, q ≤ 2⋅10^5",
+    "1 ≤ a,b,s ≤ n",
+    "1 ≤ v_i, x ≤ 10^9",
+    "Tree is rooted at node 1",
+    "Time limit: 1.00 s, Memory limit: 512 MB"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "Given the tree below and values, what is the sum in the subtree of node 3?\n\nTree edges:\n1-2, 1-3, 3-4, 3-5\nValues: v1=4, v2=2, v3=5, v4=2, v5=1",
+      "diagram": "1\n|-2\n|-3\n  |-4\n  |-5",
+      "options": [
+        {
+          "label": "5",
+          "isCode": false
+        },
+        {
+          "label": "7",
+          "isCode": false
+        },
+        {
+          "label": "8",
+          "isCode": false
+        },
+        {
+          "label": "12",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Subtree(3) contains nodes {3,4,5}. Sum = 5+2+1=8. Including node 1 or 2 is incorrect.",
+      "wrongExplanations": {
+        "1": "7 misses one of the children or mis-adds values.",
+        "3": "12 wrongly includes nodes outside subtree(3)."
+      },
+      "hint": "List nodes in the subtree of 3 and add their values.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "After applying query \"1 5 3\" (set v5=3), what is the sum in the subtree of node 3?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "8",
+          "isCode": false
+        },
+        {
+          "label": "9",
+          "isCode": false
+        },
+        {
+          "label": "10",
+          "isCode": false
+        },
+        {
+          "label": "11",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "New values in {3,4,5} are 5,2,3 so sum=10.",
+      "wrongExplanations": {
+        "0": "8 ignores the update to node 5.",
+        "1": "9 applies wrong delta (x-1=2, not 1)."
+      },
+      "hint": "Only node 5's value changed from 1 to 3.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "Initially (before any updates), what is the answer to query \"2 1\"?",
+      "diagram": "1\n|-2\n|-3\n  |-4\n  |-5",
+      "options": [
+        {
+          "label": "13",
+          "isCode": false
+        },
+        {
+          "label": "14",
+          "isCode": false
+        },
+        {
+          "label": "12",
+          "isCode": false
+        },
+        {
+          "label": "8",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Subtree(1) is the whole tree: 4+2+5+2+1=14.",
+      "wrongExplanations": {
+        "0": "13 is off by 1; check all nodes are included.",
+        "2": "12 misses some nodes' values."
+      },
+      "hint": "Node 1's subtree includes all nodes.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "If for every query \"2 s\" you traverse the subtree of s and sum values, and for every \"1 s x\" you just assign v_s=x, what is the worst-case time for all q queries when n and q are both up to 2⋅10^5?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n + q)",
+          "isCode": false
+        },
+        {
+          "label": "O(nq)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(q log n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Each sum query may scan up to O(n) nodes, so q such queries cost O(nq). This will time out.",
+      "wrongExplanations": {
+        "0": "O(n+q) would require constant-time queries, which is not true here.",
+        "3": "O(q log n) assumes a fast structure we haven't built yet."
+      },
+      "hint": "Consider the cost of summing a subtree for each query.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Exploring Approaches",
+      "questionText": "Suppose we can assign each node an index so that all nodes in any subtree occupy a contiguous segment [L,R] in an array. How can we answer subtree sum quickly and still support updates to a single node's value?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Precompute a fixed prefix sum array once and answer range sums from it.",
+          "isCode": false
+        },
+        {
+          "label": "Maintain a structure that supports fast point adds and fast prefix sums; compute sum[L..R] as prefix(R) - prefix(L-1).",
+          "isCode": false
+        },
+        {
+          "label": "Keep a sum for every subtree and, on update, walk from s to the root adjusting sums.",
+          "isCode": false
+        },
+        {
+          "label": "Sort nodes by id so subtree nodes are contiguous; then use a prefix sum array.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "With contiguous segments, point updates and prefix sums let us get any [L,R] sum via two prefix queries. A fixed prefix array alone breaks on updates.",
+      "wrongExplanations": {
+        "0": "After an update, a fixed prefix sum array is stale.",
+        "2": "Walking up the tree for each update can be O(n) in a chain."
+      },
+      "hint": "Think: how to turn range sum into two queries if you have a fast prefix sum function?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "Which visit order guarantees that when you stamp a node upon arrival, all its subtree nodes will receive consecutive stamps before you leave that node?",
+      "diagram": "Visit a node, process its children (one by one), then finish the node.",
+      "options": [
+        {
+          "label": "Visit a node; then visit all of its children one by one; then finish the node.",
+          "isCode": false
+        },
+        {
+          "label": "Visit nodes level by level from the root.",
+          "isCode": false
+        },
+        {
+          "label": "Visit all children first, then stamp the node when returning.",
+          "isCode": false
+        },
+        {
+          "label": "Stamp nodes in the given id order 1..n regardless of edges.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Stamping on arrival and only leaving after all children ensures a contiguous block for the subtree.",
+      "wrongExplanations": {
+        "1": "Level order interleaves different subtrees.",
+        "2": "Stamping on exit doesn't give a contiguous interval for entry stamps."
+      },
+      "hint": "You want all stamps for a subtree to be between the node's arrival and leaving.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "To derive a subtree's segment [L,R] from the visit, what should you record for each node?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Record the entry time when first arriving and the time just before leaving; all descendants are stamped between them.",
+          "isCode": false
+        },
+        {
+          "label": "Record only the depth of the node.",
+          "isCode": false
+        },
+        {
+          "label": "Record only the time when leaving the node.",
+          "isCode": false
+        },
+        {
+          "label": "Record the number of children of the node.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The [entry, exit] times bound a continuous interval containing exactly the subtree's entries.",
+      "wrongExplanations": {
+        "1": "Depth doesn't identify subtree boundaries.",
+        "2": "Exit times alone don't give the left boundary."
+      },
+      "hint": "You'll need a left boundary and a right boundary for each subtree.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Building the Idea",
+      "questionText": "For the tree 1-2, 1-3, 3-4, 3-5, consider this traversal: when visiting a node, record entry time, then visit children in order (2 then 3 for node 1, and 4 then 5 for node 3), then record exit time. What is [entry(3), exit(3)]?",
+      "diagram": "Root 1\n|- 2\n|- 3\n   |- 4\n   |- 5",
+      "options": [
+        {
+          "label": "[3, 5]",
+          "isCode": false
+        },
+        {
+          "label": "[2, 4]",
+          "isCode": false
+        },
+        {
+          "label": "[3, 4]",
+          "isCode": false
+        },
+        {
+          "label": "[4, 5]",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Times: 1→1, 2→2, 3→3, 4→4, 5→5; exit(3)=5 after its children. So [3,5].",
+      "wrongExplanations": {
+        "1": "This excludes one descendant.",
+        "2": "Right boundary should include both children."
+      },
+      "hint": "List the order of entries: 1,2,3,4,5.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "Let flat be an array where flat[entry[u]] = v_u for all u. How do you get the subtree sum of node s using only flat and prefix sums?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Sum flat[entry[s] .. exit[s]]",
+          "isCode": false
+        },
+        {
+          "label": "Sum flat[1 .. exit[s]]",
+          "isCode": false
+        },
+        {
+          "label": "Sum flat[entry[s] .. n]",
+          "isCode": false
+        },
+        {
+          "label": "Sum flat at entry times of s's direct children only",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The subtree of s corresponds exactly to indices entry[s]..exit[s] in flat.",
+      "wrongExplanations": {
+        "1": "This includes nodes not in the subtree if entry[s] > 1.",
+        "3": "Grandchildren and deeper nodes would be missing."
+      },
+      "hint": "Subtree of s becomes a continuous segment in flat.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "When a query \"1 s x\" arrives, what is the correct way to reflect it in flat and in a prefix-sum-friendly structure?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Compute delta = x - current_v_s; add delta at index entry[s]; update current_v_s = x.",
+          "isCode": false
+        },
+        {
+          "label": "Set flat[entry[s]] = x and do nothing else.",
+          "isCode": false
+        },
+        {
+          "label": "Add x at index s in the structure.",
+          "isCode": false
+        },
+        {
+          "label": "Rebuild the entire prefix sums for flat after each update.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need to maintain sums under updates: add the difference at entry[s] so prefix sums reflect the change.",
+      "wrongExplanations": {
+        "1": "Flat alone isn't enough if you only maintain prefix sums indirectly.",
+        "2": "Index s isn't the right position; use entry[s]."
+      },
+      "hint": "Only one position changes; adjust by the difference, not the absolute value.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "Edges are undirected. During the traversal to assign times, how do you avoid going back to the parent?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Carry the parent in the stack/parameters and skip that neighbor when iterating children.",
+          "isCode": false
+        },
+        {
+          "label": "Rely on node numbering to avoid revisits.",
+          "isCode": false
+        },
+        {
+          "label": "Delete the parent edge permanently from the adjacency list.",
+          "isCode": false
+        },
+        {
+          "label": "Use a global visited set, clear it before each query.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Pass the parent and skip it to prevent immediate backtracking without extra memory or destructive edits.",
+      "wrongExplanations": {
+        "2": "Removing edges complicates reuse and is error-prone.",
+        "3": "Clearing per query would be too slow and unnecessary."
+      },
+      "hint": "You know which neighbor you came from; skip it.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "If the tree is a single chain of n nodes, what is the maximum recursion depth when using a recursive traversal?",
+      "diagram": "1 - 2 - 3 - ... - n",
+      "options": [
+        {
+          "label": "Up to n",
+          "isCode": false
+        },
+        {
+          "label": "Up to log n",
+          "isCode": false
+        },
+        {
+          "label": "Up to the maximum degree",
+          "isCode": false
+        },
+        {
+          "label": "Constant depth",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "In a chain, you recurse down by 1 each time, so depth is O(n).",
+      "wrongExplanations": {
+        "1": "There's no branching factor here to reduce depth.",
+        "3": "Depth grows with n in a chain."
+      },
+      "hint": "Consider a path graph.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "To be safe in Python for deep trees, which traversal approach is preferable?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Use an explicit stack-based traversal that simulates entering and leaving nodes.",
+          "isCode": false
+        },
+        {
+          "label": "Stick with recursion and hope the default limit suffices.",
+          "isCode": false
+        },
+        {
+          "label": "Randomly reorder edges to reduce depth.",
+          "isCode": false
+        },
+        {
+          "label": "Traverse only the heavier child first.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "An explicit stack avoids recursion depth limits regardless of tree shape.",
+      "wrongExplanations": {
+        "1": "Default recursion limit is usually ~1000, too low for n up to 2e5.",
+        "2": "Reordering doesn't bound worst-case depth."
+      },
+      "hint": "Avoid deep call stacks.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Writing the Code",
+      "questionText": "Read all input fast and extract n and q. Choose the correct snippet.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\nsys.setrecursionlimit(1<<25)\ndata = list(map(int, sys.stdin.buffer.read().split()))\nit = iter(data)\nn = next(it); q = next(it)",
+          "isCode": true
+        },
+        {
+          "label": "import sys\nn, q = map(int, input().split())\nvals = list(map(int, input().split()))",
+          "isCode": true
+        },
+        {
+          "label": "import sys\nsys.setrecursionlimit(1<<10)\ndata = sys.stdin.buffer.read().split()\nit = iter(data)\nn = next(it); q = next(it)",
+          "isCode": true
+        },
+        {
+          "label": "import sys\nsys.setrecursionlimit(1<<25)\ndata = list(map(int, sys.stdin.buffer.read().split()))\nit = iter(data)\nq = next(it); n = next(it)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We read all tokens as ints once for speed and then iterate. Others are slow, limit too low, or swap n and q.",
+      "wrongExplanations": {
+        "1": "Reading line by line can be too slow for 2e5 operations.",
+        "2": "Too small recursion limit and tokens are bytes, not ints; next(it) yields bytes."
+      },
+      "hint": "Use buffered read and map to int.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\nsys.setrecursionlimit(1<<25)\ndata = list(map(int, sys.stdin.buffer.read().split()))\nit = iter(data)\nn = next(it); q = next(it)",
+      "codeLabel": "Fast input and n,q"
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Read the n values into a 1-based array val of length n+1.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "val = [0]*(n+1)\nfor i in range(1, n+1):\n    val[i] = next(it)",
+          "isCode": true
+        },
+        {
+          "label": "val = [0]*n\nfor i in range(1, n+1):\n    val[i] = next(it)",
+          "isCode": true
+        },
+        {
+          "label": "val = [0]*(n+1)\nfor i in range(n):\n    val[i] = next(it)",
+          "isCode": true
+        },
+        {
+          "label": "val = []\nfor _ in range(n):\n    val.append(next(it))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We want 1-based indexing since nodes are 1..n. The first option fills val[1..n].",
+      "wrongExplanations": {
+        "1": "val has size n, so val[n] would be out of range.",
+        "2": "This writes val[0], misaligning node ids."
+      },
+      "hint": "Keep val[i] aligned with node i.",
+      "isCodeBuilding": true,
+      "codeSnippet": "val = [0]*(n+1)\nfor i in range(1, n+1):\n    val[i] = next(it)",
+      "codeLabel": "Read node values"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Build the undirected adjacency list g (1..n) and read the n-1 edges.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "g = [[] for _ in range(n+1)]\nfor _ in range(n-1):\n    a = next(it); b = next(it)\n    g[a].append(b)\n    g[b].append(a)",
+          "isCode": true
+        },
+        {
+          "label": "g = [[] for _ in range(n)]\nfor _ in range(n-1):\n    a = next(it); b = next(it)\n    g[a].append(b)\n    g[b].append(a)",
+          "isCode": true
+        },
+        {
+          "label": "g = [[] for _ in range(n+1)]\nfor _ in range(n-1):\n    a = next(it); b = next(it)\n    g[a].append(b)",
+          "isCode": true
+        },
+        {
+          "label": "g = [[] for _ in range(n+1)]\nfor _ in range(n):\n    a = next(it); b = next(it)\n    g[a].append(b)\n    g[b].append(a)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need 1-based g and add both directions for an undirected edge, with exactly n-1 edges.",
+      "wrongExplanations": {
+        "1": "g should have indices 0..n; otherwise g[n] is missing.",
+        "2": "Missing the reverse edge will break traversal."
+      },
+      "hint": "Remember to add both directions.",
+      "isCodeBuilding": true,
+      "codeSnippet": "g = [[] for _ in range(n+1)]\nfor _ in range(n-1):\n    a = next(it); b = next(it)\n    g[a].append(b)\n    g[b].append(a)",
+      "codeLabel": "Build adjacency"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Create arrays for entry/exit times and flat values, and perform an explicit stack-based traversal from root 1 to fill them.",
+      "diagram": "Use tuples (node, parent, state) where state 0=enter, 1=exit.",
+      "options": [
+        {
+          "label": "tin = [0]*(n+1)\ntout = [0]*(n+1)\nflat = [0]*(n+1)\ntime = 0\nstack = [(1, 0, 0)]\nwhile stack:\n    v, p, state = stack.pop()\n    if state == 0:\n        time += 1\n        tin[v] = time\n        flat[time] = val[v]\n        stack.append((v, p, 1))\n        for u in g[v][::-1]:\n            if u == p: continue\n            stack.append((u, v, 0))\n    else:\n        tout[v] = time",
+          "isCode": true
+        },
+        {
+          "label": "tin = [0]*(n+1)\ntout = [0]*(n+1)\nflat = [0]*(n+1)\ntime = 0\nstack = [(1, 0, 0)]\nwhile stack:\n    v, p, state = stack.pop()\n    time += 1\n    if state == 0:\n        tin[v] = time\n        flat[time] = val[v]\n        for u in g[v]:\n            stack.append((u, v, 0))\n    else:\n        tout[v] = time",
+          "isCode": true
+        },
+        {
+          "label": "tin = [0]*(n+1)\ntout = [0]*(n+1)\nflat = [0]*(n+1)\ntime = 0\nstack = [(1, 0, 0)]\nwhile stack:\n    v, p, state = stack.pop()\n    if state == 0:\n        tin[v] = time\n        flat[time] = val[v]\n        stack.append((v, p, 1))\n        for u in g[v]:\n            if u == p: continue\n            stack.append((u, v, 0))\n    else:\n        tout[v] = time",
+          "isCode": true
+        },
+        {
+          "label": "tin = [0]*(n+1)\ntout = [0]*(n+1)\nflat = [0]*(n+1)\ntime = 0\nstack = [(1, 0, 0)]\nwhile stack:\n    v, p, state = stack.pop()\n    if state == 0:\n        time += 1\n        tin[v] = time\n        flat[time] = val[v]\n        for u in g[v][::-1]:\n            if u == p: continue\n            stack.append((u, v, 0))\n    else:\n        tout[v] = time",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We stamp on entry, push an exit marker, skip parent, and set tout on exit. This produces contiguous subtree intervals.",
+      "wrongExplanations": {
+        "1": "Time increments on both enter and exit and doesn't skip parent; also missing exit push.",
+        "2": "Does not increment time before using it; tin will be 0 for root."
+      },
+      "hint": "Ensure time increases only on entry and you push an exit state.",
+      "isCodeBuilding": true,
+      "codeSnippet": "tin = [0]*(n+1)\ntout = [0]*(n+1)\nflat = [0]*(n+1)\ntime = 0\nstack = [(1, 0, 0)]\nwhile stack:\n    v, p, state = stack.pop()\n    if state == 0:\n        time += 1\n        tin[v] = time\n        flat[time] = val[v]\n        stack.append((v, p, 1))\n        for u in g[v][::-1]:\n            if u == p: continue\n            stack.append((u, v, 0))\n    else:\n        tout[v] = time",
+      "codeLabel": "Iterative traversal to fill tin, tout, flat"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Define helper functions to add a value at an index and to get prefix sums on a 1-based array supporting fast updates and queries.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "bit = [0]*(n+1)\ndef add(i, delta):\n    while i <= n:\n        bit[i] += delta\n        i += i & -i\n\ndef pref(i):\n    s = 0\n    while i > 0:\n        s += bit[i]\n        i -= i & -i\n    return s",
+          "isCode": true
+        },
+        {
+          "label": "bit = [0]*(n+1)\ndef add(i, delta):\n    while i <= n:\n        bit[i] += delta\n        i += i & (i-1)\n\ndef pref(i):\n    s = 0\n    while i > 0:\n        s += bit[i]\n        i -= i & (i-1)\n    return s",
+          "isCode": true
+        },
+        {
+          "label": "bit = [0]*(n+1)\ndef add(i, delta):\n    while i > 0:\n        bit[i] += delta\n        i -= i & -i\n\ndef pref(i):\n    s = 0\n    while i <= n:\n        s += bit[i]\n        i += i & -i\n    return s",
+          "isCode": true
+        },
+        {
+          "label": "bit = [0]*(n+1)\ndef add(i, delta):\n    bit[i] += delta\n\ndef pref(i):\n    return sum(bit[:i+1])",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need logarithmic add and prefix operations with 1-based indices; the first option implements the correct loops.",
+      "wrongExplanations": {
+        "1": "The index updates are incorrect and may not progress properly.",
+        "2": "The loop directions are reversed for add/pref."
+      },
+      "hint": "Both add and pref should loop O(log n) times and move indices by i & -i.",
+      "isCodeBuilding": true,
+      "codeSnippet": "bit = [0]*(n+1)\ndef add(i, delta):\n    while i <= n:\n        bit[i] += delta\n        i += i & -i\n\ndef pref(i):\n    s = 0\n    while i > 0:\n        s += bit[i]\n        i -= i & -i\n    return s",
+      "codeLabel": "Prefix-sum structure: add and pref"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Initialize the structure by inserting the initial flat values.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "for i in range(1, n+1):\n    add(i, flat[i])",
+          "isCode": true
+        },
+        {
+          "label": "for i in range(1, n+1):\n    add(i, val[i])",
+          "isCode": true
+        },
+        {
+          "label": "for i in range(1, n+1):\n    bit[i] = bit[i-1] + flat[i]",
+          "isCode": true
+        },
+        {
+          "label": "for i in range(1, n+1):\n    add(tin[i], flat[i])",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We already mapped values into flat using entry times, so add each flat[i] at position i.",
+      "wrongExplanations": {
+        "1": "val is indexed by node id, not by flat position.",
+        "2": "Building a simple prefix array breaks fast updates later."
+      },
+      "hint": "flat already aligns positions 1..n with entry order.",
+      "isCodeBuilding": true,
+      "codeSnippet": "for i in range(1, n+1):\n    add(i, flat[i])",
+      "codeLabel": "Build initial structure"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Process q queries. For type 1, update by delta at entry[s]. For type 2, compute prefix(exit[s]) - prefix(entry[s]-1) and collect outputs.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "out_lines = []\nfor _ in range(q):\n    t = next(it)\n    if t == 1:\n        s = next(it); x = next(it)\n        delta = x - val[s]\n        val[s] = x\n        add(tin[s], delta)\n    else:\n        s = next(it)\n        res = pref(tout[s]) - pref(tin[s]-1)\n        out_lines.append(str(res))",
+          "isCode": true
+        },
+        {
+          "label": "out_lines = []\nfor _ in range(q):\n    t = next(it)\n    if t == 1:\n        s = next(it); x = next(it)\n        val[s] = x\n        add(tin[s], x)\n    else:\n        s = next(it)\n        res = pref(tout[s]) - pref(tin[s])\n        out_lines.append(str(res))",
+          "isCode": true
+        },
+        {
+          "label": "out_lines = []\nfor _ in range(q):\n    t = next(it)\n    if t == 1:\n        s = next(it); x = next(it)\n        delta = x - val[s]\n        add(s, delta)\n        val[s] = x\n    else:\n        s = next(it)\n        res = pref(tout[s]) - pref(tin[s]-1)\n        out_lines.append(str(res))",
+          "isCode": true
+        },
+        {
+          "label": "out_lines = []\nfor _ in range(q):\n    t = next(it)\n    if t == 1:\n        s = next(it); x = next(it)\n        delta = x - val[s]\n        val[s] = x\n        add(tout[s], delta)\n    else:\n        s = next(it)\n        res = pref(tout[s]-1) - pref(tin[s]-1)\n        out_lines.append(str(res))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We add the delta at entry[s] and compute the sum over [entry, exit] via two prefix sums.",
+      "wrongExplanations": {
+        "1": "Adding x instead of delta is incorrect; also off-by-one on the range.",
+        "3": "Updating at exit[s] or using exit-1 breaks the interval boundaries."
+      },
+      "hint": "Be careful with off-by-one for the left boundary.",
+      "isCodeBuilding": true,
+      "codeSnippet": "out_lines = []\nfor _ in range(q):\n    t = next(it)\n    if t == 1:\n        s = next(it); x = next(it)\n        delta = x - val[s]\n        val[s] = x\n        add(tin[s], delta)\n    else:\n        s = next(it)\n        res = pref(tout[s]) - pref(tin[s]-1)\n        out_lines.append(str(res))",
+      "codeLabel": "Query processing"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "Finally, print all collected outputs efficiently.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "sys.stdout.write(\"\\n\".join(out_lines))",
+          "isCode": true
+        },
+        {
+          "label": "for x in out_lines:\n    print(x, end=\" \")",
+          "isCode": true
+        },
+        {
+          "label": "print(\"\\n\".join(map(str, out_lines)))",
+          "isCode": true
+        },
+        {
+          "label": "sys.stdout.write(\"\".join(out_lines))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Join with newlines and write once. Others print spaces or concatenate without separators.",
+      "wrongExplanations": {
+        "1": "Outputs must be on separate lines, not space-separated.",
+        "3": "Concatenating without separators merges numbers."
+      },
+      "hint": "Each answer on its own line.",
+      "isCodeBuilding": true,
+      "codeSnippet": "sys.stdout.write(\"\\n\".join(out_lines))",
+      "codeLabel": "Print outputs"
+    },
+    {
+      "id": "q22",
+      "phase": "Verifying the Solution",
+      "questionText": "Using the sample input, after building tin and tout with the given traversal, what interval [tin[3], tout[3]] do we get?",
+      "diagram": "Order of entries: 1,2,3,4,5",
+      "options": [
+        {
+          "label": "[2, 4]",
+          "isCode": false
+        },
+        {
+          "label": "[3, 5]",
+          "isCode": false
+        },
+        {
+          "label": "[3, 4]",
+          "isCode": false
+        },
+        {
+          "label": "[4, 5]",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "tin[3]=3 and tout[3]=5; so [3,5].",
+      "wrongExplanations": {
+        "0": "Misses one descendant.",
+        "2": "Excludes part of the subtree."
+      },
+      "hint": "Check the entry order in the earlier traversal.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q23",
+      "phase": "Verifying the Solution",
+      "questionText": "On the sample: first query \"2 3\" prints 8. After \"1 5 3\", the next \"2 3\" prints what?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "8",
+          "isCode": false
+        },
+        {
+          "label": "9",
+          "isCode": false
+        },
+        {
+          "label": "10",
+          "isCode": false
+        },
+        {
+          "label": "11",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Delta at entry[5] is +2, so sum [3..5] becomes 10.",
+      "wrongExplanations": {
+        "0": "That's before the update.",
+        "1": "Wrong delta applied."
+      },
+      "hint": "Apply x - old at index entry[5].",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the time per query for this approach (ignoring I/O), in terms of n?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(1)",
+          "isCode": false
+        },
+        {
+          "label": "O(log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(log^2 n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Each update/query touches O(log n) positions in the helper array.",
+      "wrongExplanations": {
+        "0": "We are not using constant-time range sums with updates.",
+        "2": "We avoid scanning subtrees."
+      },
+      "hint": "Consider the number of loop iterations in add/pref.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the preprocessing time of the solution as written (including building the helper array by adding each flat value)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(q)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Traversal to fill tin/flat is O(n). Inserting n values via add is O(n log n). Combined O(n log n).",
+      "wrongExplanations": {
+        "0": "Only true if the helper array were built in linear time differently.",
+        "2": "Far too slow; we don't do nested loops."
+      },
+      "hint": "Each add is logarithmic and done n times.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the additional space used by the solution (excluding the input and outputs to be printed)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(n + q)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Arrays g (edges), tin, tout, flat, helper array are all linear in n.",
+      "wrongExplanations": {
+        "1": "We store arrays proportional to n.",
+        "3": "Outputs aside, working memory is linear in n."
+      },
+      "hint": "Count tin, tout, flat, and the helper array.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\nsys.setrecursionlimit(1<<25)\ndata = list(map(int, sys.stdin.buffer.read().split()))\nit = iter(data)\nn = next(it); q = next(it)",
+    "val = [0]*(n+1)\nfor i in range(1, n+1):\n    val[i] = next(it)",
+    "g = [[] for _ in range(n+1)]\nfor _ in range(n-1):\n    a = next(it); b = next(it)\n    g[a].append(b)\n    g[b].append(a)",
+    "tin = [0]*(n+1)\ntout = [0]*(n+1)\nflat = [0]*(n+1)\ntime = 0\nstack = [(1, 0, 0)]\nwhile stack:\n    v, p, state = stack.pop()\n    if state == 0:\n        time += 1\n        tin[v] = time\n        flat[time] = val[v]\n        stack.append((v, p, 1))\n        for u in g[v][::-1]:\n            if u == p: continue\n            stack.append((u, v, 0))\n    else:\n        tout[v] = time",
+    "bit = [0]*(n+1)\ndef add(i, delta):\n    while i <= n:\n        bit[i] += delta\n        i += i & -i\n\ndef pref(i):\n    s = 0\n    while i > 0:\n        s += bit[i]\n        i -= i & -i\n    return s",
+    "for i in range(1, n+1):\n    add(i, flat[i])",
+    "out_lines = []\nfor _ in range(q):\n    t = next(it)\n    if t == 1:\n        s = next(it); x = next(it)\n        delta = x - val[s]\n        val[s] = x\n        add(tin[s], delta)\n    else:\n        s = next(it)\n        res = pref(tout[s]) - pref(tin[s]-1)\n        out_lines.append(str(res))",
+    "sys.stdout.write(\"\\n\".join(out_lines))"
+  ],
+  "reasoningChain": [
+    {
+      "question": "q4",
+      "insight": "Traversing a subtree per query is too slow: worst-case O(nq)."
+    },
+    {
+      "question": "q6",
+      "insight": "A visit order that stamps on arrival and leaves after children makes each subtree a contiguous block."
+    },
+    {
+      "question": "q7",
+      "insight": "Recording entry and exit times yields an interval [entry, exit] for each node's subtree."
+    },
+    {
+      "question": "q9",
+      "insight": "Mapping values to flat[entry[u]] allows subtree sums via flat[L..R]."
+    },
+    {
+      "question": "q5",
+      "insight": "Use a structure supporting point adds and prefix sums to answer range sums and handle updates efficiently."
+    },
+    {
+      "question": "q11",
+      "insight": "Skip the parent during traversal to avoid cycling on undirected edges."
+    },
+    {
+      "question": "q13",
+      "insight": "Use an explicit stack traversal to avoid recursion depth issues on deep trees."
+    },
+    {
+      "question": "q24",
+      "insight": "Each update and query runs in O(log n) time with the chosen structure."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1493,
+    "output_tokens": 18345,
+    "input_cost": 0.001866,
+    "output_cost": 0.18345,
+    "total_cost": 0.185316
+  }
+}

@@ -1,0 +1,937 @@
+{
+  "id": "nested-ranges-check",
+  "title": "Nested Ranges Check",
+  "difficulty": "intermediate",
+  "tags": [
+    "sorting",
+    "two-pointer",
+    "binary-search"
+  ],
+  "estimatedMinutes": 45,
+  "language": "python",
+  "description": "Given n ranges, determine for each range if it contains some other range and if some other range contains it.\n\nRange [a,b] contains range [c,d] if a <= c and d <= b.\n\nInput:\n- First line: integer n (number of ranges)\n- Next n lines: two integers x and y describing range [x, y]\n\nNo range appears more than once in the input.\n\nOutput:\n- First line: for each range in input order, 1 if it contains some other range, else 0\n- Second line: for each range in input order, 1 if some other range contains it, else 0",
+  "examples": [
+    {
+      "input": "4\n1 6\n2 4\n4 8\n3 6\n",
+      "output": "1 0 0 0\n0 1 0 1\n",
+      "explanation": "[1,6] contains [2,4] and [3,6]; [2,4] is contained by [1,6]; [4,8] contains none and is not contained; [3,6] is contained by [1,6]."
+    }
+  ],
+  "constraints": [
+    "1 <= n <= 2 * 10^5",
+    "1 <= x < y <= 10^9",
+    "No identical range appears more than once"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "Does range [1,5] contain range [2,5] under the rule a <= c and d <= b?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, because 1 <= 2 and 5 <= 5",
+          "isCode": false
+        },
+        {
+          "label": "No, because endpoints must be strictly inside",
+          "isCode": false
+        },
+        {
+          "label": "No, because right endpoints are equal",
+          "isCode": false
+        },
+        {
+          "label": "Yes, only if ranges are different indices",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Containment allows equality at boundaries. Distinctness refers to different ranges; rule is a <= c and d <= b.",
+      "wrongExplanations": {
+        "1": "Strict inequality is not required.",
+        "2": "Equal right endpoints are allowed."
+      },
+      "hint": "Check both inequalities: a <= c and d <= b.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "For ranges [1,3], [2,4], [2,3] (in this order), what is the first output line (contains-some-other)?",
+      "diagram": "Ranges:\n1) [1,3]\n2) [2,4]\n3) [2,3]",
+      "options": [
+        {
+          "label": "1 0 0",
+          "isCode": false
+        },
+        {
+          "label": "0 1 0",
+          "isCode": false
+        },
+        {
+          "label": "1 1 0",
+          "isCode": false
+        },
+        {
+          "label": "0 0 1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "[1,3] contains [2,3]; [2,4] contains none; [2,3] contains none.",
+      "wrongExplanations": {
+        "1": "This swaps the idea of containing vs being contained."
+      },
+      "hint": "Check each range against others: does it contain at least one?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "For the same ranges [1,3], [2,4], [2,3], what is the second output line (is contained by some other)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "0 0 1",
+          "isCode": false
+        },
+        {
+          "label": "1 0 0",
+          "isCode": false
+        },
+        {
+          "label": "0 1 1",
+          "isCode": false
+        },
+        {
+          "label": "0 1 0",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "[2,3] is contained by [1,3]; [1,3] and [2,4] are not contained by any in this set.",
+      "wrongExplanations": {
+        "3": "[2,4] is not contained by [1,3] because 4 > 3."
+      },
+      "hint": "Check if there exists another range a <= c and d <= b covering it.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "Hypothetically, if two identical ranges [2,7] and [2,7] were both present (different lines), would each count as containing some other range?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, because containment allows equality and they are different ranges",
+          "isCode": false
+        },
+        {
+          "label": "No, because identical ranges never count",
+          "isCode": false
+        },
+        {
+          "label": "Only one of them would count",
+          "isCode": false
+        },
+        {
+          "label": "No, because a < c and d < b is required",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Containment allows equality. They are distinct entries, so each contains the other.",
+      "wrongExplanations": {
+        "1": "Problem disallows duplicates, but hypothetically identical ranges do satisfy the rule.",
+        "3": "There's no asymmetry; both satisfy the condition."
+      },
+      "hint": "Focus on the definition and \"some other range\" wording.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Exploring Approaches",
+      "questionText": "Would checking all pairs of ranges be fast enough for n up to 200,000?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "No, about 4e10 checks is too slow",
+          "isCode": false
+        },
+        {
+          "label": "Yes, it should fit in 1 second",
+          "isCode": false
+        },
+        {
+          "label": "Borderline, may pass with fast I/O",
+          "isCode": false
+        },
+        {
+          "label": "Only if ranges are small",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "All-pairs is O(n^2), around 4e10 for n=2e5, which is too slow.",
+      "wrongExplanations": {
+        "1": "1 second cannot handle tens of billions of operations."
+      },
+      "hint": "Estimate n*(n-1)/2 for n=2e5.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "If you sort ranges by starting point ascending, where can a range that contains the current one appear?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Only before (earlier in the sorted order)",
+          "isCode": false
+        },
+        {
+          "label": "Only after (later in the sorted order)",
+          "isCode": false
+        },
+        {
+          "label": "Anywhere, order does not help",
+          "isCode": false
+        },
+        {
+          "label": "Only adjacent positions",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "A containing range must start no later than the current, so it appears earlier or equal in start; sorting puts such ranges before.",
+      "wrongExplanations": {
+        "1": "Later ranges start later; they cannot contain current.",
+        "2": "Sorting by start gives structure."
+      },
+      "hint": "Containment needs a <= c.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "If two ranges have the same start, which should come first in the sorted order to simplify checks?",
+      "diagram": "Consider [2,10] and [2,5]",
+      "options": [
+        {
+          "label": "The one with the larger end first",
+          "isCode": false
+        },
+        {
+          "label": "The one with the smaller end first",
+          "isCode": false
+        },
+        {
+          "label": "It does not matter",
+          "isCode": false
+        },
+        {
+          "label": "Alternate arbitrarily",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Placing the larger end first ensures later ones can be recognized as contained by earlier ones.",
+      "wrongExplanations": {
+        "1": "Smaller end first can hide containment when checking earlier elements only."
+      },
+      "hint": "Think about checking if current is contained by any previous.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Building the Idea",
+      "questionText": "After sorting by start ascending and end descending, how can you tell if the current range is contained by some previous range?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Track the maximum end seen so far; if it's >= current end, current is contained",
+          "isCode": false
+        },
+        {
+          "label": "Track the minimum end seen so far; if it's <= current end, current is contained",
+          "isCode": false
+        },
+        {
+          "label": "Track the minimum start so far; if it's <= current start, current is contained",
+          "isCode": false
+        },
+        {
+          "label": "Track the sum of lengths; if any sum is larger, current is contained",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "A previous range contains current if its end is at least as large as current's end.",
+      "wrongExplanations": {
+        "1": "Minimum end does not guarantee coverage to the right."
+      },
+      "hint": "Compare ends: previous end must be >= current end.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "What goes wrong if for equal starts you place the smaller end before the larger end?",
+      "diagram": "Order [2,5] then [2,10]",
+      "options": [
+        {
+          "label": "You may fail to mark [2,5] as contained because you only check previous ranges",
+          "isCode": false
+        },
+        {
+          "label": "It still works the same",
+          "isCode": false
+        },
+        {
+          "label": "Both ranges would be marked as contained incorrectly",
+          "isCode": false
+        },
+        {
+          "label": "It only affects checking who contains others, not who is contained",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "When [2,5] comes first, no previous range has end >= 5; you miss its containment by [2,10] that appears later.",
+      "wrongExplanations": {
+        "1": "Order matters for one-pass checks."
+      },
+      "hint": "You only look back, not ahead, in this check.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "How can you tell if the current range contains at least one later range after sorting?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Compute the minimum end among later ranges; if it is <= current end, current contains some range",
+          "isCode": false
+        },
+        {
+          "label": "Compute the maximum end among later ranges; if it is >= current end, current contains some range",
+          "isCode": false
+        },
+        {
+          "label": "Check if any later start is >= current start",
+          "isCode": false
+        },
+        {
+          "label": "Compare current start to the minimum start among later ranges",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Later ranges start no earlier; if any later end <= current end, the current contains that range.",
+      "wrongExplanations": {
+        "1": "A larger later end does not imply containment."
+      },
+      "hint": "Containment needs later end <= current end.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "Let suff_min[i] be the minimum end among positions i..n-1 in the sorted list. Which condition marks that the range at i contains some later range?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "suff_min[i+1] <= end[i]",
+          "isCode": false
+        },
+        {
+          "label": "suff_min[i] < end[i]",
+          "isCode": false
+        },
+        {
+          "label": "end[i] <= suff_min[i+1]",
+          "isCode": false
+        },
+        {
+          "label": "suff_min[i] <= end[i+1]",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need a later range with end <= current end, so use suff_min[i+1] and compare to end[i].",
+      "wrongExplanations": {
+        "2": "This checks the wrong direction.",
+        "1": "Using suff_min[i] includes current end."
+      },
+      "hint": "Exclude the current position when checking later ones.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "For input ranges [1,6], [2,4], [3,6], [4,8] sorted by start asc and end desc (order: [1,6],[2,4],[3,6],[4,8]), which positions contain some later range?",
+      "diagram": "ends = [6,4,6,8]\nsuff_min from right (excluding current): [4,6,8,inf]",
+      "options": [
+        {
+          "label": "Only position 0",
+          "isCode": false
+        },
+        {
+          "label": "Positions 0 and 2",
+          "isCode": false
+        },
+        {
+          "label": "Only position 3",
+          "isCode": false
+        },
+        {
+          "label": "Positions 0 and 1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "suff_min[1]=4 <= 6 at pos0; others have suff_min[i+1] > end[i].",
+      "wrongExplanations": {
+        "1": "At pos2, suff_min[3]=8 <= 6 is false."
+      },
+      "hint": "Check suff_min[i+1] <= end[i] for each i.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "How do we ensure outputs are printed in the same order as the input after sorting?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Store the original index with each range and scatter results back by that index",
+          "isCode": false
+        },
+        {
+          "label": "Sort the results back by end value",
+          "isCode": false
+        },
+        {
+          "label": "Track positions by comparing values when printing",
+          "isCode": false
+        },
+        {
+          "label": "It is enough to print in sorted order",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Keep (start,end,original_index), compute answers in sorted order, and assign to arrays by original_index.",
+      "wrongExplanations": {
+        "3": "Values may repeat; comparison is unreliable."
+      },
+      "hint": "Attach an ID to each range.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Writing the Code",
+      "questionText": "Choose the correct code to read all input tokens safely and set up main.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\n\ndef main():\n    data = sys.stdin.read().strip().split()\n    if not data:\n        return",
+          "isCode": true
+        },
+        {
+          "label": "import sys\n\ndef main():\n    data = sys.stdin.readlines()\n    if data is None:\n        return",
+          "isCode": true
+        },
+        {
+          "label": "import sys\n\ndef main():\n    data = input().split()\n    if len(data) == 0:\n        pass",
+          "isCode": true
+        },
+        {
+          "label": "def main():\n    data = sys.stdin.read().split()\n    if data == []:\n        break",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Reading all tokens with read().split() is robust; empty input early-return avoids errors.",
+      "wrongExplanations": {
+        "1": "readlines returns lines, not tokens; also None check is wrong.",
+        "3": "break outside a loop is invalid."
+      },
+      "hint": "Use sys.stdin.read() and handle empty input.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\n\ndef main():\n    data = sys.stdin.read().strip().split()\n    if not data:\n        return",
+      "codeLabel": "Setup and read tokens"
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Choose the correct code to parse n and build a list of (x, y, original_index).",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    it = iter(data)\n    n = int(next(it))\n    intervals = []\n    for i in range(n):\n        x = int(next(it)); y = int(next(it))\n        intervals.append((x, y, i))",
+          "isCode": true
+        },
+        {
+          "label": "    n = int(data[0])\n    intervals = []\n    for i in range(n):\n        x = int(data[1]); y = int(data[2])\n        intervals.append((x, y))",
+          "isCode": true
+        },
+        {
+          "label": "    it = iter(data)\n    n = int(next(it))\n    intervals = [None]*n\n    for i in range(n):\n        y = int(next(it)); x = int(next(it))\n        intervals[i] = (x, y, 0)",
+          "isCode": true
+        },
+        {
+          "label": "    it = iter(data)\n    n = int(next(it))\n    intervals = []\n    for i in range(1, n+1):\n        x = int(next(it)); y = int(next(it))\n        intervals.append((x, y, i))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Iterate tokens, parse pairs, and attach the 0-based original index i.",
+      "wrongExplanations": {
+        "1": "Reuses the same tokens for all intervals; no index stored.",
+        "2": "Swapped x,y and wrong index constant."
+      },
+      "hint": "Use an iterator over tokens and 0-based indices.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    it = iter(data)\n    n = int(next(it))\n    intervals = []\n    for i in range(n):\n        x = int(next(it)); y = int(next(it))\n        intervals.append((x, y, i))",
+      "codeLabel": "Parse n and intervals with indices"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Choose the correct sorting of intervals to implement the chosen order.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    intervals.sort(key=lambda t: (t[0], -t[1]))",
+          "isCode": true
+        },
+        {
+          "label": "    intervals.sort(key=lambda t: (t[0], t[1]))",
+          "isCode": true
+        },
+        {
+          "label": "    intervals.sort(key=lambda t: (t[1], -t[0]))",
+          "isCode": true
+        },
+        {
+          "label": "    intervals = sorted(intervals, reverse=True)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Sort by start ascending and end descending to handle equal starts correctly.",
+      "wrongExplanations": {
+        "1": "End ascending breaks equal-start handling."
+      },
+      "hint": "Tie-break equal starts by larger end first.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    intervals.sort(key=lambda t: (t[0], -t[1]))",
+      "codeLabel": "Sort by start asc, end desc"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Extract the lists of ends and original indices from the sorted intervals.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    r_list = [t[1] for t in intervals]\n    idx_list = [t[2] for t in intervals]",
+          "isCode": true
+        },
+        {
+          "label": "    r_list = [t[0] for t in intervals]\n    idx_list = [t[1] for t in intervals]",
+          "isCode": true
+        },
+        {
+          "label": "    r_list = list(map(lambda t: t[1], intervals))\n    idx_list = [i for i in range(len(intervals))]",
+          "isCode": true
+        },
+        {
+          "label": "    r_list = [t[-1] for t in intervals]\n    idx_list = [t[0] for t in intervals]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The end is at index 1 and the original index at index 2 in each tuple.",
+      "wrongExplanations": {
+        "1": "t[0] is the start, not the end."
+      },
+      "hint": "Our tuple is (start, end, original_index).",
+      "isCodeBuilding": true,
+      "codeSnippet": "    r_list = [t[1] for t in intervals]\n    idx_list = [t[2] for t in intervals]",
+      "codeLabel": "Extract ends and original indices"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Compute the array marking if each sorted range is contained by some previous range.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    contained_sorted = [0] * n\n    max_r = -10**19\n    for i, r in enumerate(r_list):\n        if max_r >= r:\n            contained_sorted[i] = 1\n        if r > max_r:\n            max_r = r",
+          "isCode": true
+        },
+        {
+          "label": "    contained_sorted = [0] * n\n    min_r = 10**19\n    for i, r in enumerate(r_list):\n        if min_r <= r:\n            contained_sorted[i] = 1\n        if r < min_r:\n            min_r = r",
+          "isCode": true
+        },
+        {
+          "label": "    contained_sorted = [0] * n\n    max_r = -10**19\n    for i, r in enumerate(r_list):\n        if max_r > r:\n            contained_sorted[i] = 1\n        max_r = r",
+          "isCode": true
+        },
+        {
+          "label": "    contained_sorted = [0] * n\n    max_r = -10**19\n    for i in range(n):\n        if r_list[i] >= max_r:\n            contained_sorted[i] = 1\n        max_r = max(max_r, r_list[i])",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Track maximum end so far; if it's >= current end, current is contained. Update max properly.",
+      "wrongExplanations": {
+        "1": "Minimum end does not detect containment.",
+        "2": "Strict '>' misses equal ends; updating max incorrectly."
+      },
+      "hint": "Use a running maximum and allow equality.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    contained_sorted = [0] * n\n    max_r = -10**19\n    for i, r in enumerate(r_list):\n        if max_r >= r:\n            contained_sorted[i] = 1\n        if r > max_r:\n            max_r = r",
+      "codeLabel": "Compute contained-by flags"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Compute the suffix minimum of ends and the array marking if each sorted range contains some later range.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    suff_min = [10**19] * (n + 1)\n    for i in range(n - 1, -1, -1):\n        suff_min[i] = r_list[i] if r_list[i] < suff_min[i + 1] else suff_min[i + 1]\n    contains_sorted = [0] * n\n    for i, r in enumerate(r_list):\n        if suff_min[i + 1] <= r:\n            contains_sorted[i] = 1",
+          "isCode": true
+        },
+        {
+          "label": "    suff_min = [10**19] * n\n    for i in range(n - 1, -1, -1):\n        suff_min[i] = min(suff_min[i], r_list[i])\n    contains_sorted = [0] * n\n    for i, r in enumerate(r_list):\n        if suff_min[i] <= r:\n            contains_sorted[i] = 1",
+          "isCode": true
+        },
+        {
+          "label": "    suff_min = [0] * (n + 1)\n    for i in range(n):\n        suff_min[i + 1] = min(suff_min[i], r_list[i])\n    contains_sorted = [0] * n\n    for i, r in enumerate(r_list):\n        if suff_min[i] <= r:\n            contains_sorted[i] = 1",
+          "isCode": true
+        },
+        {
+          "label": "    suff_min = [10**19] * (n + 1)\n    for i in range(n - 1, -1, -1):\n        suff_min[i] = min(suff_min[i], r_list[i])\n    contains_sorted = [0] * n\n    for i, r in enumerate(r_list):\n        if suff_min[i] <= r:\n            contains_sorted[i] = 1",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Use a sentinel at n and compute suffix mins; compare suff_min[i+1] with current end.",
+      "wrongExplanations": {
+        "1": "This includes the current element; we must exclude it.",
+        "3": "Prefix min is the wrong direction here."
+      },
+      "hint": "Exclude current by using suff_min[i+1].",
+      "isCodeBuilding": true,
+      "codeSnippet": "    suff_min = [10**19] * (n + 1)\n    for i in range(n - 1, -1, -1):\n        suff_min[i] = r_list[i] if r_list[i] < suff_min[i + 1] else suff_min[i + 1]\n    contains_sorted = [0] * n\n    for i, r in enumerate(r_list):\n        if suff_min[i + 1] <= r:\n            contains_sorted[i] = 1",
+      "codeLabel": "Compute contains-other via suffix mins"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Map results back to original order and print both lines.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    contains = [0] * n\n    contained = [0] * n\n    for i, idx in enumerate(idx_list):\n        contains[idx] = contains_sorted[i]\n        contained[idx] = contained_sorted[i]\n    out1 = ' '.join(map(str, contains))\n    out2 = ' '.join(map(str, contained))\n    sys.stdout.write(out1 + '\\n' + out2)",
+          "isCode": true
+        },
+        {
+          "label": "    contains = contains_sorted\n    contained = contained_sorted\n    print(' '.join(map(str, contains)))\n    print(' '.join(map(str, contained)))",
+          "isCode": true
+        },
+        {
+          "label": "    for i in range(n):\n        print(contains_sorted[i], end=' ')\n    print()\n    for i in range(n):\n        print(contained_sorted[i], end=' ')",
+          "isCode": true
+        },
+        {
+          "label": "    contains = [0] * n\n    contained = [0] * n\n    for i in range(n):\n        contains[i] = contains_sorted[idx_list[i]]\n        contained[i] = contained_sorted[idx_list[i]]\n    print(' '.join(map(str, contains)))\n    print(' '.join(map(str, contained)))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Scatter sorted answers into arrays indexed by original indices, then print.",
+      "wrongExplanations": {
+        "1": "This prints in sorted order, not input order.",
+        "3": "Uses idx_list incorrectly; needs scattering, not gathering."
+      },
+      "hint": "Use idx_list to assign to the original positions.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    contains = [0] * n\n    contained = [0] * n\n    for i, idx in enumerate(idx_list):\n        contains[idx] = contains_sorted[i]\n        contained[idx] = contained_sorted[i]\n    out1 = ' '.join(map(str, contains))\n    out2 = ' '.join(map(str, contained))\n    sys.stdout.write(out1 + '\\n' + out2)",
+      "codeLabel": "Scatter results and print"
+    },
+    {
+      "id": "q21",
+      "phase": "Verifying the Solution",
+      "questionText": "For input:\n4\n1 6\n2 4\n4 8\n3 6\nAfter sorting by start asc and end desc, what is the order of original indices (0-based)?",
+      "diagram": "Original indices: 0:[1,6], 1:[2,4], 2:[4,8], 3:[3,6]",
+      "options": [
+        {
+          "label": "[0, 1, 3, 2]",
+          "isCode": false
+        },
+        {
+          "label": "[0, 3, 1, 2]",
+          "isCode": false
+        },
+        {
+          "label": "[2, 0, 1, 3]",
+          "isCode": false
+        },
+        {
+          "label": "[1, 0, 3, 2]",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Sorted by start: (1,6)->0, (2,4)->1, (3,6)->3, (4,8)->2.",
+      "wrongExplanations": {
+        "1": "Swaps [2,4] and [3,6]; but 2 < 3 so [2,4] comes earlier."
+      },
+      "hint": "Sort by the first coordinate; no ties here.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q22",
+      "phase": "Verifying the Solution",
+      "questionText": "Using the algorithm, what are the two output lines for the sample input?",
+      "diagram": "Input:\n4\n1 6\n2 4\n4 8\n3 6",
+      "options": [
+        {
+          "label": "1 0 0 0\n0 1 0 1",
+          "isCode": false
+        },
+        {
+          "label": "0 1 0 1\n1 0 0 0",
+          "isCode": false
+        },
+        {
+          "label": "1 0 1 0\n0 1 0 0",
+          "isCode": false
+        },
+        {
+          "label": "0 0 0 1\n1 0 1 0",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Contains line: only [1,6] contains a later range. Contained-by line: [2,4] and [3,6] are contained.",
+      "wrongExplanations": {
+        "1": "Lines are not interchangeable; first is contains, second is contained-by."
+      },
+      "hint": "We already reasoned positions in earlier questions.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q23",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the time complexity of the approach (sorting + linear passes)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(log n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Sorting dominates with O(n log n); the other passes are O(n).",
+      "wrongExplanations": {
+        "1": "We avoid all-pairs checks."
+      },
+      "hint": "Consider the cost of sorting vs scans.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the additional space used by the algorithm (excluding input storage)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(1)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We store a few arrays of size n (ends, indices, flags, suffix mins).",
+      "wrongExplanations": {
+        "1": "We do use arrays proportional to n."
+      },
+      "hint": "Count arrays created besides the input list.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Analyzing Complexity",
+      "questionText": "Which case requires careful ordering when sorting to ensure correctness?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Ranges with equal starts",
+          "isCode": false
+        },
+        {
+          "label": "Ranges with equal ends",
+          "isCode": false
+        },
+        {
+          "label": "Disjoint ranges far apart",
+          "isCode": false
+        },
+        {
+          "label": "Identical ranges (which are disallowed)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Equal starts must place the larger end first to detect containment in a single forward scan.",
+      "wrongExplanations": {
+        "1": "Equal ends alone don't cause ordering problems for the scans."
+      },
+      "hint": "Think about q9's example.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Writing the Code",
+      "questionText": "Finish the program with a proper entry point guard.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "if __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "if __name__ == main:\n    __main__()",
+          "isCode": true
+        },
+        {
+          "label": "if __name__:\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "main()",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The standard Python entry point guard is if __name__ == \"__main__\": main().",
+      "wrongExplanations": {
+        "3": "Unconditionally calling main is acceptable but not guarded."
+      },
+      "hint": "Use the conventional guard.",
+      "isCodeBuilding": true,
+      "codeSnippet": "if __name__ == \"__main__\":\n    main()",
+      "codeLabel": "Entry point"
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\n\ndef main():\n    data = sys.stdin.read().strip().split()\n    if not data:\n        return",
+    "    it = iter(data)\n    n = int(next(it))\n    intervals = []\n    for i in range(n):\n        x = int(next(it)); y = int(next(it))\n        intervals.append((x, y, i))",
+    "    intervals.sort(key=lambda t: (t[0], -t[1]))",
+    "    r_list = [t[1] for t in intervals]\n    idx_list = [t[2] for t in intervals]",
+    "    contained_sorted = [0] * n\n    max_r = -10**19\n    for i, r in enumerate(r_list):\n        if max_r >= r:\n            contained_sorted[i] = 1\n        if r > max_r:\n            max_r = r",
+    "    suff_min = [10**19] * (n + 1)\n    for i in range(n - 1, -1, -1):\n        suff_min[i] = r_list[i] if r_list[i] < suff_min[i + 1] else suff_min[i + 1]\n    contains_sorted = [0] * n\n    for i, r in enumerate(r_list):\n        if suff_min[i + 1] <= r:\n            contains_sorted[i] = 1",
+    "    contains = [0] * n\n    contained = [0] * n\n    for i, idx in enumerate(idx_list):\n        contains[idx] = contains_sorted[i]\n        contained[idx] = contained_sorted[i]\n    out1 = ' '.join(map(str, contains))\n    out2 = ' '.join(map(str, contained))\n    sys.stdout.write(out1 + '\\n' + out2)",
+    "if __name__ == \"__main__\":\n    main()"
+  ],
+  "reasoningChain": [
+    {
+      "question": "Why sort ranges by start ascending and end descending for equal starts?",
+      "insight": "Sorting by start groups potential containers before containees; descending end tie-break ensures equal-start larger ranges come first."
+    },
+    {
+      "question": "How to detect if a range is contained by some earlier range in one scan?",
+      "insight": "Maintain the maximum end seen so far; if it is at least as big as current end, current is contained."
+    },
+    {
+      "question": "How to detect if a range contains some later range without nested loops?",
+      "insight": "Precompute the minimum end among later ranges; if that minimum is <= current end, current contains at least one later range."
+    },
+    {
+      "question": "How to avoid including the current range when checking later ranges?",
+      "insight": "Use a suffix minimum with a sentinel at the end and compare suff_min[i+1] to the current end at position i."
+    },
+    {
+      "question": "How to print answers in input order after sorting?",
+      "insight": "Carry original indices with ranges and scatter the computed flags back to arrays indexed by those original positions."
+    },
+    {
+      "question": "Why is the descending end tie-break necessary for equal starts?",
+      "insight": "Without it, a shorter equal-start range could appear before a longer one and be missed by a backward-only containment check."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1445,
+    "output_tokens": 14745,
+    "input_cost": 0.001806,
+    "output_cost": 0.14745,
+    "total_cost": 0.149256
+  }
+}

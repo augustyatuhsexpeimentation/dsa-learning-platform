@@ -1,0 +1,968 @@
+{
+  "id": "distributing-apples",
+  "title": "Distributing Apples",
+  "difficulty": "intermediate",
+  "tags": [
+    "math"
+  ],
+  "estimatedMinutes": 45,
+  "language": "python",
+  "description": "There are n children and m apples that will be distributed to them. Count the number of ways to do this, where children are distinct and apples are identical. Print the answer modulo 10^9+7.\n\nInput: two integers n and m\n\nOutput: a single integer: the number of ways modulo 10^9+7.",
+  "examples": [
+    {
+      "input": "3 2",
+      "output": "6",
+      "explanation": "The ways are [0,0,2], [0,1,1], [0,2,0], [1,0,1], [1,1,0], [2,0,0]."
+    }
+  ],
+  "constraints": [
+    "1 ≤ n, m ≤ 10^6"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "For n=2 and m=1, how many distributions are there?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "There are two: [1,0] and [0,1]. Children are distinct and apples are identical.",
+      "wrongExplanations": {
+        "0": "This would be true only if children were indistinguishable.",
+        "2": "There are only two children, so three ways is impossible."
+      },
+      "hint": "List all pairs (x1,x2) with x1+x2=1 and xi≥0.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "Which interpretation matches the problem?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Apples are identical; children are distinct.",
+          "isCode": false
+        },
+        {
+          "label": "Apples are distinct; children are identical.",
+          "isCode": false
+        },
+        {
+          "label": "Both apples and children are identical.",
+          "isCode": false
+        },
+        {
+          "label": "Both apples and children are distinct.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The example counts only by how many apples each child gets, so apples are identical. Children are listed separately, so they are distinct.",
+      "wrongExplanations": {
+        "3": "If apples were distinct, [1,1,0] would split into many orders, which the example does not."
+      },
+      "hint": "Look at how [1,1,0] is represented in the example.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "For n=1 and m=5, how many distributions are there?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        },
+        {
+          "label": "6",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Only [5] is possible: the single child gets all apples.",
+      "wrongExplanations": {
+        "1": "Counts assignments if apples were distinct; here they're identical."
+      },
+      "hint": "There's only one child.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "If m=0 and n=3 (even though m≥1 in constraints), how many distributions would there be?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "Depends on n",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Only [0,0,0] works. This sanity check helps reason about formulas later.",
+      "wrongExplanations": {
+        "1": "There is one valid way: everyone gets zero apples."
+      },
+      "hint": "How many nonnegative solutions to x1+x2+x3=0?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Understanding the Problem",
+      "questionText": "A distribution can be represented by nonnegative integers x1,...,xn. What condition must they satisfy?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "x1 + x2 + ... + xn = m",
+          "isCode": false
+        },
+        {
+          "label": "x1 + x2 + ... + xn ≤ m",
+          "isCode": false
+        },
+        {
+          "label": "x1 + x2 + ... + xn = n",
+          "isCode": false
+        },
+        {
+          "label": "max(x1,...,xn) = m",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "All apples are distributed, so the sum must equal m.",
+      "wrongExplanations": {
+        "1": "We are counting exact distributions, not up to m."
+      },
+      "hint": "All apples must be assigned to some child.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "If you try to enumerate all n-tuples (x1,...,xn) with sum m, how does the count scale with m for fixed n?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Roughly on the order of m^(n-1), which is huge for m up to 10^6.",
+          "isCode": false
+        },
+        {
+          "label": "Roughly on the order of n^m, which is tiny here.",
+          "isCode": false
+        },
+        {
+          "label": "Roughly on the order of m^n, still tiny.",
+          "isCode": false
+        },
+        {
+          "label": "Depends only on n, not on m.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The number of nonnegative solutions grows polynomially in m with degree n−1, which is far too large to enumerate.",
+      "wrongExplanations": {
+        "2": "m^n is even worse and also enormous; the real growth is m^(n−1)."
+      },
+      "hint": "For n=2, solutions are m+1; for n=3, solutions are about (m+2)(m+1)/2.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "Imagine writing m apples in a row and placing separators to split them among children.\nHow many separators are needed to split among n children?",
+      "diagram": "*****|**|***  (example with 3 separators for 4 children)",
+      "options": [
+        {
+          "label": "n - 1",
+          "isCode": false
+        },
+        {
+          "label": "n",
+          "isCode": false
+        },
+        {
+          "label": "m - 1",
+          "isCode": false
+        },
+        {
+          "label": "m",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "n groups require n−1 separators between them.",
+      "wrongExplanations": {
+        "1": "n separators would create n+1 groups."
+      },
+      "hint": "How many cuts split a line into n segments?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Exploring Approaches",
+      "questionText": "If you form a sequence of m apples and n−1 separators, how many distinct sequences (orderings) are there?",
+      "diagram": "***|**|*  (m stars, n-1 bars)",
+      "options": [
+        {
+          "label": "C(n + m - 1, m)",
+          "isCode": false
+        },
+        {
+          "label": "C(n + m, n)",
+          "isCode": false
+        },
+        {
+          "label": "C(n + m - 1, n)",
+          "isCode": false
+        },
+        {
+          "label": "C(n + m, m)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Choose positions of the m apples (or equivalently n−1 separators) among n+m−1 places: C(n+m−1, m).",
+      "wrongExplanations": {
+        "2": "Choosing n among n+m−1 would overcount; we need m or n−1 positions."
+      },
+      "hint": "You choose which slots are apples among the total slots.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "Check with the example n=3, m=2: what is C(n+m−1, m)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "6",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "8",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "C(4,2)=6, matching the listed distributions.",
+      "wrongExplanations": {
+        "0": "C(4,2) is not 4.",
+        "2": "C(4,2) is not 3."
+      },
+      "hint": "C(4,2) = 4*3/2 = 6.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "Which identity lets you write C(n+m−1, m) in an alternative form?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "C(a, b) = C(a, a - b)",
+          "isCode": false
+        },
+        {
+          "label": "C(a, b) = C(a - 1, b)",
+          "isCode": false
+        },
+        {
+          "label": "C(a, b) = a^b",
+          "isCode": false
+        },
+        {
+          "label": "C(a, b) = C(b, a)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "C(a,b) equals C(a,a−b). So C(n+m−1,m) = C(n+m−1,n−1).",
+      "wrongExplanations": {
+        "3": "C(b, a) is undefined when b<a in combinatorics; the symmetry is around a−b."
+      },
+      "hint": "Think symmetry of choosing b items vs skipping b items.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "For n=2 and m=3, what does the formula give?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        },
+        {
+          "label": "6",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "C(2+3−1, 3)=C(4,3)=4. Distributions: [0,3],[1,2],[2,1],[3,0].",
+      "wrongExplanations": {
+        "3": "6 would count something else; here there are only 4 splits of 3 into 2 parts."
+      },
+      "hint": "Compute C(4,3).",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "To compute combinations modulo 10^9+7 efficiently, how should you handle division by factorials?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Multiply by the modular inverse of each factorial under the modulus.",
+          "isCode": false
+        },
+        {
+          "label": "Use integer division before taking modulo.",
+          "isCode": false
+        },
+        {
+          "label": "Use floating-point division and round.",
+          "isCode": false
+        },
+        {
+          "label": "Avoid division entirely and hope for cancellation.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Division modulo a prime is done by multiplying with modular inverses under the modulus.",
+      "wrongExplanations": {
+        "1": "Division before mod breaks when intermediate values overflow and isn’t valid modulo arithmetic."
+      },
+      "hint": "Recall that a/b mod p is a * inv(b) mod p when p is prime and b≠0 mod p.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "Given a nonzero a modulo 10^9+7, which Python expression gives its modular inverse?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "pow(a, MOD - 2, MOD)",
+          "isCode": true
+        },
+        {
+          "label": "pow(a, MOD, MOD - 2)",
+          "isCode": true
+        },
+        {
+          "label": "1 // a",
+          "isCode": true
+        },
+        {
+          "label": "pow(a, MOD - 2)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "For prime MOD, a^(MOD−2) mod MOD is the inverse: pow(a, MOD−2, MOD).",
+      "wrongExplanations": {
+        "3": "Without the third argument, Python computes a huge integer, not reduced mod MOD."
+      },
+      "hint": "Use Python’s built-in three-argument power for modular exponentiation.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Building the Idea",
+      "questionText": "Up to what value should factorials be precomputed to evaluate C(n+m−1, m)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "maxN = n + m",
+          "isCode": false
+        },
+        {
+          "label": "maxN = n + m - 1",
+          "isCode": false
+        },
+        {
+          "label": "maxN = max(n, m)",
+          "isCode": false
+        },
+        {
+          "label": "maxN = m",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We’ll precompute up to n+m for simplicity and then use values at n+m−1. This also simplifies building inverse factorials top-down.",
+      "wrongExplanations": {
+        "2": "max(n,m) is not enough when you need (n+m−1)!."
+      },
+      "hint": "The largest factorial index we’ll touch is n+m−1; using n+m is a safe bound.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Start with imports and the modulus constant.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\nMOD = 10**9 + 7",
+          "isCode": true
+        },
+        {
+          "label": "import sys\nMOD = 1e9 + 7",
+          "isCode": true
+        },
+        {
+          "label": "import math\nMOD = 10**9 + 7",
+          "isCode": true
+        },
+        {
+          "label": "from sys import stdin\nMOD = 10**9 + 9",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Use integer modulus 10**9+7. Avoid float 1e9+7 and wrong primes.",
+      "wrongExplanations": {
+        "1": "1e9+7 is a float; modulo with float is invalid.",
+        "3": "10^9+9 is a different modulus than required."
+      },
+      "hint": "Keep the modulus an exact integer.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\nMOD = 10**9 + 7",
+      "codeLabel": "Imports and MOD"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Read n and m from standard input.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "data = sys.stdin.read().strip().split()\nn = int(data[0]); m = int(data[1])",
+          "isCode": true
+        },
+        {
+          "label": "n, m = sys.stdin.read().split()",
+          "isCode": true
+        },
+        {
+          "label": "data = sys.stdin.read().split()\nm = int(data[0]); n = int(data[1])",
+          "isCode": true
+        },
+        {
+          "label": "data = sys.stdin.read().split()\nn = int(data[0]); m = int(data[0])",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Parse two integers in order. The other options either don’t convert to int, swap n and m, or reuse the same token.",
+      "wrongExplanations": {
+        "1": "This leaves n and m as strings, not integers.",
+        "3": "Both n and m would be the same number; that’s incorrect."
+      },
+      "hint": "Convert tokens to ints and preserve their order.",
+      "isCodeBuilding": true,
+      "codeSnippet": "data = sys.stdin.read().strip().split()\nn = int(data[0]); m = int(data[1])",
+      "codeLabel": "Read input"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Precompute factorials up to maxN = n + m.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "maxN = n + m\nfact = [1] * (maxN + 1)\nfor i in range(1, maxN + 1):\n    fact[i] = fact[i-1] * i % MOD",
+          "isCode": true
+        },
+        {
+          "label": "maxN = n + m\nfact = [1] * (maxN + 1)\nfor i in range(1, maxN):\n    fact[i] = fact[i-1] * i % MOD",
+          "isCode": true
+        },
+        {
+          "label": "maxN = n + m\nfact = [1] * (maxN + 1)\nfact[0] = 0\nfor i in range(1, maxN + 1):\n    fact[i] = fact[i-1] * i % MOD",
+          "isCode": true
+        },
+        {
+          "label": "maxN = n + m\nfact = [1] * (maxN + 1)\nfor i in range(maxN + 1):\n    fact[i] = fact[i-1] * i % MOD",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need fact[i] for all i up to maxN inclusive. Start from 1 and use fact[0]=1.",
+      "wrongExplanations": {
+        "1": "This skips computing fact[maxN].",
+        "2": "Setting fact[0]=0 zeros the entire array."
+      },
+      "hint": "fact[0] should be 1, and the loop should reach maxN.",
+      "isCodeBuilding": true,
+      "codeSnippet": "maxN = n + m\nfact = [1] * (maxN + 1)\nfor i in range(1, maxN + 1):\n    fact[i] = fact[i-1] * i % MOD",
+      "codeLabel": "Factorials"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Initialize inverse factorials and compute inv_fact[maxN].",
+      "diagram": null,
+      "options": [
+        {
+          "label": "inv_fact = [1] * (maxN + 1)\ninv_fact[maxN] = pow(fact[maxN], MOD - 2, MOD)",
+          "isCode": true
+        },
+        {
+          "label": "inv_fact = [1] * (maxN + 1)\ninv_fact[maxN] = pow(fact[maxN], MOD - 2)",
+          "isCode": true
+        },
+        {
+          "label": "inv_fact = [1] * (maxN + 1)\ninv_fact[maxN] = pow(fact[maxN], MOD + 1, MOD)",
+          "isCode": true
+        },
+        {
+          "label": "inv_fact = [1] * (maxN + 1)\ninv_fact[maxN] = 1 / fact[maxN]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Use modular exponentiation with modulus to compute the inverse efficiently and correctly.",
+      "wrongExplanations": {
+        "1": "Without the modulus, Python computes a huge integer; impractical and not reduced modulo MOD.",
+        "3": "Division in integers/floats is not modular inversion."
+      },
+      "hint": "Use the three-argument pow for modular arithmetic.",
+      "isCodeBuilding": true,
+      "codeSnippet": "inv_fact = [1] * (maxN + 1)\ninv_fact[maxN] = pow(fact[maxN], MOD - 2, MOD)",
+      "codeLabel": "Inverse factorial base"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Fill inv_fact downward from maxN to 0.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "for i in range(maxN, 0, -1):\n    inv_fact[i-1] = inv_fact[i] * i % MOD",
+          "isCode": true
+        },
+        {
+          "label": "for i in range(maxN - 1, -1, -1):\n    inv_fact[i-1] = inv_fact[i] * i % MOD",
+          "isCode": true
+        },
+        {
+          "label": "for i in range(maxN, -1, -1):\n    inv_fact[i-1] = inv_fact[i] * i % MOD",
+          "isCode": true
+        },
+        {
+          "label": "for i in range(maxN, 0, -1):\n    inv_fact[i-1] = inv_fact[i] * (i - 1) % MOD",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Use inv_fact[i−1] = inv_fact[i] * i mod MOD, starting from i=maxN down to 1.",
+      "wrongExplanations": {
+        "2": "This iterates down to i=0 and writes inv_fact[-1], corrupting data.",
+        "3": "Using (i−1) breaks the recurrence."
+      },
+      "hint": "Stop the loop before i hits 0, and multiply by i.",
+      "isCodeBuilding": true,
+      "codeSnippet": "for i in range(maxN, 0, -1):\n    inv_fact[i-1] = inv_fact[i] * i % MOD",
+      "codeLabel": "Inverse factorial fill"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Compute the final answer using the combination formula.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "ans = fact[n + m - 1] * inv_fact[m] % MOD\nans = ans * inv_fact[n - 1] % MOD",
+          "isCode": true
+        },
+        {
+          "label": "ans = fact[n + m] * inv_fact[m] % MOD\nans = ans * inv_fact[n] % MOD",
+          "isCode": true
+        },
+        {
+          "label": "ans = fact[n + m - 1] * inv_fact[m - 1] % MOD\nans = ans * inv_fact[n] % MOD",
+          "isCode": true
+        },
+        {
+          "label": "ans = fact[n + m - 1] * inv_fact[n] % MOD\nans = ans * inv_fact[m - 1] % MOD",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "C(n+m−1, m) = (n+m−1)! / (m!(n−1)!). Multiply by inv_fact[m] and inv_fact[n−1].",
+      "wrongExplanations": {
+        "1": "The numerator should be (n+m−1)!, not (n+m)!.",
+        "2": "The denominator is m!(n−1)!, not (m−1)!n!."
+      },
+      "hint": "Use C(n+m−1, m) with factorials and inverse factorials.",
+      "isCodeBuilding": true,
+      "codeSnippet": "ans = fact[n + m - 1] * inv_fact[m] % MOD\nans = ans * inv_fact[n - 1] % MOD",
+      "codeLabel": "Combine to answer"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "Output the result.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "print(ans)",
+          "isCode": true
+        },
+        {
+          "label": "print(ans % (10**9 + 9))",
+          "isCode": true
+        },
+        {
+          "label": "print(fact)",
+          "isCode": true
+        },
+        {
+          "label": "print(*ans)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Print the computed integer. Do not change the modulus or print intermediate arrays.",
+      "wrongExplanations": {
+        "1": "Wrong modulus.",
+        "3": "ans is an int; unpacking makes no sense."
+      },
+      "hint": "Just print the final integer.",
+      "isCodeBuilding": true,
+      "codeSnippet": "print(ans)",
+      "codeLabel": "Print"
+    },
+    {
+      "id": "q22",
+      "phase": "Verifying the Solution",
+      "questionText": "What does your program print for input: 3 2?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "6",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "10",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "It computes C(3+2−1, 2)=C(4,2)=6.",
+      "wrongExplanations": {
+        "1": "C(4,2) is not 4.",
+        "3": "C(4,2) is not 10."
+      },
+      "hint": "Refer back to the example in the problem statement.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q23",
+      "phase": "Verifying the Solution",
+      "questionText": "What does your program print for input: 1 5?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        },
+        {
+          "label": "6",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "C(1+5−1, 5)=C(5,5)=1.",
+      "wrongExplanations": {
+        "1": "That would be if apples were distinct; here they are identical.",
+        "3": "There is at least one way: all apples to the only child."
+      },
+      "hint": "Single child case.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Verifying the Solution",
+      "questionText": "What does your program print for input: 2 3?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        },
+        {
+          "label": "6",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "C(2+3−1, 3)=C(4,3)=4.",
+      "wrongExplanations": {
+        "3": "C(4,3) is not 6.",
+        "1": "C(4,3) is not 3."
+      },
+      "hint": "Compute C(4,3).",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the time complexity of this approach (ignoring constant factors)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n + m)",
+          "isCode": false
+        },
+        {
+          "label": "O(n * m)",
+          "isCode": false
+        },
+        {
+          "label": "O(log MOD)",
+          "isCode": false
+        },
+        {
+          "label": "O(1)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We fill two arrays of length ~n+m and do a single modular exponentiation; total is O(n+m).",
+      "wrongExplanations": {
+        "2": "The pow is O(log MOD), but the precomputation dominates for large n+m."
+      },
+      "hint": "Count the loops over maxN and additions of smaller terms.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the space complexity?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n + m)",
+          "isCode": false
+        },
+        {
+          "label": "O(1)",
+          "isCode": false
+        },
+        {
+          "label": "O(max(n, m))",
+          "isCode": false
+        },
+        {
+          "label": "O(n * m)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We store two arrays of length maxN+1 where maxN≈n+m.",
+      "wrongExplanations": {
+        "1": "We do not use only constant extra memory."
+      },
+      "hint": "Consider the arrays fact and inv_fact.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q27",
+      "phase": "Analyzing Complexity",
+      "questionText": "Why is computing modular inverses with exponent MOD-2 valid here?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Because 10^9+7 is prime; this method relies on that.",
+          "isCode": false
+        },
+        {
+          "label": "Because any modulus works for this exponent trick.",
+          "isCode": false
+        },
+        {
+          "label": "Because factorials are always 1 modulo any number.",
+          "isCode": false
+        },
+        {
+          "label": "Because we avoid division entirely.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The modular inverse via a^(MOD−2) is valid for prime MOD and a not divisible by MOD.",
+      "wrongExplanations": {
+        "1": "For composite moduli, this method can fail when a and MOD are not coprime."
+      },
+      "hint": "It uses a property that holds for prime moduli.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\nMOD = 10**9 + 7",
+    "data = sys.stdin.read().strip().split()\nn = int(data[0]); m = int(data[1])",
+    "maxN = n + m\nfact = [1] * (maxN + 1)\nfor i in range(1, maxN + 1):\n    fact[i] = fact[i-1] * i % MOD",
+    "inv_fact = [1] * (maxN + 1)\ninv_fact[maxN] = pow(fact[maxN], MOD - 2, MOD)",
+    "for i in range(maxN, 0, -1):\n    inv_fact[i-1] = inv_fact[i] * i % MOD",
+    "ans = fact[n + m - 1] * inv_fact[m] % MOD\nans = ans * inv_fact[n - 1] % MOD",
+    "print(ans)"
+  ],
+  "reasoningChain": [
+    {
+      "question": "How can a distribution be modeled?",
+      "insight": "Represent a distribution as nonnegative integers x1,...,xn with sum exactly m."
+    },
+    {
+      "question": "How to count these distributions?",
+      "insight": "Visualize m apples and use n−1 separators; each arrangement corresponds to one distribution."
+    },
+    {
+      "question": "What is the counting formula?",
+      "insight": "The number of sequences is C(n+m−1, m) (equivalently C(n+m−1, n−1))."
+    },
+    {
+      "question": "How to compute it modulo a large prime efficiently?",
+      "insight": "Precompute factorials and inverse factorials modulo 10^9+7; use modular inverses instead of division."
+    },
+    {
+      "question": "How to get modular inverses?",
+      "insight": "Use pow(a, MOD−2, MOD) to compute inverses since the modulus is prime."
+    },
+    {
+      "question": "What are complexity and implementation details?",
+      "insight": "Precompute up to maxN = n + m and compute answer in O(n+m) time and space."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1346,
+    "output_tokens": 15842,
+    "input_cost": 0.001682,
+    "output_cost": 0.15842,
+    "total_cost": 0.160103
+  }
+}

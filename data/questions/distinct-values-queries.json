@@ -1,0 +1,1089 @@
+{
+  "id": "distinct-values-queries-offline-markers",
+  "title": "Distinct Values Queries",
+  "difficulty": "hard",
+  "tags": [
+    "array"
+  ],
+  "estimatedMinutes": 60,
+  "language": "python",
+  "description": "You are given an array of n integers and q queries of the form: how many distinct values are there in a range [a,b]?\n\nInput:\n- First line: two integers n and q\n- Second line: n integers x_1, x_2, ..., x_n\n- Next q lines: each has two integers a and b describing a query\n\nOutput:\n- For each query, print the number of distinct values in the range [a,b]\n\nConstraints:\n- 1 ≤ n,q ≤ 2⋅10^5\n- 1 ≤ x_i ≤ 10^9\n- 1 ≤ a ≤ b ≤ n",
+  "examples": [
+    {
+      "input": "5 3\n3 2 3 1 2\n1 3\n2 4\n1 5\n",
+      "output": "2\n3\n3\n",
+      "explanation": "Ranges:\n[1,3] -> values {3,2,3} => distinct {3,2} -> 2\n[2,4] -> values {2,3,1} => distinct {2,3,1} -> 3\n[1,5] -> values {3,2,3,1,2} => distinct {1,2,3} -> 3"
+    }
+  ],
+  "constraints": [
+    "1 ≤ n,q ≤ 2⋅10^5",
+    "1 ≤ x_i ≤ 10^9",
+    "1 ≤ a ≤ b ≤ n",
+    "Time limit: 1.00 s",
+    "Memory limit: 512 MB"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "Array: [3, 2, 3, 1, 2]. What is the number of distinct values in range [1,3]?",
+      "diagram": "Index: 1 2 3 4 5\nValue: 3 2 3 1 2\nRange [1,3] -> 3,2,3",
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Values are {3,2,3}. Distinct set is {3,2} => 2.",
+      "wrongExplanations": {
+        "2": "3 would count duplicate 3 twice.",
+        "0": "1 ignores the presence of 2."
+      },
+      "hint": "List unique elements in the range.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "Using the same array, how many distinct values are in range [2,4]?",
+      "diagram": "Index: 1 2 3 4 5\nValue: 3 2 3 1 2\nRange [2,4] -> 2,3,1",
+      "options": [
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Values {2,3,1} are all distinct => 3.",
+      "wrongExplanations": {
+        "0": "2 would miss one distinct value.",
+        "3": "1 is too low; there are three unique values."
+      },
+      "hint": "List unique values in [2,4].",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "Is the range [a,b] inclusive at both ends? For [3,5] on the array [3,2,3,1,2], what is the distinct count?",
+      "diagram": "Range [3,5] -> values 3,1,2",
+      "options": [
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "Depends on whether bounds are inclusive",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "[a,b] is inclusive. Values {3,1,2} => 3.",
+      "wrongExplanations": {
+        "0": "2 would ignore one unique value.",
+        "3": "Bounds are inclusive per problem; no ambiguity."
+      },
+      "hint": "The problem states [a,b], not (a,b).",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "Do queries modify the array between answers?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, after each query duplicates in the range are removed",
+          "isCode": false
+        },
+        {
+          "label": "No, queries are independent; the array remains fixed",
+          "isCode": false
+        },
+        {
+          "label": "Yes, but only for overlapping ranges",
+          "isCode": false
+        },
+        {
+          "label": "Depends on the input ordering",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "The array is fixed and queries are independent. No modifications occur.",
+      "wrongExplanations": {
+        "0": "The problem does not state any array modifications.",
+        "2": "There is no rule about overlapping ranges changing the array."
+      },
+      "hint": "Read the Output and problem description again.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Exploring Approaches",
+      "questionText": "If we build a set for each query by scanning arr[a..b], what is the worst-case number of element inspections for n = q = 2⋅10^5?",
+      "diagram": "Worst case: ranges ~ n each, q ranges",
+      "options": [
+        {
+          "label": "≈ 4⋅10^10",
+          "isCode": false
+        },
+        {
+          "label": "≈ 2⋅10^5",
+          "isCode": false
+        },
+        {
+          "label": "≈ 2⋅10^5 log(2⋅10^5)",
+          "isCode": false
+        },
+        {
+          "label": "≈ 10^6",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each of q ranges may be size n: q⋅n ≈ (2e5)⋅(2e5) = 4e10. This is too slow.",
+      "wrongExplanations": {
+        "1": "Counts only one range or one pass, not all queries.",
+        "3": "Underestimates by orders of magnitude."
+      },
+      "hint": "Multiply maximum range length by number of queries.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "Let pref[i] be the number of distinct values in [1,i]. Is distinct([a,b]) = pref[b] - pref[a-1] always correct?",
+      "diagram": "Counterexample: arr=[1,1,1,1], a=2, b=3\npref[3]=1, pref[1]=1 -> 0, but distinct([2,3])=1",
+      "options": [
+        {
+          "label": "Yes, always",
+          "isCode": false
+        },
+        {
+          "label": "Only when no value repeats across the [a-1,a] boundary",
+          "isCode": false
+        },
+        {
+          "label": "Never; distinct ranges can't use prefix differences",
+          "isCode": false
+        },
+        {
+          "label": "Only if the array is sorted",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Subtracting prefix distincts fails if a value appears both before a and inside [a,b]. It works only when no value repeats across the boundary.",
+      "wrongExplanations": {
+        "0": "The counterexample shows a failure.",
+        "2": "It's not \"never\"; there are cases where it works."
+      },
+      "hint": "Think about duplicates crossing the boundary a.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "Suppose for the prefix [1,b], we keep exactly one marker at the latest index of each value seen so far. How to get distinct([a,b]) from these markers?",
+      "diagram": "Markers placed at latest occurrences up to b.\nCount markers with positions in [a,b].",
+      "options": [
+        {
+          "label": "Count markers whose indices lie in [a,b]",
+          "isCode": false
+        },
+        {
+          "label": "Scan arr[a..b] and insert into a set",
+          "isCode": false
+        },
+        {
+          "label": "Count indices i in [a,b] whose previous same value is ≥ a",
+          "isCode": false
+        },
+        {
+          "label": "Count values whose first occurrence lies in [a,b]",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "A value contributes exactly one marker at its latest index ≤ b. If that marker lies in [a,b], the value appears in the range.",
+      "wrongExplanations": {
+        "1": "This is the slow method we're avoiding.",
+        "3": "First occurrence doesn't capture latest positions and repeats."
+      },
+      "hint": "Each value has at most one active marker up to b.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Building the Idea",
+      "questionText": "When processing i from 1..n, if arr[i] was last seen at position p>0, how should markers be updated?",
+      "diagram": "Old marker at p for value v=arr[i]. New index i.",
+      "options": [
+        {
+          "label": "Leave marker at p and also add a marker at i",
+          "isCode": false
+        },
+        {
+          "label": "Remove marker at p and add marker at i",
+          "isCode": false
+        },
+        {
+          "label": "Remove marker at both p and i",
+          "isCode": false
+        },
+        {
+          "label": "Add marker at i only if i-p>1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "We must keep exactly one marker per value up to i: move it from p to i.",
+      "wrongExplanations": {
+        "0": "This double counts one value.",
+        "2": "Then the value wouldn't be counted at all."
+      },
+      "hint": "Exactly one marker per distinct value should be active.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "If we can quickly compute count of markers in [1,k] as sum(k), how do we compute count in [a,b]?",
+      "diagram": "sum(k) = markers in [1,k]\nRange [a,b] -> sum(b) - sum(a-1)",
+      "options": [
+        {
+          "label": "sum(b) - sum(a-1)",
+          "isCode": false
+        },
+        {
+          "label": "sum(b) - sum(a)",
+          "isCode": false
+        },
+        {
+          "label": "sum(a) - sum(b-1)",
+          "isCode": false
+        },
+        {
+          "label": "sum(b)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Markers in [a,b] = markers up to b minus markers up to a-1.",
+      "wrongExplanations": {
+        "1": "Off by one at the left boundary.",
+        "3": "This includes markers before a."
+      },
+      "hint": "Subtract prefix up to a-1.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "During a single pass i=1..n, when is a query (a,b) ready to be answered using markers?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "When i == a",
+          "isCode": false
+        },
+        {
+          "label": "When i == b",
+          "isCode": false
+        },
+        {
+          "label": "After finishing i = n",
+          "isCode": false
+        },
+        {
+          "label": "Before processing any elements",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "At i==b the markers reflect latest occurrences up to b, so we can count markers in [a,b].",
+      "wrongExplanations": {
+        "0": "At i==a you haven't processed up to b yet.",
+        "2": "Waiting to the end is unnecessary if you only need up to b."
+      },
+      "hint": "Markers must reflect values up to b.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "How should we order the queries to answer them during the single pass efficiently?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Keep original input order",
+          "isCode": false
+        },
+        {
+          "label": "Sort by a ascending",
+          "isCode": false
+        },
+        {
+          "label": "Sort by b ascending",
+          "isCode": false
+        },
+        {
+          "label": "Sort by (b-a) descending",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Sorting by b allows answering queries when i reaches each b without backtracking.",
+      "wrongExplanations": {
+        "0": "Original order may require revisiting ranges.",
+        "1": "Sorting by a doesn't align with the single pass over b."
+      },
+      "hint": "We answer when i == b.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "For the marker array, we need to support point updates (move marker) and prefix sums efficiently. What per-operation performance is acceptable under the constraints?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Point update O(1), prefix sum O(n)",
+          "isCode": false
+        },
+        {
+          "label": "Both around O(log n)",
+          "isCode": false
+        },
+        {
+          "label": "Both around O(n)",
+          "isCode": false
+        },
+        {
+          "label": "Both around O(1)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "With ~2e5 operations, O(log n) updates and sums give ~ (n+q) log n which fits the time limit.",
+      "wrongExplanations": {
+        "0": "O(n) per sum leads to ~n^2 in worst case.",
+        "2": "O(n) per operation is too slow."
+      },
+      "hint": "Aim for sublinear time per operation.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "Values x_i can be up to 1e9. How should we store last occurrence position for each value?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Use a dict mapping value -> last index",
+          "isCode": false
+        },
+        {
+          "label": "Use an array of size 1e9 for last indices",
+          "isCode": false
+        },
+        {
+          "label": "Ignore last occurrences and rely on scanning",
+          "isCode": false
+        },
+        {
+          "label": "Sort the array to reduce values",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "A dict efficiently maps large values to positions. An array of size 1e9 is infeasible.",
+      "wrongExplanations": {
+        "1": "Memory would be enormous.",
+        "2": "Scanning per query is too slow."
+      },
+      "hint": "We need memory proportional to distinct values, not value range.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Writing the Code",
+      "questionText": "Read all integers quickly from input.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys; data = list(map(int, sys.stdin.buffer.read().split()))",
+          "isCode": true
+        },
+        {
+          "label": "import sys; data = list(map(int, sys.stdin.read().split()))",
+          "isCode": true
+        },
+        {
+          "label": "import sys; data = [int(x) for x in sys.stdin.buffer.readline().split()]",
+          "isCode": true
+        },
+        {
+          "label": "import sys; data = list(map(int, sys.stdin.readline().split()))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Reading the entire buffer and splitting is fast for large inputs.",
+      "wrongExplanations": {
+        "1": "Using sys.stdin.read may be fine, but buffer is more consistent.",
+        "2": "Reads only one line, not all numbers."
+      },
+      "hint": "Prefer reading the whole buffer for performance.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\ndata = list(map(int, sys.stdin.buffer.read().split()))",
+      "codeLabel": "Fast input"
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Create an iterator over the integers and read n and q.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "it = iter(data); n = next(it); q = next(it)",
+          "isCode": true
+        },
+        {
+          "label": "n, q = data[0], data[1]; it = iter(data[2:])",
+          "isCode": true
+        },
+        {
+          "label": "n = data.pop(0); q = data.pop(0); it = iter(data)",
+          "isCode": true
+        },
+        {
+          "label": "n = len(data); q = data[-1]; it = iter(data)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Using an iterator and next() is simple and efficient.",
+      "wrongExplanations": {
+        "3": "n is not the number of tokens; it's given explicitly."
+      },
+      "hint": "The first two integers are n and q.",
+      "isCodeBuilding": true,
+      "codeSnippet": "it = iter(data)\nn = next(it); q = next(it)",
+      "codeLabel": "Iterator and header"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Read the array values as 1-based.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "arr = [0] + [next(it) for _ in range(n)]",
+          "isCode": true
+        },
+        {
+          "label": "arr = [next(it) for _ in range(n)]",
+          "isCode": true
+        },
+        {
+          "label": "arr = [None] * (n+1); arr[0] = 0; for i in range(1,n+1): arr[i] = next(it)",
+          "isCode": true
+        },
+        {
+          "label": "arr = [0] * n; for i in range(n): arr[i] = next(it)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Prepending 0 makes arr[1..n] correspond to positions directly.",
+      "wrongExplanations": {
+        "1": "Zero-based arr complicates index math later."
+      },
+      "hint": "Using 1-based indexing simplifies range [a,b].",
+      "isCodeBuilding": true,
+      "codeSnippet": "arr = [0] + [next(it) for _ in range(n)]",
+      "codeLabel": "Array 1-based"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Read the queries and store (b, a, idx) for sorting and output order.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "queries = []; \nfor idx in range(q):\n    a = next(it); b = next(it)\n    queries.append((b, a, idx))",
+          "isCode": true
+        },
+        {
+          "label": "queries = []; \nfor idx in range(q):\n    a = next(it); b = next(it)\n    queries.append((a, b, idx))",
+          "isCode": true
+        },
+        {
+          "label": "queries = []; \nfor idx in range(q):\n    b = next(it); a = next(it)\n    queries.append((b, a, idx))",
+          "isCode": true
+        },
+        {
+          "label": "queries = []; \nfor idx in range(q):\n    a = next(it); b = next(it)\n    queries.append((idx, a, b))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Store b first to sort by b and keep a and idx for answering and ordering.",
+      "wrongExplanations": {
+        "1": "Sorting by first element would sort by a, not b.",
+        "3": "Losing b-first makes sorting by b harder."
+      },
+      "hint": "We plan to sort by the right endpoint b.",
+      "isCodeBuilding": true,
+      "codeSnippet": "queries = []\nfor idx in range(q):\n    a = next(it); b = next(it)\n    queries.append((b, a, idx))",
+      "codeLabel": "Read queries"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Sort queries to process by increasing right endpoint.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "queries.sort()",
+          "isCode": true
+        },
+        {
+          "label": "queries = sorted(queries, key=lambda x: x[1])",
+          "isCode": true
+        },
+        {
+          "label": "queries = sorted(queries, reverse=True)",
+          "isCode": true
+        },
+        {
+          "label": "queries.sort(key=lambda x: x[1])",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Since tuples are (b,a,idx), default sort orders by b ascending.",
+      "wrongExplanations": {
+        "3": "Sorting by x[1] orders by a, not b."
+      },
+      "hint": "Tuples compare by first element by default.",
+      "isCodeBuilding": true,
+      "codeSnippet": "queries.sort()",
+      "codeLabel": "Sort by b"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Initialize the marker array structure size and storage.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "size = n; tree = [0]*(size+1)",
+          "isCode": true
+        },
+        {
+          "label": "size = n; tree = [0]*size",
+          "isCode": true
+        },
+        {
+          "label": "size = n+1; tree = [0]*(size+1)",
+          "isCode": true
+        },
+        {
+          "label": "size = n; tree = [0]*(n-1)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Using 1..n indices, we allocate size+1 to use index 1..size safely.",
+      "wrongExplanations": {
+        "1": "Index n would be out of range.",
+        "2": "Double +1 wastes space and complicates bounds."
+      },
+      "hint": "We'll index tree with positions 1..n.",
+      "isCodeBuilding": true,
+      "codeSnippet": "size = n\ntree = [0]*(size+1)",
+      "codeLabel": "Marker storage"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Implement point update: add(delta) at position i.",
+      "diagram": "Update along i += i & -i",
+      "options": [
+        {
+          "label": "def add(i, delta):\n    while i <= size:\n        tree[i] += delta\n        i += i & -i",
+          "isCode": true
+        },
+        {
+          "label": "def add(i, delta):\n    while i < size:\n        tree[i] += delta\n        i -= i & -i",
+          "isCode": true
+        },
+        {
+          "label": "def add(i, delta):\n    while i <= size:\n        tree[i] = delta\n        i += 1",
+          "isCode": true
+        },
+        {
+          "label": "def add(i, delta):\n    tree[i] += delta",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We propagate the update along indices using i += i & -i while i ≤ size.",
+      "wrongExplanations": {
+        "1": "Wrong direction and condition; would loop wrongly or miss updates.",
+        "3": "Only updates one index; no prefix computation support."
+      },
+      "hint": "Move forward using i += lowbit(i).",
+      "isCodeBuilding": true,
+      "codeSnippet": "def add(i, delta):\n    while i <= size:\n        tree[i] += delta\n        i += i & -i",
+      "codeLabel": "Point update"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "Implement prefix sum: sum_(i) = markers count in [1,i].",
+      "diagram": "Accumulate while i > 0 with i -= i & -i",
+      "options": [
+        {
+          "label": "def sum_(i):\n    s = 0\n    while i > 0:\n        s += tree[i]\n        i -= i & -i\n    return s",
+          "isCode": true
+        },
+        {
+          "label": "def sum_(i):\n    s = 0\n    while i <= size:\n        s += tree[i]\n        i += i & -i\n    return s",
+          "isCode": true
+        },
+        {
+          "label": "def sum_(i):\n    return tree[i]",
+          "isCode": true
+        },
+        {
+          "label": "def sum_(i):\n    s = 0\n    for k in range(1, i+1):\n        s += tree[k]\n    return s",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We walk down indices using i -= i & -i, summing contributions.",
+      "wrongExplanations": {
+        "1": "Wrong direction; would not compute a prefix correctly.",
+        "2": "Only the point value, not a prefix."
+      },
+      "hint": "Traverse ancestors downward to 0.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def sum_(i):\n    s = 0\n    while i > 0:\n        s += tree[i]\n        i -= i & -i\n    return s",
+      "codeLabel": "Prefix sum"
+    },
+    {
+      "id": "q22",
+      "phase": "Writing the Code",
+      "questionText": "Initialize helper structures for last occurrences and answers.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "last = {}\nans = [0]*q\nqi = 0",
+          "isCode": true
+        },
+        {
+          "label": "last = []\nans = [None]*q\nqi = 0",
+          "isCode": true
+        },
+        {
+          "label": "last = {}\nans = []\nqi = 1",
+          "isCode": true
+        },
+        {
+          "label": "last = set()\nans = [0]*q\nqi = 0",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Use a dict for last occurrences, an answer array, and a query pointer qi.",
+      "wrongExplanations": {
+        "1": "List can't map values to indices.",
+        "3": "Set doesn't store key->position mapping."
+      },
+      "hint": "We need mapping value -> last index.",
+      "isCodeBuilding": true,
+      "codeSnippet": "last = {}\nans = [0]*q\nqi = 0",
+      "codeLabel": "State init"
+    },
+    {
+      "id": "q23",
+      "phase": "Writing the Code",
+      "questionText": "Process positions 1..n: update markers and answer queries when b==i.",
+      "diagram": "For each i:\n- Move marker for arr[i]\n- Answer all queries with right endpoint i",
+      "options": [
+        {
+          "label": "for i in range(1, n+1):\n    x = arr[i]\n    prev = last.get(x, 0)\n    if prev:\n        add(prev, -1)\n    add(i, 1)\n    last[x] = i\n    while qi < q and queries[qi][0] == i:\n        b, a, idx = queries[qi]\n        ans[idx] = sum_(b) - sum_(a-1)\n        qi += 1",
+          "isCode": true
+        },
+        {
+          "label": "for i in range(0, n):\n    x = arr[i]\n    if x in last:\n        add(last[x], 1)\n    last[x] = i\n    while qi < q and queries[qi][1] == i:\n        a, b, idx = queries[qi]\n        ans[idx] = sum_(b) - sum_(a)\n        qi += 1",
+          "isCode": true
+        },
+        {
+          "label": "for i in range(1, n+1):\n    x = arr[i]\n    if x in last:\n        add(last[x], -1)\n    last[x] = i\n    while qi < q and queries[qi][0] == i:\n        b, a, idx = queries[qi]\n        ans[idx] = sum_(b)\n        qi += 1",
+          "isCode": true
+        },
+        {
+          "label": "for i in range(1, n+1):\n    x = arr[i]\n    add(i, 1)\n    last[x] = i\n    while qi < q and queries[qi][0] == i:\n        b, a, idx = queries[qi]\n        ans[idx] = sum_(b) - sum_(a-1)\n        qi += 1",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Move marker from prev to i (if exists), add at i, update last[x], and answer queries when b==i using sum(b)-sum(a-1).",
+      "wrongExplanations": {
+        "2": "Missing add(i,1); sum(b) includes markers before a.",
+        "3": "Never removes old marker, double counting duplicates."
+      },
+      "hint": "Remember to remove the old marker before adding the new one.",
+      "isCodeBuilding": true,
+      "codeSnippet": "for i in range(1, n+1):\n    x = arr[i]\n    prev = last.get(x, 0)\n    if prev:\n        add(prev, -1)\n    add(i, 1)\n    last[x] = i\n    while qi < q and queries[qi][0] == i:\n        b, a, idx = queries[qi]\n        ans[idx] = sum_(b) - sum_(a-1)\n        qi += 1",
+      "codeLabel": "Main processing loop"
+    },
+    {
+      "id": "q24",
+      "phase": "Writing the Code",
+      "questionText": "Output the answers in the original query order.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "out = '\\n'.join(map(str, ans))\nsys.stdout.write(out)",
+          "isCode": true
+        },
+        {
+          "label": "print(*ans)",
+          "isCode": true
+        },
+        {
+          "label": "for x in ans: print(x, end=' ')",
+          "isCode": true
+        },
+        {
+          "label": "sys.stdout.write(str(ans))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Join answers by newlines to match required format.",
+      "wrongExplanations": {
+        "1": "print(*ans) prints spaces, not newlines.",
+        "3": "Writes the Python list representation, not the required lines."
+      },
+      "hint": "Each answer must be on its own line.",
+      "isCodeBuilding": true,
+      "codeSnippet": "out = '\\n'.join(map(str, ans))\nsys.stdout.write(out)",
+      "codeLabel": "Print results"
+    },
+    {
+      "id": "q25",
+      "phase": "Verifying the Solution",
+      "questionText": "For the example input, what is the output for query [1,5]?",
+      "diagram": "Array: [3,2,3,1,2], [1,5] -> {3,2,3,1,2} => {1,2,3}",
+      "options": [
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Distinct values are {1,2,3} => 3.",
+      "wrongExplanations": {
+        "0": "2 undercounts distinct values.",
+        "3": "5 would count all elements, not distinct."
+      },
+      "hint": "List unique values over the full array.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Verifying the Solution",
+      "questionText": "How does the code ensure outputs are printed in the original input query order?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "It prints in the order of sorted queries",
+          "isCode": false
+        },
+        {
+          "label": "Each query stores its original index idx; answers are written into ans[idx]",
+          "isCode": false
+        },
+        {
+          "label": "It re-sorts the answers by a after computation",
+          "isCode": false
+        },
+        {
+          "label": "It tracks the time each query was answered and orders by that",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Queries include idx; ans[idx] collects the result. Printing ans preserves input order.",
+      "wrongExplanations": {
+        "0": "Sorted queries are for processing, not printing.",
+        "3": "No timing-based ordering is used."
+      },
+      "hint": "Look at how ans is indexed.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q27",
+      "phase": "Verifying the Solution",
+      "questionText": "Array: [1,2,1,2,3]. Queries: [2,4], [1,3]. What outputs should the program produce (in input order)?",
+      "diagram": "Query1 [2,4] -> {2,1,2} => {1,2} => 2\nQuery2 [1,3] -> {1,2,1} => {1,2} => 2",
+      "options": [
+        {
+          "label": "2\\n2",
+          "isCode": false
+        },
+        {
+          "label": "3\\n2",
+          "isCode": false
+        },
+        {
+          "label": "2\\n3",
+          "isCode": false
+        },
+        {
+          "label": "1\\n2",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Both ranges have distinct {1,2} => outputs 2 and 2.",
+      "wrongExplanations": {
+        "1": "3 overcounts in [2,4].",
+        "3": "1 undercounts in [2,4]."
+      },
+      "hint": "Compute distinct sets for each range.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q28",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the time complexity of the implemented approach?",
+      "diagram": "Operations: n updates, q range sums; each costs ~log n",
+      "options": [
+        {
+          "label": "O(n q)",
+          "isCode": false
+        },
+        {
+          "label": "O((n + q) log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n + q)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2 + q)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Each point update and sum is logarithmic; total ~ (n+q) log n.",
+      "wrongExplanations": {
+        "0": "That's the naive per-query scanning approach.",
+        "2": "We don't have constant-time operations."
+      },
+      "hint": "Count operations and their per-op costs.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q29",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the space complexity?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n + q)",
+          "isCode": false
+        },
+        {
+          "label": "O(n q)",
+          "isCode": false
+        },
+        {
+          "label": "O(1)",
+          "isCode": false
+        },
+        {
+          "label": "O(n + number of distinct values + q)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 3,
+      "explanation": "Tree uses O(n); last occurrences size equals distinct values; answers O(q).",
+      "wrongExplanations": {
+        "0": "Close, but last map depends on distinct values, not necessarily n."
+      },
+      "hint": "Account for tree, last map, and answers.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q30",
+      "phase": "Analyzing Complexity",
+      "questionText": "Edge case: all values equal. How does the algorithm behave?",
+      "diagram": "Markers always move to the latest index; exactly one marker active.",
+      "options": [
+        {
+          "label": "Time increases to O(n q) due to scanning",
+          "isCode": false
+        },
+        {
+          "label": "It still runs in O((n+q) log n) with a single marker moving forward",
+          "isCode": false
+        },
+        {
+          "label": "It fails because last occurrences collide",
+          "isCode": false
+        },
+        {
+          "label": "It needs value compression to work",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "We maintain one marker for the single value and move it each step; operations remain logarithmic.",
+      "wrongExplanations": {
+        "0": "No scanning per query is performed.",
+        "2": "Collisions are handled by moving the marker."
+      },
+      "hint": "Think about how many markers are active when all values are the same.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\ndata = list(map(int, sys.stdin.buffer.read().split()))",
+    "it = iter(data)\nn = next(it); q = next(it)",
+    "arr = [0] + [next(it) for _ in range(n)]",
+    "queries = []\nfor idx in range(q):\n    a = next(it); b = next(it)\n    queries.append((b, a, idx))",
+    "queries.sort()",
+    "size = n\ntree = [0]*(size+1)",
+    "def add(i, delta):\n    while i <= size:\n        tree[i] += delta\n        i += i & -i",
+    "def sum_(i):\n    s = 0\n    while i > 0:\n        s += tree[i]\n        i -= i & -i\n    return s",
+    "last = {}\nans = [0]*q\nqi = 0",
+    "for i in range(1, n+1):\n    x = arr[i]\n    prev = last.get(x, 0)\n    if prev:\n        add(prev, -1)\n    add(i, 1)\n    last[x] = i\n    while qi < q and queries[qi][0] == i:\n        b, a, idx = queries[qi]\n        ans[idx] = sum_(b) - sum_(a-1)\n        qi += 1",
+    "out = '\\n'.join(map(str, ans))\nsys.stdout.write(out)"
+  ],
+  "reasoningChain": [
+    {
+      "question": "What is a distinct count in a range and how to compute it on small examples?",
+      "insight": "Clarify the definition of distinct values and inclusive bounds; compute by listing unique elements."
+    },
+    {
+      "question": "Why is scanning each query range to build a set too slow under constraints?",
+      "insight": "Estimate worst-case work as q⋅n ≈ 4e10, which is infeasible."
+    },
+    {
+      "question": "How can we count distinct values using markers at latest occurrences up to b?",
+      "insight": "Maintain one active marker per value at its latest index; count markers inside [a,b] to get distinct([a,b])."
+    },
+    {
+      "question": "How to process queries during a single pass?",
+      "insight": "Sort queries by right endpoint b; answer when i==b using current markers."
+    },
+    {
+      "question": "What operations are needed to maintain markers efficiently?",
+      "insight": "Support point updates (move marker) and prefix sums; compute [a,b] via sum(b)-sum(a-1) in logarithmic time."
+    },
+    {
+      "question": "What implementation details ensure correctness and speed?",
+      "insight": "Use a dict for last occurrences due to large value range; store (b,a,idx); 1-based indexing; careful off-by-one in sums."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1385,
+    "output_tokens": 15555,
+    "input_cost": 0.001731,
+    "output_cost": 0.15555,
+    "total_cost": 0.157281
+  }
+}

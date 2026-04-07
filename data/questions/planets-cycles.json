@@ -1,0 +1,978 @@
+{
+  "id": "planets-cycles-functional-graph-steps",
+  "title": "Planets Cycles",
+  "difficulty": "intermediate",
+  "tags": [
+    "graph"
+  ],
+  "estimatedMinutes": 50,
+  "language": "python",
+  "description": "You are playing a game consisting of n planets. Each planet has a teleporter to another planet (or the planet itself).\n\nYou start on a planet and then travel through teleporters until you reach a planet that you have already visited before.\n\nYour task is to calculate for each planet the number of teleportations there would be if you started on that planet.\n\nInput:\n- First line: integer n, the number of planets (1 ≤ n ≤ 2⋅10^5)\n- Second line: n integers t_1, t_2, ..., t_n, where 1 ≤ t_i ≤ n. It is possible that t_i = i.\n\nOutput:\nPrint n integers: for each planet i, the number of teleportations until a planet is visited again when starting at i.",
+  "examples": [
+    {
+      "input": "5\n2 4 3 1 4\n",
+      "output": "3 3 1 3 4\n",
+      "explanation": "Planets 1-2-4 form a loop of length 3, so their answers are 3. Planet 3 teleports to itself, so its answer is 1. Planet 5 goes to 4 (in the 3-loop), so 1 step to enter the loop + 3 inside the loop = 4."
+    }
+  ],
+  "constraints": [
+    "1 ≤ n ≤ 2 ⋅ 10^5",
+    "1 ≤ t_i ≤ n"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Phase 1: Understanding the Problem",
+      "questionText": "If a planet teleports to itself (t_i = i), starting on that planet, how many teleportations happen before you reach a planet you have already visited?",
+      "diagram": "i -> i",
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "It never repeats",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "You start at i, then teleport once to i again; i is now repeated. So the count is 1.",
+      "wrongExplanations": {
+        "0": "You haven't teleported yet at count 0; the repeat happens after the first teleport.",
+        "2": "No extra step is needed beyond the first teleport back to itself."
+      },
+      "hint": "Count teleportations, not visits.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Phase 1: Understanding the Problem",
+      "questionText": "Consider n=3 and teleporters t = [2, 3, 2] (1→2, 2→3, 3→2). Starting at planet 1, how many teleportations occur before a repeated planet is reached?",
+      "diagram": "1 -> 2 -> 3 -> 2 (repeat)\n",
+      "options": [
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "It depends on indexing",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Path: 1->2 (1), 2->3 (2), 3->2 (3). At the 3rd teleport you land on 2 again. Answer is 3.",
+      "wrongExplanations": {
+        "0": "Indexing does not change the number of teleport events.",
+        "2": "Stopping condition is the first time any planet repeats, not only when returning to start."
+      },
+      "hint": "Stop when any already visited planet is reached, not necessarily the starting planet.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Phase 1: Understanding the Problem",
+      "questionText": "With t = [2, 3, 2] (1→2, 2→3, 3→2), starting at planet 2, how many teleportations before the first repeat?",
+      "diagram": "2 -> 3 -> 2 (repeat)",
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "2->3 (1), 3->2 (2): on the second teleport, planet 2 repeats. So the answer is 2.",
+      "wrongExplanations": {
+        "0": "One teleport is needed to move from 2 to 3.",
+        "2": "Three teleports would revisit multiple times, but we stop at the first repeat."
+      },
+      "hint": "Count teleports: 2→3 is one, 3→2 is two.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Phase 1: Understanding the Problem",
+      "questionText": "Which condition stops the teleportation process according to the problem?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "When you return to the starting planet for the first time",
+          "isCode": false
+        },
+        {
+          "label": "When you land on any planet that has already been visited in this run",
+          "isCode": false
+        },
+        {
+          "label": "When each planet has been visited at least once",
+          "isCode": false
+        },
+        {
+          "label": "After exactly n teleportations",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "We stop at the first repeat of any planet, not just the starting planet.",
+      "wrongExplanations": {
+        "0": "You may repeat a different planet before returning to the start."
+      },
+      "hint": "Re-read the stopping condition: 'a planet that you have already visited before.'",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Phase 1: Understanding the Problem",
+      "questionText": "If you simulate the process independently from every starting planet, what is the worst-case overall time complexity?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(1)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "In the worst case you traverse long chains repeatedly from many starts, leading to about n steps for ~n starts.",
+      "wrongExplanations": {
+        "0": "You'd be redoing many steps per start, not a single pass.",
+        "1": "There is no logarithmic factor here."
+      },
+      "hint": "Think of a long chain leading into a loop and starting from each node.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Phase 2: Exploring Approaches",
+      "questionText": "In a setting where each planet has exactly one teleporter destination, what must eventually happen if you keep teleporting?",
+      "diagram": "Every node has out-degree 1",
+      "options": [
+        {
+          "label": "You eventually reach a planet with no outgoing teleporter",
+          "isCode": false
+        },
+        {
+          "label": "You eventually land on a previously visited planet (you enter a loop)",
+          "isCode": false
+        },
+        {
+          "label": "You will visit all planets exactly once and stop",
+          "isCode": false
+        },
+        {
+          "label": "You stop only if there is a self-loop in the system",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "With one outgoing edge per node, repeated nodes are unavoidable, forming a loop.",
+      "wrongExplanations": {
+        "0": "Every planet has an outgoing teleporter by definition."
+      },
+      "hint": "Pigeonhole principle: infinite path over finite set causes a repeat.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Phase 2: Exploring Approaches",
+      "questionText": "If a starting planet lies on a loop of length L, what is the number of teleportations before reaching a repeated planet?",
+      "diagram": "Cycle: a1 -> a2 -> ... -> aL -> a1",
+      "options": [
+        {
+          "label": "L",
+          "isCode": false
+        },
+        {
+          "label": "L - 1",
+          "isCode": false
+        },
+        {
+          "label": "2L",
+          "isCode": false
+        },
+        {
+          "label": "It depends on the entry planet, not just L",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "From any node on the loop, after L moves you return to a visited node (the loop), so count is L.",
+      "wrongExplanations": {
+        "1": "You need L moves to cause the first repeat, not L-1."
+      },
+      "hint": "Trace a 3-cycle: 2 moves aren’t enough to repeat the start.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Phase 2: Exploring Approaches",
+      "questionText": "A planet x is not on a loop. After D steps from x you enter a loop of length C. What is the number of teleportations from x before a repeated visit?",
+      "diagram": "x -> ... (D steps) -> loop of length C",
+      "options": [
+        {
+          "label": "C",
+          "isCode": false
+        },
+        {
+          "label": "D",
+          "isCode": false
+        },
+        {
+          "label": "C + D",
+          "isCode": false
+        },
+        {
+          "label": "max(C, D)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "D steps to enter the loop, then C steps to cause the first repeat within the loop.",
+      "wrongExplanations": {
+        "0": "This ignores the steps needed to enter the loop.",
+        "1": "You still need to traverse the loop until a repeat occurs."
+      },
+      "hint": "Two parts: reach the loop, then loop until repeat.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Phase 3: Building the Idea",
+      "questionText": "While walking from an unseen start, how can we detect that we have just found a loop efficiently?",
+      "diagram": "Keep a record for the current path",
+      "options": [
+        {
+          "label": "Keep a record of planets currently on this path; if the next planet is already in this record, a loop is found",
+          "isCode": false
+        },
+        {
+          "label": "Keep a record of all planets ever visited across all starts; if the next is in it, a loop is found",
+          "isCode": false
+        },
+        {
+          "label": "Maintain in-degrees and detect when it becomes zero",
+          "isCode": false
+        },
+        {
+          "label": "Sort planets by t_i and scan for duplicates",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We only need to know repeats on the current walk; a repeat there means loop.",
+      "wrongExplanations": {
+        "1": "A planet seen in another run doesn't imply a loop on the current path."
+      },
+      "hint": "Track nodes on the current chain as you advance.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Phase 3: Building the Idea",
+      "questionText": "You have a list 'path' of planets in the current walk and a map 'pos' giving each planet's index in 'path'. You move to planet y that is already in 'pos'. How do you compute the loop length quickly?",
+      "diagram": "path = [p0, p1, ..., pk], y = p_j",
+      "options": [
+        {
+          "label": "len(path) - pos[y]",
+          "isCode": false
+        },
+        {
+          "label": "pos[y]",
+          "isCode": false
+        },
+        {
+          "label": "len(path)",
+          "isCode": false
+        },
+        {
+          "label": "Count more steps until y appears again",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The loop is from pos[y] to the end of path, so its length is len(path) - pos[y].",
+      "wrongExplanations": {
+        "3": "You could, but that adds extra walking; you already have the positions.",
+        "2": "This includes the tail before the loop."
+      },
+      "hint": "Loop nodes are exactly the suffix after y's first occurrence.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Phase 3: Building the Idea",
+      "questionText": "After assigning the loop length to all loop planets, how do you assign the answer to earlier planets on the current path (from tail towards the loop)?",
+      "diagram": "u -> v; v has ans[v]",
+      "options": [
+        {
+          "label": "ans[u] = ans[v] + 1",
+          "isCode": false
+        },
+        {
+          "label": "ans[u] = ans[v]",
+          "isCode": false
+        },
+        {
+          "label": "ans[u] = loop_length",
+          "isCode": false
+        },
+        {
+          "label": "ans[u] = distance(u, first loop node)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each step adds 1 to the next planet's answer; loop nodes already have the loop length.",
+      "wrongExplanations": {
+        "1": "You must account for the extra step from u to v."
+      },
+      "hint": "Think: one teleport from u to v, then follow v’s count.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Phase 3: Building the Idea",
+      "questionText": "If during a walk you land on a planet v whose answer is already known from previous processing, what should you do for the current path?",
+      "diagram": "path tail ... -> v (already has ans[v])",
+      "options": [
+        {
+          "label": "Assign answers backward along the current path: ans[u] = ans[next[u]] + 1",
+          "isCode": false
+        },
+        {
+          "label": "Ignore this path and start from the next unvisited planet",
+          "isCode": false
+        },
+        {
+          "label": "Treat v as a new loop and set all path nodes to 1",
+          "isCode": false
+        },
+        {
+          "label": "Set all path nodes to ans[v]",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "You can propagate known answers backward along the current path.",
+      "wrongExplanations": {
+        "1": "You would lose the work done on this path.",
+        "3": "Each step adds one; not all equal ans[v]."
+      },
+      "hint": "You already know the rest of the journey from v.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Phase 3: Building the Idea",
+      "questionText": "Why is it sufficient to start walks only from planets marked as unseen (unprocessed)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Because processed planets already have answers; any path entering them can reuse those answers by backward assignment",
+          "isCode": false
+        },
+        {
+          "label": "Because starting from seen planets makes the process O(1)",
+          "isCode": false
+        },
+        {
+          "label": "Because each planet belongs to multiple components",
+          "isCode": false
+        },
+        {
+          "label": "Because loops cannot be detected otherwise",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Revisiting processed planets is redundant; their answers help fill in current path answers.",
+      "wrongExplanations": {
+        "1": "Starting from seen planets does not change complexity per se.",
+        "2": "Each planet belongs to exactly one component."
+      },
+      "hint": "Avoid recomputation by reusing known answers.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Phase 3: Building the Idea",
+      "questionText": "Quick check: t = [2, 3, 4, 5, 3] (1→2→3→4→5→3). What is the answer for planet 1?",
+      "diagram": "Loop is 3-4-5 (length 3); 1→2→3 (2 steps to loop)",
+      "options": [
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        },
+        {
+          "label": "6",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Distance to loop is 2, loop length is 3, so total is 2+3=5.",
+      "wrongExplanations": {
+        "1": "This ignores part of the path before the loop."
+      },
+      "hint": "Sum distance-to-loop and loop length.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q15",
+      "phase": "Phase 4: Writing the Code",
+      "questionText": "Read input efficiently and convert to 0-based indices for destinations.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def solve():\n    import sys\n    data = sys.stdin.buffer.read().split()\n    if not data:\n        return\n    it = iter(data)\n    n = int(next(it))\n    t = [int(next(it)) - 1 for _ in range(n)]",
+          "isCode": true
+        },
+        {
+          "label": "def solve():\n    n = int(input().strip())\n    t = [int(x) for x in input().split()]",
+          "isCode": true
+        },
+        {
+          "label": "def solve():\n    import sys\n    data = sys.stdin.read().split()\n    it = iter(data)\n    n = int(next(it))\n    t = [int(next(it)) for _ in range(n)]",
+          "isCode": true
+        },
+        {
+          "label": "def solve():\n    import sys\n    n = int(sys.stdin.readline())\n    t = list(map(int, sys.stdin.readline().split()))\n    t = [x for x in t]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We read all tokens, parse n, and store t as 0-based by subtracting 1. This avoids repeated I/O and ensures proper indexing.",
+      "wrongExplanations": {
+        "2": "Destinations remain 1-based; missing '-1' will cause index errors.",
+        "1": "Mixing input() may be slower and lacks the 0-based conversion."
+      },
+      "hint": "Remember to convert t_i from 1..n to 0..n-1.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def solve():\n    import sys\n    data = sys.stdin.buffer.read().split()\n    if not data:\n        return\n    it = iter(data)\n    n = int(next(it))\n    t = [int(next(it)) - 1 for _ in range(n)]",
+      "codeLabel": "Input parsing and 0-based conversion"
+    },
+    {
+      "id": "q16",
+      "phase": "Phase 4: Writing the Code",
+      "questionText": "Initialize arrays to track node states and answers.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    state = [0] * n  # 0=unseen,1=on path,2=done\n    ans = [0] * n",
+          "isCode": true
+        },
+        {
+          "label": "    state = {}  # map node->state\n    ans = {}",
+          "isCode": true
+        },
+        {
+          "label": "    state = [False] * n\n    ans = [-1] * n",
+          "isCode": true
+        },
+        {
+          "label": "    seen = set()\n    ans = [0] * (n+1)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need per-node state with three values and per-node answer; arrays of size n are appropriate.",
+      "wrongExplanations": {
+        "2": "Boolean states are insufficient to distinguish 'on path' vs 'done'.",
+        "3": "Using size n+1 misaligns indices with 0-based t."
+      },
+      "hint": "Three-state tracking is required: unseen, on current path, done.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    state = [0] * n  # 0=unseen,1=on path,2=done\n    ans = [0] * n",
+      "codeLabel": "Initialize state and answer arrays"
+    },
+    {
+      "id": "q17",
+      "phase": "Phase 4: Writing the Code",
+      "questionText": "Start iterating over all planets and skip those already processed.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    for i in range(n):\n        if state[i] != 0:\n            continue",
+          "isCode": true
+        },
+        {
+          "label": "    i = 0\n    while i < n:\n        if state[i] == 0:\n            break\n        i += 1",
+          "isCode": true
+        },
+        {
+          "label": "    for i in range(n):\n        pass  # we'll handle skipping later",
+          "isCode": true
+        },
+        {
+          "label": "    for i in range(n):\n        if state[i] == 0:\n            continue",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We only start a walk from unseen nodes; skipping others avoids recomputation.",
+      "wrongExplanations": {
+        "3": "This skips unseen nodes and processes only seen ones, the opposite of what we want."
+      },
+      "hint": "Only launch a new walk for state==0.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    for i in range(n):\n        if state[i] != 0:\n            continue",
+      "codeLabel": "Loop over nodes and skip processed"
+    },
+    {
+      "id": "q18",
+      "phase": "Phase 4: Writing the Code",
+      "questionText": "Initialize per-walk variables before starting to advance from i.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "        u = i\n        path = []\n        pos = {}",
+          "isCode": true
+        },
+        {
+          "label": "        u = t[i]\n        path = set()\n        pos = {}",
+          "isCode": true
+        },
+        {
+          "label": "        u = i\n        path = []\n        pos = []",
+          "isCode": true
+        },
+        {
+          "label": "        u = i\n        path = [i]\n        pos = {i: 1}",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We start at i, keep an ordered list 'path', and a map pos[node]=index-in-path.",
+      "wrongExplanations": {
+        "1": "A set loses ordering; we need positions to compute loop length.",
+        "3": "Position should be 0-based and assigned when we push the node."
+      },
+      "hint": "Order matters to compute loop length; use a list and a dict.",
+      "isCodeBuilding": true,
+      "codeSnippet": "        u = i\n        path = []\n        pos = {}",
+      "codeLabel": "Initialize walk variables"
+    },
+    {
+      "id": "q19",
+      "phase": "Phase 4: Writing the Code",
+      "questionText": "Advance the walk: mark current, record position, and get next destination.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "        while True:\n            state[u] = 1\n            pos[u] = len(path)\n            path.append(u)\n            v = t[u]",
+          "isCode": true
+        },
+        {
+          "label": "        while True:\n            pos[u] = len(path)\n            path.append(u)\n            v = t[u]\n            state[v] = 1",
+          "isCode": true
+        },
+        {
+          "label": "        while True:\n            state[u] = 1\n            path.append(u)\n            pos[u] = len(path)\n            v = t[u]",
+          "isCode": true
+        },
+        {
+          "label": "        while True:\n            state[u] = 2\n            pos[u] = len(path)\n            path.append(u)\n            v = t[u]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Mark current as on-path (1), store its position before appending next, and get v = t[u].",
+      "wrongExplanations": {
+        "2": "Setting pos[u] after appending shifts index by +1.",
+        "3": "State 2 means finished; we are still exploring u."
+      },
+      "hint": "Record u's position before appending it to path; mark as on-path.",
+      "isCodeBuilding": true,
+      "codeSnippet": "        while True:\n            state[u] = 1\n            pos[u] = len(path)\n            path.append(u)\n            v = t[u]",
+      "codeLabel": "Push current node and get next"
+    },
+    {
+      "id": "q20",
+      "phase": "Phase 4: Writing the Code",
+      "questionText": "If the next planet v has not been seen in any walk, keep going.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "            if state[v] == 0:\n                u = v\n                continue",
+          "isCode": true
+        },
+        {
+          "label": "            if state[u] == 0:\n                u = v\n                continue",
+          "isCode": true
+        },
+        {
+          "label": "            if state[v] == 1:\n                u = v\n                continue",
+          "isCode": true
+        },
+        {
+          "label": "            if state[v] == 2:\n                u = v\n                continue",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "If v is unseen globally (state 0), advance u to v and continue the loop.",
+      "wrongExplanations": {
+        "1": "We need to check state of v, the next node, not u.",
+        "2": "state 1 indicates a loop; we should handle it, not continue blindly."
+      },
+      "hint": "Only continue straight when v hasn't been seen yet.",
+      "isCodeBuilding": true,
+      "codeSnippet": "            if state[v] == 0:\n                u = v\n                continue",
+      "codeLabel": "Continue to unseen next"
+    },
+    {
+      "id": "q21",
+      "phase": "Phase 4: Writing the Code",
+      "questionText": "Handle the case where v is on the current path (a loop is found): compute loop length and assign answers.",
+      "diagram": "start_idx = pos[v]; cycle_len = len(path) - start_idx",
+      "options": [
+        {
+          "label": "            if state[v] == 1:\n                start_idx = pos[v]\n                cycle_len = len(path) - start_idx\n                for k in range(start_idx, len(path)):\n                    ans[path[k]] = cycle_len\n                    state[path[k]] = 2\n                for k in range(start_idx - 1, -1, -1):\n                    ans[path[k]] = ans[t[path[k]]] + 1\n                    state[path[k]] = 2",
+          "isCode": true
+        },
+        {
+          "label": "            if state[v] == 1:\n                start_idx = pos[u]\n                cycle_len = len(path) - start_idx\n                for k in range(0, start_idx):\n                    ans[path[k]] = cycle_len\n                    state[path[k]] = 2",
+          "isCode": true
+        },
+        {
+          "label": "            if state[v] == 1:\n                start_idx = pos[v]\n                cycle_len = pos[v]\n                for k in range(start_idx, len(path)):\n                    ans[path[k]] = cycle_len\n                # no need to process the tail",
+          "isCode": true
+        },
+        {
+          "label": "            if state[v] == 1:\n                start_idx = pos[v]\n                cycle_len = len(path) - start_idx\n                for k in range(0, len(path)):\n                    ans[path[k]] = cycle_len\n                    state[path[k]] = 2",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Use the suffix from start_idx to end as the loop; assign loop length to loop nodes, then propagate backward for the tail.",
+      "wrongExplanations": {
+        "1": "start_idx should be pos[v], not pos[u]; also you must assign loop length to loop nodes, not the prefix.",
+        "3": "Only loop nodes get the loop length; tail nodes need ans[next]+1."
+      },
+      "hint": "Loop nodes form a suffix of 'path'. Tail nodes depend on their next nodes' answers.",
+      "isCodeBuilding": true,
+      "codeSnippet": "            if state[v] == 1:\n                start_idx = pos[v]\n                cycle_len = len(path) - start_idx\n                for k in range(start_idx, len(path)):\n                    ans[path[k]] = cycle_len\n                    state[path[k]] = 2\n                for k in range(start_idx - 1, -1, -1):\n                    ans[path[k]] = ans[t[path[k]]] + 1\n                    state[path[k]] = 2",
+      "codeLabel": "Handle loop found on current path"
+    },
+    {
+      "id": "q22",
+      "phase": "Phase 4: Writing the Code",
+      "questionText": "Handle the case where v is already processed, then finish the walk and output results.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "            else:\n                for k in range(len(path) - 1, -1, -1):\n                    ans[path[k]] = ans[t[path[k]]] + 1\n                    state[path[k]] = 2\n            break\n    print(' '.join(map(str, ans)))\n\nif __name__ == \"__main__\":\n    solve()",
+          "isCode": true
+        },
+        {
+          "label": "            else:\n                for k in range(0, len(path)):\n                    ans[path[k]] = ans[t[path[k]]]\n                    state[path[k]] = 2\n            # continue walking\n    print(*ans)\nsolve()",
+          "isCode": true
+        },
+        {
+          "label": "            else:\n                for k in range(len(path)):\n                    ans[path[k]] = ans[v] + (len(path) - k)\n            break\n    print(' '.join(map(str, ans)))",
+          "isCode": true
+        },
+        {
+          "label": "            else:\n                pass\n            # no break here\n    print(' '.join(map(str, ans)))\n\nif __name__ == \"__main__\":\n    solve()",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "When v is done, propagate backward along path via ans[next]+1, mark done, then break. Finally, print answers and call solve via main guard.",
+      "wrongExplanations": {
+        "1": "Missing '+1' and missing break will cause incorrect counts or infinite loops.",
+        "3": "Without break, the while loop would not terminate for this walk."
+      },
+      "hint": "Use the known answers from v onward; ensure you exit the while loop.",
+      "isCodeBuilding": true,
+      "codeSnippet": "            else:\n                for k in range(len(path) - 1, -1, -1):\n                    ans[path[k]] = ans[t[path[k]]] + 1\n                    state[path[k]] = 2\n            break\n    print(' '.join(map(str, ans)))\n\nif __name__ == \"__main__\":\n    solve()",
+      "codeLabel": "Handle done-next case, finish, and print"
+    },
+    {
+      "id": "q23",
+      "phase": "Phase 5: Verifying the Solution",
+      "questionText": "Using the implemented logic, for input:\n5\n2 4 3 1 4\nwhat is the answer for planet 4?",
+      "diagram": "1→2→4→1 (loop length 3), 3→3 (loop length 1), 5→4",
+      "options": [
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Planet 4 is on a loop of length 3 (1-2-4), so its answer is 3.",
+      "wrongExplanations": {
+        "2": "4 is the count for planet 5 (1 step to loop + 3)."
+      },
+      "hint": "Identify whether planet 4 is on a loop or a tail.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Phase 5: Verifying the Solution",
+      "questionText": "For the same input (5; 2 4 3 1 4), what is the answer for planet 5?",
+      "diagram": "5→4 then into loop of length 3",
+      "options": [
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "One step to enter the 3-loop (at 4), then 3 to repeat: 1+3=4.",
+      "wrongExplanations": {
+        "0": "This ignores the initial step from 5 to 4."
+      },
+      "hint": "Sum distance-to-loop and loop length.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Phase 6: Analyzing Complexity",
+      "questionText": "What is the overall time complexity of this approach over all planets?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(1)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each planet is pushed to and popped from the path at most once; cycles are processed once.",
+      "wrongExplanations": {
+        "2": "We avoid re-walking long chains by marking and propagating answers."
+      },
+      "hint": "No planet is processed more than a constant number of times.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Phase 6: Analyzing Complexity",
+      "questionText": "What is the space complexity of the solution?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(1)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We store arrays of size n for state and answers; path/pos are also linear in component size.",
+      "wrongExplanations": {
+        "1": "We need per-node arrays; constant space is impossible."
+      },
+      "hint": "Consider state, ans, and temporary path/pos.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q27",
+      "phase": "Phase 6: Analyzing Complexity",
+      "questionText": "Given n up to 2⋅10^5 in Python, which statement is most accurate regarding using recursive functions for this problem?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "It is safe by default; Python supports very deep recursion",
+          "isCode": false
+        },
+        {
+          "label": "Default recursion limits may be exceeded; prefer an iterative traversal or explicitly increase limits with care",
+          "isCode": false
+        },
+        {
+          "label": "Recursion depth does not depend on n here",
+          "isCode": false
+        },
+        {
+          "label": "Recursion is required to detect loops",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Python's default recursion limit (~1000) is much smaller than 2e5; an iterative approach avoids stack overflows.",
+      "wrongExplanations": {
+        "0": "Default limits are not that high.",
+        "3": "Loops can be detected iteratively by tracking the current path."
+      },
+      "hint": "Avoid deep call stacks for large n.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "def solve():\n    import sys\n    data = sys.stdin.buffer.read().split()\n    if not data:\n        return\n    it = iter(data)\n    n = int(next(it))\n    t = [int(next(it)) - 1 for _ in range(n)]",
+    "    state = [0] * n  # 0=unseen,1=on path,2=done\n    ans = [0] * n",
+    "    for i in range(n):\n        if state[i] != 0:\n            continue",
+    "        u = i\n        path = []\n        pos = {}",
+    "        while True:\n            state[u] = 1\n            pos[u] = len(path)\n            path.append(u)\n            v = t[u]",
+    "            if state[v] == 0:\n                u = v\n                continue",
+    "            if state[v] == 1:\n                start_idx = pos[v]\n                cycle_len = len(path) - start_idx\n                for k in range(start_idx, len(path)):\n                    ans[path[k]] = cycle_len\n                    state[path[k]] = 2\n                for k in range(start_idx - 1, -1, -1):\n                    ans[path[k]] = ans[t[path[k]]] + 1\n                    state[path[k]] = 2",
+    "            else:\n                for k in range(len(path) - 1, -1, -1):\n                    ans[path[k]] = ans[t[path[k]]] + 1\n                    state[path[k]] = 2\n            break\n    print(' '.join(map(str, ans)))\n\nif __name__ == \"__main__\":\n    solve()"
+  ],
+  "reasoningChain": [
+    {
+      "question": "What exactly is the stopping condition and how many teleportations are counted for trivial cases like self-loops?",
+      "insight": "Stop at the first repeat of any planet; self-loop yields 1 teleportation."
+    },
+    {
+      "question": "What structural property holds when each planet has exactly one outgoing teleporter?",
+      "insight": "From any start, the walk must eventually enter a loop."
+    },
+    {
+      "question": "What are the answers for planets on loops versus planets leading into loops?",
+      "insight": "Loop planets have answer equal to loop length; non-loop planets have distance-to-loop plus loop length."
+    },
+    {
+      "question": "How can we detect a loop during a single walk without extra passes?",
+      "insight": "Track planets on the current path and their positions; seeing a current-path planet reveals the loop and its length."
+    },
+    {
+      "question": "How do we fill answers for the tail (nodes before the loop) once the loop answers are known?",
+      "insight": "Propagate backward along the path with ans[u] = ans[next[u]] + 1."
+    },
+    {
+      "question": "How do we reuse work when a walk hits an already processed planet?",
+      "insight": "Propagate backward from the end of the current path using the known answer at the meeting point."
+    },
+    {
+      "question": "What implementation choices ensure robustness and efficiency in Python?",
+      "insight": "Use an iterative walk with arrays and a per-walk position map to achieve O(n) time and avoid recursion depth limits."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1400,
+    "output_tokens": 17537,
+    "input_cost": 0.00175,
+    "output_cost": 0.17537,
+    "total_cost": 0.17712
+  }
+}

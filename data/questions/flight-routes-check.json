@@ -1,0 +1,941 @@
+{
+  "id": "flight-routes-check-mcq",
+  "title": "Flight Routes Check",
+  "difficulty": "intermediate",
+  "tags": [
+    "graph"
+  ],
+  "estimatedMinutes": 55,
+  "language": "python",
+  "description": "There are n cities and m flight connections. Your task is to check if you can travel from any city to any other city using the available flights.\n\nInput:\n- First line: two integers n and m — the number of cities and flights. Cities are numbered 1..n.\n- Next m lines: two integers a and b — there is a one-way flight from a to b.\n\nOutput:\n- Print \"YES\" if every city can reach every other city using the flights.\n- Otherwise print \"NO\" and on the next line print two cities a and b such that you cannot travel from a to b. If there are several answers, print any.\n\nTime limit: 1.00 s\nMemory limit: 512 MB",
+  "examples": [
+    {
+      "input": "4 5\n1 2\n2 3\n3 1\n1 4\n3 4\n",
+      "output": "NO\n4 2\n",
+      "explanation": "From city 4 you cannot reach city 2."
+    }
+  ],
+  "constraints": [
+    "1 ≤ n ≤ 1e5",
+    "1 ≤ m ≤ 2e5",
+    "1 ≤ a,b ≤ n",
+    "All flights are one-way"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "Suppose there are 3 cities and flights: 1 → 2, 2 → 3. Is it guaranteed that you can travel from 3 to 1?",
+      "diagram": "1 -> 2 -> 3",
+      "options": [
+        {
+          "label": "No, because flights are one-way and there is no path from 3 back to 1.",
+          "isCode": false
+        },
+        {
+          "label": "Yes, because if 1 can reach 3, then 3 can reach 1.",
+          "isCode": false
+        },
+        {
+          "label": "Yes, because you can always reverse the route.",
+          "isCode": false
+        },
+        {
+          "label": "It depends on n and m only, not the specific flights.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "One-way flights do not imply return paths. 3 has no outgoing path to 1 here.",
+      "wrongExplanations": {
+        "1": "Reachability is not symmetric in directed flights.",
+        "2": "You cannot reverse a one-way flight unless a reverse flight exists."
+      },
+      "hint": "Think about direction: does anything go out of 3 toward 1?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "For n=2 and flights: 1 → 2 only. What should the program output?",
+      "diagram": "1 -> 2",
+      "options": [
+        {
+          "label": "YES",
+          "isCode": false
+        },
+        {
+          "label": "NO then print: 1 2",
+          "isCode": false
+        },
+        {
+          "label": "NO then print: 2 1",
+          "isCode": false
+        },
+        {
+          "label": "NO then print: 2 2",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "You cannot travel from 2 to 1, so print NO and a pair (2,1).",
+      "wrongExplanations": {
+        "1": "There is a path 1→2; the failure is from 2 to 1, not 1 to 2."
+      },
+      "hint": "Find a pair (a,b) where there is no path a→b.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "For flights: 1 → 2, 2 → 3, 3 → 1. What should the program output?",
+      "diagram": "1 -> 2 -> 3 -> 1",
+      "options": [
+        {
+          "label": "YES",
+          "isCode": false
+        },
+        {
+          "label": "NO then any pair like 1 3",
+          "isCode": false
+        },
+        {
+          "label": "NO then any pair like 2 1",
+          "isCode": false
+        },
+        {
+          "label": "Depends on m ≥ n",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "From any city you can reach the others via the cycle, so output YES.",
+      "wrongExplanations": {
+        "1": "There is a path between every ordered pair here.",
+        "2": "There is a path 2→1 (2→3→1)."
+      },
+      "hint": "Check each ordered pair using the cycle.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "If from city 1 you can reach all cities, is it enough to conclude the answer is YES?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, because reaching all from 1 implies all pairs are connected.",
+          "isCode": false
+        },
+        {
+          "label": "No, because some city might not be able to reach another (e.g., back to 1).",
+          "isCode": false
+        },
+        {
+          "label": "Yes, if m ≥ n−1.",
+          "isCode": false
+        },
+        {
+          "label": "Yes, if there are no self-loops.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Reaching all from 1 doesn't ensure others can reach back. We must also check who can reach 1.",
+      "wrongExplanations": {
+        "0": "Directed reachability is not symmetric; more checking is needed."
+      },
+      "hint": "Consider whether some city can reach 1 even if 1 reaches it.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Exploring Approaches",
+      "questionText": "A naive idea: from every city, run a traversal along outgoing flights to see if it reaches all others. What's the time cost in terms of n and m?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n + m)",
+          "isCode": false
+        },
+        {
+          "label": "O(n * (n + m))",
+          "isCode": false
+        },
+        {
+          "label": "O(m^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Each traversal is O(n+m). Doing it from n cities costs O(n*(n+m)).",
+      "wrongExplanations": {
+        "0": "That's the cost of a single traversal, not n traversals."
+      },
+      "hint": "Multiply the cost of one full traversal by how many times you do it.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "Pick a start city s (say s=1). After traversing along outgoing flights from s, you find a city t was not visited. Which pair immediately proves the answer is NO?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "(s, t)",
+          "isCode": false
+        },
+        {
+          "label": "(t, s)",
+          "isCode": false
+        },
+        {
+          "label": "(t, t)",
+          "isCode": false
+        },
+        {
+          "label": "(s, s)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "t is not reachable from s, so (s,t) witnesses failure.",
+      "wrongExplanations": {
+        "1": "We discovered s cannot reach t, not the other way around."
+      },
+      "hint": "Which direction did you try to travel in that failed?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "If all cities are visited from s along outgoing flights, what else must be checked to conclude YES?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Nothing else; it's enough.",
+          "isCode": false
+        },
+        {
+          "label": "That every city can reach s using the given flights.",
+          "isCode": false
+        },
+        {
+          "label": "That the graph has at least n−1 flights.",
+          "isCode": false
+        },
+        {
+          "label": "That there are no cycles.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "We must ensure every city can also travel to s; then any a→b can go a→…→s→…→b.",
+      "wrongExplanations": {
+        "0": "Reaching all from s doesn't imply all can reach s in directed flights."
+      },
+      "hint": "Think in terms of paths ending at s.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Building the Idea",
+      "questionText": "How can we efficiently find all cities that can travel to s using only the given directed flights?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Traverse starting at s, but move from x to y only if there is a flight y → x in the input.",
+          "isCode": false
+        },
+        {
+          "label": "Traverse from each city to see if it can reach s, aggregating results.",
+          "isCode": false
+        },
+        {
+          "label": "Traverse again from s along outgoing flights.",
+          "isCode": false
+        },
+        {
+          "label": "Sort flights and scan linearly for paths to s.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Following edges in the opposite direction from s visits exactly the cities that can reach s.",
+      "wrongExplanations": {
+        "1": "That repeats work n times; we want one more traversal, not n.",
+        "2": "That tells who s can reach, not who can reach s."
+      },
+      "hint": "Use the same traversal idea but consume edges pointing into your current city.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "During this \"incoming-edges\" traversal from s, a city v is never visited. Which pair shows failure?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "(s, v)",
+          "isCode": false
+        },
+        {
+          "label": "(v, s)",
+          "isCode": false
+        },
+        {
+          "label": "(v, v)",
+          "isCode": false
+        },
+        {
+          "label": "(s, s)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "If v is not visited when moving via incoming edges, v cannot reach s. So (v, s) proves failure.",
+      "wrongExplanations": {
+        "0": "This phase checks who can reach s, not who s can reach."
+      },
+      "hint": "Which direction fails in this second check?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "Why do the two traversals (outgoing from s, and incoming to s) together guarantee the full requirement?",
+      "diagram": "Paths: a ...-> s and s ...-> b",
+      "options": [
+        {
+          "label": "Because if s reaches everyone and everyone reaches s, then any a can go to b via s.",
+          "isCode": false
+        },
+        {
+          "label": "Because two traversals cover all edges twice.",
+          "isCode": false
+        },
+        {
+          "label": "Because visiting s twice is sufficient.",
+          "isCode": false
+        },
+        {
+          "label": "Because the flights are undirected in effect.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Any a→b path can be formed by a→…→s then s→…→b if both properties hold.",
+      "wrongExplanations": {
+        "1": "Edge coverage count doesn't imply pairwise reachability."
+      },
+      "hint": "Combine a path from a to s and a path from s to b.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "Which city can we choose as the start s for these two traversals?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Any city; picking 1 is simplest.",
+          "isCode": false
+        },
+        {
+          "label": "Only a city with the most outgoing flights.",
+          "isCode": false
+        },
+        {
+          "label": "Only a city with the fewest incoming flights.",
+          "isCode": false
+        },
+        {
+          "label": "Only a city that is already known to reach all others.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Any fixed city works; choosing 1 is convenient for implementation.",
+      "wrongExplanations": {
+        "1": "The choice does not depend on degrees."
+      },
+      "hint": "You can fix any index as s.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "Consider n=4 with flights: 1→2, 2→3, 3→1, and 1→4. From s=1, what happens?",
+      "diagram": "1->2->3->1 and 1->4",
+      "options": [
+        {
+          "label": "First traversal visits all; second traversal misses some cities.",
+          "isCode": false
+        },
+        {
+          "label": "First traversal misses some cities; second traversal visits all.",
+          "isCode": false
+        },
+        {
+          "label": "Both traversals visit all cities.",
+          "isCode": false
+        },
+        {
+          "label": "Both traversals miss some cities.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "1 reaches all (1,2,3,4). But not all can reach 1 (e.g., 4 cannot), so second traversal misses 4.",
+      "wrongExplanations": {
+        "2": "4 cannot reach 1 with only 1→4 added."
+      },
+      "hint": "Check who can reach 1 using the given flights.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Writing the Code",
+      "questionText": "Choose a robust input-reading setup in Python for large inputs and start a main function.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\n\ndef main():\n    data = sys.stdin.read().strip().split()\n    if not data:\n        return\n    it = iter(data)\n",
+          "isCode": true
+        },
+        {
+          "label": "def main():\n    n, m = map(int, input().split())\n    it = None\n",
+          "isCode": true
+        },
+        {
+          "label": "import sys\n\ndef main():\n    data = sys.stdin.readline().split()\n    it = iter(data)\n",
+          "isCode": true
+        },
+        {
+          "label": "def main():\n    tokens = input().split()\n    it = tokens\n",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Reading all tokens at once is fast and avoids per-line overhead; we also guard empty input.",
+      "wrongExplanations": {
+        "1": "Reading line-by-line can pass, but options later will expect token iterator and empty-input guard.",
+        "3": "Not converting to ints yet and no iterator/guard; also input() may be too slow for worst cases."
+      },
+      "hint": "Use sys.stdin.read and tokenize once.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\n\ndef main():\n    data = sys.stdin.read().strip().split()\n    if not data:\n        return\n    it = iter(data)\n",
+      "codeLabel": "Read tokens and begin main"
+    },
+    {
+      "id": "q14",
+      "phase": "Writing the Code",
+      "questionText": "Parse n, m; build adjacency lists for flights and for traversing via incoming edges.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    n = int(next(it)); m = int(next(it))\n    adj = [[] for _ in range(n+1)]\n    radj = [[] for _ in range(n+1)]\n    for _ in range(m):\n        a = int(next(it)); b = int(next(it))\n        adj[a].append(b)\n        radj[b].append(a)\n",
+          "isCode": true
+        },
+        {
+          "label": "    n = int(next(it)); m = int(next(it))\n    adj = [[] for _ in range(n)]\n    radj = [[] for _ in range(n)]\n    for _ in range(m):\n        a = int(next(it)); b = int(next(it))\n        adj[a-1].append(b-1)\n        radj[a-1].append(b-1)\n",
+          "isCode": true
+        },
+        {
+          "label": "    n = int(next(it)); m = int(next(it))\n    adj = [[] for _ in range(n+1)]\n    radj = [[] for _ in range(n+1)]\n    for _ in range(m):\n        a = int(next(it)); b = int(next(it))\n        adj[b].append(a)\n        radj[a].append(b)\n",
+          "isCode": true
+        },
+        {
+          "label": "    n = int(next(it)); m = int(next(it))\n    adj = [[] for _ in range(n+1)]\n    radj = [[] for _ in range(n+1)]\n    for _ in range(m):\n        a = next(it); b = next(it)\n        adj[int(a)].append(int(b))\n        radj[int(a)].append(int(b))\n",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We keep 1-based indexing and store outgoing edges in adj and incoming traversal neighbors in radj via radj[b].append(a).",
+      "wrongExplanations": {
+        "1": "Mixing 0-based with later 1-based loops and building radj in the same direction is inconsistent.",
+        "2": "Swapping adj and radj makes both traversals wrong."
+      },
+      "hint": "radj should let you move from x to y if y→x exists.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    n = int(next(it)); m = int(next(it))\n    adj = [[] for _ in range(n+1)]\n    radj = [[] for _ in range(n+1)]\n    for _ in range(m):\n        a = int(next(it)); b = int(next(it))\n        adj[a].append(b)\n        radj[b].append(a)\n",
+      "codeLabel": "Build adjacency and reverse adjacency"
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Initialize the first traversal from start city s=1.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    start = 1\n    visited = [False]*(n+1)\n    stack = [start]\n    visited[start] = True\n",
+          "isCode": true
+        },
+        {
+          "label": "    start = 1\n    visited = [False]*n\n    stack = []\n",
+          "isCode": true
+        },
+        {
+          "label": "    start = 1\n    visited = [False]*(n+1)\n    stack = []\n    # don't mark visited until pop\n",
+          "isCode": true
+        },
+        {
+          "label": "    start = 1\n    visited = [True]*(n+1)\n    stack = [start]\n",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need size n+1 for 1..n and should mark start visited and push it to begin traversal.",
+      "wrongExplanations": {
+        "1": "visited size n misses index n and mismatches 1-based indexing.",
+        "3": "Marking all True prevents any traversal."
+      },
+      "hint": "Use 1-based indexing consistently.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    start = 1\n    visited = [False]*(n+1)\n    stack = [start]\n    visited[start] = True\n",
+      "codeLabel": "Init first traversal"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Fill the loop to explore all cities reachable from start via outgoing flights.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    while stack:\n        u = stack.pop()\n        for v in adj[u]:\n            if not visited[v]:\n                visited[v] = True\n                stack.append(v)\n",
+          "isCode": true
+        },
+        {
+          "label": "    while stack:\n        u = stack[0]; stack = stack[1:]\n        for v in adj[u]:\n            if visited[v]:\n                visited[v] = False\n            else:\n                stack.append(v)\n",
+          "isCode": true
+        },
+        {
+          "label": "    for u in range(1, n+1):\n        for v in adj[u]:\n            visited[v] = True\n",
+          "isCode": true
+        },
+        {
+          "label": "    while True:\n        u = stack.pop()\n        for v in adj[u]:\n            visited[v] = True\n            stack.append(v)\n",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Standard stack-based propagation marking when first discovered avoids duplicates and terminates correctly.",
+      "wrongExplanations": {
+        "2": "Blindly marking neighbors ignores reachability from start and initial visited state.",
+        "3": "Infinite loop if stack becomes empty; also no visited checks causes duplicates."
+      },
+      "hint": "Pop, iterate neighbors, push unvisited neighbors, and mark them.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    while stack:\n        u = stack.pop()\n        for v in adj[u]:\n            if not visited[v]:\n                visited[v] = True\n                stack.append(v)\n",
+      "codeLabel": "First traversal loop"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "After the first traversal, check for any unvisited city and print the required failure pair.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    for i in range(1, n+1):\n        if not visited[i]:\n            print(\"NO\")\n            print(start, i)\n            return\n",
+          "isCode": true
+        },
+        {
+          "label": "    for i in range(n):\n        if not visited[i]:\n            print(\"NO\")\n            print(i, start)\n            return\n",
+          "isCode": true
+        },
+        {
+          "label": "    if any(visited):\n        print(\"NO\")\n        print(start, 1)\n        return\n",
+          "isCode": true
+        },
+        {
+          "label": "    if visited.count(False) == 0:\n        print(\"NO\")\n        print(1, start)\n        return\n",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Scan 1..n for the first unvisited i and report (start, i) as the failing direction.",
+      "wrongExplanations": {
+        "1": "Mixes 0-based and 1-based indices and reverses the pair direction."
+      },
+      "hint": "Report the first city not reached from start as (start, i).",
+      "isCodeBuilding": true,
+      "codeSnippet": "    for i in range(1, n+1):\n        if not visited[i]:\n            print(\"NO\")\n            print(start, i)\n            return\n",
+      "codeLabel": "Check after first traversal"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Initialize the second traversal to find who can reach start using incoming edges.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    visited2 = [False]*(n+1)\n    stack = [start]\n    visited2[start] = True\n",
+          "isCode": true
+        },
+        {
+          "label": "    visited2 = visited\n    stack = [start]\n",
+          "isCode": true
+        },
+        {
+          "label": "    visited2 = [True]*(n+1)\n    stack = []\n",
+          "isCode": true
+        },
+        {
+          "label": "    visited2 = [False]*(n+1)\n    stack = []\n",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Use a fresh visited array, push start, and mark it visited to begin the second traversal.",
+      "wrongExplanations": {
+        "1": "Reusing visited mixes the two phases and hides missing reachability to start.",
+        "3": "You need to seed the traversal with start."
+      },
+      "hint": "It's a new traversal with its own visited state.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    visited2 = [False]*(n+1)\n    stack = [start]\n    visited2[start] = True\n",
+      "codeLabel": "Init second traversal"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Fill the loop to explore all cities that can reach start by moving along incoming edges (using radj).",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    while stack:\n        u = stack.pop()\n        for v in radj[u]:\n            if not visited2[v]:\n                visited2[v] = True\n                stack.append(v)\n",
+          "isCode": true
+        },
+        {
+          "label": "    while stack:\n        u = stack.pop()\n        for v in adj[u]:\n            if not visited2[v]:\n                visited2[v] = True\n                stack.append(v)\n",
+          "isCode": true
+        },
+        {
+          "label": "    while stack:\n        u = stack.pop()\n        for v in radj[u]:\n            visited2[v] = True\n",
+          "isCode": true
+        },
+        {
+          "label": "    for u in range(1, n+1):\n        for v in radj[u]:\n            if visited2[u]:\n                visited2[v] = True\n",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Move through radj to follow incoming edges; mark on first discovery and push.",
+      "wrongExplanations": {
+        "1": "Using adj again repeats the first traversal, not the incoming-edges traversal.",
+        "2": "Without pushing, you won't propagate beyond immediate neighbors."
+      },
+      "hint": "Use the list that encodes neighbors y where y→u exists.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    while stack:\n        u = stack.pop()\n        for v in radj[u]:\n            if not visited2[v]:\n                visited2[v] = True\n                stack.append(v)\n",
+      "codeLabel": "Second traversal loop"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "After the second traversal, check for any city that cannot reach start and finish the program.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    for i in range(1, n+1):\n        if not visited2[i]:\n            print(\"NO\")\n            print(i, start)\n            return\n    print(\"YES\")\n\nif __name__ == \"__main__\":\n    main()\n",
+          "isCode": true
+        },
+        {
+          "label": "    for i in range(1, n+1):\n        if visited2[i]:\n            print(\"NO\")\n            print(start, i)\n            return\n    print(\"YES\")\n\nif __name__ == \"__main__\":\n    main()\n",
+          "isCode": true
+        },
+        {
+          "label": "    if any(visited2):\n        print(\"YES\")\n    else:\n        print(\"NO\")\n\nif __name__ == \"__main__\":\n    main()\n",
+          "isCode": true
+        },
+        {
+          "label": "    for i in range(n):\n        if not visited2[i]:\n            print(\"NO\")\n            print(start, i)\n            return\n    print(\"YES\")\n\nif __name__ == \"__main__\":\n    main()\n",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Scan for the first city that cannot reach start and print (i, start); otherwise print YES and exit.",
+      "wrongExplanations": {
+        "1": "Condition and pair direction are wrong; we want cities that were NOT visited in second pass.",
+        "4": "0-based range and pair direction mistakes."
+      },
+      "hint": "This time report (i, start) for any unvisited i.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    for i in range(1, n+1):\n        if not visited2[i]:\n            print(\"NO\")\n            print(i, start)\n            return\n    print(\"YES\")\n\nif __name__ == \"__main__\":\n    main()\n",
+      "codeLabel": "Final check and finish"
+    },
+    {
+      "id": "q21",
+      "phase": "Verifying the Solution",
+      "questionText": "Trace the program on n=4 with flights: 1→2, 2→3, 3→1, 1→4. What does it print?",
+      "diagram": "1->2->3->1 and 1->4",
+      "options": [
+        {
+          "label": "YES",
+          "isCode": false
+        },
+        {
+          "label": "NO\\n1 4",
+          "isCode": false
+        },
+        {
+          "label": "NO\\n2 1",
+          "isCode": false
+        },
+        {
+          "label": "NO\\n4 1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 3,
+      "explanation": "First pass reaches all. Second pass from 1 via incoming edges cannot reach 4; first missing is 2 or 4? Only 1 has incoming from 3; 2 and 3 are visited via incoming chain, but 4 cannot reach 1, so print NO and (4,1).",
+      "wrongExplanations": {
+        "2": "2 can reach 1 (2→3→1). The failing city is 4."
+      },
+      "hint": "Who has a path to 1 using directed flights?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q22",
+      "phase": "Verifying the Solution",
+      "questionText": "Trace the program on n=3 with a single flight: 2→3. Starting from s=1, what does it print?",
+      "diagram": "2 -> 3, 1 isolated",
+      "options": [
+        {
+          "label": "YES",
+          "isCode": false
+        },
+        {
+          "label": "NO\\n1 2",
+          "isCode": false
+        },
+        {
+          "label": "NO\\n2 1",
+          "isCode": false
+        },
+        {
+          "label": "NO\\n3 1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "First pass from 1 visits only 1. The first unvisited is 2, so it prints NO and (1,2).",
+      "wrongExplanations": {
+        "3": "We fail in the first pass already; we don't reach the second pass."
+      },
+      "hint": "In the first pass from 1, which is the first city not visited?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q23",
+      "phase": "Verifying the Solution",
+      "questionText": "For n=2 with flights 1→2 and 2→1, what does the program print?",
+      "diagram": "1 <-> 2",
+      "options": [
+        {
+          "label": "YES",
+          "isCode": false
+        },
+        {
+          "label": "NO\\n1 2",
+          "isCode": false
+        },
+        {
+          "label": "NO\\n2 1",
+          "isCode": false
+        },
+        {
+          "label": "NO\\n1 1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Both passes cover both cities, so the result is YES.",
+      "wrongExplanations": {
+        "1": "1 can reach 2 and 2 can reach 1."
+      },
+      "hint": "Check both directions between 1 and 2.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the time complexity of this solution in terms of n and m?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n + m)",
+          "isCode": false
+        },
+        {
+          "label": "O(n * (n + m))",
+          "isCode": false
+        },
+        {
+          "label": "O(m log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2 + m^2)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each traversal visits nodes/edges at most once, and we do it twice: O(n+m).",
+      "wrongExplanations": {
+        "1": "We do not traverse from every city; only two traversals."
+      },
+      "hint": "Count how many times each edge is processed.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the extra space usage of the algorithm?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n + m) for adjacency structures and O(n) for visited arrays",
+          "isCode": false
+        },
+        {
+          "label": "O(1)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(m^2)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We store adjacency lists (O(n+m)) and two visited arrays (O(n)).",
+      "wrongExplanations": {
+        "1": "We store the full graph, not constant memory."
+      },
+      "hint": "Consider both adj, radj and visited arrays.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Analyzing Complexity",
+      "questionText": "Edge case: n=1, m=0. What should the program output?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "YES",
+          "isCode": false
+        },
+        {
+          "label": "NO\\n1 1",
+          "isCode": false
+        },
+        {
+          "label": "NO\\n1 0",
+          "isCode": false
+        },
+        {
+          "label": "Depends on implementation",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "With one city, it trivially reaches itself, so print YES.",
+      "wrongExplanations": {
+        "1": "The requirement is satisfied vacuously for a single city."
+      },
+      "hint": "Can the only city reach itself under the problem statement?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\n\ndef main():\n    data = sys.stdin.read().strip().split()\n    if not data:\n        return\n    it = iter(data)\n",
+    "    n = int(next(it)); m = int(next(it))\n    adj = [[] for _ in range(n+1)]\n    radj = [[] for _ in range(n+1)]\n    for _ in range(m):\n        a = int(next(it)); b = int(next(it))\n        adj[a].append(b)\n        radj[b].append(a)\n",
+    "    start = 1\n    visited = [False]*(n+1)\n    stack = [start]\n    visited[start] = True\n",
+    "    while stack:\n        u = stack.pop()\n        for v in adj[u]:\n            if not visited[v]:\n                visited[v] = True\n                stack.append(v)\n",
+    "    for i in range(1, n+1):\n        if not visited[i]:\n            print(\"NO\")\n            print(start, i)\n            return\n",
+    "    visited2 = [False]*(n+1)\n    stack = [start]\n    visited2[start] = True\n",
+    "    while stack:\n        u = stack.pop()\n        for v in radj[u]:\n            if not visited2[v]:\n                visited2[v] = True\n                stack.append(v)\n",
+    "    for i in range(1, n+1):\n        if not visited2[i]:\n            print(\"NO\")\n            print(i, start)\n            return\n    print(\"YES\")\n\nif __name__ == \"__main__\":\n    main()\n"
+  ],
+  "reasoningChain": [
+    {
+      "question": "Why is it not enough to know that one city reaches another in one direction for directed flights?",
+      "insight": "Directed edges are one-way; reachability is not symmetric."
+    },
+    {
+      "question": "How can we quickly detect failure using one traversal from a fixed start city?",
+      "insight": "Traverse along outgoing flights from a fixed start (e.g., 1); if any city is not visited, report (start, that city)."
+    },
+    {
+      "question": "If the first traversal reaches all cities, what additional property must hold?",
+      "insight": "Every city must also be able to travel to the start; check who can reach start by moving via incoming edges."
+    },
+    {
+      "question": "How do we implement the second check efficiently with the given flights?",
+      "insight": "Build neighbors for moving along incoming edges (for each a→b, add b→a in a separate list) and traverse from start."
+    },
+    {
+      "question": "What failure pair should be reported after the second check if some city cannot reach start?",
+      "insight": "If a city v is not visited in the incoming-edges traversal, report (v, start)."
+    },
+    {
+      "question": "Why do these two traversals together imply all-pairs reachability?",
+      "insight": "If start reaches everyone and everyone reaches start, then any a can go to b via a→…→start→…→b."
+    },
+    {
+      "question": "What are the performance guarantees of this approach?",
+      "insight": "Each edge and node is processed a constant number of times across two traversals: O(n+m) time and O(n+m) space."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1426,
+    "output_tokens": 14209,
+    "input_cost": 0.001783,
+    "output_cost": 0.14209,
+    "total_cost": 0.143872
+  }
+}

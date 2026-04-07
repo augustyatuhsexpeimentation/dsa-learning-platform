@@ -1,0 +1,985 @@
+{
+  "id": "nim-game-ii",
+  "title": "Nim Game II",
+  "difficulty": "intermediate",
+  "tags": [
+    "math"
+  ],
+  "estimatedMinutes": 45,
+  "language": "python",
+  "description": "There are n heaps of sticks and two players who move alternately. On each move, a player chooses a non-empty heap and removes 1, 2, or 3 sticks. The player who removes the last stick wins the game.\n\nYour task is to find out who wins if both players play optimally.\n\nInput\n- The first input line contains an integer t: the number of tests.\n- After this, t test cases are described:\n  - The first line contains an integer n: the number of heaps.\n  - The next line has n integers x_1, x_2, ..., x_n: the number of sticks in each heap.\n\nOutput\nFor each test case, print \"first\" if the first player wins the game and \"second\" if the second player wins the game.",
+  "examples": [
+    {
+      "input": "3\n4\n5 7 2 5\n2\n4 1\n3\n4 4 4",
+      "output": "first\nfirst\nsecond",
+      "explanation": "- Test 1: Residues mod 4 are [1,3,2,1]; combining yields a nonzero value, so the first player can force a win.\n- Test 2: Residues [0,1] yield a nonzero combination; first wins.\n- Test 3: All heaps are multiples of 4; second wins."
+    }
+  ],
+  "constraints": [
+    "1 ≤ t ≤ 2⋅10^5",
+    "1 ≤ n ≤ 2⋅10^5",
+    "1 ≤ x_i ≤ 10^9",
+    "The sum of all n over tests is at most 2⋅10^5",
+    "Time limit: 1.00 s",
+    "Memory limit: 512 MB"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "Single heap: x = 1. Who wins (optimal play)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "first",
+          "isCode": false
+        },
+        {
+          "label": "second",
+          "isCode": false
+        },
+        {
+          "label": "depends on n",
+          "isCode": false
+        },
+        {
+          "label": "draw",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "With 1 stick, the first player removes it and wins immediately.",
+      "wrongExplanations": {
+        "1": "There is a legal move; second cannot win if first can take the last stick.",
+        "2": "n is the number of heaps; here there is only one heap.",
+        "3": "The game cannot draw; it ends when the last stick is removed."
+      },
+      "hint": "Try listing legal moves when there is only 1 stick.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "Single heap: x = 3. Who wins (optimal play)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "first",
+          "isCode": false
+        },
+        {
+          "label": "second",
+          "isCode": false
+        },
+        {
+          "label": "depends on t",
+          "isCode": false
+        },
+        {
+          "label": "no one (no legal moves)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "First can remove all 3 sticks at once and win.",
+      "wrongExplanations": {
+        "1": "Second only moves if first doesn't win immediately.",
+        "3": "There are legal moves: remove 1, 2, or 3 sticks."
+      },
+      "hint": "Can the first player take all sticks in one move?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "Single heap: x = 4. Who wins (optimal play)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "first",
+          "isCode": false
+        },
+        {
+          "label": "second",
+          "isCode": false
+        },
+        {
+          "label": "depends on the moves chosen randomly",
+          "isCode": false
+        },
+        {
+          "label": "draw",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Any move (remove 1,2,3) leaves 3,2,1, which lets the opponent take the remainder and win.",
+      "wrongExplanations": {
+        "0": "First cannot remove 4 in one move; any move leaves a winning reply for second."
+      },
+      "hint": "List what remains after removing 1,2,3 and what the opponent can do next.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "Single-heap outcomes for x in {1,2,3,4,5,6,7,8}: which x are losing for the first player?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "{4, 8}",
+          "isCode": false
+        },
+        {
+          "label": "{2, 6}",
+          "isCode": false
+        },
+        {
+          "label": "{3, 7}",
+          "isCode": false
+        },
+        {
+          "label": "{1, 5}",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Multiples of 4 are losing: 4 and 8. Others allow taking 1–3 to reach a multiple of 4.",
+      "wrongExplanations": {
+        "1": "2 and 6 are winning: you can remove 2 (from 2) or 2 (from 6 to make 4 for the opponent).",
+        "2": "3 is winning (remove 3). 7 is winning (remove 3 to make 4)."
+      },
+      "hint": "Look for a pattern: which positions let you move to a position like x=4?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Exploring Approaches",
+      "questionText": "With multiple heaps, is exploring all move sequences feasible within limits?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "No; the number of states grows exponentially with total sticks.",
+          "isCode": false
+        },
+        {
+          "label": "Yes; it is linear in the number of heaps.",
+          "isCode": false
+        },
+        {
+          "label": "Yes; it is logarithmic in total sticks.",
+          "isCode": false
+        },
+        {
+          "label": "No; because input parsing dominates time.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Brute force over moves is exponential and infeasible. We need a per-heap summary.",
+      "wrongExplanations": {
+        "1": "Even with two heaps, move trees branch; it's not linear without structure.",
+        "3": "Parsing is linear; the issue is the huge decision tree."
+      },
+      "hint": "Consider two heaps of size ~10^9; how many sequences of 1–3 removals exist?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "Two heaps: which start is losing for the first player (optimal play)?",
+      "diagram": "Options are pairs (a,b): sizes of two heaps.\n- (1,1)\n- (1,2)\n- (2,3)\n- (3,4)",
+      "options": [
+        {
+          "label": "(1,1)",
+          "isCode": false
+        },
+        {
+          "label": "(1,2)",
+          "isCode": false
+        },
+        {
+          "label": "(2,3)",
+          "isCode": false
+        },
+        {
+          "label": "(3,4)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "(1,1) is losing: any move leaves (0,1) for the opponent to take the last stick.",
+      "wrongExplanations": {
+        "1": "From (1,2), the first can win (e.g., remove 1 from the 2-heap to leave (1,1) to the opponent).",
+        "2": "From (2,3), the first can take 2 from the 3-heap to leave (2,1) which is winning."
+      },
+      "hint": "Try to move to a position you already know is losing in one heap.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "Let r be heap size modulo 4 for each heap. Which rule matches small two-heap tests for deciding a losing start?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Losing when (r1 + r2) % 4 == 0",
+          "isCode": false
+        },
+        {
+          "label": "Losing when r1 ^ r2 == 0",
+          "isCode": false
+        },
+        {
+          "label": "Losing when (r1 + r2) is even",
+          "isCode": false
+        },
+        {
+          "label": "Losing only when r1 == r2 == 0",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Empirically, (1,1), (2,2), (3,3), (0,0) are losing: r1 ^ r2 == 0 captures this.",
+      "wrongExplanations": {
+        "0": "(1,3) sums to 0 mod 4 but is winning, so this fails.",
+        "3": "(1,1) is losing too; not only when both are 0."
+      },
+      "hint": "Check (1,1), (1,2), (2,2), (3,3) against each rule.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Building the Idea",
+      "questionText": "For a single heap of x sticks, which statement is correct?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "If x % 4 == 0 then second wins; otherwise first wins.",
+          "isCode": false
+        },
+        {
+          "label": "If x % 4 == 3 then second wins; otherwise first wins.",
+          "isCode": false
+        },
+        {
+          "label": "If x % 2 == 0 then second wins; otherwise first wins.",
+          "isCode": false
+        },
+        {
+          "label": "If x % 4 == 1 then second wins; otherwise first wins.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Multiples of 4 are losing; other residues (1,2,3) are winning.",
+      "wrongExplanations": {
+        "1": "x=3 is winning for the first (remove 3).",
+        "2": "Parity doesn't capture x=2 (first wins) vs x=4 (second wins)."
+      },
+      "hint": "Recall outcomes for x=1..8 you identified.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "For multiple heaps, each reduced to r_i = x_i % 4, when is the start losing for the first player?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "When r_1 ^ r_2 ^ ... ^ r_n == 0",
+          "isCode": false
+        },
+        {
+          "label": "When (r_1 + r_2 + ... + r_n) % 4 == 0",
+          "isCode": false
+        },
+        {
+          "label": "When the count of nonzero r_i is even",
+          "isCode": false
+        },
+        {
+          "label": "When all r_i are equal",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Testing small cases suggests the combined XOR being 0 characterizes losing starts.",
+      "wrongExplanations": {
+        "1": "Counterexample: r=[1,3] sum%4=0 but this is winning for first.",
+        "2": "r=[1,1,2] has two nonzero r but is winning for first."
+      },
+      "hint": "Try 2–3 heaps with residues summing to 0 but differing in XOR.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "Heaps: [1, 1, 2]. Who wins (optimal play)?",
+      "diagram": "Residues: [1, 1, 2]. Compute 1 ^ 1 ^ 2.",
+      "options": [
+        {
+          "label": "first",
+          "isCode": false
+        },
+        {
+          "label": "second",
+          "isCode": false
+        },
+        {
+          "label": "cannot be determined without simulating",
+          "isCode": false
+        },
+        {
+          "label": "depends on order of moves only",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "1 ^ 1 ^ 2 = 2 (nonzero), so the first player can force a win.",
+      "wrongExplanations": {
+        "1": "Zero would indicate losing; here it's nonzero.",
+        "2": "We can decide by the residue rule without full simulation."
+      },
+      "hint": "Compute XOR; nonzero vs zero decides.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "Heaps: [3, 3, 2, 2]. Who wins (optimal play)?",
+      "diagram": "Residues: [3, 3, 2, 2]. 3 ^ 3 ^ 2 ^ 2 = ?",
+      "options": [
+        {
+          "label": "first",
+          "isCode": false
+        },
+        {
+          "label": "second",
+          "isCode": false
+        },
+        {
+          "label": "depends on t",
+          "isCode": false
+        },
+        {
+          "label": "cannot be determined",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "3^3=0 and 2^2=0; total XOR is 0, so the start is losing for first.",
+      "wrongExplanations": {
+        "0": "Nonzero XOR indicates a winning start; here it is zero."
+      },
+      "hint": "Pair equal residues to cancel to 0.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "What is the effect of adding a heap with x % 4 == 0 to any position?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "It never changes who wins.",
+          "isCode": false
+        },
+        {
+          "label": "It always flips who wins.",
+          "isCode": false
+        },
+        {
+          "label": "It changes who wins only if the count of heaps is odd.",
+          "isCode": false
+        },
+        {
+          "label": "It changes who wins only if all other residues are nonzero.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Residue 0 doesn't affect XOR; the decision remains the same.",
+      "wrongExplanations": {
+        "1": "XOR with 0 leaves the value unchanged.",
+        "2": "Parity of heap count is irrelevant; only XOR of residues matters."
+      },
+      "hint": "Compute r ^ 0 for any r.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "x_i can be up to 10^9. What do we actually need from each x_i to decide the winner?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "x_i % 4",
+          "isCode": false
+        },
+        {
+          "label": "x_i % 3",
+          "isCode": false
+        },
+        {
+          "label": "The last decimal digit of x_i",
+          "isCode": false
+        },
+        {
+          "label": "Whether x_i is even or odd",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Only the residue modulo 4 matters for the outcome with 1–3 removals.",
+      "wrongExplanations": {
+        "1": "Moves are 1–3; modulo 3 doesn’t capture the 4-cycle behavior.",
+        "3": "Parity alone cannot distinguish x=2 (win) vs x=4 (lose)."
+      },
+      "hint": "Think of the 4-cycle in single-heap results.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Writing the Code",
+      "questionText": "Start the solution function and import what you need.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def solve():\n    import sys",
+          "isCode": true
+        },
+        {
+          "label": "def solve():\n    import math",
+          "isCode": true
+        },
+        {
+          "label": "import sys\n\ndef solve():",
+          "isCode": true
+        },
+        {
+          "label": "def solve():\n    pass",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We define solve() and import sys to read input and write output efficiently.",
+      "wrongExplanations": {
+        "2": "Top-level import can work, but we will structure imports inside solve() for this build.",
+        "3": "We need a real implementation, not a placeholder."
+      },
+      "hint": "We'll read from sys.stdin and write to sys.stdout.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def solve():\n    import sys",
+      "codeLabel": "Function header and import"
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Read and tokenize all input efficiently.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    data = sys.stdin.read().strip().split()",
+          "isCode": true
+        },
+        {
+          "label": "    data = sys.stdin.readline().split()",
+          "isCode": true
+        },
+        {
+          "label": "    data = list(map(int, sys.stdin.read()))",
+          "isCode": true
+        },
+        {
+          "label": "    data = sys.stdin.read().split('\\n')",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Reading all input and splitting by whitespace gives a flat token list suitable for fast iteration.",
+      "wrongExplanations": {
+        "1": "readline() reads only one line, not the whole input.",
+        "3": "Splitting by newlines alone misses multiple numbers on one line."
+      },
+      "hint": "We need every number regardless of line breaks.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    data = sys.stdin.read().strip().split()",
+      "codeLabel": "Tokenize input"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Prepare to iterate over tokens and read t.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    it = iter(data)\n    t = int(next(it))",
+          "isCode": true
+        },
+        {
+          "label": "    idx = 0\n    t = int(data[idx])",
+          "isCode": true
+        },
+        {
+          "label": "    it = data\n    t = int(it.pop(0))",
+          "isCode": true
+        },
+        {
+          "label": "    t = int(data[0])\n    it = data[1:]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Using an iterator and next(it) is simple and fast; we’ll consistently consume tokens in order.",
+      "wrongExplanations": {
+        "1": "This sets t but doesn’t advance idx for subsequent reads unless handled carefully.",
+        "3": "Slicing creates a list, but downstream code expects an iterator and next()."
+      },
+      "hint": "We’ll repeatedly call next(...) to consume tokens.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    it = iter(data)\n    t = int(next(it))",
+      "codeLabel": "Iterator and t"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Initialize storage for outputs and start the test loop, reading n and resetting the accumulator.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    out_lines = []\n    for _ in range(t):\n        n = int(next(it))\n        g = 0",
+          "isCode": true
+        },
+        {
+          "label": "    out = ''\n    for _ in range(t):\n        n = int(next(it))\n        g += 0",
+          "isCode": true
+        },
+        {
+          "label": "    out_lines = []\n    for _ in range(t):\n        g = 0",
+          "isCode": true
+        },
+        {
+          "label": "    out_lines = []\n    for _ in range(t):\n        n = int(next(it))\n        # g is global",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We collect outputs and for each test read n and reset g=0. Resetting per test is crucial.",
+      "wrongExplanations": {
+        "2": "Missing n and g reset placement is incorrect and incomplete.",
+        "3": "Using a global g across tests would mix results between test cases."
+      },
+      "hint": "Each test case has its own accumulator; don’t leak across tests.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    out_lines = []\n    for _ in range(t):\n        n = int(next(it))\n        g = 0",
+      "codeLabel": "Loop over tests"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Process each heap in the current test and update the accumulator correctly.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "        for i in range(n):\n            x = int(next(it))\n            g ^= (x % 4)",
+          "isCode": true
+        },
+        {
+          "label": "        for i in range(n):\n            x = int(next(it))\n            g += (x % 4)",
+          "isCode": true
+        },
+        {
+          "label": "        for i in range(n):\n            x = int(next(it))\n            g ^= x",
+          "isCode": true
+        },
+        {
+          "label": "        for i in range(n):\n            x = int(next(it))\n            g ^= (x % 3)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Combine residues modulo 4 using XOR over all heaps.",
+      "wrongExplanations": {
+        "1": "Summing residues mod 4 doesn’t capture the correct combination rule.",
+        "2": "Using x directly fails because only x % 4 matters here."
+      },
+      "hint": "Use the per-heap reduction you identified and the correct combine operation.",
+      "isCodeBuilding": true,
+      "codeSnippet": "        for i in range(n):\n            x = int(next(it))\n            g ^= (x % 4)",
+      "codeLabel": "Accumulate per heap"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Decide and store the winner for this test case.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "        out_lines.append(\"first\" if g != 0 else \"second\")",
+          "isCode": true
+        },
+        {
+          "label": "        out_lines.append(\"first\" if g == 0 else \"second\")",
+          "isCode": true
+        },
+        {
+          "label": "        print(\"first\" if g != 0 else \"second\")",
+          "isCode": true
+        },
+        {
+          "label": "        out_lines.append(str(g))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Nonzero accumulator means first wins; zero means second. We append to collect outputs.",
+      "wrongExplanations": {
+        "1": "The condition is inverted: g==0 means second wins.",
+        "3": "We need the words \"first\"/\"second\", not the numeric value."
+      },
+      "hint": "Defer printing until after processing all tests.",
+      "isCodeBuilding": true,
+      "codeSnippet": "        out_lines.append(\"first\" if g != 0 else \"second\")",
+      "codeLabel": "Store result"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Write all results at once.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    sys.stdout.write(\"\\n\".join(out_lines))",
+          "isCode": true
+        },
+        {
+          "label": "    print(\"\\n\".join(out_lines), end='')",
+          "isCode": true
+        },
+        {
+          "label": "    print(out_lines)",
+          "isCode": true
+        },
+        {
+          "label": "    sys.stdout.write(\" \".join(out_lines))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Join by newlines to match required output format exactly.",
+      "wrongExplanations": {
+        "2": "Printing the list adds brackets and commas, not the required format.",
+        "3": "Joining by spaces doesn’t put each answer on its own line."
+      },
+      "hint": "Each test’s answer should be on its own line.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    sys.stdout.write(\"\\n\".join(out_lines))",
+      "codeLabel": "Flush output"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "Add the usual entry point to run the solution.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "if __name__ == \"__main__\":\n    solve()",
+          "isCode": true
+        },
+        {
+          "label": "if __name__ == \"main\":\n    solve()",
+          "isCode": true
+        },
+        {
+          "label": "solve",
+          "isCode": true
+        },
+        {
+          "label": "def main():\n    solve()",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The standard way is to call solve() under the main guard.",
+      "wrongExplanations": {
+        "1": "The sentinel is \"__main__\", not \"main\".",
+        "2": "This references the function without calling it."
+      },
+      "hint": "Use the common Python pattern to run code when the script is executed.",
+      "isCodeBuilding": true,
+      "codeSnippet": "if __name__ == \"__main__\":\n    solve()",
+      "codeLabel": "Main guard"
+    },
+    {
+      "id": "q22",
+      "phase": "Verifying the Solution",
+      "questionText": "Given input:\n3\n4\n5 7 2 5\n2\n4 1\n3\n4 4 4\nWhat does your program output?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "first\\nfirst\\nsecond",
+          "isCode": false
+        },
+        {
+          "label": "first\\nsecond\\nfirst",
+          "isCode": false
+        },
+        {
+          "label": "second\\nfirst\\nsecond",
+          "isCode": false
+        },
+        {
+          "label": "first\\nfirst\\nfirst",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Residuals: [1,3,2,1] -> nonzero; [0,1] -> nonzero; [0,0,0] -> zero. So first, first, second.",
+      "wrongExplanations": {
+        "2": "The third test is losing because all heaps are multiples of 4."
+      },
+      "hint": "Compute x % 4 for each heap and XOR within each test case.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q23",
+      "phase": "Verifying the Solution",
+      "questionText": "Input:\n1\n3\n1 1 1\nWhat should be the output?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "first",
+          "isCode": false
+        },
+        {
+          "label": "second",
+          "isCode": false
+        },
+        {
+          "label": "first\\nsecond",
+          "isCode": false
+        },
+        {
+          "label": "second\\nfirst",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Residues [1,1,1] => 1^1^1 = 1 (nonzero), so first.",
+      "wrongExplanations": {
+        "1": "Zero would indicate second; here XOR is nonzero."
+      },
+      "hint": "Odd number of 1s yields 1 when XORed.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Verifying the Solution",
+      "questionText": "Input:\n1\n1\n1000000000\nWhat should be the output?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "second",
+          "isCode": false
+        },
+        {
+          "label": "first",
+          "isCode": false
+        },
+        {
+          "label": "depends on t",
+          "isCode": false
+        },
+        {
+          "label": "error (number too large)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "1000000000 % 4 == 0, so it’s a losing single-heap position: second.",
+      "wrongExplanations": {
+        "1": "Multiples of 4 are losing for the starter.",
+        "3": "We only need x % 4; the size itself isn’t a computational issue."
+      },
+      "hint": "Only x % 4 matters.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the time complexity over all test cases in terms of total number of heaps processed?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(total number of heaps)",
+          "isCode": false
+        },
+        {
+          "label": "O(sum of all x_i)",
+          "isCode": false
+        },
+        {
+          "label": "O(total number of heaps * log max x_i)",
+          "isCode": false
+        },
+        {
+          "label": "O(1) per test case regardless of n",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We do a constant amount of work per heap (one modulo and one XOR).",
+      "wrongExplanations": {
+        "1": "We never iterate per stick; only per heap.",
+        "3": "Each test may have many heaps; not constant time."
+      },
+      "hint": "Count operations per heap and add across tests.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Analyzing Complexity",
+      "questionText": "What extra space (besides the input tokens and outputs) does the algorithm use?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(1)",
+          "isCode": false
+        },
+        {
+          "label": "O(n) per test due to storing all x_i",
+          "isCode": false
+        },
+        {
+          "label": "O(t) for accumulators",
+          "isCode": false
+        },
+        {
+          "label": "O(sum of x_i)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We maintain a few integers and strings; no per-heap storage is needed beyond reading.",
+      "wrongExplanations": {
+        "1": "We process x_i on the fly without storing the array."
+      },
+      "hint": "We read a token, use it, then discard it.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q27",
+      "phase": "Analyzing Complexity",
+      "questionText": "Which test case would likely catch an incorrect rule that uses sum of residues modulo 4 instead of XOR?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "1 test: n=2, heaps = [1,1]",
+          "isCode": false
+        },
+        {
+          "label": "1 test: n=2, heaps = [2,2]",
+          "isCode": false
+        },
+        {
+          "label": "1 test: n=2, heaps = [4,4]",
+          "isCode": false
+        },
+        {
+          "label": "1 test: n=1, heap = [4]",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "[1,1]: XOR=0 (losing) but (1+1)%4=2, so a sum-based rule would wrongly say winning.",
+      "wrongExplanations": {
+        "1": "Both rules say losing here (2^2=0 and (2+2)%4=0).",
+        "2": "Both rules say losing; residues are 0."
+      },
+      "hint": "Find a case where equal nonzero residues cancel under XOR but not under sum%4.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "def solve():\n    import sys",
+    "    data = sys.stdin.read().strip().split()",
+    "    it = iter(data)\n    t = int(next(it))",
+    "    out_lines = []\n    for _ in range(t):\n        n = int(next(it))\n        g = 0",
+    "        for i in range(n):\n            x = int(next(it))\n            g ^= (x % 4)",
+    "        out_lines.append(\"first\" if g != 0 else \"second\")",
+    "    sys.stdout.write(\"\\n\".join(out_lines))",
+    "if __name__ == \"__main__\":\n    solve()"
+  ],
+  "reasoningChain": [
+    {
+      "question": "What happens for a single heap of size x?",
+      "insight": "Outcomes repeat every 4: x % 4 == 0 is losing; otherwise winning."
+    },
+    {
+      "question": "How to reduce each heap for decision-making?",
+      "insight": "Only x % 4 matters for each heap when moves are 1,2,3."
+    },
+    {
+      "question": "How to combine multiple heaps’ reduced values?",
+      "insight": "Combine all residues using XOR; zero means losing start."
+    },
+    {
+      "question": "How to verify the rule on small cases?",
+      "insight": "Test examples like [1,1,2] and [3,3,2,2] to see nonzero vs zero XOR."
+    },
+    {
+      "question": "What to compute efficiently for large inputs?",
+      "insight": "Stream tokens, compute residue per heap, XOR into an accumulator per test."
+    },
+    {
+      "question": "What edge cases to keep in mind?",
+      "insight": "Heaps with residue 0 don’t affect the decision; cases like [1,1] catch sum-vs-XOR mistakes."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1456,
+    "output_tokens": 14700,
+    "input_cost": 0.00182,
+    "output_cost": 0.147,
+    "total_cost": 0.14882
+  }
+}

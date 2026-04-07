@@ -1,0 +1,956 @@
+{
+  "id": "increasing-subsequence-ii-count",
+  "title": "Increasing Subsequence II",
+  "difficulty": "intermediate",
+  "tags": [
+    "dp"
+  ],
+  "estimatedMinutes": 55,
+  "language": "python",
+  "description": "Given an array of n integers, calculate the number of strictly increasing subsequences. Two subsequences with the same values but taken from different positions are counted separately. Print the result modulo 10^9+7.\n\nInput:\n- First line: integer n\n- Second line: n integers x_1, x_2, ..., x_n\n\nOutput:\n- One integer: the number of increasing subsequences modulo 10^9+7.",
+  "examples": [
+    {
+      "input": "3\n2 1 3\n",
+      "output": "5",
+      "explanation": "Increasing subsequences: [2], [1], [3], [2,3], [1,3]."
+    }
+  ],
+  "constraints": [
+    "1 ≤ n ≤ 2·10^5",
+    "1 ≤ x_i ≤ 10^9",
+    "Time limit: 1.00 s",
+    "Memory limit: 512 MB"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "For the array [2, 1, 3], how many strictly increasing subsequences are there (counted by positions)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        },
+        {
+          "label": "6",
+          "isCode": false
+        },
+        {
+          "label": "7",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "They are [2], [1], [3], [2,3], [1,3] → 5. [2,1] is not increasing.",
+      "wrongExplanations": {
+        "0": "Misses one of [2,3] or [1,3].",
+        "2": "Counts a non-increasing subsequence or duplicates."
+      },
+      "hint": "List all length-1 and valid length-2 subsequences.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "For the array [1, 1], how many strictly increasing subsequences are there (counted by positions)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "The two single-element subsequences [1] (pos1) and [1] (pos2) count separately. [1,1] is not strictly increasing.",
+      "wrongExplanations": {
+        "0": "Positions matter; there are two different singletons.",
+        "2": "Pairs are not strictly increasing since 1 is not < 1."
+      },
+      "hint": "Strict means <, not ≤. Positions matter.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "For the array [1, 2, 1], how many strictly increasing subsequences are there?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        },
+        {
+          "label": "6",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "They are [1](pos1), [2], [1,2](pos1→pos2), [1](pos3). Total = 4.",
+      "wrongExplanations": {
+        "0": "Misses the [1](pos3) singleton.",
+        "2": "Includes an invalid order or equal-value pair."
+      },
+      "hint": "Check if 1 at pos3 can precede 2 at pos2 (it cannot).",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "Do we count the empty subsequence in the final answer?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, always include it.",
+          "isCode": false
+        },
+        {
+          "label": "Yes, only if n=0.",
+          "isCode": false
+        },
+        {
+          "label": "Include it but subtract 1 at the end.",
+          "isCode": false
+        },
+        {
+          "label": "No, we only count non-empty increasing subsequences.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 3,
+      "explanation": "Only non-empty strictly increasing subsequences are counted.",
+      "wrongExplanations": {
+        "0": "The problem asks for increasing subsequences, not including empty.",
+        "2": "There is no step involving subtracting 1 for the empty subsequence."
+      },
+      "hint": "Check the example: empty is not counted.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Understanding the Problem",
+      "questionText": "The result is modulo 10^9+7. How should we best handle the modulo during computation?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Apply modulo only once at the final print.",
+          "isCode": false
+        },
+        {
+          "label": "Apply modulo after each addition and update (and at the end).",
+          "isCode": false
+        },
+        {
+          "label": "Apply modulo only after each query.",
+          "isCode": false
+        },
+        {
+          "label": "Multiply partial results by modulo to keep them small.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Applying modulo throughout avoids overflow and keeps values bounded.",
+      "wrongExplanations": {
+        "0": "Intermediate sums can exceed limits for large n.",
+        "2": "Queries do not change values; updates do. Apply at updates."
+      },
+      "hint": "Keep all intermediate sums within bounds consistently.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "If you try to enumerate all subsequences and check if each is increasing, what is the time complexity with respect to n?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(2^n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^3)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "There are 2^n subsequences. This is infeasible for n up to 2·10^5.",
+      "wrongExplanations": {
+        "0": "This would be for double loops, not enumerating all subsets.",
+        "1": "Too optimistic; can't handle 2^n subsets in n log n."
+      },
+      "hint": "Each element is either included or not.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "Let count_end[i] be the number of strictly increasing subsequences that end at index i. Which formula is correct?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "count_end[i] = 1 + sum of count_end[j] for all j<i with a[j] < a[i]",
+          "isCode": false
+        },
+        {
+          "label": "count_end[i] = 1 + sum of count_end[j] for all j<i with a[j] ≤ a[i]",
+          "isCode": false
+        },
+        {
+          "label": "count_end[i] = 1 + sum of count_end[j] for all j>i with a[j] < a[i]",
+          "isCode": false
+        },
+        {
+          "label": "count_end[i] = count_end[i-1] + 1 if a[i] > a[i-1], else 1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "A subsequence ending at i extends any earlier subsequence that ends with a smaller value, plus the single a[i].",
+      "wrongExplanations": {
+        "1": "Strictly increasing requires <, not ≤.",
+        "3": "Only compares to immediate previous element; misses many subsequences."
+      },
+      "hint": "Think: to end at a[i], the previous value must be smaller and earlier.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Exploring Approaches",
+      "questionText": "How do we get the total number of increasing subsequences from count_end[i] values?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Take count_end at the last index only.",
+          "isCode": false
+        },
+        {
+          "label": "Take the maximum of count_end[i] over all i.",
+          "isCode": false
+        },
+        {
+          "label": "Multiply all count_end[i].",
+          "isCode": false
+        },
+        {
+          "label": "Sum count_end[i] over all indices i.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 3,
+      "explanation": "Each increasing subsequence ends at exactly one position, so sum all count_end[i].",
+      "wrongExplanations": {
+        "0": "Subsequences can end anywhere, not just at the last index.",
+        "1": "We need the total count, not the maximum length or count_end value."
+      },
+      "hint": "Partition by the final position of each subsequence.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "If we compute count_end[i] by scanning all j<i each time, what is the runtime for n elements?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(log n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each position scans previous ones, leading to roughly n(n-1)/2 checks.",
+      "wrongExplanations": {
+        "1": "Only if we can avoid scanning all previous elements per step.",
+        "2": "Only if updating per element were constant time without scans."
+      },
+      "hint": "Double loop complexity.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "We need to quickly get the sum of counts for all previous values smaller than a[i]. Which pair of operations should a helper structure support?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Set value at a position and range sum query on any interval.",
+          "isCode": false
+        },
+        {
+          "label": "Add on a value range and query a single position.",
+          "isCode": false
+        },
+        {
+          "label": "Add at a position and query prefix sums up to a given value.",
+          "isCode": false
+        },
+        {
+          "label": "Delete elements and query the current minimum.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "We add the count at the current value and query the total of all smaller values (a prefix sum).",
+      "wrongExplanations": {
+        "0": "We don't need arbitrary ranges; prefixes suffice.",
+        "1": "We need sums over many positions, not a single position."
+      },
+      "hint": "Think cumulative totals for values ≤ threshold.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "Values can be up to 10^9, so we can't index directly by value. What is a valid approach?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Map each distinct value to its rank in sorted order and use ranks as indices.",
+          "isCode": false
+        },
+        {
+          "label": "Use the value modulo n as an index.",
+          "isCode": false
+        },
+        {
+          "label": "Allocate an array of size 10^9 for direct indexing.",
+          "isCode": false
+        },
+        {
+          "label": "Sort the array and process in that order instead of original order.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Using ranks of unique sorted values gives compact indices that preserve < relations.",
+      "wrongExplanations": {
+        "1": "Modulo breaks ordering relations.",
+        "2": "Memory is far too large."
+      },
+      "hint": "Preserve ordering: if x<y then rank(x)<rank(y).",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "When computing the sum of previous counts for a[i], should we include previous elements equal to a[i]?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, include equals to allow non-decreasing subsequences.",
+          "isCode": false
+        },
+        {
+          "label": "Include equals only once per value.",
+          "isCode": false
+        },
+        {
+          "label": "Include equals but subtract 1 later.",
+          "isCode": false
+        },
+        {
+          "label": "No, exclude equals because the subsequence must be strictly increasing.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 3,
+      "explanation": "Strict increase requires a[j] < a[i]; equals are not allowed.",
+      "wrongExplanations": {
+        "0": "The problem requires strictly increasing, not non-decreasing.",
+        "1": "Including any equals breaks strictness."
+      },
+      "hint": "Use < for comparisons, not ≤.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "Using the idea above, what is the total number of strictly increasing subsequences in [3, 2, 2, 4]?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "6",
+          "isCode": false
+        },
+        {
+          "label": "7",
+          "isCode": false
+        },
+        {
+          "label": "8",
+          "isCode": false
+        },
+        {
+          "label": "9",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Counts: [3],[2],[2],[4] (4 singles) + [3,4],[2,4],[2,4] (3 pairs) = 7.",
+      "wrongExplanations": {
+        "0": "Misses one valid pair to 4.",
+        "2": "Overcounts; no valid length-3 subsequences here."
+      },
+      "hint": "Each 2 can independently pair with 4; 3 also pairs with 4.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Building the Idea",
+      "questionText": "After processing all elements and updating the helper structure, how can we obtain the total number of increasing subsequences?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Query the cumulative total over all ranks (sum up to the maximum rank).",
+          "isCode": false
+        },
+        {
+          "label": "Keep only the last element's count.",
+          "isCode": false
+        },
+        {
+          "label": "Take the maximum count among all positions.",
+          "isCode": false
+        },
+        {
+          "label": "Multiply counts for each distinct value.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The structure holds totals per value; summing all values yields the total number of non-empty increasing subsequences.",
+      "wrongExplanations": {
+        "1": "Subsequences can end at any position, not just the last.",
+        "2": "We need the total count, not the maximum."
+      },
+      "hint": "All subsequences contribute exactly once to the total.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Start by importing and defining the modulo constant.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\nMOD = 10**9 + 7",
+          "isCode": true
+        },
+        {
+          "label": "import sys\nMOD = 10**9 - 7",
+          "isCode": true
+        },
+        {
+          "label": "import sys\nMOD = 1e9 + 7",
+          "isCode": true
+        },
+        {
+          "label": "MOD = 10**9 + 7",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need sys for input and the correct modulus 10**9+7 as an integer.",
+      "wrongExplanations": {
+        "1": "Wrong modulus; the problem uses 10^9+7.",
+        "2": "This creates a float, not an integer."
+      },
+      "hint": "Use an integer modulus and import what you'll use for input.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\nMOD = 10**9 + 7",
+      "codeLabel": "Import and MOD"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Read all input integers and split n from the array.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "data = list(map(int, sys.stdin.read().split()))\nn = data[0]\narr = data[1:1+n]",
+          "isCode": true
+        },
+        {
+          "label": "n = int(sys.stdin.read().split()[0])\narr = list(map(int, sys.stdin.readline().split()))",
+          "isCode": true
+        },
+        {
+          "label": "data = list(map(int, sys.stdin.read().split()))\nn = data[0]\narr = data[1:n]",
+          "isCode": true
+        },
+        {
+          "label": "n = int(input())\narr = list(map(int, input().split()))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Reading all tokens handles multi-line input; slice [1:1+n] takes exactly n numbers.",
+      "wrongExplanations": {
+        "2": "Slice [1:n] is off by one and may miss the last element.",
+        "3": "This fails if the second line is wrapped over multiple lines."
+      },
+      "hint": "Use a method that is robust to line breaks.",
+      "isCodeBuilding": true,
+      "codeSnippet": "data = list(map(int, sys.stdin.read().split()))\nn = data[0]\narr = data[1:1+n]",
+      "codeLabel": "Read input"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Map values to compact increasing ranks for indexing.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "vals = sorted(set(arr))\nrank = {v: i+1 for i, v in enumerate(vals)}\nm = len(vals)",
+          "isCode": true
+        },
+        {
+          "label": "vals = sorted(arr)\nrank = {v: i+1 for i, v in enumerate(vals)}\nm = len(vals)",
+          "isCode": true
+        },
+        {
+          "label": "vals = sorted(set(arr))\nrank = {v: i for i, v in enumerate(vals)}\nm = len(arr)",
+          "isCode": true
+        },
+        {
+          "label": "vals = list(set(arr))\nrank = {v: i+1 for i, v in enumerate(vals)}\nm = max(vals)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Use sorted unique values and 1-based ranks to align with prefix indexing; m is the number of distinct values.",
+      "wrongExplanations": {
+        "1": "Using duplicates in vals breaks rank consistency and m.",
+        "2": "0-based ranks complicate prefix logic; m should be count of distincts."
+      },
+      "hint": "Ensure vals is strictly increasing and ranks start at 1.",
+      "isCodeBuilding": true,
+      "codeSnippet": "vals = sorted(set(arr))\nrank = {v: i+1 for i, v in enumerate(vals)}\nm = len(vals)",
+      "codeLabel": "Ranks"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Define a helper class that supports adding at a position and getting prefix sums.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "class IndexTree:\n    def __init__(self, n):\n        self.n = n\n        self.t = [0] * (n + 1)",
+          "isCode": true
+        },
+        {
+          "label": "class IndexTree:\n    def __init__(self, n):\n        self.n = n\n        self.t = [0] * n",
+          "isCode": true
+        },
+        {
+          "label": "class IndexTree:\n    def __init__(self, n):\n        t = [0] * (n + 1)",
+          "isCode": true
+        },
+        {
+          "label": "class IndexTree:\n    def __init__(self, n):\n        self.n = n\n        self.t = [0] * (n + 2)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need 1-based indexing; allocate n+1 and store it on self.",
+      "wrongExplanations": {
+        "1": "Size n can cause out-of-range when accessing index n.",
+        "2": "Does not assign to self; the array is lost."
+      },
+      "hint": "Use 1..n indices; keep the array as an instance field.",
+      "isCodeBuilding": true,
+      "codeSnippet": "class IndexTree:\n    def __init__(self, n):\n        self.n = n\n        self.t = [0] * (n + 1)",
+      "codeLabel": "Class header/init"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Implement the add operation to increase a position by a value (with modulo).",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    def add(self, i, delta):\n        while i <= self.n:\n            self.t[i] = (self.t[i] + delta) % MOD\n            i += i & -i",
+          "isCode": true
+        },
+        {
+          "label": "    def add(self, i, delta):\n        while i < self.n:\n            self.t[i] = (self.t[i] + delta) % MOD\n            i += i & -i",
+          "isCode": true
+        },
+        {
+          "label": "    def add(self, i, delta):\n        while i <= self.n:\n            self.t[i] = (self.t[i] + delta) % MOD\n            i -= i & -i",
+          "isCode": true
+        },
+        {
+          "label": "    def add(self, i, delta):\n        while i <= self.n:\n            self.t[i] += delta\n            i += 1",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Increase at index and jump upward by i & -i, with modulo.",
+      "wrongExplanations": {
+        "1": "Condition should include i==n; otherwise last index is skipped.",
+        "2": "This moves downward and can loop forever or do nothing useful."
+      },
+      "hint": "The index should move upwards in jumps until it passes n.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    def add(self, i, delta):\n        while i <= self.n:\n            self.t[i] = (self.t[i] + delta) % MOD\n            i += i & -i",
+      "codeLabel": "Add operation"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Implement the prefix sum operation that returns the sum from index 1 to i (inclusive).",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    def sum(self, i):\n        s = 0\n        while i > 0:\n            s = (s + self.t[i]) % MOD\n            i -= i & -i\n        return s",
+          "isCode": true
+        },
+        {
+          "label": "    def sum(self, i):\n        s = 0\n        while i >= 0:\n            s = (s + self.t[i]) % MOD\n            i -= i & -i\n        return s",
+          "isCode": true
+        },
+        {
+          "label": "    def sum(self, i):\n        s = 0\n        while i > 0:\n            s = (s + self.t[i]) % MOD\n            i += i & -i\n        return s",
+          "isCode": true
+        },
+        {
+          "label": "    def sum(self, i):\n        s = 0\n        while i > 0:\n            s += self.t[i]\n            i -= 1\n        return s % MOD",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Move downward in jumps (i -= i & -i) and accumulate with modulo.",
+      "wrongExplanations": {
+        "1": "Using i>=0 accesses index 0 repeatedly; leads to an infinite loop.",
+        "2": "Moving upward never terminates and is incorrect for prefix sums."
+      },
+      "hint": "Iterate indices toward 0 by clearing the lowest set bit.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    def sum(self, i):\n        s = 0\n        while i > 0:\n            s = (s + self.t[i]) % MOD\n            i -= i & -i\n        return s",
+      "codeLabel": "Prefix sum"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "Write the main loop that processes elements left to right and prints the result.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "bit = IndexTree(m)\nfor x in arr:\n    r = rank[x]\n    smaller = bit.sum(r - 1)\n    ways = (1 + smaller) % MOD\n    bit.add(r, ways)\nprint(bit.sum(m) % MOD)",
+          "isCode": true
+        },
+        {
+          "label": "bit = IndexTree(m)\nfor x in arr:\n    r = rank[x]\n    smaller = bit.sum(r)\n    ways = (1 + smaller) % MOD\n    bit.add(r, ways)\nprint(bit.sum(m) % MOD)",
+          "isCode": true
+        },
+        {
+          "label": "bit = IndexTree(m)\nfor x in arr:\n    r = rank[x]\n    smaller = bit.sum(r - 1)\n    ways = (smaller) % MOD\n    bit.add(r, ways)\nprint(bit.sum(m) % MOD)",
+          "isCode": true
+        },
+        {
+          "label": "bit = IndexTree(m)\nfor x in arr:\n    r = rank[x] + 1\n    smaller = bit.sum(r - 1)\n    ways = (1 + smaller) % MOD\n    bit.add(r, ways)\nprint(bit.sum(m) % MOD)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Use sum(r-1) to exclude equals, add 1 for the single-element subsequence, then update at r.",
+      "wrongExplanations": {
+        "1": "sum(r) includes equals, which breaks strictness.",
+        "2": "Missing +1 fails to count single-element subsequences."
+      },
+      "hint": "Strictly smaller means querying up to rank-1; don't forget the single element itself.",
+      "isCodeBuilding": true,
+      "codeSnippet": "bit = IndexTree(m)\nfor x in arr:\n    r = rank[x]\n    smaller = bit.sum(r - 1)\n    ways = (1 + smaller) % MOD\n    bit.add(r, ways)\nprint(bit.sum(m) % MOD)",
+      "codeLabel": "Process and print"
+    },
+    {
+      "id": "q22",
+      "phase": "Verifying the Solution",
+      "questionText": "Run the code mentally on input: n=3, arr=[2,1,3]. What is the printed result?",
+      "diagram": "Step-by-step:\n- 2: smaller=0 → ways=1\n- 1: smaller=0 → ways=1\n- 3: smaller=2 → ways=3\nTotal sum = 1+1+3 = 5",
+      "options": [
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        },
+        {
+          "label": "6",
+          "isCode": false
+        },
+        {
+          "label": "7",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Counts per element: 1, 1, 3. Sum is 5.",
+      "wrongExplanations": {
+        "0": "Misses some subsequences ending at 3.",
+        "2": "Overcounts by including non-increasing pairs."
+      },
+      "hint": "How many previous values are smaller before each element?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q23",
+      "phase": "Verifying the Solution",
+      "questionText": "For input arr=[1,2,2], what does the code print?",
+      "diagram": "Process:\n- 1: ways=1\n- 2: smaller=1 → ways=2\n- 2: smaller=1 → ways=2\nTotal=1+2+2=5",
+      "options": [
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        },
+        {
+          "label": "6",
+          "isCode": false
+        },
+        {
+          "label": "7",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Each 2 only extends subsequences ending with values <2; equals are excluded.",
+      "wrongExplanations": {
+        "0": "Misses one of the subsequences ending at the second 2.",
+        "2": "Would include equals or double count."
+      },
+      "hint": "Remember to exclude equals when querying.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the time complexity of the final approach with n elements and d distinct values?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n log d)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(d^2)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each element does a logarithmic-time update and query on the helper structure of size d.",
+      "wrongExplanations": {
+        "1": "We avoided scanning all previous elements.",
+        "2": "Only if each update/query were O(1), which they are not."
+      },
+      "hint": "Two logarithmic operations per element.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the extra space complexity (besides the input array)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(d)",
+          "isCode": false
+        },
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(1)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We store structures of size proportional to the number of distinct values.",
+      "wrongExplanations": {
+        "1": "We don't store per-position states beyond loop variables.",
+        "2": "We need arrays proportional to distinct values, not constant."
+      },
+      "hint": "Think about the rank map and the helper array.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Analyzing Complexity",
+      "questionText": "If arr = [5,5,5,5], what should the program output?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "6",
+          "isCode": false
+        },
+        {
+          "label": "8",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Only single-element subsequences are strictly increasing here, one for each position → 4.",
+      "wrongExplanations": {
+        "0": "Positions matter; there are four singletons.",
+        "2": "Pairs [5,5] are not strictly increasing."
+      },
+      "hint": "Strict increasing disallows equal pairs.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\nMOD = 10**9 + 7",
+    "data = list(map(int, sys.stdin.read().split()))\nn = data[0]\narr = data[1:1+n]",
+    "vals = sorted(set(arr))\nrank = {v: i+1 for i, v in enumerate(vals)}\nm = len(vals)",
+    "class IndexTree:\n    def __init__(self, n):\n        self.n = n\n        self.t = [0] * (n + 1)",
+    "    def add(self, i, delta):\n        while i <= self.n:\n            self.t[i] = (self.t[i] + delta) % MOD\n            i += i & -i",
+    "    def sum(self, i):\n        s = 0\n        while i > 0:\n            s = (s + self.t[i]) % MOD\n            i -= i & -i\n        return s",
+    "bit = IndexTree(m)\nfor x in arr:\n    r = rank[x]\n    smaller = bit.sum(r - 1)\n    ways = (1 + smaller) % MOD\n    bit.add(r, ways)\nprint(bit.sum(m) % MOD)"
+  ],
+  "reasoningChain": [
+    {
+      "question": "How can we count all increasing subsequences without enumerating them?",
+      "insight": "Count the number of increasing subsequences that end at each position and sum these counts."
+    },
+    {
+      "question": "What defines a valid extension to a subsequence ending at index i?",
+      "insight": "Only previous elements with smaller values and earlier positions can precede a[i]."
+    },
+    {
+      "question": "How to compute count_end[i] efficiently?",
+      "insight": "count_end[i] = 1 + total counts of all earlier elements with values less than a[i]."
+    },
+    {
+      "question": "How to avoid scanning all previous elements each time?",
+      "insight": "Maintain a structure that supports adding at a value and querying the sum of counts for all smaller values."
+    },
+    {
+      "question": "How to handle large values up to 1e9?",
+      "insight": "Map distinct values to 1-based ranks that preserve ordering and use ranks as indices."
+    },
+    {
+      "question": "How to process order and duplicates correctly?",
+      "insight": "Process left to right, query strictly smaller values (rank-1), add 1 for the singleton, and update with modulo."
+    },
+    {
+      "question": "What are the final complexity and result computation?",
+      "insight": "Time O(n log d), space O(d); the total is the sum stored across all ranks after processing."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1347,
+    "output_tokens": 15716,
+    "input_cost": 0.001684,
+    "output_cost": 0.15716,
+    "total_cost": 0.158844
+  }
+}

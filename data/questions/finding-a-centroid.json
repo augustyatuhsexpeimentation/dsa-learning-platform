@@ -1,0 +1,984 @@
+{
+  "id": "finding-a-centroid-mcq-chain",
+  "title": "Finding a Centroid",
+  "difficulty": "hard",
+  "tags": [
+    "tree"
+  ],
+  "estimatedMinutes": 70,
+  "language": "python",
+  "description": "Given a tree with n nodes, find a node that, when chosen as the root, has all of its subtrees of size at most floor(n/2). If multiple nodes satisfy this, output any one of them.",
+  "examples": [
+    {
+      "input": "5\n1 2\n2 3\n3 4\n3 5\n",
+      "output": "3\n",
+      "explanation": "Rooting at 3 splits the tree into subtrees of sizes 2 and 2 which are <= floor(5/2)=2."
+    }
+  ],
+  "constraints": [
+    "1 <= n <= 2 * 10^5",
+    "1 <= a, b <= n",
+    "n - 1 edges; input forms a tree"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "If n = 1 (a single node with no edges), which node(s) are valid centroids?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Node 1",
+          "isCode": false
+        },
+        {
+          "label": "No centroid exists",
+          "isCode": false
+        },
+        {
+          "label": "Node 0",
+          "isCode": false
+        },
+        {
+          "label": "Any node with an even index",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "With one node, choosing it as root gives no subtrees, so all (zero) subtrees have size 0 ≤ floor(1/2)=0. Node 1 is valid.",
+      "wrongExplanations": {
+        "1": "A centroid always exists in a non-empty tree.",
+        "2": "Nodes are numbered from 1..n, so 0 is invalid."
+      },
+      "hint": null,
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "Consider the chain 1-2-3-4-5. Which node is a centroid?",
+      "diagram": "1 -- 2 -- 3 -- 4 -- 5",
+      "options": [
+        {
+          "label": "Node 2 only",
+          "isCode": false
+        },
+        {
+          "label": "Node 3 only",
+          "isCode": false
+        },
+        {
+          "label": "Nodes 3 and 4",
+          "isCode": false
+        },
+        {
+          "label": "Node 4 only",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Root at 3 ⇒ subtrees sizes 2 and 2, both ≤ floor(5/2)=2. Root at 4 ⇒ subtrees sizes 3 and 1 (3>2), so 4 is not valid.",
+      "wrongExplanations": {
+        "2": "At 4, the larger subtree has size 3, which violates the limit.",
+        "0": "At 2, the larger subtree has size 3, which violates the limit."
+      },
+      "hint": "Check the sizes of the largest subtrees when rooting at each candidate.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "For a star with center 1 and leaves 2..5, which node is a centroid?",
+      "diagram": "    2\n    |\n4 -- 1 -- 3\n    |\n    5",
+      "options": [
+        {
+          "label": "Node 1",
+          "isCode": false
+        },
+        {
+          "label": "Any leaf (2..5)",
+          "isCode": false
+        },
+        {
+          "label": "Only node 2",
+          "isCode": false
+        },
+        {
+          "label": "Nodes 1 and 2",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Root at 1 ⇒ subtrees (leaves) are size 1 ≤ floor(5/2)=2. A leaf as root has a subtree of size 4, which is too big.",
+      "wrongExplanations": {
+        "1": "At a leaf, the subtree containing the center has size 4 (>2)."
+      },
+      "hint": "Compute the size of the largest child subtree for each candidate.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "To check if a node u is a centroid while doing calculations with a fixed root (say root=1), what sizes must be ≤ floor(n/2) for u?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Only the sizes of u's child subtrees (in the fixed-root tree)",
+          "isCode": false
+        },
+        {
+          "label": "The size of the component above u (if any) only",
+          "isCode": false
+        },
+        {
+          "label": "The maximum among: all child subtree sizes of u and the 'outside' size n - size[u]",
+          "isCode": false
+        },
+        {
+          "label": "The degree of u must be ≤ floor(n/2)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "With a fixed root, u may have a part 'above' it. Largest piece is max(child sizes, n - size[u]). This must be ≤ floor(n/2).",
+      "wrongExplanations": {
+        "0": "This ignores the part not in u's subtree relative to the fixed root.",
+        "1": "This ignores u's child subtrees which can be large."
+      },
+      "hint": "Think about components formed if you remove u from the tree.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Understanding the Problem",
+      "questionText": "Given n nodes and n-1 edges forming a tree, which statements are always true?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "The graph is connected and acyclic",
+          "isCode": false
+        },
+        {
+          "label": "The graph has exactly one cycle",
+          "isCode": false
+        },
+        {
+          "label": "There is at least one node with degree 0",
+          "isCode": false
+        },
+        {
+          "label": "Edges can be more than n-1 in a tree",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "A tree is connected with no cycles and has exactly n-1 edges. There are no isolated nodes if n>1.",
+      "wrongExplanations": {
+        "1": "A tree has no cycles.",
+        "2": "All nodes are connected if n>1; isolated degree 0 nodes don't occur."
+      },
+      "hint": "Recall basic tree properties.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "A naive strategy: for each node, root the tree at it and count the sizes of all subtrees. What is the rough time if each counting takes O(n)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(log n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Doing O(n) work for each of n nodes is O(n^2), which is too slow for n up to 2e5.",
+      "wrongExplanations": {
+        "0": "That's only if counting is done once.",
+        "1": "Nothing suggests a log factor here."
+      },
+      "hint": "Multiply the per-node cost by the number of nodes.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "To decide if a node u is a centroid using one pass of size computations, what key information do we need for every node u?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Only the degree of u",
+          "isCode": false
+        },
+        {
+          "label": "The sizes of all neighbor-side components: each child's subtree size and n - size[u]",
+          "isCode": false
+        },
+        {
+          "label": "The distance from u to all other nodes",
+          "isCode": false
+        },
+        {
+          "label": "The number of leaves in u's subtree",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "We need the sizes of all pieces after removing u: child subtree sizes and the outside part n - size[u].",
+      "wrongExplanations": {
+        "0": "Degree alone doesn't give component sizes.",
+        "2": "Distances are not directly related to subtree sizes here."
+      },
+      "hint": "Think in terms of component sizes when u is removed.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Exploring Approaches",
+      "questionText": "While recursively visiting neighbors to compute subtree sizes, how do we prevent infinite back-and-forth along an edge?",
+      "diagram": "u -- v\nvisit u -> v, then avoid going back to u from v",
+      "options": [
+        {
+          "label": "Ignore neighbors with a smaller index",
+          "isCode": false
+        },
+        {
+          "label": "Track the parent node and skip it when visiting neighbors",
+          "isCode": false
+        },
+        {
+          "label": "Stop after visiting one neighbor",
+          "isCode": false
+        },
+        {
+          "label": "Sort neighbors and visit in order",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Passing the parent and skipping it avoids revisiting the caller through the same edge.",
+      "wrongExplanations": {
+        "0": "Index-based filtering doesn't reflect tree structure.",
+        "2": "You must visit all children, not just one."
+      },
+      "hint": "Carry the previous node in the recursive call and skip it.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "We will use an adjacency list for the tree. For nodes labeled 1..n, which structure is suitable?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "adj = [[] for _ in range(n+1)]",
+          "isCode": true
+        },
+        {
+          "label": "adj = [set() for _ in range(n)]",
+          "isCode": true
+        },
+        {
+          "label": "adj = {}",
+          "isCode": true
+        },
+        {
+          "label": "adj = [None] * n",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "A list of lists sized n+1 supports 1-based indexing and storing neighbors.",
+      "wrongExplanations": {
+        "1": "Sets could work but range(n) would be 0..n-1, mismatching 1..n indexing.",
+        "2": "An empty dict alone doesn't define neighbors per node."
+      },
+      "hint": "We want 1-based indexing and a container of neighbors for each node.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "How do we define the subtree size size[u] using a recursive visit that skips the parent p?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "size[u] = sum(size[v] for v in adj[u])",
+          "isCode": true
+        },
+        {
+          "label": "size[u] = 1 + sum(size[v] for v in children of u excluding p)",
+          "isCode": true
+        },
+        {
+          "label": "size[u] = degree(u)",
+          "isCode": true
+        },
+        {
+          "label": "size[u] = n - size[p]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Each node counts itself plus the sizes of its child subtrees (excluding the parent side).",
+      "wrongExplanations": {
+        "0": "This double-counts and includes the parent side.",
+        "2": "Degree is unrelated to subtree size except in special cases."
+      },
+      "hint": "Include the node itself and add sizes from recursive children only.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "Suppose for node u we have child subtree sizes [2, 3, 1] and n = 10. If size[u] = 1 + 2 + 3 + 1, what is the largest piece when considering u with a fixed-root perspective?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "6",
+          "isCode": false
+        },
+        {
+          "label": "10",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "size[u]=7 ⇒ outside = n - size[u] = 3. Max among child sizes (2,3,1) and outside (3) is 3.",
+      "wrongExplanations": {
+        "1": "6 doesn't appear among child sizes or outside; outside is 3.",
+        "3": "4 isn't among the candidates either."
+      },
+      "hint": "Compute outside = n - size[u] and take the max with child sizes.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "If u is the root of our traversal (e.g., node 1 initially), what is the value of the outside part n - size[u]?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "n",
+          "isCode": false
+        },
+        {
+          "label": "size[u]",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "Depends on u's degree",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "The root's subtree includes all nodes, so size[root]=n and n - size[root] = 0.",
+      "wrongExplanations": {
+        "0": "n - n is 0 at the root.",
+        "1": "This is the subtree size, not the outside part."
+      },
+      "hint": "How many nodes are not in the root’s subtree?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "For n = 1 with size[1] = 1, what is the largest piece for node 1 when computing max(child sizes, n - size[1])?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "-1",
+          "isCode": false
+        },
+        {
+          "label": "Undefined",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "There are no children, so child max is 0. Outside is n - size[1] = 0. The largest piece is 0.",
+      "wrongExplanations": {
+        "0": "No child subtree has size 1; outside is also 0.",
+        "2": "Sizes are non-negative."
+      },
+      "hint": "Empty set max can be treated as 0 here.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Building the Idea",
+      "questionText": "If multiple nodes tie for the smallest largest-piece size, what should we output?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "The smallest index among them",
+          "isCode": false
+        },
+        {
+          "label": "The largest index among them",
+          "isCode": false
+        },
+        {
+          "label": "Any one of them",
+          "isCode": false
+        },
+        {
+          "label": "None (report impossible)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "The problem allows returning any centroid when multiple exist.",
+      "wrongExplanations": {
+        "0": "No tie-breaking rule is required by the problem.",
+        "3": "A centroid always exists."
+      },
+      "hint": "Check the Output specification.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Set up fast input and allow deep recursion. Choose the best snippet.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\nsys.setrecursionlimit(1<<25)",
+          "isCode": true
+        },
+        {
+          "label": "import math\nmath.setrecursionlimit(10**6)",
+          "isCode": true
+        },
+        {
+          "label": "from collections import deque\ndeque.maxlen = 10**6",
+          "isCode": true
+        },
+        {
+          "label": "import sys\nsys.setcheckinterval(1<<25)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need sys and to raise recursion limit for deep trees.",
+      "wrongExplanations": {
+        "1": "math has no setrecursionlimit; this would error.",
+        "3": "setcheckinterval is unrelated to recursion depth."
+      },
+      "hint": "Use the standard module that controls recursion depth.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\nsys.setrecursionlimit(1<<25)",
+      "codeLabel": "Imports and recursion limit"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Read n from stdin efficiently.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "n = int(sys.stdin.readline().strip())",
+          "isCode": true
+        },
+        {
+          "label": "n = sys.stdin.read()",
+          "isCode": true
+        },
+        {
+          "label": "n = int(input().split())",
+          "isCode": true
+        },
+        {
+          "label": "n = int(next(sys.stdin).strip())",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Reading a single line and converting to int is correct and efficient.",
+      "wrongExplanations": {
+        "1": "read() reads the entire file; also missing int conversion.",
+        "2": "split() returns a list; int() on a list will fail."
+      },
+      "hint": "Use readline and convert to int.",
+      "isCodeBuilding": true,
+      "codeSnippet": "n = int(sys.stdin.readline().strip())",
+      "codeLabel": "Read n"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Initialize the adjacency list for nodes 1..n.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "adj = [[] for _ in range(n+1)]",
+          "isCode": true
+        },
+        {
+          "label": "adj = [[] for _ in range(n)]",
+          "isCode": true
+        },
+        {
+          "label": "adj = [set() for _ in range(n+1)]",
+          "isCode": true
+        },
+        {
+          "label": "adj = {}",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need n+1 slots for 1-based indexing; lists of lists are fine for neighbors.",
+      "wrongExplanations": {
+        "1": "Size n would make index n invalid.",
+        "3": "An empty dict alone doesn't store per-node lists."
+      },
+      "hint": "Account for 1-based node ids.",
+      "isCodeBuilding": true,
+      "codeSnippet": "adj = [[] for _ in range(n+1)]",
+      "codeLabel": "Adjacency list"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Read n-1 edges and fill the adjacency list appropriately.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "for _ in range(n-1):\n    a, b = map(int, sys.stdin.readline().split())\n    adj[a].append(b)\n    adj[b].append(a)",
+          "isCode": true
+        },
+        {
+          "label": "for _ in range(n-1):\n    a, b = map(int, sys.stdin.readline().split())\n    adj[a].append(b)",
+          "isCode": true
+        },
+        {
+          "label": "for _ in range(n):\n    a, b = map(int, sys.stdin.readline().split())\n    adj[a].append(b)\n    adj[b].append(a)",
+          "isCode": true
+        },
+        {
+          "label": "for _ in range(n-1):\n    a = int(sys.stdin.readline())\n    adj[a].append(a)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each undirected edge must be added both ways; there are exactly n-1 edges.",
+      "wrongExplanations": {
+        "1": "Missing the reverse addition; graph would be one-directional.",
+        "2": "There are n-1 edges, not n."
+      },
+      "hint": "Tree edges are undirected.",
+      "isCodeBuilding": true,
+      "codeSnippet": "for _ in range(n-1):\n    a, b = map(int, sys.stdin.readline().split())\n    adj[a].append(b)\n    adj[b].append(a)",
+      "codeLabel": "Read edges"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Initialize storage for subtree sizes and tracking the current best centroid candidate.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "size = [0]*(n+1)\nbest_node = 1\nbest_max = n",
+          "isCode": true
+        },
+        {
+          "label": "size = [0]*n\nbest_node = 0\nbest_max = 0",
+          "isCode": true
+        },
+        {
+          "label": "size = {}\nbest_node = None\nbest_max = None",
+          "isCode": true
+        },
+        {
+          "label": "sizes = [0]*(n+1)\nbest = (n, 1)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Use 1-based size array; initialize best_max to n and best_node to any valid index like 1.",
+      "wrongExplanations": {
+        "1": "Off-by-one in size array and invalid initial best values.",
+        "3": "Variable names don't match later usage and tuple complicates updates."
+      },
+      "hint": "Start with a safe worst-case best_max.",
+      "isCodeBuilding": true,
+      "codeSnippet": "size = [0]*(n+1)\nbest_node = 1\nbest_max = n",
+      "codeLabel": "Init arrays and best"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Write the function header and the part that accumulates subtree sizes while skipping the parent.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def visit(u, p):\n    global best_node, best_max\n    size[u] = 1\n    for v in adj[u]:\n        if v == p:\n            continue\n        visit(v, u)\n        size[u] += size[v]",
+          "isCode": true
+        },
+        {
+          "label": "def visit(u):\n    size[u] = 0\n    for v in adj[u]:\n        size[u] += 1",
+          "isCode": true
+        },
+        {
+          "label": "def visit(u, p):\n    size[u] = 1\n    for v in adj[u]:\n        visit(v, u)\n        size[u] += size[v]",
+          "isCode": true
+        },
+        {
+          "label": "def visit(u, p):\n    global best_node, best_max\n    size[u] = 1\n    for v in adj[u]:\n        if v != p:\n            size[u] += 1",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We must skip the parent, recurse to children, and add their sizes; declare globals to update best later.",
+      "wrongExplanations": {
+        "2": "Missing parent check risks infinite recursion.",
+        "3": "Adding 1 per neighbor counts edges, not subtree sizes."
+      },
+      "hint": "Initialize with 1 and recursively add sizes from valid neighbors.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def visit(u, p):\n    global best_node, best_max\n    size[u] = 1\n    for v in adj[u]:\n        if v == p:\n            continue\n        visit(v, u)\n        size[u] += size[v]",
+      "codeLabel": "visit() header and size accumulation"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "Inside visit, compute the largest piece for u and update the best candidate if improved.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    max_part = 0\n    for v in adj[u]:\n        if v == p:\n            continue\n        if size[v] > max_part:\n            max_part = size[v]\n    outside = n - size[u]\n    if outside > max_part:\n        max_part = outside\n    if max_part < best_max:\n        best_max = max_part\n        best_node = u",
+          "isCode": true
+        },
+        {
+          "label": "    max_part = 0\n    for v in adj[u]:\n        if v != p:\n            max_part = min(max_part, size[v])\n    if n - size[u] < max_part:\n        max_part = n - size[u]\n    if max_part > best_max:\n        best_max = max_part\n        best_node = u",
+          "isCode": true
+        },
+        {
+          "label": "    max_part = n - size[u]\n    for v in adj[u]:\n        if v == p:\n            continue\n        max_part = max_part - size[v]\n    if max_part < best_max:\n        best_max = max_part\n        best_node = u",
+          "isCode": true
+        },
+        {
+          "label": "    max_part = 0\n    for v in adj[u]:\n        if v == p:\n            continue\n        max_part += size[v]\n    if max_part < best_max:\n        best_max = max_part\n        best_node = u",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Largest piece is the max of child sizes and the outside part. Update best when this value decreases.",
+      "wrongExplanations": {
+        "1": "Using min on child sizes and comparing inversely is incorrect logic.",
+        "3": "Summing child sizes is the total below u, not the largest piece."
+      },
+      "hint": "We care about the maximum component size after removing u.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    max_part = 0\n    for v in adj[u]:\n        if v == p:\n            continue\n        if size[v] > max_part:\n            max_part = size[v]\n    outside = n - size[u]\n    if outside > max_part:\n        max_part = outside\n    if max_part < best_max:\n        best_max = max_part\n        best_node = u",
+      "codeLabel": "Compute max piece and update best"
+    },
+    {
+      "id": "q22",
+      "phase": "Writing the Code",
+      "questionText": "Call the traversal and print the result.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "visit(1, 0)\nprint(best_node)",
+          "isCode": true
+        },
+        {
+          "label": "visit(0, -1)\nprint(best_node)",
+          "isCode": true
+        },
+        {
+          "label": "visit(1)\nprint(best_node)",
+          "isCode": true
+        },
+        {
+          "label": "print(visit(1, 0))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Start at any valid node like 1 with parent 0, then print the best_node tracked globally.",
+      "wrongExplanations": {
+        "1": "Node 0 doesn't exist; parent can be 0 though, but starting node must be in 1..n.",
+        "3": "visit returns None; it updates globals instead."
+      },
+      "hint": "The function updates global best_node; it doesn't return it.",
+      "isCodeBuilding": true,
+      "codeSnippet": "visit(1, 0)\nprint(best_node)",
+      "codeLabel": "Run and output"
+    },
+    {
+      "id": "q23",
+      "phase": "Verifying the Solution",
+      "questionText": "Run the code conceptually on the sample:\n5\n1 2\n2 3\n3 4\n3 5\nWhich node will be printed?",
+      "diagram": "1-2-3-4 and 3-5",
+      "options": [
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "At node 3, the largest piece is 2 (subtrees of 2 and 2). Others have a largest piece of 3. So 3 is printed.",
+      "wrongExplanations": {
+        "0": "At 2, the piece through 3 has size 3.",
+        "2": "At 4, the piece through 3 has size 4."
+      },
+      "hint": "Compute size[u] and then max(child sizes, n - size[u]) for each u.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Verifying the Solution",
+      "questionText": "Consider a star with center 1 and leaves 2..4 (n=4). What will the program output?",
+      "diagram": "  2\n  |\n4-1-3",
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "At 1, largest piece is 1. At any leaf, the piece through 1 is size 3 (> floor(4/2)=2).",
+      "wrongExplanations": {
+        "1": "Leafs have a large opposite piece through the center."
+      },
+      "hint": "Check largest piece at center vs at leaf.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the time complexity of the solution?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(log n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each edge is processed a constant number of times during one traversal; overall linear time.",
+      "wrongExplanations": {
+        "1": "There is no sorting or log factor.",
+        "2": "We do not recompute sizes per node."
+      },
+      "hint": "Count how many times each edge and node are visited.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the additional space used by the algorithm (excluding input storage for the adjacency list)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n) for size array and recursion stack",
+          "isCode": false
+        },
+        {
+          "label": "O(1)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(log n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We use size[1..n] and recursion stack up to tree height, both O(n) in worst case.",
+      "wrongExplanations": {
+        "1": "The size array alone is O(n).",
+        "2": "No quadratic structures are used."
+      },
+      "hint": "Consider the arrays and the maximum recursion depth on a path.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q27",
+      "phase": "Analyzing Complexity",
+      "questionText": "Why do we set a high recursion limit at the start?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Trees can be very deep (e.g., a chain), causing many nested calls",
+          "isCode": false
+        },
+        {
+          "label": "To speed up I/O operations",
+          "isCode": false
+        },
+        {
+          "label": "To reduce memory usage",
+          "isCode": false
+        },
+        {
+          "label": "To avoid integer overflow",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "A path-like tree of length n could require n nested calls; default limit (~1000) is too low.",
+      "wrongExplanations": {
+        "1": "Recursion limit does not affect I/O speed.",
+        "2": "Raising recursion limit doesn't reduce memory usage."
+      },
+      "hint": "Consider the worst-case shape of the tree.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\nsys.setrecursionlimit(1<<25)",
+    "n = int(sys.stdin.readline().strip())",
+    "adj = [[] for _ in range(n+1)]",
+    "for _ in range(n-1):\n    a, b = map(int, sys.stdin.readline().split())\n    adj[a].append(b)\n    adj[b].append(a)",
+    "size = [0]*(n+1)\nbest_node = 1\nbest_max = n",
+    "def visit(u, p):\n    global best_node, best_max\n    size[u] = 1\n    for v in adj[u]:\n        if v == p:\n            continue\n        visit(v, u)\n        size[u] += size[v]",
+    "    max_part = 0\n    for v in adj[u]:\n        if v == p:\n            continue\n        if size[v] > max_part:\n            max_part = size[v]\n    outside = n - size[u]\n    if outside > max_part:\n        max_part = outside\n    if max_part < best_max:\n        best_max = max_part\n        best_node = u",
+    "visit(1, 0)\nprint(best_node)"
+  ],
+  "reasoningChain": [
+    {
+      "question": "What exactly defines a centroid and how does it relate to subtree sizes and the overall tree size?",
+      "insight": "A centroid is a node where the largest piece after considering all neighbor-side components (child subtrees and the outside part) is ≤ floor(n/2)."
+    },
+    {
+      "question": "How can we check this condition efficiently for all nodes without re-rooting the entire tree repeatedly?",
+      "insight": "Compute subtree sizes once using a recursive visit while skipping the parent, then for each node compute its largest piece as max(child sizes, n - size[u])."
+    },
+    {
+      "question": "Why must we include the 'outside' part n - size[u] when evaluating a node with a fixed initial root?",
+      "insight": "Because from a fixed root's perspective, the component above u forms an additional piece that must be considered in the centroid condition."
+    },
+    {
+      "question": "What data structures and traversal order allow us to compute sizes and evaluate all nodes in linear time?",
+      "insight": "An adjacency list for the tree and a single recursive pass visiting neighbors (skipping the parent) lets us compute size[u] for all u and evaluate each node’s largest piece."
+    },
+    {
+      "question": "How do we track and update the best centroid candidate during the traversal?",
+      "insight": "Maintain best_max (current minimal largest piece) and best_node; for each u, compute max_part and update if max_part < best_max."
+    },
+    {
+      "question": "What are the time and space implications of this approach for n up to 2e5?",
+      "insight": "Time is O(n) since each edge is processed a constant number of times; extra space is O(n) for sizes and the recursion stack in the worst case."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1381,
+    "output_tokens": 12502,
+    "input_cost": 0.001726,
+    "output_cost": 0.12502,
+    "total_cost": 0.126746
+  }
+}

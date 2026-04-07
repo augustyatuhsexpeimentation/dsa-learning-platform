@@ -1,0 +1,882 @@
+{
+  "id": "permutation-order",
+  "title": "Permutation Order",
+  "difficulty": "intermediate",
+  "tags": [
+    "math",
+    "combinatorics"
+  ],
+  "estimatedMinutes": 45,
+  "language": "python",
+  "description": "Given p(n, k) as the k-th permutation (in lexicographical order) of 1..n, process t tests of two types:\n- Type 1: Given n and k, output p(n, k).\n- Type 2: Given n and a specific permutation of 1..n, output k such that the permutation is p(n, k).\n\nInput:\n- First line t, the number of tests.\n- Each test is either \"1 n k\" or \"2 n a1 a2 ... an\".\n\nOutput: For each test, print the result on its own line. For type 1, print the permutation as space-separated integers. For type 2, print the integer k.\n",
+  "examples": [
+    {
+      "input": "6\n1 4 1\n1 4 2\n2 4 1 2 3 4\n2 4 1 2 4 3\n1 5 42\n2 5 2 4 5 3 1\n",
+      "output": "1 2 3 4\n1 2 4 3\n1\n2\n2 4 5 3 1\n42\n",
+      "explanation": "Type 1 queries output the k-th permutation of 1..n. Type 2 queries output the rank k of the given permutation."
+    }
+  ],
+  "constraints": [
+    "1 ≤ t ≤ 1000",
+    "1 ≤ n ≤ 20",
+    "1 ≤ k ≤ n!"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "For n=3, what is p(3,2) in lexicographical order?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "[1, 2, 3]",
+          "isCode": false
+        },
+        {
+          "label": "[1, 3, 2]",
+          "isCode": false
+        },
+        {
+          "label": "[2, 1, 3]",
+          "isCode": false
+        },
+        {
+          "label": "[2, 3, 1]",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Lex order for 1..3 is [1,2,3], [1,3,2], [2,1,3], [2,3,1], [3,1,2], [3,2,1]. So p(3,2) = [1,3,2].",
+      "wrongExplanations": {
+        "0": "That's p(3,1).",
+        "2": "That's p(3,3), not the 2nd."
+      },
+      "hint": "Write all permutations of 1..3 in lex order.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "For n=3, what is p(3,6)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "[3, 2, 1]",
+          "isCode": false
+        },
+        {
+          "label": "[2, 3, 1]",
+          "isCode": false
+        },
+        {
+          "label": "[3, 1, 2]",
+          "isCode": false
+        },
+        {
+          "label": "[2, 1, 3]",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The last permutation in lex order is the descending one: [3,2,1].",
+      "wrongExplanations": {
+        "1": "That's p(3,4).",
+        "2": "That's p(3,5)."
+      },
+      "hint": "The last permutation of 1..n in lex order is descending.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "For n=3, what k satisfies p(3,k) = [1,3,2]?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "From lex order: [1,2,3] (1), [1,3,2] (2). So k=2.",
+      "wrongExplanations": {
+        "0": "That's [1,2,3].",
+        "2": "That's [2,1,3]."
+      },
+      "hint": "List permutations of 1..3 in lex order.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "For n=4, which is the first element of p(4,5)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The first 6 permutations start with 1. Since 5 ≤ 6, the first element is 1.",
+      "wrongExplanations": {
+        "1": "Starts from k=7 to k=12 (second block of 6).",
+        "2": "Starts from k=13 to k=18."
+      },
+      "hint": "How many permutations share the same first element when n=4?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Exploring Approaches",
+      "questionText": "Is it practical to generate all permutations for n up to 20 and pick the k-th?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "No. n! grows too fast; we must avoid generating all permutations.",
+          "isCode": false
+        },
+        {
+          "label": "Yes. We can generate all permutations within 1 second.",
+          "isCode": false
+        },
+        {
+          "label": "Only type 2 queries are infeasible; type 1 is fine to generate all.",
+          "isCode": false
+        },
+        {
+          "label": "It's fine if we stop after generating k permutations, even when k≈n!.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "20! is ~2.43e18; generating is impossible. We need direct computation.",
+      "wrongExplanations": {
+        "1": "Generating even a tiny fraction of 20! is impossible.",
+        "3": "k can be near n!, still infeasible."
+      },
+      "hint": "Compare 20! to typical operation limits (~1e8).",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "For n=4, how many permutations share the same first element in lex order?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "12",
+          "isCode": false
+        },
+        {
+          "label": "6",
+          "isCode": false
+        },
+        {
+          "label": "24",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Fixing the first element leaves 3 positions: 3! = 6 permutations per first element.",
+      "wrongExplanations": {
+        "1": "12 counts two first elements combined (2×6).",
+        "3": "That's the total number of permutations (4!)."
+      },
+      "hint": "With the first element fixed, how many ways to permute the rest?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "When choosing the first element from k, which formula gives its block index b for n=4?",
+      "diagram": "block size = 3! = 6\nk = ?\nWhich b to use so that k=1..6 -> b=0, k=7..12 -> b=1, ...",
+      "options": [
+        {
+          "label": "b = k // 6",
+          "isCode": false
+        },
+        {
+          "label": "b = (k - 1) // 6",
+          "isCode": false
+        },
+        {
+          "label": "b = k % 6",
+          "isCode": false
+        },
+        {
+          "label": "b = (k - 1) % 6",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "We want k in 1..6 to map to b=0; subtract 1 then divide: b=(k-1)//6.",
+      "wrongExplanations": {
+        "0": "k=6 would map to b=1, off by one.",
+        "2": "Modulo gives remainder, not the block index."
+      },
+      "hint": "Use zero-based indexing for blocks.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Building the Idea",
+      "questionText": "For n=4, k=8, what is the first element of p(4,8)?",
+      "diagram": "block size = 6; r = k-1 = 7; b = r // 6",
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "r=7, block size=6, b=1. The first element is the (b+1)-th smallest = 2.",
+      "wrongExplanations": {
+        "0": "b=0 corresponds to k in 1..6, not 8.",
+        "2": "b=2 would require r≥12."
+      },
+      "hint": "Compute r=k-1 and divide by 6.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "Continuing n=4, k=8: after choosing first=2, what is the new r for the next position?",
+      "diagram": "r = 7 initially; block size = 6; new r = r % 6",
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "7",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "New r is the remainder within the block: 7 % 6 = 1.",
+      "wrongExplanations": {
+        "0": "Would be true only if r were exactly a multiple of 6.",
+        "3": "r must shrink to the position within the block."
+      },
+      "hint": "Use remainder by the block size.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "With remaining numbers [1,3,4] and r=1 for the second position (block size 2), which number is chosen?",
+      "diagram": "idx = r // 2 = 1 // 2 = 0; choose avail[idx]",
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Block size is 2; idx=1//2=0; pick 0-th (smallest) remaining: 1.",
+      "wrongExplanations": {
+        "1": "That would be idx=1; but idx=0 here.",
+        "2": "Too large; idx is 0."
+      },
+      "hint": "Compute idx = r // 2.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "Completing p(4,8) with the steps so far, which full permutation do we obtain?",
+      "diagram": "Remaining after first two picks: [3,4], r becomes 1 % 2 = 1; next block size = 1",
+      "options": [
+        {
+          "label": "[2, 1, 4, 3]",
+          "isCode": false
+        },
+        {
+          "label": "[2, 3, 1, 4]",
+          "isCode": false
+        },
+        {
+          "label": "[2, 4, 1, 3]",
+          "isCode": false
+        },
+        {
+          "label": "[1, 2, 4, 3]",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Next idx=1//1=1 → pick 4, r=0, then pick 3. So [2,1,4,3].",
+      "wrongExplanations": {
+        "1": "Second element should be 1, not 3.",
+        "3": "Begins with 1; but k=8 starts with 2."
+      },
+      "hint": "After [2,1], r becomes 1%2=1, then idx=1//1=1.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "For n=4, what k corresponds to permutation [2,1,4,3]?",
+      "diagram": "Count smaller unused at each position times factorial of remaining slots.",
+      "options": [
+        {
+          "label": "7",
+          "isCode": false
+        },
+        {
+          "label": "8",
+          "isCode": false
+        },
+        {
+          "label": "9",
+          "isCode": false
+        },
+        {
+          "label": "6",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Computed earlier as p(4,8). Ranking gives r=7, so k=r+1=8.",
+      "wrongExplanations": {
+        "0": "That would be r, not r+1.",
+        "3": "Too small; check contributions at each position."
+      },
+      "hint": "Verify by unranking you just did: it matched k=8.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "For n=4, what is k for permutation [1,4,2,3]?",
+      "diagram": "avail=[1,2,3,4]\n- idx(1)=0 → +0×3!\n- idx(4)=2 → +2×2!=4\n- idx(2)=0 → +0×1!\n- idx(3)=0 → +0×0!",
+      "options": [
+        {
+          "label": "5",
+          "isCode": false
+        },
+        {
+          "label": "6",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "7",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "r=4, so k=r+1=5.",
+      "wrongExplanations": {
+        "1": "That would require r=5; recompute 2×2!=4.",
+        "2": "For k=4, the second element would be 3, not 4."
+      },
+      "hint": "Compute index of each element within remaining numbers.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Writing the Code",
+      "questionText": "Start with the minimal import needed for fast input reading with tokens.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys",
+          "isCode": true
+        },
+        {
+          "label": "import math",
+          "isCode": true
+        },
+        {
+          "label": "from sys import stdin, stdout",
+          "isCode": true
+        },
+        {
+          "label": "import itertools",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We'll use sys.stdin.read() and sys.stdout.write().",
+      "wrongExplanations": {
+        "2": "Usable, but our code references sys.stdin and sys.stdout directly."
+      },
+      "hint": "We will use sys.stdin.read() and sys.stdout.write().",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys",
+      "codeLabel": "Import sys"
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Implement a helper to build factorials up to max_n inclusive.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def build_fact(max_n):\n    fact = [1] * (max_n + 1)\n    for i in range(2, max_n + 1):\n        fact[i] = fact[i - 1] * i\n    return fact",
+          "isCode": true
+        },
+        {
+          "label": "def build_fact(max_n):\n    fact = [1] * max_n\n    for i in range(2, max_n):\n        fact[i] = fact[i - 1] * i\n    return fact",
+          "isCode": true
+        },
+        {
+          "label": "def build_fact(max_n):\n    fact = [1]\n    for i in range(1, max_n + 1):\n        fact.append(fact[-1] * (i - 1))\n    return fact",
+          "isCode": true
+        },
+        {
+          "label": "def build_fact(max_n):\n    import math\n    return [math.factorial(i) for i in range(max_n)]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need indices 0..max_n. fact[i]=i! with fact[0]=1.",
+      "wrongExplanations": {
+        "1": "Length and loop exclude max_n; fact[max_n] missing.",
+        "3": "Range excludes max_n and misses fact[0]."
+      },
+      "hint": "Ensure fact[0]=1 and fact[max_n]=max_n! exist.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def build_fact(max_n):\n    fact = [1] * (max_n + 1)\n    for i in range(2, max_n + 1):\n        fact[i] = fact[i - 1] * i\n    return fact",
+      "codeLabel": "Factorial builder"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Write a function that returns the k-th permutation of 1..n (1-based k).",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def unrank(n, k, fact):\n    r = k - 1\n    avail = list(range(1, n + 1))\n    perm = []\n    for i in range(n, 0, -1):\n        idx = r // fact[i - 1]\n        r %= fact[i - 1]\n        perm.append(avail.pop(idx))\n    return perm",
+          "isCode": true
+        },
+        {
+          "label": "def unrank(n, k, fact):\n    r = k\n    avail = list(range(1, n + 1))\n    perm = []\n    for i in range(n, 0, -1):\n        idx = r // fact[i]\n        r %= fact[i]\n        perm.append(avail.pop(idx))\n    return perm",
+          "isCode": true
+        },
+        {
+          "label": "def unrank(n, k, fact):\n    r = k - 1\n    avail = list(range(1, n + 1))\n    perm = []\n    for i in range(1, n + 1):\n        idx = r % fact[i - 1]\n        perm.append(avail.pop(idx))\n    return perm",
+          "isCode": true
+        },
+        {
+          "label": "def unrank(n, k, fact):\n    r = k - 1\n    avail = list(range(1, n + 1))\n    perm = []\n    for i in range(n, 0, -1):\n        idx = r // fact[i - 1]\n        perm.append(avail[idx])\n    return perm",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Use r=k-1, divide by decreasing factorials, take avail.pop(idx), and update r with modulo.",
+      "wrongExplanations": {
+        "1": "Off by one and uses fact[i] instead of fact[i-1].",
+        "3": "Doesn't remove used numbers or update r, so duplicates and wrong positions."
+      },
+      "hint": "Subtract 1 from k and remove chosen numbers from the available list.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def unrank(n, k, fact):\n    r = k - 1\n    avail = list(range(1, n + 1))\n    perm = []\n    for i in range(n, 0, -1):\n        idx = r // fact[i - 1]\n        r %= fact[i - 1]\n        perm.append(avail.pop(idx))\n    return perm",
+      "codeLabel": "Unranking function"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Write a function that returns k (1-based) for a given permutation of 1..n.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def rank_perm(perm, fact):\n    n = len(perm)\n    avail = list(range(1, n + 1))\n    r = 0\n    for i, val in enumerate(perm):\n        idx = avail.index(val)\n        r += idx * fact[n - 1 - i]\n        avail.pop(idx)\n    return r + 1",
+          "isCode": true
+        },
+        {
+          "label": "def rank_perm(perm, fact):\n    n = len(perm)\n    r = 0\n    for i, val in enumerate(perm):\n        r += (val - 1) * fact[n - 1 - i]\n    return r + 1",
+          "isCode": true
+        },
+        {
+          "label": "def rank_perm(perm, fact):\n    n = len(perm)\n    avail = list(range(1, n + 1))\n    r = 0\n    for i, val in enumerate(perm):\n        idx = avail.index(val)\n        r += idx * fact[i]\n        avail.pop(idx)\n    return r + 1",
+          "isCode": true
+        },
+        {
+          "label": "def rank_perm(perm, fact):\n    n = len(perm)\n    avail = list(range(1, n + 1))\n    r = 0\n    for i, val in enumerate(perm):\n        idx = avail.index(val)\n        r += idx * fact[n - 1 - i]\n        avail.pop(idx)\n    return r",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Count how many smaller unused values precede each element and multiply by the factorial of remaining slots; then add 1 at the end.",
+      "wrongExplanations": {
+        "1": "val-1 ignores the fact that some smaller values may already be used.",
+        "3": "Rank is 1-based; must return r+1."
+      },
+      "hint": "Track which numbers are still available after each step.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def rank_perm(perm, fact):\n    n = len(perm)\n    avail = list(range(1, n + 1))\n    r = 0\n    for i, val in enumerate(perm):\n        idx = avail.index(val)\n        r += idx * fact[n - 1 - i]\n        avail.pop(idx)\n    return r + 1",
+      "codeLabel": "Ranking function"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Write the main function: read all tokens, precompute factorials, process tests, and collect outputs.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def main():\n    data = sys.stdin.read().strip().split()\n    it = iter(data)\n    t = int(next(it))\n    max_n = 20\n    fact = build_fact(max_n)\n    out = []\n    for _ in range(t):\n        typ = int(next(it))\n        n = int(next(it))\n        if typ == 1:\n            k = int(next(it))\n            perm = unrank(n, k, fact)\n            out.append(\" \".join(map(str, perm)))\n        else:\n            perm = [int(next(it)) for _ in range(n)]\n            k = rank_perm(perm, fact)\n            out.append(str(k))\n    sys.stdout.write(\"\\n\".join(out))",
+          "isCode": true
+        },
+        {
+          "label": "def main():\n    t = int(sys.stdin.readline())\n    out = []\n    for _ in range(t):\n        parts = sys.stdin.readline().split()\n        if parts[0] == '1':\n            n = int(parts[1]); k = int(parts[2])\n            perm = unrank(n, k, build_fact(n))\n            out.append(\" \".join(map(str, perm)))\n        else:\n            n = int(parts[1])\n            perm = list(map(int, sys.stdin.readline().split()))\n            out.append(str(rank_perm(perm, build_fact(n))))\n    print(\"\\n\".join(out))",
+          "isCode": true
+        },
+        {
+          "label": "def main():\n    data = sys.stdin.read().split()\n    it = iter(data)\n    t = next(it)\n    max_n = 20\n    fact = build_fact(max_n)\n    out = []\n    for _ in range(int(t)):\n        typ = next(it)\n        n = next(it)\n        if typ == 1:\n            k = next(it)\n            perm = unrank(n, k, fact)\n            out.append(\" \".join(map(str, perm)))\n        else:\n            perm = [next(it) for _ in range(n)]\n            k = rank_perm(perm, fact)\n            out.append(str(k))\n    sys.stdout.write(\"\\n\".join(out))",
+          "isCode": true
+        },
+        {
+          "label": "def main():\n    data = sys.stdin.read().strip().split()\n    it = iter(data)\n    t = int(next(it))\n    fact = build_fact(20)\n    for _ in range(t):\n        typ = int(next(it)); n = int(next(it))\n        if typ == 1:\n            k = int(next(it))\n            print(*unrank(n, k, fact))\n        else:\n            perm = [int(next(it)) for _ in range(n)]\n            print(rank_perm(perm, fact))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Reads all tokens safely, precomputes factorials once up to 20, processes both types, and writes outputs together.",
+      "wrongExplanations": {
+        "1": "Rebuilding factorial per test is wasteful; also reads a separate line for perm which may fail with tokenized input formats.",
+        "3": "Printing per test is fine, but we standardize buffered output to align with the collected approach here."
+      },
+      "hint": "Compute factorials once and parse tokens as ints before use.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def main():\n    data = sys.stdin.read().strip().split()\n    it = iter(data)\n    t = int(next(it))\n    max_n = 20\n    fact = build_fact(max_n)\n    out = []\n    for _ in range(t):\n        typ = int(next(it))\n        n = int(next(it))\n        if typ == 1:\n            k = int(next(it))\n            perm = unrank(n, k, fact)\n            out.append(\" \".join(map(str, perm)))\n        else:\n            perm = [int(next(it)) for _ in range(n)]\n            k = rank_perm(perm, fact)\n            out.append(str(k))\n    sys.stdout.write(\"\\n\".join(out))",
+      "codeLabel": "Main function"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Add the standard guard to run main when the script is executed.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "if __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "if __name__ == \"main\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "main()",
+          "isCode": true
+        },
+        {
+          "label": "if __main__:\n    main()",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The conventional guard ensures main() runs only when executed as a script.",
+      "wrongExplanations": {
+        "1": "The magic name is '__main__', not 'main'.",
+        "2": "Works, but will also execute on import, which we avoid."
+      },
+      "hint": "Use the double-underscore '__main__' string.",
+      "isCodeBuilding": true,
+      "codeSnippet": "if __name__ == \"__main__\":\n    main()",
+      "codeLabel": "Main guard"
+    },
+    {
+      "id": "q20",
+      "phase": "Verifying the Solution",
+      "questionText": "What does the program output for a single test: \"1 4 2\"?",
+      "diagram": "Input:\n1\n1 4 2",
+      "options": [
+        {
+          "label": "1 2 3 4",
+          "isCode": false
+        },
+        {
+          "label": "1 2 4 3",
+          "isCode": false
+        },
+        {
+          "label": "1 3 2 4",
+          "isCode": false
+        },
+        {
+          "label": "2 1 3 4",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "p(4,2) = [1,2,4,3]; only the last two swap from the first permutation.",
+      "wrongExplanations": {
+        "0": "That's k=1.",
+        "2": "That's not the second permutation in lex order."
+      },
+      "hint": "List the first two permutations of 1..4.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q21",
+      "phase": "Verifying the Solution",
+      "questionText": "For the test: \"2 5 2 4 5 3 1\", what will be printed?",
+      "diagram": "We must rank [2,4,5,3,1] within 1..5 in lex order.",
+      "options": [
+        {
+          "label": "42",
+          "isCode": false
+        },
+        {
+          "label": "41",
+          "isCode": false
+        },
+        {
+          "label": "43",
+          "isCode": false
+        },
+        {
+          "label": "24",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Matches the example: rank is 42.",
+      "wrongExplanations": {
+        "1": "Off by one; verify each positional contribution.",
+        "2": "Off by one in the other direction."
+      },
+      "hint": "Compute idx at each position against remaining values and sum idx×(remaining!) + 1.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q22",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the time complexity per test for both operations with the current approach?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(n!)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "We use list.index and list.pop at arbitrary positions, leading to O(n^2) total for n≤20.",
+      "wrongExplanations": {
+        "1": "No sorting or log factors; repeated linear scans dominate.",
+        "3": "We never enumerate all permutations."
+      },
+      "hint": "Each position may scan the list of remaining elements.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q23",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the auxiliary space usage (excluding input/output) of the algorithm?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(1)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(n!)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The availability list and the permutation use O(n); factorial array is O(max_n)=O(n) here.",
+      "wrongExplanations": {
+        "1": "We store lists of length up to n and factorials.",
+        "2": "We don't allocate quadratic structures."
+      },
+      "hint": "We keep a list of remaining numbers and a factorial table.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Analyzing Complexity",
+      "questionText": "In unranking, what initial value should we use for r to avoid off-by-one errors, even when k = n!?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "r = k",
+          "isCode": false
+        },
+        {
+          "label": "r = k - 1",
+          "isCode": false
+        },
+        {
+          "label": "r = 0",
+          "isCode": false
+        },
+        {
+          "label": "r = n! - k",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Using r=k-1 makes k=1 map to r=0, and k=n! map to r=n!-1, matching zero-based indices.",
+      "wrongExplanations": {
+        "0": "This shifts blocks by one and breaks at boundaries.",
+        "3": "That reverses the order, not needed."
+      },
+      "hint": "We want k=1 to select the first block index 0.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys",
+    "def build_fact(max_n):\n    fact = [1] * (max_n + 1)\n    for i in range(2, max_n + 1):\n        fact[i] = fact[i - 1] * i\n    return fact",
+    "def unrank(n, k, fact):\n    r = k - 1\n    avail = list(range(1, n + 1))\n    perm = []\n    for i in range(n, 0, -1):\n        idx = r // fact[i - 1]\n        r %= fact[i - 1]\n        perm.append(avail.pop(idx))\n    return perm",
+    "def rank_perm(perm, fact):\n    n = len(perm)\n    avail = list(range(1, n + 1))\n    r = 0\n    for i, val in enumerate(perm):\n        idx = avail.index(val)\n        r += idx * fact[n - 1 - i]\n        avail.pop(idx)\n    return r + 1",
+    "def main():\n    data = sys.stdin.read().strip().split()\n    it = iter(data)\n    t = int(next(it))\n    max_n = 20\n    fact = build_fact(max_n)\n    out = []\n    for _ in range(t):\n        typ = int(next(it))\n        n = int(next(it))\n        if typ == 1:\n            k = int(next(it))\n            perm = unrank(n, k, fact)\n            out.append(\" \".join(map(str, perm)))\n        else:\n            perm = [int(next(it)) for _ in range(n)]\n            k = rank_perm(perm, fact)\n            out.append(str(k))\n    sys.stdout.write(\"\\n\".join(out))",
+    "if __name__ == \"__main__\":\n    main()"
+  ],
+  "reasoningChain": [
+    {
+      "question": "How are permutations ordered lexicographically, and what do small examples look like?",
+      "insight": "Understanding lex order and verifying small p(n,k) builds intuition for ranking/unranking."
+    },
+    {
+      "question": "Why can’t we generate all permutations for n up to 20?",
+      "insight": "We need a direct arithmetic method using factorial-based block sizes, not enumeration."
+    },
+    {
+      "question": "How does k map to the first element’s block using k-1 and (n-1)!?",
+      "insight": "Use zero-based r=k-1 and divide by (n-1)! to pick the first element and reduce the problem."
+    },
+    {
+      "question": "How do we iteratively choose subsequent elements and update r?",
+      "insight": "Repeat with decreasing factorials, taking indices from a list of available numbers and updating r with modulo."
+    },
+    {
+      "question": "How do we compute k from a given permutation?",
+      "insight": "At each position, count how many smaller unused numbers remain, multiply by factorial of remaining slots, sum to r, then k=r+1."
+    },
+    {
+      "question": "What are the efficiency and implementation details to code this correctly?",
+      "insight": "Precompute factorials up to 20, parse input tokens, manage 1-based vs 0-based carefully, and produce outputs in the required format."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1460,
+    "output_tokens": 15532,
+    "input_cost": 0.001825,
+    "output_cost": 0.15532,
+    "total_cost": 0.157145
+  }
+}

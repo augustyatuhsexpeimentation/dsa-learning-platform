@@ -1,0 +1,946 @@
+{
+  "id": "increasing-array-queries",
+  "title": "Increasing Array Queries",
+  "difficulty": "hard",
+  "tags": [
+    "array"
+  ],
+  "estimatedMinutes": 70,
+  "language": "python",
+  "description": "You are given an array of n integers, indexed 1..n. You may perform operations: choose an element and increase its value by one.\n\nFor each of q queries [a,b], determine the minimum number of operations needed so that the subarray x[a..b] becomes increasing (nondecreasing: each element is >= the previous).\n\nInput:\n- First line: n q\n- Second line: x_1 .. x_n\n- Next q lines: a b\n\nOutput:\n- For each query, print the minimum number of operations.",
+  "examples": [
+    {
+      "input": "5 3\n2 10 4 2 5\n3 5\n2 2\n1 4",
+      "output": "2\n0\n14",
+      "explanation": "- [3,5]: Make 4->5 (1), 2->5 (3), but after raising 4 to 5, previous is 10? Actually prefix from a=3: M=[4,4,5], so total increments: (4-4)+(4-2)+(5-5)=0+2+0=2.\n- [2,2]: Single element needs 0.\n- [1,4]: M=[2,10,10,10], increments: (2-2)+(10-10)+(10-4)+(10-2)=0+0+6+8=14."
+    }
+  ],
+  "constraints": [
+    "1 <= n, q <= 2*10^5",
+    "1 <= x_i <= 10^9",
+    "1 <= a <= b <= n",
+    "Time limit: 1.00 s",
+    "Memory limit: 512 MB"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Phase 1: Understanding the Problem",
+      "questionText": "Given x = [2, 2], query [1,2]. What is the minimum number of operations to make x[1..2] increasing (nondecreasing)?",
+      "diagram": "x[1]=2, x[2]=2\nWe can only increase values.",
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "It is impossible",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Already nondecreasing since 2 <= 2. No operations needed.",
+      "wrongExplanations": {
+        "1": "You would need to raise x[2] only if x[2] < x[1].",
+        "2": "No decrease exists to fix; both equal.",
+        "3": "Increasing-only operations can always make it nondecreasing."
+      },
+      "hint": "Nondecreasing allows equality.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Phase 1: Understanding the Problem",
+      "questionText": "Given x = [3, 1], query [1,2]. What is the minimum number of operations?",
+      "diagram": "x[1]=3, x[2]=1\nWe can only increase by +1.",
+      "options": [
+        {
+          "label": "1 (raise 1 -> 2)",
+          "isCode": false
+        },
+        {
+          "label": "2 (raise 1 -> 3)",
+          "isCode": false
+        },
+        {
+          "label": "3 (raise 1 -> 4 then adjust)",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Make 1 -> 3 (2 ops) so that 3 <= 3. Anything less still leaves a drop.",
+      "wrongExplanations": {
+        "0": "Array is not already nondecreasing.",
+        "1": "Raising to 2 still violates 3 <= 2."
+      },
+      "hint": "Final x[2] must be ≥ x[1].",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Phase 1: Understanding the Problem",
+      "questionText": "Trap: For x = [3, 1, 2], query [1,3], what is the minimum number of operations?",
+      "diagram": "Consider whether fixing the first drop can affect later positions.",
+      "options": [
+        {
+          "label": "2 (sum of positive drops: (3-1)=2, (1-2)<=0)",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Raise 1->3 (2 ops), then 2 must be raised to 3 (1 op). Total 3.",
+      "wrongExplanations": {
+        "0": "Raising earlier elements can force additional raises later.",
+        "3": "Overcounts; you don't need to exceed 3 at the end."
+      },
+      "hint": "After fixing 1, what must 2 become?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Phase 1: Understanding the Problem",
+      "questionText": "For x = [2, 10, 4, 2, 5] and query [1,4], what are the final values x'[1..4] after the minimum operations?",
+      "diagram": "Scan left to right, each must be ≥ previous.",
+      "options": [
+        {
+          "label": "[2, 10, 4, 2]",
+          "isCode": false
+        },
+        {
+          "label": "[2, 10, 10, 10]",
+          "isCode": false
+        },
+        {
+          "label": "[2, 3, 4, 5]",
+          "isCode": false
+        },
+        {
+          "label": "[2, 10, 6, 8]",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Final value at i is max of original x[1..i]. So [2,10,10,10].",
+      "wrongExplanations": {
+        "0": "x[3] and x[4] must be raised to at least 10.",
+        "2": "We cannot decrease values.",
+        "3": "Raises must make each ≥ previous, but not exceed next."
+      },
+      "hint": "At each step, the final value is at least the max so far.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Phase 1: Understanding the Problem",
+      "questionText": "Let M[i] = max(x[a..i]) for i in [a,b]. Which expression equals the minimum number of operations for [a,b]?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "sum_{i=a..b} (M[i] - x[i])",
+          "isCode": false
+        },
+        {
+          "label": "sum_{i=a+1..b} max(0, x[i-1] - x[i])",
+          "isCode": false
+        },
+        {
+          "label": "max(M[b] - x[a], 0)",
+          "isCode": false
+        },
+        {
+          "label": "(M[b] - x[b])",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each position i is raised to M[i], so total is sum(M[i] - x[i]).",
+      "wrongExplanations": {
+        "1": "This ignores that earlier raises increase later requirements.",
+        "2": "Only accounts for first and last elements.",
+        "3": "Only last position; misses all others."
+      },
+      "hint": "Sum the per-position raises needed.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Phase 2: Exploring Approaches",
+      "questionText": "As i increases from a to b, how does M[i] = max(x[a..i]) behave?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "It never decreases and only changes when a new larger value appears.",
+          "isCode": false
+        },
+        {
+          "label": "It can go up and down depending on x[i].",
+          "isCode": false
+        },
+        {
+          "label": "It changes at every position.",
+          "isCode": false
+        },
+        {
+          "label": "It decreases when x[i] is small.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "M[i] is a running maximum; it stays until a new larger x[i] arrives.",
+      "wrongExplanations": {
+        "1": "A maximum over an expanding range cannot decrease."
+      },
+      "hint": "Max over a growing prefix cannot get smaller.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Phase 2: Exploring Approaches",
+      "questionText": "Fix a start i. Let j be the smallest index > i with x[j] > x[i] (if none, j = n+1). For which positions t does M[t] equal x[i] when starting at i?",
+      "diagram": "i ----- j-1   j\nx[j] > x[i], and for i <= t < j.",
+      "options": [
+        {
+          "label": "For all t in [i, j-1].",
+          "isCode": false
+        },
+        {
+          "label": "Only for t = i.",
+          "isCode": false
+        },
+        {
+          "label": "For all t in [i, j].",
+          "isCode": false
+        },
+        {
+          "label": "Never; M[t] is independent of x[i].",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Until a strictly larger element appears, the running max stays x[i].",
+      "wrongExplanations": {
+        "2": "At t=j, x[j] > x[i], so M[j] becomes x[j]."
+      },
+      "hint": "When does the running max change?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Phase 2: Exploring Approaches",
+      "questionText": "When defining j for index i, should we choose the first index > i with x[j] > x[i] or with x[j] >= x[i]?",
+      "diagram": "Consider x = [5, 5, ...] starting at the first 5.",
+      "options": [
+        {
+          "label": "Use x[j] > x[i] (strictly greater).",
+          "isCode": false
+        },
+        {
+          "label": "Use x[j] >= x[i] (allow equal).",
+          "isCode": false
+        },
+        {
+          "label": "Either works; results are the same.",
+          "isCode": false
+        },
+        {
+          "label": "Pick the farthest j with x[j] >= x[i].",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Equal values do not create a new larger running max, so only strictly greater should advance.",
+      "wrongExplanations": {
+        "1": "Equal does not change the running max; moving at equal would split a constant block incorrectly."
+      },
+      "hint": "Does an equal value change the running max?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Phase 2: Exploring Approaches",
+      "questionText": "Using the i→j links, how can we express sum_{t=a..b} M[t]?",
+      "diagram": "Blocks: [p0=a .. p1-1], [p1 .. p2-1], ... where p_{k+1} is next with larger value.",
+      "options": [
+        {
+          "label": "Sum over each block: x[p] * (# of t in [p, min(b, next(p)-1)]).",
+          "isCode": false
+        },
+        {
+          "label": "Sum of x[t] over t in [a,b].",
+          "isCode": false
+        },
+        {
+          "label": "x[a] * (b-a+1) only.",
+          "isCode": false
+        },
+        {
+          "label": "Sum over blocks: (next(p)-p) without multiplying by x[p].",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Within each block, M[t] is constant and equals x[p].",
+      "wrongExplanations": {
+        "1": "This is the original sum, not the running max sum.",
+        "3": "You must weight by the block's constant max value."
+      },
+      "hint": "Within a block, M[t] is constant.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Phase 3: Building the Idea",
+      "questionText": "We need j for each i (first index to the right with x[j] > x[i]). Which approach is efficient for all i?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Scan left to right keeping indices of decreasing values; when a larger x[i] appears, assign it as j for smaller tops and pop them.",
+          "isCode": false
+        },
+        {
+          "label": "For each i, scan rightwards until you find a larger value.",
+          "isCode": false
+        },
+        {
+          "label": "Sort the array and use positions in sorted order.",
+          "isCode": false
+        },
+        {
+          "label": "Precompute table of max for every pair (i,j).",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "A single pass with a list of indices works in linear time.",
+      "wrongExplanations": {
+        "1": "This is O(n^2) in the worst case.",
+        "3": "That would be O(n^2) memory/time."
+      },
+      "hint": "Maintain a list of indices whose next larger hasn't been found yet.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Phase 3: Building the Idea",
+      "questionText": "Why must the comparison be strictly '>' when assigning j?",
+      "diagram": "Example: x = [5, 5, 6] starting at index 1.",
+      "options": [
+        {
+          "label": "Equal values should not start a new block; the running max doesn't change on equality.",
+          "isCode": false
+        },
+        {
+          "label": "Using '>=' simplifies code even if results differ.",
+          "isCode": false
+        },
+        {
+          "label": "Using '>=' always gives the same blocks.",
+          "isCode": false
+        },
+        {
+          "label": "Using '>' would skip strictly larger values.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Equality doesn't create a new record high; blocks should merge across equals.",
+      "wrongExplanations": {
+        "2": "Equality would create extra splits, changing block lengths."
+      },
+      "hint": "What happens to M at an equal next value?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Phase 3: Building the Idea",
+      "questionText": "We also need sum of x[a..b] quickly for each query. What should we precompute?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Prefix sums pref[i] = x[1] + ... + x[i].",
+          "isCode": false
+        },
+        {
+          "label": "Suffix sums only.",
+          "isCode": false
+        },
+        {
+          "label": "Running maximum array only.",
+          "isCode": false
+        },
+        {
+          "label": "Nothing; we can sum per query in O(b-a+1).",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Then sum x[a..b] = pref[b] - pref[a-1] in O(1).",
+      "wrongExplanations": {
+        "1": "Suffix sums don't directly give arbitrary range sums.",
+        "3": "Too slow for 2e5 queries."
+      },
+      "hint": "Classic range sum trick.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Phase 3: Building the Idea",
+      "questionText": "To sum full blocks quickly along the i→j chain for [a,b], how can we avoid stepping block-by-block?",
+      "diagram": "Think of jumping 1, 2, 4, 8, ... blocks at a time and pre-summing their contributions.",
+      "options": [
+        {
+          "label": "Precompute for each index and step size 1,2,4,...: the index after that many jumps and the total x[p]*len over those blocks.",
+          "isCode": false
+        },
+        {
+          "label": "Only store the immediate next index j.",
+          "isCode": false
+        },
+        {
+          "label": "Sort blocks by length and sweep them.",
+          "isCode": false
+        },
+        {
+          "label": "Use range maximum queries at query time.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "This lets us skip many blocks in O(log n) per query.",
+      "wrongExplanations": {
+        "1": "You'd still traverse each block per query.",
+        "3": "We need sums over piecewise-constant blocks, not just maxima."
+      },
+      "hint": "Store jumps of sizes 2^k with pre-accumulated sums.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Phase 3: Building the Idea",
+      "questionText": "After jumping over all full blocks with end < b, how do we account for the last (possibly partial) block starting at 'pos'?",
+      "diagram": "Block starting at pos covers indices [pos .. next(pos)-1]. We only need up to b.",
+      "options": [
+        {
+          "label": "Add x[pos] * (b - pos + 1).",
+          "isCode": false
+        },
+        {
+          "label": "Add x[pos] * (b - pos).",
+          "isCode": false
+        },
+        {
+          "label": "Add x[pos] * (next(pos) - pos).",
+          "isCode": false
+        },
+        {
+          "label": "Do nothing; all blocks are full.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We include indices from pos to b inclusive: length is b - pos + 1.",
+      "wrongExplanations": {
+        "1": "Off by one; inclusive range length adds 1.",
+        "3": "The last block may extend beyond b."
+      },
+      "hint": "Inclusive counting from pos to b.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q15",
+      "phase": "Phase 4: Writing the Code",
+      "questionText": "Read input efficiently and build x (1-based, size n+2) and store queries.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\n\ndata = list(map(int, sys.stdin.buffer.read().split()))\nit = iter(data)\nn = next(it); q = next(it)\nx = [0] * (n + 2)\nfor i in range(1, n + 1):\n    x[i] = next(it)\nqueries = [(next(it), next(it)) for _ in range(q)]",
+          "isCode": true
+        },
+        {
+          "label": "import sys\n\ndata = sys.stdin.read().split()\nn = int(data[0]); q = int(data[1])\nx = [0] * n\nfor i in range(n):\n    x[i] = int(data[2 + i])\nqueries = []",
+          "isCode": true
+        },
+        {
+          "label": "import sys\n\ndata = list(map(int, sys.stdin.buffer.read().split()))\nn, q = data[0], data[1]\nx = data[2:]\nqueries = []",
+          "isCode": true
+        },
+        {
+          "label": "import sys\nn, q = map(int, sys.stdin.readline().split())\nx = [0] + list(map(int, sys.stdin.readline().split()))\nqueries = [tuple(map(int, sys.stdin.readline().split())) for _ in range(q)]\n# no padding for sentinel",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Builds 1-based x with padding and collects all queries from the buffer.",
+      "wrongExplanations": {
+        "1": "x is 0-based and lacks padding; queries missing.",
+        "3": "No padding for sentinel; later code expects n+2 size."
+      },
+      "hint": "We'll use 1-based indices and a sentinel slot.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\n\ndata = list(map(int, sys.stdin.buffer.read().split()))\nit = iter(data)\nn = next(it); q = next(it)\nx = [0] * (n + 2)\nfor i in range(1, n + 1):\n    x[i] = next(it)\nqueries = [(next(it), next(it)) for _ in range(q)]",
+      "codeLabel": "Parse input"
+    },
+    {
+      "id": "q16",
+      "phase": "Phase 4: Writing the Code",
+      "questionText": "Compute j for each i: the first index > i with x[j] > x[i] (or n+1 if none).",
+      "diagram": "Iterate i from 1..n, maintain indices with descending x-values.",
+      "options": [
+        {
+          "label": "nxt = [n + 1] * (n + 2)\nst = []\nfor i in range(1, n + 1):\n    while st and x[i] > x[st[-1]]:\n        nxt[st.pop()] = i\n    st.append(i)",
+          "isCode": true
+        },
+        {
+          "label": "nxt = [0] * (n + 2)\nst = []\nfor i in range(n, 0, -1):\n    while st and x[i] > x[st[-1]]:\n        nxt[i] = st.pop()\n    st.append(i)",
+          "isCode": true
+        },
+        {
+          "label": "nxt = [n + 1] * (n + 2)\nst = []\nfor i in range(1, n + 1):\n    while st and x[i] >= x[st[-1]]:\n        nxt[st.pop()] = i\n    st.append(i)",
+          "isCode": true
+        },
+        {
+          "label": "nxt = [n + 1] * (n + 2)\nfor i in range(1, n + 1):\n    j = i + 1\n    while j <= n and x[j] <= x[i]:\n        j += 1\n    nxt[i] = j",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Left-to-right, assign current i as the first strictly larger index for smaller tops.",
+      "wrongExplanations": {
+        "2": "Using '>=' would treat equals as larger, splitting equal blocks.",
+        "3": "O(n^2) worst case; too slow for constraints."
+      },
+      "hint": "Set nxt[prev] = i when x[i] is strictly larger than x[prev].",
+      "isCodeBuilding": true,
+      "codeSnippet": "nxt = [n + 1] * (n + 2)\nst = []\nfor i in range(1, n + 1):\n    while st and x[i] > x[st[-1]]:\n        nxt[st.pop()] = i\n    st.append(i)",
+      "codeLabel": "Next greater-to-right (strict)"
+    },
+    {
+      "id": "q17",
+      "phase": "Phase 4: Writing the Code",
+      "questionText": "Allocate jump tables for jumps of sizes 1,2,4,... and matching sums of x[p]*(nxt[p]-p). Compute LOG.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "LOG = 1\nwhile (1 << LOG) <= n + 1:\n    LOG += 1\nup = [[n + 1] * (n + 2) for _ in range(LOG)]\nsumv = [[0] * (n + 2) for _ in range(LOG)]",
+          "isCode": true
+        },
+        {
+          "label": "LOG = 0\nwhile (1 << LOG) < n:\n    LOG += 1\nup = [[0] * (n + 1) for _ in range(LOG)]\nsumv = [[0] * (n + 1) for _ in range(LOG)]",
+          "isCode": true
+        },
+        {
+          "label": "LOG = n\nup = [[n + 1] * (n + 2) for _ in range(LOG)]\nsumv = [[0] * (n + 2) for _ in range(LOG)]",
+          "isCode": true
+        },
+        {
+          "label": "LOG = 32\nup = [[0] * (n + 2) for _ in range(LOG)]\nsumv = [[0] * (n + 2) for _ in range(LOG)]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need enough levels to jump up to n+1; allocate n+2 for sentinel.",
+      "wrongExplanations": {
+        "1": "Sizes are off; sentinel index n+1 is missing.",
+        "2": "Allocating n levels is wasteful and slow."
+      },
+      "hint": "Compute smallest LOG where 2^LOG > n+1.",
+      "isCodeBuilding": true,
+      "codeSnippet": "LOG = 1\nwhile (1 << LOG) <= n + 1:\n    LOG += 1\nup = [[n + 1] * (n + 2) for _ in range(LOG)]\nsumv = [[0] * (n + 2) for _ in range(LOG)]",
+      "codeLabel": "Allocate jump tables"
+    },
+    {
+      "id": "q18",
+      "phase": "Phase 4: Writing the Code",
+      "questionText": "Initialize base layer (jump of size 1) and its sums.",
+      "diagram": "up[0][i] = nxt[i]; sumv[0][i] = x[i] * (nxt[i] - i). Sentinel at n+1 stays pointing to itself with sum 0.",
+      "options": [
+        {
+          "label": "for i in range(1, n + 2):\n    up[0][i] = nxt[i] if i <= n else n + 1\n    sumv[0][i] = (nxt[i] - i) * x[i] if i <= n else 0",
+          "isCode": true
+        },
+        {
+          "label": "for i in range(1, n + 1):\n    up[0][i] = nxt[i]\n    sumv[0][i] = (i - nxt[i]) * x[i]",
+          "isCode": true
+        },
+        {
+          "label": "for i in range(1, n + 2):\n    up[0][i] = nxt[i]\n    sumv[0][i] = (nxt[i] - i) * x[i]",
+          "isCode": true
+        },
+        {
+          "label": "for i in range(0, n + 1):\n    up[0][i] = nxt[i]\n    sumv[0][i] = (nxt[i] - i) * x[i]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Include sentinel i=n+1 with sum 0; lengths are (nxt[i]-i).",
+      "wrongExplanations": {
+        "1": "Length sign is wrong; should be nxt[i] - i.",
+        "2": "Accesses x[n+1], which is not set; must special-case sentinel."
+      },
+      "hint": "Handle i=n+1 separately.",
+      "isCodeBuilding": true,
+      "codeSnippet": "for i in range(1, n + 2):\n    up[0][i] = nxt[i] if i <= n else n + 1\n    sumv[0][i] = (nxt[i] - i) * x[i] if i <= n else 0",
+      "codeLabel": "Init base layer"
+    },
+    {
+      "id": "q19",
+      "phase": "Phase 4: Writing the Code",
+      "questionText": "Build higher jump layers and accumulate sums over blocks for those jumps.",
+      "diagram": "For k>=1: up[k][i] = up[k-1][ up[k-1][i] ]; sumv[k][i] = sumv[k-1][i] + sumv[k-1][ up[k-1][i] ].",
+      "options": [
+        {
+          "label": "for k in range(1, LOG):\n    ui = up[k - 1]\n    uin = up[k]\n    svi = sumv[k - 1]\n    svn = sumv[k]\n    for i in range(1, n + 2):\n        u = ui[i]\n        uin[i] = ui[u]\n        svn[i] = svi[i] + svi[u]",
+          "isCode": true
+        },
+        {
+          "label": "for k in range(1, LOG):\n    for i in range(1, n + 1):\n        up[k][i] = up[k - 1][i]\n        sumv[k][i] = sumv[k - 1][i]",
+          "isCode": true
+        },
+        {
+          "label": "for k in range(1, LOG):\n    for i in range(1, n + 2):\n        up[k][i] = up[k - 1][ up[k - 1][i] ]\n        sumv[k][i] = sumv[k - 1][ up[k - 1][i] ]",
+          "isCode": true
+        },
+        {
+          "label": "for k in range(1, LOG):\n    for i in range(1, n + 2):\n        up[k][i] = up[k - 1][ up[k - 1][i] ]\n        sumv[k][i] = sumv[k - 1][i] - sumv[k - 1][ up[k - 1][i] ]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Combine two jumps of size 2^{k-1}, summing both parts.",
+      "wrongExplanations": {
+        "2": "Only takes the second part; misses the first half of the jump."
+      },
+      "hint": "A jump of size 2^k is two jumps of size 2^{k-1}.",
+      "isCodeBuilding": true,
+      "codeSnippet": "for k in range(1, LOG):\n    ui = up[k - 1]\n    uin = up[k]\n    svi = sumv[k - 1]\n    svn = sumv[k]\n    for i in range(1, n + 2):\n        u = ui[i]\n        uin[i] = ui[u]\n        svn[i] = svi[i] + svi[u]",
+      "codeLabel": "Build jump layers"
+    },
+    {
+      "id": "q20",
+      "phase": "Phase 4: Writing the Code",
+      "questionText": "Precompute prefix sums of x for range sums.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "pref = [0] * (n + 1)\nfor i in range(1, n + 1):\n    pref[i] = pref[i - 1] + x[i]",
+          "isCode": true
+        },
+        {
+          "label": "pref = [0] * (n + 2)\nfor i in range(1, n + 1):\n    pref[i] = pref[i] + x[i]",
+          "isCode": true
+        },
+        {
+          "label": "pref = [0]\nfor i in range(1, n + 1):\n    pref.append(x[i])",
+          "isCode": true
+        },
+        {
+          "label": "pref = [x[1]] * (n + 1)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Standard prefix sums with 1-based indexing.",
+      "wrongExplanations": {
+        "1": "Uses pref[i] before computing it; should use pref[i-1].",
+        "2": "This builds raw x values, not cumulative sums."
+      },
+      "hint": "pref[i] should include all x up to i.",
+      "isCodeBuilding": true,
+      "codeSnippet": "pref = [0] * (n + 1)\nfor i in range(1, n + 1):\n    pref[i] = pref[i - 1] + x[i]",
+      "codeLabel": "Prefix sums"
+    },
+    {
+      "id": "q21",
+      "phase": "Phase 4: Writing the Code",
+      "questionText": "Answer each query [a,b]: jump over full blocks and add the last partial block, then subtract sum x[a..b].",
+      "diagram": "pos starts at a. For k from high to low, if up[k][pos] <= b, add sumv[k][pos] and set pos=up[k][pos]. Then add x[pos]*(b-pos+1).",
+      "options": [
+        {
+          "label": "out = []\nfor a, b in queries:\n    pos = a\n    total = 0\n    for k in range(LOG - 1, -1, -1):\n        nxtpos = up[k][pos]\n        if nxtpos <= b:\n            total += sumv[k][pos]\n            pos = nxtpos\n    total += x[pos] * (b - pos + 1)\n    ans = total - (pref[b] - pref[a - 1])\n    out.append(str(ans))",
+          "isCode": true
+        },
+        {
+          "label": "out = []\nfor a, b in queries:\n    pos = a\n    total = 0\n    for k in range(LOG):\n        nxtpos = up[k][pos]\n        if nxtpos < b:\n            total += sumv[k][pos]\n            pos = nxtpos\n    total += x[pos] * (b - pos)\n    ans = total - (pref[b] - pref[a])\n    out.append(str(ans))",
+          "isCode": true
+        },
+        {
+          "label": "out = []\nfor a, b in queries:\n    pos = a\n    total = 0\n    while up[0][pos] < b:\n        total += sumv[0][pos]\n        pos = up[0][pos]\n    total += x[pos] * (b - pos + 2)\n    ans = total - (pref[b] - pref[a - 1])\n    out.append(str(ans))",
+          "isCode": true
+        },
+        {
+          "label": "out = []\nfor a, b in queries:\n    pos = a\n    total = 0\n    for k in range(LOG - 1, -1, -1):\n        nxtpos = up[k][pos]\n        if nxtpos < b:\n            total += sumv[k][pos]\n            pos = nxtpos\n    total += x[pos] * (b - pos + 1)\n    ans = total - (pref[b] - pref[a])\n    out.append(str(ans))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Jump while the block end (nxtpos-1) ≤ b, i.e., nxtpos ≤ b; then add the partial block and subtract the range sum.",
+      "wrongExplanations": {
+        "1": "Off-by-one on conditions and lengths; also wrong range sum indices.",
+        "3": "Condition should allow nxtpos == b; and subtract pref[a-1]."
+      },
+      "hint": "Include blocks whose nxtpos is ≤ b.",
+      "isCodeBuilding": true,
+      "codeSnippet": "out = []\nfor a, b in queries:\n    pos = a\n    total = 0\n    for k in range(LOG - 1, -1, -1):\n        nxtpos = up[k][pos]\n        if nxtpos <= b:\n            total += sumv[k][pos]\n            pos = nxtpos\n    total += x[pos] * (b - pos + 1)\n    ans = total - (pref[b] - pref[a - 1])\n    out.append(str(ans))",
+      "codeLabel": "Process queries"
+    },
+    {
+      "id": "q22",
+      "phase": "Phase 4: Writing the Code",
+      "questionText": "Output all answers efficiently.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "print(\"\\n\".join(out))",
+          "isCode": true
+        },
+        {
+          "label": "for v in out: print(v, end=' ')",
+          "isCode": true
+        },
+        {
+          "label": "print(out)",
+          "isCode": true
+        },
+        {
+          "label": "for v in out: sys.stdout.write(v)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Join with newlines to match required output format.",
+      "wrongExplanations": {
+        "1": "Spaces not newlines; wrong format.",
+        "3": "No newlines between outputs."
+      },
+      "hint": "Each answer on its own line.",
+      "isCodeBuilding": true,
+      "codeSnippet": "print(\"\\n\".join(out))",
+      "codeLabel": "Print output"
+    },
+    {
+      "id": "q23",
+      "phase": "Phase 5: Verifying the Solution",
+      "questionText": "Using the built idea, compute answers for the example:\n- x = [2, 10, 4, 2, 5]\n- queries: [3,5], [2,2], [1,4]\nWhat outputs should the program print?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "2, 0, 14 (each on a new line)",
+          "isCode": false
+        },
+        {
+          "label": "2, 1, 14",
+          "isCode": false
+        },
+        {
+          "label": "3, 0, 12",
+          "isCode": false
+        },
+        {
+          "label": "2, 0, 12",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Matches the sample: 2, 0, 14.",
+      "wrongExplanations": {},
+      "hint": "We already reasoned these in earlier questions.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Phase 5: Verifying the Solution",
+      "questionText": "Check a custom case: x = [1, 1, 1, 1], queries: [1,4], [2,3]. What are the answers?",
+      "diagram": "For any subarray, M is constant 1; no raises needed.",
+      "options": [
+        {
+          "label": "0, 0",
+          "isCode": false
+        },
+        {
+          "label": "3, 1",
+          "isCode": false
+        },
+        {
+          "label": "1, 0",
+          "isCode": false
+        },
+        {
+          "label": "0, 1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Already nondecreasing for any range; zero operations.",
+      "wrongExplanations": {},
+      "hint": "All equal means already nondecreasing.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Phase 6: Analyzing Complexity",
+      "questionText": "What is the time complexity of the full solution (building + answering q queries)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O((n + q) log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2 + q)",
+          "isCode": false
+        },
+        {
+          "label": "O(n + q^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n + q n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Next-greater scan is O(n), jump tables O(n log n), each query O(log n).",
+      "wrongExplanations": {
+        "3": "Queries are logarithmic, not linear in n."
+      },
+      "hint": "Consider per-query work and preprocessing.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Phase 6: Analyzing Complexity",
+      "questionText": "Which edge cases are correctly handled by our approach?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Equal adjacent values (they stay in the same block since we use strict '>').",
+          "isCode": false
+        },
+        {
+          "label": "Single-element queries (a=b).",
+          "isCode": false
+        },
+        {
+          "label": "Strictly increasing subarrays (no operations).",
+          "isCode": false
+        },
+        {
+          "label": "All of the above.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 3,
+      "explanation": "All are handled: strict comparison merges equals; partial block handles a=b; sums subtract original values.",
+      "wrongExplanations": {},
+      "hint": "Think through each case against how blocks and sums work.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\n\ndata = list(map(int, sys.stdin.buffer.read().split()))\nit = iter(data)\nn = next(it); q = next(it)\nx = [0] * (n + 2)\nfor i in range(1, n + 1):\n    x[i] = next(it)\nqueries = [(next(it), next(it)) for _ in range(q)]",
+    "nxt = [n + 1] * (n + 2)\nst = []\nfor i in range(1, n + 1):\n    while st and x[i] > x[st[-1]]:\n        nxt[st.pop()] = i\n    st.append(i)",
+    "LOG = 1\nwhile (1 << LOG) <= n + 1:\n    LOG += 1\nup = [[n + 1] * (n + 2) for _ in range(LOG)]\nsumv = [[0] * (n + 2) for _ in range(LOG)]",
+    "for i in range(1, n + 2):\n    up[0][i] = nxt[i] if i <= n else n + 1\n    sumv[0][i] = (nxt[i] - i) * x[i] if i <= n else 0",
+    "for k in range(1, LOG):\n    ui = up[k - 1]\n    uin = up[k]\n    svi = sumv[k - 1]\n    svn = sumv[k]\n    for i in range(1, n + 2):\n        u = ui[i]\n        uin[i] = ui[u]\n        svn[i] = svi[i] + svi[u]",
+    "pref = [0] * (n + 1)\nfor i in range(1, n + 1):\n    pref[i] = pref[i - 1] + x[i]",
+    "out = []\nfor a, b in queries:\n    pos = a\n    total = 0\n    for k in range(LOG - 1, -1, -1):\n        nxtpos = up[k][pos]\n        if nxtpos <= b:\n            total += sumv[k][pos]\n            pos = nxtpos\n    total += x[pos] * (b - pos + 1)\n    ans = total - (pref[b] - pref[a - 1])\n    out.append(str(ans))",
+    "print(\"\\n\".join(out))"
+  ],
+  "reasoningChain": [
+    {
+      "question": "What does 'increasing' mean here and how do increases propagate?",
+      "insight": "Nondecreasing is allowed; fixing a drop can force later elements up as well."
+    },
+    {
+      "question": "What are the final values after minimal operations?",
+      "insight": "Final value at i equals the running maximum of the original subarray from a to i."
+    },
+    {
+      "question": "How to express the total operations?",
+      "insight": "Sum over i in [a,b] of (running max at i − original x[i])."
+    },
+    {
+      "question": "How to avoid recomputing running max per query?",
+      "insight": "Between new record highs, the running max is constant; split the range into blocks."
+    },
+    {
+      "question": "How to define blocks efficiently?",
+      "insight": "For each i, the next index with a strictly larger value marks the end of i’s block (exclusive)."
+    },
+    {
+      "question": "How to sum over many blocks quickly in a query?",
+      "insight": "Precompute jumps of sizes 1,2,4,... along the next-larger links with cumulative block sums."
+    },
+    {
+      "question": "How to finalize the result per query?",
+      "insight": "Sum block contributions up to b, add the last partial block, then subtract the original range sum."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1468,
+    "output_tokens": 20713,
+    "input_cost": 0.001835,
+    "output_cost": 0.20713,
+    "total_cost": 0.208965
+  }
+}

@@ -1,0 +1,1059 @@
+{
+  "id": "moving-robots-expected-empty-squares",
+  "title": "Moving Robots",
+  "difficulty": "intermediate",
+  "tags": [
+    "math",
+    "probability",
+    "random-walk",
+    "grids"
+  ],
+  "estimatedMinutes": 60,
+  "language": "python",
+  "description": "Each square of an 8×8 chessboard has a robot. Each robot independently moves k steps. On each turn, a robot moves one step left, right, up or down, but not outside the board. It randomly chooses a direction among those where it can move. Compute the expected number of empty squares after k turns. Output should be rounded to six decimal places (rounding half to even).",
+  "examples": [
+    {
+      "input": "10",
+      "output": "23.120740",
+      "explanation": "Robots perform independent random walks with equal split among available moves; probabilities are propagated step by step, and empty-square probabilities are multiplied across robots."
+    }
+  ],
+  "constraints": [
+    "Board size: 8×8 (64 robots)",
+    "1 ≤ k ≤ 100",
+    "Time limit: 1.00 s",
+    "Memory limit: 512 MB"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "Initially (before any moves), how many empty squares are there on the 8×8 board?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "32",
+          "isCode": false
+        },
+        {
+          "label": "64",
+          "isCode": false
+        },
+        {
+          "label": "It depends on k",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Every square starts with one robot, so no square is empty at step 0.",
+      "wrongExplanations": {
+        "2": "64 empty squares would mean no robots initially, which is false.",
+        "3": "At k=0, there have been no moves; the setup is fixed."
+      },
+      "hint": null,
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "A robot starts on a corner square. On its first move, how many directions can it choose from?",
+      "diagram": "Corner has only two in-bounds neighbors.",
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "At a corner, only two directions stay inside the board.",
+      "wrongExplanations": {
+        "2": "Edge (non-corner) squares have 3 moves, not corners.",
+        "3": "Interior squares have 4 moves."
+      },
+      "hint": "Count moves that stay within the 8×8 grid.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "Are all squares equally likely to be empty after k=1 move?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, symmetry makes all squares equivalent",
+          "isCode": false
+        },
+        {
+          "label": "No, corner/edge squares differ from interior squares",
+          "isCode": false
+        },
+        {
+          "label": "Yes, because there is one robot per square initially",
+          "isCode": false
+        },
+        {
+          "label": "Cannot determine without simulation",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Squares have different numbers of in-bound neighbors, so arrival probabilities differ.",
+      "wrongExplanations": {
+        "0": "Symmetry is broken by borders; corners/edges are different.",
+        "2": "Initial placement doesn't equalize move options after one step."
+      },
+      "hint": "Consider how many distinct ways you can arrive at a corner vs an interior square in one move.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "Robots move independently. For a fixed square s after k moves, which statement is correct?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "The events that different robots land on s are independent",
+          "isCode": false
+        },
+        {
+          "label": "Two robots cannot be on the same square",
+          "isCode": false
+        },
+        {
+          "label": "If one robot lands on s, it makes others more likely to land on s",
+          "isCode": false
+        },
+        {
+          "label": "All robots have the same probability to land on s",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Robots move independently; multiple robots can share a square. Their landing events are independent.",
+      "wrongExplanations": {
+        "1": "The problem allows multiple robots on the same square.",
+        "3": "Probabilities differ by starting position and borders."
+      },
+      "hint": "Independence refers to their random choices being separate.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Exploring Approaches",
+      "questionText": "Why is enumerating all possible paths for all robots impractical?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "There are about 4^k paths per robot; with 64 robots this explodes",
+          "isCode": false
+        },
+        {
+          "label": "Because robots cannot reach corners",
+          "isCode": false
+        },
+        {
+          "label": "We only need the most likely path, not all paths",
+          "isCode": false
+        },
+        {
+          "label": "The expected value cannot be computed without simulation",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each step branches up to 4 ways; 4^k per robot is huge. We need probabilities, not path-by-path enumeration.",
+      "wrongExplanations": {
+        "1": "Robots can reach corners; borders restrict moves but do not block reachability.",
+        "3": "We can compute probabilities by propagating mass step by step."
+      },
+      "hint": "Estimate 4^100.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "Let prev[u] be the probability that a single robot is at square u after t moves. How do we compute next[v] after t+1 moves?",
+      "diagram": "u -> v if v is a neighbor of u\nShare from u splits equally among its neighbors.",
+      "options": [
+        {
+          "label": "next[v] = sum over u that have v as a neighbor of (prev[u] / deg(u))",
+          "isCode": false
+        },
+        {
+          "label": "next[v] = prev[v] / deg(v)",
+          "isCode": false
+        },
+        {
+          "label": "next[v] = average of prev over v's neighbors",
+          "isCode": false
+        },
+        {
+          "label": "next[v] = sum over neighbors u of (prev[u] / deg(v))",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each u splits its probability equally among its available moves: contribution to v is prev[u]/deg(u) if v is a neighbor of u.",
+      "wrongExplanations": {
+        "1": "Dividing prev[v] by deg(v) ignores incoming contributions.",
+        "3": "The split depends on the source u's degree, not v's."
+      },
+      "hint": "Incoming flow to v is the sum of outgoing shares from neighbors.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "Given independence, how do we compute the probability that square s is empty after k moves?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Multiply over all robots r: (1 − P_r(s))",
+          "isCode": false
+        },
+        {
+          "label": "1 − sum over robots r of P_r(s)",
+          "isCode": false
+        },
+        {
+          "label": "exp(−sum over r of P_r(s))",
+          "isCode": false
+        },
+        {
+          "label": "Average over robots r of (1 − P_r(s))",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "No robot on s means every robot fails to be on s; independence gives a product of their failure probabilities.",
+      "wrongExplanations": {
+        "1": "Inclusion–exclusion is not just a simple subtraction due to overlaps.",
+        "2": "That would be a Poisson approximation, not exact here."
+      },
+      "hint": "Think of independent Bernoulli events: none occur.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Building the Idea",
+      "questionText": "What is the number of available moves (degree) for squares by category?",
+      "diagram": "Corner: 2; Edge (non-corner): 3; Interior: 4",
+      "options": [
+        {
+          "label": "Corner=2, Edge=3, Interior=4",
+          "isCode": false
+        },
+        {
+          "label": "Corner=2, Edge=4, Interior=4",
+          "isCode": false
+        },
+        {
+          "label": "Corner=3, Edge=3, Interior=4",
+          "isCode": false
+        },
+        {
+          "label": "Corner=2, Edge=3, Interior=3",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Corners have 2 neighbors, edges (non-corner) have 3, interior squares have 4.",
+      "wrongExplanations": {
+        "1": "Edge squares do not have 4 valid moves.",
+        "2": "Corners don't have 3 moves."
+      },
+      "hint": "Draw a small section of the board and count neighbors.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "For a single robot, does the total probability mass stay 1 after each move when using the update rule?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, because each square's probability is split equally among its available moves",
+          "isCode": false
+        },
+        {
+          "label": "No, some mass is lost at the borders",
+          "isCode": false
+        },
+        {
+          "label": "No, mass increases since multiple neighbors receive shares",
+          "isCode": false
+        },
+        {
+          "label": "Only for interior squares",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each square redistributes its probability without loss or duplication; sums preserve 1.",
+      "wrongExplanations": {
+        "1": "Moves that would leave the board are not allowed; mass is only split among valid moves.",
+        "2": "Shares from each source sum to its original probability."
+      },
+      "hint": "Sum next[v] over all v and swap sums with sources.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "After one move (k=1), which category of squares has the highest expected number of robots on it?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Interior squares",
+          "isCode": false
+        },
+        {
+          "label": "Edge (non-corner) squares",
+          "isCode": false
+        },
+        {
+          "label": "Corner squares",
+          "isCode": false
+        },
+        {
+          "label": "All categories have the same expected count",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Interior squares have four in-bound neighbors that split mass; corners have fewer sources or larger splits per source.",
+      "wrongExplanations": {
+        "1": "Edges have fewer in-bound neighbors and receive less total mass than interiors.",
+        "2": "Corners receive the least after one move."
+      },
+      "hint": "Compute contributions from neighbors using 1/deg(source).",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "If two independent robots have probabilities 0.2 and 0.1 to land on the same square s after k moves, what is P(s is empty)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "0.72",
+          "isCode": false
+        },
+        {
+          "label": "0.7",
+          "isCode": false
+        },
+        {
+          "label": "0.8",
+          "isCode": false
+        },
+        {
+          "label": "0.9",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "P(empty) = (1 − 0.2) × (1 − 0.1) = 0.8 × 0.9 = 0.72.",
+      "wrongExplanations": {
+        "1": "Subtracting probabilities ignores overlaps.",
+        "3": "This is just the failure of one robot, not both."
+      },
+      "hint": "Both must fail to land on s.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "Which precomputation best supports fast probability updates each step?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "For each square, a list of neighbor indices (and degree by len(list))",
+          "isCode": false
+        },
+        {
+          "label": "A list of all pairs of squares",
+          "isCode": false
+        },
+        {
+          "label": "Only degrees for each square",
+          "isCode": false
+        },
+        {
+          "label": "No precomputation is needed",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Neighbor lists let us distribute shares efficiently; degree is simply the length of the list.",
+      "wrongExplanations": {
+        "2": "Degree alone is insufficient; we need to know which neighbors receive shares."
+      },
+      "hint": "We repeatedly need to push probability to valid moves.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "For k=1 and a corner square s, what is P(s is empty)?",
+      "diagram": "Corner s has exactly two neighbors; each neighbor has degree 3.",
+      "options": [
+        {
+          "label": "(1 − 1/3)^2 = 4/9",
+          "isCode": false
+        },
+        {
+          "label": "(1 − 1/2)^2 = 1/4",
+          "isCode": false
+        },
+        {
+          "label": "(1 − 1/4)^4 = 81/256",
+          "isCode": false
+        },
+        {
+          "label": "(1 − 1/3)^4 = 16/81",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Only its two neighbors can arrive in one step, each with chance 1/3; others have 0. So (2/3)^2.",
+      "wrongExplanations": {
+        "1": "Neighbors of a corner have degree 3, not 2.",
+        "2": "Four neighbors apply to interior squares, not corners."
+      },
+      "hint": "Only consider robots that can reach s in one move.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Writing the Code",
+      "questionText": "Read input and prepare to build the solution. Choose the correct way to read k.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\nk = int(sys.stdin.readline().strip())",
+          "isCode": true
+        },
+        {
+          "label": "k = input()",
+          "isCode": true
+        },
+        {
+          "label": "import sys\nk = float(sys.stdin.read())",
+          "isCode": true
+        },
+        {
+          "label": "k = int(open(0).readline())\nimport sys",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need an integer k from a single line. Using sys.stdin.readline().strip() is reliable.",
+      "wrongExplanations": {
+        "1": "input() returns a string; missing int() conversion.",
+        "2": "k should be an integer, not float."
+      },
+      "hint": "Use int() on the line read from stdin.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\nk = int(sys.stdin.readline().strip())",
+      "codeLabel": "Read input k"
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Initialize the neighbor list for all 64 squares.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "neighbors = [[] for _ in range(64)]",
+          "isCode": true
+        },
+        {
+          "label": "neighbors = [set()]*64",
+          "isCode": true
+        },
+        {
+          "label": "neighbors = [[0]*4 for _ in range(64)]",
+          "isCode": true
+        },
+        {
+          "label": "neighbors = []\nfor _ in range(8): neighbors.append([])",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need a list of lists; each index holds a dynamic list of neighbor indices.",
+      "wrongExplanations": {
+        "1": "This creates 64 references to the same set object.",
+        "2": "A fixed-size list of 4 may not fit corners/edges cleanly without placeholders."
+      },
+      "hint": "We need an independent list for each of the 64 squares.",
+      "isCodeBuilding": true,
+      "codeSnippet": "neighbors = [[] for _ in range(64)]",
+      "codeLabel": "Init neighbors"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Fill neighbors with valid moves (up/down/left/right) staying inside the 8×8 board.",
+      "diagram": "Index i -> (r,c) via r=i//8, c=i%8",
+      "options": [
+        {
+          "label": "for i in range(64):\n    r, c = divmod(i, 8)\n    for dr, dc in [(-1,0),(1,0),(0,-1),(0,1)]:\n        nr, nc = r+dr, c+dc\n        if 0 <= nr < 8 and 0 <= nc < 8:\n            neighbors[i].append(nr*8+nc)",
+          "isCode": true
+        },
+        {
+          "label": "for i in range(64):\n    r, c = i//8, i%8\n    for dr, dc in [(-1,0),(1,0),(0,-1),(0,1)]:\n        nr, nc = r+dr, c+dc\n        neighbors[i].append(nr*8+nc)",
+          "isCode": true
+        },
+        {
+          "label": "for i in range(64):\n    r, c = divmod(i, 8)\n    for dr, dc in [(-1,0),(1,0),(0,-1),(0,1)]:\n        neighbors[i].append(((r+dr)%8)*8 + ((c+dc)%8))",
+          "isCode": true
+        },
+        {
+          "label": "for i in range(64):\n    r, c = divmod(i, 8)\n    for nr, nc in [(r-1,c),(r+1,c),(r,c-1),(r,c+1)]:\n        neighbors[nr*8+nc].append(i)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We must only add in-bounds neighbors; use bounds checks and map back to index.",
+      "wrongExplanations": {
+        "1": "No bounds check; would include invalid indices.",
+        "3": "This populates incoming lists for neighbors rather than outgoing from i; either can work if consistent, but we'll use outgoing."
+      },
+      "hint": "Avoid wrap-around and off-board moves.",
+      "isCodeBuilding": true,
+      "codeSnippet": "for i in range(64):\n    r, c = divmod(i, 8)\n    for dr, dc in [(-1,0),(1,0),(0,-1),(0,1)]:\n        nr, nc = r+dr, c+dc\n        if 0 <= nr < 8 and 0 <= nc < 8:\n            neighbors[i].append(nr*8+nc)",
+      "codeLabel": "Build neighbors"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Prepare storage for the final k-step landing probabilities from each start square.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "probs = [[0.0]*64 for _ in range(64)]",
+          "isCode": true
+        },
+        {
+          "label": "probs = [0.0]*64",
+          "isCode": true
+        },
+        {
+          "label": "probs = [[0]*64]*64",
+          "isCode": true
+        },
+        {
+          "label": "probs = dict()",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need a 64×64 matrix: rows=start indices, columns=destination probabilities.",
+      "wrongExplanations": {
+        "2": "This creates shared inner lists (aliasing), causing incorrect updates.",
+        "1": "A single list cannot store distributions for all starts."
+      },
+      "hint": "Think matrix: start index by destination index.",
+      "isCodeBuilding": true,
+      "codeSnippet": "probs = [[0.0]*64 for _ in range(64)]",
+      "codeLabel": "Init probs matrix"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "For each start square t, initialize its probability distribution before stepping.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "for t in range(64):\n    dp = [0.0]*64\n    dp[t] = 1.0",
+          "isCode": true
+        },
+        {
+          "label": "for t in range(64):\n    dp = [1.0]*64",
+          "isCode": true
+        },
+        {
+          "label": "for t in range(64):\n    dp = [0]*64\n    dp[0] = 1.0",
+          "isCode": true
+        },
+        {
+          "label": "for t in range(64):\n    dp = []\n    dp.append(1.0)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Start with certainty at t: dp[t]=1.0 and 0 elsewhere.",
+      "wrongExplanations": {
+        "1": "This sums to 64, not a valid distribution.",
+        "2": "This always starts at index 0 regardless of t."
+      },
+      "hint": "Use a one-hot vector for the start position.",
+      "isCodeBuilding": true,
+      "codeSnippet": "for t in range(64):\n    dp = [0.0]*64\n    dp[t] = 1.0",
+      "codeLabel": "Init per-start distribution"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Advance the distribution by one step k times: set up the loop and next array.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    for _ in range(k):\n        nxt = [0.0]*64",
+          "isCode": true
+        },
+        {
+          "label": "    for _ in range(k):\n        nxt = dp",
+          "isCode": true
+        },
+        {
+          "label": "    for _ in range(k+1):\n        nxt = [0.0]*64",
+          "isCode": true
+        },
+        {
+          "label": "    for step in range(1, k+1):\n        nxt = [1.0]*64",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We perform exactly k updates; each time start with a fresh zeroed next array.",
+      "wrongExplanations": {
+        "1": "This reuses the same list, causing accumulation errors.",
+        "2": "This performs k+1 updates, off by one."
+      },
+      "hint": "You need k transitions, not k+1.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    for _ in range(k):\n        nxt = [0.0]*64",
+      "codeLabel": "Loop k steps"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Distribute probability mass from each square u to its neighbors for one step.",
+      "diagram": "If dp[u] > 0, share = dp[u]/len(neighbors[u]); add to all neighbors.",
+      "options": [
+        {
+          "label": "        for u in range(64):\n            if dp[u] == 0.0:\n                continue\n            d = len(neighbors[u])\n            share = dp[u] / d\n            for v in neighbors[u]:\n                nxt[v] += share",
+          "isCode": true
+        },
+        {
+          "label": "        for u in range(64):\n            d = len(neighbors[u])\n            for v in neighbors[u]:\n                nxt[v] += dp[v] / d",
+          "isCode": true
+        },
+        {
+          "label": "        for u in range(64):\n            for v in neighbors[u]:\n                nxt[u] += dp[u] / len(neighbors[v])",
+          "isCode": true
+        },
+        {
+          "label": "        for v in range(64):\n            nxt[v] = dp[v]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Split dp[u] equally among neighbors using u's degree and add to nxt[v].",
+      "wrongExplanations": {
+        "1": "Uses dp[v] as source; wrong direction.",
+        "2": "Dividing by len(neighbors[v]) uses the destination's degree, which is incorrect."
+      },
+      "hint": "Use the degree of the source square to split.",
+      "isCodeBuilding": true,
+      "codeSnippet": "        for u in range(64):\n            if dp[u] == 0.0:\n                continue\n            d = len(neighbors[u])\n            share = dp[u] / d\n            for v in neighbors[u]:\n                nxt[v] += share",
+      "codeLabel": "Distribute mass"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "Complete the per-step update and store the final distribution after k steps for start t.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "        dp = nxt\n    probs[t] = dp",
+          "isCode": true
+        },
+        {
+          "label": "        dp = nxt\n    probs[t] = nxt\n    dp = [0.0]*64",
+          "isCode": true
+        },
+        {
+          "label": "        nxt = dp\n    probs[t] = nxt",
+          "isCode": true
+        },
+        {
+          "label": "        dp[:] = nxt\n    probs.append(dp)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "After k iterations, dp holds the k-step distribution; assign it to probs[t].",
+      "wrongExplanations": {
+        "2": "Assigning nxt=dp doesn't propagate new values; it aliases lists.",
+        "3": "Appending breaks the 64×64 matrix shape and order."
+      },
+      "hint": "Ensure probs has 64 rows indexed by t.",
+      "isCodeBuilding": true,
+      "codeSnippet": "        dp = nxt\n    probs[t] = dp",
+      "codeLabel": "Finalize per-start distribution"
+    },
+    {
+      "id": "q22",
+      "phase": "Writing the Code",
+      "questionText": "Compute the expected number of empty squares from the probs matrix.",
+      "diagram": "For each destination s: p_empty = Π_t (1 − probs[t][s]); ans += p_empty",
+      "options": [
+        {
+          "label": "ans = 0.0\nfor s in range(64):\n    p_empty = 1.0\n    for t in range(64):\n        p_empty *= (1.0 - probs[t][s])\n    ans += p_empty",
+          "isCode": true
+        },
+        {
+          "label": "ans = 0.0\nfor s in range(64):\n    p_empty = 0.0\n    for t in range(64):\n        p_empty += (1.0 - probs[t][s])\n    ans += p_empty / 64.0",
+          "isCode": true
+        },
+        {
+          "label": "ans = 0.0\nfor s in range(64):\n    p_empty = 1.0\n    for t in range(64):\n        p_empty *= probs[t][s]\n    ans += (1.0 - p_empty)",
+          "isCode": true
+        },
+        {
+          "label": "ans = 64.0\nfor s in range(64):\n    for t in range(64):\n        ans -= probs[t][s]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Independence gives a product over robots of their failure probabilities for each square.",
+      "wrongExplanations": {
+        "1": "Averaging failures is not the same as the probability all fail.",
+        "2": "This computes the probability that at least one lands, not empty."
+      },
+      "hint": "Empty means every robot misses that square.",
+      "isCodeBuilding": true,
+      "codeSnippet": "ans = 0.0\nfor s in range(64):\n    p_empty = 1.0\n    for t in range(64):\n        p_empty *= (1.0 - probs[t][s])\n    ans += p_empty",
+      "codeLabel": "Aggregate emptiness"
+    },
+    {
+      "id": "q23",
+      "phase": "Writing the Code",
+      "questionText": "Print the answer with six decimal places using rounding half to even (default).",
+      "diagram": null,
+      "options": [
+        {
+          "label": "print(\"{:.6f}\".format(ans))",
+          "isCode": true
+        },
+        {
+          "label": "print(round(ans, 6))",
+          "isCode": true
+        },
+        {
+          "label": "print(f\"{ans:.6}\")",
+          "isCode": true
+        },
+        {
+          "label": "print(int(ans * 1e6) / 1e6)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Formatting with \"{:.6f}\" prints exactly six decimals using Python’s rounding (half to even).",
+      "wrongExplanations": {
+        "1": "round may not always display trailing zeros.",
+        "3": "Manual truncation is not the required rounding rule."
+      },
+      "hint": "Ensure exactly 6 digits after the decimal point.",
+      "isCodeBuilding": true,
+      "codeSnippet": "print(\"{:.6f}\".format(ans))",
+      "codeLabel": "Print result"
+    },
+    {
+      "id": "q24",
+      "phase": "Verifying the Solution",
+      "questionText": "Suppose k=1 and we focus on a specific corner square s. Which robots can reach s in one move?",
+      "diagram": "s is a corner; only two adjacent edge squares can move into it.",
+      "options": [
+        {
+          "label": "Exactly the two edge neighbors of s",
+          "isCode": false
+        },
+        {
+          "label": "All its four hypothetical neighbors",
+          "isCode": false
+        },
+        {
+          "label": "All squares in the same row and column",
+          "isCode": false
+        },
+        {
+          "label": "All robots on the board have nonzero chance",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "In one step, only adjacent squares can reach s, and a corner has exactly two adjacent edge squares.",
+      "wrongExplanations": {
+        "1": "A corner only has two valid neighbors, not four.",
+        "3": "Only adjacent squares can reach in one step."
+      },
+      "hint": "One move is a single step up/down/left/right.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Verifying the Solution",
+      "questionText": "For k=1, what is the probability that a specific interior square is empty?",
+      "diagram": "Interior square has four neighbors; each neighbor has degree 4.",
+      "options": [
+        {
+          "label": "(1 − 1/4)^4",
+          "isCode": false
+        },
+        {
+          "label": "(1 − 1/3)^4",
+          "isCode": false
+        },
+        {
+          "label": "(1 − 1/4)^3",
+          "isCode": false
+        },
+        {
+          "label": "(1 − 1/2)^4",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Only its four neighbors can reach it; each arrives with 1/4 from their positions.",
+      "wrongExplanations": {
+        "1": "Neighbors of an interior square have degree 4, not 3.",
+        "2": "There are four neighbors, not three."
+      },
+      "hint": "Count only robots that can reach in one step and their split.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Verifying the Solution",
+      "questionText": "In your implementation, after each step for a single start t, what should sum(dp) be?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Exactly 1.0 (up to small floating-point error)",
+          "isCode": false
+        },
+        {
+          "label": "Less than 1 due to borders",
+          "isCode": false
+        },
+        {
+          "label": "Greater than 1 because we add contributions",
+          "isCode": false
+        },
+        {
+          "label": "Depends on t and k",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Mass is conserved: we redistribute existing probability among valid moves.",
+      "wrongExplanations": {
+        "1": "No mass leaves the board; we only split among in-bounds neighbors.",
+        "2": "Redistribution does not create mass."
+      },
+      "hint": "Check that the update collects shares only from in-bounds moves.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q27",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the time complexity of this approach on an 8×8 board in terms of k?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(64 × k) with a small constant factor (processing neighbors each step)",
+          "isCode": false
+        },
+        {
+          "label": "O(4^k)",
+          "isCode": false
+        },
+        {
+          "label": "O(64^2 × k^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(k^3)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We run k steps for each of 64 starts, distributing to a constant number of neighbors per cell.",
+      "wrongExplanations": {
+        "1": "We do not enumerate paths.",
+        "2": "There is no extra k factor inside the neighbor loop."
+      },
+      "hint": "Each step processes a fixed number of squares and neighbors.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q28",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the space complexity of storing all final landing probabilities and helper arrays?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(64^2) for the 64×64 matrix, plus O(64) for working arrays",
+          "isCode": false
+        },
+        {
+          "label": "O(64)",
+          "isCode": false
+        },
+        {
+          "label": "O(k)",
+          "isCode": false
+        },
+        {
+          "label": "O(4^k)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We store a 64×64 matrix of floats and a few 64-length lists; all are constant-size for an 8×8 board.",
+      "wrongExplanations": {
+        "1": "We need to keep distributions for all starts, not just one value.",
+        "2": "k only affects the number of iterations, not stored matrix size."
+      },
+      "hint": "Consider the probs matrix dimensions.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q29",
+      "phase": "Analyzing Complexity",
+      "questionText": "Which rounding behavior does print(\"{:.6f}\".format(ans)) use in Python?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Round half to even (banker's rounding)",
+          "isCode": false
+        },
+        {
+          "label": "Always round .5 up",
+          "isCode": false
+        },
+        {
+          "label": "Always truncate",
+          "isCode": false
+        },
+        {
+          "label": "Undefined; depends on platform",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Python formatting uses IEEE 754 rules, rounding half to even.",
+      "wrongExplanations": {
+        "1": "Python does not always round .5 up.",
+        "3": "Behavior is defined by Python’s floating formatting."
+      },
+      "hint": "Same behavior as round() in Python 3 formatting.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\nk = int(sys.stdin.readline().strip())",
+    "neighbors = [[] for _ in range(64)]",
+    "for i in range(64):\n    r, c = divmod(i, 8)\n    for dr, dc in [(-1,0),(1,0),(0,-1),(0,1)]:\n        nr, nc = r+dr, c+dc\n        if 0 <= nr < 8 and 0 <= nc < 8:\n            neighbors[i].append(nr*8+nc)",
+    "probs = [[0.0]*64 for _ in range(64)]",
+    "for t in range(64):\n    dp = [0.0]*64\n    dp[t] = 1.0",
+    "    for _ in range(k):\n        nxt = [0.0]*64",
+    "        for u in range(64):\n            if dp[u] == 0.0:\n                continue\n            d = len(neighbors[u])\n            share = dp[u] / d\n            for v in neighbors[u]:\n                nxt[v] += share",
+    "        dp = nxt\n    probs[t] = dp",
+    "ans = 0.0\nfor s in range(64):\n    p_empty = 1.0\n    for t in range(64):\n        p_empty *= (1.0 - probs[t][s])\n    ans += p_empty",
+    "print(\"{:.6f}\".format(ans))"
+  ],
+  "reasoningChain": [
+    {
+      "question": "How can we express the expected number of empty squares?",
+      "insight": "Use linearity of expectation: sum over squares of the probability that each square is empty."
+    },
+    {
+      "question": "How do we compute the probability that a square is empty given independent robots?",
+      "insight": "Multiply (1 − landing probability) over all robots because their landings are independent."
+    },
+    {
+      "question": "How do we compute a single robot’s landing probabilities after k moves?",
+      "insight": "Iteratively propagate probability by splitting from each square equally among its valid neighbors at each step."
+    },
+    {
+      "question": "How do borders affect the per-step propagation?",
+      "insight": "Degrees vary: corners have 2, edges 3, interior 4 neighbors; splits must use the source square’s degree."
+    },
+    {
+      "question": "How do we assemble the final expected value from per-start distributions?",
+      "insight": "For each destination, compute the product of misses across all starts and sum over all destinations."
+    },
+    {
+      "question": "Is this approach efficient for k ≤ 100 on an 8×8 board?",
+      "insight": "Yes; time is O(64 × k) with small constants and space is O(64^2), both easily within limits."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1337,
+    "output_tokens": 14841,
+    "input_cost": 0.001671,
+    "output_cost": 0.14841,
+    "total_cost": 0.150081
+  }
+}

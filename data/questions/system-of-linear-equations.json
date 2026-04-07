@@ -1,0 +1,971 @@
+{
+  "id": "system-of-linear-equations-modulo",
+  "title": "System of Linear Equations",
+  "difficulty": "intermediate",
+  "tags": [
+    "math",
+    "modular arithmetic"
+  ],
+  "estimatedMinutes": 70,
+  "language": "python",
+  "description": "You are given n·(m+1) coefficients a_{i,j} and b_i that form n linear equations modulo 10^9+7:\n\na_{1,1}x_1 + ... + a_{1,m}x_m = b_1 (mod 10^9+7)\n...\na_{n,1}x_1 + ... + a_{n,m}x_m = b_n (mod 10^9+7)\n\nFind any m integers x_1..x_m that satisfy all the equations modulo 10^9+7. If no solution exists, print -1. If a solution exists, output values in the range 0 ≤ x_i < 10^9+7.",
+  "examples": [
+    {
+      "input": "3 3\n2 0 1 7\n1 2 0 0\n1 3 1 2",
+      "output": "2 1000000006 3",
+      "explanation": "One valid solution modulo 1e9+7. Multiple solutions may exist; any valid one is accepted."
+    }
+  ],
+  "constraints": [
+    "1 ≤ n, m ≤ 500",
+    "0 ≤ a_{i,j}, b_i < 10^9+7",
+    "Modulus is prime: 10^9+7"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "Over modulus 7, which x satisfies 2x ≡ 1 (mod 7)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "x = 3",
+          "isCode": false
+        },
+        {
+          "label": "x = 4",
+          "isCode": false
+        },
+        {
+          "label": "x = 1",
+          "isCode": false
+        },
+        {
+          "label": "x = 6",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "2*4 = 8 ≡ 1 (mod 7). The others give remainders 6, 2, and 5 respectively.",
+      "wrongExplanations": {
+        "0": "2*3 = 6 ≡ -1 (mod 7), not 1."
+      },
+      "hint": "Try small x and compute 2x mod 7.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "Over modulus 7, which pair (x1, x2) satisfies x1 + 2x2 ≡ 3 (mod 7)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "(1, 1)",
+          "isCode": false
+        },
+        {
+          "label": "(2, 1)",
+          "isCode": false
+        },
+        {
+          "label": "(3, 2)",
+          "isCode": false
+        },
+        {
+          "label": "(0, 3)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "1 + 2*1 = 3 ≡ 3. Others: 2+2=4, 3+4=7≡0, 0+6=6.",
+      "wrongExplanations": {
+        "2": "3 + 2*2 = 7 ≡ 0, not 3."
+      },
+      "hint": "Check x1 + 2*x2 modulo 7 for each pair.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "Output must satisfy 0 ≤ x_i < 10^9+7. If your math gives x = −1 (mod 10^9+7), what should you print?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "-1",
+          "isCode": false
+        },
+        {
+          "label": "1000000006",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "−1 ≡ 10^9+7−1 = 1000000006, which is in the required range.",
+      "wrongExplanations": {
+        "0": "Printing -1 here indicates \"no solution\" per problem; not a valid residue."
+      },
+      "hint": "Add 10^9+7 to bring into [0, MOD).",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "Which single equation over modulus 7 is unsatisfiable?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "0·x + 0·y ≡ 1",
+          "isCode": false
+        },
+        {
+          "label": "x ≡ 0",
+          "isCode": false
+        },
+        {
+          "label": "2x ≡ 0",
+          "isCode": false
+        },
+        {
+          "label": "3x ≡ 3",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "0 ≡ 1 is impossible. The others have solutions.",
+      "wrongExplanations": {
+        "2": "2x ≡ 0 has x ≡ 0 as a solution."
+      },
+      "hint": "A row of all zeros equaling a nonzero RHS is impossible.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Exploring Approaches",
+      "questionText": "Why is trying all x_1..x_m in [0, MOD) infeasible?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "It’s O(n·m).",
+          "isCode": false
+        },
+        {
+          "label": "It’s O(MOD^m), astronomically large.",
+          "isCode": false
+        },
+        {
+          "label": "It’s O(m^MOD).",
+          "isCode": false
+        },
+        {
+          "label": "It’s O(MOD + m).",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "There are MOD choices per variable, so MOD^m combinations.",
+      "wrongExplanations": {
+        "0": "n and m aren’t the search space size here."
+      },
+      "hint": "Count the number of combinations.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "Which operation does NOT always preserve the set of solutions of a linear equation modulo a prime?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Swap two equations.",
+          "isCode": false
+        },
+        {
+          "label": "Replace equation j by (equation j) − c·(equation i) with c ≠ 0 (mod MOD).",
+          "isCode": false
+        },
+        {
+          "label": "Multiply both sides of an equation by a nonzero constant.",
+          "isCode": false
+        },
+        {
+          "label": "Multiply an entire equation by 0.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 3,
+      "explanation": "Multiplying by 0 collapses information and changes the solution set.",
+      "wrongExplanations": {
+        "2": "Multiplying by a nonzero is invertible modulo a prime."
+      },
+      "hint": "Think about invertibility modulo a prime.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "When is it valid to divide by a coefficient a in modulus 10^9+7 arithmetic?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Whenever a ≠ 0 (mod MOD), by multiplying with a^(MOD−2) (mod MOD).",
+          "isCode": false
+        },
+        {
+          "label": "Only when a divides the right-hand side.",
+          "isCode": false
+        },
+        {
+          "label": "Only when a = 1.",
+          "isCode": false
+        },
+        {
+          "label": "Never; division is not allowed modulo.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "MOD is prime, so nonzero a has a multiplicative inverse a^(MOD−2) mod MOD.",
+      "wrongExplanations": {
+        "3": "Division corresponds to multiplying by the modular inverse."
+      },
+      "hint": "Use Fermat’s little theorem for inverses when MOD is prime.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Building the Idea",
+      "questionText": "Over modulus 7, to turn a coefficient 3 of x2 into 1 in an equation, what should you do to that entire equation?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Multiply by 3.",
+          "isCode": false
+        },
+        {
+          "label": "Multiply by 5.",
+          "isCode": false
+        },
+        {
+          "label": "Add 3 to both sides.",
+          "isCode": false
+        },
+        {
+          "label": "Subtract 3 from both sides.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "3*5 ≡ 1 (mod 7); multiply the whole row by 5 to make the coefficient 1.",
+      "wrongExplanations": {
+        "0": "3*3 ≡ 2 (mod 7), not 1."
+      },
+      "hint": "Find the multiplicative inverse of 3 modulo 7.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "If the current row has 0 in a chosen column but a lower row has a nonzero there, what should you do?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Swap the current row with that lower row.",
+          "isCode": false
+        },
+        {
+          "label": "Set that variable to 0.",
+          "isCode": false
+        },
+        {
+          "label": "Skip this column permanently.",
+          "isCode": false
+        },
+        {
+          "label": "Add the current row to itself.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Bring a row with a usable nonzero into position to proceed.",
+      "wrongExplanations": {
+        "2": "Skipping loses potential to solve for that variable."
+      },
+      "hint": "Reorder equations; the solution set is unaffected by swapping.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "After making a coefficient 1 in a chosen position (row, col), what should be done to other rows regarding that column?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Make all other entries in that column 0 by adding/subtracting multiples of the current row.",
+          "isCode": false
+        },
+        {
+          "label": "Ignore other rows; this is enough.",
+          "isCode": false
+        },
+        {
+          "label": "Zero only the entries below.",
+          "isCode": false
+        },
+        {
+          "label": "Double every row to keep numbers large.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Zeroing both above and below simplifies reading off a solution directly.",
+      "wrongExplanations": {
+        "2": "Zeroing only below requires an extra backward phase later."
+      },
+      "hint": "Aim for a column with a single 1 and zeros elsewhere.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "If a column has no nonzero coefficients in the remaining rows, what does that mean for that variable?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "It’s free; you can assign it any value (e.g., 0).",
+          "isCode": false
+        },
+        {
+          "label": "No solution exists.",
+          "isCode": false
+        },
+        {
+          "label": "You must delete that column.",
+          "isCode": false
+        },
+        {
+          "label": "Set the right-hand side to 0.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "No constraint ties that variable yet; set it conveniently.",
+      "wrongExplanations": {
+        "1": "Lack of a constraint does not imply inconsistency."
+      },
+      "hint": "A column of zeros imposes no restriction on that variable.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "Consider a row [0 0 ... 0 | b] with b ≠ 0 after row operations. What does this indicate?",
+      "diagram": "Row: [0 0 ... 0 | b!=0]",
+      "options": [
+        {
+          "label": "The system is inconsistent; no solution.",
+          "isCode": false
+        },
+        {
+          "label": "There are infinitely many solutions.",
+          "isCode": false
+        },
+        {
+          "label": "We should rescale the row.",
+          "isCode": false
+        },
+        {
+          "label": "We should delete the row and continue.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "0 ≡ b (b ≠ 0) is impossible; the system has no solution.",
+      "wrongExplanations": {
+        "1": "Infinite solutions occur only without contradictions."
+      },
+      "hint": "Can 0 equal a nonzero value modulo a prime?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "If a column has a single 1 and zeros elsewhere (after elimination), how do you read x_j from that row?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "x_j equals the right-hand side value of that row (mod MOD).",
+          "isCode": false
+        },
+        {
+          "label": "x_j equals the sum of coefficients in that row.",
+          "isCode": false
+        },
+        {
+          "label": "x_j equals the coefficient 1.",
+          "isCode": false
+        },
+        {
+          "label": "x_j must be 0.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "With that column isolated, the row reads x_j ≡ RHS (mod MOD).",
+      "wrongExplanations": {
+        "2": "The 1 is the coefficient, not the value."
+      },
+      "hint": "The row is x_j + 0 + ... + 0 ≡ RHS.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Building the Idea",
+      "questionText": "Solve over modulus 7: x + y ≡ 3 and 2x + y ≡ 4. Which (x, y) works?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "(1, 2)",
+          "isCode": false
+        },
+        {
+          "label": "(2, 1)",
+          "isCode": false
+        },
+        {
+          "label": "(3, 0)",
+          "isCode": false
+        },
+        {
+          "label": "(0, 3)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Subtracting equations gives x ≡ 1; then y ≡ 2.",
+      "wrongExplanations": {
+        "1": "2+1=3 but 2*2+1=5≡5, not 4."
+      },
+      "hint": "Subtract the first from the second; solve for x, then y.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Initialize constants and read all integers from stdin efficiently.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\nMOD = 10**9 + 7\nn, m = map(int, sys.stdin.readline().split())\nA = []\nfor _ in range(n):\n    A.append(list(map(int, sys.stdin.readline().split())))",
+          "isCode": true
+        },
+        {
+          "label": "import sys\nMOD = 10**9 + 7\ndata = sys.stdin.read().split()\nif not data:\n    sys.exit(0)\nit = iter(map(int, data))\nn = next(it); m = next(it)\nA = [[0]*(m+1) for _ in range(n)]",
+          "isCode": true
+        },
+        {
+          "label": "import sys\n\nMOD = 10**9 + 7\ndata = list(map(int, sys.stdin.read().strip().split()))\nif not data:\n    sys.exit(0)\nit = iter(data)\nn = next(it); m = next(it)\nA = [[0]*(m+1) for _ in range(n)]",
+          "isCode": true
+        },
+        {
+          "label": "MOD = 1000000006\nimport sys\ndata = list(map(int, sys.stdin.read().split()))\nif not data:\n    exit()\nit = iter(data)\nn = next(it); m = next(it)\nA = [[0]*(m+1) for _ in range(n)]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Read all ints at once, set MOD correctly (1e9+7), guard empty input, and preallocate matrix size.",
+      "wrongExplanations": {
+        "0": "This reads line by line and loses the last column count; also doesn’t preallocate with m+1.",
+        "3": "Incorrect MOD (should be 1e9+7), and missing strip(); also exit semantics differ."
+      },
+      "hint": "Use sys.stdin.read, create an iterator, and preallocate matrix with m+1 columns.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\n\nMOD = 10**9 + 7\ndata = list(map(int, sys.stdin.read().strip().split()))\nif not data:\n    sys.exit(0)\nit = iter(data)\nn = next(it); m = next(it)\nA = [[0]*(m+1) for _ in range(n)]",
+      "codeLabel": "Setup and bulk read"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Fill the augmented matrix A with coefficients modulo MOD.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "for i in range(n):\n    for j in range(m):\n        A[i][j] = next(it) % MOD\n    A[i][m] = 0",
+          "isCode": true
+        },
+        {
+          "label": "for i in range(n):\n    for j in range(m+1):\n        A[i][j] = next(it)",
+          "isCode": true
+        },
+        {
+          "label": "for i in range(n):\n    for j in range(m+1):\n        A[i][j] = next(it) % MOD",
+          "isCode": true
+        },
+        {
+          "label": "for i in range(m):\n    for j in range(n+1):\n        A[i][j] = next(it) % MOD",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Read m+1 entries per row and reduce modulo MOD.",
+      "wrongExplanations": {
+        "1": "Lacks modulo reduction; values must be normalized.",
+        "0": "Doesn’t read the (m+1)-th RHS per row and wrongly sets it to 0."
+      },
+      "hint": "There are m coefficients plus one RHS per row.",
+      "isCodeBuilding": true,
+      "codeSnippet": "for i in range(n):\n    for j in range(m+1):\n        A[i][j] = next(it) % MOD",
+      "codeLabel": "Read matrix"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Initialize helper structures for tracking which column is solved by which row.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "where = [0] * n\nrow = 0",
+          "isCode": true
+        },
+        {
+          "label": "where = [-1] * m\nrow = 0",
+          "isCode": true
+        },
+        {
+          "label": "where = [-1] * (m+1)\nrow = 1",
+          "isCode": true
+        },
+        {
+          "label": "where = [None] * m\nrow = -1",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Track, for each column j, the row index that solves it; start with -1 and row=0.",
+      "wrongExplanations": {
+        "0": "Size should be m (columns), not n (rows)."
+      },
+      "hint": "We map columns to pivot rows; unknown at start.",
+      "isCodeBuilding": true,
+      "codeSnippet": "where = [-1] * m\nrow = 0",
+      "codeLabel": "Init trackers"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Loop over columns and pick a usable row with a nonzero in that column from the current row downward.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "for col in range(m):\n    if row >= n:\n        break\n    sel = -1\n    for i in range(row, n):\n        if A[i][col] % MOD != 0:\n            sel = i\n            break\n    if sel == -1:\n        continue",
+          "isCode": true
+        },
+        {
+          "label": "for col in range(m):\n    sel = 0\n    for i in range(n):\n        if A[i][col] == 0:\n            sel = i\n            break\n    if sel == -1:\n        continue",
+          "isCode": true
+        },
+        {
+          "label": "for col in range(m):\n    if row >= n:\n        break\n    sel = -1\n    for i in range(0, row):\n        if A[i][col] != 0:\n            sel = i\n            break\n    if sel == -1:\n        continue",
+          "isCode": true
+        },
+        {
+          "label": "for col in range(m):\n    if row >= n:\n        break\n    sel = -1\n    for i in range(row, n):\n        if A[i][col] == 0:\n            sel = i\n            break\n    if sel == -1:\n        continue",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Scan from current row down to find a nonzero entry in the column; if none, move to next column.",
+      "wrongExplanations": {
+        "2": "Scanning only above current row misses candidates below.",
+        "1": "This picks a zero entry, not a nonzero pivot."
+      },
+      "hint": "We need a nonzero coefficient at or below the current row.",
+      "isCodeBuilding": true,
+      "codeSnippet": "for col in range(m):\n    if row >= n:\n        break\n    sel = -1\n    for i in range(row, n):\n        if A[i][col] % MOD != 0:\n            sel = i\n            break\n    if sel == -1:\n        continue",
+      "codeLabel": "Find usable row"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Swap in the selected row, record the column’s row, and normalize the row so the chosen entry becomes 1.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "if sel != row:\n    A[row], A[sel] = A[sel], A[row]\nwhere[col] = row\ninv = pow(A[row][col], MOD-2, MOD)\nfor j in range(col, m+1):\n    A[row][j] = (A[row][j] * inv) % MOD",
+          "isCode": true
+        },
+        {
+          "label": "if sel != row:\n    A[sel], A[row] = A[row], A[sel]\nwhere[col] = sel\ninv = pow(A[row][col], MOD-1, MOD)\nfor j in range(0, m):\n    A[row][j] = (A[row][j] * inv) % MOD",
+          "isCode": true
+        },
+        {
+          "label": "if sel == row:\n    A[row], A[sel] = A[sel], A[row]\nwhere[col] = row\ninv = pow(A[row][col], MOD-2, MOD)\nfor j in range(col, m):\n    A[row][j] = (A[row][j] * inv) % MOD",
+          "isCode": true
+        },
+        {
+          "label": "if sel != row:\n    A[row], A[sel] = A[sel], A[row]\nwhere[col] = row\ninv = pow(A[row][col], MOD-2, MOD)\nfor j in range(0, m+1):\n    A[row][j] = (A[row][j] * inv) % MOD",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Swap when needed, record where[col]=row, use inverse pow(..., MOD-2, MOD), and scale columns col..m to keep zeros left intact.",
+      "wrongExplanations": {
+        "1": "MOD-1 is wrong exponent; also doesn’t scale RHS or columns past m.",
+        "3": "Scaling from 0 may disturb established zeros to the left."
+      },
+      "hint": "Normalize starting at the chosen column through the RHS.",
+      "isCodeBuilding": true,
+      "codeSnippet": "if sel != row:\n    A[row], A[sel] = A[sel], A[row]\nwhere[col] = row\ninv = pow(A[row][col], MOD-2, MOD)\nfor j in range(col, m+1):\n    A[row][j] = (A[row][j] * inv) % MOD",
+      "codeLabel": "Swap and normalize"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Eliminate the chosen column from all other rows (set them to 0) using the normalized row.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "for i in range(n):\n    if i != row and A[i][col] != 0:\n        factor = A[i][col]\n        for j in range(col, m+1):\n            A[i][j] = (A[i][j] - factor * A[row][j]) % MOD\nrow += 1",
+          "isCode": true
+        },
+        {
+          "label": "for i in range(row+1, n):\n    if A[i][col] != 0:\n        factor = A[i][col]\n        for j in range(0, m+1):\n            A[i][j] = (A[i][j] - factor * A[row][j]) % MOD\nrow += 1",
+          "isCode": true
+        },
+        {
+          "label": "for i in range(n):\n    if i != row and A[i][col] != 0:\n        factor = A[i][col]\n        for j in range(0, m+1):\n            A[i][j] = (A[i][j] + factor * A[row][j]) % MOD\nrow += 1",
+          "isCode": true
+        },
+        {
+          "label": "for i in range(n):\n    if i == row:\n        continue\n    for j in range(col, m):\n        A[i][j] = 0\nrow += 1",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Subtract factor times the normalized row from every other row, starting from the chosen column through RHS.",
+      "wrongExplanations": {
+        "1": "Only eliminating below leaves nonzeros above; we want all zeros in the column.",
+        "2": "Adding instead of subtracting won’t zero the entry (unless factor=0)."
+      },
+      "hint": "Use A[i][col] as the factor to cancel the entry.",
+      "isCodeBuilding": true,
+      "codeSnippet": "for i in range(n):\n    if i != row and A[i][col] != 0:\n        factor = A[i][col]\n        for j in range(col, m+1):\n            A[i][j] = (A[i][j] - factor * A[row][j]) % MOD\nrow += 1",
+      "codeLabel": "Eliminate column"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "After processing all columns, how do we detect an inconsistency row [0 ... 0 | b] with b ≠ 0?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "# check for inconsistency\nfor i in range(n):\n    all_zero = True\n    for j in range(m):\n        if A[i][j] != 0:\n            all_zero = False\n            break\n    if all_zero and A[i][m] != 0:\n        print(-1)\n        sys.exit(0)",
+          "isCode": true
+        },
+        {
+          "label": "# check for inconsistency\nfor i in range(n):\n    if A[i][m] == 0:\n        print(-1)\n        sys.exit(0)",
+          "isCode": true
+        },
+        {
+          "label": "# check for inconsistency\nfor j in range(m):\n    all_zero = True\n    for i in range(n):\n        if A[i][j] != 0:\n            all_zero = False\n            break\n    if all_zero and A[i][m] != 0:\n        print(-1); sys.exit(0)",
+          "isCode": true
+        },
+        {
+          "label": "# check for inconsistency\nfor i in range(n):\n    nonzero = False\n    for j in range(m):\n        if A[i][j] == 0:\n            nonzero = True\n            break\n    if nonzero and A[i][m] != 0:\n        print(-1)\n        sys.exit(0)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Detect rows with all zero coefficients but nonzero RHS and exit with -1.",
+      "wrongExplanations": {
+        "1": "RHS=0 is not inconsistent; that’s fine.",
+        "2": "Mixes row/column logic and references i outside scope."
+      },
+      "hint": "Scan each row’s left part for all zeros.",
+      "isCodeBuilding": true,
+      "codeSnippet": "# check for inconsistency\nfor i in range(n):\n    all_zero = True\n    for j in range(m):\n        if A[i][j] != 0:\n            all_zero = False\n            break\n    if all_zero and A[i][m] != 0:\n        print(-1)\n        sys.exit(0)",
+      "codeLabel": "Detect inconsistency"
+    },
+    {
+      "id": "q22",
+      "phase": "Writing the Code",
+      "questionText": "Build the solution vector x from the processed matrix and print it.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "x = [0] * m\nfor j in range(m):\n    if where[j] != -1:\n        x[j] = A[ where[j] ][ m ] % MOD\nprint(\" \".join(str(v) for v in x))",
+          "isCode": true
+        },
+        {
+          "label": "x = [0] * n\nfor i in range(n):\n    if where[i] != -1:\n        x[i] = A[i][m]\nprint(*x)",
+          "isCode": true
+        },
+        {
+          "label": "x = [0] * m\nfor j in range(m):\n    if where[j] == -1:\n        x[j] = A[j][m]\nprint(\" \".join(map(str, x)))",
+          "isCode": true
+        },
+        {
+          "label": "x = [0] * m\nfor j in range(m):\n    x[j] = A[j][m] % MOD\nprint(\" \".join(map(str, x)))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Use where[j] to find the row that determines x_j; free variables remain 0.",
+      "wrongExplanations": {
+        "1": "x has length m (variables), not n; where maps columns to rows.",
+        "3": "This assumes each column j is solved by row j, which may be false."
+      },
+      "hint": "Columns with where[j] = -1 are free; others read RHS at their row.",
+      "isCodeBuilding": true,
+      "codeSnippet": "x = [0] * m\nfor j in range(m):\n    if where[j] != -1:\n        x[j] = A[ where[j] ][ m ] % MOD\nprint(\" \".join(str(v) for v in x))",
+      "codeLabel": "Extract and print solution"
+    },
+    {
+      "id": "q23",
+      "phase": "Verifying the Solution",
+      "questionText": "Consider input:\n2 2\n1 0 1\n0 1 2\nWhat does the program print?",
+      "diagram": "Matrix: [1 0 | 1]\n        [0 1 | 2]",
+      "options": [
+        {
+          "label": "1 2",
+          "isCode": false
+        },
+        {
+          "label": "2 1",
+          "isCode": false
+        },
+        {
+          "label": "-1",
+          "isCode": false
+        },
+        {
+          "label": "0 0",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each column has an isolated 1, so x1=1, x2=2.",
+      "wrongExplanations": {
+        "2": "There is no inconsistency here."
+      },
+      "hint": "Already in solved form.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Verifying the Solution",
+      "questionText": "Consider input:\n1 2\n0 0 5\nWhat does the program print?",
+      "diagram": "Row: [0 0 | 5]",
+      "options": [
+        {
+          "label": "-1",
+          "isCode": false
+        },
+        {
+          "label": "0 0",
+          "isCode": false
+        },
+        {
+          "label": "5 0",
+          "isCode": false
+        },
+        {
+          "label": "0 5",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "All-zero coefficients with nonzero RHS is inconsistent; prints -1.",
+      "wrongExplanations": {
+        "1": "Setting variables to 0 doesn't satisfy 0 ≡ 5."
+      },
+      "hint": "Does any x make 0 equal 5 modulo?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the time complexity of the implemented method in terms of n and m?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n·m)",
+          "isCode": false
+        },
+        {
+          "label": "O(n·m·min(n, m))",
+          "isCode": false
+        },
+        {
+          "label": "O(MOD)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^m)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Each chosen column elimination touches up to n rows and ~m columns, across up to min(n,m) columns.",
+      "wrongExplanations": {
+        "0": "We perform nested loops over rows and columns per pivot column."
+      },
+      "hint": "Think triple loop: columns × rows × trailing columns.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the auxiliary space usage of the approach (excluding input storage)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n·m) for the augmented matrix plus O(m) for helpers.",
+          "isCode": false
+        },
+        {
+          "label": "O(1)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(MOD)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The matrix is n×(m+1). Additional arrays are linear in m.",
+      "wrongExplanations": {
+        "1": "We store the full matrix; not constant space."
+      },
+      "hint": "We keep the entire augmented matrix in memory.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q27",
+      "phase": "Analyzing Complexity",
+      "questionText": "If there are more variables than equations (m > n) and the system is consistent, what will the program output?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "One valid solution with some variables set to 0 (free variables).",
+          "isCode": false
+        },
+        {
+          "label": "-1 (no solution).",
+          "isCode": false
+        },
+        {
+          "label": "All possible solutions.",
+          "isCode": false
+        },
+        {
+          "label": "It will loop indefinitely.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Columns without a determining row remain 0, yielding a valid solution.",
+      "wrongExplanations": {
+        "1": "Consistency is checked; -1 only if inconsistent."
+      },
+      "hint": "Unconstrained variables are assigned 0 in the code.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\n\nMOD = 10**9 + 7\ndata = list(map(int, sys.stdin.read().strip().split()))\nif not data:\n    sys.exit(0)\nit = iter(data)\nn = next(it); m = next(it)\nA = [[0]*(m+1) for _ in range(n)]",
+    "for i in range(n):\n    for j in range(m+1):\n        A[i][j] = next(it) % MOD",
+    "where = [-1] * m\nrow = 0",
+    "for col in range(m):\n    if row >= n:\n        break\n    sel = -1\n    for i in range(row, n):\n        if A[i][col] % MOD != 0:\n            sel = i\n            break\n    if sel == -1:\n        continue",
+    "if sel != row:\n    A[row], A[sel] = A[sel], A[row]\nwhere[col] = row\ninv = pow(A[row][col], MOD-2, MOD)\nfor j in range(col, m+1):\n    A[row][j] = (A[row][j] * inv) % MOD",
+    "for i in range(n):\n    if i != row and A[i][col] != 0:\n        factor = A[i][col]\n        for j in range(col, m+1):\n            A[i][j] = (A[i][j] - factor * A[row][j]) % MOD\nrow += 1",
+    "# check for inconsistency\nfor i in range(n):\n    all_zero = True\n    for j in range(m):\n        if A[i][j] != 0:\n            all_zero = False\n            break\n    if all_zero and A[i][m] != 0:\n        print(-1)\n        sys.exit(0)",
+    "x = [0] * m\nfor j in range(m):\n    if where[j] != -1:\n        x[j] = A[ where[j] ][ m ] % MOD\nprint(\" \".join(str(v) for v in x))"
+  ],
+  "reasoningChain": [
+    {
+      "question": "What does equality modulo a prime mean for equations and outputs?",
+      "insight": "Interpret equations modulo MOD and normalize outputs into [0, MOD)."
+    },
+    {
+      "question": "Which row operations keep the solution set unchanged modulo a prime?",
+      "insight": "Swapping rows and adding multiples of one equation to another with nonzero factors preserve solutions."
+    },
+    {
+      "question": "When and how can we divide a row by a coefficient modulo a prime?",
+      "insight": "If a coefficient is nonzero mod MOD, multiply the entire row by its modular inverse (pow(a, MOD-2, MOD))."
+    },
+    {
+      "question": "How do we systematically isolate variables column by column?",
+      "insight": "Scan columns, bring a row with a nonzero into position, scale to make a 1, and zero that column in all other rows."
+    },
+    {
+      "question": "How do we handle columns with no usable entries and detect contradictions?",
+      "insight": "Treat such variables as free (set to 0) and check for any row of all zeros with a nonzero RHS to detect inconsistency."
+    },
+    {
+      "question": "How do we read off a solution once columns are isolated?",
+      "insight": "For columns with a single 1, the variable equals the RHS of that row; free variables stay 0."
+    },
+    {
+      "question": "What are the resource bounds of the approach?",
+      "insight": "The method runs in O(n·m·min(n,m)) time, uses O(n·m) space for the matrix, and fits n,m ≤ 500."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1591,
+    "output_tokens": 16214,
+    "input_cost": 0.001989,
+    "output_cost": 0.16214,
+    "total_cost": 0.164129
+  }
+}

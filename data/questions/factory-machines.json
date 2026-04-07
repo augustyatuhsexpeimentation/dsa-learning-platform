@@ -1,0 +1,957 @@
+{
+  "id": "factory-machines",
+  "title": "Factory Machines",
+  "difficulty": "intermediate",
+  "tags": [
+    "sorting",
+    "two-pointer",
+    "binary-search"
+  ],
+  "estimatedMinutes": 45,
+  "language": "python",
+  "description": "You have n machines working in parallel. Machine i needs k_i seconds to make one product. Machines can run simultaneously and be scheduled freely. Given a target of t products, find the minimum time (in seconds) needed so that the machines together produce at least t products.\n\nInput format:\n- First line: two integers n and t\n- Second line: n integers k_1, k_2, ..., k_n\n\nOutput: A single integer — the minimum time needed to make t products.",
+  "examples": [
+    {
+      "input": "3 7\n3 2 5\n",
+      "output": "8",
+      "explanation": "By time 8: machine 3s -> 2 products, 2s -> 4 products, 5s -> 1 product, total = 7. No smaller time reaches 7."
+    }
+  ],
+  "constraints": [
+    "1 ≤ n ≤ 2 * 10^5",
+    "1 ≤ t ≤ 10^9",
+    "1 ≤ k_i ≤ 10^9"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "Single machine sanity check: With one machine needing 3 seconds per product and target t=4, what is the minimum time?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "9",
+          "isCode": false
+        },
+        {
+          "label": "12",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 3,
+      "explanation": "One machine produces ⌊time/3⌋ products. We need ⌊time/3⌋ ≥ 4 ⇒ time ≥ 12. Smaller times give at most 3 products.",
+      "wrongExplanations": {
+        "2": "At time 9, ⌊9/3⌋ = 3 products, not enough.",
+        "0": "3 seconds yields ⌊3/3⌋ = 1 product, not 4."
+      },
+      "hint": "Compute how many products are made by a given time using floor division.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "Two machines: k = [3, 2], at time x = 6 seconds, how many products have been made in total?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "6",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Machine 3s makes ⌊6/3⌋ = 2; machine 2s makes ⌊6/2⌋ = 3; total 5.",
+      "wrongExplanations": {
+        "0": "4 undercounts: 2 + 3 = 5.",
+        "3": "6 assumes one per second, ignoring machine speeds."
+      },
+      "hint": "Sum floor divisions x // k_i across machines.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "At time x = 0 seconds (start), how many products have been made regardless of machine speeds?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "sum of 1 // k_i",
+          "isCode": false
+        },
+        {
+          "label": "Cannot be determined",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "⌊0 / k_i⌋ = 0 for all i, so total is 0.",
+      "wrongExplanations": {
+        "1": "No machine produces anything at time 0.",
+        "2": "1 // k_i is 0 for all k_i ≥ 1; the sum is 0."
+      },
+      "hint": null,
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "With k = [3, 2, 5], by time x = 5 seconds, how many products are completed?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "⌊5/3⌋ + ⌊5/2⌋ + ⌊5/5⌋ = 1 + 2 + 1 = 4.",
+      "wrongExplanations": {
+        "0": "3 ignores one of the contributions.",
+        "2": "5 assumes one per second overall, which is not given."
+      },
+      "hint": "Compute each machine’s contribution and sum.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Understanding the Problem",
+      "questionText": "If at time X the machines can make at least t products, what can you say about any later time Y > X?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "They will never reach t again.",
+          "isCode": false
+        },
+        {
+          "label": "Only if Y is a multiple of all machine times.",
+          "isCode": false
+        },
+        {
+          "label": "They will still have at least t products.",
+          "isCode": false
+        },
+        {
+          "label": "It depends on the exact schedule.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Total products is non-decreasing with time. More time cannot decrease completed products.",
+      "wrongExplanations": {
+        "1": "No need for special multiples; extra time always allows at least as many products.",
+        "3": "Schedule cannot reduce already completed products."
+      },
+      "hint": "Think monotonicity of ⌊x/k_i⌋ as x increases.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "Would checking time second-by-second from 0 upward until reaching t products meet the limits here?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, it’s fine for all inputs.",
+          "isCode": false
+        },
+        {
+          "label": "Only if t ≤ 10^6.",
+          "isCode": false
+        },
+        {
+          "label": "No, the needed time can be up to about min(k) * t (≈ 10^18).",
+          "isCode": false
+        },
+        {
+          "label": "Yes, if we precompute machine cycles.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "The minimum time can be as large as min(k) * t (up to 1e18). Stepping one-by-one is far too slow.",
+      "wrongExplanations": {
+        "0": "This would loop trillions of times in worst cases.",
+        "3": "Precomputing cycles doesn’t avoid stepping through huge times."
+      },
+      "hint": "Consider the maximum possible answer scale.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "To guide a search over time, which check is straightforward to compute?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Given products p, find the exact time to get exactly p.",
+          "isCode": false
+        },
+        {
+          "label": "Given a time x, compute how many products are completed by x.",
+          "isCode": false
+        },
+        {
+          "label": "Given products p, check if the machines idle before p.",
+          "isCode": false
+        },
+        {
+          "label": "Given a time x, ensure machines produce exactly t with no extra.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "For a given time x, the total is sum ⌊x/k_i⌋, which is simple to compute.",
+      "wrongExplanations": {
+        "0": "Finding exact time for a given p directly is harder than checking a given time.",
+        "3": "Requiring exactly t is unnecessary and complicates the check."
+      },
+      "hint": "Think: is counting products at time x easy?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Exploring Approaches",
+      "questionText": "What is the smallest easy-to-compute upper bound on the minimum time?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "min(k) * t",
+          "isCode": false
+        },
+        {
+          "label": "sum(k_i) * t",
+          "isCode": false
+        },
+        {
+          "label": "average(k) * t",
+          "isCode": false
+        },
+        {
+          "label": "max(k) * t",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The fastest machine alone can finish t in min(k)*t seconds, so the true answer is ≤ that. This is the tightest among these options.",
+      "wrongExplanations": {
+        "3": "max(k)*t is also an upper bound but looser than min(k)*t.",
+        "1": "sum(k_i)*t can be enormous and is not tight."
+      },
+      "hint": "Imagine only the fastest machine working.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "For a candidate time x, how do you compute the total number of products completed by all machines?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "sum(k_i // x)",
+          "isCode": false
+        },
+        {
+          "label": "min_i (x // k_i)",
+          "isCode": false
+        },
+        {
+          "label": "sum(x / k_i)",
+          "isCode": false
+        },
+        {
+          "label": "sum(x // k_i)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 3,
+      "explanation": "Each machine makes ⌊x/k_i⌋ products by time x; sum these over all machines.",
+      "wrongExplanations": {
+        "0": "k_i // x inverts the ratio.",
+        "2": "Using division without floor yields fractions; we need integers."
+      },
+      "hint": "Use floor division for each machine’s contribution.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "While summing ⌊x/k_i⌋ across machines, what optimization is safe and helpful when the partial sum already reaches t?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Stop early and return the current total.",
+          "isCode": false
+        },
+        {
+          "label": "Continue summing all to avoid mistakes.",
+          "isCode": false
+        },
+        {
+          "label": "Reset the total and start over.",
+          "isCode": false
+        },
+        {
+          "label": "Skip the fastest machine next.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Once the sum reaches t, adding more only increases it. Early return saves time without changing the decision.",
+      "wrongExplanations": {
+        "1": "Extra sums don’t change the ≥ t check, they just waste time.",
+        "2": "Resetting loses information and is incorrect."
+      },
+      "hint": "We only care if the sum is at least t.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "Choose a safe lower bound for time when searching for the minimum time.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "min(k)",
+          "isCode": false
+        },
+        {
+          "label": "-∞",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "At time 0 we certainly have 0 products, so 0 is a safe lower bound even if the true answer is >0.",
+      "wrongExplanations": {
+        "0": "1 is also below the true answer but 0 is simpler and always valid.",
+        "2": "min(k) might be above the true answer in some cases (e.g., t=1)."
+      },
+      "hint": "What time guarantees zero products?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "Suppose for a chosen time mid the total products ≥ t. To find the minimum time, how should the search range move?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Move the lower bound up: low = mid + 1",
+          "isCode": false
+        },
+        {
+          "label": "Move the upper bound down: high = mid",
+          "isCode": false
+        },
+        {
+          "label": "Set upper bound to mid - 1",
+          "isCode": false
+        },
+        {
+          "label": "Set lower bound to mid",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "If mid is already enough, smaller times might also work. Keep mid in the range by setting high = mid.",
+      "wrongExplanations": {
+        "0": "Raising low would skip mid and possibly miss the minimum.",
+        "2": "high = mid - 1 risks skipping a valid minimal time at mid."
+      },
+      "hint": "We seek the smallest time that still meets the target.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "What loop condition safely narrows the time range without infinite loops?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "while low < high:",
+          "isCode": true
+        },
+        {
+          "label": "while low <= high:",
+          "isCode": true
+        },
+        {
+          "label": "for _ in range(high):",
+          "isCode": true
+        },
+        {
+          "label": "while True:",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Using while low < high with the chosen updates guarantees convergence to a single point.",
+      "wrongExplanations": {
+        "1": "With low<=high and our updates, it’s easy to get stuck or need special handling to terminate.",
+        "3": "An unconditional loop needs extra break logic to avoid infinite loops."
+      },
+      "hint": "We stop when the range shrinks to one value.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Building the Idea",
+      "questionText": "Which mid calculation will we use to split the current time range?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "mid = (low + high) / 2",
+          "isCode": true
+        },
+        {
+          "label": "mid = (low + high + 1) // 2",
+          "isCode": true
+        },
+        {
+          "label": "mid = (low + high) // 2",
+          "isCode": true
+        },
+        {
+          "label": "mid = low + high // 2",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "We will use the integer midpoint mid = (low + high) // 2 to keep values integral.",
+      "wrongExplanations": {
+        "0": "This produces a float in Python, which we don’t want for time.",
+        "3": "Operator precedence makes this low + (high // 2), which is wrong."
+      },
+      "hint": "Keep everything in integers.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Pick the exact input-reading snippet we will use.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\ndata = list(map(int, sys.stdin.read().split()))\nn, t = data[0], data[1]\nks = data[2:2+n]",
+          "isCode": true
+        },
+        {
+          "label": "n, t = map(int, input().split())\nks = list(map(int, input().split()))",
+          "isCode": true
+        },
+        {
+          "label": "n = int(input())\nt = int(input())\nks = [int(x) for x in input().split()]",
+          "isCode": true
+        },
+        {
+          "label": "import sys\nbuf = sys.stdin.readline().split()\nn, t = int(buf[0]), int(buf[1])\nks = [int(x) for x in sys.stdin.readline().split()]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We’ll read all integers at once and slice, which is robust to whitespace and matches later slicing.",
+      "wrongExplanations": {
+        "1": "This can work for two lines, but our assembly relies on a single flat list and slicing.",
+        "3": "Also works for exactly two lines; we’ll stick to the flat read to be consistent."
+      },
+      "hint": "We’ll parse a flat list and slice out n, t, and k’s.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\ndata = list(map(int, sys.stdin.read().split()))\nn, t = data[0], data[1]\nks = data[2:2+n]",
+      "codeLabel": "Read input"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Initialize the search bounds for time.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "low, high = 0, min(ks) * t",
+          "isCode": true
+        },
+        {
+          "label": "low, high = 1, max(ks) * t",
+          "isCode": true
+        },
+        {
+          "label": "low, high = 0, sum(ks) * t",
+          "isCode": true
+        },
+        {
+          "label": "low, high = min(ks), max(ks)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "0 is a safe lower bound; min(ks)*t is a tight, easy upper bound.",
+      "wrongExplanations": {
+        "1": "Starting at 1 is unnecessary; using max(ks)*t is a looser upper bound.",
+        "3": "This upper bound doesn’t scale with t and can be far too small."
+      },
+      "hint": "Upper bound: fastest machine alone finishing t.",
+      "isCodeBuilding": true,
+      "codeSnippet": "low, high = 0, min(ks) * t",
+      "codeLabel": "Bounds"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Write a helper that returns how many products can be made by time x, with an early stop if it already reaches t.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def produced_in_time(x):\n    total = 0\n    for k in ks:\n        total += x / k\n        if total >= t:\n            return total\n    return total",
+          "isCode": true
+        },
+        {
+          "label": "def produced_in_time(x):\n    total = 0\n    for k in ks:\n        total += x // k\n        if total >= t:\n            return total\n    return total",
+          "isCode": true
+        },
+        {
+          "label": "def produced_in_time(x):\n    cnt = 0\n    for k in ks:\n        cnt += (k // x)\n    return cnt >= t",
+          "isCode": true
+        },
+        {
+          "label": "def produced_in_time(x):\n    s = 0\n    for k in ks:\n        s += (x % k)\n    return s",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "We need integer products via x // k and can return early when total ≥ t.",
+      "wrongExplanations": {
+        "0": "x / k produces floats, not integer counts.",
+        "2": "Returns a boolean and also uses k // x, which is the wrong ratio."
+      },
+      "hint": "Use floor division and sum across machines.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def produced_in_time(x):\n    total = 0\n    for k in ks:\n        total += x // k\n        if total >= t:\n            return total\n    return total",
+      "codeLabel": "Helper function"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Choose the main loop header for narrowing the time range.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "while low <= high:",
+          "isCode": true
+        },
+        {
+          "label": "while low < high:",
+          "isCode": true
+        },
+        {
+          "label": "while high < low:",
+          "isCode": true
+        },
+        {
+          "label": "while True:",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "We narrow until one value remains with while low < high.",
+      "wrongExplanations": {
+        "0": "With our updates, this needs extra care to avoid infinite loops.",
+        "3": "Needs an explicit break condition we don’t add."
+      },
+      "hint": "Stop when the range size becomes 1.",
+      "isCodeBuilding": true,
+      "codeSnippet": "while low < high:",
+      "codeLabel": "Loop header"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Compute the midpoint of the current range.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    mid = (low + high) // 2",
+          "isCode": true
+        },
+        {
+          "label": "    mid = (low + high) / 2",
+          "isCode": true
+        },
+        {
+          "label": "    mid = low + high // 2",
+          "isCode": true
+        },
+        {
+          "label": "    mid = (high - low) // 2",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need an integer midpoint: (low + high) // 2.",
+      "wrongExplanations": {
+        "1": "This yields a float, causing type issues later.",
+        "3": "This gives an offset from 0, not the actual midpoint."
+      },
+      "hint": "Keep mid as an integer within [low, high).",
+      "isCodeBuilding": true,
+      "codeSnippet": "    mid = (low + high) // 2",
+      "codeLabel": "Midpoint"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Update the bounds based on the number of products at mid.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    if produced_in_time(mid) >= t:\n        high = mid\n    else:\n        low = mid + 1",
+          "isCode": true
+        },
+        {
+          "label": "    if produced_in_time(mid) >= t:\n        high = mid - 1\n    else:\n        low = mid",
+          "isCode": true
+        },
+        {
+          "label": "    if produced_in_time(mid) >= t:\n        low = mid\n    else:\n        high = mid + 1",
+          "isCode": true
+        },
+        {
+          "label": "    if produced_in_time(mid) >= t:\n        low = mid + 1\n    else:\n        high = mid - 1",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Keep mid when it’s sufficient (high = mid); otherwise move low past mid (low = mid + 1).",
+      "wrongExplanations": {
+        "1": "Dropping mid when it’s sufficient can skip the minimum.",
+        "2": "Setting low = mid when insufficient risks not shrinking the range."
+      },
+      "hint": "Don’t discard a sufficient mid; do discard an insufficient mid.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    if produced_in_time(mid) >= t:\n        high = mid\n    else:\n        low = mid + 1",
+      "codeLabel": "Bounds update"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "After the loop finishes, which value holds the minimum time to print?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "print(low)",
+          "isCode": true
+        },
+        {
+          "label": "print(high)",
+          "isCode": true
+        },
+        {
+          "label": "print(mid)",
+          "isCode": true
+        },
+        {
+          "label": "print(produced_in_time(low))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The loop stops with low == high at the smallest sufficient time; we print low.",
+      "wrongExplanations": {
+        "1": "high equals low at the end, but we decided to use low explicitly.",
+        "2": "mid is only the last midpoint, not necessarily the final value."
+      },
+      "hint": "At termination low == high and equals the minimum time.",
+      "isCodeBuilding": true,
+      "codeSnippet": "print(low)",
+      "codeLabel": "Output"
+    },
+    {
+      "id": "q22",
+      "phase": "Verifying the Solution",
+      "questionText": "Run the assembled code on the sample input:\n3 7\n3 2 5\nWhat is the output?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "7",
+          "isCode": false
+        },
+        {
+          "label": "8",
+          "isCode": false
+        },
+        {
+          "label": "9",
+          "isCode": false
+        },
+        {
+          "label": "10",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "By time 8: 8//3 + 8//2 + 8//5 = 2 + 4 + 1 = 7. Smaller times produce < 7.",
+      "wrongExplanations": {
+        "0": "7 cannot be achieved by a smaller time than 8.",
+        "2": "9 is not minimal; 8 already suffices."
+      },
+      "hint": "Check times 7 and 8 by summing floors.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q23",
+      "phase": "Verifying the Solution",
+      "questionText": "Test another case: n=2, t=4, k=[1, 3]. What will the program print?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "By time 3: 3//1 + 3//3 = 3 + 1 = 4. Time 2 gives 2 + 0 = 2 < 4. So answer is 3.",
+      "wrongExplanations": {
+        "0": "Time 2 yields only 2 products.",
+        "2": "Time 4 is sufficient but not minimal."
+      },
+      "hint": "Try times 2 and 3 and sum each machine’s output.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the time cost to compute how many products are made by a given time x (one call to the helper)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(1)",
+          "isCode": false
+        },
+        {
+          "label": "O(log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n * t)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "We iterate over all n machines (with possible early exit), so it’s O(n) in the worst case.",
+      "wrongExplanations": {
+        "0": "We must visit each machine unless we exit early.",
+        "1": "No logarithmic structure over machines is used."
+      },
+      "hint": "Look at the loop over the machine list.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Analyzing Complexity",
+      "questionText": "Roughly how many iterations will the main loop take as a function of the initial range size (high - low + 1)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "About log2(high - low + 1)",
+          "isCode": false
+        },
+        {
+          "label": "About n",
+          "isCode": false
+        },
+        {
+          "label": "About t",
+          "isCode": false
+        },
+        {
+          "label": "About √(high - low + 1)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each iteration roughly halves the range, so iterations are logarithmic in the initial range size.",
+      "wrongExplanations": {
+        "1": "Depends on the range size, not on n.",
+        "2": "t can be up to 1e9; we don’t iterate that many steps."
+      },
+      "hint": "We repeatedly split the time range into two parts.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Analyzing Complexity",
+      "questionText": "What extra memory does the algorithm use beyond storing the input array?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(1)",
+          "isCode": false
+        },
+        {
+          "label": "O(t)",
+          "isCode": false
+        },
+        {
+          "label": "O(n + t)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "We keep a few integers and a function stack; extra space is constant.",
+      "wrongExplanations": {
+        "0": "We don’t allocate any arrays proportional to n.",
+        "2": "We don’t store anything proportional to t."
+      },
+      "hint": "Count the scalar variables used.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\ndata = list(map(int, sys.stdin.read().split()))\nn, t = data[0], data[1]\nks = data[2:2+n]",
+    "low, high = 0, min(ks) * t",
+    "def produced_in_time(x):\n    total = 0\n    for k in ks:\n        total += x // k\n        if total >= t:\n            return total\n    return total",
+    "while low < high:",
+    "    mid = (low + high) // 2",
+    "    if produced_in_time(mid) >= t:\n        high = mid\n    else:\n        low = mid + 1",
+    "print(low)"
+  ],
+  "reasoningChain": [
+    {
+      "question": "How do we count how many products can be made by a given time x?",
+      "insight": "Sum floor divisions: total(x) = sum over i of ⌊x / k_i⌋."
+    },
+    {
+      "question": "How does total(x) behave as x increases?",
+      "insight": "It is non-decreasing; more time never reduces completed products."
+    },
+    {
+      "question": "What safe search bounds can we set for time?",
+      "insight": "Use low = 0 and high = min(k) * t because the fastest machine alone finishes by that time."
+    },
+    {
+      "question": "How do we decide which side of the range to keep for a candidate time mid?",
+      "insight": "If total(mid) ≥ t, keep the left side including mid; otherwise move past mid."
+    },
+    {
+      "question": "How can we speed up counting without changing correctness?",
+      "insight": "Stop summing early once the partial total reaches t."
+    },
+    {
+      "question": "What loop condition and midpoint keep the search safe and terminating?",
+      "insight": "Use while low < high and mid = (low + high) // 2 to converge to a single time."
+    },
+    {
+      "question": "What are the algorithm’s costs?",
+      "insight": "Each iteration scans up to n machines; iterations are logarithmic in the time range; extra space is constant."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1394,
+    "output_tokens": 14081,
+    "input_cost": 0.001742,
+    "output_cost": 0.14081,
+    "total_cost": 0.142552
+  }
+}

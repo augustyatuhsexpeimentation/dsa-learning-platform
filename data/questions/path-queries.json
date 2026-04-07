@@ -1,0 +1,887 @@
+{
+  "id": "path-queries-guided-chain",
+  "title": "Path Queries",
+  "difficulty": "hard",
+  "tags": [
+    "tree"
+  ],
+  "estimatedMinutes": 75,
+  "language": "python",
+  "description": "You are given a rooted tree of n nodes (1-indexed) with node 1 as the root. Each node has a value.\n\nYou must process q queries of two types:\n- `1 s x`: change the value of node s to x\n- `2 s`: calculate the sum of values on the path from the root to node s\n\nInput format:\n- First line: two integers n and q\n- Next line: n integers v1, v2, ..., vn (values of nodes 1..n)\n- Next n-1 lines: edges a b (undirected)\n- Next q lines: queries in the above format\n\nOutput: Print the answer to each query of type 2.",
+  "examples": [
+    {
+      "input": "5 3\n4 2 5 2 1\n1 2\n1 3\n3 4\n3 5\n2 4\n1 3 2\n2 4\n",
+      "output": "11\n8\n",
+      "explanation": "Initial path to 4: 1->3->4 with values 4+5+2=11. After updating node 3 to 2, path to 4 becomes 4+2+2=8."
+    }
+  ],
+  "constraints": [
+    "1 <= n, q <= 2 * 10^5",
+    "1 <= a, b, s <= n",
+    "1 <= v_i, x <= 10^9",
+    "Tree is connected and rooted at node 1"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "Given a tree with edges 1-2, 1-3, 3-4 and values v[1]=4, v[2]=2, v[3]=5, v[4]=2, what is the sum on the path from root (1) to node 4?",
+      "diagram": "1(4)\n|\\\n2(2) 3(5)\n       \\\n        4(2)",
+      "options": [
+        {
+          "label": "11",
+          "isCode": false
+        },
+        {
+          "label": "7",
+          "isCode": false
+        },
+        {
+          "label": "6",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Path 1->3->4: 4+5+2=11. The other sums miss nodes or include wrong nodes.",
+      "wrongExplanations": {
+        "1": "7 would be 5+2, ignoring the root.",
+        "2": "6 would be 4+2, ignoring node 3."
+      },
+      "hint": "Include all nodes from root to the target node.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "For any tree, what is the sum on the path from the root to the root (query `2 1`)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "The value of node 1",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "The sum of all nodes",
+          "isCode": false
+        },
+        {
+          "label": "The sum of all children of node 1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The path root to root is just node 1, so the sum is v[1].",
+      "wrongExplanations": {
+        "1": "The path is not empty; it includes node 1.",
+        "2": "We only sum along the path, not the whole tree."
+      },
+      "hint": "A path from a node to itself includes exactly that node.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "In the earlier tree, after changing v[3] from 5 to 2, what is the sum on the path to node 4?",
+      "diagram": "1(4)\n|\\\n2(2) 3(2)\n       \\\n        4(2)",
+      "options": [
+        {
+          "label": "8",
+          "isCode": false
+        },
+        {
+          "label": "11",
+          "isCode": false
+        },
+        {
+          "label": "6",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Path 1->3->4: 4+2+2=8 after the update.",
+      "wrongExplanations": {
+        "1": "11 ignores the update.",
+        "2": "6 forgets node 3 or miscounts."
+      },
+      "hint": "Only nodes on the path contribute; use new values after updates.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "If you update a node that is NOT on the path from root to s, how does it affect a `2 s` query?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "It does not change the answer for `2 s`",
+          "isCode": false
+        },
+        {
+          "label": "It always increases the answer",
+          "isCode": false
+        },
+        {
+          "label": "It always decreases the answer",
+          "isCode": false
+        },
+        {
+          "label": "It changes the answer only if the node is a sibling of s",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Only nodes on the path contribute. Off-path updates do not affect the sum.",
+      "wrongExplanations": {
+        "1": "Effect depends on path membership, not sign of update.",
+        "3": "Siblings are not on the path unless they are also ancestors."
+      },
+      "hint": "Think of the path as a set of nodes that contribute to the sum.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Exploring Approaches",
+      "questionText": "Consider a naive approach: for each `2 s`, walk parent pointers from s to root and sum values. With n=q=2e5 and a chain-shaped tree, what is the worst-case total steps for all `2` queries?",
+      "diagram": "1-2-3-...-n (chain)",
+      "options": [
+        {
+          "label": "~4e10 steps (too slow)",
+          "isCode": false
+        },
+        {
+          "label": "~2e5 steps (fine)",
+          "isCode": false
+        },
+        {
+          "label": "~2e6 steps (maybe okay)",
+          "isCode": false
+        },
+        {
+          "label": "~2e8 steps (borderline)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each query can traverse O(n) in a chain: q*n ≈ 4e10, too slow.",
+      "wrongExplanations": {
+        "1": "This assumes O(1) per query, which is not true for a chain.",
+        "3": "2e8 is still large and underestimates worst case here."
+      },
+      "hint": "Multiply path length by number of queries in the worst case.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "What if we precompute the sum from root to every node once and answer `2 s` in O(1)? After a `1 s x` update, how many precomputed sums might need to be changed in the worst case?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "All nodes in the subtree of s (up to n)",
+          "isCode": false
+        },
+        {
+          "label": "Only node s",
+          "isCode": false
+        },
+        {
+          "label": "Only ancestors of s",
+          "isCode": false
+        },
+        {
+          "label": "Only siblings of s",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Changing s affects sums for all its descendants, which can be O(n).",
+      "wrongExplanations": {
+        "1": "Just changing s misses impact on descendants.",
+        "2": "Ancestors' root-to-node sums do not include s as a descendant."
+      },
+      "hint": "Which nodes' root-to-node sums include the value of s?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "Suppose we perform a traversal from root and record two positions for each node u: when we enter u (enter[u]) and when we leave u (exit[u]). If we build an array A where we add +v[u] at enter[u] and -v[u] at exit[u], what does the prefix sum A[1..enter[s]] equal?",
+      "diagram": "For each node u:\nA[enter[u]] += v[u]\nA[exit[u]] += -v[u]\nQuery: sum A[1..enter[s]] = ?",
+      "options": [
+        {
+          "label": "Sum of values on the path from root to s",
+          "isCode": false
+        },
+        {
+          "label": "Sum of values in the subtree of s",
+          "isCode": false
+        },
+        {
+          "label": "Sum of values of nodes visited before s (in traversal order)",
+          "isCode": false
+        },
+        {
+          "label": "Sum of values on the path from s to a leaf",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "All ancestors' +v appear before enter[s], and their -v appear after, so they contribute. Non-ancestors cancel or don't appear.",
+      "wrongExplanations": {
+        "1": "Subtree sums require a different indexing; here we capture ancestors.",
+        "2": "It's not arbitrary 'visited before'; exit marks remove off-path contributions."
+      },
+      "hint": "Consider whether an off-path node's -v appears before or after enter[s].",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Building the Idea",
+      "questionText": "In any correct enter/exit timing, what must hold between a parent p and its child c?",
+      "diagram": "Required inequalities between times for p (enter[p], exit[p]) and c (enter[c], exit[c])?",
+      "options": [
+        {
+          "label": "enter[p] < enter[c] < exit[c] < exit[p]",
+          "isCode": false
+        },
+        {
+          "label": "enter[c] < enter[p] < exit[p] < exit[c]",
+          "isCode": false
+        },
+        {
+          "label": "enter[p] < enter[c] < exit[p] < exit[c]",
+          "isCode": false
+        },
+        {
+          "label": "enter[p] < exit[p] < enter[c] < exit[c]",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Child interval is nested within parent’s interval in a root-first traversal.",
+      "wrongExplanations": {
+        "1": "This reverses ancestor/descendant order.",
+        "3": "exit[p] must come after all children’s exits."
+      },
+      "hint": "The parent's exit time must be after all its children finish.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "If we only add +v[u] at enter[u] and do nothing at exit[u], what goes wrong when computing sum A[1..enter[s]]?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "It includes contributions from nodes not on the path to s",
+          "isCode": false
+        },
+        {
+          "label": "It becomes the sum of the subtree of s",
+          "isCode": false
+        },
+        {
+          "label": "It undercounts ancestors of s",
+          "isCode": false
+        },
+        {
+          "label": "It double-counts only the value of s",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Earlier nodes in other branches would remain in the running sum without exit markers.",
+      "wrongExplanations": {
+        "1": "Subtree sums require a different construction.",
+        "2": "Ancestors are fully included; the issue is extra nodes."
+      },
+      "hint": "Consider contributions from a completed sibling subtree before s is entered.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "When the value at node s changes by Δ, which positions in A must be updated to keep sums correct?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Add +Δ at enter[s] and -Δ at exit[s]",
+          "isCode": false
+        },
+        {
+          "label": "Add +Δ at enter[s] only",
+          "isCode": false
+        },
+        {
+          "label": "Add +Δ at exit[s] only",
+          "isCode": false
+        },
+        {
+          "label": "Add +Δ at enter[parent[s]] and -Δ at exit[parent[s]]",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We mirror the initialization: + at enter, - at exit, to adjust path sums correctly.",
+      "wrongExplanations": {
+        "1": "Without the -Δ at exit, off-path queries would change incorrectly.",
+        "3": "Adjustments belong to s, not its parent."
+      },
+      "hint": "Think symmetry with the initial marking of +v and -v.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "What operations do we need on the array A to support both query and update efficiently?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Add a value at a position; query sum of the first k positions",
+          "isCode": false
+        },
+        {
+          "label": "Set a position to a value; query max over a range",
+          "isCode": false
+        },
+        {
+          "label": "Add a value to a range; query point value",
+          "isCode": false
+        },
+        {
+          "label": "Set a range to a value; query sum over a range",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We perform two position updates (enter/exit) and ask for a prefix sum up to enter[s].",
+      "wrongExplanations": {
+        "1": "We need sums, not max.",
+        "2": "We update single positions, not ranges."
+      },
+      "hint": "Updates touch exactly two indices per node value change.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "What length should we allocate for A to safely hold enter/exit positions for n nodes?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "At least 2*n + 2",
+          "isCode": false
+        },
+        {
+          "label": "Exactly n",
+          "isCode": false
+        },
+        {
+          "label": "At least n + 1",
+          "isCode": false
+        },
+        {
+          "label": "Exactly 2*n",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We use times 1..2n and often allocate a small cushion for indexing; 2n+2 is safe.",
+      "wrongExplanations": {
+        "1": "n slots aren’t enough since each node uses two positions.",
+        "3": "2n is tight; extra space avoids edge issues."
+      },
+      "hint": "Each node contributes two distinct time points.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Writing the Code",
+      "questionText": "Choose an efficient way to read the entire input and prepare an iterator over integers.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\nsys.setrecursionlimit(1<<25)\ndata = list(map(int, sys.stdin.buffer.read().split()))\nit = iter(data)",
+          "isCode": true
+        },
+        {
+          "label": "import sys\ndata = []\nfor line in sys.stdin:\n    data += list(map(int, line.split()))\nit = iter(data)",
+          "isCode": true
+        },
+        {
+          "label": "import sys\nsys.setrecursionlimit(1000)\ndata = list(map(int, sys.stdin.read().split()))\nit = iter(data)",
+          "isCode": true
+        },
+        {
+          "label": "from sys import stdin\nit = (int(x) for x in stdin.readline().split())",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Buffered read and a higher recursion limit suit large input and deep trees.",
+      "wrongExplanations": {
+        "1": "Line-by-line accumulation is slower for large input.",
+        "2": "Default recursion limit may be too low for deep trees."
+      },
+      "hint": "Aim for minimal overhead per token and allow deep recursion.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\nsys.setrecursionlimit(1<<25)\ndata = list(map(int, sys.stdin.buffer.read().split()))\nit = iter(data)",
+      "codeLabel": "Fast IO and recursion limit"
+    },
+    {
+      "id": "q14",
+      "phase": "Writing the Code",
+      "questionText": "Parse n, q and read values into a 1-indexed array.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "n = next(it); q = next(it)\nvals = [0]*(n+1)\nfor i in range(1, n+1):\n    vals[i] = next(it)",
+          "isCode": true
+        },
+        {
+          "label": "n = next(it); q = next(it)\nvals = [next(it) for _ in range(n)]",
+          "isCode": true
+        },
+        {
+          "label": "q = next(it); n = next(it)\nvals = [0]*(n+1)\nfor i in range(n):\n    vals[i] = next(it)",
+          "isCode": true
+        },
+        {
+          "label": "n = next(it); q = next(it)\nvals = []\nfor _ in range(n):\n    vals.append(next(it))\nvals = [0] + vals",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We want 1-indexing and correct order of n,q.",
+      "wrongExplanations": {
+        "1": "0-indexed; would misalign node indices.",
+        "2": "Swapped n and q, and 0-indexing."
+      },
+      "hint": "Accessing vals[s] should work for s in [1..n].",
+      "isCodeBuilding": true,
+      "codeSnippet": "n = next(it); q = next(it)\nvals = [0]*(n+1)\nfor i in range(1, n+1):\n    vals[i] = next(it)",
+      "codeLabel": "Read n, q, and values"
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Build the adjacency list for the tree from the next n-1 pairs.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "g = [[] for _ in range(n+1)]\nfor _ in range(n-1):\n    a = next(it); b = next(it)\n    g[a].append(b); g[b].append(a)",
+          "isCode": true
+        },
+        {
+          "label": "g = [[] for _ in range(n)]\nfor _ in range(n):\n    a = next(it); b = next(it)\n    g[a-1].append(b-1); g[b-1].append(a-1)",
+          "isCode": true
+        },
+        {
+          "label": "g = [[] for _ in range(n+1)]\nfor _ in range(n-1):\n    a = next(it); b = next(it)\n    g[a].append(b)",
+          "isCode": true
+        },
+        {
+          "label": "g = [set() for _ in range(n+1)]\nfor _ in range(n-1):\n    a = next(it); b = next(it)\n    g[a].add(b)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Undirected edges must be added both ways; 1-indexing is used.",
+      "wrongExplanations": {
+        "2": "This treats edges as directed; missing reverse links.",
+        "1": "Wrong size and indexing; also reads n pairs instead of n-1."
+      },
+      "hint": "Ensure both endpoints include each other as neighbors.",
+      "isCodeBuilding": true,
+      "codeSnippet": "g = [[] for _ in range(n+1)]\nfor _ in range(n-1):\n    a = next(it); b = next(it)\n    g[a].append(b); g[b].append(a)",
+      "codeLabel": "Build adjacency list"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Compute enter/exit times with a traversal from root=1. Choose the correct code.",
+      "diagram": "We need enter before children and exit after children.",
+      "options": [
+        {
+          "label": "tin = [0]*(n+1)\ntout = [0]*(n+1)\ntimer = 0\n\ndef dfs(u, p):\n    global timer\n    timer += 1\n    tin[u] = timer\n    for v in g[u]:\n        if v != p:\n            dfs(v, u)\n    timer += 1\n    tout[u] = timer\n\ndfs(1, 0)",
+          "isCode": true
+        },
+        {
+          "label": "tin = [0]*(n+1)\ntout = [0]*(n+1)\ntimer = 0\n\ndef dfs(u, p):\n    global timer\n    tin[u] = timer\n    timer += 1\n    for v in g[u]:\n        if v != p:\n            dfs(v, u)\n    tout[u] = timer\n\ndfs(1, 0)",
+          "isCode": true
+        },
+        {
+          "label": "tin = [0]*(n+1)\ntout = [0]*(n+1)\ntimer = 0\n\ndef dfs(u, p):\n    global timer\n    timer += 1\n    tin[u] = timer\n    for v in g[u]:\n        if v == p:\n            dfs(v, u)\n    timer += 1\n    tout[u] = timer\n\ndfs(1, 0)",
+          "isCode": true
+        },
+        {
+          "label": "tin = [0]*(n+1)\ntout = [0]*(n+1)\n\ndef dfs(u, p):\n    tin[u] = tin[p] + 1\n    for v in g[u]:\n        if v != p:\n            dfs(v, u)\n    tout[u] = tin[u] + 1\n\ndfs(1, 0)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We increment timer on entry and exit, and skip traversing back to the parent.",
+      "wrongExplanations": {
+        "1": "exit times never advance beyond children; lacks second increment.",
+        "2": "The condition v==p recurses into the parent, causing issues."
+      },
+      "hint": "There should be exactly two increments per node: entry and exit.",
+      "isCodeBuilding": true,
+      "codeSnippet": "tin = [0]*(n+1)\ntout = [0]*(n+1)\ntimer = 0\n\ndef dfs(u, p):\n    global timer\n    timer += 1\n    tin[u] = timer\n    for v in g[u]:\n        if v != p:\n            dfs(v, u)\n    timer += 1\n    tout[u] = timer\n\ndfs(1, 0)",
+      "codeLabel": "Compute enter/exit times"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "We need a structure supporting add at a position and sum of first i positions. Choose the correct implementation.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "class BIT:\n    def __init__(self, n):\n        self.n = n\n        self.t = [0]*(n+1)\n    def add(self, i, delta):\n        while i <= self.n:\n            self.t[i] += delta\n            i += i & -i\n    def sum(self, i):\n        s = 0\n        while i > 0:\n            s += self.t[i]\n            i -= i & -i\n        return s",
+          "isCode": true
+        },
+        {
+          "label": "class BIT:\n    def __init__(self, n):\n        self.n = n\n        self.t = [0]*(n+1)\n    def add(self, i, delta):\n        while i > 0:\n            self.t[i] += delta\n            i -= i & -i\n    def sum(self, i):\n        s = 0\n        while i <= self.n:\n            s += self.t[i]\n            i += i & -i\n        return s",
+          "isCode": true
+        },
+        {
+          "label": "class BIT:\n    def __init__(self, n):\n        self.n = n\n        self.t = [0]*(n+1)\n    def add(self, i, delta):\n        while i < self.n:\n            self.t[i] += delta\n            i += 1\n    def sum(self, i):\n        return sum(self.t[:i+1])",
+          "isCode": true
+        },
+        {
+          "label": "class BIT:\n    def __init__(self, n):\n        self.n = n\n        self.t = [0]*(n+1)\n    def add(self, i, delta):\n        self.t[i] += delta\n    def sum(self, i):\n        return sum(self.t[1:i+1])",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "This supports O(log n) add and prefix sum, needed for the constraints.",
+      "wrongExplanations": {
+        "1": "Update and query loops are swapped; both are wrong.",
+        "2": "This degenerates to O(n) updates/queries."
+      },
+      "hint": "Indices should move by the least significant set bit.",
+      "isCodeBuilding": true,
+      "codeSnippet": "class BIT:\n    def __init__(self, n):\n        self.n = n\n        self.t = [0]*(n+1)\n    def add(self, i, delta):\n        while i <= self.n:\n            self.t[i] += delta\n            i += i & -i\n    def sum(self, i):\n        s = 0\n        while i > 0:\n            s += self.t[i]\n            i -= i & -i\n        return s",
+      "codeLabel": "Position-add / prefix-sum structure"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Initialize the structure with +v at enter[u] and -v at exit[u] for all nodes. Pick the correct code.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "fen = BIT(2*n + 2)\nfor u in range(1, n+1):\n    fen.add(tin[u], vals[u])\n    fen.add(tout[u], -vals[u])",
+          "isCode": true
+        },
+        {
+          "label": "fen = BIT(n)\nfor u in range(1, n+1):\n    fen.add(tin[u], vals[u])\n    fen.add(tout[u], vals[u])",
+          "isCode": true
+        },
+        {
+          "label": "fen = BIT(2*n + 2)\nfor u in range(1, n+1):\n    fen.add(tin[u], vals[u])",
+          "isCode": true
+        },
+        {
+          "label": "fen = BIT(2*n + 2)\nfor u in range(1, n+1):\n    fen.add(tout[u], vals[u])\n    fen.add(tin[u], -vals[u])",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need both + at enter and - at exit, and the size must accommodate 2n indices.",
+      "wrongExplanations": {
+        "1": "Adding + at exit breaks path sums; and size n is insufficient.",
+        "2": "Missing - at exit will overcount off-path nodes."
+      },
+      "hint": "Mirror the earlier reasoning: +v on entry, -v on exit.",
+      "isCodeBuilding": true,
+      "codeSnippet": "fen = BIT(2*n + 2)\nfor u in range(1, n+1):\n    fen.add(tin[u], vals[u])\n    fen.add(tout[u], -vals[u])",
+      "codeLabel": "Initialize markers"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Process queries: set up an output list and loop over q queries.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "out = []\nfor _ in range(q):\n    t = next(it)\n    if t == 1:\n        s = next(it); x = next(it)\n        delta = x - vals[s]\n        vals[s] = x\n        fen.add(tin[s], delta)\n        fen.add(tout[s], -delta)\n    else:\n        s = next(it)\n        out.append(str(fen.sum(tin[s])))",
+          "isCode": true
+        },
+        {
+          "label": "out = []\nfor _ in range(q):\n    t = next(it)\n    if t == 1:\n        s = next(it); x = next(it)\n        vals[s] = x\n    else:\n        s = next(it)\n        out.append(str(fen.sum(tout[s])))",
+          "isCode": true
+        },
+        {
+          "label": "out = []\nfor _ in range(q):\n    t = next(it)\n    if t == 2:\n        s = next(it); x = next(it)\n        delta = x - vals[s]\n        vals[s] = x\n        fen.add(tin[s], delta)\n        fen.add(tout[s], -delta)\n    else:\n        s = next(it)\n        out.append(str(fen.sum(tin[s])))",
+          "isCode": true
+        },
+        {
+          "label": "out = []\nfor _ in range(q):\n    t = next(it)\n    if t == 1:\n        s = next(it); x = next(it)\n        delta = vals[s] - x\n        vals[s] = x\n        fen.add(tin[s], delta)\n        fen.add(tout[s], -delta)\n    else:\n        s = next(it)\n        out.append(str(fen.sum(tin[s]) - vals[s]))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "On update, apply delta at enter/exit. On query, compute prefix up to enter[s].",
+      "wrongExplanations": {
+        "1": "Query should use enter[s], not exit[s], and updates must apply delta.",
+        "2": "Swapped query types; reads wrong number of tokens."
+      },
+      "hint": "Use enter[s] for query and both enter/exit for updates.",
+      "isCodeBuilding": true,
+      "codeSnippet": "out = []\nfor _ in range(q):\n    t = next(it)\n    if t == 1:\n        s = next(it); x = next(it)\n        delta = x - vals[s]\n        vals[s] = x\n        fen.add(tin[s], delta)\n        fen.add(tout[s], -delta)\n    else:\n        s = next(it)\n        out.append(str(fen.sum(tin[s])))",
+      "codeLabel": "Process queries"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Finally, print all collected answers efficiently.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "sys.stdout.write(\"\\n\".join(out))",
+          "isCode": true
+        },
+        {
+          "label": "for x in out:\n    print(x)",
+          "isCode": true
+        },
+        {
+          "label": "print(\"\\n\".join(map(str, out)))",
+          "isCode": true
+        },
+        {
+          "label": "sys.stdout.write(out)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Writing once is efficient and avoids extra conversions (out already holds strings).",
+      "wrongExplanations": {
+        "1": "Multiple prints are slower; still correct but less efficient.",
+        "3": "out is a list, not a string."
+      },
+      "hint": "We appended strings; write them in one go.",
+      "isCodeBuilding": true,
+      "codeSnippet": "sys.stdout.write(\"\\n\".join(out))",
+      "codeLabel": "Print output"
+    },
+    {
+      "id": "q21",
+      "phase": "Verifying the Solution",
+      "questionText": "Using the sample input, what is the first printed answer?",
+      "diagram": "n=5, values: 4 2 5 2 1\nEdges: 1-2, 1-3, 3-4, 3-5\nQueries:\n2 4\n1 3 2\n2 4",
+      "options": [
+        {
+          "label": "11",
+          "isCode": false
+        },
+        {
+          "label": "8",
+          "isCode": false
+        },
+        {
+          "label": "6",
+          "isCode": false
+        },
+        {
+          "label": "9",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Before updates, path 1->3->4 sums to 11.",
+      "wrongExplanations": {
+        "1": "8 is after the update, not before."
+      },
+      "hint": "Compute the path sum before any updates.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q22",
+      "phase": "Verifying the Solution",
+      "questionText": "After applying `1 3 2` (change v[3] from 5 to 2), what is the second printed answer for `2 4`?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "8",
+          "isCode": false
+        },
+        {
+          "label": "11",
+          "isCode": false
+        },
+        {
+          "label": "6",
+          "isCode": false
+        },
+        {
+          "label": "9",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Now the path sum is 4+2+2=8.",
+      "wrongExplanations": {
+        "1": "11 ignores the update."
+      },
+      "hint": "Apply the delta to node 3 and recompute.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q23",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the overall time complexity of the solution with n nodes and q queries?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O((n + q) log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(nq)",
+          "isCode": false
+        },
+        {
+          "label": "O(n + q)",
+          "isCode": false
+        },
+        {
+          "label": "O((n + q) log^2 n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Traversal is O(n). Each update and query takes O(log n) on the array.",
+      "wrongExplanations": {
+        "1": "This is the naive worst case.",
+        "2": "We need logarithmic time for updates/queries."
+      },
+      "hint": "Consider the per-operation cost on the flattened array.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the additional space complexity beyond the input graph?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(nq)",
+          "isCode": false
+        },
+        {
+          "label": "O(1)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We store enter/exit arrays and one array-based structure of size ~2n.",
+      "wrongExplanations": {
+        "1": "We store arrays proportional to n, not logarithmic.",
+        "3": "We store much more than constant extra space."
+      },
+      "hint": "Count tin, tout, and the prefix-sum structure.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\nsys.setrecursionlimit(1<<25)\ndata = list(map(int, sys.stdin.buffer.read().split()))\nit = iter(data)",
+    "n = next(it); q = next(it)\nvals = [0]*(n+1)\nfor i in range(1, n+1):\n    vals[i] = next(it)",
+    "g = [[] for _ in range(n+1)]\nfor _ in range(n-1):\n    a = next(it); b = next(it)\n    g[a].append(b); g[b].append(a)",
+    "tin = [0]*(n+1)\ntout = [0]*(n+1)\ntimer = 0\n\ndef dfs(u, p):\n    global timer\n    timer += 1\n    tin[u] = timer\n    for v in g[u]:\n        if v != p:\n            dfs(v, u)\n    timer += 1\n    tout[u] = timer\n\ndfs(1, 0)",
+    "class BIT:\n    def __init__(self, n):\n        self.n = n\n        self.t = [0]*(n+1)\n    def add(self, i, delta):\n        while i <= self.n:\n            self.t[i] += delta\n            i += i & -i\n    def sum(self, i):\n        s = 0\n        while i > 0:\n            s += self.t[i]\n            i -= i & -i\n        return s",
+    "fen = BIT(2*n + 2)\nfor u in range(1, n+1):\n    fen.add(tin[u], vals[u])\n    fen.add(tout[u], -vals[u])",
+    "out = []\nfor _ in range(q):\n    t = next(it)\n    if t == 1:\n        s = next(it); x = next(it)\n        delta = x - vals[s]\n        vals[s] = x\n        fen.add(tin[s], delta)\n        fen.add(tout[s], -delta)\n    else:\n        s = next(it)\n        out.append(str(fen.sum(tin[s])))",
+    "sys.stdout.write(\"\\n\".join(out))"
+  ],
+  "reasoningChain": [
+    {
+      "question": "How is the path sum defined for queries of type 2?",
+      "insight": "It includes all nodes from the root to the target node, inclusive."
+    },
+    {
+      "question": "Why are naive per-query traversals or precomputed path sums insufficient at scale?",
+      "insight": "Walking to the root per query is too slow in tall trees; precomputed sums require updating many nodes on a value change."
+    },
+    {
+      "question": "How can we convert root-to-node path sums into prefix sums over a 1D array?",
+      "insight": "By recording +v at a node’s entry time and -v at its exit time during a traversal, the prefix sum up to enter[s] equals the path sum."
+    },
+    {
+      "question": "What information must we compute on the tree to enable this mapping?",
+      "insight": "For each node, we need consistent enter and exit positions such that a child's interval is nested within its parent’s."
+    },
+    {
+      "question": "What operations must our array-backed structure support?",
+      "insight": "Efficiently add a value at a position and query the sum of the first k positions."
+    },
+    {
+      "question": "How do updates and queries translate to operations on the array?",
+      "insight": "On update at s by Δ: add +Δ at enter[s] and -Δ at exit[s]; on query for s: take the sum up to enter[s]."
+    },
+    {
+      "question": "What are the complexity characteristics of the resulting solution?",
+      "insight": "Traversal is linear; each update and query runs in logarithmic time; extra space is linear."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1494,
+    "output_tokens": 15241,
+    "input_cost": 0.001868,
+    "output_cost": 0.15241,
+    "total_cost": 0.154277
+  }
+}

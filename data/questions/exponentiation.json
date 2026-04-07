@@ -1,0 +1,978 @@
+{
+  "id": "exponentiation-mod-fast",
+  "title": "Exponentiation",
+  "difficulty": "intermediate",
+  "tags": [
+    "math"
+  ],
+  "estimatedMinutes": 40,
+  "language": "python",
+  "description": "Compute a^b modulo 1e9+7 for many queries efficiently.\n\nInput:\n- First line: integer n, the number of calculations.\n- Next n lines: two integers a and b per line.\n\nAssume 0^0 = 1.\n\nOutput:\n- For each line, print a^b modulo 1e9+7.",
+  "examples": [
+    {
+      "input": "3\n3 4\n2 8\n123 123\n",
+      "output": "81\n256\n921450052\n",
+      "explanation": "Compute each a^b under modulo 1,000,000,007. For 3^4=81, 2^8=256. 123^123 is large; the modulo gives 921450052."
+    }
+  ],
+  "constraints": [
+    "1 ≤ n ≤ 2·10^5",
+    "0 ≤ a, b ≤ 10^9",
+    "Time limit: 1.00 s",
+    "Memory limit: 512 MB"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "What is 3^4 modulo 1,000,000,007?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "81",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "256",
+          "isCode": false
+        },
+        {
+          "label": "80",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "3^4 = 81 which is far less than the modulus, so 81 mod 1e9+7 = 81.",
+      "wrongExplanations": {
+        "2": "256 is 4^4 or 2^8, not 3^4."
+      },
+      "hint": "Compute 3×3×3×3.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "The problem states 0^0 should be treated as what value?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "Undefined (no output)",
+          "isCode": false
+        },
+        {
+          "label": "1,000,000,007",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "By problem definition, 0^0 = 1. Our implementation must follow this.",
+      "wrongExplanations": {
+        "0": "The problem explicitly overrides common conventions here.",
+        "2": "We must print a number for every test case."
+      },
+      "hint": "They explicitly define 0^0 in the statement.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "What is a^b mod 1e9+7 when a = 2 and b = 0?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "1,000,000,006",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Any nonzero a^0 = 1. Modulo does not change 1.",
+      "wrongExplanations": {
+        "0": "2^0 is 1, not 0."
+      },
+      "hint": "Anything to the power 0 equals 1.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "What is a^b mod 1e9+7 when a = 0 and b = 5?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        },
+        {
+          "label": "1,000,000,006",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "0^positive = 0. The modulus does not change 0.",
+      "wrongExplanations": {
+        "1": "0^b for b>0 is 0, not 1."
+      },
+      "hint": "0 multiplied by itself any positive number of times is 0.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Understanding the Problem",
+      "questionText": "Given a = 1,000,000,008 and b = 1, what is a^b mod 1,000,000,007?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "1000000008",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "1000000007",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "a mod 1e9+7 = 1, so 1^1 = 1.",
+      "wrongExplanations": {
+        "0": "Modulo reduces the base before exponentiation.",
+        "2": "Only a multiple of the modulus reduces to 0."
+      },
+      "hint": "Reduce the base modulo first: 1,000,000,008 ≡ 1 (mod 1,000,000,007).",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "Suppose you multiply a by itself b times for each query. With n up to 2·10^5 and b up to 10^9, is this feasible within 1 second?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, Python integers are fast enough for this.",
+          "isCode": false
+        },
+        {
+          "label": "No, worst-case multiplications are far too many.",
+          "isCode": false
+        },
+        {
+          "label": "Yes, if we take modulo at each step (same number of steps).",
+          "isCode": false
+        },
+        {
+          "label": "Yes, but only if b ≤ 10^5.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Naively doing up to 10^9 multiplications per query is impossible for 2·10^5 queries.",
+      "wrongExplanations": {
+        "0": "Speed of integers doesn't change the step count.",
+        "2": "Modulo keeps values small but does not reduce the number of multiplications."
+      },
+      "hint": "Compute the worst-case number of multiplications across all queries.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "When computing products under a modulus, when should you take the modulo?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Only once at the end.",
+          "isCode": false
+        },
+        {
+          "label": "After each multiplication.",
+          "isCode": false
+        },
+        {
+          "label": "Only when the product exceeds the modulus.",
+          "isCode": false
+        },
+        {
+          "label": "Never, Python integers never overflow.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Taking modulo after each multiplication keeps numbers bounded and preserves correctness.",
+      "wrongExplanations": {
+        "0": "Intermediate numbers become huge and slow.",
+        "2": "Waiting risks huge intermediates; modulo is cheap and safe each step."
+      },
+      "hint": "Ensure intermediate values remain small while preserving equivalence modulo M.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Exploring Approaches",
+      "questionText": "To compute 3^13 efficiently, which combination of precomputed squares would you multiply?",
+      "diagram": "13 = 8 + 4 + 1\nSquares: 3^1, 3^2, 3^4, 3^8, ...",
+      "options": [
+        {
+          "label": "3^8 × 3^4 × 3^1",
+          "isCode": false
+        },
+        {
+          "label": "3^12 × 3^1, with 3^12 = 3^3 × 3^4",
+          "isCode": false
+        },
+        {
+          "label": "3^6 × 3^7",
+          "isCode": false
+        },
+        {
+          "label": "3^16 ÷ 3^3",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "13 = 8+4+1, so multiply those powers. Division is not straightforward under modulo.",
+      "wrongExplanations": {
+        "3": "Division under a modulus is not generally valid without extra conditions."
+      },
+      "hint": "Express 13 as a sum of powers of two.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "In an iterative method that scans the bits of b and multiplies selected squares into an accumulator, what should the accumulator start as?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "a mod M",
+          "isCode": false
+        },
+        {
+          "label": "M − 1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "We multiply into the result only when needed; starting at 1 is the neutral element for multiplication.",
+      "wrongExplanations": {
+        "0": "Starting at 0 would make every product 0."
+      },
+      "hint": "What value leaves the product unchanged when multiplied by anything?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "Trace one step for a = 3, b = 5 (binary 101), res = 1, base = 3, exp = 5.\nRule for each loop step:\n- If exp is odd: res = res×base mod M.\n- base = base×base mod M.\n- exp = exp // 2.\nWhat are res, base, exp after this step?",
+      "diagram": "Before step: res=1, base=3, exp=5 (odd)",
+      "options": [
+        {
+          "label": "res=3, base=9, exp=2",
+          "isCode": false
+        },
+        {
+          "label": "res=1, base=9, exp=2",
+          "isCode": false
+        },
+        {
+          "label": "res=3, base=27, exp=4",
+          "isCode": false
+        },
+        {
+          "label": "res=4, base=9, exp=2",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "exp is odd: res←1×3=3; base←3×3=9; exp←5//2=2.",
+      "wrongExplanations": {
+        "1": "You must update res when exp is odd.",
+        "2": "base should be squared, not multiplied by 3."
+      },
+      "hint": "Apply all three updates in order.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "Continuing the previous trace: res=3, base=9, exp=2 (even). Apply one loop step.\nWhat are res, base, exp now?",
+      "diagram": "exp is even: skip multiplying into res",
+      "options": [
+        {
+          "label": "res=27, base=81, exp=1",
+          "isCode": false
+        },
+        {
+          "label": "res=3, base=18, exp=1",
+          "isCode": false
+        },
+        {
+          "label": "res=3, base=81, exp=1",
+          "isCode": false
+        },
+        {
+          "label": "res=3, base=9, exp=0",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Even exp: res unchanged; base←9×9=81; exp←2//2=1.",
+      "wrongExplanations": {
+        "0": "Do not multiply into res when exp is even.",
+        "1": "base should be squared, not doubled."
+      },
+      "hint": "Only square base and halve exp when exp is even.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "Final step for the trace: res=3, base=81, exp=1 (odd). After this step, what final result do we return?",
+      "diagram": "Odd exp: multiply res by base, then square base, then halve exp.",
+      "options": [
+        {
+          "label": "243",
+          "isCode": false
+        },
+        {
+          "label": "729",
+          "isCode": false
+        },
+        {
+          "label": "81",
+          "isCode": false
+        },
+        {
+          "label": "6561",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Odd exp: res←3×81=243; exp becomes 0 so we return res=243.",
+      "wrongExplanations": {
+        "2": "81 is base^4 (3^4), not the final accumulated value."
+      },
+      "hint": "Multiply res by base one last time when the least significant bit is 1.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "Why is it important to reduce a by the modulus before starting the loop?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "To keep values small and ensure correctness under modulus.",
+          "isCode": false
+        },
+        {
+          "label": "It is required only if b is odd.",
+          "isCode": false
+        },
+        {
+          "label": "To handle negative exponents.",
+          "isCode": false
+        },
+        {
+          "label": "To avoid division operations later.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Reducing the base keeps calculations bounded and equivalent modulo M.",
+      "wrongExplanations": {
+        "1": "It’s helpful regardless of b’s parity.",
+        "2": "We do not handle negative exponents here."
+      },
+      "hint": "a and a mod M represent the same value modulo M.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Building the Idea",
+      "questionText": "Roughly how many loop iterations are needed to process a single query with b up to 10^9 using the bit-scanning method?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "About 30",
+          "isCode": false
+        },
+        {
+          "label": "About 10^9",
+          "isCode": false
+        },
+        {
+          "label": "About 60",
+          "isCode": false
+        },
+        {
+          "label": "About 10^5",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The number of steps is the number of bits in b: ⌊log2 b⌋+1 ≈ 30 for b ≤ 10^9.",
+      "wrongExplanations": {
+        "1": "We halve b each step; it’s not linear in b."
+      },
+      "hint": "How many times can you divide 10^9 by 2 before reaching 0?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Start the program with the necessary import and modulus constant.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\nMOD = 10**9 + 7",
+          "isCode": true
+        },
+        {
+          "label": "import sys\nMOD = 10^9 + 7",
+          "isCode": true
+        },
+        {
+          "label": "MOD = 10**9 + 7",
+          "isCode": true
+        },
+        {
+          "label": "import sys\nMOD = 10**9 + 9",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Use exponentiation operator **, not ^. We also need sys for fast I/O.",
+      "wrongExplanations": {
+        "1": "^ is bitwise XOR in Python, not exponentiation.",
+        "2": "We need to import sys for input/output later."
+      },
+      "hint": "10^9 in Python is written with **, not ^.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\nMOD = 10**9 + 7",
+      "codeLabel": "Import and modulus"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Define a function header for modular exponentiation that accepts a, b, and mod.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def power_mod(a: int, b: int, mod: int) -> int:",
+          "isCode": true
+        },
+        {
+          "label": "def power_mod(a, b):",
+          "isCode": true
+        },
+        {
+          "label": "def power_mod(a: int, b: int, mod: int)",
+          "isCode": true
+        },
+        {
+          "label": "def pow_mod(a: int, b: int, mod: int) -> int:",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We’ll call power_mod(a, b, MOD), so the name and parameters must match.",
+      "wrongExplanations": {
+        "1": "We need the modulus parameter to pass MOD.",
+        "2": "Missing colon makes it a syntax error."
+      },
+      "hint": "Match the intended call: power_mod(a, b, MOD).",
+      "isCodeBuilding": true,
+      "codeSnippet": "def power_mod(a: int, b: int, mod: int) -> int:",
+      "codeLabel": "Function signature"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Initialize inside the function before the loop.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "a %= mod\nres = 1",
+          "isCode": true
+        },
+        {
+          "label": "res = a\na %= mod",
+          "isCode": true
+        },
+        {
+          "label": "res = 0\na %= mod",
+          "isCode": true
+        },
+        {
+          "label": "a = a % mod if a > mod else a\nres = 1",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Reduce base modulo and start res at 1. Other initializations break correctness.",
+      "wrongExplanations": {
+        "1": "res should start at 1, not a.",
+        "3": "Fails when a == mod; a should become 0 in that case."
+      },
+      "hint": "Start with the neutral element for multiplication.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    a %= mod\n    res = 1",
+      "codeLabel": "Init base and result"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Write the loop header to iterate while there are bits left in b.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "while b > 0:",
+          "isCode": true
+        },
+        {
+          "label": "for _ in range(b):",
+          "isCode": true
+        },
+        {
+          "label": "while b >= 0:",
+          "isCode": true
+        },
+        {
+          "label": "while a > 0:",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We halve b each iteration and stop when b is 0.",
+      "wrongExplanations": {
+        "1": "Iterating b times is too slow.",
+        "2": "This loop never terminates when b starts at 0."
+      },
+      "hint": "We repeatedly divide b by 2 until it becomes 0.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    while b > 0:",
+      "codeLabel": "Loop header"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Fill in the conditional multiply step inside the loop.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "if (b & 1) != 0:\n        res = (res * a) % mod",
+          "isCode": true
+        },
+        {
+          "label": "if b % 2 == 0:\n        res = (res * a) % mod",
+          "isCode": true
+        },
+        {
+          "label": "if (b & 1):\n        res = res * a",
+          "isCode": true
+        },
+        {
+          "label": "if (b & 1) == 1:\n        res == (res * a) % mod",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "When the lowest bit is 1, multiply res by a and take modulo.",
+      "wrongExplanations": {
+        "1": "We should multiply when b is odd, not even.",
+        "2": "Always reduce modulo to keep numbers bounded."
+      },
+      "hint": "Check the least significant bit of b.",
+      "isCodeBuilding": true,
+      "codeSnippet": "        if (b & 1) != 0:\n            res = (res * a) % mod",
+      "codeLabel": "Conditional multiply"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Now write the square-and-halve updates inside the loop.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "a = (a * a) % mod\n        b //= 2",
+          "isCode": true
+        },
+        {
+          "label": "a = a * a\n        b //= 2",
+          "isCode": true
+        },
+        {
+          "label": "a = (a * a) % mod\n        b /= 2",
+          "isCode": true
+        },
+        {
+          "label": "a = (a * a) % mod\n        b -= 2",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Square the base under modulo and halve b with integer division.",
+      "wrongExplanations": {
+        "1": "Omitting modulo allows values to grow huge.",
+        "2": "Use integer division; b must remain an integer."
+      },
+      "hint": "Square under modulo; cut the exponent in half.",
+      "isCodeBuilding": true,
+      "codeSnippet": "        a = (a * a) % mod\n        b //= 2",
+      "codeLabel": "Square and halve"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "Return the final result from the function.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "return res",
+          "isCode": true
+        },
+        {
+          "label": "print(res)",
+          "isCode": true
+        },
+        {
+          "label": "return a",
+          "isCode": true
+        },
+        {
+          "label": "return res if b == 0 else -1",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We built the answer in res; return it.",
+      "wrongExplanations": {
+        "1": "The function should return the value, not print it.",
+        "2": "a holds the base, not the accumulated result."
+      },
+      "hint": "Which variable accumulated selected powers?",
+      "isCodeBuilding": true,
+      "codeSnippet": "    return res",
+      "codeLabel": "Return"
+    },
+    {
+      "id": "q22",
+      "phase": "Writing the Code",
+      "questionText": "Add fast input reading, process n pairs, and print all answers.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "data = list(map(int, sys.stdin.buffer.read().split()))\nit = iter(data)\nn = next(it)\nout_lines = []\nfor _ in range(n):\n    a = next(it); b = next(it)\n    out_lines.append(str(power_mod(a, b, MOD)))\nsys.stdout.write(\"\\n\".join(out_lines))",
+          "isCode": true
+        },
+        {
+          "label": "data = list(map(int, sys.stdin.buffer.read().split()))\nit = iter(data)\nn = next(it)\nout_lines = []\nfor _ in range(n-1):\n    a = next(it); b = next(it)\n    out_lines.append(str(power_mod(a, b, MOD)))\nsys.stdout.write(' '.join(out_lines))",
+          "isCode": true
+        },
+        {
+          "label": "data = list(map(int, sys.stdin.buffer.read().split()))\nit = iter(data)\nout_lines = []\nfor _ in range(next(it)):\n    b = next(it); a = next(it)\n    out_lines.append(power_mod(a, b, MOD))\nsys.stdout.write('\\n'.join(out_lines))",
+          "isCode": true
+        },
+        {
+          "label": "n = int(sys.stdin.readline())\nout_lines = []\nfor _ in range(n):\n    a = int(sys.stdin.readline())\n    b = int(sys.stdin.readline())\n    out_lines.append(str(power_mod(a, b, MOD)))\nsys.stdout.write('\\n'.join(out_lines))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Read all ints, iterate over n pairs, convert results to strings, and join by newlines.",
+      "wrongExplanations": {
+        "1": "Off-by-one in the loop and spaces between outputs are incorrect.",
+        "3": "Input format provides a and b on the same line; reading separate lines will mis-parse."
+      },
+      "hint": "There are exactly n pairs after the first integer.",
+      "isCodeBuilding": true,
+      "codeSnippet": "data = list(map(int, sys.stdin.buffer.read().split()))\nit = iter(data)\nn = next(it)\nout_lines = []\nfor _ in range(n):\n    a = next(it); b = next(it)\n    out_lines.append(str(power_mod(a, b, MOD)))\nsys.stdout.write(\"\\n\".join(out_lines))",
+      "codeLabel": "Main I/O and loop"
+    },
+    {
+      "id": "q23",
+      "phase": "Verifying the Solution",
+      "questionText": "Given the input:\n3\n3 4\n2 8\n123 123\nwhat should the program print?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "81 256 921450052",
+          "isCode": false
+        },
+        {
+          "label": "81\n256\n123^123",
+          "isCode": false
+        },
+        {
+          "label": "81\n256\n921450052",
+          "isCode": false
+        },
+        {
+          "label": "3^4\n2^8\n123^123",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Each result is printed on its own line: 3^4=81, 2^8=256, and 123^123 mod 1e9+7=921450052.",
+      "wrongExplanations": {
+        "0": "Outputs must be newline-separated, not space-separated."
+      },
+      "hint": "Check the example in the problem statement.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Verifying the Solution",
+      "questionText": "For the input:\n2\n1000000007 0\n1000000008 1\nwhat are the outputs?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "1\n1",
+          "isCode": false
+        },
+        {
+          "label": "0\n1",
+          "isCode": false
+        },
+        {
+          "label": "1\n1000000008",
+          "isCode": false
+        },
+        {
+          "label": "1000000007\n1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Anything^0 is 1. 1,000,000,008 ≡ 1 (mod 1,000,000,007), so result is 1.",
+      "wrongExplanations": {
+        "1": "The first line uses exponent 0, which yields 1.",
+        "2": "We output modulo, not the raw base."
+      },
+      "hint": "Reduce bases modulo first and apply b=0 rule.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the per-query time complexity of the bit-scanning power method in terms of b?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(b)",
+          "isCode": false
+        },
+        {
+          "label": "O(log b)",
+          "isCode": false
+        },
+        {
+          "label": "O(1)",
+          "isCode": false
+        },
+        {
+          "label": "O(n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Each iteration halves b, so the number of steps is proportional to the number of bits in b.",
+      "wrongExplanations": {
+        "0": "We do not perform one multiplication per unit of b.",
+        "2": "It depends on the size of b."
+      },
+      "hint": "Count how many times b can be divided by 2 until it becomes 0.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the overall time complexity for n queries with exponents up to B (the maximum b)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n log B)",
+          "isCode": false
+        },
+        {
+          "label": "O(nB)",
+          "isCode": false
+        },
+        {
+          "label": "O(log B)",
+          "isCode": false
+        },
+        {
+          "label": "O(n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We do about log b steps per query; summing across n queries gives O(n log B).",
+      "wrongExplanations": {
+        "1": "That would be true for naive repeated multiplication, which we avoided.",
+        "3": "We still depend on b’s size."
+      },
+      "hint": "Multiply the per-query cost by the number of queries.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q27",
+      "phase": "Analyzing Complexity",
+      "questionText": "What extra space (excluding input and output storage) does the algorithm use per query?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(1)",
+          "isCode": false
+        },
+        {
+          "label": "O(log b)",
+          "isCode": false
+        },
+        {
+          "label": "O(b)",
+          "isCode": false
+        },
+        {
+          "label": "O(n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "It uses a few integer variables regardless of b.",
+      "wrongExplanations": {
+        "1": "We do not store all bits; we process them on the fly."
+      },
+      "hint": "How many variables do we maintain while looping?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\nMOD = 10**9 + 7",
+    "def power_mod(a: int, b: int, mod: int) -> int:",
+    "    a %= mod\n    res = 1",
+    "    while b > 0:",
+    "        if (b & 1) != 0:\n            res = (res * a) % mod",
+    "        a = (a * a) % mod\n        b //= 2",
+    "    return res",
+    "data = list(map(int, sys.stdin.buffer.read().split()))\nit = iter(data)\nn = next(it)\nout_lines = []\nfor _ in range(n):\n    a = next(it); b = next(it)\n    out_lines.append(str(power_mod(a, b, MOD)))\nsys.stdout.write(\"\\n\".join(out_lines))"
+  ],
+  "reasoningChain": [
+    {
+      "question": "Why can we reduce the base a modulo 1e9+7 before exponentiation?",
+      "insight": "a and a mod M are equivalent under the modulus, keeping numbers small without changing the result."
+    },
+    {
+      "question": "How should we handle the special case 0^0 in this problem?",
+      "insight": "Return 1, as explicitly required by the statement; initializing the accumulator to 1 ensures this."
+    },
+    {
+      "question": "Why is naive repeated multiplication infeasible here?",
+      "insight": "b can be up to 1e9 and n up to 2e5, so doing O(b) multiplications per query is far too slow."
+    },
+    {
+      "question": "How can we compute a^b quickly by inspecting bits of b?",
+      "insight": "Express b as a sum of powers of two, square the base each step, and multiply into the result when the current bit is 1."
+    },
+    {
+      "question": "What loop updates implement this idea correctly?",
+      "insight": "Initialize res=1 and a%=M; while b>0: if b is odd multiply res by a modulo M; then set a=(a*a)%M and b//=2."
+    },
+    {
+      "question": "How do we scale to many queries within limits?",
+      "insight": "Use fast per-query exponentiation with O(log b) steps and efficient I/O to process up to 2·10^5 lines."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1337,
+    "output_tokens": 15445,
+    "input_cost": 0.001671,
+    "output_cost": 0.15445,
+    "total_cost": 0.156121
+  }
+}

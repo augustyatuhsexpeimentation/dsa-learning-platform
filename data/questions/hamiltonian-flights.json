@@ -1,0 +1,1013 @@
+{
+  "id": "hamiltonian-flights",
+  "title": "Hamiltonian Flights",
+  "difficulty": "intermediate",
+  "tags": [
+    "graph"
+  ],
+  "estimatedMinutes": 60,
+  "language": "python",
+  "description": "You are given a directed graph with n cities and m one-way flights. City 1 is Syrjälä and city n is Lehmälä.\n\nYour task is to count the number of distinct routes starting at city 1 and ending at city n that visit every city exactly once. Return the count modulo 10^9+7.\n\nInput:\n- First line: two integers n and m.\n- Next m lines: two integers a b indicating a flight from city a to city b.\n\nOutput:\n- One integer: the number of routes modulo 10^9+7.\n\nConstraints:\n- 2 ≤ n ≤ 20\n- 1 ≤ m ≤ n^2\n- 1 ≤ a, b ≤ n",
+  "examples": [
+    {
+      "input": "4 6\n1 2\n1 3\n2 3\n3 2\n2 4\n3 4",
+      "output": "2",
+      "explanation": "Valid routes visiting each city exactly once from 1 to 4 are: 1→2→3→4 and 1→3→2→4."
+    }
+  ],
+  "constraints": [
+    "2 ≤ n ≤ 20",
+    "1 ≤ m ≤ n^2",
+    "1 ≤ a, b ≤ n",
+    "Output modulo 10^9+7"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "If the input contains a line \"a b\", which movements are allowed between cities a and b?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "You can travel both ways: a→b and b→a.",
+          "isCode": false
+        },
+        {
+          "label": "You can only travel from a to b (one-way).",
+          "isCode": false
+        },
+        {
+          "label": "You can travel from b to a only.",
+          "isCode": false
+        },
+        {
+          "label": "You can travel from a to b only if a<b.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Each line defines a one-way flight a→b only. Reverse movement b→a is allowed only if there is an explicit line for it.",
+      "wrongExplanations": {
+        "0": "The problem states flights are one-way; bidirectional is incorrect.",
+        "2": "The line explicitly says a→b, not b→a."
+      },
+      "hint": "Re-read: \"All flights are one-way flights.\"",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "Which statement correctly defines a valid route for this task?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Start at any city, end at any city, visit each city at most once.",
+          "isCode": false
+        },
+        {
+          "label": "Start at city 1, end at city n, and visit each city exactly once.",
+          "isCode": false
+        },
+        {
+          "label": "Start and end at city 1, visit each city exactly once.",
+          "isCode": false
+        },
+        {
+          "label": "Start at city n, end at city 1, visit each city exactly once.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Routes must start at 1 (Syrjälä), end at n (Lehmälä), and visit every city exactly once.",
+      "wrongExplanations": {
+        "0": "Start and end are fixed in the problem.",
+        "2": "End must be city n, not 1."
+      },
+      "hint": "City 1 and city n are special.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "Consider n=3 and flights: 1→2 and 2→3. How many valid routes are there?",
+      "diagram": "Cities: 1 -> 2 -> 3",
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "1 (1→2→3)",
+          "isCode": false
+        },
+        {
+          "label": "2 (1→2→3 and 1→3→2)",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Only 1→2→3 visits each city exactly once and ends at city 3. 1→3→2 is impossible since there is no 1→3 flight.",
+      "wrongExplanations": {
+        "2": "There is no flight 1→3.",
+        "0": "1→2→3 is a valid route."
+      },
+      "hint": "Check if 1→3 exists.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "Let n=3 and flights: 1→3, 3→2, 1→2. How many valid routes are there?",
+      "diagram": "1 -> 3 -> 2; 1 -> 2",
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "1 (1→2→3)",
+          "isCode": false
+        },
+        {
+          "label": "1 (1→3→2)",
+          "isCode": false
+        },
+        {
+          "label": "2 (1→2→3 and 1→3→2)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Valid route must end at city 3. 1→2→3 is valid if 2→3 exists; here 2→3 is missing. Wait, check carefully: actually there is no 2→3 flight; thus only 1→3→2 ends at 2, which is invalid. So 0 is wrong; but the only valid ending at 3 would be 1→2→3, and 2→3 is missing. Hence 0 routes.",
+      "wrongExplanations": {
+        "2": "It ends at city 2, not city 3.",
+        "3": "1→2→3 requires 2→3 which is not given."
+      },
+      "hint": "Does 2→3 exist? The route must end at city 3."
+    },
+    {
+      "id": "q5",
+      "phase": "Understanding the Problem",
+      "questionText": "n=3, flights: 1→2, 2→1, 2→3. How many valid routes are there?",
+      "diagram": "1 <-> 2, and 2 -> 3",
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "1 (1→2→3)",
+          "isCode": false
+        },
+        {
+          "label": "2 (1→2→3 and 1→2→1)",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "1→2→3 is valid. 1→2→1 revisits city 1 and does not end at city 3.",
+      "wrongExplanations": {
+        "2": "It revisits city 1 and fails to end at city 3."
+      },
+      "hint": "You cannot revisit cities; the route must end at city n.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "A naive idea is to try all permutations of the cities and check if edges exist along the path. With fixed start at 1 and end at n, how many permutations do we need to check in the worst case?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "(n-2)! permutations",
+          "isCode": false
+        },
+        {
+          "label": "n! permutations",
+          "isCode": false
+        },
+        {
+          "label": "2^n permutations",
+          "isCode": false
+        },
+        {
+          "label": "n^2 permutations",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Cities 1 and n are fixed at ends; the remaining n-2 cities can be in any order: (n-2)!.",
+      "wrongExplanations": {
+        "1": "Start and end are fixed, reducing to (n-2)!.",
+        "2": "Permutations grow factorially, not exponentially with base 2."
+      },
+      "hint": "How many ways to arrange the middle cities?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "To count routes by extending partial routes step by step, what information must each partial state keep?",
+      "diagram": "State = ?",
+      "options": [
+        {
+          "label": "Only the number of visited cities so far",
+          "isCode": false
+        },
+        {
+          "label": "The set of visited cities and the current last city",
+          "isCode": false
+        },
+        {
+          "label": "Only the current last city",
+          "isCode": false
+        },
+        {
+          "label": "The number of outgoing edges from the last city",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "We need the visited set to avoid revisiting and the last city to know valid next steps.",
+      "wrongExplanations": {
+        "0": "Which cities were visited matters, not just the count.",
+        "2": "Without the visited set, you might revisit cities."
+      },
+      "hint": "We must prevent revisits and know where we are.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Exploring Approaches",
+      "questionText": "When extending a partial state (visited set, last city), which next cities are allowed?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Any city not in the visited set",
+          "isCode": false
+        },
+        {
+          "label": "Any city with a flight from the last city and not yet visited",
+          "isCode": false
+        },
+        {
+          "label": "Any city with a flight from the last city (visited status doesn't matter)",
+          "isCode": false
+        },
+        {
+          "label": "Only cities with more incoming than outgoing flights",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "You can extend along one-way edges from the last city to unvisited cities.",
+      "wrongExplanations": {
+        "0": "Must also have a flight from the last city.",
+        "3": "Incoming/outgoing counts are irrelevant here."
+      },
+      "hint": "Both edge existence and non-visited condition must hold.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Exploring Approaches",
+      "questionText": "City n must be the final city. What is a helpful restriction for partial states to reduce work?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Allow visiting city n at any time and track it in the visited set.",
+          "isCode": false
+        },
+        {
+          "label": "Never visit city n in partial states; only add it as the final step when all others are visited.",
+          "isCode": false
+        },
+        {
+          "label": "Always visit city n first.",
+          "isCode": false
+        },
+        {
+          "label": "Exclude city 1 from the visited set.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Deferring city n to the last step avoids useless partial states that cannot lead to a valid full route.",
+      "wrongExplanations": {
+        "0": "Entering n early creates states that won't end at n after visiting all cities.",
+        "3": "City 1 must be included from the start."
+      },
+      "hint": "Add city n only when finishing.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "How should we represent the set of visited cities efficiently?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "A Python list of booleans length n",
+          "isCode": false
+        },
+        {
+          "label": "A Python set of visited city indices",
+          "isCode": false
+        },
+        {
+          "label": "An integer bitmask where bit i indicates city i is visited",
+          "isCode": false
+        },
+        {
+          "label": "A string of '0'/'1' characters length n",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Bitmasks are compact and fast to test/set bits, suitable for up to n=20.",
+      "wrongExplanations": {
+        "1": "Sets work but bitmasks are faster and more compact for small n."
+      },
+      "hint": "We will frequently test and set membership.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "What is the correct base partial state?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Visited set empty, last city undefined",
+          "isCode": false
+        },
+        {
+          "label": "Visited set {1}, last city = 1, count = 1",
+          "isCode": false
+        },
+        {
+          "label": "Visited set {n}, last city = n, count = 1",
+          "isCode": false
+        },
+        {
+          "label": "Visited set {1, n}, last city = 1, count = 1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "We start at city 1, so visited={1}, last=1 with one way to be at the start.",
+      "wrongExplanations": {
+        "0": "We must include the start city.",
+        "3": "City n should not be visited in partial states."
+      },
+      "hint": "Start position is fixed at city 1.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "For a partial state (mask, last=u), how do we compute the number of ways to extend to a city v ≠ n?",
+      "diagram": "Extend u -> v if edge exists and v not in mask",
+      "options": [
+        {
+          "label": "Increase by the number of incoming edges to v",
+          "isCode": false
+        },
+        {
+          "label": "Increase by the number of outgoing edges from u",
+          "isCode": false
+        },
+        {
+          "label": "Add the count of (mask, u) to (mask | {v}, v) if there is an edge u→v and v∉mask",
+          "isCode": false
+        },
+        {
+          "label": "Replace the count of (mask, u) with 0",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "We extend along u→v to unvisited v, adding to the new state (mask∪{v}, v).",
+      "wrongExplanations": {
+        "1": "Edge count alone does not give route counts.",
+        "0": "Incoming edges to v are irrelevant unless they connect from u and v is unvisited."
+      },
+      "hint": "Think of building longer paths one edge at a time.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "How should we handle transitions into city n (the destination)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Allow transitions into n at any time; store them in partial states.",
+          "isCode": false
+        },
+        {
+          "label": "Only add transitions into n when all other cities are already in the visited set; then contribute to the final answer.",
+          "isCode": false
+        },
+        {
+          "label": "Never allow transitions into n.",
+          "isCode": false
+        },
+        {
+          "label": "Add transitions into n only if it has zero outgoing edges.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "We finish by entering n after visiting all others; adding earlier does not lead to valid full routes.",
+      "wrongExplanations": {
+        "0": "This generates useless states and complicates counting."
+      },
+      "hint": "n must be the last city.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Building the Idea",
+      "questionText": "Why is it safe to only consider visited sets that include city 1 during computation?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Because any valid route must start at 1.",
+          "isCode": false
+        },
+        {
+          "label": "Because city 1 has no incoming edges.",
+          "isCode": false
+        },
+        {
+          "label": "Because city 1 has the largest out-degree.",
+          "isCode": false
+        },
+        {
+          "label": "Because city n has no outgoing edges.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "All valid routes start at city 1, so partial states without city 1 cannot contribute.",
+      "wrongExplanations": {
+        "1": "The graph may have any structure; start at 1 is the reason."
+      },
+      "hint": "Start city inclusion is required in any valid route.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q15",
+      "phase": "Building the Idea",
+      "questionText": "Where should we apply the modulo 10^9+7 in the counting process?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Only once at the final print",
+          "isCode": false
+        },
+        {
+          "label": "On every addition when updating counts",
+          "isCode": false
+        },
+        {
+          "label": "On every subtraction only",
+          "isCode": false
+        },
+        {
+          "label": "Nowhere; Python integers don't overflow",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Apply modulo during updates to keep numbers bounded and consistent with the required modulo result.",
+      "wrongExplanations": {
+        "0": "Intermediate values can grow large; modulo during updates is safer."
+      },
+      "hint": "Apply modulo when adding counts.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Read input and build a 0-based adjacency list of outgoing edges.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\nMOD = 10**9 + 7\n\ndef main():\n    data = sys.stdin.read().strip().split()\n    it = iter(data)\n    n = int(next(it)); m = int(next(it))\n    succ = [[] for _ in range(n)]\n    for _ in range(m):\n        a = int(next(it)); b = int(next(it))\n        succ[a-1].append(b-1)",
+          "isCode": true
+        },
+        {
+          "label": "import sys\nMOD = 10**9 + 7\n\ndef main():\n    n, m = map(int, sys.stdin.readline().split())\n    succ = [[] for _ in range(n)]\n    for _ in range(m):\n        a, b = map(int, sys.stdin.readline().split())\n        succ[a].append(b)",
+          "isCode": true
+        },
+        {
+          "label": "import sys\nMOD = 10**9 + 7\n\ndef main():\n    data = sys.stdin.read().split()\n    it = iter(data)\n    m = int(next(it)); n = int(next(it))\n    succ = [[] for _ in range(n)]\n    for _ in range(m):\n        a = int(next(it)); b = int(next(it))\n        succ[b-1].append(a-1)",
+          "isCode": true
+        },
+        {
+          "label": "import sys\nMOD = 10**9 + 7\n\ndef main():\n    data = sys.stdin.read().strip().split()\n    it = iter(data)\n    n = int(next(it)); m = int(next(it))\n    succ = [[] for _ in range(m)]\n    for _ in range(m):\n        a = int(next(it)); b = int(next(it))\n        succ[a-1].append(b-1)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need a 0-based adjacency list of length n with edges a-1→b-1. Other options have indexing mistakes or wrong sizes.",
+      "wrongExplanations": {
+        "1": "succ[a] uses 1-based indices; should be a-1.",
+        "3": "Adjacency list must have length n, not m."
+      },
+      "hint": "Convert city numbers to 0-based when storing.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\nMOD = 10**9 + 7\n\ndef main():\n    data = sys.stdin.read().strip().split()\n    it = iter(data)\n    n = int(next(it)); m = int(next(it))\n    succ = [[] for _ in range(n)]\n    for _ in range(m):\n        a = int(next(it)); b = int(next(it))\n        succ[a-1].append(b-1)",
+      "codeLabel": "Input parsing and adjacency"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Initialize start/end, the partial-state storage, and the base state.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    start = 0\n    end = n-1\n    dp = [dict() for _ in range(n)]\n    dp[start][1 << start] = 1",
+          "isCode": true
+        },
+        {
+          "label": "    start = 1\n    end = n\n    dp = [dict() for _ in range(n)]\n    dp[start][1 << start] = 1",
+          "isCode": true
+        },
+        {
+          "label": "    start = 0\n    end = n-1\n    dp = dict()\n    dp[1 << start] = 1",
+          "isCode": true
+        },
+        {
+          "label": "    start = 0\n    end = n-1\n    dp = [dict() for _ in range(n)]\n    dp[end][1 << end] = 1",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Use 0-based indices; per-last-city dicts; base is last=start with mask containing start.",
+      "wrongExplanations": {
+        "1": "Indices must be 0-based; city n is n-1.",
+        "3": "We start at city 1, not city n."
+      },
+      "hint": "City 1 is index 0 in 0-based.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    start = 0\n    end = n-1\n    dp = [dict() for _ in range(n)]\n    dp[start][1 << start] = 1",
+      "codeLabel": "Base state"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Set up the outer loop over the number of visited cities (excluding city n), initialize the accumulator, and the next layer.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    ans = 0\n    for _k in range(1, n):  # we will add city n only at the end\n        next_dp = [dict() for _ in range(n)]",
+          "isCode": true
+        },
+        {
+          "label": "    ans = 0\n    for _k in range(n):\n        next_dp = dict()",
+          "isCode": true
+        },
+        {
+          "label": "    ans = 0\n    for _k in range(1, n-1):\n        next_dp = [0]*n",
+          "isCode": true
+        },
+        {
+          "label": "    ans = 0\n    for _k in range(2, n+1):\n        next_dp = [dict() for _ in range(m)]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Loop from 1 to n-1 layers (excluding n), and prepare per-last-city dicts for the next layer.",
+      "wrongExplanations": {
+        "1": "We need per-city dicts, not a single dict.",
+        "3": "Adjacency container should be sized by n, not m."
+      },
+      "hint": "We never include city n in masks; n layers means we finish when adding n.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    ans = 0\n    for _k in range(1, n):  # we will add city n only at the end\n        next_dp = [dict() for _ in range(n)]",
+      "codeLabel": "Outer loop and accumulator"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Iterate over current states, but avoid extending from city n before finishing.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "        for u in range(n):\n            if u == end:\n                continue\n            for mask, cnt in dp[u].items():\n                for v in succ[u]:",
+          "isCode": true
+        },
+        {
+          "label": "        for u in range(n):\n            for mask in dp[u]:\n                for v in succ[u]:",
+          "isCode": true
+        },
+        {
+          "label": "        for u in range(n):\n            if u == start:\n                continue\n            for mask, cnt in dp[u].keys():\n                for v in succ[u]:",
+          "isCode": true
+        },
+        {
+          "label": "        for u in range(end):\n            for mask, cnt in dp[u].items():\n                for v in succ[end]:",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Skip u=end; iterate (mask, cnt) over dp[u].items() and successors of u.",
+      "wrongExplanations": {
+        "1": "You need values (cnt), not just keys.",
+        "3": "We must use successors of u, not of end."
+      },
+      "hint": "Look up counts and successors correctly.",
+      "isCodeBuilding": true,
+      "codeSnippet": "        for u in range(n):\n            if u == end:\n                continue\n            for mask, cnt in dp[u].items():\n                for v in succ[u]:",
+      "codeLabel": "Iterate states and successors"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Skip moves to already visited cities; how do you test if v is in mask?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "                    if (mask >> v) & 1:\n                        continue",
+          "isCode": true
+        },
+        {
+          "label": "                    if mask & (1 << u):\n                        continue",
+          "isCode": true
+        },
+        {
+          "label": "                    if mask | (1 << v):\n                        continue",
+          "isCode": true
+        },
+        {
+          "label": "                    if (1 << v) // mask:\n                        continue",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Bit v set means v already visited. Other checks test the wrong bit or use wrong operator.",
+      "wrongExplanations": {
+        "1": "Tests bit u, not v.",
+        "3": "// is integer division, not a bit test."
+      },
+      "hint": "Use bit operations to test membership.",
+      "isCodeBuilding": true,
+      "codeSnippet": "                    if (mask >> v) & 1:\n                        continue",
+      "codeLabel": "Visited check"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "Handle transitions into city n: only finish when all other cities are already visited.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "                    if v == end:\n                        if mask.bit_count() == n-1:\n                            ans = (ans + cnt) % MOD\n                        continue",
+          "isCode": true
+        },
+        {
+          "label": "                    if v == end:\n                        ans += cnt\n                        continue",
+          "isCode": true
+        },
+        {
+          "label": "                    if v == end:\n                        if mask.bit_count() == n:\n                            ans = (ans + cnt) % MOD\n                        continue",
+          "isCode": true
+        },
+        {
+          "label": "                    if v == end:\n                        if (mask & (1 << end)) == 0:\n                            ans = (ans + cnt) % MOD\n                        continue",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We finish only when mask already has n-1 cities (all except end). Then add cnt modulo and skip further extension.",
+      "wrongExplanations": {
+        "1": "May count incomplete routes; must ensure all others visited.",
+        "3": "The mask does not include end in partial states."
+      },
+      "hint": "The mask excludes city n; count only when mask covers all n-1 other cities.",
+      "isCodeBuilding": true,
+      "codeSnippet": "                    if v == end:\n                        if mask.bit_count() == n-1:\n                            ans = (ans + cnt) % MOD\n                        continue",
+      "codeLabel": "Finish at end"
+    },
+    {
+      "id": "q22",
+      "phase": "Writing the Code",
+      "questionText": "Extend to non-end cities and update the next layer with modulo arithmetic.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "                    new_mask = mask | (1 << v)\n                    prev = next_dp[v].get(new_mask)\n                    if prev is None:\n                        next_dp[v][new_mask] = cnt\n                    else:\n                        s = prev + cnt\n                        if s >= MOD:\n                            s -= MOD\n                        next_dp[v][new_mask] = s",
+          "isCode": true
+        },
+        {
+          "label": "                    new_mask = mask | (1 << v)\n                    next_dp[v][new_mask] = cnt",
+          "isCode": true
+        },
+        {
+          "label": "                    new_mask = mask ^ (1 << v)\n                    next_dp[v][new_mask] = (next_dp[v].get(new_mask, 0) - cnt) % MOD",
+          "isCode": true
+        },
+        {
+          "label": "                    new_mask = mask | (1 << v)\n                    next_dp[v][new_mask] += cnt",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We add cnt to existing value (if any) and keep modulo bounded. Other options overwrite, subtract, or rely on non-initialized entries.",
+      "wrongExplanations": {
+        "1": "Overwrites previous counts for the same state.",
+        "3": "Will raise KeyError on first assignment."
+      },
+      "hint": "Sum counts for the same (new_mask, v) state.",
+      "isCodeBuilding": true,
+      "codeSnippet": "                    new_mask = mask | (1 << v)\n                    prev = next_dp[v].get(new_mask)\n                    if prev is None:\n                        next_dp[v][new_mask] = cnt\n                    else:\n                        s = prev + cnt\n                        if s >= MOD:\n                            s -= MOD\n                        next_dp[v][new_mask] = s",
+      "codeLabel": "Extend non-end"
+    },
+    {
+      "id": "q23",
+      "phase": "Writing the Code",
+      "questionText": "Move to the next layer, then finalize and print the answer with the required modulo.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "        dp = next_dp\n    print(ans % MOD)\n\nif __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "        dp = next_dp\n    print(ans)\n\nif __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "        dp = next_dp\nprint(ans % MOD)\n\nif __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "        dp = next_dp\n    print(ans % MOD)\n",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Assign dp to the next layer inside the loop, then print ans % MOD and include the usual entry point.",
+      "wrongExplanations": {
+        "1": "Must respect modulo requirement.",
+        "2": "Incorrect indentation; print should be inside main()."
+      },
+      "hint": "Respect modulo and proper function scope.",
+      "isCodeBuilding": true,
+      "codeSnippet": "        dp = next_dp\n    print(ans % MOD)\n\nif __name__ == \"__main__\":\n    main()",
+      "codeLabel": "Finalize"
+    },
+    {
+      "id": "q24",
+      "phase": "Verifying the Solution",
+      "questionText": "On the sample input:\n4 6\n1 2\n1 3\n2 3\n3 2\n2 4\n3 4\nWhat is the correct output?",
+      "diagram": "Routes: 1→2→3→4 and 1→3→2→4",
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Two valid routes: 1→2→3→4 and 1→3→2→4.",
+      "wrongExplanations": {
+        "0": "There are two valid routes.",
+        "3": "Only these two valid permutations work."
+      },
+      "hint": "Check both 1→2→3→4 and 1→3→2→4.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Verifying the Solution",
+      "questionText": "Consider n=4, flights: 1→2, 2→3, 3→4 only. How many routes?",
+      "diagram": "1 -> 2 -> 3 -> 4",
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "1 (1→2→3→4)",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Only the single chain exists.",
+      "wrongExplanations": {
+        "0": "There is a valid chain.",
+        "2": "No alternative edges exist."
+      },
+      "hint": "Only one path is possible.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Analyzing Complexity",
+      "questionText": "How many different visited-set masks do we consider when we exclude city n until the last step?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "2^n",
+          "isCode": false
+        },
+        {
+          "label": "2^(n-1)",
+          "isCode": false
+        },
+        {
+          "label": "2^(n-2)",
+          "isCode": false
+        },
+        {
+          "label": "n!",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "We always include city 1 and exclude city n in masks, leaving n-2 free choices: 2^(n-2).",
+      "wrongExplanations": {
+        "1": "Including city 1 reduces choices further: n-2 free bits.",
+        "0": "City n is excluded until the end."
+      },
+      "hint": "Mask includes start and excludes end.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q27",
+      "phase": "Analyzing Complexity",
+      "questionText": "Roughly, what is the time complexity with this approach, considering we extend states along outgoing edges?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O((n + m) * 2^(n-2))",
+          "isCode": false
+        },
+        {
+          "label": "O(n! * m)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(2^m)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We process about 2^(n-2) masks across last-city buckets and follow outgoing edges, yielding O((n+m) * 2^(n-2)).",
+      "wrongExplanations": {
+        "1": "We avoid enumerating permutations.",
+        "2": "Too optimistic; masks grow exponentially."
+      },
+      "hint": "Count masks times per-node/edge work.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q28",
+      "phase": "Analyzing Complexity",
+      "questionText": "What happens if there is no route from 1 to n visiting every city exactly once?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "We should print -1.",
+          "isCode": false
+        },
+        {
+          "label": "We should print 0.",
+          "isCode": false
+        },
+        {
+          "label": "We should print n.",
+          "isCode": false
+        },
+        {
+          "label": "We should print m.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "If no valid route exists, the count is 0.",
+      "wrongExplanations": {
+        "0": "The problem asks for a count modulo 1e9+7, not -1.",
+        "3": "m is the number of edges, not the number of routes."
+      },
+      "hint": "Count of routes can be zero.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\nMOD = 10**9 + 7\n\ndef main():\n    data = sys.stdin.read().strip().split()\n    it = iter(data)\n    n = int(next(it)); m = int(next(it))\n    succ = [[] for _ in range(n)]\n    for _ in range(m):\n        a = int(next(it)); b = int(next(it))\n        succ[a-1].append(b-1)",
+    "    start = 0\n    end = n-1\n    dp = [dict() for _ in range(n)]\n    dp[start][1 << start] = 1",
+    "    ans = 0\n    for _k in range(1, n):  # we will add city n only at the end\n        next_dp = [dict() for _ in range(n)]",
+    "        for u in range(n):\n            if u == end:\n                continue\n            for mask, cnt in dp[u].items():\n                for v in succ[u]:",
+    "                    if (mask >> v) & 1:\n                        continue",
+    "                    if v == end:\n                        if mask.bit_count() == n-1:\n                            ans = (ans + cnt) % MOD\n                        continue",
+    "                    new_mask = mask | (1 << v)\n                    prev = next_dp[v].get(new_mask)\n                    if prev is None:\n                        next_dp[v][new_mask] = cnt\n                    else:\n                        s = prev + cnt\n                        if s >= MOD:\n                            s -= MOD\n                        next_dp[v][new_mask] = s",
+    "        dp = next_dp\n    print(ans % MOD)\n\nif __name__ == \"__main__\":\n    main()"
+  ],
+  "reasoningChain": [
+    {
+      "question": "What defines a valid route here?",
+      "insight": "Start at city 1, end at city n, visit each city exactly once, follow one-way edges."
+    },
+    {
+      "question": "Is brute force over permutations feasible?",
+      "insight": "No; (n-2)! is too large for n=20, so we need structured counting over partial routes."
+    },
+    {
+      "question": "What should a partial state track?",
+      "insight": "Keep a visited set and the last city to know valid next steps and avoid revisits."
+    },
+    {
+      "question": "How to represent visited sets efficiently?",
+      "insight": "Use an integer bitmask; with n≤20, bit operations are fast and compact."
+    },
+    {
+      "question": "How to handle city n (destination)?",
+      "insight": "Defer visiting city n until the final step; when all others are visited and there's an edge to n, add to the answer."
+    },
+    {
+      "question": "How to update counts?",
+      "insight": "Extend partial states along outgoing edges to unvisited cities, summing counts and applying modulo at each addition."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1410,
+    "output_tokens": 18032,
+    "input_cost": 0.001762,
+    "output_cost": 0.18032,
+    "total_cost": 0.182083
+  }
+}

@@ -1,0 +1,899 @@
+{
+  "id": "stick-lengths-min-cost",
+  "title": "Stick Lengths",
+  "difficulty": "intermediate",
+  "tags": [
+    "sorting",
+    "two-pointer",
+    "binary-search"
+  ],
+  "estimatedMinutes": 35,
+  "language": "python",
+  "description": "You are given n stick lengths. You may lengthen or shorten any stick; changing a stick by x units costs x. Choose a target length so all sticks become that length with minimum total cost. Input: first line n, second line n integers p_1..p_n. Output: minimum total cost.",
+  "examples": [
+    {
+      "input": "5\n2 3 1 5 2",
+      "output": "5",
+      "explanation": "Sorting gives [1,2,2,3,5]. Choosing target 2 yields |1-2|+|2-2|+|2-2|+|3-2|+|5-2| = 1+0+0+1+3 = 5."
+    }
+  ],
+  "constraints": [
+    "1 <= n <= 2 * 10^5",
+    "1 <= p_i <= 10^9"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "If all sticks already have the same length, what is the minimum total cost?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "n (the number of sticks)",
+          "isCode": false
+        },
+        {
+          "label": "Sum of the lengths",
+          "isCode": false
+        },
+        {
+          "label": "The common length",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "No changes are needed, so the cost is 0. The other choices confuse cost with counts or lengths.",
+      "wrongExplanations": {
+        "1": "Cost counts changes, not sticks. Changing nothing costs 0.",
+        "2": "Sum of lengths is unrelated to cost; cost is based on differences."
+      },
+      "hint": null,
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "For sticks [1, 4, 6], if the target length t=4, what is the total cost?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "5 (|1-4| + |4-4| + |6-4|)",
+          "isCode": false
+        },
+        {
+          "label": "6",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "7",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Compute absolute differences: 3 + 0 + 2 = 5. Other numbers come from arithmetic mistakes.",
+      "wrongExplanations": {
+        "1": "Likely added 3+0+3 incorrectly.",
+        "2": "Forgetting one term or sign errors leads to 3."
+      },
+      "hint": "Add the absolute differences: |1-4|, |4-4|, |6-4|.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "For sticks [2, 2, 7], which target gives the smaller cost: t=2 or t=7?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "t=2 gives smaller cost",
+          "isCode": false
+        },
+        {
+          "label": "t=7 gives smaller cost",
+          "isCode": false
+        },
+        {
+          "label": "Both give the same cost",
+          "isCode": false
+        },
+        {
+          "label": "Cannot determine",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Cost at t=2: 0+0+5=5. At t=7: 5+5+0=10. So t=2 is better.",
+      "wrongExplanations": {
+        "2": "Check both sums carefully; they are different."
+      },
+      "hint": "Compute sum of absolute differences for each t.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "For sticks [1, 2, 100], which target t gives the smallest cost?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "t = 2",
+          "isCode": false
+        },
+        {
+          "label": "t ≈ 34.33 (the average)",
+          "isCode": false
+        },
+        {
+          "label": "t = 1",
+          "isCode": false
+        },
+        {
+          "label": "t = 100",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "At t=2: 1+0+98=99; at ~34.3: ~33.3+32.3+65.7>99; at 1: 0+1+99=100; at 100: 99+98+0=197.",
+      "wrongExplanations": {
+        "1": "The average minimizes squared differences, not absolute differences."
+      },
+      "hint": "Try actual sums of |pi - t| for the options.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Exploring Approaches",
+      "questionText": "If we try every integer target t from min(p) to max(p) and compute the cost, how many t values might we try in the worst case?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Up to 10^9 different t values (impractical)",
+          "isCode": false
+        },
+        {
+          "label": "Up to n (manageable)",
+          "isCode": false
+        },
+        {
+          "label": "Up to sqrt(n)",
+          "isCode": false
+        },
+        {
+          "label": "A constant number",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The value range can be as large as 1..10^9. Trying every t is too slow.",
+      "wrongExplanations": {
+        "1": "The number of sticks doesn't bound the value range."
+      },
+      "hint": "Consider p_i up to 10^9 and arbitrary spread.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "Consider increasing t by 1. What is the change in total cost?",
+      "diagram": "Let L = number of sticks with length < t, R = number with length > t.\nMoving t -> t+1:\n- Each of L sticks increases its contribution by 1.\n- Each of R sticks decreases its contribution by 1.",
+      "options": [
+        {
+          "label": "Change = L - R",
+          "isCode": false
+        },
+        {
+          "label": "Change = R - L",
+          "isCode": false
+        },
+        {
+          "label": "It always increases by 1",
+          "isCode": false
+        },
+        {
+          "label": "It depends only on t, not on counts",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Shorter-than-t sticks get farther (+L), longer-than-t sticks get closer (-R). Net change is L - R.",
+      "wrongExplanations": {
+        "1": "Sign reversed; longer sticks reduce the cost when t increases."
+      },
+      "hint": "Track how each group's |pi - t| changes when t increases.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "When does the total cost stop decreasing as we move t to the right?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "When L = R (equal counts on both sides)",
+          "isCode": false
+        },
+        {
+          "label": "When L > R",
+          "isCode": false
+        },
+        {
+          "label": "When R > L",
+          "isCode": false
+        },
+        {
+          "label": "When t equals the average",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "From change = L - R: cost decreases if L < R, increases if L > R. It stops decreasing where L = R.",
+      "wrongExplanations": {
+        "3": "The average doesn't balance absolute deviations."
+      },
+      "hint": "Use the sign of L - R.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Building the Idea",
+      "questionText": "In a sorted list, which position of t balances L and R (equal counts on both sides) when n is odd?",
+      "diagram": "Indices 0..n-1 (0-based):\nLeft side count = index of t, Right side count = n-1 - index.",
+      "options": [
+        {
+          "label": "Pick the element at index n//2",
+          "isCode": false
+        },
+        {
+          "label": "Pick the smallest element",
+          "isCode": false
+        },
+        {
+          "label": "Pick the largest element",
+          "isCode": false
+        },
+        {
+          "label": "Pick the average of all elements",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "At index n//2, counts on both sides are equal for odd n. Other positions skew counts.",
+      "wrongExplanations": {
+        "3": "Average doesn't guarantee equal counts on both sides."
+      },
+      "hint": "Consider how many elements lie left/right of index i.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "When n is even, which t values minimize the total cost?",
+      "diagram": "Sorted array ... a[k], a[k+1] ... where k = n//2 - 1.",
+      "options": [
+        {
+          "label": "Any t in the interval [a[k], a[k+1]] (inclusive)",
+          "isCode": false
+        },
+        {
+          "label": "Exactly the average (a[k]+a[k+1])/2 only",
+          "isCode": false
+        },
+        {
+          "label": "Only t = a[k]",
+          "isCode": false
+        },
+        {
+          "label": "Only t = a[k+1]",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "For absolute differences, any t between the two middle values yields the same minimum cost.",
+      "wrongExplanations": {
+        "1": "The minimum is flat across the entire interval, not only at the average."
+      },
+      "hint": "Think about how L and R compare for t in between the middle two.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "Verify on [1, 2, 3, 10]: which two targets give the same minimum cost?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "t=2 and t=3",
+          "isCode": false
+        },
+        {
+          "label": "t=1 and t=10",
+          "isCode": false
+        },
+        {
+          "label": "t=2 and t=10",
+          "isCode": false
+        },
+        {
+          "label": "t=1 and t=3",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Middle values are 2 and 3. Costs: at 2 -> 1+0+1+8=10; at 3 -> 2+1+0+7=10 (equal and minimal).",
+      "wrongExplanations": {
+        "2": "Check sums carefully; far from middle increases cost."
+      },
+      "hint": "Compute sums at t=2 and t=3.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "Do we need a target t that is not one of the existing stick lengths to achieve the minimum?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "No; choosing a middle element (median) suffices.",
+          "isCode": false
+        },
+        {
+          "label": "Yes; we must use the exact average of all sticks.",
+          "isCode": false
+        },
+        {
+          "label": "Yes; we must choose a value smaller than the minimum.",
+          "isCode": false
+        },
+        {
+          "label": "Yes; we must choose a value larger than the maximum.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Choosing any median element is enough. Averages or extremes don't minimize the sum of absolute differences.",
+      "wrongExplanations": {
+        "1": "Average minimizes squared differences, not absolute differences."
+      },
+      "hint": "From earlier, any value in the middle interval works; an existing middle element is simplest.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "What is a simple and reliable plan to find a suitable target t?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Sort the list and pick a middle element as t.",
+          "isCode": false
+        },
+        {
+          "label": "Compute the average and use it as t.",
+          "isCode": false
+        },
+        {
+          "label": "Try every t between min and max.",
+          "isCode": false
+        },
+        {
+          "label": "Pick the smallest element.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Sorting and picking a median directly finds a minimizing t. Average and extremes are not reliable.",
+      "wrongExplanations": {
+        "2": "Iterating over a huge value range is too slow."
+      },
+      "hint": "Link the balanced-count idea to a straightforward method.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "With n up to 2e5 and p_i up to 1e9, is the total cost at risk of integer overflow in Python?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "No; Python integers grow as needed.",
+          "isCode": false
+        },
+        {
+          "label": "Yes; we must use modular arithmetic.",
+          "isCode": false
+        },
+        {
+          "label": "Yes; we cannot compute sums that large.",
+          "isCode": false
+        },
+        {
+          "label": "Only when n is odd.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Python uses arbitrary-precision integers, so the sum is safe.",
+      "wrongExplanations": {
+        "2": "Python can handle integers much larger than 64-bit limits."
+      },
+      "hint": "Consider Python's integer model.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Writing the Code",
+      "questionText": "Start by importing what you need for fast input.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys",
+          "isCode": true
+        },
+        {
+          "label": "from math import sqrt",
+          "isCode": true
+        },
+        {
+          "label": "import statistics",
+          "isCode": true
+        },
+        {
+          "label": "No imports needed",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We will use sys.stdin.buffer for fast input. Other imports are unnecessary.",
+      "wrongExplanations": {
+        "3": "We'll rely on sys.stdin.buffer; no import leads to NameError."
+      },
+      "hint": "We plan to read raw bytes from stdin.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys",
+      "codeLabel": "Import"
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Read all integers from stdin in a robust way (n followed by n values).",
+      "diagram": null,
+      "options": [
+        {
+          "label": "data = list(map(int, sys.stdin.buffer.read().split()))",
+          "isCode": true
+        },
+        {
+          "label": "data = list(map(int, input().split()))",
+          "isCode": true
+        },
+        {
+          "label": "data = [int(x) for x in sys.stdin.readline().split()]",
+          "isCode": true
+        },
+        {
+          "label": "data = sys.stdin.read()",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Reading the entire input and splitting is robust for numbers across lines. Single-line reads miss values; sys.stdin.read() returns a string.",
+      "wrongExplanations": {
+        "1": "input().split() reads only one line; the values may span multiple lines.",
+        "3": "You'd still need to split and convert to ints."
+      },
+      "hint": "Use sys.stdin.buffer.read().split().",
+      "isCodeBuilding": true,
+      "codeSnippet": "data = list(map(int, sys.stdin.buffer.read().split()))",
+      "codeLabel": "Read input"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Extract n from the data.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "n = data[0]",
+          "isCode": true
+        },
+        {
+          "label": "n = data[1]",
+          "isCode": true
+        },
+        {
+          "label": "n = len(data)",
+          "isCode": true
+        },
+        {
+          "label": "n = sum(data)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The first integer is n. The others misuse the structure of the input.",
+      "wrongExplanations": {
+        "1": "data[1] is the first stick length, not n.",
+        "2": "len(data) counts all tokens, not the specified n."
+      },
+      "hint": "The first token is the count.",
+      "isCodeBuilding": true,
+      "codeSnippet": "n = data[0]",
+      "codeLabel": "Extract n"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Slice the next n integers as the list of stick lengths.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "arr = data[1:1+n]",
+          "isCode": true
+        },
+        {
+          "label": "arr = data[:n]",
+          "isCode": true
+        },
+        {
+          "label": "arr = list(map(int, sys.stdin.buffer.read().split()))",
+          "isCode": true
+        },
+        {
+          "label": "arr = data[1:]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "data[1:1+n] takes exactly the next n values. The other choices risk including n itself, reading again, or over-consuming.",
+      "wrongExplanations": {
+        "1": "Includes data[0] (n) and misses one stick length.",
+        "3": "May include extra tokens beyond the n sticks if any."
+      },
+      "hint": "Use a slice that starts right after n and takes n numbers.",
+      "isCodeBuilding": true,
+      "codeSnippet": "arr = data[1:1+n]",
+      "codeLabel": "Slice sticks"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Compute a suitable target t using the idea of taking a middle element.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "t = sorted(arr)[n//2]",
+          "isCode": true
+        },
+        {
+          "label": "t = arr[n//2]",
+          "isCode": true
+        },
+        {
+          "label": "t = sum(arr) // n",
+          "isCode": true
+        },
+        {
+          "label": "t = max(arr)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Sorting and taking index n//2 picks a middle element. Using arr[n//2] without sorting uses arbitrary order; average or max are not minimizing targets.",
+      "wrongExplanations": {
+        "1": "Without sorting, index n//2 is not the middle value.",
+        "2": "The average doesn't minimize the sum of absolute differences."
+      },
+      "hint": "Ensure you pick a middle value of the sorted list.",
+      "isCodeBuilding": true,
+      "codeSnippet": "t = sorted(arr)[n//2]",
+      "codeLabel": "Target t"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Compute the total cost as the sum of absolute differences to t.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "total = sum(abs(a - t) for a in arr)",
+          "isCode": true
+        },
+        {
+          "label": "total = sum(a - t for a in arr)",
+          "isCode": true
+        },
+        {
+          "label": "total = sum(abs(a - t))",
+          "isCode": true
+        },
+        {
+          "label": "total = sum(|a - t| for a in arr)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need absolute differences for each a. Omitting abs, missing the iterator, or using non-Python syntax leads to wrong or invalid code.",
+      "wrongExplanations": {
+        "1": "Sum without abs lets negatives cancel positives; cost must be nonnegative sum of magnitudes."
+      },
+      "hint": "Use a generator over arr with abs.",
+      "isCodeBuilding": true,
+      "codeSnippet": "total = sum(abs(a - t) for a in arr)",
+      "codeLabel": "Sum cost"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Output the total cost.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "print(total)",
+          "isCode": true
+        },
+        {
+          "label": "sys.stdout.write(total)",
+          "isCode": true
+        },
+        {
+          "label": "print(sum)",
+          "isCode": true
+        },
+        {
+          "label": "print(*total)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "print(total) correctly outputs the integer. Writing a non-string or printing the wrong variable will error or print the wrong thing.",
+      "wrongExplanations": {
+        "1": "sys.stdout.write expects a string; passing int causes a TypeError."
+      },
+      "hint": "Just print the integer result.",
+      "isCodeBuilding": true,
+      "codeSnippet": "print(total)",
+      "codeLabel": "Print result"
+    },
+    {
+      "id": "q21",
+      "phase": "Verifying the Solution",
+      "questionText": "Run the assembled code on the sample input:\n5\\n2 3 1 5 2\nWhat is the output?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "5",
+          "isCode": false
+        },
+        {
+          "label": "6",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "7",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Sorted arr is [1,2,2,3,5]; t=2; sum is 1+0+0+1+3=5.",
+      "wrongExplanations": {
+        "1": "Double-check the absolute differences; don't miss zeros."
+      },
+      "hint": "Trace: take middle after sorting, then sum |a-t|.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q22",
+      "phase": "Verifying the Solution",
+      "questionText": "Test: n=4, sticks: 1 1 100 100. What does the program print?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "198",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "99",
+          "isCode": false
+        },
+        {
+          "label": "396",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Sorted arr=[1,1,100,100]; t=arr[2]=100; sum=|1-100|+|1-100|+0+0=99+99=198.",
+      "wrongExplanations": {
+        "2": "99 is one difference; total sums two such differences."
+      },
+      "hint": "Any t in [1,100] yields 198; our code picks 100.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q23",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the overall time complexity of the solution?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n log n) due to sorting to get the middle element",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(log n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Sorting dominates at O(n log n); reading and summing are O(n).",
+      "wrongExplanations": {
+        "2": "We sort; pure linear time isn’t achieved here."
+      },
+      "hint": "Which step is the most expensive?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the extra space usage beyond storing the input array?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(1) extra (plus O(n) for the array itself)",
+          "isCode": false
+        },
+        {
+          "label": "O(n) extra for the median",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(log n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We store the input and a few variables; sorted(arr) creates a copy but still O(n) total. Extra beyond the input is constant-sized.",
+      "wrongExplanations": {
+        "1": "We don't build large auxiliary structures besides the array."
+      },
+      "hint": "Consider variables and any temporary structures.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Analyzing Complexity",
+      "questionText": "Which edge cases should your program handle correctly?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "n=1 and many duplicates",
+          "isCode": false
+        },
+        {
+          "label": "Only distinct numbers",
+          "isCode": false
+        },
+        {
+          "label": "Only even n",
+          "isCode": false
+        },
+        {
+          "label": "Only small values",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "n=1 should print 0; duplicates are common and fine. The algorithm works for both odd/even n and large values.",
+      "wrongExplanations": {
+        "3": "Values can be up to 1e9; ensure reading handles that."
+      },
+      "hint": "Think about minimal n and repeated values.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys",
+    "data = list(map(int, sys.stdin.buffer.read().split()))",
+    "n = data[0]",
+    "arr = data[1:1+n]",
+    "t = sorted(arr)[n//2]",
+    "total = sum(abs(a - t) for a in arr)",
+    "print(total)"
+  ],
+  "reasoningChain": [
+    {
+      "question": "How do we measure the cost for a chosen target length t?",
+      "insight": "Total cost is the sum of absolute differences: sum |pi - t|."
+    },
+    {
+      "question": "What happens to the total cost when we move t by +1?",
+      "insight": "Change equals (#sticks < t) minus (#sticks > t); cost decreases while left-count < right-count."
+    },
+    {
+      "question": "Where does the cost reach a minimum?",
+      "insight": "When counts on both sides are balanced; any median (and, for even n, any t between the two middles) minimizes the cost."
+    },
+    {
+      "question": "How can we find such a t simply and reliably?",
+      "insight": "Sort and pick a middle element; this is straightforward and fast enough for constraints."
+    },
+    {
+      "question": "How do we implement the computation?",
+      "insight": "Read input efficiently, get n and the array, compute t as sorted(arr)[n//2], sum abs differences, print."
+    },
+    {
+      "question": "What are the complexity and edge-case considerations?",
+      "insight": "Sorting gives O(n log n) time, O(n) storage; Python handles large sums; works for odd/even n, n=1, duplicates."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1364,
+    "output_tokens": 13553,
+    "input_cost": 0.001705,
+    "output_cost": 0.13553,
+    "total_cost": 0.137235
+  }
+}

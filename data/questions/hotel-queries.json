@@ -1,0 +1,983 @@
+{
+  "id": "hotel-queries-guided-chain",
+  "title": "Hotel Queries",
+  "difficulty": "hard",
+  "tags": [
+    "array"
+  ],
+  "estimatedMinutes": 60,
+  "language": "python",
+  "description": "There are n hotels on a street. For each hotel you know the number of free rooms. Your task is to assign hotel rooms for groups of tourists. All members of a group want to stay in the same hotel.\n\nThe groups will come to you one after another, and you know for each group the number of rooms it requires. You always assign a group to the first hotel having enough rooms. After this, the number of free rooms in the hotel decreases.\n\nInput:\n- First line: two integers n and m — the number of hotels and the number of groups.\n- Second line: n integers h_1, ..., h_n — the number of free rooms in each hotel.\n- Third line: m integers r_1, ..., r_m — the number of rooms each group requires.\n\nOutput:\nPrint the assigned hotel for each group in order. If a group cannot be assigned a hotel, print 0 instead.",
+  "examples": [
+    {
+      "input": "8 5\n3 2 4 1 5 5 2 6\n4 4 7 1 1\n",
+      "output": "3 5 0 1 1",
+      "explanation": "Requests are handled in order: 4 → hotel 3 (4→0 left), 4 → hotel 5 (5→1 left), 7 → none (0), 1 → hotel 1 (3→2 left), 1 → hotel 1 again (2→1 left)."
+    }
+  ],
+  "constraints": [
+    "1 ≤ n, m ≤ 2⋅10^5",
+    "1 ≤ h_i ≤ 10^9",
+    "1 ≤ r_i ≤ 10^9",
+    "Time limit: 1.00 s",
+    "Memory limit: 512 MB"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "Hotels: [3, 2, 4], request = 2. Which hotel is assigned?",
+      "diagram": "Index:   1  2  3\nRooms:   3  2  4\nRequest: 2",
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We choose the first hotel with rooms ≥ request. Hotel 1 has 3 ≥ 2, so assign 1.",
+      "wrongExplanations": {
+        "1": "Hotel 2 also fits but is not the first.",
+        "3": "There exists a valid hotel; we only print 0 when none fits."
+      },
+      "hint": "Scan from index 1 upwards until you find ≥ request.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "After assigning request 2 to hotel 1 in [3, 2, 4], what are the new room counts?",
+      "diagram": "Before: [3, 2, 4]\nAssigned at 1: subtract 2",
+      "options": [
+        {
+          "label": "[1, 2, 4]",
+          "isCode": false
+        },
+        {
+          "label": "[3, 2, 2]",
+          "isCode": false
+        },
+        {
+          "label": "[2, 2, 4]",
+          "isCode": false
+        },
+        {
+          "label": "[1, 0, 4]",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Only the chosen hotel's rooms decrease by the request: 3−2=1. Others unchanged.",
+      "wrongExplanations": {
+        "2": "We don't subtract 1; we subtract the request (2).",
+        "3": "Only one hotel is updated, not two."
+      },
+      "hint": "Decrease only the assigned hotel's count by the request.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "From state [1, 2, 4], next request is 4. Which hotel is assigned?",
+      "diagram": "Index: 1 2 3\nRooms: 1 2 4\nReq:   4",
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Hotel 3 is the first with rooms ≥ 4. Hotels 1 and 2 have less.",
+      "wrongExplanations": {
+        "3": "0 only if no hotel can serve the request."
+      },
+      "hint": "Check hotels left to right for ≥ 4.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "Rooms: [1, 2, 3], request = 4. What do we output?",
+      "diagram": "1, 2, 3 vs request 4",
+      "options": [
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "No hotel has ≥ 4 rooms. Output 0.",
+      "wrongExplanations": {
+        "0": "We need a hotel with at least 4 rooms, not closest.",
+        "1": "We do not split groups or combine hotels."
+      },
+      "hint": "Only print an index if a hotel's rooms ≥ request.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Understanding the Problem",
+      "questionText": "If rooms are [3, 3, 3] and request = 3, which index is chosen?",
+      "diagram": "All equal, pick the first that fits.",
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "Any of 1,2,3 randomly",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We always pick the smallest index that satisfies the request.",
+      "wrongExplanations": {
+        "3": "There is a deterministic rule: first that fits.",
+        "1": "Not the middle: we scan from index 1."
+      },
+      "hint": "The rule is 'first hotel with enough rooms'.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "Is scanning hotels from 1..n for each request feasible under n, m ≤ 2⋅10^5?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, because n*m ≈ 4⋅10^10 is fine in 1s",
+          "isCode": false
+        },
+        {
+          "label": "No, worst-case ~4⋅10^10 checks is too slow",
+          "isCode": false
+        },
+        {
+          "label": "Yes, since we update rarely",
+          "isCode": false
+        },
+        {
+          "label": "It depends only on average case",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Brute scanning per request is O(nm) ~ 4e10 worst-case, far too slow for 1s.",
+      "wrongExplanations": {
+        "0": "4e10 primitive operations won't finish within 1 second.",
+        "2": "Updates happen for every assigned request; scanning still dominates."
+      },
+      "hint": "Compute the worst-case operations if each request scans all hotels.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "Which query do we need to answer for each request x to decide placement?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Find the smallest index i with rooms[i] ≥ x",
+          "isCode": false
+        },
+        {
+          "label": "Find any index i with prefix sum ≥ x",
+          "isCode": false
+        },
+        {
+          "label": "Find the largest index i with rooms[i] ≥ x",
+          "isCode": false
+        },
+        {
+          "label": "Find the hotel with the maximum rooms",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We must place at the first index meeting rooms ≥ x; not any, not largest, not necessarily the maximum.",
+      "wrongExplanations": {
+        "1": "Prefix sums don't represent individual hotel capacities.",
+        "3": "Maximum hotel might not be the first that fits."
+      },
+      "hint": "Respect the 'first hotel that fits' rule.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Exploring Approaches",
+      "questionText": "To quickly skip ranges that cannot fit x, what summary should each range store?",
+      "diagram": "Range summaries let us decide whether to go inside a range.",
+      "options": [
+        {
+          "label": "Maximum rooms within the range",
+          "isCode": false
+        },
+        {
+          "label": "Sum of rooms in the range",
+          "isCode": false
+        },
+        {
+          "label": "Minimum rooms within the range",
+          "isCode": false
+        },
+        {
+          "label": "Average rooms within the range",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "If the max in a range is < x, the whole range cannot contain a valid hotel.",
+      "wrongExplanations": {
+        "1": "Sum ≥ x doesn't guarantee one hotel has ≥ x rooms.",
+        "2": "Minimum says nothing about presence of a large value."
+      },
+      "hint": "We need to know if any index in a range can fit x.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "Suppose we organize hotels into a balanced binary structure where each node covers a range and stores that range's maximum. How do we choose which child to descend to for request x?",
+      "diagram": "Node covers [L..R] with max M.\nLeft child covers [L..mid], right child [mid+1..R].",
+      "options": [
+        {
+          "label": "If left max ≥ x, go left; else go right",
+          "isCode": false
+        },
+        {
+          "label": "If left sum ≥ x, go left; else go right",
+          "isCode": false
+        },
+        {
+          "label": "Always go right first",
+          "isCode": false
+        },
+        {
+          "label": "Pick whichever child has a larger max",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need the leftmost index with value ≥ x; check left max first; if it can't, go right.",
+      "wrongExplanations": {
+        "1": "Sum doesn't ensure a single hotel fits the request.",
+        "3": "Choosing larger max can skip an earlier valid index."
+      },
+      "hint": "Leftmost property is ensured by testing the left child first.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "For an array of length n, to map hotels to leaves in a perfect binary shape, what base size should we use?",
+      "diagram": "Base is the number of leaves, hotels map to first n leaves.",
+      "options": [
+        {
+          "label": "Exactly n (only if n is a power of two)",
+          "isCode": false
+        },
+        {
+          "label": "Smallest power of two ≥ n",
+          "isCode": false
+        },
+        {
+          "label": "Always 2n",
+          "isCode": false
+        },
+        {
+          "label": "Largest power of two ≤ n",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Using the next power of two lets us build a full binary layout and place hotels at the leftmost leaves.",
+      "wrongExplanations": {
+        "0": "If n is not a power of two, this doesn't form a full base.",
+        "3": "Largest ≤ n leaves is insufficient to hold n hotels."
+      },
+      "hint": "We need at least n leaves and prefer a power of two for a compact array layout.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "After choosing base as the smallest power of two ≥ n, where do we place hotel values in the array of size 2*base?",
+      "diagram": "Array positions: [base .. base+n-1] ← hotels; others 0.",
+      "options": [
+        {
+          "label": "Positions base .. base+n-1, rest initialized to 0",
+          "isCode": false
+        },
+        {
+          "label": "Positions 1 .. n, rest initialized to 0",
+          "isCode": false
+        },
+        {
+          "label": "Positions base+1 .. base+n, rest initialized to 0",
+          "isCode": false
+        },
+        {
+          "label": "Positions base .. base+n-1, rest left uninitialized",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Leaves start at index base in a 1-indexed tree layout; we must zero the unused leaves.",
+      "wrongExplanations": {
+        "1": "Internal nodes occupy 1..base-1; leaves start at base.",
+        "2": "That shifts all hotels by one and breaks indexing."
+      },
+      "hint": "In this layout, index 1 is the root; leaves begin at base.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "How do we compute internal node values after placing leaves?",
+      "diagram": "For i from base-1 down to 1: node[i] = max(node[2*i], node[2*i+1]).",
+      "options": [
+        {
+          "label": "node[i] = max(node[2*i], node[2*i+1]) for i=base-1..1",
+          "isCode": false
+        },
+        {
+          "label": "node[i] = node[2*i] + node[2*i+1]",
+          "isCode": false
+        },
+        {
+          "label": "node[i] = min(node[2*i], node[2*i+1])",
+          "isCode": false
+        },
+        {
+          "label": "Internal nodes remain 0; we only use leaves",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each internal node stores the maximum over its covered range using its children.",
+      "wrongExplanations": {
+        "1": "We need max to test feasibility; sum is irrelevant for the rule.",
+        "2": "Minimum loses information about large values in the range."
+      },
+      "hint": "Our range summary is the maximum.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "During a search for x, suppose at node i, left child max ≥ x. What should we do?",
+      "diagram": "At node i: left covers earlier indices than right.",
+      "options": [
+        {
+          "label": "Go to the left child to keep the result leftmost",
+          "isCode": false
+        },
+        {
+          "label": "Go to the right child to maximize remaining rooms",
+          "isCode": false
+        },
+        {
+          "label": "Randomly choose; both have a valid index",
+          "isCode": false
+        },
+        {
+          "label": "Check both children fully before choosing",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "To ensure the first valid index, we always prioritize the left if it can contain x.",
+      "wrongExplanations": {
+        "1": "The rule requires leftmost, not most remaining rooms.",
+        "3": "We can decide with one max comparison; full checks are unnecessary."
+      },
+      "hint": "We only need to test if left has any value ≥ x.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Building the Idea",
+      "questionText": "What quick check lets us immediately decide that no hotel can serve request x?",
+      "diagram": "Check the overall maximum first.",
+      "options": [
+        {
+          "label": "If the root's stored maximum < x, return 0",
+          "isCode": false
+        },
+        {
+          "label": "If the leftmost leaf < x, return 0",
+          "isCode": false
+        },
+        {
+          "label": "If the rightmost leaf < x, return 0",
+          "isCode": false
+        },
+        {
+          "label": "Always descend; only decide at leaves",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The root stores the max over all hotels; if it's < x, none can fit.",
+      "wrongExplanations": {
+        "1": "Leftmost leaf says nothing about other hotels.",
+        "3": "This would waste time; the root check is decisive."
+      },
+      "hint": "The root summarizes the entire range.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q15",
+      "phase": "Building the Idea",
+      "questionText": "After assigning x at a leaf, how do we update the structure?",
+      "diagram": "Decrease leaf by x, then recompute max up to the root.",
+      "options": [
+        {
+          "label": "Decrease the leaf by x, then for each ancestor set it to max(children)",
+          "isCode": false
+        },
+        {
+          "label": "Decrease the leaf by x, and decrease each ancestor by x",
+          "isCode": false
+        },
+        {
+          "label": "Set the leaf to 0; ancestors unchanged",
+          "isCode": false
+        },
+        {
+          "label": "Decrease all leaves in the same range by x",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Only the chosen hotel's rooms change; ancestors recompute their max from children.",
+      "wrongExplanations": {
+        "1": "Ancestors store max, not sums; they must be recomputed, not decremented.",
+        "2": "We must keep the actual remaining rooms at that leaf."
+      },
+      "hint": "Ancestors' values reflect their children only.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Start by reading all input efficiently and parsing n, m, h, and reqs.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\ndata = list(map(int, sys.stdin.buffer.read().split()))\nit = iter(data); n = next(it); m = next(it)\nh = [next(it) for _ in range(n)]\nreqs = [next(it) for _ in range(m)]",
+          "isCode": true
+        },
+        {
+          "label": "import sys\ndata = list(map(int, sys.stdin.read().split()))\nit = iter(data); n = next(it); m = next(it)\nh = [next(it) for _ in range(m)]\nreqs = [next(it) for _ in range(n)]",
+          "isCode": true
+        },
+        {
+          "label": "import sys\ndata = [int(x) for x in sys.stdin.buffer.read().split()]\nit = iter(data); m = next(it); n = next(it)\nh = [next(it) for _ in range(n)]\nreqs = [next(it) for _ in range(m)]",
+          "isCode": true
+        },
+        {
+          "label": "import sys\nd = sys.stdin.buffer.read().split()\nn, m = map(int, d[:2])\nh = list(map(int, d[2:2+m]))\nreqs = list(map(int, d[2+m:2+m+n]))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We read all ints once and parse in the correct order. Other options swap n and m or swap list lengths.",
+      "wrongExplanations": {
+        "1": "This reads, but h and reqs lengths are swapped and will break.",
+        "2": "This swaps n and m; parsing order matters."
+      },
+      "hint": "Be careful to read n values for h and m values for reqs in the correct order.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\ndata = list(map(int, sys.stdin.buffer.read().split()))\nit = iter(data); n = next(it); m = next(it)\nh = [next(it) for _ in range(n)]\nreqs = [next(it) for _ in range(m)]",
+      "codeLabel": "Read and parse input"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Compute the base size (smallest power of two ≥ n), and initialize the tree array and leaves.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "base = 1\nwhile base < n:\n    base <<= 1\nsize = 2 * base\ntree = [0] * size\nfor i, val in enumerate(h):\n    tree[base + i] = val",
+          "isCode": true
+        },
+        {
+          "label": "base = n\nsize = 2 * base\ntree = [0] * size\nfor i, val in enumerate(h):\n    tree[base + i] = val",
+          "isCode": true
+        },
+        {
+          "label": "base = 1\nwhile base <= n:\n    base <<= 1\nsize = 2 * base\ntree = [0] * size\nfor i, val in enumerate(h):\n    tree[base + i + 1] = val",
+          "isCode": true
+        },
+        {
+          "label": "base = 1\nwhile base < n:\n    base <<= 1\nsize = 2 * base\ntree = [0] * size\nfor i, val in enumerate(h):\n    tree[i] = val",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need next power-of-two base, leaves start at index 'base'. Alternatives either don't round up or misplace leaves.",
+      "wrongExplanations": {
+        "1": "If n is not a power of two, this won't leave space for a full structure.",
+        "2": "Uses <= (overshoots base) and shifts leaves by +1."
+      },
+      "hint": "Leaves should go at positions base..base+n-1.",
+      "isCodeBuilding": true,
+      "codeSnippet": "base = 1\nwhile base < n:\n    base <<= 1\nsize = 2 * base\ntree = [0] * size\nfor i, val in enumerate(h):\n    tree[base + i] = val",
+      "codeLabel": "Initialize base and leaves"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Build internal nodes so that each stores the maximum of its two children.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "for i in range(base - 1, 0, -1):\n    tree[i] = max(tree[2 * i], tree[2 * i + 1])",
+          "isCode": true
+        },
+        {
+          "label": "for i in range(1, base):\n    tree[i] = max(tree[2 * i], tree[2 * i + 1])",
+          "isCode": true
+        },
+        {
+          "label": "for i in range(base - 1, 0, -1):\n    tree[i] = tree[2 * i] + tree[2 * i + 1]",
+          "isCode": true
+        },
+        {
+          "label": "for i in range(base - 1, 0, -1):\n    tree[i] = min(tree[2 * i], tree[2 * i + 1])",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We fill parents bottom-up with max. Other loops or operators build wrong values.",
+      "wrongExplanations": {
+        "1": "Filling top-down references uninitialized parents.",
+        "2": "Sum doesn't support 'any value ≥ x' tests."
+      },
+      "hint": "Fill from the last parent down to the root using max.",
+      "isCodeBuilding": true,
+      "codeSnippet": "for i in range(base - 1, 0, -1):\n    tree[i] = max(tree[2 * i], tree[2 * i + 1])",
+      "codeLabel": "Build parent maxima"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Write the function header and early exit: if no hotel can satisfy x, return 0 immediately.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def assign(x):\n    if tree[1] < x:\n        return 0",
+          "isCode": true
+        },
+        {
+          "label": "def assign(x):\n    if tree[0] < x:\n        return 0",
+          "isCode": true
+        },
+        {
+          "label": "def assign(x):\n    if tree[base] < x:\n        return 0",
+          "isCode": true
+        },
+        {
+          "label": "def assign(x):\n    if max(tree) < x:\n        return 0",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "tree[1] stores the overall maximum. Checking other positions is incorrect or inefficient.",
+      "wrongExplanations": {
+        "1": "Index 0 is unused in this 1-indexed layout.",
+        "3": "Computing max(tree) each time is too slow."
+      },
+      "hint": "Which index holds the overall range's max?",
+      "isCodeBuilding": true,
+      "codeSnippet": "def assign(x):\n    if tree[1] < x:\n        return 0",
+      "codeLabel": "Assign: header and early exit"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Complete the descent to the leaf holding the leftmost hotel with rooms ≥ x.",
+      "diagram": "At each step, check left child's max; go left if it fits, else right.",
+      "options": [
+        {
+          "label": "    i = 1\n    while i < base:\n        if tree[2 * i] >= x:\n            i = 2 * i\n        else:\n            i = 2 * i + 1",
+          "isCode": true
+        },
+        {
+          "label": "    i = 1\n    while i < base:\n        if tree[2 * i] > x:\n            i = 2 * i\n        else:\n            i = 2 * i + 1",
+          "isCode": true
+        },
+        {
+          "label": "    i = 1\n    while i <= base:\n        if tree[2 * i] >= x:\n            i = 2 * i\n        else:\n            i = 2 * i + 1",
+          "isCode": true
+        },
+        {
+          "label": "    i = 1\n    while i < base:\n        if tree[2 * i + 1] >= x:\n            i = 2 * i + 1\n        else:\n            i = 2 * i",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Using >= ensures ties choose the left. Loop stops at leaves (i < base).",
+      "wrongExplanations": {
+        "1": "> sends equals to the right and can skip the leftmost valid index.",
+        "2": "i <= base steps one level too deep (past leaves)."
+      },
+      "hint": "When left has enough, we must go left to keep leftmost.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    i = 1\n    while i < base:\n        if tree[2 * i] >= x:\n            i = 2 * i\n        else:\n            i = 2 * i + 1",
+      "codeLabel": "Assign: descent to leaf"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "Write the update at the leaf and recompute ancestors up to the root.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    tree[i] -= x\n    j = i // 2\n    while j:\n        left = tree[2 * j]\n        right = tree[2 * j + 1]\n        tree[j] = left if left >= right else right\n        j //= 2\n    return i - base + 1",
+          "isCode": true
+        },
+        {
+          "label": "    tree[i] = 0\n    j = i // 2\n    while j > 1:\n        tree[j] = tree[2 * j] + tree[2 * j + 1]\n        j //= 2\n    return i - base + 1",
+          "isCode": true
+        },
+        {
+          "label": "    tree[i] -= x\n    j = i // 2\n    while j:\n        tree[j] = tree[2 * j] + tree[2 * j + 1]\n        j //= 2\n    return i - base + 1",
+          "isCode": true
+        },
+        {
+          "label": "    tree[i] -= x\n    # no need to update parents\n    return i - base + 1",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Decrease the leaf and update each ancestor with max(children). Return 1-based hotel index.",
+      "wrongExplanations": {
+        "2": "Ancestors must store max, not sum.",
+        "3": "Without parent updates, future queries are wrong."
+      },
+      "hint": "Parents store max(children), and the root must be updated too.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    tree[i] -= x\n    j = i // 2\n    while j:\n        left = tree[2 * j]\n        right = tree[2 * j + 1]\n        tree[j] = left if left >= right else right\n        j //= 2\n    return i - base + 1",
+      "codeLabel": "Assign: update and return index"
+    },
+    {
+      "id": "q22",
+      "phase": "Writing the Code",
+      "questionText": "Process all requests and output indices in one space-separated line.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "out = []\nfor x in reqs:\n    out.append(str(assign(x)))\nsys.stdout.write(\" \".join(out))",
+          "isCode": true
+        },
+        {
+          "label": "for x in reqs:\n    print(assign(x))",
+          "isCode": true
+        },
+        {
+          "label": "out = []\nfor x in reqs:\n    out.append(assign(x))\nsys.stdout.write(\" \".join(out))",
+          "isCode": true
+        },
+        {
+          "label": "print(*[assign(x) for x in reqs])",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Collect as strings and join with spaces for a single-line output matching the sample format.",
+      "wrongExplanations": {
+        "1": "This prints each on a new line, not space-separated as in the sample.",
+        "2": "Joining integers without converting to str causes a TypeError."
+      },
+      "hint": "Match the sample output format exactly.",
+      "isCodeBuilding": true,
+      "codeSnippet": "out = []\nfor x in reqs:\n    out.append(str(assign(x)))\nsys.stdout.write(\" \".join(out))",
+      "codeLabel": "Process requests and print"
+    },
+    {
+      "id": "q23",
+      "phase": "Verifying the Solution",
+      "questionText": "Run your logic on the sample input:\n8 5\n3 2 4 1 5 5 2 6\n4 4 7 1 1\nWhat is the output?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "3 5 0 1 1",
+          "isCode": false
+        },
+        {
+          "label": "3 5 0 2 1",
+          "isCode": false
+        },
+        {
+          "label": "3 6 0 1 1",
+          "isCode": false
+        },
+        {
+          "label": "0 5 0 1 1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Trace: 4→3, then 4→5, 7→0, 1→1, 1→1 matches the sample output.",
+      "wrongExplanations": {
+        "1": "After previous updates, the fourth request goes to hotel 1, not 2."
+      },
+      "hint": "Follow each request step by step, updating the chosen hotel.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Verifying the Solution",
+      "questionText": "Test a custom case. n=4, h=[2, 5, 3, 1], requests=[4,1,5]. What output should our code produce?",
+      "diagram": "Start: [2,5,3,1]\nReq 4 → index 2 → [2,1,3,1]\nReq 1 → index 1 → [1,1,3,1]\nReq 5 → none → 0",
+      "options": [
+        {
+          "label": "2 1 0",
+          "isCode": false
+        },
+        {
+          "label": "2 2 0",
+          "isCode": false
+        },
+        {
+          "label": "2 1 3",
+          "isCode": false
+        },
+        {
+          "label": "1 2 0",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Apply 'first hotel with enough rooms' and update after each assignment.",
+      "wrongExplanations": {
+        "1": "After second update, index 2 has only 1 room left; the second request goes to index 1."
+      },
+      "hint": "Update the counts after each assignment before the next request.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the time per request for our search and update procedure?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Proportional to the height of the tree over n, i.e., about log2 n",
+          "isCode": false
+        },
+        {
+          "label": "Constant time",
+          "isCode": false
+        },
+        {
+          "label": "Linear in n",
+          "isCode": false
+        },
+        {
+          "label": "Proportional to m",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each request descends and ascends along one root-to-leaf path, which is O(log n).",
+      "wrongExplanations": {
+        "1": "We still traverse multiple levels; it's not O(1).",
+        "2": "Our structure avoids scanning all hotels."
+      },
+      "hint": "How many levels does a balanced binary structure over n leaves have?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the time to build the structure from the initial h values?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n) to place leaves plus O(n) to build parents → overall O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(m)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We assign n leaves and compute each parent once in a single bottom-up pass.",
+      "wrongExplanations": {
+        "2": "No nested loops over n levels; it's a simple bottom-up pass."
+      },
+      "hint": "Count how many parent nodes there are and how many times each is computed.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q27",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the extra space usage of our structure (excluding input arrays)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n) for the array-based structure",
+          "isCode": false
+        },
+        {
+          "label": "O(1)",
+          "isCode": false
+        },
+        {
+          "label": "O(n + m)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We store an array of size about 2⋅base ≤ 4⋅n; this is O(n).",
+      "wrongExplanations": {
+        "1": "We store a separate array for the structure; not constant.",
+        "2": "We don't store anything proportional to m."
+      },
+      "hint": "We maintain a binary structure over the hotels only.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\ndata = list(map(int, sys.stdin.buffer.read().split()))\nit = iter(data); n = next(it); m = next(it)\nh = [next(it) for _ in range(n)]\nreqs = [next(it) for _ in range(m)]",
+    "base = 1\nwhile base < n:\n    base <<= 1\nsize = 2 * base\ntree = [0] * size\nfor i, val in enumerate(h):\n    tree[base + i] = val",
+    "for i in range(base - 1, 0, -1):\n    tree[i] = max(tree[2 * i], tree[2 * i + 1])",
+    "def assign(x):\n    if tree[1] < x:\n        return 0",
+    "    i = 1\n    while i < base:\n        if tree[2 * i] >= x:\n            i = 2 * i\n        else:\n            i = 2 * i + 1",
+    "    tree[i] -= x\n    j = i // 2\n    while j:\n        left = tree[2 * j]\n        right = tree[2 * j + 1]\n        tree[j] = left if left >= right else right\n        j //= 2\n    return i - base + 1",
+    "out = []\nfor x in reqs:\n    out.append(str(assign(x)))\nsys.stdout.write(\" \".join(out))"
+  ],
+  "reasoningChain": [
+    {
+      "question": "What exact action do we perform for each request under the 'first hotel with enough rooms' rule?",
+      "insight": "We must find the smallest index i with h[i] ≥ x and then decrease h[i] by x."
+    },
+    {
+      "question": "Is scanning linearly for each request feasible under constraints?",
+      "insight": "No; we need an approach that avoids O(n) per request and supports fast updates."
+    },
+    {
+      "question": "What range information allows us to skip parts of the array quickly?",
+      "insight": "Storing the maximum per range lets us decide if any index in that range can satisfy x."
+    },
+    {
+      "question": "How can we organize these maxima to find the leftmost valid index quickly?",
+      "insight": "Use a balanced binary layout over ranges; at each node, test left range first (if left max ≥ x go left, else go right) to reach the leftmost leaf."
+    },
+    {
+      "question": "How do we maintain correctness after updating a hotel's rooms?",
+      "insight": "Decrease the leaf and recompute parent maxima on the path to the root."
+    },
+    {
+      "question": "What are the performance characteristics of this approach?",
+      "insight": "Building is O(n); each request is O(log n) time; space is O(n)."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1492,
+    "output_tokens": 15216,
+    "input_cost": 0.001865,
+    "output_cost": 0.15216,
+    "total_cost": 0.154025
+  }
+}

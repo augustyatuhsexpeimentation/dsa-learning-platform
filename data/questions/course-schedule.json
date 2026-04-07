@@ -1,0 +1,966 @@
+{
+  "id": "course-schedule-topo-order",
+  "title": "Course Schedule",
+  "difficulty": "intermediate",
+  "tags": [
+    "graph"
+  ],
+  "estimatedMinutes": 60,
+  "language": "python",
+  "description": "You have to complete n courses. There are m requirements of the form \"course a has to be completed before course b\". Your task is to find an order in which you can complete the courses.\n\nThe first input line has two integers n and m: the number of courses and requirements. The courses are numbered 1,2,\\dots,n.\n\nAfter this, there are m lines describing the requirements. Each line has two integers a and b: course a has to be completed before course b.\n\nOutput\nPrint an order in which you can complete the courses. You can print any valid order that includes all the courses.\n\nIf there are no solutions, print \"IMPOSSIBLE\".",
+  "examples": [
+    {
+      "input": "5 3\n1 2\n3 1\n4 5\n",
+      "output": "3 4 1 5 2",
+      "explanation": "3 must be before 1, 1 before 2, and 4 before 5. One valid order is 3 4 1 5 2."
+    }
+  ],
+  "constraints": [
+    "1 ≤ n ≤ 10^5",
+    "1 ≤ m ≤ 2·10^5",
+    "1 ≤ a,b ≤ n",
+    "Time limit: 1.00 s",
+    "Memory limit: 512 MB"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "Each requirement line is \"a b\" meaning course a has to be completed before course b. How should we interpret this relationship?",
+      "diagram": "a ----> b",
+      "options": [
+        {
+          "label": "Add a directed link a → b meaning b depends on a.",
+          "isCode": false
+        },
+        {
+          "label": "Add a directed link b → a meaning a depends on b.",
+          "isCode": false
+        },
+        {
+          "label": "Treat it as an undirected relation between a and b.",
+          "isCode": false
+        },
+        {
+          "label": "Only enforce it if a < b.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The statement says a before b, so b depends on a (edge a → b). Reversing or ignoring direction breaks the requirement.",
+      "wrongExplanations": {
+        "1": "b → a would force b before a, contradicting the requirement.",
+        "2": "Undirected edges lose ordering information needed for prerequisites."
+      },
+      "hint": "Think in terms of \"b cannot happen until a is done.\"",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "For n=3, requirements: 1 2 and 2 3. Which order is valid?",
+      "diagram": "1 -> 2 -> 3",
+      "options": [
+        {
+          "label": "1 2 3",
+          "isCode": false
+        },
+        {
+          "label": "2 1 3",
+          "isCode": false
+        },
+        {
+          "label": "1 3 2",
+          "isCode": false
+        },
+        {
+          "label": "3 2 1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "1 must come before 2, and 2 before 3. Only 1 2 3 satisfies both.",
+      "wrongExplanations": {
+        "1": "2 1 3 violates 1 before 2.",
+        "2": "1 3 2 violates 2 before 3."
+      },
+      "hint": "Check both constraints against each sequence.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "If the requirements contain a cycle, e.g., 1 2 and 2 1, what should the program output?",
+      "diagram": "1 -> 2 -> 1",
+      "options": [
+        {
+          "label": "IMPOSSIBLE",
+          "isCode": false
+        },
+        {
+          "label": "1 2",
+          "isCode": false
+        },
+        {
+          "label": "2 1",
+          "isCode": false
+        },
+        {
+          "label": "Any order of all courses",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "A cycle means no course in the cycle can be first; there is no valid ordering.",
+      "wrongExplanations": {
+        "1": "Printing 1 2 ignores 2 before 1.",
+        "2": "Printing 2 1 ignores 1 before 2."
+      },
+      "hint": "Try to place any course in the cycle first; a prerequisite always blocks it.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "What property must any valid output order satisfy?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "It contains each course exactly once.",
+          "isCode": false
+        },
+        {
+          "label": "Courses must be in ascending numeric order.",
+          "isCode": false
+        },
+        {
+          "label": "Courses with prerequisites must appear only after their direct parent course.",
+          "isCode": false
+        },
+        {
+          "label": "It may repeat courses if needed.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need a permutation of all courses satisfying all prerequisites. Sorting by number isn’t required; duplicates are invalid.",
+      "wrongExplanations": {
+        "1": "Numbering has no inherent order requirement.",
+        "3": "Repeating courses violates the requirement to include each once."
+      },
+      "hint": "Think: do we ever skip or repeat a course?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Understanding the Problem",
+      "questionText": "Does a smaller course number imply it must be completed earlier?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, always.",
+          "isCode": false
+        },
+        {
+          "label": "No, only the given requirements determine the order.",
+          "isCode": false
+        },
+        {
+          "label": "Only when there are no requirements.",
+          "isCode": false
+        },
+        {
+          "label": "Only when n ≤ 1000.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Numbers are just labels. Only the requirements constrain the order.",
+      "wrongExplanations": {
+        "0": "The problem never states numbers imply precedence."
+      },
+      "hint": "Consider m=0; any order is fine, not just ascending.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "Would trying all permutations of courses scale to n up to 10^5? What is the growth of such an approach?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n!)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2 + m)",
+          "isCode": false
+        },
+        {
+          "label": "O(n + m)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Trying all orders is factorial and infeasible for large n.",
+      "wrongExplanations": {
+        "3": "Linear-time solutions exist, but enumerating permutations is not linear."
+      },
+      "hint": "How many permutations does 10^5 items have?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "At any point, which course is safe to take next without violating any requirement?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Any course with zero prerequisites remaining.",
+          "isCode": false
+        },
+        {
+          "label": "The course with the fewest prerequisites.",
+          "isCode": false
+        },
+        {
+          "label": "The smallest-numbered course.",
+          "isCode": false
+        },
+        {
+          "label": "Any course; we can adjust later.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Only a course with no unmet prerequisites is guaranteed safe to take next.",
+      "wrongExplanations": {
+        "1": "Fewest isn’t necessarily zero; it could still violate a requirement.",
+        "2": "Numbering is irrelevant to safety."
+      },
+      "hint": "A course is ready only when all its prerequisite edges are satisfied.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Exploring Approaches",
+      "questionText": "After taking course u, how do we reflect that in the remaining requirements?",
+      "diagram": "u -> v1, v2, ... (these depended on u)",
+      "options": [
+        {
+          "label": "Decrease the remaining-prerequisite count for each course that depended on u.",
+          "isCode": false
+        },
+        {
+          "label": "Increase the remaining-prerequisite count for u’s dependents.",
+          "isCode": false
+        },
+        {
+          "label": "Delete all remaining courses that don’t depend on u.",
+          "isCode": false
+        },
+        {
+          "label": "Set all remaining-prerequisite counts to zero.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Finishing u removes its constraint, reducing counts for courses that had u as a prerequisite.",
+      "wrongExplanations": {
+        "1": "Counts should go down when a prerequisite is satisfied, not up."
+      },
+      "hint": "Only the courses that directly depended on u are affected.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "How should we represent the requirements to efficiently find and update courses that depend on a finished course u?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "For each course a, store a list of courses b that depend on a (pairs a → b).",
+          "isCode": false
+        },
+        {
+          "label": "For each course b, store a list of courses a that are prerequisites of b.",
+          "isCode": false
+        },
+        {
+          "label": "Use an n×n boolean matrix of edges.",
+          "isCode": false
+        },
+        {
+          "label": "Store the set of pairs without any per-course structure.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need to quickly find dependents of u when u is taken; outgoing adjacency lists give that directly.",
+      "wrongExplanations": {
+        "1": "Listing prerequisites of b doesn’t tell us quickly who depends on u.",
+        "2": "A full matrix is too large (n up to 10^5)."
+      },
+      "hint": "When u is finished, which courses do we need to visit immediately?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "We’ll maintain for each course a count of unmet prerequisites. What does this count represent?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "The number of courses that must be completed before this course.",
+          "isCode": false
+        },
+        {
+          "label": "The number of courses that depend on this course.",
+          "isCode": false
+        },
+        {
+          "label": "The total number of courses.",
+          "isCode": false
+        },
+        {
+          "label": "A constant 0 or 1 depending on whether it has any prerequisite.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "It counts unmet prerequisites. When it reaches 0, the course is ready.",
+      "wrongExplanations": {
+        "1": "Dependents are different; we need unmet prerequisites."
+      },
+      "hint": "Think: how many incoming edges does a node have?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "Which courses should we start with in our processing structure?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "All courses with count 0 (no prerequisites).",
+          "isCode": false
+        },
+        {
+          "label": "Only one arbitrary course with count 0.",
+          "isCode": false
+        },
+        {
+          "label": "All courses with the smallest numbers.",
+          "isCode": false
+        },
+        {
+          "label": "All courses with the highest counts.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "All zero-count courses are immediately available. Starting with all avoids missing options.",
+      "wrongExplanations": {
+        "1": "Choosing only one may delay others unnecessarily.",
+        "2": "Numbers don’t reflect prerequisites."
+      },
+      "hint": "Availability is about prerequisites, not indices.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "After repeatedly taking available courses and updating counts, we processed k courses. If k < n, what does that imply?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "There is at least one cycle, so no full order exists.",
+          "isCode": false
+        },
+        {
+          "label": "Some edges were missing from input.",
+          "isCode": false
+        },
+        {
+          "label": "Some courses are unreachable and can be skipped.",
+          "isCode": false
+        },
+        {
+          "label": "We must restart and try a different starting course.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "If no available course remains but not all are processed, the remaining courses mutually depend, forming a cycle.",
+      "wrongExplanations": {
+        "2": "We cannot skip courses; all must appear. \"Unreachable\" here indicates cyclic dependency."
+      },
+      "hint": "Why would no course have zero unmet prerequisites before all are scheduled?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "Example: n=4, requirements: 1 2, 1 3, 3 4. Which courses are initially available (count 0)?",
+      "diagram": "1 -> 2, 1 -> 3 -> 4",
+      "options": [
+        {
+          "label": "{1}",
+          "isCode": false
+        },
+        {
+          "label": "{2}",
+          "isCode": false
+        },
+        {
+          "label": "{1,4}",
+          "isCode": false
+        },
+        {
+          "label": "{}",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Counts: 1:0, 2:1, 3:1, 4:1. Only 1 has zero.",
+      "wrongExplanations": {
+        "2": "4 depends on 3, so count is not zero."
+      },
+      "hint": "Count how many incoming edges each node has.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Building the Idea",
+      "questionText": "Continuing the same example, after taking course 1, which courses become available?",
+      "diagram": "1 -> 2, 1 -> 3 -> 4",
+      "options": [
+        {
+          "label": "{2,3}",
+          "isCode": false
+        },
+        {
+          "label": "{3,4}",
+          "isCode": false
+        },
+        {
+          "label": "{2,4}",
+          "isCode": false
+        },
+        {
+          "label": "{2}",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Removing 1 reduces counts of 2 and 3 to zero. 4 still depends on 3.",
+      "wrongExplanations": {
+        "1": "4 depends on 3, which is not done yet."
+      },
+      "hint": "Only neighbors of 1 are affected immediately.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Choose a robust way to read all tokens and parse n, m, preparing an iterator for the remaining pairs.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\ndef main():\n    data = sys.stdin.buffer.read().split()\n    it = iter(data)\n    try:\n        n = int(next(it)); m = int(next(it))\n    except StopIteration:\n        return",
+          "isCode": true
+        },
+        {
+          "label": "import sys\ndata = sys.stdin.buffer.read().split()\nit = iter(data)\nn = int(next(it)); m = int(next(it))",
+          "isCode": true
+        },
+        {
+          "label": "import sys\ndef main():\n    tokens = sys.stdin.buffer.read().split()\n    n = int(tokens[0]); m = int(tokens[1])",
+          "isCode": true
+        },
+        {
+          "label": "import sys\ndef main():\n    data = sys.stdin.buffer.read().split()\n    it = iter(data)\n    n = int(next(it)); m = int(next(it))\n    it = iter(data)  # reset iterator",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We read all tokens, create an iterator, consume n and m, and handle empty input. Others break structure or iterator usage.",
+      "wrongExplanations": {
+        "1": "No main() defined; later guard will call main().",
+        "2": "Doesn’t provide an iterator for the edge loop.",
+        "3": "Resets iterator so edges will include n,m again."
+      },
+      "hint": "We need an iterator positioned after n and m.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\ndef main():\n    data = sys.stdin.buffer.read().split()\n    it = iter(data)\n    try:\n        n = int(next(it)); m = int(next(it))\n    except StopIteration:\n        return",
+      "codeLabel": "Read input and parse n, m"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Initialize the adjacency list and the unmet-prerequisite counts for 1..n (1-based indexing).",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    adj = [[] for _ in range(n+1)]\n    indeg = [0] * (n+1)",
+          "isCode": true
+        },
+        {
+          "label": "    adj = [[]] * (n+1)\n    indeg = [0] * (n+1)",
+          "isCode": true
+        },
+        {
+          "label": "    adj = [[] for _ in range(n)]\n    indeg = [0] * n",
+          "isCode": true
+        },
+        {
+          "label": "    adj = {}\n    indeg = {}",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need separate lists per course and 1-based size. Using the same inner list repeats references; size n misses index n.",
+      "wrongExplanations": {
+        "1": "This creates n+1 references to the same list, causing cross-updates.",
+        "2": "With 1-based nodes, index n will be out of range."
+      },
+      "hint": "Careful with 1-based nodes and independent neighbor lists.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    adj = [[] for _ in range(n+1)]\n    indeg = [0] * (n+1)",
+      "codeLabel": "Init structures"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Read the m requirements and update the structures correctly.",
+      "diagram": "For each (a, b): add edge a→b and increase count of b.",
+      "options": [
+        {
+          "label": "    for _ in range(m):\n        a = int(next(it)); b = int(next(it))\n        adj[a].append(b)\n        indeg[b] += 1",
+          "isCode": true
+        },
+        {
+          "label": "    for _ in range(m):\n        a = int(next(it)); b = int(next(it))\n        adj[b].append(a)\n        indeg[a] += 1",
+          "isCode": true
+        },
+        {
+          "label": "    for _ in range(m):\n        a = int(next(it)) - 1; b = int(next(it)) - 1\n        adj[a].append(b)\n        indeg[b] += 1",
+          "isCode": true
+        },
+        {
+          "label": "    for _ in range(m):\n        a = int(next(it)); b = int(next(it))\n        adj[a].append(b)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Edge direction is a→b and b’s count increases. Reversing edges, 0-indexing, or skipping count will break availability logic.",
+      "wrongExplanations": {
+        "1": "Reverses the prerequisite direction.",
+        "3": "Without increasing indeg[b], we cannot detect when b becomes available."
+      },
+      "hint": "Remember: a before b means b depends on a.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    for _ in range(m):\n        a = int(next(it)); b = int(next(it))\n        adj[a].append(b)\n        indeg[b] += 1",
+      "codeLabel": "Read edges"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Initialize a structure with all courses that currently have no unmet prerequisites.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    from collections import deque\n    dq = deque(i for i in range(1, n+1) if indeg[i] == 0)",
+          "isCode": true
+        },
+        {
+          "label": "    from collections import deque\n    dq = deque([i for i in range(n) if indeg[i] == 0])",
+          "isCode": true
+        },
+        {
+          "label": "    from collections import deque\n    dq = deque()\n    for i in range(1, n+1):\n        if indeg[i] == 0:\n            dq.append(i)\n            break",
+          "isCode": true
+        },
+        {
+          "label": "    dq = []",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need all courses i in 1..n with indeg[i]==0 in a queue-like structure. Other options miss nodes or use the wrong container.",
+      "wrongExplanations": {
+        "1": "Iterates 0..n-1; misses node n and includes 0.",
+        "3": "List lacks popleft; our loop relies on queue operations."
+      },
+      "hint": "Include all zero-count courses; order among them can be arbitrary.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    from collections import deque\n    dq = deque(i for i in range(1, n+1) if indeg[i] == 0)",
+      "codeLabel": "Init available queue"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Process available courses, updating dependents and collecting the result.",
+      "diagram": "Loop: take u from dq -> append to order -> for each v in adj[u], indeg[v]--, if 0 then push v.",
+      "options": [
+        {
+          "label": "    order = []\n    while dq:\n        u = dq.popleft()\n        order.append(u)\n        for v in adj[u]:\n            indeg[v] -= 1\n            if indeg[v] == 0:\n                dq.append(v)",
+          "isCode": true
+        },
+        {
+          "label": "    order = []\n    while dq:\n        u = dq.popleft()\n        for v in adj[u]:\n            indeg[v] -= 1\n            if indeg[v] == 0:\n                dq.append(v)",
+          "isCode": true
+        },
+        {
+          "label": "    order = []\n    while dq:\n        u = dq.popleft()\n        order.append(u)\n        for v in adj[u]:\n            indeg[u] -= 1\n            if indeg[u] == 0:\n                dq.append(u)",
+          "isCode": true
+        },
+        {
+          "label": "    order = []\n    while dq:\n        u = dq.pop()\n        order.append(u)\n        for v in adj[u]:\n            if indeg[v] == 0:\n                dq.append(v)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We must record u, decrease indeg of neighbors v, and enqueue v when it becomes zero. Other snippets miss appending to result or update the wrong counts.",
+      "wrongExplanations": {
+        "1": "Forgets to append u to the result.",
+        "2": "Decrements indeg[u] instead of indeg[v], corrupting counts."
+      },
+      "hint": "Only neighbors’ counts change when their prerequisite u is done.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    order = []\n    while dq:\n        u = dq.popleft()\n        order.append(u)\n        for v in adj[u]:\n            indeg[v] -= 1\n            if indeg[v] == 0:\n                dq.append(v)",
+      "codeLabel": "Main processing loop"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "After processing, how should we output the result?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    if len(order) != n:\n        print(\"IMPOSSIBLE\")\n    else:\n        print(\" \".join(map(str, order)))",
+          "isCode": true
+        },
+        {
+          "label": "    if len(order) != m:\n        print(\"IMPOSSIBLE\")\n    else:\n        print(\" \".join(map(str, order)))",
+          "isCode": true
+        },
+        {
+          "label": "    if len(order) < n:\n        print(\"IMPOSSIBLE\")\n    else:\n        print(\" \".join(map(str, sorted(order))))",
+          "isCode": true
+        },
+        {
+          "label": "    print(\" \".join(map(str, order)))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We must have scheduled all n courses. If not, print \"IMPOSSIBLE\"; otherwise print the collected order.",
+      "wrongExplanations": {
+        "1": "Comparing to m (edges) is meaningless for the count of courses.",
+        "2": "Sorting destroys the prerequisite-respecting order you built."
+      },
+      "hint": "How many courses should be in the final order?",
+      "isCodeBuilding": true,
+      "codeSnippet": "    if len(order) != n:\n        print(\"IMPOSSIBLE\")\n    else:\n        print(\" \".join(map(str, order)))",
+      "codeLabel": "Output"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "Add the standard entry point to run main().",
+      "diagram": null,
+      "options": [
+        {
+          "label": "if __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "main()",
+          "isCode": true
+        },
+        {
+          "label": "if __name__ == \"__main__\":\n    pass",
+          "isCode": true
+        },
+        {
+          "label": "if __name__ == \"__main__\":\n    print(main())",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Use the conventional guard and call main(). Printing main() would print None; calling without a guard is less robust.",
+      "wrongExplanations": {
+        "1": "Runs on import and may cause issues in some environments.",
+        "3": "main() returns None; printing it is unnecessary."
+      },
+      "hint": "What is the usual Python pattern for script entry?",
+      "isCodeBuilding": true,
+      "codeSnippet": "if __name__ == \"__main__\":\n    main()",
+      "codeLabel": "Entry point"
+    },
+    {
+      "id": "q22",
+      "phase": "Verifying the Solution",
+      "questionText": "For input:\n5 3\n1 2\n3 1\n4 5\nWhich of the following is a valid output order?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "3 4 1 5 2",
+          "isCode": false
+        },
+        {
+          "label": "1 3 2 4 5",
+          "isCode": false
+        },
+        {
+          "label": "3 1 5 4 2",
+          "isCode": false
+        },
+        {
+          "label": "3 2 1 4 5",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "3 before 1, 1 before 2, and 4 before 5 hold in 3 4 1 5 2. Others violate at least one constraint.",
+      "wrongExplanations": {
+        "1": "Violates 3 before 1.",
+        "2": "Violates 4 before 5."
+      },
+      "hint": "Check 3→1, 1→2, and 4→5 against each sequence.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q23",
+      "phase": "Verifying the Solution",
+      "questionText": "For n=3, m=3 with requirements 1 2, 2 3, 3 1, what will the program print?",
+      "diagram": "1 -> 2 -> 3 -> 1",
+      "options": [
+        {
+          "label": "IMPOSSIBLE",
+          "isCode": false
+        },
+        {
+          "label": "1 2 3",
+          "isCode": false
+        },
+        {
+          "label": "3 2 1",
+          "isCode": false
+        },
+        {
+          "label": "2 3 1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "There is a cycle; no course becomes available at some point, so not all courses can be scheduled.",
+      "wrongExplanations": {
+        "1": "These orders violate at least one requirement due to the cycle."
+      },
+      "hint": "Does any course have zero unmet prerequisites at the start?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the time complexity of building the structures and processing all courses and requirements once?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n + m)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(m log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n!)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each course and requirement is handled a constant number of times.",
+      "wrongExplanations": {
+        "1": "No nested loops over all pairs of courses are used."
+      },
+      "hint": "How many times can an edge be reduced and a node be enqueued?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the extra space complexity of the solution?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n + m)",
+          "isCode": false
+        },
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(m)",
+          "isCode": false
+        },
+        {
+          "label": "O(1)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We store adjacency lists for all edges and counts for all nodes.",
+      "wrongExplanations": {
+        "3": "We store more than a few variables; adjacency lists require memory proportional to edges."
+      },
+      "hint": "Consider memory for adj, indegree array, queue, and result.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Analyzing Complexity",
+      "questionText": "Edge case: n=1, m=1 with requirement 1 1 (self-loop). What should the program print?",
+      "diagram": "1 ↺",
+      "options": [
+        {
+          "label": "IMPOSSIBLE",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "1 1",
+          "isCode": false
+        },
+        {
+          "label": "Empty line",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "A self-loop means the course depends on itself; no valid ordering exists.",
+      "wrongExplanations": {
+        "1": "Printing 1 ignores that its prerequisite is itself, which is unmet."
+      },
+      "hint": "Does any course have zero prerequisites initially here?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys",
+    "def main():",
+    "    data = sys.stdin.buffer.read().split()",
+    "    it = iter(data)",
+    "    try:",
+    "        n = int(next(it)); m = int(next(it))",
+    "    except StopIteration:",
+    "        return",
+    "    adj = [[] for _ in range(n+1)]",
+    "    indeg = [0] * (n+1)",
+    "    for _ in range(m):",
+    "        a = int(next(it)); b = int(next(it))",
+    "        adj[a].append(b)",
+    "        indeg[b] += 1",
+    "    from collections import deque",
+    "    dq = deque(i for i in range(1, n+1) if indeg[i] == 0)",
+    "    order = []",
+    "    while dq:",
+    "        u = dq.popleft()",
+    "        order.append(u)",
+    "        for v in adj[u]:",
+    "            indeg[v] -= 1",
+    "            if indeg[v] == 0:",
+    "                dq.append(v)",
+    "    if len(order) != n:",
+    "        print(\"IMPOSSIBLE\")",
+    "    else:",
+    "        print(\" \".join(map(str, order)))",
+    "if __name__ == \"__main__\":",
+    "    main()"
+  ],
+  "reasoningChain": [
+    {
+      "question": "How should a requirement \"a b\" be represented and what does it imply?",
+      "insight": "Model requirements as directed edges a→b meaning b depends on a; ordering must respect edge directions."
+    },
+    {
+      "question": "Which courses are safe to take next while building an order?",
+      "insight": "Only courses with zero unmet prerequisites are safe to take; taking one can unlock others."
+    },
+    {
+      "question": "What structures track dependencies and availability efficiently?",
+      "insight": "Use adjacency lists to map each course to its dependents and an array of counts for unmet prerequisites per course."
+    },
+    {
+      "question": "How to iterate to build a full valid order or detect impossibility?",
+      "insight": "Repeatedly take any available course, reduce counts of its dependents, and add new zero-count courses; collect order."
+    },
+    {
+      "question": "How to detect cycles and handle no-solution cases?",
+      "insight": "If processed count < n after the process, remaining courses mutually depend (cycle); print IMPOSSIBLE."
+    },
+    {
+      "question": "What are the performance characteristics of this approach?",
+      "insight": "Each node and edge is handled a constant number of times, yielding O(n+m) time and O(n+m) space."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1406,
+    "output_tokens": 14881,
+    "input_cost": 0.001757,
+    "output_cost": 0.14881,
+    "total_cost": 0.150567
+  }
+}

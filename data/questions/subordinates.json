@@ -1,0 +1,957 @@
+{
+  "id": "subordinates-guided-build",
+  "title": "Subordinates",
+  "difficulty": "hard",
+  "tags": [
+    "tree"
+  ],
+  "estimatedMinutes": 55,
+  "language": "python",
+  "description": "Given the company hierarchy, for each employee 1..n, output how many subordinates they have (direct and indirect). Input: first line n, then n-1 integers where the i-th of these gives the direct boss of employee i+1. Employee 1 is the general director.",
+  "examples": [
+    {
+      "input": "5\n1 1 2 3",
+      "output": "4 1 1 0 0",
+      "explanation": "1 manages everyone (4), 2 manages 4 (1), 3 manages 5 (1), 4 and 5 manage nobody."
+    },
+    {
+      "input": "3\n1 1",
+      "output": "2 0 0",
+      "explanation": "2 and 3 both report to 1, so 1 has 2 subordinates; 2 and 3 have none."
+    }
+  ],
+  "constraints": [
+    "1 ≤ n ≤ 2⋅10^5",
+    "Employees are numbered 1..n",
+    "Employee 1 is the general director",
+    "The next n-1 integers give the boss of employees 2..n"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "If n = 1 (only the general director), what should be printed?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "Undefined because there are no bosses",
+          "isCode": false
+        },
+        {
+          "label": "Depends on input format",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "With one employee, they have no subordinates, so print 0.",
+      "wrongExplanations": {
+        "1": "Counting the employee themselves is incorrect; subordinates exclude the employee.",
+        "2": "The problem is well-defined even without bosses."
+      },
+      "hint": "Subordinates are other employees managed directly or indirectly.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "n = 3, bosses for employees 2..3 are: 1 1. What output is correct?",
+      "diagram": "1\n├─ 2\n└─ 3",
+      "options": [
+        {
+          "label": "2 1 1",
+          "isCode": false
+        },
+        {
+          "label": "2 0 0",
+          "isCode": false
+        },
+        {
+          "label": "1 1 0",
+          "isCode": false
+        },
+        {
+          "label": "0 0 0",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Employee 1 has 2 subordinates (2 and 3). Employees 2 and 3 have none.",
+      "wrongExplanations": {
+        "0": "This counts each child of 1 also as having 1 (incorrect).",
+        "2": "1 has two subordinates, not one."
+      },
+      "hint": "Include indirect and direct subordinates; here there are no indirect ones.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "n = 4, bosses: 1 2 3 (a chain 1→2→3→4). What is the correct output?",
+      "diagram": "1\n└─ 2\n   └─ 3\n      └─ 4",
+      "options": [
+        {
+          "label": "3 2 1 0",
+          "isCode": false
+        },
+        {
+          "label": "1 1 1 0",
+          "isCode": false
+        },
+        {
+          "label": "2 1 1 0",
+          "isCode": false
+        },
+        {
+          "label": "3 1 1 0",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "1 has 3 (2,3,4); 2 has 2 (3,4); 3 has 1 (4); 4 has 0.",
+      "wrongExplanations": {
+        "1": "This counts only direct reports, ignoring indirect subordinates.",
+        "3": "2 should have 2 subordinates (3 and 4)."
+      },
+      "hint": "Each manager counts all people below them, not just direct reports.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "n = 5, bosses: 1 1 2 2 (employees 2,3 report to 1; 4,5 report to 2). What is the correct output?",
+      "diagram": "1\n├─ 2\n│  ├─ 4\n│  └─ 5\n└─ 3",
+      "options": [
+        {
+          "label": "4 2 0 0 0",
+          "isCode": false
+        },
+        {
+          "label": "3 2 0 0 0",
+          "isCode": false
+        },
+        {
+          "label": "4 1 0 0 0",
+          "isCode": false
+        },
+        {
+          "label": "2 2 0 0 0",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "1 has 2,3,4,5 (4 total); 2 has 4,5 (2); 3,4,5 have none.",
+      "wrongExplanations": {
+        "1": "Misses that 1 also indirectly manages 4 and 5.",
+        "2": "2 manages both 4 and 5, so it should be 2, not 1."
+      },
+      "hint": "Include both direct and indirect reports.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Exploring Approaches",
+      "questionText": "Idea: For each employee, scan all others to see if they are below them by following boss links up to 1. For n up to 2⋅10^5, is this feasible?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "No, it can be about n^2 operations in worst case",
+          "isCode": false
+        },
+        {
+          "label": "Yes, because each check is O(1)",
+          "isCode": false
+        },
+        {
+          "label": "Yes, because the hierarchy is shallow",
+          "isCode": false
+        },
+        {
+          "label": "Maybe, depending on input order",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Checking each pair can lead to ~n^2 steps, which is too slow for 2⋅10^5.",
+      "wrongExplanations": {
+        "1": "Following boss links is not O(1) per check in general.",
+        "2": "The hierarchy can be a chain of length n."
+      },
+      "hint": "Consider a chain where each employee reports to the previous one.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "Which representation helps efficiently enumerate all subordinates of a boss?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "For each boss, store a list of their direct subordinates",
+          "isCode": false
+        },
+        {
+          "label": "For each employee, store only their direct boss",
+          "isCode": false
+        },
+        {
+          "label": "Store undirected edges between boss and employee",
+          "isCode": false
+        },
+        {
+          "label": "Store only the top-level employees",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Having children lists lets you traverse downwards from a boss to all below.",
+      "wrongExplanations": {
+        "1": "Only storing the boss makes downward traversal awkward for all nodes.",
+        "2": "Undirected edges risk extra checks; you want directed boss→subordinate."
+      },
+      "hint": "You need to go from a manager to their team members quickly.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "What quantity, if computed for each employee, makes the number of subordinates immediate to get?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Depth of the employee in the hierarchy",
+          "isCode": false
+        },
+        {
+          "label": "Number of direct children only",
+          "isCode": false
+        },
+        {
+          "label": "Number of nodes in their team including themselves",
+          "isCode": false
+        },
+        {
+          "label": "Number of ancestors",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "If you know team size including the employee, subtract 1 to get subordinates.",
+      "wrongExplanations": {
+        "1": "Direct children misses indirect subordinates.",
+        "0": "Depth doesn't tell how many subordinates a node has."
+      },
+      "hint": "Think of counting everyone in the employee’s team (below them) plus themselves.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Building the Idea",
+      "questionText": "Given team size includes the employee, how do you compute the number of subordinates for each employee?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Use team_size[u]",
+          "isCode": false
+        },
+        {
+          "label": "Use team_size[u] - 1",
+          "isCode": false
+        },
+        {
+          "label": "Use team_size[u] + 1",
+          "isCode": false
+        },
+        {
+          "label": "Use number_of_children[u]^2",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Subtract 1 to exclude the employee from their own team count.",
+      "wrongExplanations": {
+        "0": "That includes the employee themselves.",
+        "2": "Adding 1 goes the wrong direction."
+      },
+      "hint": "Remove the employee from their own team size.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "How should team size for a node be combined from its children?",
+      "diagram": "team_size(u) = 1 + sum(team_size(child) for each child)",
+      "options": [
+        {
+          "label": "team_size(u) = sum(team_size(child))",
+          "isCode": false
+        },
+        {
+          "label": "team_size(u) = 1 + sum(team_size(child))",
+          "isCode": false
+        },
+        {
+          "label": "team_size(u) = number_of_children(u)",
+          "isCode": false
+        },
+        {
+          "label": "team_size(u) = max(team_size(child))",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Include the node itself (1) plus all team sizes of its children.",
+      "wrongExplanations": {
+        "0": "Missing the node itself.",
+        "2": "Only counts direct children, not full teams."
+      },
+      "hint": "A leaf has team size 1.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "What visiting order ensures a boss’s team size uses already computed child team sizes?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Process a node first, then its children",
+          "isCode": false
+        },
+        {
+          "label": "Process all children of a node before the node",
+          "isCode": false
+        },
+        {
+          "label": "Process nodes in input order",
+          "isCode": false
+        },
+        {
+          "label": "Process from smallest index to largest",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Compute children first so their team sizes are available when computing the parent.",
+      "wrongExplanations": {
+        "0": "Then the parent's sum would not have children's sizes ready.",
+        "2": "Input order doesn't guarantee children before parent."
+      },
+      "hint": "Think from leaves upwards.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "For n=5, bosses: 1 1 2 3 (i.e., 1→{2,3}, 2→{4}, 3→{5}), what is team size of employee 2?",
+      "diagram": "1\n├─ 2\n│  └─ 4\n└─ 3\n   └─ 5",
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Employee 2 includes themselves and 4 → team size 2.",
+      "wrongExplanations": {
+        "0": "Ignores their child 4.",
+        "2": "There are only 2 nodes in 2’s team: 2 and 4."
+      },
+      "hint": "Team size = 1 (self) + team sizes of children.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "Using the same structure (1→{2,3}, 2→{4}, 3→{5}), what is the number of subordinates of employee 3?",
+      "diagram": "3\n└─ 5",
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "Cannot be determined from given info",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Employee 3 manages 5 only → 1 subordinate.",
+      "wrongExplanations": {
+        "0": "Employee 5 is below 3.",
+        "2": "There is only one subordinate under 3."
+      },
+      "hint": "Team size of 3 is 2; subtract 1 to get subordinates.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "Edge case check: If n = 1, what is the team size of employee 1 and their subordinates count?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Team size 0, subordinates 0",
+          "isCode": false
+        },
+        {
+          "label": "Team size 1, subordinates 1",
+          "isCode": false
+        },
+        {
+          "label": "Team size 1, subordinates 0",
+          "isCode": false
+        },
+        {
+          "label": "Team size 0, subordinates 1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Single node team size is 1 (self), so subordinates = 0.",
+      "wrongExplanations": {
+        "0": "Team size counts the node itself.",
+        "1": "Subordinates exclude the employee."
+      },
+      "hint": "A leaf’s team size is 1; subordinates = team size − 1.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Writing the Code",
+      "questionText": "Start with imports and preparing for deep hierarchies. Which snippet is best?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\nsys.setrecursionlimit(1_000_000)",
+          "isCode": true
+        },
+        {
+          "label": "import math\nmath.setrecursionlimit(10**6)",
+          "isCode": true
+        },
+        {
+          "label": "from collections import defaultdict\nsys.setrecursionlimit(1000)",
+          "isCode": true
+        },
+        {
+          "label": "import sys\n# no need to change recursion limit",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We use sys.setrecursionlimit to safely handle long chains in Python.",
+      "wrongExplanations": {
+        "1": "recursionlimit is set via sys, not math.",
+        "3": "Default limit (~1000) can fail on deep hierarchies."
+      },
+      "hint": "Use the sys module to adjust recursion depth.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\nsys.setrecursionlimit(1_000_000)",
+      "codeLabel": "Imports and recursion limit"
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Define an entry function to structure the solution.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def main():",
+          "isCode": true
+        },
+        {
+          "label": "def solve(n, bosses):",
+          "isCode": true
+        },
+        {
+          "label": "def run():",
+          "isCode": true
+        },
+        {
+          "label": "def __main__():",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "A main() function pairs well with the __name__ guard and input parsing inside.",
+      "wrongExplanations": {
+        "1": "We will parse input directly inside the function.",
+        "3": "__main__ is a module name, not a function name."
+      },
+      "hint": "Common pattern: define main and call it under a guard.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def main():",
+      "codeLabel": "Define main"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Parse input efficiently and split into n and bosses (for employees 2..n). Choose the correct snippet.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    data = list(map(int, sys.stdin.read().strip().split()))\n    if not data:\n        return\n    n = data[0]\n    bosses = data[1:]",
+          "isCode": true
+        },
+        {
+          "label": "    n = int(sys.stdin.readline())\n    bosses = list(map(int, sys.stdin.readline().split()))\n    if len(bosses) != n:\n        return",
+          "isCode": true
+        },
+        {
+          "label": "    tokens = sys.stdin.read().split()\n    n = int(tokens[0])\n    bosses = list(map(int, tokens[0:]))",
+          "isCode": true
+        },
+        {
+          "label": "    n, *bosses = map(int, sys.stdin.read().split())",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Reading all ints is robust; first is n, rest are bosses for 2..n.",
+      "wrongExplanations": {
+        "1": "Bosses may be across multiple lines; also length check is off by one.",
+        "3": "This attempts to unpack all tokens into n and bosses incorrectly typed."
+      },
+      "hint": "The bosses are n−1 integers following n, possibly with line breaks.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    data = list(map(int, sys.stdin.read().strip().split()))\n    if not data:\n        return\n    n = data[0]\n    bosses = data[1:]",
+      "codeLabel": "Parse input"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Build the children lists (for each boss, list direct subordinates). Which is correct?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    children = [[] for _ in range(n+1)]\n    for i, b in enumerate(bosses, start=2):\n        children[b].append(i)",
+          "isCode": true
+        },
+        {
+          "label": "    children = [[] for _ in range(n)]\n    for i, b in enumerate(bosses, start=1):\n        children[i].append(b)",
+          "isCode": true
+        },
+        {
+          "label": "    children = [[] for _ in range(n+1)]\n    for i in range(2, n+1):\n        children[i].append(bosses[i])",
+          "isCode": true
+        },
+        {
+          "label": "    children = [[] for _ in range(n+1)]\n    for i, b in enumerate(bosses, start=2):\n        children[i].append(b)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Employee i (starting at 2) has boss b; add i to children[b].",
+      "wrongExplanations": {
+        "1": "This reverses the direction (stores boss under child).",
+        "2": "bosses is 0-indexed for employees 2..n; bosses[i] is out of sync."
+      },
+      "hint": "For each employee i (2..n), add i to the list for its boss b.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    children = [[] for _ in range(n+1)]\n    for i, b in enumerate(bosses, start=2):\n        children[b].append(i)",
+      "codeLabel": "Build children adjacency"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Prepare an array to store the number of subordinates for each employee (1..n). Which snippet?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    res = [0] * n",
+          "isCode": true
+        },
+        {
+          "label": "    res = [0] * (n + 1)",
+          "isCode": true
+        },
+        {
+          "label": "    res = [None] * (n + 2)",
+          "isCode": true
+        },
+        {
+          "label": "    res = {}",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Use size n+1 to index directly by employee number 1..n.",
+      "wrongExplanations": {
+        "0": "Index 0 would map to employee 1; off by one.",
+        "3": "A dict is slower and unnecessary here."
+      },
+      "hint": "We want O(1) indexed access by employee id.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    res = [0] * (n + 1)",
+      "codeLabel": "Initialize results"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Write the recursive function to compute team sizes and fill res[u] = team_size[u] - 1. Choose the correct code.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    def visit(u):\n        size = 1\n        for v in children[u]:\n            size += visit(v)\n        res[u] = size - 1\n        return size",
+          "isCode": true
+        },
+        {
+          "label": "    def visit(u):\n        size = 0\n        for v in children[u]:\n            size += visit(v)\n        res[u] = size\n        return size",
+          "isCode": true
+        },
+        {
+          "label": "    def visit(u):\n        for v in children[u]:\n            res[u] += visit(v)\n        return res[u]",
+          "isCode": true
+        },
+        {
+          "label": "    def visit(u):\n        res[u] = len(children[u])\n        return res[u]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Start with 1 (self), add child sizes, then res[u] is size−1.",
+      "wrongExplanations": {
+        "1": "Missing the +1 for the node itself; res should be size−1, not size.",
+        "3": "Only counts direct children, missing deeper subordinates."
+      },
+      "hint": "A leaf should return 1 and store 0 in res.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    def visit(u):\n        size = 1\n        for v in children[u]:\n            size += visit(v)\n        res[u] = size - 1\n        return size",
+      "codeLabel": "Recursive team size"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Invoke the computation from the correct starting employee.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    visit(1)",
+          "isCode": true
+        },
+        {
+          "label": "    for u in range(1, n+1): visit(u)",
+          "isCode": true
+        },
+        {
+          "label": "    visit(0)",
+          "isCode": true
+        },
+        {
+          "label": "    visit(n)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The hierarchy is rooted at 1; visiting from 1 reaches everyone.",
+      "wrongExplanations": {
+        "1": "Revisiting nodes repeatedly is wasteful and can duplicate work.",
+        "2": "There is no employee 0."
+      },
+      "hint": "Employee 1 is the general director.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    visit(1)",
+      "codeLabel": "Start recursion at root"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "Print the results in order 1..n and wrap up the script. Choose the correct snippet.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    print(' '.join(str(res[i]) for i in range(1, n+1)))\n\nif __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "    print(*res)\n\nif __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "    print(' '.join(map(str, res)))\n\nif __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "    for i in range(n):\n        print(res[i])\n\nif __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Print indices 1..n joined by spaces; include the main guard.",
+      "wrongExplanations": {
+        "1": "res includes index 0 which is unused.",
+        "2": "Same issue: includes res[0] which is not part of the output."
+      },
+      "hint": "Skip index 0 and print values for employees 1..n.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    print(' '.join(str(res[i]) for i in range(1, n+1)))\n\nif __name__ == \"__main__\":\n    main()",
+      "codeLabel": "Output and main guard"
+    },
+    {
+      "id": "q22",
+      "phase": "Verifying the Solution",
+      "questionText": "Run your code mentally for the sample: n=5, bosses: 1 1 2 3. What output is printed?",
+      "diagram": "1\n├─ 2\n│  └─ 4\n└─ 3\n   └─ 5",
+      "options": [
+        {
+          "label": "4 1 1 0 0",
+          "isCode": false
+        },
+        {
+          "label": "3 2 1 0 0",
+          "isCode": false
+        },
+        {
+          "label": "2 1 1 0 0",
+          "isCode": false
+        },
+        {
+          "label": "4 2 1 0 0",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Team sizes: 1→5, 2→2, 3→2, 4→1, 5→1 → res: 4 1 1 0 0.",
+      "wrongExplanations": {
+        "1": "2 has 2 subordinates only if both 3 and 4 were under 2 (not true).",
+        "3": "3 has only 1 subordinate (5), not 2."
+      },
+      "hint": "Compute team sizes bottom-up, then subtract 1.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q23",
+      "phase": "Verifying the Solution",
+      "questionText": "Test another case: n=7, bosses: 1 1 2 2 3 3 (1→{2,3}, 2→{4,5}, 3→{6,7}). What output should be produced?",
+      "diagram": "1\n├─ 2\n│  ├─ 4\n│  └─ 5\n└─ 3\n   ├─ 6\n   └─ 7",
+      "options": [
+        {
+          "label": "6 2 2 0 0 0 0",
+          "isCode": false
+        },
+        {
+          "label": "6 4 4 0 0 0 0",
+          "isCode": false
+        },
+        {
+          "label": "3 2 2 0 0 0 0",
+          "isCode": false
+        },
+        {
+          "label": "6 2 4 0 0 0 0",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "1 has 6; 2 has 2 (4,5); 3 has 2 (6,7); leaves have 0.",
+      "wrongExplanations": {
+        "1": "2 does not include nodes under 3.",
+        "3": "3 has 2 subordinates, not 4."
+      },
+      "hint": "Each subtree’s count is independent of siblings.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the time complexity of building children lists and computing all team sizes with one traversal?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(log n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each node and edge is processed a constant number of times.",
+      "wrongExplanations": {
+        "2": "We don't compare all pairs or re-traverse many times."
+      },
+      "hint": "Counting visits to nodes and edges suffices.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the space complexity of the solution, excluding input storage inside Python’s buffers?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n) for children lists, result array, and call stack",
+          "isCode": false
+        },
+        {
+          "label": "O(1) extra space",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2) due to adjacency lists",
+          "isCode": false
+        },
+        {
+          "label": "O(log n) stack space only",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Children lists and results take O(n); stack depth is up to O(n) in worst case.",
+      "wrongExplanations": {
+        "1": "We allocate arrays proportional to n.",
+        "2": "Adjacency lists for a tree use O(n)."
+      },
+      "hint": "Consider the worst-case chain for recursion depth.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Analyzing Complexity",
+      "questionText": "Why set a higher recursion limit in Python for this problem?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "To avoid stack overflow in deep hierarchies (like a chain)",
+          "isCode": false
+        },
+        {
+          "label": "To make the program faster",
+          "isCode": false
+        },
+        {
+          "label": "To reduce memory usage",
+          "isCode": false
+        },
+        {
+          "label": "It is unnecessary for any input",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "A chain of length n can exceed the default recursion depth; increasing it avoids crashes.",
+      "wrongExplanations": {
+        "1": "It does not speed up computations; it prevents crashes.",
+        "3": "Deep inputs can exceed the default."
+      },
+      "hint": "Default recursion depth is around 1000 in CPython.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\nsys.setrecursionlimit(1_000_000)",
+    "def main():",
+    "    data = list(map(int, sys.stdin.read().strip().split()))\n    if not data:\n        return\n    n = data[0]\n    bosses = data[1:]",
+    "    children = [[] for _ in range(n+1)]\n    for i, b in enumerate(bosses, start=2):\n        children[b].append(i)",
+    "    res = [0] * (n + 1)",
+    "    def visit(u):\n        size = 1\n        for v in children[u]:\n            size += visit(v)\n        res[u] = size - 1\n        return size",
+    "    visit(1)",
+    "    print(' '.join(str(res[i]) for i in range(1, n+1)))\n\nif __name__ == \"__main__\":\n    main()"
+  ],
+  "reasoningChain": [
+    {
+      "question": "What exactly is being asked for each employee?",
+      "insight": "Count all direct and indirect subordinates; for a leaf this is 0."
+    },
+    {
+      "question": "How to represent the hierarchy to move from a boss to their team quickly?",
+      "insight": "Build for each boss a list of direct subordinates (children) to traverse downward."
+    },
+    {
+      "question": "What value should we compute to derive subordinates easily?",
+      "insight": "Compute team size (including the employee) for every node; subordinates = team size − 1."
+    },
+    {
+      "question": "How to compute team size correctly?",
+      "insight": "For a node: 1 (self) plus the sum of team sizes of its children; process children before parent."
+    },
+    {
+      "question": "How to implement this efficiently within limits?",
+      "insight": "One traversal from the root visiting each edge once gives O(n) time; store results in an array."
+    },
+    {
+      "question": "What Python-specific concern must be handled?",
+      "insight": "Deep hierarchies can exceed default recursion depth; increase recursion limit to be safe."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1353,
+    "output_tokens": 12373,
+    "input_cost": 0.001691,
+    "output_cost": 0.12373,
+    "total_cost": 0.125421
+  }
+}
