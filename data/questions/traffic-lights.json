@@ -1,0 +1,883 @@
+{
+  "id": "traffic-lights-cses-interactive-mcq",
+  "title": "Traffic Lights",
+  "difficulty": "intermediate",
+  "tags": [
+    "sorting",
+    "two-pointer",
+    "binary-search"
+  ],
+  "estimatedMinutes": 60,
+  "language": "python",
+  "description": "There is a street of length x whose positions are numbered 0,1,\\ldots,x. Initially there are no traffic lights, but n sets of traffic lights are added to the street one after another.\n\nYour task is to calculate the length of the longest passage without traffic lights after each addition.\n\nInput:\n- First line: two integers x and n — the length of the street and the number of traffic lights.\n- Second line: n distinct integers p_1, p_2, \\ldots, p_n — the positions of the traffic lights (0 < p_i < x).\n\nOutput:\nPrint the length of the longest passage without traffic lights after each addition.",
+  "examples": [
+    {
+      "input": "8 3\n3 6 2\n",
+      "output": "5 3 3\n",
+      "explanation": "After placing at 3: gaps [0,3],[3,8] -> max 5. After placing at 6: gaps [0,3],[3,6],[6,8] -> max 3. After placing at 2: gaps [0,2],[2,3],[3,6],[6,8] -> max 3."
+    }
+  ],
+  "constraints": [
+    "1 ≤ x ≤ 10^9",
+    "1 ≤ n ≤ 2 · 10^5",
+    "positions are distinct",
+    "0 < p_i < x"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "Street length x=8. After placing a light at position 3, what is the longest passage without lights?",
+      "diagram": "0----3---------8\n|----|---------|\n len3   len5",
+      "options": [
+        {
+          "label": "8",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Passages are [0,3] (len 3) and [3,8] (len 5), so max is 5. The endpoints 0 and x also bound passages.",
+      "wrongExplanations": {
+        "0": "8 is the whole street, but a light at 3 splits it.",
+        "2": "3 is the smaller passage. The other passage has length 5."
+      },
+      "hint": "Include edges [0, first light] and [last light, x].",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "x=8. Lights added at positions 3 and 6. What is the longest passage now?",
+      "diagram": "0----3---6-8\n|----|---|-|\n  3    3  2",
+      "options": [
+        {
+          "label": "5",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Passages: [0,3]=3, [3,6]=3, [6,8]=2; max is 3.",
+      "wrongExplanations": {
+        "0": "5 was before placing 6. Now the longest is shorter.",
+        "2": "2 is just the last small segment [6,8]."
+      },
+      "hint": "List all segments between consecutive lights and edges.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "Continuing: x=8, lights at 3 and 6. Next add a light at 2. What is the longest passage now?",
+      "diagram": "0-2-3---6-8\n| | |   | |\n2 1 3   2",
+      "options": [
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Passages: [0,2]=2, [2,3]=1, [3,6]=3, [6,8]=2; max is 3.",
+      "wrongExplanations": {
+        "1": "2 is not the largest; [3,6]=3 is larger.",
+        "2": "1 is the smallest passage between 2 and 3."
+      },
+      "hint": "Recompute all segments after the new light.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "Which boundaries should always be considered when computing passages?",
+      "diagram": "Street positions: 0 ... x",
+      "options": [
+        {
+          "label": "Only between consecutive added lights",
+          "isCode": false
+        },
+        {
+          "label": "Between 0 and the first light, consecutive lights, and the last light to x",
+          "isCode": false
+        },
+        {
+          "label": "Only the largest two lights define the passages",
+          "isCode": false
+        },
+        {
+          "label": "Include positions 0 and x only if they appear in input",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Passages are edges [0, first], between consecutive lights, and [last, x].",
+      "wrongExplanations": {
+        "0": "You must include edges [0, first] and [last, x] too.",
+        "3": "0 and x are always boundaries even if not in input."
+      },
+      "hint": "Endpoints matter even without lights placed there.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Exploring Approaches",
+      "questionText": "If after each addition you sort all current lights and scan to find the max passage, what is the rough time for n additions?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n^2 log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(log n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each step sorts O(k) lights → O(k log k). Summed over k=1..n ≈ O(n^2 log n).",
+      "wrongExplanations": {
+        "1": "You would need to sort at each step, not just once.",
+        "2": "Sorting dominates with a log factor."
+      },
+      "hint": "Sum sorting costs across all additions.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "When inserting a new light at position p, which part(s) of the passage structure change?",
+      "diagram": "----p inside a current passage [L,R]----",
+      "options": [
+        {
+          "label": "All passages change",
+          "isCode": false
+        },
+        {
+          "label": "Only the passage [L,R] that contains p splits into [L,p] and [p,R]",
+          "isCode": false
+        },
+        {
+          "label": "Passages near 0 and x only",
+          "isCode": false
+        },
+        {
+          "label": "No passages change; only counts change",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Only the containing passage splits; others remain the same.",
+      "wrongExplanations": {
+        "0": "Unrelated passages are unchanged.",
+        "2": "Edges change only if p is near them."
+      },
+      "hint": "Think about splitting a single interval.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "To avoid costly ordered insertions, is it valid to start with all lights placed and then remove them one by one in reverse input order, recording the longest passage after each removal?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes. Removing a light merges two adjacent passages, the inverse of splitting",
+          "isCode": false
+        },
+        {
+          "label": "No. This computes different values",
+          "isCode": false
+        },
+        {
+          "label": "Only if positions are already sorted ascending",
+          "isCode": false
+        },
+        {
+          "label": "Only if x ≤ 10^6",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Reverse processing mirrors forward splits as merges, yielding the same sequence in reverse.",
+      "wrongExplanations": {
+        "1": "The sequence computed in reverse corresponds exactly to forward additions.",
+        "2": "Sorting the positions is handled separately; reverse order is about input order."
+      },
+      "hint": "Think of merging the two gaps that were previously split.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Building the Idea",
+      "questionText": "x=8, positions [3,6,2]. With all lights present, sort including boundaries: [0,2,3,6,8]. What are the gap lengths and their maximum?",
+      "diagram": "0-2-3---6-8\n2 1 3   2",
+      "options": [
+        {
+          "label": "Lengths [2,1,3,2], max=3",
+          "isCode": false
+        },
+        {
+          "label": "Lengths [2,3,2], max=3",
+          "isCode": false
+        },
+        {
+          "label": "Lengths [3,5], max=5",
+          "isCode": false
+        },
+        {
+          "label": "Lengths [1,2,3,4], max=4",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Consecutive differences: 2,1,3,2 → max 3.",
+      "wrongExplanations": {
+        "1": "You must include all consecutive differences including edges.",
+        "2": "Those were lengths before all lights were placed."
+      },
+      "hint": "Subtract adjacent sorted positions.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "Remove the light at 2 from [0,2,3,6,8]. Which two gaps merge and what is the merged length?",
+      "diagram": "[0,2]=2 and [2,3]=1 merge -> [0,3]=3",
+      "options": [
+        {
+          "label": "Merge 2 and 1 -> 3",
+          "isCode": false
+        },
+        {
+          "label": "Merge 1 and 3 -> 4",
+          "isCode": false
+        },
+        {
+          "label": "Merge 3 and 2 -> 6",
+          "isCode": false
+        },
+        {
+          "label": "No merge; still separate",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Removing 2 merges [0,2] and [2,3] into [0,3] of length 3.",
+      "wrongExplanations": {
+        "1": "The gaps adjacent to 2 are 2 and 1, not 1 and 3.",
+        "2": "3 and 2 merge when removing 6, not 2."
+      },
+      "hint": "Look at immediate neighbors of 2 in the sorted list.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "Continuing: after removing 2, remove 6. Which new gap appears and what's the new maximum?",
+      "diagram": "Before removing 6: [0,3]=3, [3,6]=3, [6,8]=2",
+      "options": [
+        {
+          "label": "New gap [3,8]=5; max=5",
+          "isCode": false
+        },
+        {
+          "label": "New gap [0,6]=6; max=6",
+          "isCode": false
+        },
+        {
+          "label": "New gap [0,8]=8; max=8",
+          "isCode": false
+        },
+        {
+          "label": "New gap [6,8]=2; max=3",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Removing 6 merges [3,6]=3 and [6,8]=2 into [3,8]=5, which is the new max.",
+      "wrongExplanations": {
+        "1": "[0,6] isn’t formed; 0 and 6 aren’t adjacent after removing 6.",
+        "2": "8 only appears when removing all interior lights."
+      },
+      "hint": "Merge the two gaps adjacent to 6.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "We need to quickly report the current largest gap length while gaps are incrementally added/removed. Which approach fits best?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Scan a list of all gaps on each step",
+          "isCode": false
+        },
+        {
+          "label": "Keep a max-oriented heap and a dictionary of counts (lazy-remove outdated entries)",
+          "isCode": false
+        },
+        {
+          "label": "Only store the current maximum in a variable",
+          "isCode": false
+        },
+        {
+          "label": "Use only a set of positions, recomputing gaps when needed",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "A heap gives quick access to the largest value; counts allow ignoring removed gaps.",
+      "wrongExplanations": {
+        "0": "Scanning all gaps each time is too slow.",
+        "2": "A single variable can become stale after removals."
+      },
+      "hint": "Think of a structure that returns max in logarithmic time and can skip stale values.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "When removing a light at index k in the sorted array, how can we find its current left and right neighbors efficiently without searching?",
+      "diagram": "Indices: ... a < k < b ...",
+      "options": [
+        {
+          "label": "Maintain two arrays left[i], right[i] linking to current neighbors",
+          "isCode": false
+        },
+        {
+          "label": "Linearly scan from k outward to find neighbors",
+          "isCode": false
+        },
+        {
+          "label": "Rebuild the entire sorted array after each removal",
+          "isCode": false
+        },
+        {
+          "label": "Store only neighbor distances in a list",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Neighbor index arrays let you hop directly to current neighbors and update in O(1).",
+      "wrongExplanations": {
+        "1": "Scanning defeats the goal of efficiency.",
+        "2": "Rebuilding each time is too slow."
+      },
+      "hint": "Think of an array-based linked list of indices.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Writing the Code",
+      "questionText": "Read all input efficiently and parse x, n, and the positions into a list.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys, heapq\nfrom collections import defaultdict\ndata = list(map(int, sys.stdin.read().split()))\nx, n = data[0], data[1]\npos = data[2:2+n]",
+          "isCode": true
+        },
+        {
+          "label": "data = list(map(int, sys.stdin.read().split()))\nn, x = data[0], data[1]\npos = data[2:2+n]",
+          "isCode": true
+        },
+        {
+          "label": "data = list(map(int, sys.stdin.read().split()))\nx, n = data[0], data[1]\npos = data[2:2+x]",
+          "isCode": true
+        },
+        {
+          "label": "pos = list(map(int, sys.stdin.read().split()))\nx, n = pos[0], pos[1]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We read all ints, then slice exactly n positions. Also import heapq and defaultdict for later.",
+      "wrongExplanations": {
+        "1": "Swapping n and x breaks later logic.",
+        "2": "Slicing by x instead of n reads the wrong number of positions."
+      },
+      "hint": "There are 2+n integers in total; positions follow x and n.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys, heapq\nfrom collections import defaultdict\ndata = list(map(int, sys.stdin.read().split()))\nx, n = data[0], data[1]\npos = data[2:2+n]",
+      "codeLabel": "Imports and input parsing"
+    },
+    {
+      "id": "q14",
+      "phase": "Writing the Code",
+      "questionText": "Build the sorted positions array with boundaries, its size, an index map, and neighbor links.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "arr = sorted([0, x] + pos)\nm = len(arr)\nidx = {arr[i]: i for i in range(m)}\nleft = [i - 1 for i in range(m)]\nright = [i + 1 for i in range(m)]\nleft[0] = -1\nright[m - 1] = -1",
+          "isCode": true
+        },
+        {
+          "label": "arr = [0] + pos + [x]\nm = len(arr)\nidx = {i: arr[i] for i in range(m)}\nleft = [i - 1 for i in range(m)]\nright = [i + 1 for i in range(m)]",
+          "isCode": true
+        },
+        {
+          "label": "arr = sorted(pos)\nm = len(arr)\nidx = {arr[i]: i for i in range(m)}\nleft = [i + 1 for i in range(m)]\nright = [i - 1 for i in range(m)]",
+          "isCode": true
+        },
+        {
+          "label": "arr = sorted([0, x] + pos)\nm = len(arr)\nidx = {arr[i]: i for i in range(m)}\nleft = [i + 1 for i in range(m)]\nright = [i - 1 for i in range(m)]\nleft[0] = 0\nright[m - 1] = m - 1",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We must sort and include 0 and x, build index map, and initialize neighbor links with -1 sentinels at ends.",
+      "wrongExplanations": {
+        "1": "Without sorting, neighbors and gaps are wrong; index map also wrong direction.",
+        "2": "Missing boundaries 0 and x breaks gap computation."
+      },
+      "hint": "Sorted positions should include the endpoints.",
+      "isCodeBuilding": true,
+      "codeSnippet": "arr = sorted([0, x] + pos)\nm = len(arr)\nidx = {arr[i]: i for i in range(m)}\nleft = [i - 1 for i in range(m)]\nright = [i + 1 for i in range(m)]\nleft[0] = -1\nright[m - 1] = -1",
+      "codeLabel": "Sorted positions and neighbor links"
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Initialize the gap multiset (counts) and a max-heap of gap lengths.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "cnt = defaultdict(int)\nheap = []\nfor i in range(1, m):\n    d = arr[i] - arr[i - 1]\n    cnt[d] += 1\n    heapq.heappush(heap, -d)",
+          "isCode": true
+        },
+        {
+          "label": "cnt = {}\nheap = []\nfor i in range(0, m):\n    d = arr[i] - arr[i - 1]\n    cnt[d] += 1\n    heapq.heappush(heap, -d)",
+          "isCode": true
+        },
+        {
+          "label": "cnt = defaultdict(int)\nheap = []\nfor i in range(1, m):\n    d = arr[i] - arr[i - 1]\n    cnt[d] += 1\n    heapq.heappush(heap, d)",
+          "isCode": true
+        },
+        {
+          "label": "cnt = defaultdict(int)\nheap = []\nfor i in range(1, m):\n    d = arr[i] - arr[i - 1]\n    cnt[d] = 1\n    heapq.heappush(heap, -d)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We count each gap length and push its negative for max-heap behavior.",
+      "wrongExplanations": {
+        "1": "i=0 uses arr[-1], and cnt without default int causes KeyError.",
+        "2": "Pushing positive values makes it a min-heap, not what we want."
+      },
+      "hint": "Use negative values to simulate a max-heap.",
+      "isCodeBuilding": true,
+      "codeSnippet": "cnt = defaultdict(int)\nheap = []\nfor i in range(1, m):\n    d = arr[i] - arr[i - 1]\n    cnt[d] += 1\n    heapq.heappush(heap, -d)",
+      "codeLabel": "Initial gaps and heap"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Initialize the answers array and set the value when all lights are present.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "ans = [0] * (n + 1)\nwhile heap and cnt[-heap[0]] == 0:\n    heapq.heappop(heap)\nans[n] = -heap[0] if heap else 0",
+          "isCode": true
+        },
+        {
+          "label": "ans = [0] * n\nans[n] = -heap[0]",
+          "isCode": true
+        },
+        {
+          "label": "ans = [0] * (n + 1)\nans[n] = heap[0]",
+          "isCode": true
+        },
+        {
+          "label": "ans = [0] * (n + 1)\nwhile heap and cnt[heap[0]] == 0:\n    heapq.heappop(heap)\nans[n] = heap[0]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We ensure the heap top is current and then take -heap[0] as the maximum gap.",
+      "wrongExplanations": {
+        "1": "ans has size n+1 (we fill ans[0..n]); also missing negation.",
+        "2": "heap stores negative gaps; missing negation gives wrong value."
+      },
+      "hint": "Remember the heap stores negatives of gap lengths.",
+      "isCodeBuilding": true,
+      "codeSnippet": "ans = [0] * (n + 1)\nwhile heap and cnt[-heap[0]] == 0:\n    heapq.heappop(heap)\nans[n] = -heap[0] if heap else 0",
+      "codeLabel": "Initialize answers"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Write the reverse loop: remove lights in reverse order, update gaps and neighbors, and record answers.",
+      "diagram": "At removal of k: merge lengths L1=arr[k]-arr[a], L2=arr[b]-arr[k] into L3=arr[b]-arr[a]",
+      "options": [
+        {
+          "label": "for t in range(n - 1, -1, -1):\n    k = idx[pos[t]]\n    a = left[k]\n    b = right[k]\n    L1 = arr[k] - arr[a]\n    L2 = arr[b] - arr[k]\n    L3 = arr[b] - arr[a]\n    cnt[L1] -= 1\n    cnt[L2] -= 1\n    cnt[L3] += 1\n    heapq.heappush(heap, -L3)\n    right[a] = b\n    left[b] = a\n    while heap and cnt[-heap[0]] == 0:\n        heapq.heappop(heap)\n    ans[t] = -heap[0] if heap else 0",
+          "isCode": true
+        },
+        {
+          "label": "for t in range(n - 1, -1, -1):\n    k = idx[pos[t]]\n    a = left[k]\n    b = right[k]\n    L1 = arr[b] - arr[a]\n    L2 = arr[k] - arr[a]\n    L3 = arr[b] - arr[k]\n    cnt[L1] -= 1\n    cnt[L2] += 1\n    cnt[L3] += 1\n    heapq.heappush(heap, -L3)\n    right[a] = b\n    left[b] = a\n    ans[t] = -heap[0]",
+          "isCode": true
+        },
+        {
+          "label": "for t in range(n - 1, -1, -1):\n    k = idx[pos[t]]\n    a = left[k]\n    b = right[k]\n    L1 = arr[k] - arr[a]\n    L2 = arr[b] - arr[k]\n    L3 = arr[b] - arr[a]\n    cnt[L1] += 1\n    cnt[L2] += 1\n    cnt[L3] -= 1\n    heapq.heappush(heap, -L3)\n    right[k] = b\n    left[k] = a\n    ans[t] = -heap[0]",
+          "isCode": true
+        },
+        {
+          "label": "for t in range(n - 1, -1, -1):\n    k = idx[pos[t]]\n    a = left[k]\n    b = right[k]\n    L1 = arr[k] - arr[a]\n    L2 = arr[b] - arr[k]\n    L3 = arr[b] - arr[a]\n    cnt[L1] -= 1\n    cnt[L2] -= 1\n    cnt[L3] += 1\n    heapq.heappush(heap, L3)\n    right[a] = b\n    left[b] = a\n    ans[t] = heap[0]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We remove the two old gaps, add the merged gap, update neighbor links, clean stale heap tops, and record -heap[0].",
+      "wrongExplanations": {
+        "1": "Wrong lengths to decrement/increment and missing heap cleanup.",
+        "3": "Pushing positive lengths breaks max retrieval; also missing cleanup and negation."
+      },
+      "hint": "Two gaps around k go away; one bigger gap appears. Keep the heap consistent.",
+      "isCodeBuilding": true,
+      "codeSnippet": "for t in range(n - 1, -1, -1):\n    k = idx[pos[t]]\n    a = left[k]\n    b = right[k]\n    L1 = arr[k] - arr[a]\n    L2 = arr[b] - arr[k]\n    L3 = arr[b] - arr[a]\n    cnt[L1] -= 1\n    cnt[L2] -= 1\n    cnt[L3] += 1\n    heapq.heappush(heap, -L3)\n    right[a] = b\n    left[b] = a\n    while heap and cnt[-heap[0]] == 0:\n        heapq.heappop(heap)\n    ans[t] = -heap[0] if heap else 0",
+      "codeLabel": "Reverse removals and updates"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Print the answers after each addition in the original order.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "print(\" \".join(map(str, ans[1:])))",
+          "isCode": true
+        },
+        {
+          "label": "print(*ans)",
+          "isCode": true
+        },
+        {
+          "label": "print(\" \".join(map(str, ans)))",
+          "isCode": true
+        },
+        {
+          "label": "print(ans[1:])",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We skip ans[0] (no additions) and print the rest space-separated.",
+      "wrongExplanations": {
+        "1": "This prints ans[0] too, which is not requested.",
+        "3": "This prints a Python list repr, not space-separated numbers."
+      },
+      "hint": "We want exactly n numbers separated by spaces.",
+      "isCodeBuilding": true,
+      "codeSnippet": "print(\" \".join(map(str, ans[1:])))",
+      "codeLabel": "Output"
+    },
+    {
+      "id": "q19",
+      "phase": "Verifying the Solution",
+      "questionText": "For input: x=8, n=3, positions: 3 6 2. What does the program print?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "5 3 3",
+          "isCode": false
+        },
+        {
+          "label": "3 5 3",
+          "isCode": false
+        },
+        {
+          "label": "3 3 5",
+          "isCode": false
+        },
+        {
+          "label": "5 5 3",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "After 3: 5; after 6: 3; after 2: 3 → output 5 3 3.",
+      "wrongExplanations": {
+        "1": "Order is after each addition; not sorted by size.",
+        "2": "This is reversed order."
+      },
+      "hint": "Forward sequence was computed in reverse and then reordered.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q20",
+      "phase": "Verifying the Solution",
+      "questionText": "In the reverse process on the same example, after removing light at 2, what does ans[2] become?",
+      "diagram": "After removing 2: gaps [0,3]=3, [3,6]=3, [6,8]=2",
+      "options": [
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        },
+        {
+          "label": "8",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The maximum gap after removing 2 is 3.",
+      "wrongExplanations": {
+        "1": "2 is a smaller gap, not the maximum.",
+        "2": "5 appears after removing 6, not 2."
+      },
+      "hint": "List current gaps after removing 2.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q21",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the overall time complexity of this approach with n additions/removals?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each removal does O(log n) updates on the heap; overall O(n log n).",
+      "wrongExplanations": {
+        "1": "We avoid quadratic behavior by not rebuilding or scanning fully each step.",
+        "3": "Heap operations dominate with a log factor."
+      },
+      "hint": "Consider heap pushes/pops per step.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q22",
+      "phase": "Analyzing Complexity",
+      "questionText": "Why do we pop from the heap while the top has count zero?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Because the top might be a gap that no longer exists after merges",
+          "isCode": false
+        },
+        {
+          "label": "Because the heap must be kept sorted",
+          "isCode": false
+        },
+        {
+          "label": "To reduce memory usage",
+          "isCode": false
+        },
+        {
+          "label": "To ensure the heap never contains duplicates",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Counts track active gaps; count zero means the length is stale and should be ignored.",
+      "wrongExplanations": {
+        "1": "Heaps are always partially ordered; popping is to skip stale entries.",
+        "3": "Duplicates are fine; they represent multiple gaps with the same length."
+      },
+      "hint": "We do lazy deletion: keep pushing but skip removed ones when reading the top.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q23",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the additional space used by this solution in terms of n?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(1)",
+          "isCode": false
+        },
+        {
+          "label": "O(log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We store arrays of size ~n (positions, neighbors) and a heap with O(n) entries.",
+      "wrongExplanations": {
+        "1": "We need to store all positions and gaps, not constant extra space."
+      },
+      "hint": "Consider the sizes of arr, left/right, counts, and heap.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys, heapq",
+    "from collections import defaultdict",
+    "data = list(map(int, sys.stdin.read().split()))",
+    "x, n = data[0], data[1]",
+    "pos = data[2:2+n]",
+    "arr = sorted([0, x] + pos)",
+    "m = len(arr)",
+    "idx = {arr[i]: i for i in range(m)}",
+    "left = [i - 1 for i in range(m)]",
+    "right = [i + 1 for i in range(m)]",
+    "left[0] = -1",
+    "right[m - 1] = -1",
+    "cnt = defaultdict(int)",
+    "heap = []",
+    "for i in range(1, m):",
+    "    d = arr[i] - arr[i - 1]",
+    "    cnt[d] += 1",
+    "    heapq.heappush(heap, -d)",
+    "ans = [0] * (n + 1)",
+    "while heap and cnt[-heap[0]] == 0:",
+    "    heapq.heappop(heap)",
+    "ans[n] = -heap[0] if heap else 0",
+    "for t in range(n - 1, -1, -1):",
+    "    k = idx[pos[t]]",
+    "    a = left[k]",
+    "    b = right[k]",
+    "    L1 = arr[k] - arr[a]",
+    "    L2 = arr[b] - arr[k]",
+    "    L3 = arr[b] - arr[a]",
+    "    cnt[L1] -= 1",
+    "    cnt[L2] -= 1",
+    "    cnt[L3] += 1",
+    "    heapq.heappush(heap, -L3)",
+    "    right[a] = b",
+    "    left[b] = a",
+    "    while heap and cnt[-heap[0]] == 0:",
+    "        heapq.heappop(heap)",
+    "    ans[t] = -heap[0] if heap else 0",
+    "print(\" \".join(map(str, ans[1:])))"
+  ],
+  "reasoningChain": [
+    {
+      "question": "After placing a light at p, which passage(s) change?",
+      "insight": "Only the passage containing p splits into two; all other passages remain the same."
+    },
+    {
+      "question": "What information is needed to update the result efficiently after a placement?",
+      "insight": "We must find the nearest lights to the left and right of p and update the affected passage(s) only."
+    },
+    {
+      "question": "How to avoid costly ordered insertions?",
+      "insight": "Process in reverse: start with all lights present, then remove them one by one in reverse order so splits become merges."
+    },
+    {
+      "question": "How to track neighbors during removals efficiently?",
+      "insight": "Keep two arrays of neighbor indices (left and right) to jump to current neighbors and update links in constant time."
+    },
+    {
+      "question": "How to maintain and query the current largest gap quickly?",
+      "insight": "Use a max-heap (via negative values) plus a count map to lazily discard outdated gap lengths."
+    },
+    {
+      "question": "How to produce outputs in the correct order?",
+      "insight": "Record results after each reverse removal into ans[t], then print ans[1..n] as the forward sequence."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1400,
+    "output_tokens": 19505,
+    "input_cost": 0.00175,
+    "output_cost": 0.19505,
+    "total_cost": 0.1968
+  }
+}

@@ -1,0 +1,1044 @@
+{
+  "id": "teleporters-path",
+  "title": "Teleporters Path",
+  "difficulty": "intermediate",
+  "tags": [
+    "graph"
+  ],
+  "estimatedMinutes": 70,
+  "language": "python",
+  "description": "You are given n levels and m directed teleporters between them. You win if you can start at level 1 and reach level n while using every teleporter exactly once. Print any valid visiting order of levels (m+1 numbers), or print \"IMPOSSIBLE\" if it cannot be done.\n\nInput:\n- First line: two integers n and m\n- Next m lines: two integers a b indicating a teleporter from a to b\n\nOutput:\n- If possible, print m+1 integers: the sequence of visited levels using each teleporter exactly once from level 1 to level n.\n- Otherwise, print \"IMPOSSIBLE\".",
+  "examples": [
+    {
+      "input": "5 6\n1 2\n1 3\n2 4\n2 5\n3 1\n4 2\n",
+      "output": "1 3 1 2 4 2 5\n",
+      "explanation": "One valid route uses each teleporter exactly once, starting at level 1 and ending at level 5."
+    }
+  ],
+  "constraints": [
+    "2 <= n <= 1e5",
+    "1 <= m <= 2e5",
+    "1 <= a,b <= n",
+    "All (a,b) pairs are distinct"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "For any valid solution that uses every teleporter exactly once, how many level numbers must be printed?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "m",
+          "isCode": false
+        },
+        {
+          "label": "m + 1",
+          "isCode": false
+        },
+        {
+          "label": "n",
+          "isCode": false
+        },
+        {
+          "label": "It depends on the graph structure",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Each teleporter contributes one move between levels, so using m teleporters yields m moves and m+1 visited levels.",
+      "wrongExplanations": {
+        "0": "m numbers would mean only m-1 moves.",
+        "3": "Regardless of structure, using m edges means m+1 nodes in the sequence."
+      },
+      "hint": "Think: edges used = steps; steps + 1 = visited nodes.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "In the example, the printed path is: 1 3 1 2 4 2 5. Which statement is correct?",
+      "diagram": "Teleporters:\n1->2, 1->3, 2->4, 2->5, 3->1, 4->2",
+      "options": [
+        {
+          "label": "It is valid: starts at 1, ends at 5, and uses each teleporter exactly once.",
+          "isCode": false
+        },
+        {
+          "label": "It is invalid because it revisits level 1.",
+          "isCode": false
+        },
+        {
+          "label": "It is invalid because it uses some teleporters more than once.",
+          "isCode": false
+        },
+        {
+          "label": "It is invalid because it travels an edge backward.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Revisiting levels is allowed; edges must not repeat and direction must be followed. The shown sequence uses each teleporter once and ends at 5.",
+      "wrongExplanations": {
+        "1": "Node revisits are allowed; the restriction is on teleporters (edges).",
+        "2": "Each of the six teleporters appears exactly once in the traversal."
+      },
+      "hint": "Check each consecutive pair against the teleporter list.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "Are you allowed to visit the same level multiple times in the output sequence?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, levels can repeat; teleporters must be used exactly once.",
+          "isCode": false
+        },
+        {
+          "label": "No, each level must be visited at most once.",
+          "isCode": false
+        },
+        {
+          "label": "Only start and end levels may repeat.",
+          "isCode": false
+        },
+        {
+          "label": "Only if the level has more than one outgoing teleporter.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The constraint is on using each teleporter exactly once. Levels may be revisited.",
+      "wrongExplanations": {
+        "1": "The problem never restricts level revisits.",
+        "3": "Outgoing degree doesn’t restrict revisiting levels."
+      },
+      "hint": "Focus on edges, not nodes.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "Which of the following makes a candidate sequence invalid?",
+      "diagram": "Teleporters: 1->2, 2->3, 3->1",
+      "options": [
+        {
+          "label": "Repeating a level",
+          "isCode": false
+        },
+        {
+          "label": "Using a teleporter in the opposite direction (e.g., 2->1 when only 1->2 exists)",
+          "isCode": false
+        },
+        {
+          "label": "Starting at level 1",
+          "isCode": false
+        },
+        {
+          "label": "Ending at level n",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Direction matters; traversing a teleporter backward is invalid. Repeating levels is allowed.",
+      "wrongExplanations": {
+        "0": "Node repetition is allowed; edges must be unique and directed.",
+        "2": "Starting at level 1 is required."
+      },
+      "hint": "Teleporters are directed.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Exploring Approaches",
+      "questionText": "Why is trying all possible orders of using the m teleporters infeasible?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "There are at most m orders to try, which is fine for m up to 2e5.",
+          "isCode": false
+        },
+        {
+          "label": "There are m! possible orders, which is astronomically large.",
+          "isCode": false
+        },
+        {
+          "label": "The number of orders is O(m log m).",
+          "isCode": false
+        },
+        {
+          "label": "Because teleporters are directed, orders can't be tried at all.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Permutations of m edges are m!, far too large for m up to 2e5.",
+      "wrongExplanations": {
+        "0": "It's not m, it's factorial in m.",
+        "3": "Direction doesn't prevent trying; it just constrains validity."
+      },
+      "hint": "Count permutations of m distinct items.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "Consider a level v that is neither level 1 nor level n. If there is a valid sequence using every teleporter exactly once from 1 to n, which condition must hold at v?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "outdegree(v) = indegree(v)",
+          "isCode": false
+        },
+        {
+          "label": "outdegree(v) = indegree(v) + 1",
+          "isCode": false
+        },
+        {
+          "label": "indegree(v) = outdegree(v) + 1",
+          "isCode": false
+        },
+        {
+          "label": "No condition on degrees is necessary for v",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Every time you enter v you must also leave via a unique teleporter, so in = out for internal levels.",
+      "wrongExplanations": {
+        "3": "Balance at internal levels is necessary to avoid getting stuck or leaving unused edges."
+      },
+      "hint": "Count how many times you enter vs leave v in a single traversal.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "Which degree conditions must hold at the start (level 1) and end (level n) for a valid sequence using every teleporter exactly once?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "outdeg(1) = indeg(1) and indeg(n) = outdeg(n)",
+          "isCode": false
+        },
+        {
+          "label": "outdeg(1) = indeg(1) + 1 and indeg(n) = outdeg(n) + 1",
+          "isCode": false
+        },
+        {
+          "label": "indeg(1) = outdeg(1) + 1 and outdeg(n) = indeg(n) + 1",
+          "isCode": false
+        },
+        {
+          "label": "outdeg(1) = indeg(1) + 2 and indeg(n) = outdeg(n) + 2",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "You leave level 1 one more time than you enter it, and you enter level n one more time than you leave it.",
+      "wrongExplanations": {
+        "0": "Start and end are special: they are unbalanced by 1.",
+        "2": "This swaps the imbalance and would end at 1 instead."
+      },
+      "hint": "Start has one extra exit; end has one extra entry.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Building the Idea",
+      "questionText": "Given n=3, m=3 with teleporters: 1->2, 2->2, 2->3. Do the degree conditions allow a valid sequence from 1 to 3 using all teleporters once?",
+      "diagram": "Degrees: indeg/outdeg?\n1: in=0,out=1\n2: in=2,out=2\n3: in=1,out=0",
+      "options": [
+        {
+          "label": "Yes, degrees fit: start has out=in+1, end has in=out+1, others equal.",
+          "isCode": false
+        },
+        {
+          "label": "No, because level 2 has out=in+1.",
+          "isCode": false
+        },
+        {
+          "label": "No, because level 1 has out=in.",
+          "isCode": false
+        },
+        {
+          "label": "No, because level 3 has out>in.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Level 1: out=1,in=0; Level 3: in=1,out=0; Level 2: in=2,out=2. Degree conditions allow it.",
+      "wrongExplanations": {
+        "2": "At start, out should be in+1; here 1=0+1, so it's fine."
+      },
+      "hint": "Compute indegree/outdegree for each level and compare to rules.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "Are degree conditions alone sufficient? Consider n=4, m=4 with teleporters: 1->2, 2->1, 1->4, 3->3. What extra check ensures we truly used all teleporters?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Verify that the sequence length is exactly m+1 after construction.",
+          "isCode": false
+        },
+        {
+          "label": "Verify every node is reachable from 1 following directions.",
+          "isCode": false
+        },
+        {
+          "label": "Verify there is a direct path from 1 to n.",
+          "isCode": false
+        },
+        {
+          "label": "No extra check is needed if degrees match.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Degrees can match even with unreachable edges (e.g., 3->3). Ensuring the built sequence has length m+1 confirms every teleporter was used.",
+      "wrongExplanations": {
+        "1": "We only need to ensure all edges used; full reachability of nodes isn’t required.",
+        "3": "Degrees alone do not guarantee all edges are in one usable component."
+      },
+      "hint": "Count how many edges were consumed in your construction.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "We need a linear-time way to build the sequence. Which approach works?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Walk from the current level using any unused outgoing teleporter; if stuck, record the level and backtrack using a stack until you find unused teleporters.",
+          "isCode": false
+        },
+        {
+          "label": "Always pick the smallest-numbered next level to ensure progress.",
+          "isCode": false
+        },
+        {
+          "label": "Try all possible next teleporters with recursion and return on the first success.",
+          "isCode": false
+        },
+        {
+          "label": "Sort teleporters and then traverse them in order, skipping those that don't fit.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Following unused outgoing edges and backtracking when stuck collects a valid sequence in linear time if degrees allow.",
+      "wrongExplanations": {
+        "2": "Trying all choices is exponential in the worst case."
+      },
+      "hint": "Use a stack to remember the current path; record nodes when you cannot move further.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "In the above process, why maintain a stack of levels?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "To remember the current route so we can backtrack and continue from earlier levels when stuck.",
+          "isCode": false
+        },
+        {
+          "label": "To ensure we always visit the smallest-numbered level next.",
+          "isCode": false
+        },
+        {
+          "label": "To avoid using extra memory for the adjacency list.",
+          "isCode": false
+        },
+        {
+          "label": "To track indegrees and outdegrees dynamically.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The stack tracks the current route; when a level has no unused outgoing teleporters, we pop and record it, then continue from prior levels.",
+      "wrongExplanations": {
+        "1": "Choosing smallest-numbered next level is not required and may break correctness.",
+        "3": "Degrees are computed separately; the stack is for traversal state."
+      },
+      "hint": "Think about how to resume from earlier levels when you get stuck.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "When you record levels upon getting stuck and popping from the stack, in which order should you output them?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "In the order they were recorded (no change).",
+          "isCode": false
+        },
+        {
+          "label": "Reverse the recorded list to get the correct visiting sequence.",
+          "isCode": false
+        },
+        {
+          "label": "Sort the recorded levels by their indices.",
+          "isCode": false
+        },
+        {
+          "label": "Rotate the recorded list so that it starts at level 1.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Recording occurs on backtrack; the correct visiting order is the reverse of the recorded list.",
+      "wrongExplanations": {
+        "0": "Without reversing, the order corresponds to a reverse traversal.",
+        "3": "Rotation without reversing does not fix the order."
+      },
+      "hint": "When do you append: when moving forward or when backtracking?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "How can we keep the traversal linear in m when skipping already-used teleporters?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Store (to, edge_id) in adjacency lists and a boolean used[edge_id]; pop edges and skip those already used.",
+          "isCode": false
+        },
+        {
+          "label": "Store only destination nodes; scan the list each time to find an unused edge.",
+          "isCode": false
+        },
+        {
+          "label": "Use a set of unused edges and remove edges during traversal, checking membership frequently.",
+          "isCode": false
+        },
+        {
+          "label": "Copy the entire graph each time we use an edge to avoid revisiting it.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Edge IDs with a used array let us pop once and skip used edges in O(1), ensuring total O(m).",
+      "wrongExplanations": {
+        "1": "Scanning lists repeatedly can lead to O(m^2) behavior.",
+        "2": "Sets can add log factors and complex overhead without need."
+      },
+      "hint": "Assign a unique index to each teleporter.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Writing the Code",
+      "questionText": "Read all input efficiently and parse n and m.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\ndata = list(map(int, sys.stdin.read().strip().split()))\nif not data:\n    print(\"IMPOSSIBLE\"); sys.exit(0)\nit = iter(data); n = next(it); m = next(it)",
+          "isCode": true
+        },
+        {
+          "label": "n, m = map(int, input().split())\ndata = [list(map(int, input().split())) for _ in range(m)]",
+          "isCode": true
+        },
+        {
+          "label": "import sys\ndata = sys.stdin.read().split()\nn = int(data[0]); m = int(data[1])\n# leave the rest unparsed",
+          "isCode": true
+        },
+        {
+          "label": "import sys\nn = int(sys.stdin.readline()); m = int(sys.stdin.readline())",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Reading all tokens and iterating is fast and robust for large input. It also handles empty input safely.",
+      "wrongExplanations": {
+        "1": "Line-by-line input can TLE with large m and doesn't parse edges here.",
+        "3": "Input format has n and m on one line, not two separate lines."
+      },
+      "hint": "Use sys.stdin.read and parse all integers at once.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\ndata = list(map(int, sys.stdin.read().strip().split()))\nif not data:\n    print(\"IMPOSSIBLE\"); sys.exit(0)\nit = iter(data); n = next(it); m = next(it)",
+      "codeLabel": "Read input tokens"
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Initialize adjacency and degree arrays, and fill them while reading teleporters. Use 0-based indices internally.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "adj = [[] for _ in range(n)]\nindeg = [0]*n; outdeg = [0]*n\nfor i in range(m):\n    a = next(it)-1; b = next(it)-1\n    adj[a].append((b, i))\n    outdeg[a] += 1; indeg[b] += 1",
+          "isCode": true
+        },
+        {
+          "label": "adj = [[] for _ in range(n+1)]\nindeg = [0]*(n+1); outdeg = [0]*(n+1)\nfor i in range(m):\n    a = next(it); b = next(it)\n    adj[a].append((b, i))\n    outdeg[a] += 1; indeg[b] += 1",
+          "isCode": true
+        },
+        {
+          "label": "adj = [[] for _ in range(n)]\nindeg = [0]*n; outdeg = [0]*n\nfor i in range(m):\n    a = next(it)-1; b = next(it)-1\n    adj[b].append((a, i))\n    outdeg[b] += 1; indeg[a] += 1",
+          "isCode": true
+        },
+        {
+          "label": "adj = [[] for _ in range(n)]\nindeg = [0]*n; outdeg = [0]*n\nfor i in range(m):\n    a = next(it); b = next(it)\n    adj[a-1].append((b-1, i))\n    outdeg[b-1] += 1; indeg[a-1] += 1",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Store edges as (to, id) with 0-based nodes and update indegree/outdegree correctly.",
+      "wrongExplanations": {
+        "1": "Mixes 1-based arrays and leaves indices unshifted; prone to off-by-one and large memory.",
+        "3": "Swaps indegree/outdegree updates; outdeg should increment at source."
+      },
+      "hint": "Subtract 1 from a and b; increment outdeg at source and indeg at destination.",
+      "isCodeBuilding": true,
+      "codeSnippet": "adj = [[] for _ in range(n)]\nindeg = [0]*n; outdeg = [0]*n\nfor i in range(m):\n    a = next(it)-1; b = next(it)-1\n    adj[a].append((b, i))\n    outdeg[a] += 1; indeg[b] += 1",
+      "codeLabel": "Build graph and degrees"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Check the start (level 1) and end (level n) degree conditions and set a flag.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "ok = True\nif outdeg[0] != indeg[0] + 1 or indeg[n-1] != outdeg[n-1] + 1:\n    ok = False",
+          "isCode": true
+        },
+        {
+          "label": "ok = True\nif outdeg[0] != indeg[0] or indeg[n-1] != outdeg[n-1]:\n    ok = False",
+          "isCode": true
+        },
+        {
+          "label": "ok = True\nif outdeg[0] + 1 != indeg[0] or indeg[n-1] + 1 != outdeg[n-1]:\n    ok = False",
+          "isCode": true
+        },
+        {
+          "label": "ok = False\nif outdeg[0] == indeg[0] + 1 and indeg[n-1] == outdeg[n-1] + 1:\n    ok = True",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Start must have out = in + 1; end must have in = out + 1; we set ok accordingly.",
+      "wrongExplanations": {
+        "1": "This enforces equality, which is wrong for start and end.",
+        "2": "Reverses the inequalities; start would require extra indegree."
+      },
+      "hint": "Start has one extra exit; end has one extra entry.",
+      "isCodeBuilding": true,
+      "codeSnippet": "ok = True\nif outdeg[0] != indeg[0] + 1 or indeg[n-1] != outdeg[n-1] + 1:\n    ok = False",
+      "codeLabel": "Check start/end degree conditions"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Check degree balance for all intermediate levels (2..n-1).",
+      "diagram": null,
+      "options": [
+        {
+          "label": "for v in range(1, n-1):\n    if indeg[v] != outdeg[v]:\n        ok = False; break",
+          "isCode": true
+        },
+        {
+          "label": "for v in range(2, n):\n    if indeg[v] != outdeg[v]:\n        ok = False; break",
+          "isCode": true
+        },
+        {
+          "label": "for v in range(n):\n    if indeg[v] != outdeg[v]:\n        ok = False; break",
+          "isCode": true
+        },
+        {
+          "label": "for v in range(1, n-1):\n    if indeg[v] == outdeg[v]:\n        ok = False; break",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Only check internal nodes (indices 1..n-2 in 0-based). They must have indeg == outdeg.",
+      "wrongExplanations": {
+        "2": "This would also require start and end to be balanced, which they shouldn’t be."
+      },
+      "hint": "Skip index 0 and n-1.",
+      "isCodeBuilding": true,
+      "codeSnippet": "for v in range(1, n-1):\n    if indeg[v] != outdeg[v]:\n        ok = False; break",
+      "codeLabel": "Check internal degree balance"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "If degrees are invalid, terminate early.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "if not ok:\n    print(\"IMPOSSIBLE\"); sys.exit(0)",
+          "isCode": true
+        },
+        {
+          "label": "if ok:\n    print(\"IMPOSSIBLE\"); sys.exit(0)",
+          "isCode": true
+        },
+        {
+          "label": "if ok:\n    pass\nelse:\n    print(\"IMPOSSIBLE\")",
+          "isCode": true
+        },
+        {
+          "label": "if not ok:\n    print(\"IMPOSSIBLE\")\n# continue anyway",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "On invalid degrees, there is no valid sequence; stop immediately.",
+      "wrongExplanations": {
+        "3": "We must not continue if it's impossible; exit prevents extra work."
+      },
+      "hint": "Fail fast.",
+      "isCodeBuilding": true,
+      "codeSnippet": "if not ok:\n    print(\"IMPOSSIBLE\"); sys.exit(0)",
+      "codeLabel": "Early exit on invalid degrees"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Initialize arrays and structures for traversal.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "used = [False]*m\nstack = [0]\npath = []",
+          "isCode": true
+        },
+        {
+          "label": "visited = [False]*n\nstack = []\npath = [0]",
+          "isCode": true
+        },
+        {
+          "label": "used = set()\nstack = []\npath = [0]",
+          "isCode": true
+        },
+        {
+          "label": "used = [0]*n\nstack = [1]\npath = []",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We track used edges by id, start the stack at level 0 (1 in 1-based), and collect the path nodes.",
+      "wrongExplanations": {
+        "3": "Stack should start at node 0 in 0-based indexing; used should size m (edges), not n."
+      },
+      "hint": "We need to start at level 1 (index 0).",
+      "isCodeBuilding": true,
+      "codeSnippet": "used = [False]*m\nstack = [0]\npath = []",
+      "codeLabel": "Initialize traversal state"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Write the main traversal loop header and prune already-used outgoing teleporters.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "while stack:\n    v = stack[-1]\n    while adj[v] and used[adj[v][-1][1]]:\n        adj[v].pop()",
+          "isCode": true
+        },
+        {
+          "label": "while stack:\n    v = stack.pop()\n    while adj[v] and used[adj[v][-1][1]]:\n        adj[v].pop()",
+          "isCode": true
+        },
+        {
+          "label": "while stack:\n    v = stack[0]\n    while adj[v] and used[adj[v][0][1]]:\n        adj[v].pop(0)",
+          "isCode": true
+        },
+        {
+          "label": "while stack:\n    v = stack[-1]\n    if adj[v] and used[adj[v][-1][1]]:\n        continue",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Peek the current node (top of stack) and repeatedly discard already-used edges from the end for amortized O(1).",
+      "wrongExplanations": {
+        "1": "Popping v here loses the path context needed when we cannot proceed.",
+        "3": "Simply continuing risks an infinite loop; we must pop pruned edges."
+      },
+      "hint": "Do not remove the current node from the stack unless stuck.",
+      "isCodeBuilding": true,
+      "codeSnippet": "while stack:\n    v = stack[-1]\n    while adj[v] and used[adj[v][-1][1]]:\n        adj[v].pop()",
+      "codeLabel": "Loop and prune used edges"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "Handle the case when there is an unused outgoing teleporter from v.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "if adj[v]:\n    to, eid = adj[v].pop()\n    if not used[eid]:\n        used[eid] = True\n        stack.append(to)",
+          "isCode": true
+        },
+        {
+          "label": "if adj[v]:\n    to, eid = adj[v][-1]\n    used[eid] = True\n    stack.append(v)",
+          "isCode": true
+        },
+        {
+          "label": "if adj[v]:\n    to, eid = adj[v].pop(0)\n    used[eid] = True\n    path.append(to)",
+          "isCode": true
+        },
+        {
+          "label": "if adj[v]:\n    to, eid = adj[v][-1]\n    if not used[eid]:\n        stack.append(eid)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Pop an unused edge, mark it used, and move to its destination by pushing it on the stack.",
+      "wrongExplanations": {
+        "1": "This doesn’t advance to the neighbor (pushes v again) and doesn’t pop the edge.",
+        "3": "Pushing the edge id is wrong; we need to push the destination node."
+      },
+      "hint": "Advance along the edge and remember you've consumed it.",
+      "isCodeBuilding": true,
+      "codeSnippet": "if adj[v]:\n    to, eid = adj[v].pop()\n    if not used[eid]:\n        used[eid] = True\n        stack.append(to)",
+      "codeLabel": "Advance along an unused edge"
+    },
+    {
+      "id": "q22",
+      "phase": "Writing the Code",
+      "questionText": "Handle the case when v has no unused outgoing teleporters.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "else:\n    path.append(stack.pop())",
+          "isCode": true
+        },
+        {
+          "label": "else:\n    stack.append(path.pop())",
+          "isCode": true
+        },
+        {
+          "label": "else:\n    path.append(v)\n    # keep v in stack",
+          "isCode": true
+        },
+        {
+          "label": "else:\n    stack.pop(); stack.pop()",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Record the node and backtrack by popping it from the stack.",
+      "wrongExplanations": {
+        "2": "We must also remove v from the stack to backtrack.",
+        "3": "Popping twice would skip nodes erroneously."
+      },
+      "hint": "When stuck, record and backtrack by one level.",
+      "isCodeBuilding": true,
+      "codeSnippet": "else:\n    path.append(stack.pop())",
+      "codeLabel": "Record node when stuck"
+    },
+    {
+      "id": "q23",
+      "phase": "Writing the Code",
+      "questionText": "Reverse the path and validate that it uses all teleporters and has correct endpoints before printing.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "path.reverse()\nif len(path) != m+1 or path[0] != 0 or path[-1] != n-1:\n    print(\"IMPOSSIBLE\"); sys.exit(0)\nprint(\" \".join(str(x+1) for x in path))",
+          "isCode": true
+        },
+        {
+          "label": "path.reverse()\nif len(path) != m or path[0] != 0 or path[-1] != n-1:\n    print(\"IMPOSSIBLE\"); sys.exit(0)\nprint(\" \".join(map(str, path)))",
+          "isCode": true
+        },
+        {
+          "label": "if len(path) == m+1 and path[0] == 0 and path[-1] == n-1:\n    print(\" \".join(str(x) for x in path))\nelse:\n    print(\"IMPOSSIBLE\")",
+          "isCode": true
+        },
+        {
+          "label": "path.reverse()\nif len(path) != m+1:\n    print(\"IMPOSSIBLE\"); sys.exit(0)\nprint(\" \".join(str(x) for x in path))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Reverse to get the correct order, verify length and endpoints, and print 1-based labels.",
+      "wrongExplanations": {
+        "1": "The path should have m+1 nodes, and must be printed 1-based.",
+        "3": "Also need to ensure it starts at 1 and ends at n."
+      },
+      "hint": "Check both length and endpoints; convert back to 1-based for output.",
+      "isCodeBuilding": true,
+      "codeSnippet": "path.reverse()\nif len(path) != m+1 or path[0] != 0 or path[-1] != n-1:\n    print(\"IMPOSSIBLE\"); sys.exit(0)\nprint(\" \".join(str(x+1) for x in path))",
+      "codeLabel": "Finalize and print result"
+    },
+    {
+      "id": "q24",
+      "phase": "Verifying the Solution",
+      "questionText": "Consider n=4, m=4 with teleporters:\n1 2\n2 1\n1 3\n3 4\nUsing the implemented traversal (processing last-added edges first), what sequence is printed?",
+      "diagram": "Adjacency (0-based):\n1->2 (id0), 2->1 (id1), 1->3 (id2), 3->4 (id3)\nEdges from 1 are added in order id0 then id2; we pop from the end.",
+      "options": [
+        {
+          "label": "1 3 4 1 2",
+          "isCode": false
+        },
+        {
+          "label": "1 2 1 3 4",
+          "isCode": false
+        },
+        {
+          "label": "1 3 1 2 4",
+          "isCode": false
+        },
+        {
+          "label": "1 2 3 4 1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "We take 1->3 first (last-added), then 3->4, backtrack to 1, then 1->2, then 2->1, yielding 1 2 1 3 4 reversed is 1 2 1 3 4.",
+      "wrongExplanations": {
+        "0": "This misses using the 2->1 edge correctly in order.",
+        "2": "This sequence doesn’t use all edges with correct direction in the applied order."
+      },
+      "hint": "Simulate the stack: push when moving, append to path when stuck, then reverse.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Verifying the Solution",
+      "questionText": "Consider n=4, m=4 with teleporters:\n1 2\n2 1\n1 4\n3 3\nWhat will the program output?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "A sequence of 5 levels starting at 1 and ending at 4",
+          "isCode": false
+        },
+        {
+          "label": "IMPOSSIBLE",
+          "isCode": false
+        },
+        {
+          "label": "A sequence that ends at 3",
+          "isCode": false
+        },
+        {
+          "label": "A sequence of 4 levels",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Degrees match, but the teleporter 3->3 is unreachable from 1. The constructed path will be shorter than m+1, so we print IMPOSSIBLE.",
+      "wrongExplanations": {
+        "0": "The extra edge at level 3 cannot be included; length check fails.",
+        "3": "Length must be m+1 if valid."
+      },
+      "hint": "Does the traversal from 1 consume all 4 teleporters?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the time complexity of the implemented solution?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n + m)",
+          "isCode": false
+        },
+        {
+          "label": "O(m log m)",
+          "isCode": false
+        },
+        {
+          "label": "O(m^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each edge is processed at most once; adjacency pruning and used flags keep it linear in edges plus nodes.",
+      "wrongExplanations": {
+        "1": "We do not sort or use log factors.",
+        "2": "We avoid repeated scans that would cause quadratic time."
+      },
+      "hint": "Each edge is popped and marked at most once.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q27",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the space complexity of the implemented solution?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n + m)",
+          "isCode": false
+        },
+        {
+          "label": "O(m^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(1)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Adjacency lists store all edges; arrays for degrees and used flags are linear in n and m.",
+      "wrongExplanations": {
+        "2": "We also need to store edges and used flags.",
+        "3": "We store the entire graph and traversal state."
+      },
+      "hint": "Consider adjacency, degree arrays, used flags, and stack/path.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q28",
+      "phase": "Analyzing Complexity",
+      "questionText": "Which edge cases must be handled to avoid incorrect answers?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Degree mismatch at start/end or internal nodes; edges unreachable from level 1; ensure path length equals m+1 and endpoints are 1 and n.",
+          "isCode": false
+        },
+        {
+          "label": "Only graphs where all nodes are reachable from 1 following directions.",
+          "isCode": false
+        },
+        {
+          "label": "Only graphs without self-loops and without multiple edges.",
+          "isCode": false
+        },
+        {
+          "label": "Only when n == m.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Degree checks and the final length/endpoints validation cover mismatch and unreachable edges. Self-loops and distinct pairs are allowed by input.",
+      "wrongExplanations": {
+        "1": "We do not require every node to be reachable; only that all edges on the route are used.",
+        "2": "Self-loops are allowed; pairs are distinct but this doesn’t affect correctness."
+      },
+      "hint": "Focus on degrees and confirming all edges are used with correct start/end.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys",
+    "data = list(map(int, sys.stdin.read().strip().split()))",
+    "if not data:",
+    "    print(\"IMPOSSIBLE\"); sys.exit(0)",
+    "it = iter(data); n = next(it); m = next(it)",
+    "adj = [[] for _ in range(n)]",
+    "indeg = [0]*n; outdeg = [0]*n",
+    "for i in range(m):",
+    "    a = next(it)-1; b = next(it)-1",
+    "    adj[a].append((b, i))",
+    "    outdeg[a] += 1; indeg[b] += 1",
+    "ok = True",
+    "if outdeg[0] != indeg[0] + 1 or indeg[n-1] != outdeg[n-1] + 1:",
+    "    ok = False",
+    "for v in range(1, n-1):",
+    "    if indeg[v] != outdeg[v]:",
+    "        ok = False; break",
+    "if not ok:",
+    "    print(\"IMPOSSIBLE\"); sys.exit(0)",
+    "used = [False]*m",
+    "stack = [0]",
+    "path = []",
+    "while stack:",
+    "    v = stack[-1]",
+    "    while adj[v] and used[adj[v][-1][1]]:",
+    "        adj[v].pop()",
+    "    if adj[v]:",
+    "        to, eid = adj[v].pop()",
+    "        if not used[eid]:",
+    "            used[eid] = True",
+    "            stack.append(to)",
+    "    else:",
+    "        path.append(stack.pop())",
+    "path.reverse()",
+    "if len(path) != m+1 or path[0] != 0 or path[-1] != n-1:",
+    "    print(\"IMPOSSIBLE\"); sys.exit(0)",
+    "print(\" \".join(str(x+1) for x in path))"
+  ],
+  "reasoningChain": [
+    {
+      "question": "How many level numbers must a valid sequence print when using each teleporter exactly once?",
+      "insight": "Using m teleporters means m moves and m+1 visited levels; nodes may repeat."
+    },
+    {
+      "question": "What local constraints must hold at each level to traverse every teleporter once from 1 to n?",
+      "insight": "Internal levels must have equal incoming and outgoing counts; start has one extra outgoing; end has one extra incoming."
+    },
+    {
+      "question": "Are degree conditions alone enough to guarantee success?",
+      "insight": "No; edges must all be consumable from level 1. After construction, ensure the path length is m+1 and endpoints are correct."
+    },
+    {
+      "question": "How to construct such a sequence efficiently?",
+      "insight": "Walk along unused outgoing teleporters and, when stuck, record the level and backtrack with a stack; reverse the recorded list at the end."
+    },
+    {
+      "question": "What data structures ensure linear performance?",
+      "insight": "Adjacency lists storing (to, edge_id), a boolean used array, and pruning by popping edges allow O(m) traversal."
+    },
+    {
+      "question": "What validations finalize correctness?",
+      "insight": "Reverse the built list, check length m+1 and that it starts at 1 and ends at n; otherwise print IMPOSSIBLE."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1454,
+    "output_tokens": 15437,
+    "input_cost": 0.001818,
+    "output_cost": 0.15437,
+    "total_cost": 0.156188
+  }
+}

@@ -1,0 +1,1021 @@
+{
+  "id": "round-trip-ii-directed-cycle",
+  "title": "Round Trip II",
+  "difficulty": "intermediate",
+  "tags": [
+    "graph"
+  ],
+  "estimatedMinutes": 55,
+  "language": "python",
+  "description": "Byteland has n cities and m flight connections. Your task is to design a round trip that begins in a city, goes through one or more other cities, and finally returns to the starting city. Every intermediate city on the route has to be distinct.\n\nInput:\n- First line: two integers n and m — the number of cities and flights.\n- Next m lines: two integers a and b — a one-way flight from city a to city b.\n\nOutput:\n- If a route exists, first print k: the number of cities on the route. Then print k cities in the order they are visited (the first and last city should be the same to show the return).\n- If there are no solutions, print \"IMPOSSIBLE\".\n\nCities are numbered 1..n.",
+  "examples": [
+    {
+      "input": "4 5\n1 3\n2 1\n2 4\n3 2\n3 4",
+      "output": "4\n2 1 3 2",
+      "explanation": "One valid route is 2 → 1 → 3 → 2. Any valid cycle is acceptable."
+    }
+  ],
+  "constraints": [
+    "1 ≤ n ≤ 10^5",
+    "1 ≤ m ≤ 2 · 10^5",
+    "1 ≤ a, b ≤ n",
+    "All flights are one-way"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "Which describes a valid round trip in this setting?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Start and end at the same city; intermediate cities may repeat; edges can be used in any direction.",
+          "isCode": false
+        },
+        {
+          "label": "Start and end at the same city; all intermediate cities are distinct; edges must be followed in their given direction.",
+          "isCode": false
+        },
+        {
+          "label": "Start and end can be different; all intermediate cities are distinct; edges must be followed in their given direction.",
+          "isCode": false
+        },
+        {
+          "label": "Start and end at the same city; intermediate cities may repeat once; edges are undirected.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "A valid route starts and ends at the same city, follows directed edges, and intermediate cities are distinct.",
+      "wrongExplanations": {
+        "0": "Intermediate cities cannot repeat and edges are one-way.",
+        "2": "The route must return to the starting city."
+      },
+      "hint": "Pay attention to direction and the distinctness of intermediate cities.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "Consider n=2, m=1 with a single flight 1→2. Does any valid round trip exist?",
+      "diagram": "1 -> 2",
+      "options": [
+        {
+          "label": "Yes: 1 2 1",
+          "isCode": false
+        },
+        {
+          "label": "Yes: 2 1 2",
+          "isCode": false
+        },
+        {
+          "label": "No, IMPOSSIBLE",
+          "isCode": false
+        },
+        {
+          "label": "Yes, if we allow reusing a city once in the middle.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "With only 1→2, there’s no way to return to 1 or 2 following directions. So no valid route.",
+      "wrongExplanations": {
+        "0": "There is no edge 2→1, so 1 2 1 is not possible.",
+        "1": "There is no edge 2→1 or 1→2 from 2 to return."
+      },
+      "hint": "A return edge is needed to come back to the start.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "For edges 1→2 and 2→1, which output is a valid round trip?",
+      "diagram": "1 <-> 2",
+      "options": [
+        {
+          "label": "3\n1 2 1",
+          "isCode": false
+        },
+        {
+          "label": "2\n1 2",
+          "isCode": false
+        },
+        {
+          "label": "4\n1 2 1 2",
+          "isCode": false
+        },
+        {
+          "label": "IMPOSSIBLE",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "A valid route must start and end at the same city, listing visited cities including the return. 1 2 1 is valid.",
+      "wrongExplanations": {
+        "1": "The output must include returning to the start; length should be 3 here.",
+        "2": "You should return once to the start, not loop multiple times."
+      },
+      "hint": "Include the starting city again at the end to show the return.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "Given edges 1→2, 2→3, and 3→2, which of the following is a valid output?",
+      "diagram": "1 -> 2 <-> 3",
+      "options": [
+        {
+          "label": "3\n2 3 2",
+          "isCode": false
+        },
+        {
+          "label": "4\n1 2 3 1",
+          "isCode": false
+        },
+        {
+          "label": "3\n1 2 1",
+          "isCode": false
+        },
+        {
+          "label": "2\n2 2",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "2→3→2 is a cycle. There is no edge 3→1, so 1 2 3 1 is invalid.",
+      "wrongExplanations": {
+        "1": "There is no flight from 3 back to 1.",
+        "2": "There is no 2→1 edge."
+      },
+      "hint": "Check edges carefully and ensure start equals end.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Understanding the Problem",
+      "questionText": "If the graph has no valid round trip, what should the program print?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "IMPOSSIBLE",
+          "isCode": false
+        },
+        {
+          "label": "NONE",
+          "isCode": false
+        },
+        {
+          "label": "Just an empty line",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "The problem asks to print \"IMPOSSIBLE\" when no route exists.",
+      "wrongExplanations": {
+        "0": "Zero is not the specified output for no solution.",
+        "2": "Exact required keyword is \"IMPOSSIBLE\"."
+      },
+      "hint": "Check the Output section of the problem.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "Is trying all possible paths up to length n to find a round trip feasible under the constraints?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, it’s O(n+m).",
+          "isCode": false
+        },
+        {
+          "label": "Yes, it’s about O(n^2).",
+          "isCode": false
+        },
+        {
+          "label": "No, it can blow up exponentially in the worst case.",
+          "isCode": false
+        },
+        {
+          "label": "Yes, about O(log n).",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Enumerating paths can be exponential; m can be 2e5, so this is infeasible.",
+      "wrongExplanations": {
+        "0": "You would revisit many combinations, not linear time.",
+        "1": "Underestimates the path explosion."
+      },
+      "hint": "Consider a node with many outgoing edges and long chains.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "While exploring from a start city and keeping the current path, what event guarantees a round trip exists?",
+      "diagram": "current path: s -> ... -> u; exploring edge u -> v",
+      "options": [
+        {
+          "label": "You follow an edge to a never-seen city.",
+          "isCode": false
+        },
+        {
+          "label": "You follow an edge to a city that is on the current path.",
+          "isCode": false
+        },
+        {
+          "label": "You follow an edge to any city seen before at any time.",
+          "isCode": false
+        },
+        {
+          "label": "You reach a city with no outgoing edges.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "An edge to a city already in the current path means you can return to it, forming a cycle.",
+      "wrongExplanations": {
+        "2": "Edges to already-finished cities don’t necessarily close a cycle along the current path.",
+        "3": "Dead ends don’t indicate cycles."
+      },
+      "hint": "Think in terms of a path you are currently walking and revisiting a city on it.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Exploring Approaches",
+      "questionText": "Why is a single boolean \"visited\" flag per city not sufficient for this task?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "We need to compute degrees as well.",
+          "isCode": false
+        },
+        {
+          "label": "We must distinguish cities on the current path from those already fully processed.",
+          "isCode": false
+        },
+        {
+          "label": "The graph might be weighted.",
+          "isCode": false
+        },
+        {
+          "label": "We need to record all paths explicitly.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "We need to tell whether a seen city is on the current path (cycle) or already done (no cycle via that edge).",
+      "wrongExplanations": {
+        "0": "Degrees are not required for detection.",
+        "3": "We do not need to store all paths."
+      },
+      "hint": "Consider two categories of seen cities: on-path vs done.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "Choose the most useful state scheme for each city during exploration.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "0: unvisited, 1: on current path, 2: finished",
+          "isCode": false
+        },
+        {
+          "label": "1: unvisited, 2: visited, 3: finished",
+          "isCode": false
+        },
+        {
+          "label": "0: visited, 1: unvisited, 2: finished",
+          "isCode": false
+        },
+        {
+          "label": "0: finished, 1: unvisited, 2: on current path",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Using 0/1/2 as (unvisited/on-path/finished) cleanly captures the needed distinctions.",
+      "wrongExplanations": {
+        "1": "Nonzero base and vague labels are less clear.",
+        "2": "Swapping semantics will break checks."
+      },
+      "hint": "We need three distinct states: new, active, done.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "When should a city be marked as finished (state=2)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Immediately upon first seeing it.",
+          "isCode": false
+        },
+        {
+          "label": "After exploring all of its outgoing edges completely.",
+          "isCode": false
+        },
+        {
+          "label": "After seeing its first outgoing edge.",
+          "isCode": false
+        },
+        {
+          "label": "Right before exploring any neighbor.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "A city is finished only after all paths starting there have been explored.",
+      "wrongExplanations": {
+        "0": "We need to be able to detect if it appears on the current path.",
+        "2": "Finishing early would hide possible cycles."
+      },
+      "hint": "Finished means there’s nothing left to explore from it.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "How and when should we set parent pointers to later reconstruct a cycle?",
+      "diagram": "Edge u -> v",
+      "options": [
+        {
+          "label": "When we first follow u→v and v was unvisited, set parent[v] = u.",
+          "isCode": false
+        },
+        {
+          "label": "Set parent[v] after finishing exploring v.",
+          "isCode": false
+        },
+        {
+          "label": "Only set parents when a cycle is detected.",
+          "isCode": false
+        },
+        {
+          "label": "Never set parents; they are not needed.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Set parent for each newly discovered city to trace back along the current path.",
+      "wrongExplanations": {
+        "1": "Setting it too late breaks path reconstruction on discovery.",
+        "3": "We need parents to rebuild the route."
+      },
+      "hint": "Parents capture the path you took to reach a city the first time.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "You are at city u and see an edge u→v where v is on the current path. How do you reconstruct the cycle?",
+      "diagram": "current path: ... -> v -> ... -> u ; edge u -> v closes the cycle",
+      "options": [
+        {
+          "label": "Collect [u], repeatedly move to parent[u] until v is reached, reverse the list to get v..u, then append v at the end.",
+          "isCode": false
+        },
+        {
+          "label": "Collect starting from v up to a root city using parents and stop.",
+          "isCode": false
+        },
+        {
+          "label": "Collect every city visited so far and print them all.",
+          "isCode": false
+        },
+        {
+          "label": "Use in-degree counts to list the cycle.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Walk back from u to v along parents, reverse to go v→...→u, and append v to close the route.",
+      "wrongExplanations": {
+        "1": "We need the segment from v to u specifically.",
+        "2": "Only the cycle segment should be output."
+      },
+      "hint": "The parents trace the current path backward.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "After reversing the collected list to v..u, what should you print for the route?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Print v..u and then append v once more to end at the start.",
+          "isCode": false
+        },
+        {
+          "label": "Print v..u without appending anything.",
+          "isCode": false
+        },
+        {
+          "label": "Print v, then v..u, then v again.",
+          "isCode": false
+        },
+        {
+          "label": "Print u first, then v..u, then u again.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need to return to the start city v, so append v once at the end.",
+      "wrongExplanations": {
+        "1": "The route must end at the start city.",
+        "2": "That prints v twice at the beginning."
+      },
+      "hint": "The first and last printed cities should be the same.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Building the Idea",
+      "questionText": "Where should we start exploring to ensure we find a round trip if one exists?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Only from city 1.",
+          "isCode": false
+        },
+        {
+          "label": "From every city that is still unvisited, to cover all components.",
+          "isCode": false
+        },
+        {
+          "label": "Only from cities with zero in-degree.",
+          "isCode": false
+        },
+        {
+          "label": "Only from cities with outgoing edges.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Start from each unvisited city to explore all parts of the graph.",
+      "wrongExplanations": {
+        "0": "There may be cycles not reachable from city 1.",
+        "2": "A cycle can exist without zero in-degree nodes."
+      },
+      "hint": "Disconnected parts may contain cycles too.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Choose a robust input parsing setup and handle deep recursion safely.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\nsys.setrecursionlimit(1 << 25)\ndata = sys.stdin.read().strip().split()\nit = iter(data)\nn = int(next(it)); m = int(next(it))",
+          "isCode": true
+        },
+        {
+          "label": "n, m = map(int, input().split())\n# later: read lines with input()",
+          "isCode": true
+        },
+        {
+          "label": "import sys\ndata = sys.stdin.readline().split()\nn = int(data[0]); m = int(data[1])",
+          "isCode": true
+        },
+        {
+          "label": "import sys\n# No recursion limit needed\nn, m = map(int, sys.stdin.read().split())",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Reading all tokens and raising recursion limit handles large inputs and deep calls.",
+      "wrongExplanations": {
+        "1": "Line-by-line input may be fine but we still need to handle deep recursion.",
+        "3": "Deep exploration may exceed default recursion depth."
+      },
+      "hint": "Default recursion depth in Python is ~1000; n can be up to 1e5.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\nsys.setrecursionlimit(1 << 25)\ndata = sys.stdin.read().strip().split()\nit = iter(data)\nn = int(next(it)); m = int(next(it))",
+      "codeLabel": "Parse input and set recursion limit"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Build the adjacency list for directed edges (1-based cities).",
+      "diagram": null,
+      "options": [
+        {
+          "label": "g = [[] for _ in range(n+1)]\nfor _ in range(m):\n    a = int(next(it)); b = int(next(it))\n    g[a].append(b)",
+          "isCode": true
+        },
+        {
+          "label": "g = [[] for _ in range(n)]\nfor _ in range(m):\n    a = int(next(it)); b = int(next(it))\n    g[a-1].append(b-1)",
+          "isCode": true
+        },
+        {
+          "label": "g = [[] for _ in range(n+1)]\nfor _ in range(m):\n    a = int(next(it)); b = int(next(it))\n    g[b].append(a)",
+          "isCode": true
+        },
+        {
+          "label": "g = [set() for _ in range(n+1)]\nfor _ in range(m):\n    a = int(next(it)); b = int(next(it))\n    g[a].add(b)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need a 1-based list of outgoing neighbors with directed edges g[a].append(b).",
+      "wrongExplanations": {
+        "1": "This converts to 0-based indices; we’ll keep 1-based for simplicity.",
+        "3": "Sets lose duplicates order; lists are fine and simpler here."
+      },
+      "hint": "Cities are numbered 1..n.",
+      "isCodeBuilding": true,
+      "codeSnippet": "g = [[] for _ in range(n+1)]\nfor _ in range(m):\n    a = int(next(it)); b = int(next(it))\n    g[a].append(b)",
+      "codeLabel": "Build adjacency list"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Initialize tracking structures for states, parents, and the result cycle.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "state = [0]*(n+1)\nparent = [-1]*(n+1)\ncycle = []",
+          "isCode": true
+        },
+        {
+          "label": "state = {}\nparent = {}\ncycle = None",
+          "isCode": true
+        },
+        {
+          "label": "state = [False]*(n+1)\nparent = [0]*(n+1)\ncycle = []",
+          "isCode": true
+        },
+        {
+          "label": "state = [0]*n\nparent = [-1]*n\ncycle = []",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We’ll use 0/1/2 states, parent pointers default -1, and store cycle nodes in a list.",
+      "wrongExplanations": {
+        "2": "Boolean states lose the 3-way distinction; parent=0 conflicts with 1-based cities.",
+        "3": "We need arrays of size n+1 to index by city number directly."
+      },
+      "hint": "Keep arrays 1-based to align with city numbers.",
+      "isCodeBuilding": true,
+      "codeSnippet": "state = [0]*(n+1)\nparent = [-1]*(n+1)\ncycle = []",
+      "codeLabel": "Initialize state, parent, result"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Start the recursive exploration function and mark a city as on the current path.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def dfs(u):\n    global cycle\n    state[u] = 1",
+          "isCode": true
+        },
+        {
+          "label": "def dfs(u):\n    state[u] = 2",
+          "isCode": true
+        },
+        {
+          "label": "def dfs(u):\n    cycle = []\n    state[u] = 1",
+          "isCode": true
+        },
+        {
+          "label": "def dfs(u):\n    state[u] = True",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Mark state 1 for on-path and declare cycle as global since we assign to it inside.",
+      "wrongExplanations": {
+        "1": "State 2 means finished; we just started exploring u.",
+        "3": "We need 3 integer states, not booleans."
+      },
+      "hint": "We’ll assign to the shared 'cycle' variable inside this function.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def dfs(u):\n    global cycle\n    state[u] = 1",
+      "codeLabel": "dfs header and mark active"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Process outgoing edges and recurse to unvisited neighbors while recording parent.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    for v in g[u]:\n        if state[v] == 0:\n            parent[v] = u\n            if dfs(v):\n                return True",
+          "isCode": true
+        },
+        {
+          "label": "    for v in g[u]:\n        if state[v] == 1:\n            parent[v] = u\n            dfs(v)",
+          "isCode": true
+        },
+        {
+          "label": "    for v in g[u]:\n        if state[v] == 0:\n            if dfs(v):\n                parent[v] = u\n                return True",
+          "isCode": true
+        },
+        {
+          "label": "    for v in g[u]:\n        parent[v] = u\n        if dfs(v):\n            return True",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Set parent before recursing and short-circuit if a cycle is found.",
+      "wrongExplanations": {
+        "2": "Setting parent after recursion breaks path reconstruction on discovery.",
+        "3": "Parent should be set only when v was unvisited; otherwise it corrupts parents."
+      },
+      "hint": "Set parent at the moment you discover v the first time.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    for v in g[u]:\n        if state[v] == 0:\n            parent[v] = u\n            if dfs(v):\n                return True",
+      "codeLabel": "Recurse on unvisited neighbors"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Handle the case when an edge goes to a city on the current path and reconstruct the cycle.",
+      "diagram": "u -> v with v on current path",
+      "options": [
+        {
+          "label": "        elif state[v] == 1:\n            path = [u]\n            x = u\n            while x != v:\n                x = parent[x]\n                path.append(x)\n            path.reverse()\n            path.append(v)\n            cycle = path\n            return True",
+          "isCode": true
+        },
+        {
+          "label": "        elif state[v] == 1:\n            path = [v]\n            x = v\n            while x != u:\n                x = parent[x]\n                path.append(x)\n            cycle = path\n            return True",
+          "isCode": true
+        },
+        {
+          "label": "        elif state[v] == 2:\n            path = [u]\n            x = u\n            while parent[x] != v:\n                x = parent[x]\n                path.append(x)\n            cycle = path\n            return True",
+          "isCode": true
+        },
+        {
+          "label": "        elif state[v] == 1:\n            path = [u]\n            x = u\n            while x != v:\n                x = parent[x]\n                path.append(x)\n            path.append(v)\n            path.reverse()\n            cycle = path\n            return True",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Collect u..v via parents, reverse to v..u, then append v to close the route in order.",
+      "wrongExplanations": {
+        "1": "Building from v forward with parents reverses direction and misses appending v at end.",
+        "3": "Reversing after appending v puts v at the start rather than closing the loop."
+      },
+      "hint": "We need final order: v ... u v.",
+      "isCodeBuilding": true,
+      "codeSnippet": "        elif state[v] == 1:\n            path = [u]\n            x = u\n            while x != v:\n                x = parent[x]\n                path.append(x)\n            path.reverse()\n            path.append(v)\n            cycle = path\n            return True",
+      "codeLabel": "Detect and reconstruct cycle"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "After processing all neighbors of u without finding a cycle, how do you finish u?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    state[u] = 2\n    return False",
+          "isCode": true
+        },
+        {
+          "label": "    state[u] = 1\n    return False",
+          "isCode": true
+        },
+        {
+          "label": "    return True",
+          "isCode": true
+        },
+        {
+          "label": "    state[v] = 2\n    return False",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Mark u as finished (2) and report no cycle found along this path.",
+      "wrongExplanations": {
+        "1": "State 1 means on current path; we are done with u.",
+        "2": "We didn’t find a cycle, so returning True is incorrect."
+      },
+      "hint": "Finished means no further exploration from u is needed.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    state[u] = 2\n    return False",
+      "codeLabel": "Finish node and return"
+    },
+    {
+      "id": "q22",
+      "phase": "Writing the Code",
+      "questionText": "Now write the driver loop to explore from all cities and print the result as soon as a cycle is found.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "for u in range(1, n+1):\n    if state[u] == 0:\n        if dfs(u):\n            print(len(cycle))\n            print(' '.join(map(str, cycle)))\n            sys.exit(0)\nprint(\"IMPOSSIBLE\")",
+          "isCode": true
+        },
+        {
+          "label": "for u in range(1, n+1):\n    if state[u] == 0:\n        dfs(u)\nprint(len(cycle))\nprint(' '.join(map(str, cycle)))",
+          "isCode": true
+        },
+        {
+          "label": "if dfs(1):\n    print(len(cycle))\n    print(' '.join(map(str, cycle)))\nelse:\n    print(\"IMPOSSIBLE\")",
+          "isCode": true
+        },
+        {
+          "label": "for u in range(1, n+1):\n    dfs(u)\nprint(\"IMPOSSIBLE\")",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Start from every unvisited node, print and exit on first cycle found; otherwise print IMPOSSIBLE.",
+      "wrongExplanations": {
+        "1": "If no cycle is found, this prints an empty cycle; and it doesn’t stop after finding one.",
+        "2": "Starting only from city 1 may miss cycles elsewhere."
+      },
+      "hint": "Exit immediately after printing a valid route.",
+      "isCodeBuilding": true,
+      "codeSnippet": "for u in range(1, n+1):\n    if state[u] == 0:\n        if dfs(u):\n            print(len(cycle))\n            print(' '.join(map(str, cycle)))\n            sys.exit(0)\nprint(\"IMPOSSIBLE\")",
+      "codeLabel": "Driver and output"
+    },
+    {
+      "id": "q23",
+      "phase": "Verifying the Solution",
+      "questionText": "Given the sample input:\n4 5\n1 3\n2 1\n2 4\n3 2\n3 4\nWhich of the following is a valid output from your program?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "4\n2 1 3 2",
+          "isCode": false
+        },
+        {
+          "label": "3\n1 3 2",
+          "isCode": false
+        },
+        {
+          "label": "4\n1 3 4 1",
+          "isCode": false
+        },
+        {
+          "label": "IMPOSSIBLE",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "2→1→3→2 is a valid cycle. Other options either don’t follow edges or aren’t cycles.",
+      "wrongExplanations": {
+        "1": "Does not return to the start and also 2→? edge missing.",
+        "2": "There is no edge 4→1."
+      },
+      "hint": "Check if each consecutive pair is an edge and start==end.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Verifying the Solution",
+      "questionText": "Input:\n4 3\n1 2\n2 3\n3 4\nWhat should your program print?",
+      "diagram": "1 -> 2 -> 3 -> 4",
+      "options": [
+        {
+          "label": "IMPOSSIBLE",
+          "isCode": false
+        },
+        {
+          "label": "4\n1 2 3 1",
+          "isCode": false
+        },
+        {
+          "label": "3\n2 3 2",
+          "isCode": false
+        },
+        {
+          "label": "2\n3 3",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "This is a chain with no way back; no cycles exist.",
+      "wrongExplanations": {
+        "1": "No 3→1 edge exists, so 1 2 3 1 is invalid.",
+        "3": "No self-loop 3→3 exists."
+      },
+      "hint": "No edge allows a return to any earlier city.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Verifying the Solution",
+      "questionText": "Input:\n5 5\n1 2\n2 3\n3 1\n3 4\n4 5\nWhich valid output could your program produce?",
+      "diagram": "1 -> 2 -> 3 -> 1 and 3 -> 4 -> 5",
+      "options": [
+        {
+          "label": "4\n1 2 3 1",
+          "isCode": false
+        },
+        {
+          "label": "5\n1 2 3 4 1",
+          "isCode": false
+        },
+        {
+          "label": "3\n3 4 3",
+          "isCode": false
+        },
+        {
+          "label": "IMPOSSIBLE",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "1→2→3→1 is a valid cycle; edges 3→4→5 don’t form a cycle.",
+      "wrongExplanations": {
+        "1": "There is no edge 3→4→1 completing this route.",
+        "2": "No edge 4→3 exists."
+      },
+      "hint": "Find any directed cycle; extra edges don’t matter for validity.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the time complexity of your solution in terms of n (cities) and m (flights)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n + m)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(m log n)",
+          "isCode": false
+        },
+        {
+          "label": "Exponential in n",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each city and edge is processed a constant number of times.",
+      "wrongExplanations": {
+        "1": "We don't compare all pairs of cities.",
+        "3": "We avoid exhaustive path enumeration."
+      },
+      "hint": "We traverse each edge at most twice overall.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q27",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the space complexity of the approach?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n + m) for adjacency list and auxiliary arrays",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(m^2)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We store the graph (O(n+m)) and a few arrays with O(n) size.",
+      "wrongExplanations": {
+        "1": "We don't store all pairs of cities.",
+        "3": "No quadratic storage in edges is used."
+      },
+      "hint": "Adjacency list dominates memory use.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q28",
+      "phase": "Analyzing Complexity",
+      "questionText": "Which line in the implementation ensures we won’t crash due to deep call stacks on large inputs?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "sys.setrecursionlimit(1 << 25)",
+          "isCode": true
+        },
+        {
+          "label": "import sys",
+          "isCode": true
+        },
+        {
+          "label": "it = iter(data)",
+          "isCode": true
+        },
+        {
+          "label": "print(\"IMPOSSIBLE\")",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Increasing the recursion limit avoids hitting the default depth with long chains.",
+      "wrongExplanations": {
+        "1": "Importing sys alone doesn’t change recursion limits.",
+        "2": "Iterator creation is unrelated to call stack depth."
+      },
+      "hint": "Python defaults to ~1000 frame depth.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\nsys.setrecursionlimit(1 << 25)\ndata = sys.stdin.read().strip().split()\nit = iter(data)\nn = int(next(it)); m = int(next(it))",
+    "g = [[] for _ in range(n+1)]\nfor _ in range(m):\n    a = int(next(it)); b = int(next(it))\n    g[a].append(b)",
+    "state = [0]*(n+1)\nparent = [-1]*(n+1)\ncycle = []",
+    "def dfs(u):\n    global cycle\n    state[u] = 1",
+    "    for v in g[u]:\n        if state[v] == 0:\n            parent[v] = u\n            if dfs(v):\n                return True",
+    "        elif state[v] == 1:\n            path = [u]\n            x = u\n            while x != v:\n                x = parent[x]\n                path.append(x)\n            path.reverse()\n            path.append(v)\n            cycle = path\n            return True",
+    "    state[u] = 2\n    return False",
+    "for u in range(1, n+1):\n    if state[u] == 0:\n        if dfs(u):\n            print(len(cycle))\n            print(' '.join(map(str, cycle)))\n            sys.exit(0)\nprint(\"IMPOSSIBLE\")"
+  ],
+  "reasoningChain": [
+    {
+      "question": "What exactly is a valid round trip and how should it be printed?",
+      "insight": "It’s a directed cycle: start and end at the same city, intermediate cities distinct, and print the sequence including the repeated start at the end."
+    },
+    {
+      "question": "Why not enumerate all paths?",
+      "insight": "Brute force is exponential; we need a linear-time traversal that detects returning to a city on the current path."
+    },
+    {
+      "question": "How to detect a cycle during traversal?",
+      "insight": "Maintain three states (unvisited/on-path/finished) and detect an edge to a city currently on the path."
+    },
+    {
+      "question": "How to rebuild the actual route when a returning edge is found?",
+      "insight": "Keep parent pointers when first discovering a city; on detecting u→v with v on path, walk parents from u to v, reverse, and append v."
+    },
+    {
+      "question": "How to ensure coverage of the whole graph?",
+      "insight": "Start exploration from every unvisited city and stop as soon as a cycle is found."
+    },
+    {
+      "question": "What implementation details ensure correctness and robustness?",
+      "insight": "Use adjacency lists and arrays, increase recursion limit, and short-circuit/exit upon finding a valid route."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1451,
+    "output_tokens": 17616,
+    "input_cost": 0.001814,
+    "output_cost": 0.17616,
+    "total_cost": 0.177974
+  }
+}

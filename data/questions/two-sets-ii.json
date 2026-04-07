@@ -1,0 +1,985 @@
+{
+  "id": "two-sets-ii-guided-mcqs",
+  "title": "Two Sets II",
+  "difficulty": "intermediate",
+  "tags": [
+    "dp"
+  ],
+  "estimatedMinutes": 45,
+  "language": "python",
+  "description": "Your task is to count the number of ways numbers 1,2,\\ldots,n can be divided into two sets of equal sum.\n\nFor example, if n=7 , there are four solutions:\n\n\\{1,3,4,6\\} and \\{2,5,7\\}\n\\{1,2,5,6\\} and \\{3,4,7\\}\n\\{1,2,4,7\\} and \\{3,5,6\\}\n\\{1,6,7\\} and \\{2,3,4,5\\}\n\nThe only input line contains an integer n.\n\nOutput: Print the answer modulo 10^9+7.",
+  "examples": [
+    {
+      "input": "7",
+      "output": "4",
+      "explanation": "Total sum S=28, target T=14. There are 8 subsets of {1..7} summing to 14, each partition counted twice, so 8/2=4."
+    }
+  ],
+  "constraints": [
+    "1 ≤ n ≤ 500",
+    "Time limit: 1.00 s",
+    "Memory limit: 512 MB",
+    "Print the answer modulo 10^9+7"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "For n = 1, how many ways can {1} be split into two sets of equal sum?",
+      "diagram": "Set: {1}\nTotal sum S = 1 (odd)",
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "It depends on modulo",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "S=1 is odd, so equal split is impossible. Answer is 0.",
+      "wrongExplanations": {
+        "1": "There is no way to split {1} into two equal-sum parts.",
+        "3": "Modulo doesn't change feasibility; only parity of S matters."
+      },
+      "hint": "Check if the total sum is even.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "For n = 2, how many ways can {1,2} be split into two sets of equal sum?",
+      "diagram": "Set: {1,2}\nAll splits:\n- {1} | {2} => sums 1 and 2 (not equal)\n- { } | {1,2} => sums 0 and 3 (not equal)",
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "S=3 is odd, so there are 0 ways.",
+      "wrongExplanations": {
+        "1": "{1}|{2} doesn't have equal sums.",
+        "2": "No equal sums exist because S is odd."
+      },
+      "hint": "Compute S = 1+2 and check parity.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "For n = 3, how many ways can {1,2,3} be split into two sets of equal sum?",
+      "diagram": "S = 6, target T = 3.\nCandidates: {3} | {1,2}.",
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Only {3}|{1,2} works. So 1 way.",
+      "wrongExplanations": {
+        "0": "There is a valid split: {3}|{1,2}.",
+        "2": "No other subset sums to 3 besides {3} and {1,2}, which form the same partition."
+      },
+      "hint": "List subsets summing to 3 and account for double counting.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "For n = 4, S=10 and target T=5. The subsets summing to 5 are {1,4} and {2,3} (two subsets). How many partitions of {1..4} into equal sums does this correspond to?",
+      "diagram": "Subsets of sum 5: {1,4}, {2,3}\nEach subset defines one side of a partition.",
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each partition is counted twice by choosing either side. Two subsets => one partition.",
+      "wrongExplanations": {
+        "1": "Selecting either subset corresponds to the same partition, so divide by 2.",
+        "3": "There are only two subsets of sum 5."
+      },
+      "hint": "Does {1,4} | {2,3} differ from {2,3} | {1,4}?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Exploring Approaches",
+      "questionText": "When S is even, which sum should we count subsets for?",
+      "diagram": "S = n(n+1)/2, target T = ?",
+      "options": [
+        {
+          "label": "S",
+          "isCode": false
+        },
+        {
+          "label": "S/2",
+          "isCode": false
+        },
+        {
+          "label": "n",
+          "isCode": false
+        },
+        {
+          "label": "S/4",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "We need subsets reaching half of the total sum, T = S/2.",
+      "wrongExplanations": {
+        "0": "Subsets summing to the full S would only be the whole set.",
+        "3": "S/4 is unrelated to equal partitioning."
+      },
+      "hint": "Each side of the partition sums to the same T.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "n ≤ 500. Which plan is feasible to count subsets summing to T?",
+      "diagram": "Compare options by their rough operation counts.",
+      "options": [
+        {
+          "label": "Enumerate all 2^n subsets and sum each.",
+          "isCode": false
+        },
+        {
+          "label": "Incrementally count ways to reach each sum by adding numbers 1..n.",
+          "isCode": false
+        },
+        {
+          "label": "Try pairing largest with smallest greedily.",
+          "isCode": false
+        },
+        {
+          "label": "Randomly sample subsets and estimate.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Incrementally counting sums scales as O(n*T), feasible for T≈n^2/2.",
+      "wrongExplanations": {
+        "0": "2^500 is impossibly large.",
+        "2": "Greedy pairing doesn't count all valid combinations."
+      },
+      "hint": "You need an exact count, not a single construction.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "While adding a number x to the counting process, in which order should sums be updated to avoid using x multiple times?",
+      "diagram": "When adding x, ensure each x is used at most once.",
+      "options": [
+        {
+          "label": "From small sums up to T (ascending).",
+          "isCode": false
+        },
+        {
+          "label": "From T down to x (descending).",
+          "isCode": false
+        },
+        {
+          "label": "Order doesn't matter.",
+          "isCode": false
+        },
+        {
+          "label": "Alternate ascending and descending each step.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Descending ensures new uses of x don't feed back into the same step.",
+      "wrongExplanations": {
+        "0": "Ascending would allow multiple uses of x within the same iteration.",
+        "2": "Order matters to prevent reusing the same number."
+      },
+      "hint": "Think about s and s−x being updated in the same pass.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Building the Idea",
+      "questionText": "We maintain an array ways[s] = number of ways to reach sum s using some prefix of {1..n}. How should we initialize it before processing any numbers?",
+      "diagram": "Before using any numbers, only sum 0 is achievable in 1 way (choose nothing).",
+      "options": [
+        {
+          "label": "ways[0] = 1 and ways[s>0] = 0",
+          "isCode": false
+        },
+        {
+          "label": "ways[0] = 0 and ways[s>0] = 1",
+          "isCode": false
+        },
+        {
+          "label": "ways[s] = 1 for all s",
+          "isCode": false
+        },
+        {
+          "label": "ways[s] = 0 for all s",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Sum 0 is achievable by choosing nothing; others are impossible initially.",
+      "wrongExplanations": {
+        "1": "Sum 0 is achievable; set it to 1.",
+        "2": "We can't achieve positive sums without numbers."
+      },
+      "hint": "How many ways to get sum 0 from an empty set?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "Let T=3. After processing just number x=1, what are ways[0..3]?",
+      "diagram": "Start: [1,0,0,0]\nAdd 1: can add 1 to previous sums.",
+      "options": [
+        {
+          "label": "[1,1,0,0]",
+          "isCode": false
+        },
+        {
+          "label": "[0,1,0,0]",
+          "isCode": false
+        },
+        {
+          "label": "[1,0,1,0]",
+          "isCode": false
+        },
+        {
+          "label": "[1,1,1,1]",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We can make sum 0 (skip 1) or 1 (use 1).",
+      "wrongExplanations": {
+        "2": "Sum 2 isn't reachable with only number 1.",
+        "3": "Not all sums become reachable."
+      },
+      "hint": "Only sums 0 and 1 are possible with elements {1}.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "Continuing with T=3. After processing x=1 and x=2 (descending order), what are ways[0..3]?",
+      "diagram": "After x=1: [1,1,0,0]\nAdd x=2 descending: update s=3 and s=2.",
+      "options": [
+        {
+          "label": "[1,1,1,1]",
+          "isCode": false
+        },
+        {
+          "label": "[1,1,1,0]",
+          "isCode": false
+        },
+        {
+          "label": "[1,1,1,1] then fix to [1,1,1,1] after modulo",
+          "isCode": false
+        },
+        {
+          "label": "[1,1,1,1] but ways[3] stays 0",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "ways[2]+=ways[0] =>1, ways[3]+=ways[1] =>1. So [1,1,1,1].",
+      "wrongExplanations": {
+        "1": "ways[3] becomes 1 via 1+2.",
+        "3": "ways[3] updates from ways[1]=1 when adding 2."
+      },
+      "hint": "Consider sums 2 and 3: previous ways at 0 and 1.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "Still with T=3. After also processing x=3, what is ways[3]?",
+      "diagram": "Before x=3: ways[0..3] = [1,1,1,1]\nAdd x=3: ways[3] += ways[0].",
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "ways[3] was 1 from {1,2}, plus 1 from {3} => 2.",
+      "wrongExplanations": {
+        "0": "We gain a new way via {3}.",
+        "3": "We can reach 3 at least via {1,2}."
+      },
+      "hint": "Add the contribution from using 3 exactly once.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "What is the correct range for the inner update when adding x?",
+      "diagram": "Update ways[s] += ways[s - x] for valid s while avoiding negative indices and avoiding reusing x.",
+      "options": [
+        {
+          "label": "for s in range(T, x-1, -1)",
+          "isCode": false
+        },
+        {
+          "label": "for s in range(x, T+1)",
+          "isCode": false
+        },
+        {
+          "label": "for s in range(0, T+1)",
+          "isCode": false
+        },
+        {
+          "label": "for s in range(T, -1, -1)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Descending from T down to x ensures s−x ≥ 0 and one use of x.",
+      "wrongExplanations": {
+        "1": "Ascending risks reusing x within the same step.",
+        "3": "Including s<x would index s−x negative."
+      },
+      "hint": "Start high, stop at x, step -1.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "Where should we apply modulo 1e9+7 when accumulating counts?",
+      "diagram": "ways[s] = ways[s] + ways[s-x]",
+      "options": [
+        {
+          "label": "Apply modulo during each update.",
+          "isCode": false
+        },
+        {
+          "label": "Apply modulo only once at the very end.",
+          "isCode": false
+        },
+        {
+          "label": "No need to apply modulo anywhere.",
+          "isCode": false
+        },
+        {
+          "label": "Apply modulo only after each outer loop over x.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Applying modulo per update keeps numbers small; final result is correct.",
+      "wrongExplanations": {
+        "1": "Delaying is riskier and unnecessary; per-update is safe and clear.",
+        "2": "The problem requires answers modulo 1e9+7."
+      },
+      "hint": "Modulo doesn't change correctness if applied consistently; do it early.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Building the Idea",
+      "questionText": "We counted subsets that sum to T, but each partition is counted twice. How to divide by 2 under modulo 1e9+7?",
+      "diagram": "Answer = ways[T] / 2 mod M",
+      "options": [
+        {
+          "label": "ans = ways[T] // 2",
+          "isCode": false
+        },
+        {
+          "label": "ans = ways[T] * ((MOD + 1) // 2) % MOD",
+          "isCode": false
+        },
+        {
+          "label": "ans = ways[T] / 2",
+          "isCode": false
+        },
+        {
+          "label": "ans = (ways[T] % MOD) // 2",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Multiply by the modular inverse of 2: (MOD+1)//2 works for prime MOD.",
+      "wrongExplanations": {
+        "0": "//2 is not valid under modulo arithmetic.",
+        "3": "Integer division after taking modulo is incorrect in general."
+      },
+      "hint": "Find x such that 2*x ≡ 1 (mod MOD).",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Read input and set the modulo constant.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "MOD = 10**9 + 7; n = int(input().strip())",
+          "isCode": true
+        },
+        {
+          "label": "MOD = 10**9 + 7\\nn = int(sys.stdin.readline())",
+          "isCode": true
+        },
+        {
+          "label": "MOD = 1000000007; n = int(input())",
+          "isCode": true
+        },
+        {
+          "label": "n = int(input().strip()); MOD = 10**7 + 9",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Define MOD as 1e9+7 and read n from input.",
+      "wrongExplanations": {
+        "1": "Using sys.stdin requires importing sys.",
+        "3": "MOD should be 1e9+7, not 1e7+9."
+      },
+      "hint": "Keep it simple: standard input and standard modulo.",
+      "isCodeBuilding": true,
+      "codeSnippet": "MOD = 10**9 + 7; n = int(input().strip())",
+      "codeLabel": "Init MOD and read n"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Compute the total sum S of numbers 1..n.",
+      "diagram": "S = n(n+1)/2",
+      "options": [
+        {
+          "label": "S = n * (n + 1) // 2",
+          "isCode": true
+        },
+        {
+          "label": "S = n * (n - 1) // 2",
+          "isCode": true
+        },
+        {
+          "label": "S = (n + 1) // 2",
+          "isCode": true
+        },
+        {
+          "label": "S = sum(range(n))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Sum of 1..n is n(n+1)/2 with integer division.",
+      "wrongExplanations": {
+        "1": "This sums 1..(n-1), missing n.",
+        "3": "sum(range(n)) sums 0..n-1, not 1..n."
+      },
+      "hint": "Use the well-known arithmetic series formula.",
+      "isCodeBuilding": true,
+      "codeSnippet": "S = n * (n + 1) // 2",
+      "codeLabel": "Compute total sum"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "If S is odd, we should immediately output 0 and stop.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "if S % 2: print(0); exit()",
+          "isCode": true
+        },
+        {
+          "label": "if S % 2 == 0: print(0); exit()",
+          "isCode": true
+        },
+        {
+          "label": "if S // 2: print(0); exit()",
+          "isCode": true
+        },
+        {
+          "label": "if S % 2 != 0: pass",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Odd S means no partition; print 0 and terminate.",
+      "wrongExplanations": {
+        "1": "This exits on even S, the opposite of what we want.",
+        "3": "We must exit after printing 0; pass does nothing."
+      },
+      "hint": "An odd total can't be split into two equal integers.",
+      "isCodeBuilding": true,
+      "codeSnippet": "if S % 2: print(0); exit()",
+      "codeLabel": "Handle odd sum early"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Set the target T and initialize the ways array with the base case.",
+      "diagram": "T = S//2; ways[0]=1",
+      "options": [
+        {
+          "label": "target = S // 2; dp = [0] * (target + 1); dp[0] = 1",
+          "isCode": true
+        },
+        {
+          "label": "target = S // 2; dp = [1] * (target + 1); dp[0] = 0",
+          "isCode": true
+        },
+        {
+          "label": "target = S // 2; dp = [0] * target; dp[0] = 1",
+          "isCode": true
+        },
+        {
+          "label": "target = S // 2; dp = [0] * (target + 1); dp[1] = 1",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need indices 0..target, and dp[0]=1 as the base.",
+      "wrongExplanations": {
+        "2": "Length target misses index 'target' itself.",
+        "3": "Base case must set dp[0]=1, not dp[1]."
+      },
+      "hint": "Include index target and set dp[0] = 1.",
+      "isCodeBuilding": true,
+      "codeSnippet": "target = S // 2; dp = [0] * (target + 1); dp[0] = 1",
+      "codeLabel": "Target and base case"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Write the outer loop to add numbers 1..n one by one.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "for x in range(1, n + 1):",
+          "isCode": true
+        },
+        {
+          "label": "for x in range(n):",
+          "isCode": true
+        },
+        {
+          "label": "for x in range(2, n):",
+          "isCode": true
+        },
+        {
+          "label": "for x in range(1, n):",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need to include n; range(1, n+1) iterates 1..n.",
+      "wrongExplanations": {
+        "1": "range(n) iterates 0..n-1; 0 isn't a valid element.",
+        "3": "range(1, n) misses n."
+      },
+      "hint": "Numbers are 1 through n inclusive.",
+      "isCodeBuilding": true,
+      "codeSnippet": "for x in range(1, n + 1):",
+      "codeLabel": "Outer loop over elements"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Write the inner loop header to update sums in the correct order.",
+      "diagram": "Descending s to avoid reusing x",
+      "options": [
+        {
+          "label": "    for s in range(target, x - 1, -1):",
+          "isCode": true
+        },
+        {
+          "label": "    for s in range(x, target + 1):",
+          "isCode": true
+        },
+        {
+          "label": "    for s in range(0, target + 1):",
+          "isCode": true
+        },
+        {
+          "label": "    for s in range(target + 1):",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Descending from target to x ensures one use of x per subset.",
+      "wrongExplanations": {
+        "1": "Ascending can reuse x within the same iteration.",
+        "2": "Including s<x would cause negative index s-x."
+      },
+      "hint": "Start at target, stop at x, step -1.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    for s in range(target, x - 1, -1):",
+      "codeLabel": "Inner loop over sums"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "Write the update to add ways that include x (with modulo).",
+      "diagram": "dp[s] += dp[s - x] (mod MOD)",
+      "options": [
+        {
+          "label": "        dp[s] = (dp[s] + dp[s - x]) % MOD",
+          "isCode": true
+        },
+        {
+          "label": "        dp[s] = (dp[s] + dp[x]) % MOD",
+          "isCode": true
+        },
+        {
+          "label": "        dp[s] = (dp[s] + dp[s + x]) % MOD",
+          "isCode": true
+        },
+        {
+          "label": "        dp[s] = dp[s - x] % MOD",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "To extend to sum s using x, add counts from s−x.",
+      "wrongExplanations": {
+        "1": "dp[x] is a single index, not tied to s−x transitions.",
+        "3": "We must add to existing ways, not overwrite."
+      },
+      "hint": "Combine existing dp[s] with dp[s-x].",
+      "isCodeBuilding": true,
+      "codeSnippet": "        dp[s] = (dp[s] + dp[s - x]) % MOD",
+      "codeLabel": "Transition update"
+    },
+    {
+      "id": "q22",
+      "phase": "Writing the Code",
+      "questionText": "Finally, print the result after dividing by 2 under modulo.",
+      "diagram": "ans = dp[target] * inv2 % MOD, where inv2 = (MOD+1)//2",
+      "options": [
+        {
+          "label": "print(dp[target] * ((MOD + 1) // 2) % MOD)",
+          "isCode": true
+        },
+        {
+          "label": "print((dp[target] // 2) % MOD)",
+          "isCode": true
+        },
+        {
+          "label": "print(dp[target] / 2 % MOD)",
+          "isCode": true
+        },
+        {
+          "label": "print(dp[target] * (MOD - 1) // 2 % MOD)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Multiply by (MOD+1)//2 to divide by 2 modulo MOD.",
+      "wrongExplanations": {
+        "1": "Integer division before modulo is not equivalent in modulo arithmetic.",
+        "3": "(MOD-1)//2 is not the inverse of 2."
+      },
+      "hint": "2 * ((MOD+1)//2) ≡ 1 (mod MOD).",
+      "isCodeBuilding": true,
+      "codeSnippet": "print(dp[target] * ((MOD + 1) // 2) % MOD)",
+      "codeLabel": "Print answer"
+    },
+    {
+      "id": "q23",
+      "phase": "Verifying the Solution",
+      "questionText": "What does the program output for n = 3?",
+      "diagram": "We computed ways[3] = 2 earlier; divide by 2 -> 1.",
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "ways[3]=2 => answer = 1.",
+      "wrongExplanations": {
+        "2": "You must divide by 2 to account for symmetric partitions."
+      },
+      "hint": "From earlier: {3}|{1,2} is the only partition.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Verifying the Solution",
+      "questionText": "For n = 7, the correct output is 4. What is dp[target] (the number of subsets summing to S/2) before dividing by 2?",
+      "diagram": "Answer = dp[target] / 2 mod M",
+      "options": [
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "6",
+          "isCode": false
+        },
+        {
+          "label": "8",
+          "isCode": false
+        },
+        {
+          "label": "12",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Since output is 4 and each partition is counted twice, dp[target]=8.",
+      "wrongExplanations": {
+        "0": "This is the final answer after dividing by 2.",
+        "3": "12 would yield 6 after dividing, not 4."
+      },
+      "hint": "Multiply the final answer by 2.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Analyzing Complexity",
+      "questionText": "Let T = S/2. What is the time complexity of the counting algorithm in terms of n and T?",
+      "diagram": "Nested loops: x from 1..n; s from T down to x.",
+      "options": [
+        {
+          "label": "O(n * T)",
+          "isCode": false
+        },
+        {
+          "label": "O(2^n)",
+          "isCode": false
+        },
+        {
+          "label": "O(T)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log T)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each of n iterations scans up to T sums.",
+      "wrongExplanations": {
+        "1": "We are not enumerating all subsets.",
+        "2": "There's an outer loop over n as well."
+      },
+      "hint": "Count iterations across both loops.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the space complexity with T = S/2?",
+      "diagram": "We store an array dp[0..T].",
+      "options": [
+        {
+          "label": "O(T)",
+          "isCode": false
+        },
+        {
+          "label": "O(n + T)",
+          "isCode": false
+        },
+        {
+          "label": "O(nT)",
+          "isCode": false
+        },
+        {
+          "label": "O(1)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We store only dp of size T+1 and a few scalars.",
+      "wrongExplanations": {
+        "2": "We don't store a 2D structure; updates are in-place."
+      },
+      "hint": "We use a single 1D array indexed by sum.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q27",
+      "phase": "Analyzing Complexity",
+      "questionText": "Asymptotically in n alone, with T ≈ n(n+1)/4 = O(n^2), what is the time complexity?",
+      "diagram": "Time ~ O(n * T) with T ~ O(n^2)",
+      "options": [
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^3)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(2^n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "O(n * T) with T=O(n^2) gives O(n^3).",
+      "wrongExplanations": {
+        "0": "That's missing a factor of n.",
+        "3": "We never enumerate exponentially many subsets."
+      },
+      "hint": "Multiply n by n^2.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "MOD = 10**9 + 7; n = int(input().strip())",
+    "S = n * (n + 1) // 2",
+    "if S % 2: print(0); exit()",
+    "target = S // 2; dp = [0] * (target + 1); dp[0] = 1",
+    "for x in range(1, n + 1):",
+    "    for s in range(target, x - 1, -1):",
+    "        dp[s] = (dp[s] + dp[s - x]) % MOD",
+    "print(dp[target] * ((MOD + 1) // 2) % MOD)"
+  ],
+  "reasoningChain": [
+    {
+      "question": "When is an equal split possible?",
+      "insight": "Only if the total sum S is even; otherwise answer is 0."
+    },
+    {
+      "question": "What should we count to get the number of partitions?",
+      "insight": "Count subsets of {1..n} summing to S/2 and divide by 2 due to symmetry."
+    },
+    {
+      "question": "How to count subsets efficiently?",
+      "insight": "Process numbers 1..n, maintaining counts of achievable sums and updating in-place."
+    },
+    {
+      "question": "How to update without reusing the same number?",
+      "insight": "Iterate sums in descending order so each number is used at most once per sum."
+    },
+    {
+      "question": "What are the base and transitions?",
+      "insight": "Initialize ways[0]=1; for each x and sum s≥x, add ways[s−x] to ways[s]."
+    },
+    {
+      "question": "How to handle modulo and final division?",
+      "insight": "Apply modulo after each addition; divide by 2 using the modular inverse (MOD+1)//2."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1368,
+    "output_tokens": 14296,
+    "input_cost": 0.00171,
+    "output_cost": 0.14296,
+    "total_cost": 0.14467
+  }
+}

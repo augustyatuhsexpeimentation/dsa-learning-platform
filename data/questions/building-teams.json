@@ -1,0 +1,983 @@
+{
+  "id": "building-teams-interactive-mcq",
+  "title": "Building Teams",
+  "difficulty": "intermediate",
+  "tags": [
+    "graph"
+  ],
+  "estimatedMinutes": 45,
+  "language": "python",
+  "description": "There are n pupils and m friendships. Assign each pupil to team 1 or team 2 so that no friendship connects two pupils in the same team. If it's not possible, print \"IMPOSSIBLE\".\n\nInput:\n- First line: two integers n and m\n- Next m lines: two integers a b denoting a friendship between a and b\n\nOutput:\n- Either a line of n integers (each 1 or 2), where the i-th number is the team of pupil i\n- Or \"IMPOSSIBLE\" if no valid assignment exists",
+  "examples": [
+    {
+      "input": "5 3\n1 2\n1 3\n4 5\n",
+      "output": "1 2 2 1 2\n",
+      "explanation": "One valid assignment: pupils (1,4) in team 1 and pupils (2,3,5) in team 2. Any valid assignment is accepted."
+    }
+  ],
+  "constraints": [
+    "1 <= n <= 1e5",
+    "1 <= m <= 2e5",
+    "1 <= a,b <= n",
+    "No self-loops; at most one friendship per pair"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "Which requirement must any valid output satisfy for every friendship (a, b)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Assign each pupil 1 or 2, and ensure team[a] != team[b] for every friendship (a, b).",
+          "isCode": false
+        },
+        {
+          "label": "Split pupils into two teams with sizes as equal as possible.",
+          "isCode": false
+        },
+        {
+          "label": "Ensure friends are always in the same team.",
+          "isCode": false
+        },
+        {
+          "label": "Put all pupils without friends into team 1 and others into team 2.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each edge must connect pupils in different teams. Team sizes do not matter, and friends cannot be in the same team.",
+      "wrongExplanations": {
+        "1": "Team sizes are unrestricted; only friend pairs must be separated.",
+        "2": "This directly violates the requirement by grouping friends together."
+      },
+      "hint": "Focus on constraints on each friendship, not on team sizes.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "Tiny check: n=2, m=1 with friendship 1 2. Which assignment is valid?",
+      "diagram": "1 -- 2",
+      "options": [
+        {
+          "label": "1 1",
+          "isCode": false
+        },
+        {
+          "label": "1 2",
+          "isCode": false
+        },
+        {
+          "label": "2 2",
+          "isCode": false
+        },
+        {
+          "label": "2 1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Friends must be in different teams; both '1 2' and '2 1' are valid. Here, '1 2' is a valid choice.",
+      "wrongExplanations": {
+        "0": "Both in team 1 violates the friendship constraint.",
+        "2": "Both in team 2 violates the friendship constraint."
+      },
+      "hint": "Check whether friends share the same number.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "Triangle trap: n=3 with friendships 1-2, 2-3, 1-3. What should the output be?",
+      "diagram": "1\n|\\\n| \\\n2--3",
+      "options": [
+        {
+          "label": "1 2 1",
+          "isCode": false
+        },
+        {
+          "label": "1 2 2",
+          "isCode": false
+        },
+        {
+          "label": "IMPOSSIBLE",
+          "isCode": false
+        },
+        {
+          "label": "2 2 2",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Every pair is friends; two teams cannot avoid a same-team friendship. Hence 'IMPOSSIBLE'.",
+      "wrongExplanations": {
+        "0": "1 and 3 are both 1 but are friends, so this fails.",
+        "1": "2 and 3 are both 2 but are friends, so this fails."
+      },
+      "hint": "Try assigning 1 or 2 to node 1 and propagate; you’ll hit a conflict either way.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "Does assigning team numbers by index parity (1 for odd i, 2 for even i) always work?",
+      "diagram": "Consider friendships that don't follow index order.",
+      "options": [
+        {
+          "label": "Yes, parity assignment always satisfies the constraints.",
+          "isCode": false
+        },
+        {
+          "label": "No; friendships can connect same-parity indices, causing conflicts.",
+          "isCode": false
+        },
+        {
+          "label": "Yes, because each node only cares about its index.",
+          "isCode": false
+        },
+        {
+          "label": "It depends only on m, not on edges.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Edges are arbitrary; two connected pupils may both be odd or even indices. Parity-based assignment can fail.",
+      "wrongExplanations": {
+        "0": "Counterexample: edge (1,3) makes both odd in same team.",
+        "2": "Constraints depend on friendships, not indices."
+      },
+      "hint": "Imagine an edge between 1 and 3.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Exploring Approaches",
+      "questionText": "How can we enforce the friend-opposite requirement starting from an unassigned pupil s?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Assign s to a team, then systematically visit its friends, assigning each friend the opposite team, and continue through the network.",
+          "isCode": false
+        },
+        {
+          "label": "Assign everyone to team 1 first, then try to fix conflicts by flipping random pupils.",
+          "isCode": false
+        },
+        {
+          "label": "Assign teams randomly; retry until no edge has same-team endpoints.",
+          "isCode": false
+        },
+        {
+          "label": "Assign teams based on degrees: high degree -> team 1, low degree -> team 2.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Propagating opposite assignments through friendships ensures all connected constraints are respected or a conflict is found.",
+      "wrongExplanations": {
+        "1": "Flipping randomly can oscillate and doesn’t guarantee correctness.",
+        "3": "Degree doesn’t capture adjacency constraints precisely."
+      },
+      "hint": "Think about spreading labels through edges so each neighbor differs.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "The friendships may form several disconnected groups. After finishing one group, what should we do?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Stop; the rest can be arbitrary.",
+          "isCode": false
+        },
+        {
+          "label": "Pick another unassigned pupil and repeat the process for its group.",
+          "isCode": false
+        },
+        {
+          "label": "Assign all remaining pupils to team 1.",
+          "isCode": false
+        },
+        {
+          "label": "Print \"IMPOSSIBLE\" if not all pupils were reached.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Each disconnected group must be processed independently. Start from any unassigned node and propagate again.",
+      "wrongExplanations": {
+        "0": "Remaining groups might contain friendships; arbitrary assignments can violate constraints."
+      },
+      "hint": "Treat each group independently but ensure everyone is assigned.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "While assigning teams through friendships, you find an edge (u, v) where team[u] == team[v]. What should happen?",
+      "diagram": "u -- v with same team number",
+      "options": [
+        {
+          "label": "Swap team[v] to the other value and continue.",
+          "isCode": false
+        },
+        {
+          "label": "Restart the entire process from a different starting node.",
+          "isCode": false
+        },
+        {
+          "label": "Report \"IMPOSSIBLE\" immediately.",
+          "isCode": false
+        },
+        {
+          "label": "Ignore this edge; continue with others.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "A same-team edge means the constraints of this group cannot be satisfied; stop and print \"IMPOSSIBLE\".",
+      "wrongExplanations": {
+        "0": "Swapping may break earlier constraints and won’t fix inherent contradictions.",
+        "3": "Ignoring a violated constraint yields an invalid solution."
+      },
+      "hint": "A violated edge means no assignment for that group can satisfy all edges.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Building the Idea",
+      "questionText": "When starting from an unassigned pupil s, what team can we initially assign to s?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Always 1; choosing 2 could miss solutions.",
+          "isCode": false
+        },
+        {
+          "label": "Always 2; choosing 1 could miss solutions.",
+          "isCode": false
+        },
+        {
+          "label": "Either 1 or 2; both lead to some valid assignment if one exists.",
+          "isCode": false
+        },
+        {
+          "label": "Assign based on s's index parity.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Either label works as a starting point; if a valid assignment exists, starting with 1 or 2 will find one.",
+      "wrongExplanations": {
+        "0": "There's no restriction that forces a specific initial team.",
+        "1": "Same as above; initial choice is arbitrary."
+      },
+      "hint": "Symmetry: swapping all 1s and 2s yields another valid assignment.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "Given a pupil u with team t in {1,2}, what is a concise way to compute the opposite team for a neighbor?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "3 - t",
+          "isCode": false
+        },
+        {
+          "label": "2 - t",
+          "isCode": false
+        },
+        {
+          "label": "1 - t",
+          "isCode": false
+        },
+        {
+          "label": "t ^ 1  (bitwise XOR)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "If t=1, 3-t=2; if t=2, 3-t=1. Other formulas either yield 0 or depend on 0/1 encoding.",
+      "wrongExplanations": {
+        "1": "2 - 1 = 1 (wrong) and 2 - 2 = 0 (invalid team).",
+        "3": "XOR with 1 flips 0/1, but we use 1/2, not 0/1."
+      },
+      "hint": "Try both t=1 and t=2 and see which formula swaps correctly.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "To process pupils and their friends iteratively without recursion, which structure fits well?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "A queue to push pupils as they get assigned.",
+          "isCode": false
+        },
+        {
+          "label": "Randomly pick any unprocessed pupil at each step.",
+          "isCode": false
+        },
+        {
+          "label": "A set that only stores unassigned pupils.",
+          "isCode": false
+        },
+        {
+          "label": "A dictionary keyed by degrees.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "A queue allows incremental processing of neighbors as assignments are made.",
+      "wrongExplanations": {
+        "1": "Random order can work but offers no structure to ensure all neighbors are handled promptly.",
+        "2": "You need to process assigned pupils' neighbors, not just track unassigned ones."
+      },
+      "hint": "Think of enqueuing neighbors as soon as they get a team.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "What data structure should we use to represent friendships efficiently for up to 1e5 pupils and 2e5 friendships?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Adjacency list: for each pupil, store a list of friends.",
+          "isCode": false
+        },
+        {
+          "label": "Adjacency matrix of size n x n.",
+          "isCode": false
+        },
+        {
+          "label": "Just keep the edge list and scan it for neighbors each time.",
+          "isCode": false
+        },
+        {
+          "label": "A boolean array of size n.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Adjacency lists are memory- and time-efficient for sparse connections.",
+      "wrongExplanations": {
+        "1": "n x n is too large (1e10 cells) and slow to scan.",
+        "2": "Scanning full edge list per node is too slow."
+      },
+      "hint": "We need to iterate over neighbors of a given pupil efficiently.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "Each friendship (a, b) connects two different pupils. How should we add it to our data structure?",
+      "diagram": "a -- b (undirected)",
+      "options": [
+        {
+          "label": "Add b to a's list and a to b's list.",
+          "isCode": false
+        },
+        {
+          "label": "Add only b to a's list.",
+          "isCode": false
+        },
+        {
+          "label": "Add only a to b's list.",
+          "isCode": false
+        },
+        {
+          "label": "Add neither to avoid duplicates.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Friendships are undirected; both a lists b and b lists a.",
+      "wrongExplanations": {
+        "1": "This would treat it as one-way and miss constraints from b’s perspective."
+      },
+      "hint": "Edges can be traversed in both directions.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "How do we ensure all pupils get assigned, including those in disconnected groups?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Loop s from 1..n; if unassigned, start a new propagation from s.",
+          "isCode": false
+        },
+        {
+          "label": "Start from 1 only; everyone will be reached.",
+          "isCode": false
+        },
+        {
+          "label": "Assign team 1 to all pupils not reached after the first propagation.",
+          "isCode": false
+        },
+        {
+          "label": "Pick one random start and repeat it twice.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Iterate through all pupils and start a new propagation for each unassigned one.",
+      "wrongExplanations": {
+        "1": "Disconnected pupils won’t be reached from a single start."
+      },
+      "hint": "Combine an outer loop over pupils with an inner propagation.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Writing the Code",
+      "questionText": "Choose the correct imports to support fast input reading and a queue structure.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\nfrom collections import deque",
+          "isCode": true
+        },
+        {
+          "label": "import math\nfrom collections import defaultdict",
+          "isCode": true
+        },
+        {
+          "label": "from sys import stdin\nfrom queue import PriorityQueue",
+          "isCode": true
+        },
+        {
+          "label": "import io\nfrom collections import Counter",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need sys for input and deque for a simple queue.",
+      "wrongExplanations": {
+        "1": "math and defaultdict are not needed for the core logic.",
+        "2": "PriorityQueue is not required; we need a simple FIFO queue."
+      },
+      "hint": "A double-ended queue supports fast pops from the left.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\nfrom collections import deque",
+      "codeLabel": "Imports"
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Read all input tokens and parse n and m.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "data = sys.stdin.read().split()\nit = iter(data)\nn = int(next(it)); m = int(next(it))",
+          "isCode": true
+        },
+        {
+          "label": "tokens = input().split()\nn = int(tokens[0]); m = int(tokens[1])",
+          "isCode": true
+        },
+        {
+          "label": "n, m = map(int, sys.stdin.readline().split())\n# then read edges with input()",
+          "isCode": true
+        },
+        {
+          "label": "n = int(sys.stdin.read()); m = int(sys.stdin.read())",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Reading all tokens and iterating is robust for large inputs and multiple lines.",
+      "wrongExplanations": {
+        "1": "Reads only a single line; edges on following lines would be missed.",
+        "3": "sys.stdin.read() gives the whole stream, not one integer per call."
+      },
+      "hint": "Use a token iterator to consume 2*m edge values after n and m.",
+      "isCodeBuilding": true,
+      "codeSnippet": "data = sys.stdin.read().split()\nit = iter(data)\nn = int(next(it)); m = int(next(it))",
+      "codeLabel": "Read n, m"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Initialize the adjacency structure for 1..n pupils.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "adj = [[] for _ in range(n + 1)]",
+          "isCode": true
+        },
+        {
+          "label": "adj = [[False]*(n+1) for _ in range(n+1)]",
+          "isCode": true
+        },
+        {
+          "label": "adj = {}",
+          "isCode": true
+        },
+        {
+          "label": "adj = [set() for _ in range(n)]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "A list of lists indexed 1..n (ignore 0) is efficient and simple.",
+      "wrongExplanations": {
+        "1": "A full matrix uses too much memory for n up to 1e5.",
+        "4": "Indexing would be off by one if sized n."
+      },
+      "hint": "We’ll append neighbors for each pupil; 1-based indexing is convenient here.",
+      "isCodeBuilding": true,
+      "codeSnippet": "adj = [[] for _ in range(n + 1)]",
+      "codeLabel": "Adjacency init"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Fill the adjacency lists by reading m friendships (a, b).",
+      "diagram": null,
+      "options": [
+        {
+          "label": "for _ in range(m):\n    a = int(next(it)); b = int(next(it))\n    adj[a].append(b)\n    adj[b].append(a)",
+          "isCode": true
+        },
+        {
+          "label": "for _ in range(m):\n    a = int(next(it)); b = int(next(it))\n    adj[a].append(b)",
+          "isCode": true
+        },
+        {
+          "label": "for _ in range(m):\n    a = int(next(it)); b = int(next(it))\n    adj[b].append(a)",
+          "isCode": true
+        },
+        {
+          "label": "for _ in range(m):\n    a = int(next(it)); b = int(next(it))\n    if b not in adj[a]: adj[a].append(b)\n    # no reverse add",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Friendships are undirected, so add both directions.",
+      "wrongExplanations": {
+        "1": "This treats it as directed and breaks neighbor checks from b.",
+        "3": "Avoiding duplicates is fine, but missing the reverse edge is wrong."
+      },
+      "hint": "Each friend relation must be visible from both ends.",
+      "isCodeBuilding": true,
+      "codeSnippet": "for _ in range(m):\n    a = int(next(it)); b = int(next(it))\n    adj[a].append(b)\n    adj[b].append(a)",
+      "codeLabel": "Read edges"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Initialize the team assignment array. 0 means unassigned.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "team = [0] * (n + 1)",
+          "isCode": true
+        },
+        {
+          "label": "team = [-1] * n",
+          "isCode": true
+        },
+        {
+          "label": "team = [1] * (n + 1)",
+          "isCode": true
+        },
+        {
+          "label": "team = [False] * (n + 1)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We want 1-based indexing and 0 for unassigned, so size n+1 with zeros.",
+      "wrongExplanations": {
+        "1": "Size n misses index n if you intend 1-based; also -1 isn’t necessary.",
+        "3": "Booleans don’t encode 1/2 teams directly."
+      },
+      "hint": "Reserve index 0 unused to avoid off-by-one errors.",
+      "isCodeBuilding": true,
+      "codeSnippet": "team = [0] * (n + 1)",
+      "codeLabel": "Teams init"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Start processing each group: loop through pupils and, for unassigned s, assign it and initialize the queue.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "for s in range(1, n + 1):\n    if team[s] != 0:\n        continue\n    team[s] = 1\n    q = deque([s])",
+          "isCode": true
+        },
+        {
+          "label": "for s in range(n):\n    if team[s] == 0:\n        team[s] = 1\n    q = deque([s])",
+          "isCode": true
+        },
+        {
+          "label": "for s in range(1, n + 1):\n    team[s] = 1\n    q = deque([s])",
+          "isCode": true
+        },
+        {
+          "label": "for s in range(1, n + 1):\n    if team[s] != 0:\n        q = deque([s])",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Only start a new queue from unassigned s, assign it team 1, and continue others already assigned.",
+      "wrongExplanations": {
+        "1": "range(n) misses pupil n and initializes q even for assigned nodes.",
+        "2": "Overwrites previous assignments in the same group and breaks logic."
+      },
+      "hint": "Initialize a queue exactly once per unassigned starting pupil.",
+      "isCodeBuilding": true,
+      "codeSnippet": "for s in range(1, n + 1):\n    if team[s] != 0:\n        continue\n    team[s] = 1\n    q = deque([s])",
+      "codeLabel": "Outer loop and seed"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Process the queue: assign neighbors the opposite team and detect conflicts.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    while q:\n        u = q.popleft()\n        for v in adj[u]:\n            if team[v] == 0:\n                team[v] = 3 - team[u]\n                q.append(v)\n            elif team[v] == team[u]:\n                print(\"IMPOSSIBLE\")\n                sys.exit(0)",
+          "isCode": true
+        },
+        {
+          "label": "    while q:\n        u = q.pop()\n        for v in adj[u]:\n            if team[v] == 0:\n                team[v] = 1 - team[u]\n                q.append(v)\n            elif team[v] != team[u]:\n                print(\"IMPOSSIBLE\"); sys.exit(0)",
+          "isCode": true
+        },
+        {
+          "label": "    while q:\n        u = q.popleft()\n        for v in adj[u]:\n            if team[v] != 0:\n                continue\n            team[v] = team[u]\n            q.appendleft(v)",
+          "isCode": true
+        },
+        {
+          "label": "    while q:\n        u = q.popleft()\n        for v in adj[u]:\n            if team[v] == team[u]:\n                team[v] = 2\n            else:\n                team[v] = 1",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Assign opposite team with 3 - team[u]; if a neighbor has the same team, it's impossible and we exit.",
+      "wrongExplanations": {
+        "1": "1 - team[u] gives 0 or negative for teams 1/2; and the conflict check is inverted.",
+        "3": "Blindly forcing teams overwrites consistent assignments and ignores conflicts."
+      },
+      "hint": "Use 3 - team[u] to flip between 1 and 2; check equality for conflicts.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    while q:\n        u = q.popleft()\n        for v in adj[u]:\n            if team[v] == 0:\n                team[v] = 3 - team[u]\n                q.append(v)\n            elif team[v] == team[u]:\n                print(\"IMPOSSIBLE\")\n                sys.exit(0)",
+      "codeLabel": "Queue processing"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "After processing all groups without conflicts, how do we output the assignment?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "print(\" \".join(str(team[i]) for i in range(1, n + 1)))",
+          "isCode": true
+        },
+        {
+          "label": "print(team)",
+          "isCode": true
+        },
+        {
+          "label": "print(*team)",
+          "isCode": true
+        },
+        {
+          "label": "print(\" \".join(map(str, team)))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We must print teams for pupils 1..n separated by spaces. Index 0 is unused.",
+      "wrongExplanations": {
+        "1": "Printing the list shows brackets and includes index 0.",
+        "3": "Includes the index 0 placeholder."
+      },
+      "hint": "Skip the 0th element; output exactly n numbers.",
+      "isCodeBuilding": true,
+      "codeSnippet": "print(\" \".join(str(team[i]) for i in range(1, n + 1)))",
+      "codeLabel": "Print result"
+    },
+    {
+      "id": "q22",
+      "phase": "Verifying the Solution",
+      "questionText": "Test: n=4, m=2 with edges 1 2 and 3 4. Which output is valid and consistent with starting each new group with team 1?",
+      "diagram": "1 -- 2    3 -- 4",
+      "options": [
+        {
+          "label": "1 2 1 2",
+          "isCode": false
+        },
+        {
+          "label": "2 1 2 1",
+          "isCode": false
+        },
+        {
+          "label": "1 1 1 1",
+          "isCode": false
+        },
+        {
+          "label": "2 2 1 1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Starting at 1 -> (1,2) = (1,2); starting at 3 -> (3,4) = (1,2). So '1 2 1 2' is consistent.",
+      "wrongExplanations": {
+        "2": "Friends would be in the same team.",
+        "3": "3 and 4 would be in the same team."
+      },
+      "hint": "Start at 1: set 1->1, then 2->2; start at 3: 3->1, 4->2.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q23",
+      "phase": "Verifying the Solution",
+      "questionText": "Test: n=3, m=3 with edges 1 2, 2 3, 1 3. What will the program print?",
+      "diagram": "1--2--3 and 1--3 (triangle)",
+      "options": [
+        {
+          "label": "1 2 1",
+          "isCode": false
+        },
+        {
+          "label": "2 1 2",
+          "isCode": false
+        },
+        {
+          "label": "1 1 2",
+          "isCode": false
+        },
+        {
+          "label": "IMPOSSIBLE",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 3,
+      "explanation": "Propagation triggers a conflict on the last edge; the code prints 'IMPOSSIBLE' and exits.",
+      "wrongExplanations": {
+        "0": "1 and 3 would both be 1 while being friends.",
+        "2": "1 and 2 are friends but both 1."
+      },
+      "hint": "Trace: 1->1, 2->2, then 3 should be 1 but conflicts with 1-3.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Verifying the Solution",
+      "questionText": "Test: n=4, m=4 with edges 1 2, 2 3, 3 4, 4 1 (a 4-cycle). Starting at 1 with team 1, which output is consistent?",
+      "diagram": "1--2--3--4--1 (cycle of length 4)",
+      "options": [
+        {
+          "label": "1 2 1 2",
+          "isCode": false
+        },
+        {
+          "label": "1 2 2 1",
+          "isCode": false
+        },
+        {
+          "label": "2 2 2 2",
+          "isCode": false
+        },
+        {
+          "label": "1 1 2 2",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Assigning around the cycle alternates: 1->1, 2->2, 3->1, 4->2.",
+      "wrongExplanations": {
+        "1": "2 and 3 would be friends in the same team.",
+        "3": "1 and 2 are friends in the same team."
+      },
+      "hint": "Each step flips the team of the next node.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the time complexity of this approach in terms of n (pupils) and m (friendships)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n + m)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(m log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n + m)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each pupil and friendship is processed a constant number of times.",
+      "wrongExplanations": {
+        "1": "We never inspect all pairs; only adjacent pairs.",
+        "2": "No sorting or priority operations are used."
+      },
+      "hint": "Consider how many times each edge and node is touched.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the auxiliary space complexity?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n + m)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(m^2)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Adjacency lists store 2m entries (both directions) plus arrays of size n.",
+      "wrongExplanations": {
+        "2": "Adjacency lists for m edges require additional space beyond O(n)."
+      },
+      "hint": "Consider storage for all friendships and the team array.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q27",
+      "phase": "Analyzing Complexity",
+      "questionText": "Which edge cases must the solution handle correctly?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Disconnected groups of pupils",
+          "isCode": false
+        },
+        {
+          "label": "No friendships (m=0) or a single pupil (n=1)",
+          "isCode": false
+        },
+        {
+          "label": "Graphs where some components force a conflict",
+          "isCode": false
+        },
+        {
+          "label": "All of the above",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 3,
+      "explanation": "We must handle multiple groups, trivial cases, and detect conflicts when they arise.",
+      "wrongExplanations": {
+        "0": "Only one aspect; there are more edge cases.",
+        "1": "Only trivial cases; conflicts must also be detected."
+      },
+      "hint": "Think about both trivial and conflicting structures.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\nfrom collections import deque",
+    "data = sys.stdin.read().split()\nit = iter(data)\nn = int(next(it)); m = int(next(it))",
+    "adj = [[] for _ in range(n + 1)]",
+    "for _ in range(m):\n    a = int(next(it)); b = int(next(it))\n    adj[a].append(b)\n    adj[b].append(a)",
+    "team = [0] * (n + 1)",
+    "for s in range(1, n + 1):\n    if team[s] != 0:\n        continue\n    team[s] = 1\n    q = deque([s])",
+    "    while q:\n        u = q.popleft()\n        for v in adj[u]:\n            if team[v] == 0:\n                team[v] = 3 - team[u]\n                q.append(v)\n            elif team[v] == team[u]:\n                print(\"IMPOSSIBLE\")\n                sys.exit(0)",
+    "print(\" \".join(str(team[i]) for i in range(1, n + 1)))"
+  ],
+  "reasoningChain": [
+    {
+      "question": "What exactly must the assignment satisfy for each friendship?",
+      "insight": "Model as labeling each pupil with 1 or 2 so every friendship connects pupils with different labels."
+    },
+    {
+      "question": "How do we enforce constraints across connected pupils?",
+      "insight": "Pick an unassigned pupil, assign a team, and propagate opposite assignments to neighbors, continuing through friendships."
+    },
+    {
+      "question": "What if we encounter a friendship whose endpoints already share the same team?",
+      "insight": "This indicates a contradiction in that group; immediately conclude it's impossible."
+    },
+    {
+      "question": "How do we ensure all pupils are covered?",
+      "insight": "Process every disconnected group by looping over all pupils and starting propagation from any unassigned one."
+    },
+    {
+      "question": "How to represent friendships and traverse efficiently?",
+      "insight": "Use adjacency lists and an iterative queue to process neighbors, achieving linear time in nodes and edges."
+    },
+    {
+      "question": "How to compute the opposite team cleanly and avoid off-by-one errors?",
+      "insight": "Use 3 - t to flip between 1 and 2, and store teams in a 1-indexed array with 0 as unassigned."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1453,
+    "output_tokens": 13409,
+    "input_cost": 0.001816,
+    "output_cost": 0.13409,
+    "total_cost": 0.135906
+  }
+}

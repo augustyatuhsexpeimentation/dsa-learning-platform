@@ -1,0 +1,943 @@
+{
+  "id": "subarray-divisibility",
+  "title": "Subarray Divisibility",
+  "difficulty": "intermediate",
+  "tags": [
+    "sorting",
+    "two-pointer",
+    "binary-search"
+  ],
+  "estimatedMinutes": 45,
+  "language": "python",
+  "description": "Given an array of n integers, count the number of subarrays whose sum is divisible by n.\n\nInput:\n- First line: integer n (size of the array)\n- Second line: n integers a_1, a_2, ..., a_n\n\nOutput:\n- One integer: the number of subarrays with sum divisible by n\n\nNote: Subarray means a contiguous block of the array.",
+  "examples": [
+    {
+      "input": "5\n3 1 2 7 4",
+      "output": "1",
+      "explanation": "Remainders of running totals modulo 5: [3,4,1,3,2]. Equal remainder pairs including the starting remainder 0 yield exactly one valid subarray."
+    }
+  ],
+  "constraints": [
+    "1 ≤ n ≤ 2⋅10^5",
+    "−10^9 ≤ a_i ≤ 10^9"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "Which of the following is a valid subarray of [3, 1, 2, 7, 4]?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "[1, 2, 7]",
+          "isCode": false
+        },
+        {
+          "label": "[3, 2]",
+          "isCode": false
+        },
+        {
+          "label": "[7, 3]",
+          "isCode": false
+        },
+        {
+          "label": "[3, 7, 4]",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "A subarray must be contiguous; [1,2,7] is elements 2..4. The others either skip elements or change order.",
+      "wrongExplanations": {
+        "1": "Skipping 1 makes it non-contiguous.",
+        "3": "3 and 7 are not adjacent to 4 in that order."
+      },
+      "hint": "Contiguous means consecutive indices.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "For n=3 and array [1, 2, 3], how many subarrays have sum divisible by 3?",
+      "diagram": "Subarrays:\n[1]=1\n[1,2]=3\n[1,2,3]=6\n[2]=2\n[2,3]=5\n[3]=3",
+      "options": [
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "6",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "[1,2], [1,2,3], and [3] have sums 3,6,3 which are divisible by 3. Total 3.",
+      "wrongExplanations": {
+        "0": "Misses one valid subarray.",
+        "2": "Counts a non-divisible subarray."
+      },
+      "hint": "Check each subarray’s sum modulo 3.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "For n=4 and array [0, 0, 0, 0], how many subarrays have sum divisible by 4?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "6",
+          "isCode": false
+        },
+        {
+          "label": "10",
+          "isCode": false
+        },
+        {
+          "label": "16",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "All subarray sums are 0. Total subarrays = 4*5/2 = 10.",
+      "wrongExplanations": {
+        "1": "6 is the count for n=3 all zeros, not here.",
+        "3": "16 counts non-contiguous selections."
+      },
+      "hint": "Total subarrays for length n is n(n+1)/2.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "If a subarray sum is −5 and n=5, does it count as divisible by n?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, because −5 is a multiple of 5.",
+          "isCode": false
+        },
+        {
+          "label": "No, because the sum is negative.",
+          "isCode": false
+        },
+        {
+          "label": "Only if the subarray length is 5.",
+          "isCode": false
+        },
+        {
+          "label": "Only if the array contains 5 distinct values.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Divisibility depends on multiples of n, not sign. −5 is divisible by 5.",
+      "wrongExplanations": {
+        "1": "Negative values can be divisible by n.",
+        "2": "Divisibility is independent of subarray length."
+      },
+      "hint": "Divisible means sum % n == 0.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Understanding the Problem",
+      "questionText": "When checking a subarray, which modulus should be used to decide if its sum is counted?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "n (the size of the original array from input).",
+          "isCode": false
+        },
+        {
+          "label": "The length of the subarray.",
+          "isCode": false
+        },
+        {
+          "label": "The maximum element in the array.",
+          "isCode": false
+        },
+        {
+          "label": "The number of distinct values in the array.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Use n from input: we want sums divisible by n, not by changing subarray-specific quantities.",
+      "wrongExplanations": {
+        "1": "The condition is about divisibility by n, not subarray length."
+      },
+      "hint": "The problem repeats: divisible by n.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "If you check every possible subarray, how many checks are there in terms of n?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2 log n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "There are n(n+1)/2 subarrays which is O(n^2). Too slow for n up to 2⋅10^5.",
+      "wrongExplanations": {
+        "0": "Linear checks would require a stronger structure.",
+        "1": "n log n is too optimistic for all subarrays."
+      },
+      "hint": "Count all starting and ending positions.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "Let S[k] be the sum of a_1 + a_2 + ... + a_k. For i < j, when is a_{i+1} + ... + a_j divisible by n?",
+      "diagram": "S[j] - S[i] = sum of a_{i+1..j}",
+      "options": [
+        {
+          "label": "When S[j] % n == S[i] % n.",
+          "isCode": false
+        },
+        {
+          "label": "When S[j] % n == 0.",
+          "isCode": false
+        },
+        {
+          "label": "When S[j] - S[i] == n.",
+          "isCode": false
+        },
+        {
+          "label": "When S[j] == S[i].",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "S[j] − S[i] divisible by n iff their remainders modulo n are equal.",
+      "wrongExplanations": {
+        "1": "That only handles subarrays starting at the first element.",
+        "2": "Difference equal to n isn't necessary; any multiple of n works."
+      },
+      "hint": "Think modulo n: equal remainders cancel in subtraction.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Exploring Approaches",
+      "questionText": "To count valid subarrays quickly, what should we tally while scanning the array?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Occurrences of each remainder of S[k] modulo n.",
+          "isCode": false
+        },
+        {
+          "label": "Positions of maximum values.",
+          "isCode": false
+        },
+        {
+          "label": "Sorted order of the array.",
+          "isCode": false
+        },
+        {
+          "label": "Lengths of all subarrays.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Equal remainders indicate valid subarrays via differences. Counting remainder occurrences enables combining them.",
+      "wrongExplanations": {
+        "2": "Sorting isn't related to remainder equality.",
+        "3": "Length doesn't control divisibility by n."
+      },
+      "hint": "Remainder groups form pairs.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "For n=5 and array [3, 1, 2, 7, 4], what are the remainders of running totals S[k] modulo 5?",
+      "diagram": "S[1]=3, S[2]=4, S[3]=6, S[4]=13, S[5]=17",
+      "options": [
+        {
+          "label": "[3, 4, 1, 3, 2]",
+          "isCode": false
+        },
+        {
+          "label": "[3, 1, 2, 2, 4]",
+          "isCode": false
+        },
+        {
+          "label": "[0, 3, 1, 2, 4]",
+          "isCode": false
+        },
+        {
+          "label": "[3, 4, 1, 2, 1]",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "6 % 5 = 1, 13 % 5 = 3, 17 % 5 = 2. The sequence is [3,4,1,3,2].",
+      "wrongExplanations": {
+        "3": "Last remainder is 17 % 5 = 2, not 1."
+      },
+      "hint": "Take each running sum modulo 5.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "Suppose a particular remainder value appears f times among indices including the starting position (sum before any elements). How many subarrays does that remainder contribute?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "f",
+          "isCode": false
+        },
+        {
+          "label": "f−1",
+          "isCode": false
+        },
+        {
+          "label": "f⋅(f−1)/2",
+          "isCode": false
+        },
+        {
+          "label": "f^2",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Choose any two indices with the same remainder to form a valid subarray. That's f choose 2.",
+      "wrongExplanations": {
+        "0": "Each remainder occurrence doesn’t individually yield a subarray; pairs do."
+      },
+      "hint": "Pairs of indices i<j form subarrays.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "Why should we include an initial count for remainder 0 before processing any elements?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "To count subarrays that start at the first element.",
+          "isCode": false
+        },
+        {
+          "label": "To handle large values without overflow.",
+          "isCode": false
+        },
+        {
+          "label": "To speed up modulo operations.",
+          "isCode": false
+        },
+        {
+          "label": "To ensure remainders are non-negative.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "It accounts for subarrays starting at index 1 whose running total remainder is 0.",
+      "wrongExplanations": {
+        "3": "Non-negativity is handled by the modulo operation, not this initialization."
+      },
+      "hint": "Subarrays starting at the beginning need a pair with the 'empty' sum.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "Using the remainders [3,4,1,3,2] for n=5 and including an initial remainder 0, how many subarrays are counted?",
+      "diagram": "Counts: remainder 0:1, 1:1, 2:1, 3:2, 4:1",
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Only remainder 3 occurs twice, contributing C(2,2)=1. Others contribute 0.",
+      "wrongExplanations": {
+        "2": "There’s only one pair with equal remainder.",
+        "3": "Miscounts pairs."
+      },
+      "hint": "Sum C(f_r, 2) over all remainders r.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "Which expression guarantees the remainder is in [0, n−1] for any integer sum s?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "s % n",
+          "isCode": false
+        },
+        {
+          "label": "(s % n + n) % n",
+          "isCode": false
+        },
+        {
+          "label": "s // n",
+          "isCode": false
+        },
+        {
+          "label": "abs(s) % n",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Adding n then taking modulo n normalizes negative remainders to [0..n−1].",
+      "wrongExplanations": {
+        "0": "In some languages, s % n may be negative for negative s.",
+        "2": "Integer division gives a quotient, not a remainder."
+      },
+      "hint": "Consider negative sums and how modulo behaves.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Building the Idea",
+      "questionText": "While scanning, at each position with remainder r, what should we add to the result?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "res += freq[r]",
+          "isCode": false
+        },
+        {
+          "label": "res += 1 if r == 0 else 0",
+          "isCode": false
+        },
+        {
+          "label": "res += sum(freq)",
+          "isCode": false
+        },
+        {
+          "label": "res = max(res, freq[r])",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Previous occurrences of r form valid pairs with current position. Add their count.",
+      "wrongExplanations": {
+        "1": "This only counts subarrays starting at the first element.",
+        "2": "Summing all frequencies counts unrelated remainders."
+      },
+      "hint": "Current remainder pairs with all earlier equal remainders.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Import needed module for reading from standard input.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys",
+          "isCode": true
+        },
+        {
+          "label": "import os",
+          "isCode": true
+        },
+        {
+          "label": "from sys import exit",
+          "isCode": true
+        },
+        {
+          "label": "import sys as system",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We will use sys.stdin.read(). The other imports don't provide the name 'sys' we use.",
+      "wrongExplanations": {
+        "3": "Using alias 'system' breaks references to 'sys'."
+      },
+      "hint": "We will reference sys.stdin.read().",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys",
+      "codeLabel": "Import"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Define main and read all tokens robustly.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def main():\n    data = sys.stdin.read().strip().split()\n    if not data:\n        return",
+          "isCode": true
+        },
+        {
+          "label": "def main():\n    n = int(sys.stdin.readline())",
+          "isCode": true
+        },
+        {
+          "label": "def main():\n    data = sys.stdin.read()",
+          "isCode": true
+        },
+        {
+          "label": "def main():\n    data = []\n    data.append(sys.stdin.read())",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need tokenized input across lines and an early empty-input guard.",
+      "wrongExplanations": {
+        "2": "Without split(), tokens can't be iterated as integers."
+      },
+      "hint": "Split by whitespace to get all numbers.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def main():\n    data = sys.stdin.read().strip().split()\n    if not data:\n        return",
+      "codeLabel": "Main+Read"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Parse n and the array from tokens.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    it = iter(data)\n    n = int(next(it))\n    arr = [int(next(it)) for _ in range(n)]",
+          "isCode": true
+        },
+        {
+          "label": "    arr = list(map(int, data))  # use all tokens as array",
+          "isCode": true
+        },
+        {
+          "label": "    n = len(data)\n    arr = [int(x) for x in data]",
+          "isCode": true
+        },
+        {
+          "label": "    n = int(data[0])\n    arr = [int(next(it)) for _ in range(n)]  # 'it' not defined",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "First token is n, then read exactly n integers via an iterator.",
+      "wrongExplanations": {
+        "1": "This includes n inside the array and ignores the expected count.",
+        "3": "Uses undefined iterator 'it'."
+      },
+      "hint": "Consume the first token for n, then the next n for arr.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    it = iter(data)\n    n = int(next(it))\n    arr = [int(next(it)) for _ in range(n)]",
+      "codeLabel": "Parse"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Initialize the remainder frequency structure including the starting remainder.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    freq = [0] * n\n    freq[0] = 1",
+          "isCode": true
+        },
+        {
+          "label": "    freq = {}\n    freq[0] = 1",
+          "isCode": true
+        },
+        {
+          "label": "    freq = [0] * (n + 1)\n    freq[0] = 0",
+          "isCode": true
+        },
+        {
+          "label": "    freq = [0] * n  # no initial count",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need a list of size n and an initial count at remainder 0.",
+      "wrongExplanations": {
+        "3": "Missing the initial remainder 0 causes undercounting of subarrays from the start."
+      },
+      "hint": "Add 1 at remainder 0 before the loop.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    freq = [0] * n\n    freq[0] = 1",
+      "codeLabel": "Init freq"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Initialize running sum and answer.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    s = 0\n    res = 0",
+          "isCode": true
+        },
+        {
+          "label": "    s = arr[0]\n    res = 0",
+          "isCode": true
+        },
+        {
+          "label": "    s = 0\n    res = 1",
+          "isCode": true
+        },
+        {
+          "label": "    s = 0.0\n    res = 0.0",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Start sum and count at zero; we'll account for initial remainder via freq[0]=1.",
+      "wrongExplanations": {
+        "1": "Starting sum at arr[0] will double-add it in the loop.",
+        "2": "res should start at 0; freq[0] covers initial pairing."
+      },
+      "hint": "Keep both integers, starting at zero.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    s = 0\n    res = 0",
+      "codeLabel": "Init sum/res"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Process each element, update remainder, answer, and frequency.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    for x in arr:\n        s += x\n        r = (s % n + n) % n\n        res += freq[r]\n        freq[r] += 1",
+          "isCode": true
+        },
+        {
+          "label": "    for x in arr:\n        s += x\n        r = x % n\n        res += freq[r]\n        freq[r] += 1",
+          "isCode": true
+        },
+        {
+          "label": "    for x in arr:\n        s += x\n        r = s % n\n        freq[r] += 1\n        res += freq[r]",
+          "isCode": true
+        },
+        {
+          "label": "    for x in arr:\n        s += x\n        r = (s // n)\n        res += freq[r]\n        freq[r] += 1",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Use the running sum's remainder, normalize, add previous count, then increment frequency.",
+      "wrongExplanations": {
+        "1": "Using x % n ignores the cumulative sum, breaking the logic.",
+        "2": "Incrementing frequency before adding causes off-by-one overcount."
+      },
+      "hint": "Order matters: add freq[r] then increment it.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    for x in arr:\n        s += x\n        r = (s % n + n) % n\n        res += freq[r]\n        freq[r] += 1",
+      "codeLabel": "Main loop"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "Finish the program: output the result and run main.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    print(res)\n\nif __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "    print(freq)\n\nif __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "if __name__ == \"__main__\":\n    print(res)",
+          "isCode": true
+        },
+        {
+          "label": "print(res)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Print the computed count inside main and then call main under the standard guard.",
+      "wrongExplanations": {
+        "3": "Without calling main, res isn't defined at top level."
+      },
+      "hint": "Use the common script entry pattern.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    print(res)\n\nif __name__ == \"__main__\":\n    main()",
+      "codeLabel": "Output+Run"
+    },
+    {
+      "id": "q22",
+      "phase": "Verifying the Solution",
+      "questionText": "With input:\n5\n3 1 2 7 4\nwhat does the program print?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Remainders [3,4,1,3,2] with initial 0 give exactly one pair (remainder 3).",
+      "wrongExplanations": {
+        "2": "There is only one equal-remainder pair."
+      },
+      "hint": "Pair counts are C(f_r,2).",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q23",
+      "phase": "Verifying the Solution",
+      "questionText": "For input:\n5\n-1 -4 5 0 0\nwhat is the output?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        },
+        {
+          "label": "8",
+          "isCode": false
+        },
+        {
+          "label": "10",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 3,
+      "explanation": "Remainders become [4,0,0,0,0] with initial 0; remainder 0 occurs 5+1 times total including start, yielding 10 subarrays.",
+      "wrongExplanations": {
+        "1": "Underestimates pairs formed by many zeros."
+      },
+      "hint": "Count pairs of equal remainders (including the starting 0).",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the time complexity of the implemented method?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(log n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We scan the array once and do O(1) work per element.",
+      "wrongExplanations": {
+        "2": "We avoided checking all subarrays."
+      },
+      "hint": "One pass, constant work per item.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the space complexity of the method?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(1)",
+          "isCode": false
+        },
+        {
+          "label": "O(log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "We store counts for n possible remainders, which is O(n).",
+      "wrongExplanations": {
+        "0": "We need a frequency list of size n."
+      },
+      "hint": "How many distinct remainders are there?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Analyzing Complexity",
+      "questionText": "Which edge case is addressed by using r = (s % n + n) % n?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Negative running totals producing negative remainders.",
+          "isCode": false
+        },
+        {
+          "label": "Integer overflow in addition.",
+          "isCode": false
+        },
+        {
+          "label": "Reading input with extra spaces.",
+          "isCode": false
+        },
+        {
+          "label": "Out-of-bounds access of the array.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "It normalizes the remainder into 0..n−1 even if s is negative.",
+      "wrongExplanations": {
+        "1": "Python integers are unbounded; the formula doesn't change overflow behavior."
+      },
+      "hint": "Think about how modulo behaves with negatives.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys",
+    "def main():\n    data = sys.stdin.read().strip().split()\n    if not data:\n        return",
+    "    it = iter(data)\n    n = int(next(it))\n    arr = [int(next(it)) for _ in range(n)]",
+    "    freq = [0] * n\n    freq[0] = 1",
+    "    s = 0\n    res = 0",
+    "    for x in arr:\n        s += x\n        r = (s % n + n) % n\n        res += freq[r]\n        freq[r] += 1",
+    "    print(res)\n\nif __name__ == \"__main__\":\n    main()"
+  ],
+  "reasoningChain": [
+    {
+      "question": "What is a subarray and how do we identify valid ones?",
+      "insight": "Subarrays are contiguous segments; counting requires considering only consecutive indices."
+    },
+    {
+      "question": "Why is checking all subarrays too slow for large n?",
+      "insight": "There are O(n^2) subarrays; we need a linear-time approach."
+    },
+    {
+      "question": "How does the difference of running totals relate to divisibility by n?",
+      "insight": "A subarray sum is divisible by n when two running totals have the same remainder modulo n."
+    },
+    {
+      "question": "What should we tally to count valid subarrays efficiently?",
+      "insight": "Count occurrences of each remainder of the running total; equal remainders form pairs."
+    },
+    {
+      "question": "Why include an initial remainder 0 before scanning?",
+      "insight": "It accounts for subarrays starting at the first element where the running total remainder is 0."
+    },
+    {
+      "question": "How to handle negative sums safely when taking remainders?",
+      "insight": "Normalize with (s % n + n) % n to keep remainders in [0..n−1]."
+    },
+    {
+      "question": "What update rule should be used per element?",
+      "insight": "At each step, add the current remainder’s existing count to the answer, then increment the count."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1340,
+    "output_tokens": 16406,
+    "input_cost": 0.001675,
+    "output_cost": 0.16406,
+    "total_cost": 0.165735
+  }
+}

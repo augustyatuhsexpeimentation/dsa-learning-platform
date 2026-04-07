@@ -1,0 +1,881 @@
+{
+  "id": "planets-queries-ii-mcq-chain",
+  "title": "Planets Queries II",
+  "difficulty": "intermediate",
+  "tags": [
+    "graph"
+  ],
+  "estimatedMinutes": 75,
+  "language": "python",
+  "description": "You are given a directed graph of n planets where each planet has exactly one outgoing teleporter to another planet (possibly itself). For q queries, each query gives a starting planet a and a destination planet b. Determine the minimum number of teleportations needed to reach b from a following teleporters, or -1 if it is impossible.\n\nInput:\n- First line: n q\n- Second line: t_1 t_2 ... t_n (teleporter destinations for planets 1..n)\n- Next q lines: a b for each query\n\nOutput:\n- For each query, the minimum teleportations from a to b, or -1 if unreachable.",
+  "examples": [
+    {
+      "input": "5 3\n2 3 2 3 2\n1 2\n1 3\n1 4",
+      "output": "1\n2\n-1",
+      "explanation": "Teleporters: 1→2, 2→3, 3→2 (cycle 2↔3), 4→3, 5→2.\n- From 1 to 2: 1 step (1→2).\n- From 1 to 3: 2 steps (1→2→3).\n- From 1 to 4: impossible, since edges always move towards the cycle."
+    }
+  ],
+  "constraints": [
+    "1 ≤ n, q ≤ 2⋅10^5",
+    "1 ≤ a, b ≤ n"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "Consider n=4 with teleporters: t = [2,3,4,4] (1-indexed). Query: a=1, b=4. What is the minimum number of teleportations?",
+      "diagram": "1 → 2 → 3 → 4\n4 → 4",
+      "options": [
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "-1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Path: 1→2→3→4 takes 3 moves. There is a unique path from 1, so no shorter route exists.",
+      "wrongExplanations": {
+        "0": "2 counts only 1→2→3; you haven't reached 4 yet.",
+        "3": "4 is reachable; -1 applies only if no path exists."
+      },
+      "hint": "Trace the unique path from 1 following t.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "n=4, t = [2,3,1,4] (1-indexed). Query: a=1, b=4. What should be printed?",
+      "diagram": "1 → 2 → 3 ↘\n↑         ↓\n└──────── 1  and  4 → 4",
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "-1",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "1 is stuck in the cycle 1→2→3→1 and never reaches 4. Thus answer is -1.",
+      "wrongExplanations": {
+        "0": "1→4 is not a direct teleporter.",
+        "1": "No path from 1 to 4 exists at all."
+      },
+      "hint": "Check the component of 1 and 4.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "n=3, t = [2,3,1] (1-indexed). Query: a=2, b=2. What is the minimum number of teleportations?",
+      "diagram": "1 → 2 → 3 → 1 (cycle of length 3)",
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "-1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "You are already at b, so 0 steps. We count teleportations, not visits.",
+      "wrongExplanations": {
+        "1": "1 step would move to 3, not stay at 2.",
+        "3": "It's reachable (already there), so not -1."
+      },
+      "hint": "Minimum number of moves can be zero.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "From any planet a, following teleporters yields a unique sequence. When will the sequence revisit a planet?",
+      "diagram": "a → t[a] → t[t[a]] → ...",
+      "options": [
+        {
+          "label": "Only when a cycle is entered along that path.",
+          "isCode": false
+        },
+        {
+          "label": "When there are multiple outgoing teleporters from a node.",
+          "isCode": false
+        },
+        {
+          "label": "Whenever two different nodes point to the same node.",
+          "isCode": false
+        },
+        {
+          "label": "Never; revisiting is impossible.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Outdegree is 1, so revisits happen exactly at cycles on the path.",
+      "wrongExplanations": {
+        "1": "Each node has exactly one outgoing edge.",
+        "3": "Cycles exist; revisits are possible."
+      },
+      "hint": "Outdegree=1 implies deterministic path.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Exploring Approaches",
+      "questionText": "If you simulate each query by walking until reaching b or repeating a node, what is the worst-case time for all queries?",
+      "diagram": "n,q up to 2e5. Path length up to O(n).",
+      "options": [
+        {
+          "label": "O(n + q)",
+          "isCode": false
+        },
+        {
+          "label": "O(n q)",
+          "isCode": false
+        },
+        {
+          "label": "O(q)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n + q log n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Each query can take up to O(n) steps; with q queries this is O(nq), too slow.",
+      "wrongExplanations": {
+        "0": "You'd still traverse many edges per query.",
+        "2": "Each query may traverse a long chain, not constant."
+      },
+      "hint": "Consider a long chain feeding into a cycle.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "Which statement correctly describes the structure of this graph?",
+      "diagram": "Functional graph: each node has exactly one outgoing edge.",
+      "options": [
+        {
+          "label": "It splits into disjoint components, each containing exactly one cycle with trees feeding into it.",
+          "isCode": false
+        },
+        {
+          "label": "It is a collection of straight chains with no cycles.",
+          "isCode": false
+        },
+        {
+          "label": "Every node is part of some cycle; there are no trees.",
+          "isCode": false
+        },
+        {
+          "label": "There can be multiple cycles within one connected component.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "With outdegree 1, every component has one cycle and in-arborescences feeding into it.",
+      "wrongExplanations": {
+        "1": "Cycles must exist because of finiteness and outdegree=1.",
+        "3": "Outdegree=1 prevents multiple cycles in one component."
+      },
+      "hint": "Follow edges until repetition; what forms?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "To answer many queries quickly, what information is most useful to precompute for each node?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Only its immediate teleporter.",
+          "isCode": false
+        },
+        {
+          "label": "Whether it is visited by some other node.",
+          "isCode": false
+        },
+        {
+          "label": "Distance to its component's cycle, the cycle id and position, and a table to jump k steps quickly.",
+          "isCode": false
+        },
+        {
+          "label": "All possible distances to all other nodes.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Depth to cycle, cycle identity/position, and a fast k-step jump table enable O(log n) queries.",
+      "wrongExplanations": {
+        "0": "Only immediate teleporter isn't enough for long jumps.",
+        "3": "Storing all-pairs distances is infeasible."
+      },
+      "hint": "Think about reusing computations across queries.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Building the Idea",
+      "questionText": "When can a reach b before entering the cycle (without going around the cycle)?",
+      "diagram": "Depth[a] = steps to reach cycle from a; similarly for b.",
+      "options": [
+        {
+          "label": "If depth[a] ≤ depth[b] and they share a component.",
+          "isCode": false
+        },
+        {
+          "label": "If depth[a] ≥ depth[b], they share a component, and moving exactly depth[a]−depth[b] steps from a lands at b.",
+          "isCode": false
+        },
+        {
+          "label": "Only if both are on the cycle.",
+          "isCode": false
+        },
+        {
+          "label": "If b is deeper (further from the cycle) than a.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "From a you can only move towards the cycle. You must land exactly on b after depth difference steps within the same component.",
+      "wrongExplanations": {
+        "0": "If depth[a] < depth[b], you can't move away from the cycle.",
+        "3": "Edges point towards the cycle; you cannot go deeper."
+      },
+      "hint": "Can you move away from the cycle?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "Define a table up[i][v] to allow fast k-step moves. Which definition is correct?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "up[i][v] = the node reached from v after 2^i teleportations.",
+          "isCode": false
+        },
+        {
+          "label": "up[i][v] = the number of teleportations needed to reach v.",
+          "isCode": false
+        },
+        {
+          "label": "up[i][v] = the node reached from v after i teleportations.",
+          "isCode": false
+        },
+        {
+          "label": "up[i][v] = the parent of v in some tree.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Storing powers of two steps enables composing any k in binary to jump quickly.",
+      "wrongExplanations": {
+        "2": "This loses the exponential step power and becomes linear.",
+        "1": "We need destination nodes, not counts."
+      },
+      "hint": "Think binary representation of k.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "How can we detect cycles and assign cycle positions for nodes?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Walk from each unvisited node, mark 0/1/2 states (unvisited/visiting/processed); when you meet a visiting node, the loop from its index in the stack is a cycle. Mark those nodes with depth 0 and assign positions.",
+          "isCode": false
+        },
+        {
+          "label": "Use indegree counts and repeatedly remove nodes with indegree 1.",
+          "isCode": false
+        },
+        {
+          "label": "Randomly jump around until you find a repetition.",
+          "isCode": false
+        },
+        {
+          "label": "Sort nodes by index and pair neighbors.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Marking states during a walk identifies a cycle precisely; nodes on the cycle get depth 0 and position indices.",
+      "wrongExplanations": {
+        "1": "Outdegree is fixed at 1; indegree can vary and this approach won't mark cycles directly.",
+        "2": "Random jumping provides no guarantee to find all cycles."
+      },
+      "hint": "Track a path stack and node states.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "If b is on the cycle of a's component, how do we compute steps from a to b?",
+      "diagram": "Let entry = first cycle node reached from a; pos[*] are indices on the cycle; L is cycle length.",
+      "options": [
+        {
+          "label": "depth[a] + ((pos[b] - pos[entry]) mod L)",
+          "isCode": false
+        },
+        {
+          "label": "depth[b] + ((pos[b] - pos[entry]) mod L)",
+          "isCode": false
+        },
+        {
+          "label": "((pos[b] - pos[a]) mod L)",
+          "isCode": false
+        },
+        {
+          "label": "depth[a] + abs(pos[b] - pos[entry])",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "You need depth[a] steps to reach entry, then move along the cycle by the modular difference to b.",
+      "wrongExplanations": {
+        "2": "This ignores the steps to reach the cycle if a is not on it.",
+        "3": "Cycle movement is circular; absolute difference fails directionally."
+      },
+      "hint": "Two parts: to cycle, then around cycle.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "Before any further checks, what immediate condition makes a→b impossible?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "If a and b are the same.",
+          "isCode": false
+        },
+        {
+          "label": "If a and b are in different components (different cycles eventually).",
+          "isCode": false
+        },
+        {
+          "label": "If b has indegree 0.",
+          "isCode": false
+        },
+        {
+          "label": "If a has a self-loop.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Paths never leave a component; different eventual cycles imply unreachable.",
+      "wrongExplanations": {
+        "0": "If a==b, the answer is 0, not impossible.",
+        "2": "Indegree doesn't prevent reachability from a different node."
+      },
+      "hint": "Where does the path from a end up?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Writing the Code",
+      "questionText": "Choose the correct input parsing and teleporter array setup (0-based indices).",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\n\ndef main():\n    data = sys.stdin.read().strip().split()\n    if not data:\n        return\n    it = iter(data)\n    n = int(next(it)); q = int(next(it))\n    t = [int(next(it)) - 1 for _ in range(n)]",
+          "isCode": true
+        },
+        {
+          "label": "import sys\n\ndef main():\n    data = sys.stdin.read().strip().split()\n    it = iter(data)\n    q = int(next(it)); n = int(next(it))\n    t = [int(next(it)) for _ in range(n)]",
+          "isCode": true
+        },
+        {
+          "label": "import sys\n\ndef main():\n    line = sys.stdin.readline().split()\n    n = int(line[0])\n    q = int(line[1])\n    t = list(map(int, sys.stdin.readline().split()))  # keep 1-based",
+          "isCode": true
+        },
+        {
+          "label": "import sys\n\ndef main():\n    n, q = map(int, sys.stdin.readline().split())\n    t = [int(x) - 1 for x in sys.stdin.readline().split()]\n    t = [x for x in t]  # 1-based kept",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We read all tokens, parse n and q, and store t as 0-based. Other options misread order or keep t as 1-based, causing index errors later.",
+      "wrongExplanations": {
+        "1": "Reads q and n swapped and keeps 1-based t.",
+        "2": "Keeps 1-based indices; later logic assumes 0-based."
+      },
+      "hint": "Subsequent logic uses 0-based indices.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\n\ndef main():\n    data = sys.stdin.read().strip().split()\n    if not data:\n        return\n    it = iter(data)\n    n = int(next(it)); q = int(next(it))\n    t = [int(next(it)) - 1 for _ in range(n)]",
+      "codeLabel": "Parse input and teleporter array"
+    },
+    {
+      "id": "q14",
+      "phase": "Writing the Code",
+      "questionText": "Initialize the jump table base (for 2^0 steps) with a reasonable LOG.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    LOG = 20\n    up = [[0] * n for _ in range(LOG)]\n    for v in range(n):\n        up[0][v] = t[v]",
+          "isCode": true
+        },
+        {
+          "label": "    LOG = 18\n    up = [[0] * LOG for _ in range(n)]\n    for v in range(n):\n        up[v][0] = t[v]",
+          "isCode": true
+        },
+        {
+          "label": "    LOG = 20\n    up = [[0] * n for _ in range(LOG)]\n    for v in range(n):\n        up[1][v] = t[v]",
+          "isCode": true
+        },
+        {
+          "label": "    LOG = 10\n    up = [[t[v] for v in range(n)] for _ in range(LOG)]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We set up the base layer up[0] as the immediate teleporter. LOG=20 covers paths up to >1e6 steps.",
+      "wrongExplanations": {
+        "1": "Dimensions are swapped and base is placed incorrectly.",
+        "2": "Base should be at index 0, not 1."
+      },
+      "hint": "up[0][v] should be the immediate teleporter.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    LOG = 20\n    up = [[0] * n for _ in range(LOG)]\n    for v in range(n):\n        up[0][v] = t[v]",
+      "codeLabel": "Initialize jump table base"
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Fill the higher layers of the jump table.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    for i in range(1, LOG):\n        for v in range(n):\n            up[i][v] = up[i-1][ up[i-1][v] ]",
+          "isCode": true
+        },
+        {
+          "label": "    for i in range(1, LOG):\n        for v in range(n):\n            up[i][v] = up[i-1][v]",
+          "isCode": true
+        },
+        {
+          "label": "    for v in range(n):\n        for i in range(1, LOG):\n            up[i-1][v] = up[i][ up[i][v] ]",
+          "isCode": true
+        },
+        {
+          "label": "    for i in range(LOG):\n        for v in range(n):\n            up[i][v] = up[i][ up[i][v] ]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each layer composes two previous half-steps: up[i][v] = up[i-1][ up[i-1][v] ].",
+      "wrongExplanations": {
+        "1": "This never advances beyond 1 step.",
+        "3": "This uses the same layer for lookup, which is undefined."
+      },
+      "hint": "Compose two 2^{i-1} steps to make 2^i.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    for i in range(1, LOG):\n        for v in range(n):\n            up[i][v] = up[i-1][ up[i-1][v] ]",
+      "codeLabel": "Build jump table higher layers"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Initialize arrays for cycle detection and depths/positions.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    state = [0] * n\n    depth = [-1] * n\n    comp = [-1] * n\n    pos = [-1] * n\n    compLen = []\n    inStackIndex = [-1] * n\n    compCount = 0",
+          "isCode": true
+        },
+        {
+          "label": "    state = [2] * n\n    depth = [0] * n\n    comp = [0] * n\n    pos = [0] * n\n    compLen = {}\n    inStackIndex = [0] * n\n    compCount = 0",
+          "isCode": true
+        },
+        {
+          "label": "    state = [0] * n\n    depth = [0] * n\n    comp = [-1] * n\n    pos = [0] * n\n    compLen = [0] * n\n    inStackIndex = [-1] * n\n    compCount = 0",
+          "isCode": true
+        },
+        {
+          "label": "    state = [1] * n\n    depth = [-1] * n\n    comp = [-1] * n\n    pos = [-1] * n\n    compLen = []\n    inStackIndex = [-1] * n\n    compCount = 1",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Start with unvisited (state=0), unknown depths (-1), unknown comps (-1), unknown positions (-1). We'll fill compLen and compCount as we find cycles.",
+      "wrongExplanations": {
+        "1": "Pre-filling as processed or zeros hides actual cycle/chain structure.",
+        "2": "Setting default depths/positions to 0 mislabels non-cycle nodes."
+      },
+      "hint": "Unknowns should be marked clearly and updated later.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    state = [0] * n\n    depth = [-1] * n\n    comp = [-1] * n\n    pos = [-1] * n\n    compLen = []\n    inStackIndex = [-1] * n\n    compCount = 0",
+      "codeLabel": "Initialize cycle/metadata arrays"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Complete the traversal to detect cycles, assign cycle nodes (depth=0, positions), and set depths/comp for tree nodes.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    for v in range(n):\n        if state[v] != 0:\n            continue\n        stack = []\n        u = v\n        while state[u] == 0:\n            state[u] = 1\n            inStackIndex[u] = len(stack)\n            stack.append(u)\n            u = t[u]\n        if state[u] == 1:\n            idx = inStackIndex[u]\n            cyc = stack[idx:]\n            L = len(cyc)\n            for i_node, node in enumerate(cyc):\n                depth[node] = 0\n                comp[node] = compCount\n                pos[node] = i_node\n                state[node] = 2\n            compLen.append(L)\n            compCount += 1\n            for i_idx in range(idx - 1, -1, -1):\n                x = stack[i_idx]\n                y = stack[i_idx + 1]\n                depth[x] = depth[y] + 1\n                comp[x] = comp[y]\n                state[x] = 2\n        else:\n            for i_idx in range(len(stack) - 1, -1, -1):\n                x = stack[i_idx]\n                y = t[x]\n                depth[x] = depth[y] + 1\n                comp[x] = comp[y]\n                state[x] = 2",
+          "isCode": true
+        },
+        {
+          "label": "    for v in range(n):\n        if state[v] != 0:\n            continue\n        seen = set()\n        u = v\n        while u not in seen:\n            seen.add(u)\n            state[u] = 2\n            u = t[u]\n        for x in seen:\n            depth[x] = 0\n            comp[x] = compCount\n            pos[x] = 0\n        compLen.append(len(seen))\n        compCount += 1",
+          "isCode": true
+        },
+        {
+          "label": "    for v in range(n):\n        if state[v] != 0:\n            continue\n        stack = []\n        u = v\n        while state[u] == 0:\n            stack.append(u)\n            u = t[u]\n        # found processed\n        for i_idx in range(len(stack)):\n            x = stack[i_idx]\n            depth[x] = depth[u] + i_idx + 1\n            comp[x] = comp[u]",
+          "isCode": true
+        },
+        {
+          "label": "    for v in range(n):\n        if state[v] == 2:\n            continue\n        u = v\n        while True:\n            state[u] = 2\n            if state[t[u]] == 2:\n                depth[u] = depth[t[u]] + 1\n                comp[u] = comp[t[u]]\n                break\n            u = t[u]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We track a stack and states; on encountering a visiting node, mark the cycle and then back-propagate depths. Otherwise, back-propagate to the processed node.",
+      "wrongExplanations": {
+        "1": "Treats the whole seen set as a cycle and loses tree structure and positions.",
+        "2": "Doesn't mark cycles or handle indices correctly; y is unknown for many nodes."
+      },
+      "hint": "Use the visiting state and stack index to extract the exact cycle.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    for v in range(n):\n        if state[v] != 0:\n            continue\n        stack = []\n        u = v\n        while state[u] == 0:\n            state[u] = 1\n            inStackIndex[u] = len(stack)\n            stack.append(u)\n            u = t[u]\n        if state[u] == 1:\n            idx = inStackIndex[u]\n            cyc = stack[idx:]\n            L = len(cyc)\n            for i_node, node in enumerate(cyc):\n                depth[node] = 0\n                comp[node] = compCount\n                pos[node] = i_node\n                state[node] = 2\n            compLen.append(L)\n            compCount += 1\n            for i_idx in range(idx - 1, -1, -1):\n                x = stack[i_idx]\n                y = stack[i_idx + 1]\n                depth[x] = depth[y] + 1\n                comp[x] = comp[y]\n                state[x] = 2\n        else:\n            for i_idx in range(len(stack) - 1, -1, -1):\n                x = stack[i_idx]\n                y = t[x]\n                depth[x] = depth[y] + 1\n                comp[x] = comp[y]\n                state[x] = 2",
+      "codeLabel": "Detect cycles and assign depths/positions"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Implement a function to jump k teleportations from a node using the precomputed table.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    def jump(x, k):\n        i = 0\n        while k > 0:\n            if k & 1:\n                x = up[i][x]\n            k >>= 1\n            i += 1\n        return x",
+          "isCode": true
+        },
+        {
+          "label": "    def jump(x, k):\n        for i in range(LOG):\n            if (k >> i) & 1:\n                x = up[i][x]\n        return x",
+          "isCode": true
+        },
+        {
+          "label": "    def jump(x, k):\n        i = 0\n        while i < LOG:\n            if k & 1:\n                x = up[i][x]\n            i += 1\n        return x",
+          "isCode": true
+        },
+        {
+          "label": "    def jump(x, k):\n        while k:\n            x = up[0][x]\n            k -= 1\n        return x",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We consume k's bits from least significant upward, moving through up[i] when a bit is set. The LOOP in option 2 also works but assumes LOG covers all bits; option 0 is explicit and safe.",
+      "wrongExplanations": {
+        "2": "This never shifts k, so it uses only the lowest bit repeatedly.",
+        "3": "This is linear in k and too slow."
+      },
+      "hint": "Use the binary representation of k.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    def jump(x, k):\n        i = 0\n        while k > 0:\n            if k & 1:\n                x = up[i][x]\n            k >>= 1\n            i += 1\n        return x",
+      "codeLabel": "Jump function using powers of two"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Write the query-answering logic using depth/comp/pos and the jump function, and print answers.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    out_lines = []\n    for _ in range(q):\n        a = int(next(it)) - 1\n        b = int(next(it)) - 1\n        if comp[a] != comp[b]:\n            out_lines.append(\"-1\")\n            continue\n        if depth[a] >= depth[b]:\n            c = jump(a, depth[a] - depth[b])\n            if c == b:\n                out_lines.append(str(depth[a] - depth[b]))\n                continue\n        if depth[b] == 0:\n            entry = jump(a, depth[a])\n            L = compLen[comp[a]]\n            steps = depth[a] + ((pos[b] - pos[entry]) % L)\n            out_lines.append(str(steps))\n        else:\n            out_lines.append(\"-1\")\n    sys.stdout.write(\"\\n\".join(out_lines))\n\nif __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "    out_lines = []\n    for _ in range(q):\n        a = int(next(it)) - 1\n        b = int(next(it)) - 1\n        if depth[a] >= depth[b]:\n            c = jump(a, depth[a] - depth[b])\n            if c == b:\n                out_lines.append(str(depth[a] - depth[b]))\n                continue\n        entry = jump(a, depth[a])\n        L = compLen[comp[a]]\n        steps = depth[a] + ((pos[b] - pos[entry]) % L)\n        out_lines.append(str(steps))\n    print(\"\\n\".join(out_lines))\n\nif __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "    out_lines = []\n    for _ in range(q):\n        a = int(next(it)) - 1\n        b = int(next(it)) - 1\n        if comp[a] != comp[b]:\n            out_lines.append(\"0\")\n            continue\n        if depth[b] == 0:\n            steps = (pos[b] - pos[a]) % compLen[comp[a]]\n            out_lines.append(str(steps))\n        else:\n            out_lines.append(str(depth[a] - depth[b]))\n    sys.stdout.write(\"\\n\".join(out_lines))\n\nif __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "    for _ in range(q):\n        a = int(next(it))\n        b = int(next(it))\n        print(jump(a, b))\n\nif __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We first reject different components, try tree-to-tree along the path, else if b is on the cycle compute via entry and positions; otherwise -1.",
+      "wrongExplanations": {
+        "1": "It never checks component equality and always assumes b is on a's cycle.",
+        "2": "Assumes a is always on the cycle or b on tree is always reachable; both are wrong."
+      },
+      "hint": "Handle: different components, path within tree, then cycle case.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    out_lines = []\n    for _ in range(q):\n        a = int(next(it)) - 1\n        b = int(next(it)) - 1\n        if comp[a] != comp[b]:\n            out_lines.append(\"-1\")\n            continue\n        if depth[a] >= depth[b]:\n            c = jump(a, depth[a] - depth[b])\n            if c == b:\n                out_lines.append(str(depth[a] - depth[b]))\n                continue\n        if depth[b] == 0:\n            entry = jump(a, depth[a])\n            L = compLen[comp[a]]\n            steps = depth[a] + ((pos[b] - pos[entry]) % L)\n            out_lines.append(str(steps))\n        else:\n            out_lines.append(\"-1\")\n    sys.stdout.write(\"\\n\".join(out_lines))\n\nif __name__ == \"__main__\":\n    main()",
+      "codeLabel": "Answer queries and print"
+    },
+    {
+      "id": "q20",
+      "phase": "Verifying the Solution",
+      "questionText": "n=6, t=[2,3,4,2,6,5] (1-indexed). Query: a=1, b=3. What will the code output?",
+      "diagram": "Cycle: 2→3→4→2. Also 5↔6. 1→2.",
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "-1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Path: 1→2→3, so 2 steps. They are in the same component; b is on the cycle.",
+      "wrongExplanations": {
+        "0": "1 step only reaches 2.",
+        "3": "They are connected via the chain and cycle."
+      },
+      "hint": "Find the cycle entry from 1 and then move to 3.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q21",
+      "phase": "Verifying the Solution",
+      "questionText": "Using the same graph (n=6, t=[2,3,4,2,6,5]), what is the output for query a=1, b=6?",
+      "diagram": "Components: {1,2,3,4} and {5,6}.",
+      "options": [
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "-1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 3,
+      "explanation": "a and b are in different components (different eventual cycles). Answer is -1.",
+      "wrongExplanations": {
+        "1": "No path exists crossing components."
+      },
+      "hint": "Check comp[a] vs comp[b].",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q22",
+      "phase": "Verifying the Solution",
+      "questionText": "Same graph: what about a=4, b=3?",
+      "diagram": "Cycle positions: e.g., pos[2]=0,pos[3]=1,pos[4]=2 (one possible assignment).",
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "-1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "On the cycle: distance = (pos[3] - pos[4]) mod 3 = 2 steps: 4→2→3.",
+      "wrongExplanations": {
+        "0": "4→3 isn't a direct teleporter.",
+        "3": "Both are on the same cycle; reachable."
+      },
+      "hint": "Use modular difference around the 3-cycle.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q23",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the overall preprocessing time complexity?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(log n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Building the jump table takes O(n log n); cycle/depth labeling is O(n).",
+      "wrongExplanations": {
+        "0": "You still need to build multiple jump layers.",
+        "2": "No quadratic loops are used."
+      },
+      "hint": "Count layers in the jump table.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Analyzing Complexity",
+      "questionText": "What are per-query time and extra space complexities?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Per-query O(log n), space O(n log n).",
+          "isCode": false
+        },
+        {
+          "label": "Per-query O(1), space O(n).",
+          "isCode": false
+        },
+        {
+          "label": "Per-query O(n), space O(n).",
+          "isCode": false
+        },
+        {
+          "label": "Per-query O(log n), space O(n).",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Queries use O(log n) jumps. The table uses O(n log n) space; other arrays are O(n).",
+      "wrongExplanations": {
+        "1": "With the jump table, queries still need logarithmic steps.",
+        "3": "Space excludes the jump table cost."
+      },
+      "hint": "Space is dominated by the jump table.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\n\ndef main():\n    data = sys.stdin.read().strip().split()\n    if not data:\n        return\n    it = iter(data)\n    n = int(next(it)); q = int(next(it))\n    t = [int(next(it)) - 1 for _ in range(n)]",
+    "    LOG = 20\n    up = [[0] * n for _ in range(LOG)]\n    for v in range(n):\n        up[0][v] = t[v]",
+    "    for i in range(1, LOG):\n        for v in range(n):\n            up[i][v] = up[i-1][ up[i-1][v] ]",
+    "    state = [0] * n\n    depth = [-1] * n\n    comp = [-1] * n\n    pos = [-1] * n\n    compLen = []\n    inStackIndex = [-1] * n\n    compCount = 0",
+    "    for v in range(n):\n        if state[v] != 0:\n            continue\n        stack = []\n        u = v\n        while state[u] == 0:\n            state[u] = 1\n            inStackIndex[u] = len(stack)\n            stack.append(u)\n            u = t[u]\n        if state[u] == 1:\n            idx = inStackIndex[u]\n            cyc = stack[idx:]\n            L = len(cyc)\n            for i_node, node in enumerate(cyc):\n                depth[node] = 0\n                comp[node] = compCount\n                pos[node] = i_node\n                state[node] = 2\n            compLen.append(L)\n            compCount += 1\n            for i_idx in range(idx - 1, -1, -1):\n                x = stack[i_idx]\n                y = stack[i_idx + 1]\n                depth[x] = depth[y] + 1\n                comp[x] = comp[y]\n                state[x] = 2\n        else:\n            for i_idx in range(len(stack) - 1, -1, -1):\n                x = stack[i_idx]\n                y = t[x]\n                depth[x] = depth[y] + 1\n                comp[x] = comp[y]\n                state[x] = 2",
+    "    def jump(x, k):\n        i = 0\n        while k > 0:\n            if k & 1:\n                x = up[i][x]\n            k >>= 1\n            i += 1\n        return x",
+    "    out_lines = []\n    for _ in range(q):\n        a = int(next(it)) - 1\n        b = int(next(it)) - 1\n        if comp[a] != comp[b]:\n            out_lines.append(\"-1\")\n            continue\n        if depth[a] >= depth[b]:\n            c = jump(a, depth[a] - depth[b])\n            if c == b:\n                out_lines.append(str(depth[a] - depth[b]))\n                continue\n        if depth[b] == 0:\n            entry = jump(a, depth[a])\n            L = compLen[comp[a]]\n            steps = depth[a] + ((pos[b] - pos[entry]) % L)\n            out_lines.append(str(steps))\n        else:\n            out_lines.append(\"-1\")\n    sys.stdout.write(\"\\n\".join(out_lines))\n\nif __name__ == \"__main__\":\n    main()"
+  ],
+  "reasoningChain": [
+    {
+      "question": "What structure does a graph with exactly one outgoing edge per node have?",
+      "insight": "It decomposes into components where each has exactly one cycle and trees feeding into it."
+    },
+    {
+      "question": "How can we move k steps along teleporters efficiently?",
+      "insight": "Precompute a table where up[i][v] gives the node after 2^i steps; use k's binary representation to jump."
+    },
+    {
+      "question": "When can b be reached from a without looping around the cycle?",
+      "insight": "If they share a component and b lies on a's path towards the cycle, i.e., depth[a] ≥ depth[b] and jumping depth difference lands at b."
+    },
+    {
+      "question": "How to handle reaching cycle nodes?",
+      "insight": "Compute entry = jump(a, depth[a]) and then move around the cycle using positions and modulo cycle length."
+    },
+    {
+      "question": "What immediate check can rule out reachability?",
+      "insight": "If a and b eventually lead to different cycles (different components), reaching is impossible."
+    },
+    {
+      "question": "What are the time and space costs?",
+      "insight": "Preprocessing O(n log n) for the jump table and O(n) for cycle labeling; per query O(log n); space O(n log n) for the table plus O(n) metadata."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1446,
+    "output_tokens": 19395,
+    "input_cost": 0.001808,
+    "output_cost": 0.19395,
+    "total_cost": 0.195758
+  }
+}

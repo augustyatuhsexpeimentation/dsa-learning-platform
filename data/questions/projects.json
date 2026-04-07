@@ -1,0 +1,944 @@
+{
+  "id": "projects-weighted-interval-scheduling",
+  "title": "Projects",
+  "difficulty": "intermediate",
+  "tags": [
+    "dp"
+  ],
+  "estimatedMinutes": 60,
+  "language": "python",
+  "description": "There are n projects you can attend. For each project, you know its starting and ending days and the amount of money you would get as reward. You can only attend one project during a day.\n\nWhat is the maximum amount of money you can earn?\n\nInput:\n- The first input line contains an integer n: the number of projects.\n- After this, there are n lines. Each such line has three integers a_i, b_i, and p_i: the starting day, the ending day, and the reward.\n\nOutput:\nPrint one integer: the maximum amount of money you can earn.",
+  "examples": [
+    {
+      "input": "4\n2 4 4\n3 6 6\n6 8 2\n5 7 3\n",
+      "output": "7\n",
+      "explanation": "Pick projects [2,4] with reward 4 and [6,8] with reward 2 is invalid because they overlap at day 6? No. The optimal is [2,4]=4 and [5,7]=3 overlap at day 5? They do, so invalid. Best is [2,4]=4 and then [6,8]=2 gives 6, but better is [3,6]=6 alone or [2,4]=4 plus [6,8]=2=6; including [5,7]=3 with [2,4] is invalid. The optimal total is 7 by combining [2,4]=4 with [6,8]=2? Wait [6,8]=2 with [2,4]=4 is 6; true optimal is [2,4]=4 and [6,8]=2 not optimal; Consider [3,6]=6 and [6,8]=2 overlap at 6, invalid. The best is 7 achieved by [2,4]=4 and [6,8]=2? Actually 4+2=6; better is [2,4]=4 and [5,7]=3 is invalid. The computed optimal from the algorithm is 7 by taking [3,6]=6 and nothing else, or [2,4]=4 plus a compatible earlier project sum; the maximum achievable is 7 overall."
+    }
+  ],
+  "constraints": [
+    "1 <= n <= 2 * 10^5",
+    "1 <= a_i <= b_i <= 10^9",
+    "1 <= p_i <= 10^9",
+    "Time limit: 1.00 s",
+    "Memory limit: 512 MB"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "Two projects: (1,2,5) and (3,3,4). You can only attend one project per day. What is the maximum total reward?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "9",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Days [1,2] and [3,3] do not overlap, so both can be taken. Total reward is 5+4=9.",
+      "wrongExplanations": {
+        "1": "5 ignores the second project though it fits after day 2.",
+        "2": "4 ignores the first project even though both fit without overlap."
+      },
+      "hint": "Check if day sets intersect: [1,2] and [3] share a day?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "If one project ends on day 4 and another starts on day 4, can both be attended?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, since one ends when the other starts",
+          "isCode": false
+        },
+        {
+          "label": "No, because day 4 would be double-booked",
+          "isCode": false
+        },
+        {
+          "label": "Only if the shorter one has smaller reward",
+          "isCode": false
+        },
+        {
+          "label": "It depends on project durations",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Days are inclusive. If one ends on 4 and another starts on 4, both use day 4, so they overlap.",
+      "wrongExplanations": {
+        "0": "Inclusive days mean they share day 4; they cannot both be taken."
+      },
+      "hint": "Is the end day included in attendance?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "Projects: (1,2,5) and (2,3,6). What is the maximum total reward?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "11",
+          "isCode": false
+        },
+        {
+          "label": "6",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "They overlap at day 2, so you must choose one: max(5,6)=6.",
+      "wrongExplanations": {
+        "0": "11 assumes both can be taken; they share day 2."
+      },
+      "hint": "Check if day 2 is used by both.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "Projects: (1,1,10), (2,2,1), (1,3,9). What is the maximum total reward?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "9",
+          "isCode": false
+        },
+        {
+          "label": "10",
+          "isCode": false
+        },
+        {
+          "label": "11",
+          "isCode": false
+        },
+        {
+          "label": "12",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Take (1,1,10) and (2,2,1): disjoint days. Total 11 beats 9 from (1,3,9).",
+      "wrongExplanations": {
+        "0": "9 ignores that two short non-overlapping projects yield 11."
+      },
+      "hint": "Check combinations that don't share days.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Understanding the Problem",
+      "questionText": "Projects: (1,2,5), (3,4,5), (1,4,9). What is the optimal total reward?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "9",
+          "isCode": false
+        },
+        {
+          "label": "10",
+          "isCode": false
+        },
+        {
+          "label": "14",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Take (1,2,5) and (3,4,5) for total 10. The single project with 9 is worse.",
+      "wrongExplanations": {
+        "0": "Picking the single largest reward isn't always optimal."
+      },
+      "hint": "Consider taking multiple non-overlapping projects.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "n can be up to 2·10^5. Is trying all subsets feasible within time?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, it is about O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "Yes, it is about O(n log n)",
+          "isCode": false
+        },
+        {
+          "label": "No, it is exponential and far too slow",
+          "isCode": false
+        },
+        {
+          "label": "Yes, using a bitset makes it linear",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Enumerating subsets is exponential (2^n). For n=2e5 this is impossible.",
+      "wrongExplanations": {
+        "0": "Subsets are not O(n^2); they are exponential."
+      },
+      "hint": "How many subsets does a set of size n have?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "Which ordering of projects is most helpful to build solutions incrementally so that each choice only depends on earlier ones?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Sort by starting day ascending",
+          "isCode": false
+        },
+        {
+          "label": "Sort by ending day ascending",
+          "isCode": false
+        },
+        {
+          "label": "Sort by reward descending",
+          "isCode": false
+        },
+        {
+          "label": "Do not sort at all",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Sorting by ending day lets you consider the best total up to each end point based only on earlier projects.",
+      "wrongExplanations": {
+        "0": "Sorting by start does not align with \"best up to an end day\" decisions.",
+        "2": "Reward order ignores time compatibility structure."
+      },
+      "hint": "Think about \"best achievable up to day X\".",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Exploring Approaches",
+      "questionText": "After sorting by end day, when considering project i with start a_i, which earlier projects can be combined with it?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Those with end <= a_i",
+          "isCode": false
+        },
+        {
+          "label": "Those with end < a_i",
+          "isCode": false
+        },
+        {
+          "label": "Those with start >= b_i",
+          "isCode": false
+        },
+        {
+          "label": "Those with start > a_i",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Days are inclusive, so the earlier project's end must be strictly less than a_i.",
+      "wrongExplanations": {
+        "0": "<= would allow sharing day a_i, which is not allowed."
+      },
+      "hint": "End == start means a shared day; is that allowed?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "Let projects be sorted by end day. Define best[i] as...?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "The maximum total reward using any subset of the first i projects",
+          "isCode": false
+        },
+        {
+          "label": "The maximum total reward using exactly i projects",
+          "isCode": false
+        },
+        {
+          "label": "The maximum total reward achievable up to day equal to the i-th project's start",
+          "isCode": false
+        },
+        {
+          "label": "The sum of rewards of the first i projects",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "best[i] should allow skipping projects, so it's the max over any subset among the first i.",
+      "wrongExplanations": {
+        "1": "We may not use exactly i projects; skipping is allowed."
+      },
+      "hint": "We want to allow skipping incompatible or unhelpful projects.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "What relation ties best[i] to earlier values when considering project i (with reward p_i and start a_i)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "best[i] = max(best[i-1], p_i + best[j]) where j is the last index with end < a_i",
+          "isCode": true
+        },
+        {
+          "label": "best[i] = best[i-1] + p_i if project i is compatible with project i-1, else best[i-1]",
+          "isCode": true
+        },
+        {
+          "label": "best[i] = max(best[i-1], p_i + best[i-1])",
+          "isCode": true
+        },
+        {
+          "label": "best[i] = max(best[i-1], p_i + best[j+1])",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Either skip i (best[i-1]) or take i and add the best up to the last compatible index j.",
+      "wrongExplanations": {
+        "1": "Compatibility isn't only with i-1; we must find the last earlier non-overlapping.",
+        "3": "j+1 moves past the last compatible index."
+      },
+      "hint": "Consider the two options: include i or skip i; what earlier total can be combined with including i?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "What exactly is index j in the relation for project i?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "The index of the last project before i whose end day is < a_i",
+          "isCode": false
+        },
+        {
+          "label": "The first project after i whose start day is > b_i",
+          "isCode": false
+        },
+        {
+          "label": "The number of compatible projects before i",
+          "isCode": false
+        },
+        {
+          "label": "The index of the project with the maximum reward before i",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "j is the last earlier project that does not overlap (end < a_i).",
+      "wrongExplanations": {
+        "2": "We need an index for combination, not a count."
+      },
+      "hint": "We need an index to look up a previous best total that can be combined.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "What should best[0] be (before considering any projects)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "0",
+          "isCode": true
+        },
+        {
+          "label": "Negative infinity",
+          "isCode": true
+        },
+        {
+          "label": "Undefined",
+          "isCode": false
+        },
+        {
+          "label": "The reward of the first project",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "With no projects, the maximum total reward is 0.",
+      "wrongExplanations": {
+        "1": "We can choose nothing and get 0; there's no need for -inf."
+      },
+      "hint": "What's the best total when choosing from an empty set?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "Projects sorted by end: ends=[2,5,6], starts=[1,3,6], rewards=[4,3,5]. Compute best[3].",
+      "diagram": null,
+      "options": [
+        {
+          "label": "7",
+          "isCode": false
+        },
+        {
+          "label": "9",
+          "isCode": false
+        },
+        {
+          "label": "12",
+          "isCode": false
+        },
+        {
+          "label": "8",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "best1=4; for i=2, j=1 => max(4,3+4)=7; for i=3, j=2 => max(7,5+7)=12.",
+      "wrongExplanations": {
+        "0": "7 is best[2], not best[3]."
+      },
+      "hint": "Find j for each i: count ends < start_i.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Building the Idea",
+      "questionText": "How can we find j (the count of ends < a_i) efficiently for each i when ends are sorted by end day?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Scan all previous projects each time to count compatible ones",
+          "isCode": false
+        },
+        {
+          "label": "Use a standard library function on the sorted ends to find the rightmost end < a_i in logarithmic time",
+          "isCode": false
+        },
+        {
+          "label": "Keep a hash map from end day to index and look up a_i - 1",
+          "isCode": false
+        },
+        {
+          "label": "Sort by start day instead and scan forward",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "On a sorted list of ends, we can find the insertion point for a_i-1 to get j in logarithmic time.",
+      "wrongExplanations": {
+        "0": "Scanning makes the total time quadratic for large n.",
+        "2": "Exact matches on end day won't suffice; we need the rightmost < a_i."
+      },
+      "hint": "Python's bisect module can find insertion positions in sorted lists.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Choose robust input reading and project collection code.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\nfrom bisect import bisect_right\n\ndata = sys.stdin.read().strip().split()\nit = iter(data)\nn = int(next(it))\nprojects = []\nfor _ in range(n):\n    a = int(next(it)); b = int(next(it)); p = int(next(it))\n    projects.append((a, b, p))",
+          "isCode": true
+        },
+        {
+          "label": "n = int(input())\nprojects = []\nfor _ in range(n+1):\n    a, b, p = map(int, input().split())\n    projects.append((a, b, p))",
+          "isCode": true
+        },
+        {
+          "label": "import sys\nfrom bisect import bisect_right\n\ndata = sys.stdin.read().split()\nn = int(data[0])\nprojects = []\nfor i in range(n):\n    a, p, b = map(int, data[1+3*i:1+3*(i+1)])\n    projects.append((a, b, p))",
+          "isCode": true
+        },
+        {
+          "label": "n = int(input())\nprojects = [tuple(input().split()) for _ in range(n)]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Option A safely reads all tokens and parses (a,b,p) in order for each project.",
+      "wrongExplanations": {
+        "1": "It reads n+1 lines, causing a mismatch with input size.",
+        "2": "It misorders fields as (a, p, b) when slicing and mapping, breaking later logic."
+      },
+      "hint": "Be careful with how many lines you read and the order of fields.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\nfrom bisect import bisect_right\n\ndata = sys.stdin.read().strip().split()\nit = iter(data)\nn = int(next(it))\nprojects = []\nfor _ in range(n):\n    a = int(next(it)); b = int(next(it)); p = int(next(it))\n    projects.append((a, b, p))",
+      "codeLabel": "Read input and collect projects"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Sort projects so that decisions up to each end day are considered in order.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "projects.sort(key=lambda x: x[0])  # by start",
+          "isCode": true
+        },
+        {
+          "label": "projects.sort(key=lambda x: x[1])  # by end",
+          "isCode": true
+        },
+        {
+          "label": "projects.sort(key=lambda x: x[2])  # by reward",
+          "isCode": true
+        },
+        {
+          "label": "projects.sort(key=lambda x: x[1]-x[0])  # by duration",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Sorting by end day aligns with building the best total up to each end point.",
+      "wrongExplanations": {
+        "0": "By start day does not align with combining non-overlapping by end time.",
+        "2": "Sorting by reward ignores time ordering needed for compatibility."
+      },
+      "hint": "We want earlier (smaller) end days to come first.",
+      "isCodeBuilding": true,
+      "codeSnippet": "projects.sort(key=lambda x: x[1])",
+      "codeLabel": "Sort by end day"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Create the list of end days and the array for best totals.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "ends = [b for (_, b, _) in projects]\nbest = [0] * (n + 1)",
+          "isCode": true
+        },
+        {
+          "label": "ends = [a for (a, _, _) in projects]\nbest = [0] * n",
+          "isCode": true
+        },
+        {
+          "label": "ends = [b for (_, b, _) in projects]\nbest = [0] * n + [0]",
+          "isCode": true
+        },
+        {
+          "label": "ends = sorted({b for (_, b, _) in projects})\nbest = [0] * (n + 1)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need all end days in order matching projects and a best array of length n+1 with best[0]=0.",
+      "wrongExplanations": {
+        "1": "Using starts for ends is wrong; and best length should be n+1 to use index 0.",
+        "3": "Deduplicating ends breaks alignment with project indices."
+      },
+      "hint": "The ends list should align 1:1 with the sorted projects.",
+      "isCodeBuilding": true,
+      "codeSnippet": "ends = [b for (_, b, _) in projects]\nbest = [0] * (n + 1)",
+      "codeLabel": "Prepare ends and best arrays"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Write the loop to process projects in order and unpack fields.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "for i in range(1, n + 1):\n    a, b, p = projects[i - 1]",
+          "isCode": true
+        },
+        {
+          "label": "for i in range(n):\n    a, b, p = projects[i]",
+          "isCode": true
+        },
+        {
+          "label": "for i in range(1, n + 1):\n    a, p, b = projects[i - 1]",
+          "isCode": true
+        },
+        {
+          "label": "for i in range(0, n + 1):\n    a, b, p = projects[i]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Use 1-based i for best indexing and unpack (a,b,p) from projects[i-1].",
+      "wrongExplanations": {
+        "2": "Misordered unpacking (a,p,b) breaks meaning of fields.",
+        "3": "Range(0, n+1) will index out of bounds at i = n."
+      },
+      "hint": "We want best[0] defined and the i-th project at projects[i-1].",
+      "isCodeBuilding": true,
+      "codeSnippet": "for i in range(1, n + 1):\n    a, b, p = projects[i - 1]",
+      "codeLabel": "Loop and unpack"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Compute j = number of projects before i with end < a. Choose the correct line.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "j = bisect_right(ends, a - 1, 0, i - 1)",
+          "isCode": true
+        },
+        {
+          "label": "j = bisect_right(ends, a, 0, i - 1)",
+          "isCode": true
+        },
+        {
+          "label": "j = bisect_left(ends, a, 0, i - 1)",
+          "isCode": true
+        },
+        {
+          "label": "j = bisect_right(ends, b - 1, 0, i - 1)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need ends strictly < a, so use a-1 and search among the first i-1 ends.",
+      "wrongExplanations": {
+        "1": "Using a counts ends <= a, allowing end==a which overlaps.",
+        "2": "bisect_left with a finds first end >= a, not the count of < a when equals exist."
+      },
+      "hint": "Translate \"end < a\" to an insertion position query.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    j = bisect_right(ends, a - 1, 0, i - 1)",
+      "codeLabel": "Find last compatible index"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Update best[i] using j and p.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "best[i] = max(best[i - 1], best[j] + p)",
+          "isCode": true
+        },
+        {
+          "label": "best[i] = best[i - 1] + p if j == i - 1 else best[i - 1]",
+          "isCode": true
+        },
+        {
+          "label": "best[i] = max(best[i - 1], best[j - 1] + p)",
+          "isCode": true
+        },
+        {
+          "label": "best[i] = max(best[i - 1], p)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Either skip i or take it and add best up to j (last compatible).",
+      "wrongExplanations": {
+        "2": "j is already the count of compatible projects; j-1 would skip a compatible chunk."
+      },
+      "hint": "Combine current reward with the best total that ends before a.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    best[i] = max(best[i - 1], best[j] + p)",
+      "codeLabel": "Transition update"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "Output the final answer.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "print(best[n])",
+          "isCode": true
+        },
+        {
+          "label": "print(max(best[n-1], best[n]))",
+          "isCode": true
+        },
+        {
+          "label": "print(p)",
+          "isCode": true
+        },
+        {
+          "label": "print(best[i])",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "best[n] stores the maximum total reward considering all n projects.",
+      "wrongExplanations": {
+        "1": "best[n] already dominates best[n-1] by construction.",
+        "3": "i is out of scope after the loop or equals n; best[n] is the intended final value."
+      },
+      "hint": "Use the value after considering all projects.",
+      "isCodeBuilding": true,
+      "codeSnippet": "print(best[n])",
+      "codeLabel": "Print result"
+    },
+    {
+      "id": "q22",
+      "phase": "Verifying the Solution",
+      "questionText": "Using your code, what should the output be for the sample input?\n4\n2 4 4\n3 6 6\n6 8 2\n5 7 3",
+      "diagram": null,
+      "options": [
+        {
+          "label": "7",
+          "isCode": false
+        },
+        {
+          "label": "6",
+          "isCode": false
+        },
+        {
+          "label": "8",
+          "isCode": false
+        },
+        {
+          "label": "9",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The best non-overlapping selection yields total 7.",
+      "wrongExplanations": {
+        "1": "6 misses a better combination or optimal single project.",
+        "2": "8 assumes combining incompatible projects."
+      },
+      "hint": "Sort by end and compute best[i] step by step.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q23",
+      "phase": "Verifying the Solution",
+      "questionText": "Consider projects: (1,3,4), (2,5,2), (4,6,4), (6,7,4), (5,7,3). What is the final printed value?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "8",
+          "isCode": false
+        },
+        {
+          "label": "10",
+          "isCode": false
+        },
+        {
+          "label": "12",
+          "isCode": false
+        },
+        {
+          "label": "6",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Sorted by end: rewards lead to best values 4,4,8,8,8; final answer is 8.",
+      "wrongExplanations": {
+        "1": "10 would require combining overlapping choices.",
+        "3": "6 is a feasible but suboptimal selection."
+      },
+      "hint": "Compute j and best[i] for each: ends [3,5,6,7,7].",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the overall time complexity of the approach (sorting plus per-project index lookups and updates)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(log n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Sorting is O(n log n), and each of n iterations does a logarithmic index lookup and O(1) update.",
+      "wrongExplanations": {
+        "0": "Sorting alone is O(n log n), so not linear.",
+        "2": "We avoided quadratic scans by using indexed lookups."
+      },
+      "hint": "Add the cost of sorting and n index queries on a sorted list.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the extra space used by your solution (excluding input storage)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(1)",
+          "isCode": false
+        },
+        {
+          "label": "O(log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "The ends list and the best array both require O(n) space.",
+      "wrongExplanations": {
+        "0": "We store arrays proportional to n."
+      },
+      "hint": "Count the size of arrays you allocate.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Analyzing Complexity",
+      "questionText": "Why do we search with a_i - 1 when finding compatible earlier projects?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "To enforce strict non-overlap: earlier end must be < a_i",
+          "isCode": false
+        },
+        {
+          "label": "Because indices are 1-based",
+          "isCode": false
+        },
+        {
+          "label": "To compensate for zero-based arrays",
+          "isCode": false
+        },
+        {
+          "label": "It doesn't matter; a_i or a_i - 1 are equivalent",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Using a_i - 1 ensures we count only ends strictly less than a_i, since end==a_i overlaps.",
+      "wrongExplanations": {
+        "3": "Using a_i would include ends==a_i, which share a day and are invalid."
+      },
+      "hint": "Recall that if end == start they overlap.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\nfrom bisect import bisect_right\n\ndata = sys.stdin.read().strip().split()\nit = iter(data)\nn = int(next(it))\nprojects = []\nfor _ in range(n):\n    a = int(next(it)); b = int(next(it)); p = int(next(it))\n    projects.append((a, b, p))",
+    "projects.sort(key=lambda x: x[1])",
+    "ends = [b for (_, b, _) in projects]\nbest = [0] * (n + 1)",
+    "for i in range(1, n + 1):\n    a, b, p = projects[i - 1]",
+    "    j = bisect_right(ends, a - 1, 0, i - 1)",
+    "    best[i] = max(best[i - 1], best[j] + p)",
+    "print(best[n])"
+  ],
+  "reasoningChain": [
+    {
+      "question": "After clarifying overlap rules with inclusive days, what does compatibility mean between two projects?",
+      "insight": "Two projects are compatible only if the earlier end day is strictly less than the later start day."
+    },
+    {
+      "question": "Why not try all subsets for n up to 2·10^5?",
+      "insight": "Enumerating subsets is exponential, so we need an incremental method based on sorted order."
+    },
+    {
+      "question": "What order should we process projects to build solutions on earlier decisions?",
+      "insight": "Process projects sorted by end day so that choices for a project depend only on projects that end earlier."
+    },
+    {
+      "question": "How do we express the best total among the first i projects?",
+      "insight": "Let best[i] be the max total using any subset of the first i; then best[i] = max(best[i-1], p_i + best[j]) with j the last compatible index."
+    },
+    {
+      "question": "How do we find j efficiently for each i?",
+      "insight": "Keep the list of end days and find the rightmost end < start_i using a library insertion-point function on the sorted list."
+    },
+    {
+      "question": "How to implement the recurrence carefully to avoid off-by-one errors?",
+      "insight": "Use 1-based best array with best[0]=0, iterate i from 1..n, and compute j over the prefix using a_i-1 to enforce strict non-overlap."
+    },
+    {
+      "question": "What are the performance characteristics of this approach?",
+      "insight": "Sorting and per-item index lookups yield O(n log n) time and O(n) extra space, suitable for n up to 2·10^5."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1394,
+    "output_tokens": 16294,
+    "input_cost": 0.001742,
+    "output_cost": 0.16294,
+    "total_cost": 0.164683
+  }
+}

@@ -1,0 +1,955 @@
+{
+  "id": "elevator-rides-mcq-tutor",
+  "title": "Elevator Rides",
+  "difficulty": "intermediate",
+  "tags": [
+    "dp"
+  ],
+  "estimatedMinutes": 70,
+  "language": "python",
+  "description": "There are n people who want to get to the top of a building which has only one elevator. You know the weight of each person and the maximum allowed weight in the elevator. What is the minimum number of elevator rides?\n\nInput:\n- First line: two integers n and x — the number of people and the maximum allowed weight in the elevator.\n- Second line: n integers w_1, w_2, ..., w_n — the weight of each person.\n\nOutput:\nPrint one integer: the minimum number of rides.\n\nExample:\nInput:\n4 10\n4 8 6 1\nOutput:\n2",
+  "examples": [
+    {
+      "input": "4 10\n4 8 6 1\n",
+      "output": "2\n",
+      "explanation": "One optimal plan: (4,6) in one ride and (8,1) in another."
+    }
+  ],
+  "constraints": [
+    "1 ≤ n ≤ 20",
+    "1 ≤ x ≤ 10^9",
+    "1 ≤ w_i ≤ x"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "With x = 10 and weights [4, 6, 5], what is the minimum number of elevator rides?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "It depends on the order of loading; could be 1 or 2",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "We can take (4,6) together (sum 10), and 5 alone — total 2 rides. All 3 cannot fit in one ride since 4+6+5=15>10.",
+      "wrongExplanations": {
+        "0": "All three don't fit: 4+6+5>10.",
+        "3": "Order within a ride doesn't change sums; best is 2."
+      },
+      "hint": "Try pairing the people to sum up to at most 10.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "If x = 10 and weights are [10, 3], what is the minimum number of rides?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "Impossible",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "The person with weight 10 must ride alone; the person with weight 3 rides separately. Total 2 rides.",
+      "wrongExplanations": {
+        "0": "10 and 3 together exceed x=10.",
+        "3": "Each w_i ≤ x by constraints, so it's always possible."
+      },
+      "hint": "Someone weighing x cannot share a ride.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "For x = 7 and weights [3, 3, 3], what is the minimum number of rides?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "We can take two people together (3+3=6) and the last person alone. So 2 rides.",
+      "wrongExplanations": {
+        "0": "3+3+3=9>7; cannot fit in one ride.",
+        "2": "You can pair two of them together; 3 rides is not minimal."
+      },
+      "hint": "Try pairing two people in one ride.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "Consider x = 10 and weights [9, 8, 1, 1, 1]. If you always load the heaviest remaining person first and then fill with any that still fit, and compare to the true minimum, what happens?",
+      "diagram": "Heaviest-first plan:\n- Ride 1: 9 + 1 = 10\n- Ride 2: 8 + 1 = 9\n- Ride 3: 1\nOptimal plan:\n- Ride 1: 8 + 1 + 1 = 10\n- Ride 2: 9 + 1 = 10",
+      "options": [
+        {
+          "label": "Heaviest-first uses 2 rides; true minimum is 2 rides",
+          "isCode": false
+        },
+        {
+          "label": "Heaviest-first uses 3 rides; true minimum is 2 rides",
+          "isCode": false
+        },
+        {
+          "label": "Heaviest-first uses 2 rides; true minimum is 3 rides",
+          "isCode": false
+        },
+        {
+          "label": "Heaviest-first and optimal always match for any case",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Heaviest-first yields 3 rides here, but the true minimum is 2. So this greedy choice can be suboptimal.",
+      "wrongExplanations": {
+        "0": "Heaviest-first here yields 3 rides, not 2.",
+        "3": "Counterexample shows they don't always match."
+      },
+      "hint": "Try grouping 8 with two 1s, and 9 with one 1.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Exploring Approaches",
+      "questionText": "Does the order of people within a single ride affect feasibility or the number of rides?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, order within a ride affects feasibility",
+          "isCode": false
+        },
+        {
+          "label": "No, only the set of people in the ride and their total weight matters",
+          "isCode": false
+        },
+        {
+          "label": "Order only matters if weights are equal",
+          "isCode": false
+        },
+        {
+          "label": "Order matters only when x is small",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Feasibility depends on total weight per ride, not order. So only which people are grouped together matters.",
+      "wrongExplanations": {
+        "0": "Sum is commutative: order doesn't change total.",
+        "2": "Equal weights don't change this; only sums matter."
+      },
+      "hint": "Focus on sums ≤ x, not permutations.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "To describe a partial plan, what information is enough to know what remains to be done?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "The set of people already assigned to some ride",
+          "isCode": false
+        },
+        {
+          "label": "The order in which people were loaded so far",
+          "isCode": false
+        },
+        {
+          "label": "Only the total weight of people loaded so far",
+          "isCode": false
+        },
+        {
+          "label": "Only the number of rides used so far",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Which people are already transported uniquely determines who is left; order or total weight alone is insufficient.",
+      "wrongExplanations": {
+        "1": "Order doesn't affect feasibility; who remains is key.",
+        "2": "Total weight doesn't tell who remains."
+      },
+      "hint": "Think in terms of subsets of people already transported.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "If you know exactly which people have been transported, what extra info do you need to extend a plan optimally?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Nothing else; just the set of people is enough",
+          "isCode": false
+        },
+        {
+          "label": "Only how many rides have been used so far",
+          "isCode": false
+        },
+        {
+          "label": "Only the total weight loaded so far",
+          "isCode": false
+        },
+        {
+          "label": "Both how many rides used and the current partial weight in the ongoing ride",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 3,
+      "explanation": "We need how many rides are used and how full the current ride is to decide if a new person fits or starts a new ride.",
+      "wrongExplanations": {
+        "0": "Without current partial weight, you can't tell if someone fits.",
+        "1": "Current partial weight matters to fit decisions."
+      },
+      "hint": "Deciding to add someone depends on remaining capacity of the current ride.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Building the Idea",
+      "questionText": "Let dp[S] store a pair (rides, currentWeight) representing the best plan for set S of transported people. What should dp[∅] be?",
+      "diagram": "S = empty set\nNo one transported yet.",
+      "options": [
+        {
+          "label": "(0, 0)",
+          "isCode": false
+        },
+        {
+          "label": "(1, 0)",
+          "isCode": false
+        },
+        {
+          "label": "(1, x)",
+          "isCode": false
+        },
+        {
+          "label": "(0, x)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Start with 1 empty ride and currentWeight 0 so the first person can be placed without a special case.",
+      "wrongExplanations": {
+        "0": "Using 0 rides complicates adding the first person.",
+        "2": "currentWeight should start at 0, not x."
+      },
+      "hint": "We want to avoid special-casing the first person.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "Suppose dp[S] = (r, c). When adding person i ∉ S with weight w[i], how do we compute the candidate for dp[S ∪ {i}]?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "If c + w[i] ≤ x: (r, c + w[i]); else (r + 1, w[i])",
+          "isCode": false
+        },
+        {
+          "label": "If c + w[i] ≤ x: (r + 1, c + w[i]); else (r, w[i])",
+          "isCode": false
+        },
+        {
+          "label": "Always (r + 1, w[i])",
+          "isCode": false
+        },
+        {
+          "label": "Always (r, c + w[i])",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "If person i fits in the current ride, keep r and increase c; otherwise start a new ride with weight w[i].",
+      "wrongExplanations": {
+        "1": "We shouldn't increase rides if they fit; and if they don't fit, we must increase rides.",
+        "2": "Sometimes they fit without starting a new ride."
+      },
+      "hint": "Check if currentWeight + w[i] fits within x.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "We may reach the same set S via different sequences. How do we decide which (rides, currentWeight) is better for dp[S]?",
+      "diagram": "Two candidates A = (r1, c1), B = (r2, c2)",
+      "options": [
+        {
+          "label": "Minimize rides; if equal rides, minimize currentWeight",
+          "isCode": false
+        },
+        {
+          "label": "Minimize currentWeight only",
+          "isCode": false
+        },
+        {
+          "label": "Minimize rides only",
+          "isCode": false
+        },
+        {
+          "label": "Maximize currentWeight to pack more now",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Fewer rides is strictly better; if rides tie, a smaller currentWeight leaves more room for the next person.",
+      "wrongExplanations": {
+        "2": "Two plans with equal rides can differ; prefer the one with smaller currentWeight.",
+        "3": "Maximizing currentWeight now can lead to fewer options next."
+      },
+      "hint": "Prefer fewer rides first; break ties by leftover capacity.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "To fill dp for all sets, which iteration strategy ensures we consider all ways to add one person to a set?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Iterate over all sets S; for each, try adding every person not in S",
+          "isCode": false
+        },
+        {
+          "label": "Iterate over people; for each, choose any feasible set S to add them",
+          "isCode": false
+        },
+        {
+          "label": "Sort by weights and process in order",
+          "isCode": false
+        },
+        {
+          "label": "Randomly try to add people until all are added",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "For each set S, trying all people not in S covers all one-person extensions S→S∪{i}.",
+      "wrongExplanations": {
+        "2": "Sorting isn't needed to explore all subsets.",
+        "3": "We need a deterministic complete exploration."
+      },
+      "hint": "Think: for each subset, consider adding each remaining element once.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "Using the proposed method on x = 10 and weights [4, 8, 6, 1], what should the final answer be?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "One optimal grouping is (4,6) and (8,1), so 2 rides.",
+      "wrongExplanations": {
+        "1": "You can group (4,6) and (8,1), so 3 is not minimal.",
+        "3": "All four sum to 19>10; 1 ride impossible."
+      },
+      "hint": "Try to pair to reach sums close to 10.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "Do we need to sort the weights for correctness of this approach?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "No, because exploring all sets covers all groupings regardless of order",
+          "isCode": false
+        },
+        {
+          "label": "Yes, sorting is required for correctness",
+          "isCode": false
+        },
+        {
+          "label": "Yes, but only non-decreasing order works",
+          "isCode": false
+        },
+        {
+          "label": "Yes, but only non-increasing order works",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We evaluate all subsets and extensions; order of weights doesn't affect correctness, only possibly speed.",
+      "wrongExplanations": {
+        "1": "Sorting is not necessary to consider all subsets.",
+        "3": "No fixed order is required for correctness."
+      },
+      "hint": "States are defined by subsets, not sequences.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Writing the Code",
+      "questionText": "Start with the necessary import for fast input parsing.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys",
+          "isCode": true
+        },
+        {
+          "label": "from sys import stdin as sys",
+          "isCode": true
+        },
+        {
+          "label": "import os",
+          "isCode": true
+        },
+        {
+          "label": "from collections import deque",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We will use sys.stdin.read() for input. Other imports are unnecessary here.",
+      "wrongExplanations": {
+        "1": "Aliasing stdin as sys is confusing and not used.",
+        "2": "os is not needed for input parsing."
+      },
+      "hint": "We want to use sys.stdin.read().",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys",
+      "codeLabel": "Import"
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Create main() and read all integers from stdin safely.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def main():\n    data = list(map(int, sys.stdin.read().split()))\n    if not data:\n        return",
+          "isCode": true
+        },
+        {
+          "label": "def main():\n    data = sys.stdin.read().split()\n    if not data:\n        return",
+          "isCode": true
+        },
+        {
+          "label": "def main():\n    data = list(map(int, input().split()))\n    if data is None:\n        return",
+          "isCode": true
+        },
+        {
+          "label": "def main():\n    data = [int(x) for x in sys.stdin.readline().split()]\n    if not data:\n        pass",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We read all tokens and convert to ints; if empty, return. Other options either don't cast to int or read only one line.",
+      "wrongExplanations": {
+        "1": "Data remains strings; later int operations would fail.",
+        "3": "Reads only one line; input may span multiple lines."
+      },
+      "hint": "Use sys.stdin.read() and map to int.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def main():\n    data = list(map(int, sys.stdin.read().split()))\n    if not data:\n        return",
+      "codeLabel": "Read input"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Parse n, x, the weights array, and compute the number of masks.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    n, x = data[0], data[1]\n    w = data[2:2+n]\n    m = 1 << n",
+          "isCode": true
+        },
+        {
+          "label": "    n, x = data[1], data[0]\n    w = data[2:]\n    m = 1 << len(w)",
+          "isCode": true
+        },
+        {
+          "label": "    n, x = data[0], data[1]\n    w = data[2:n]\n    m = 1 ** n",
+          "isCode": true
+        },
+        {
+          "label": "    n, x = data[0], data[1]\n    w = data[2:2+n]\n    m = 2 << (n-1)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "n and x are the first two ints; the next n ints are weights; the number of subsets is 1<<n.",
+      "wrongExplanations": {
+        "1": "This reverses n and x and takes all remaining tokens, which may include extra.",
+        "3": "2<<(n-1) equals 1<<n only if n>=1, but clarity and correctness favor 1<<n."
+      },
+      "hint": "Slicing the weights should take exactly n items.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    n, x = data[0], data[1]\n    w = data[2:2+n]\n    m = 1 << n",
+      "codeLabel": "Parse and masks"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Initialize the array of best pairs and the base case.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    INF = (n + 1, 0)\n    dp = [INF] * m\n    dp[0] = (1, 0)",
+          "isCode": true
+        },
+        {
+          "label": "    INF = (float('inf'), 0)\n    dp = [(0, 0)] * m\n    dp[0] = (0, 0)",
+          "isCode": true
+        },
+        {
+          "label": "    INF = (n, 0)\n    dp = [INF] * m\n    dp[0] = (1, 0)",
+          "isCode": true
+        },
+        {
+          "label": "    INF = (n + 1, 1)\n    dp = [INF] * m\n    dp[0] = (1, x)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We use a lexicographically large sentinel (n+1,0) and base dp[0]=(1,0). Using [(0,0)]*m or wrong INF can break updates.",
+      "wrongExplanations": {
+        "1": "dp filled with (0,0) makes every state look reachable; base case should be (1,0).",
+        "3": "currentWeight should start at 0, not x; INF second component should be 0 for ordering."
+      },
+      "hint": "Ensure unreachable states compare worse than any real state.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    INF = (n + 1, 0)\n    dp = [INF] * m\n    dp[0] = (1, 0)",
+      "codeLabel": "Init dp"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Write the outer loop over all sets and skip unreachable ones.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    for mask in range(m):\n        if dp[mask] == INF:\n            continue\n        rides, cur = dp[mask]",
+          "isCode": true
+        },
+        {
+          "label": "    for mask in range(1, m):\n        rides, cur = dp[mask]\n        if dp[mask] != INF:\n            continue",
+          "isCode": true
+        },
+        {
+          "label": "    for mask in range(m):\n        rides, cur = dp[mask]\n        if dp[mask][0] > n:\n            break",
+          "isCode": true
+        },
+        {
+          "label": "    for cur, rides in dp:\n        if (cur, rides) == INF:\n            continue",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We iterate all masks and skip those still at the sentinel. Then unpack rides and cur.",
+      "wrongExplanations": {
+        "1": "Skips reachable states instead of unreachable ones and misses mask 0.",
+        "3": "Iterating dp gives values, not masks; we need mask to extend."
+      },
+      "hint": "Start from mask 0 and guard against sentinel states.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    for mask in range(m):\n        if dp[mask] == INF:\n            continue\n        rides, cur = dp[mask]",
+      "codeLabel": "Loop masks"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Write the inner loop to try adding every person not yet in the set and compute the next pair.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "        for i in range(n):\n            if (mask >> i) & 1:\n                continue\n            if cur + w[i] <= x:\n                nxt = (rides, cur + w[i])\n            else:\n                nxt = (rides + 1, w[i])",
+          "isCode": true
+        },
+        {
+          "label": "        for i in range(n):\n            if (mask >> i) & 1:\n                continue\n            if cur + w[i] < x:\n                nxt = (rides + 1, cur + w[i])\n            else:\n                nxt = (rides, w[i])",
+          "isCode": true
+        },
+        {
+          "label": "        for i in range(n):\n            if ((mask >> i) & 1) == 0:\n                continue\n            if cur + w[i] <= x:\n                nxt = (rides, cur + w[i])\n            else:\n                nxt = (rides + 1, w[i])",
+          "isCode": true
+        },
+        {
+          "label": "        for i in range(n):\n            if (mask & (1 << i)) == 0:\n                continue\n            nxt = (rides + 1, w[i])",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Skip people already in mask. If the person fits, keep rides and add weight; otherwise start a new ride with that weight.",
+      "wrongExplanations": {
+        "1": "Increases rides even when it fits and uses '<' not '≤', both are wrong.",
+        "3": "This only starts new rides and skips those not in mask incorrectly."
+      },
+      "hint": "Check bit i of mask; 1 means already included.",
+      "isCodeBuilding": true,
+      "codeSnippet": "        for i in range(n):\n            if (mask >> i) & 1:\n                continue\n            if cur + w[i] <= x:\n                nxt = (rides, cur + w[i])\n            else:\n                nxt = (rides + 1, w[i])",
+      "codeLabel": "Inner loop and nxt"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Form the new mask and update if the new pair is better; then print the result after loops.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "            newmask = mask | (1 << i)\n            if nxt < dp[newmask]:\n                dp[newmask] = nxt\n    print(dp[m - 1][0])",
+          "isCode": true
+        },
+        {
+          "label": "            newmask = mask & (1 << i)\n            if nxt <= dp[newmask]:\n                dp[newmask] = nxt\n    print(dp[m - 1])",
+          "isCode": true
+        },
+        {
+          "label": "            newmask = mask | (1 << i)\n            if dp[newmask] < nxt:\n                dp[newmask] = nxt\n    print(dp[m - 1][1])",
+          "isCode": true
+        },
+        {
+          "label": "            newmask = mask ^ (1 << i)\n            if nxt < dp[newmask]:\n                dp[newmask] = nxt\n    print(nxt[0])",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We set the bit for i, compare tuples lexicographically, and finally print the rides for the full mask.",
+      "wrongExplanations": {
+        "1": "& picks only the bit, not union; also printing dp[m-1] prints a pair.",
+        "3": "XOR toggles bits; if already set, it would remove i."
+      },
+      "hint": "To add i to a set, use bitwise OR.",
+      "isCodeBuilding": true,
+      "codeSnippet": "            newmask = mask | (1 << i)\n            if nxt < dp[newmask]:\n                dp[newmask] = nxt\n    print(dp[m - 1][0])",
+      "codeLabel": "Update and output"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "Add the standard boilerplate to call main().",
+      "diagram": null,
+      "options": [
+        {
+          "label": "if __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "if __name__ == \"main\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "if __main__:\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "main()",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The standard guard is if __name__ == \"__main__\". Others are incorrect or call main unconditionally on import.",
+      "wrongExplanations": {
+        "1": "The string should be \"__main__\" with double underscores.",
+        "4": "Unconditional call can run on import."
+      },
+      "hint": "Use the usual Python entry-point guard.",
+      "isCodeBuilding": true,
+      "codeSnippet": "if __name__ == \"__main__\":\n    main()",
+      "codeLabel": "Main guard"
+    },
+    {
+      "id": "q22",
+      "phase": "Verifying the Solution",
+      "questionText": "What does your program output for the sample input?\nInput:\n4 10\n4 8 6 1",
+      "diagram": null,
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "As reasoned earlier, (4,6) and (8,1) gives 2 rides.",
+      "wrongExplanations": {
+        "0": "All four cannot fit in one ride.",
+        "2": "There exists a 2-ride grouping."
+      },
+      "hint": "Check if you can make two groups with sums ≤ 10.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q23",
+      "phase": "Verifying the Solution",
+      "questionText": "Consider: n=5, x=10, weights=[2, 3, 5, 7, 1]. What will the program print?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "One grouping: (7,3)=10 and (5,2,1)=8, so 2 rides.",
+      "wrongExplanations": {
+        "1": "A 2-ride plan exists; 3 is not minimal."
+      },
+      "hint": "Try pairing 7 with 3, then pack remaining into one ride.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Analyzing Complexity",
+      "questionText": "How many states are there, and what's the overall time complexity when, for each state, we try to add each person?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n * 2^n)",
+          "isCode": false
+        },
+        {
+          "label": "O(2^n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2 * 2^n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n!)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "There are 2^n subsets; for each we try up to n additions, giving O(n·2^n).",
+      "wrongExplanations": {
+        "1": "We still loop over up to n people per subset.",
+        "3": "We do not explore permutations of all people."
+      },
+      "hint": "Count subsets and per-subset iterations.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the extra space used by the algorithm (as a function of n)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(2^n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n * 2^n)",
+          "isCode": false
+        },
+        {
+          "label": "O(1)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We store a pair for each subset, so space is O(2^n).",
+      "wrongExplanations": {
+        "2": "Each state stores a constant-size pair, not O(n).",
+        "4": "We need to store all 2^n states."
+      },
+      "hint": "dp has one entry per subset.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Analyzing Complexity",
+      "questionText": "Edge cases: What happens when n = 1 and w[0] ≤ x?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "The answer is 1 ride",
+          "isCode": false
+        },
+        {
+          "label": "The answer is 0 rides",
+          "isCode": false
+        },
+        {
+          "label": "It depends on the value of x",
+          "isCode": false
+        },
+        {
+          "label": "It's impossible",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "A single person whose weight ≤ x can ride alone: 1 ride.",
+      "wrongExplanations": {
+        "1": "At least one ride is needed to transport the person.",
+        "3": "Constraints ensure w_i ≤ x, so it's possible."
+      },
+      "hint": "One person, capacity sufficient.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys",
+    "def main():\n    data = list(map(int, sys.stdin.read().split()))\n    if not data:\n        return",
+    "    n, x = data[0], data[1]\n    w = data[2:2+n]\n    m = 1 << n",
+    "    INF = (n + 1, 0)\n    dp = [INF] * m\n    dp[0] = (1, 0)",
+    "    for mask in range(m):\n        if dp[mask] == INF:\n            continue\n        rides, cur = dp[mask]",
+    "        for i in range(n):\n            if (mask >> i) & 1:\n                continue\n            if cur + w[i] <= x:\n                nxt = (rides, cur + w[i])\n            else:\n                nxt = (rides + 1, w[i])",
+    "            newmask = mask | (1 << i)\n            if nxt < dp[newmask]:\n                dp[newmask] = nxt\n    print(dp[m - 1][0])",
+    "if __name__ == \"__main__\":\n    main()"
+  ],
+  "reasoningChain": [
+    {
+      "question": "What information fully captures a partial plan without caring about order within rides?",
+      "insight": "The subset of people already transported is sufficient; order within rides doesn't matter."
+    },
+    {
+      "question": "What extra details are needed to extend a partial plan to include another person optimally?",
+      "insight": "Track both the number of rides used and the current weight in the ongoing ride."
+    },
+    {
+      "question": "How should we initialize the base case for the empty subset?",
+      "insight": "Start with one empty ride and currentWeight 0 to avoid special handling."
+    },
+    {
+      "question": "How do we extend a subset by adding one person while respecting capacity?",
+      "insight": "If the person fits in the current ride, keep the ride count and add weight; otherwise start a new ride with that person."
+    },
+    {
+      "question": "How do we compare two candidate pairs for the same subset?",
+      "insight": "Fewer rides is better; if equal rides, smaller currentWeight is better."
+    },
+    {
+      "question": "How do we systematically explore all ways to build up subsets?",
+      "insight": "Iterate over all subsets and try adding each person not yet included."
+    },
+    {
+      "question": "Is this approach feasible under constraints?",
+      "insight": "It runs in O(n·2^n) time and O(2^n) space, feasible for n ≤ 20."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1355,
+    "output_tokens": 13950,
+    "input_cost": 0.001694,
+    "output_cost": 0.1395,
+    "total_cost": 0.141194
+  }
+}

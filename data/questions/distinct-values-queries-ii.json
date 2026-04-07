@@ -1,0 +1,908 @@
+{
+  "id": "distinct-values-queries-ii",
+  "title": "Distinct Values Queries II",
+  "difficulty": "hard",
+  "tags": [
+    "array"
+  ],
+  "estimatedMinutes": 100,
+  "language": "python",
+  "description": "Given an array of n integers, process q queries:\n- Type 1: update the value at position k to u\n- Type 2: check if every value in range [a, b] is distinct\n\nInput:\n- First line: n q\n- Second line: x_1 ... x_n\n- Next q lines: either \"1 k u\" or \"2 a b\"\n\nOutput:\n- For each query of type 2, print YES if every value in [a,b] is distinct, otherwise NO.",
+  "examples": [
+    {
+      "input": "5 4\n3 2 7 2 8\n2 3 5\n2 2 5\n1 2 9\n2 2 5\n",
+      "output": "YES\nNO\nYES\n",
+      "explanation": "Initial array [3,2,7,2,8]. In [3,5] all values are distinct. In [2,5] the value 2 repeats. After updating position 2 to 9, the array is [3,9,7,2,8]; now [2,5] is distinct."
+    }
+  ],
+  "constraints": [
+    "1 ≤ n, q ≤ 2⋅10^5",
+    "1 ≤ x_i, u ≤ 10^9",
+    "1 ≤ k ≤ n",
+    "1 ≤ a ≤ b ≤ n",
+    "Time limit: 1.00 s",
+    "Memory limit: 512 MB"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "Array: [3, 2, 7, 2, 8] (1-indexed positions). Query: 2 3 5. Should the output be YES or NO?",
+      "diagram": "Positions: 1  2  3  4  5\nValues:    3  2  7  2  8\nRange [3,5] -> [7,2,8]",
+      "options": [
+        {
+          "label": "YES",
+          "isCode": false
+        },
+        {
+          "label": "NO",
+          "isCode": false
+        },
+        {
+          "label": "It depends on future updates",
+          "isCode": false
+        },
+        {
+          "label": "Cannot determine from given data",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Values in [3,5] are [7,2,8] which are all distinct. So YES.",
+      "wrongExplanations": {
+        "1": "NO would require a repeated value in [7,2,8], but there is none."
+      },
+      "hint": "List the values in positions 3..5 and check duplicates.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "Same array [3, 2, 7, 2, 8]. Query: 2 2 5. What is the answer?",
+      "diagram": "Range [2,5] -> [2,7,2,8]",
+      "options": [
+        {
+          "label": "YES",
+          "isCode": false
+        },
+        {
+          "label": "NO",
+          "isCode": false
+        },
+        {
+          "label": "YES, because 2 appears at positions 2 and 4 which are outside the range (trap)",
+          "isCode": false
+        },
+        {
+          "label": "YES if 1-indexed, NO if 0-indexed",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Range [2,5] is [2,7,2,8]; the value 2 repeats. So NO.",
+      "wrongExplanations": {
+        "0": "There is a duplicate: 2 appears twice in the range.",
+        "2": "Positions 2 and 4 are inside [2,5] in 1-based indexing."
+      },
+      "hint": "Check duplicates within the inclusive range positions 2..5.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "After update query 1 2 9 (set position 2 to 9), the array becomes [3, 9, 7, 2, 8]. Now answer query 2 2 5.",
+      "diagram": "Range [2,5] -> [9,7,2,8]",
+      "options": [
+        {
+          "label": "YES",
+          "isCode": false
+        },
+        {
+          "label": "NO",
+          "isCode": false
+        },
+        {
+          "label": "NO, because 9 > 8 (trap)",
+          "isCode": false
+        },
+        {
+          "label": "Cannot determine without recomputing the entire array (trap)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Range [2,5] is [9,7,2,8], all distinct. So YES.",
+      "wrongExplanations": {
+        "1": "There is no repeated value in [9,7,2,8].",
+        "2": "Comparing magnitudes is irrelevant; only duplicates matter."
+      },
+      "hint": "Only duplicates matter, not order or size.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "Is any range [a,b] with a == b always answered YES?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "YES, a single value cannot repeat within itself",
+          "isCode": false
+        },
+        {
+          "label": "NO, it depends on the value",
+          "isCode": false
+        },
+        {
+          "label": "NO, unless the value is unique in the entire array",
+          "isCode": false
+        },
+        {
+          "label": "Only if the array has all distinct values globally",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "A single element segment cannot contain duplicates within itself.",
+      "wrongExplanations": {
+        "2": "Global uniqueness is irrelevant for a range containing one element."
+      },
+      "hint": "A range with one position contains exactly one element.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Exploring Approaches",
+      "questionText": "Naively, to answer a type 2 query on [a,b], you could scan the range and use a set to detect repeats. What is the time per such query?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(1)",
+          "isCode": false
+        },
+        {
+          "label": "O(log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(b - a + 1)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "You examine each element in [a,b] once, so linear in range length.",
+      "wrongExplanations": {
+        "1": "There is no ordering structure to give logarithmic time without extra preprocessing."
+      },
+      "hint": "Count how many elements you must check in the worst case.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "Given n,q up to 2⋅10^5 with frequent updates, what per-query/per-update target is reasonable to fit within time?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Around O(log n) per operation",
+          "isCode": false
+        },
+        {
+          "label": "Around O(√n) per operation",
+          "isCode": false
+        },
+        {
+          "label": "Around O(n) per operation",
+          "isCode": false
+        },
+        {
+          "label": "Around O(n^2) per operation",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "O(log n) per op keeps 2e5 operations feasible. Linear per op is too slow.",
+      "wrongExplanations": {
+        "2": "O(n) per op would be ~4e10 steps in worst cases."
+      },
+      "hint": "Think about 2e5 operations and their cost.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "Define next[i] = the smallest index j > i such that a[j] == a[i], or +∞ if none. For [3,2,7,2,8] (1-based positions), what are next for i=1..5?",
+      "diagram": "Positions 1..5; values: 3,2,7,2,8",
+      "options": [
+        {
+          "label": "[∞, 4, ∞, ∞, ∞]",
+          "isCode": false
+        },
+        {
+          "label": "[2, ∞, 4, ∞, ∞]",
+          "isCode": false
+        },
+        {
+          "label": "[∞, 3, ∞, ∞, ∞]",
+          "isCode": false
+        },
+        {
+          "label": "[∞, 4, ∞, 5, ∞]",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Only value 2 repeats at positions 2 and 4, so next[2]=4 and others have no next.",
+      "wrongExplanations": {
+        "1": "a[1]=3; its next is not at 2.",
+        "3": "a[4]=2 has no later equal at 5."
+      },
+      "hint": "Scan each position and find the next equal value.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Exploring Approaches",
+      "questionText": "Given next[i] as defined, how can we decide if all values in [a,b] are distinct (1-based)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Compute min(next[i]) for i in [a,b]; if it > b, then all distinct",
+          "isCode": false
+        },
+        {
+          "label": "Compute max(next[i]) for i in [a,b]; if it < a, then all distinct",
+          "isCode": false
+        },
+        {
+          "label": "Compute sum(next[i] - i); if it > b-a, then all distinct",
+          "isCode": false
+        },
+        {
+          "label": "Check if next[a] > b and next[b] > b only",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "A repeat exists iff some index in [a,b] has a next inside [a,b]; so min(next) ≤ b means not distinct.",
+      "wrongExplanations": {
+        "1": "max(next) doesn't capture earlier duplicates within [a,b]."
+      },
+      "hint": "Duplicates show up if there is any next inside the range.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "What is an efficient way to compute next[i] for all i initially?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Scan from right to left, tracking last seen position per value",
+          "isCode": false
+        },
+        {
+          "label": "Scan from left to right, tracking first seen position per value",
+          "isCode": false
+        },
+        {
+          "label": "Use nested loops over all pairs (i,j)",
+          "isCode": false
+        },
+        {
+          "label": "Sort values by index and check neighbors only",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Right-to-left with a map of last positions sets next[i] in O(1) each.",
+      "wrongExplanations": {
+        "1": "Left-to-right doesn't give the next position directly.",
+        "3": "Sorting by index keeps original order; doesn't give next equal without extra structure."
+      },
+      "hint": "When scanning from right, the next equal to a[i] is the last seen at that moment.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "When value at position k changes from old to new, which indices' next values can change?",
+      "diagram": "… prev_old … k … next_old …   and   … prev_new … (k) … next_new …",
+      "options": [
+        {
+          "label": "Only k",
+          "isCode": false
+        },
+        {
+          "label": "For the old value: predecessor around k, k, and successor around k; for the new value: predecessor around k and k",
+          "isCode": false
+        },
+        {
+          "label": "All indices with the same old or new value anywhere in the array",
+          "isCode": false
+        },
+        {
+          "label": "Only the successor around k for both old and new values",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Only neighbors among equal values around k (and k itself) can change their next links.",
+      "wrongExplanations": {
+        "0": "Neighbors may now skip over k or point to k.",
+        "2": "Far-away non-adjacent occurrences keep their next unchanged."
+      },
+      "hint": "Only adjacencies among equal values are affected.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "On removing k from the occurrence list of its old value with neighbors prev_old and next_old, how should next[prev_old] be updated?",
+      "diagram": "prev_old -> k -> next_old becomes prev_old -> next_old",
+      "options": [
+        {
+          "label": "Set next[prev_old] = next_old if it exists, otherwise to +∞",
+          "isCode": false
+        },
+        {
+          "label": "Leave next[prev_old] unchanged",
+          "isCode": false
+        },
+        {
+          "label": "Set next[prev_old] = k",
+          "isCode": false
+        },
+        {
+          "label": "Set next[prev_old] = next(next_old)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "After removing k, prev_old should jump to next_old, or to no next if none exists.",
+      "wrongExplanations": {
+        "1": "It must change to skip over the removed k.",
+        "3": "prev_old should link to the immediate next occurrence, not skip two ahead."
+      },
+      "hint": "prev_old's next should become the next equal after k.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "On inserting k into the occurrence list of its new value between prev_new and next_new, which next links must be updated?",
+      "diagram": "prev_new -> next_new becomes prev_new -> k -> next_new",
+      "options": [
+        {
+          "label": "Set next[prev_new] = k (if prev_new exists) and next[k] = next_new (or +∞ if none)",
+          "isCode": false
+        },
+        {
+          "label": "Set next[next_new] = k and next[k] = prev_new",
+          "isCode": false
+        },
+        {
+          "label": "Only set next[k] = prev_new",
+          "isCode": false
+        },
+        {
+          "label": "Only set next[prev_new] = next_new",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "k becomes the next of prev_new, and k’s next becomes next_new.",
+      "wrongExplanations": {
+        "1": "next[next_new] does not change; we only connect prev_new -> k and k -> next_new."
+      },
+      "hint": "k should be placed between prev_new and next_new.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "Which information about a range [a,b] do we need to check to answer \"all distinct\" quickly?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "The minimum of next[i] over i in [a,b]",
+          "isCode": false
+        },
+        {
+          "label": "The maximum of next[i] over i in [a,b]",
+          "isCode": false
+        },
+        {
+          "label": "The frequency of the most common value in [a,b]",
+          "isCode": false
+        },
+        {
+          "label": "The number of values greater than the median of [a,b]",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "If min(next[i]) > b, then no value repeats within [a,b].",
+      "wrongExplanations": {
+        "1": "max(next) might be large even if a duplicate exists near the left.",
+        "2": "Computing frequencies per query is too slow."
+      },
+      "hint": "We only need to know whether a next appears inside the range.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Building the Idea",
+      "questionText": "What should we use to represent \"no next occurrence\" so comparing against b is easy?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "A very large number (e.g., ≥ n)",
+          "isCode": false
+        },
+        {
+          "label": "-1",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "The value itself",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Use a sentinel larger than any index so it never lies inside any [a,b].",
+      "wrongExplanations": {
+        "1": "-1 would incorrectly appear less than b."
+      },
+      "hint": "Pick a number that is always outside any valid index range.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Choose a compact structure that supports setting a value at a position and querying the minimum on any interval.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "class MinRange:\n    def __init__(self, n, default):\n        self.N = 1\n        while self.N < n:\n            self.N *= 2\n        self.default = default\n        self.seg = [default] * (2 * self.N)\n    def set(self, i, v):\n        i += self.N\n        self.seg[i] = v\n        i //= 2\n        while i:\n            self.seg[i] = min(self.seg[2*i], self.seg[2*i+1])\n            i //= 2\n    def range_min(self, l, r):\n        l += self.N; r += self.N\n        resL = self.default; resR = self.default\n        while l <= r:\n            if (l % 2) == 1:\n                resL = min(resL, self.seg[l]); l += 1\n            if (r % 2) == 0:\n                resR = min(self.seg[r], resR); r -= 1\n            l //= 2; r //= 2\n        return min(resL, resR)",
+          "isCode": true
+        },
+        {
+          "label": "class MinRange:\n    def __init__(self, n, default):\n        self.N = n\n        self.default = default\n        self.seg = [default] * (2 * self.N)\n    def set(self, i, v):\n        self.seg[i] = v\n    def range_min(self, l, r):\n        return min(self.seg[l:r+1])",
+          "isCode": true
+        },
+        {
+          "label": "class MinRange:\n    def __init__(self, n, default):\n        self.N = 1\n        while self.N < n:\n            self.N *= 2\n        self.default = default\n        self.seg = [default] * (2 * self.N)\n    def set(self, i, v):\n        i += self.N\n        self.seg[i] = v\n    def range_min(self, l, r):\n        l += self.N; r += self.N\n        ans = self.default\n        while l < r:\n            if l & 1:\n                ans = min(ans, self.seg[l]); l += 1\n            if not (r & 1):\n                ans = min(ans, self.seg[r]); r -= 1\n            l >>= 1; r >>= 1\n        return ans",
+          "isCode": true
+        },
+        {
+          "label": "class MinRange:\n    def __init__(self, n, default):\n        self.N = 1\n        while self.N <= n:\n            self.N *= 2\n        self.default = default\n        self.seg = [default] * (2 * self.N)\n    def set(self, i, v):\n        i += self.N\n        self.seg[i] = v\n        while i:\n            self.seg[i] = min(self.seg[i], v)\n            i //= 2\n    def range_min(self, l, r):\n        return self.default",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "This option supports point set updates and range minimum queries correctly in logarithmic time.",
+      "wrongExplanations": {
+        "1": "Range queries become O(n); too slow for constraints.",
+        "3": "range_min always returns default; updates also incorrectly propagate."
+      },
+      "hint": "We need to aggregate minimums over segments efficiently.",
+      "isCodeBuilding": true,
+      "codeSnippet": "class MinRange:\n    def __init__(self, n, default):\n        self.N = 1\n        while self.N < n:\n            self.N *= 2\n        self.default = default\n        self.seg = [default] * (2 * self.N)\n    def set(self, i, v):\n        i += self.N\n        self.seg[i] = v\n        i //= 2\n        while i:\n            self.seg[i] = min(self.seg[2*i], self.seg[2*i+1])\n            i //= 2\n    def range_min(self, l, r):\n        l += self.N; r += self.N\n        resL = self.default; resR = self.default\n        while l <= r:\n            if (l % 2) == 1:\n                resL = min(resL, self.seg[l]); l += 1\n            if (r % 2) == 0:\n                resR = min(self.seg[r], resR); r -= 1\n            l //= 2; r //= 2\n        return min(resL, resR)",
+      "codeLabel": "Min-range structure"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Read input efficiently and set up basic variables.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\nfrom bisect import bisect_left\n\ndata = list(map(int, sys.stdin.buffer.read().split()))\nit = iter(data)\nn = next(it); q = next(it)\narr = [next(it) for _ in range(n)]\nINF = 10**18",
+          "isCode": true
+        },
+        {
+          "label": "import sys\n\ndata = sys.stdin.read().split()\nit = iter(data)\nn = int(next(it)); q = int(next(it))\narr = [next(it) for _ in range(n)]\nINF = -1",
+          "isCode": true
+        },
+        {
+          "label": "import sys\nfrom bisect import bisect_left\n\ndata = list(map(int, sys.stdin.buffer.read().split()))\nq = data[0]; n = data[1]\narr = data[2:2+n]\nINF = 10**9",
+          "isCode": true
+        },
+        {
+          "label": "from bisect import bisect_left\n\ndata = list(map(int, sys.stdin.read().split()))\nidx = 0\nn = data[idx]; idx += 1\nq = data[idx]; idx += 1\narr = data[idx:idx+q]\nINF = 10**18",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "This reads all ints, parses n,q, the array, and defines a big INF. bisect_left is imported for later.",
+      "wrongExplanations": {
+        "1": "arr remains strings; INF = -1 breaks comparisons with indices.",
+        "3": "arr slices wrong: it should read n values, not q."
+      },
+      "hint": "Use buffer.read() and map to int to parse fast.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\nfrom bisect import bisect_left\n\ndata = list(map(int, sys.stdin.buffer.read().split()))\nit = iter(data)\nn = next(it); q = next(it)\narr = [next(it) for _ in range(n)]\nINF = 10**18",
+      "codeLabel": "Input parsing and constants"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Initialize occurrence lists per value and the next[] array based on them.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "occ = {}\nfor i, v in enumerate(arr):\n    occ.setdefault(v, []).append(i)\n\nnxt = [INF] * n\nfor v, L in occ.items():\n    for i in range(len(L) - 1):\n        nxt[L[i]] = L[i+1]",
+          "isCode": true
+        },
+        {
+          "label": "occ = {}\nfor i, v in enumerate(arr):\n    occ.setdefault(v, []).append(i)\n\nnxt = [INF] * n\nfor v, L in occ.items():\n    for i in range(len(L)):\n        nxt[L[i]] = L[i]  # self-loop",
+          "isCode": true
+        },
+        {
+          "label": "occ = {}\nfor i, v in enumerate(arr):\n    occ.setdefault(v, set()).add(i)\n\nnxt = [0] * n\nfor v, S in occ.items():\n    for idx in sorted(S):\n        nxt[idx] = INF",
+          "isCode": true
+        },
+        {
+          "label": "occ = {}\nfor i, v in enumerate(arr):\n    occ[v] = [i]  # overwrite\n\nnxt = [INF] * n\nfor v, L in occ.items():\n    if L:\n        nxt[L[0]] = INF",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "For each value's increasing index list, set next of each element to its successor.",
+      "wrongExplanations": {
+        "1": "Setting next to itself is incorrect; it should point to the next occurrence.",
+        "3": "Overwriting lists loses all but the last position."
+      },
+      "hint": "Each occurrence should point to the next index of the same value.",
+      "isCodeBuilding": true,
+      "codeSnippet": "occ = {}\nfor i, v in enumerate(arr):\n    occ.setdefault(v, []).append(i)\n\nnxt = [INF] * n\nfor v, L in occ.items():\n    # L is already in increasing order\n    for i in range(len(L) - 1):\n        nxt[L[i]] = L[i+1]",
+      "codeLabel": "Build occurrences and next"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Initialize the range-min structure with next[] values.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "tree = MinRange(n, INF)\nfor i in range(n):\n    tree.set(i, nxt[i])",
+          "isCode": true
+        },
+        {
+          "label": "tree = MinRange(n, INF)\nfor i in range(1, n+1):\n    tree.set(i, nxt[i])",
+          "isCode": true
+        },
+        {
+          "label": "tree = MinRange(n, 0)\nfor i in range(n):\n    tree.set(i, nxt[i])",
+          "isCode": true
+        },
+        {
+          "label": "tree = MinRange(n, INF)\n# no need to set leaves; they will default to INF",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We must set each position's next value; indices are 0..n-1.",
+      "wrongExplanations": {
+        "1": "This uses 1-based indices and will go out of range.",
+        "3": "We need actual next[] values, not all INF."
+      },
+      "hint": "Iterate i from 0 to n-1 to set values.",
+      "isCodeBuilding": true,
+      "codeSnippet": "tree = MinRange(n, INF)\nfor i in range(n):\n    tree.set(i, nxt[i])",
+      "codeLabel": "Initialize min-range structure"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "Process queries: implement updates by adjusting neighbors' next links and queries by checking the min in [a-1,b-1].",
+      "diagram": "On update at k: remove from old value's list and fix predecessor; insert into new value's list and fix predecessor and k.",
+      "options": [
+        {
+          "label": "out = []\nfor _ in range(q):\n    t = next(it); a = next(it); b = next(it)\n    if t == 1:\n        k = a - 1\n        u = b\n        v_old = arr[k]\n        if v_old != u:\n            L = occ[v_old]\n            pos = bisect_left(L, k)\n            prevOld = L[pos-1] if pos > 0 else None\n            nextOld = L[pos+1] if pos + 1 < len(L) else None\n            L.pop(pos)\n            if prevOld is not None:\n                newNext = nextOld if nextOld is not None else INF\n                nxt[prevOld] = newNext\n                tree.set(prevOld, newNext)\n            arr[k] = u\n            L2 = occ.get(u)\n            if L2 is None:\n                L2 = []\n                occ[u] = L2\n            pos2 = bisect_left(L2, k)\n            prevNew = L2[pos2-1] if pos2 > 0 else None\n            nextNew = L2[pos2] if pos2 < len(L2) else None\n            L2.insert(pos2, k)\n            if prevNew is not None:\n                nxt[prevNew] = k\n                tree.set(prevNew, k)\n            nxt_k = nextNew if nextNew is not None else INF\n            nxt[k] = nxt_k\n            tree.set(k, nxt_k)\n    else:\n        l = a - 1; r = b - 1\n        m = tree.range_min(l, r)\n        out.append(\"NO\" if m <= r else \"YES\")",
+          "isCode": true
+        },
+        {
+          "label": "out = []\nfor _ in range(q):\n    t = next(it); a = next(it); b = next(it)\n    if t == 1:\n        k = a\n        u = b\n        v_old = arr[k]\n        if v_old != u:\n            L = occ[v_old]\n            pos = bisect_left(L, k)\n            prevOld = L[pos-1] if pos > 0 else None\n            nextOld = L[pos+1] if pos + 1 < len(L) else None\n            L.pop(pos)\n            if prevOld is not None:\n                nxt[prevOld] = k  # wrong\n                tree.set(prevOld, k)\n            arr[k] = u\n            L2 = occ.get(u, [])\n            pos2 = bisect_left(L2, k)\n            nextNew = L2[pos2] if pos2 < len(L2) else None\n            L2.insert(pos2, k)\n            occ[u] = L2\n            if nextNew is not None:\n                nxt[nextNew] = k\n                tree.set(nextNew, k)\n            nxt[k] = nextNew if nextNew is not None else INF\n            tree.set(k, nxt[k])\n    else:\n        l = a; r = b\n        m = tree.range_min(l, r)\n        out.append(\"NO\" if m < r else \"YES\")",
+          "isCode": true
+        },
+        {
+          "label": "out = []\nfor _ in range(q):\n    t = next(it); a = next(it); b = next(it)\n    if t == 1:\n        k = a - 1\n        u = b\n        v_old = arr[k]\n        if v_old != u:\n            # remove old\n            L = occ[v_old]\n            pos = bisect_left(L, k)\n            L.pop(pos)\n            # do not update any nexts\n            arr[k] = u\n            # insert new\n            L2 = occ.get(u)\n            if L2 is None:\n                L2 = []\n                occ[u] = L2\n            pos2 = bisect_left(L2, k)\n            L2.insert(pos2, k)\n            # do not update any nexts\n    else:\n        l = a - 1; r = b - 1\n        out.append(\"YES\")",
+          "isCode": true
+        },
+        {
+          "label": "out = []\nfor _ in range(q):\n    t = next(it); a = next(it); b = next(it)\n    if t == 1:\n        k = a - 1\n        u = b\n        v_old = arr[k]\n        if v_old != u:\n            L = occ[v_old]\n            pos = bisect_left(L, k)\n            prevOld = L[pos-1] if pos > 0 else None\n            L.pop(pos)\n            if prevOld is not None:\n                nxt[prevOld] = INF\n                tree.set(prevOld, INF)\n            arr[k] = u\n            L2 = occ.get(u)\n            if L2 is None:\n                L2 = []\n                occ[u] = L2\n            pos2 = bisect_left(L2, k)\n            prevNew = L2[pos2-1] if pos2 > 0 else None\n            L2.insert(pos2, k)\n            if prevNew is not None:\n                nxt[prevNew] = k\n                tree.set(prevNew, k)\n            nxt[k] = INF\n            tree.set(k, INF)\n    else:\n        l = a - 1; r = b - 1\n        m = tree.range_min(l, r)\n        out.append(\"NO\" if m < r else \"YES\")",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "This adjusts predecessor links on removal/insertion and updates k and predecessor, then queries by comparing min next to r.",
+      "wrongExplanations": {
+        "1": "Mixes indices (no -1), and wrongly updates next[nextNew]; also uses wrong compare m < r.",
+        "3": "On removal, it always sets predecessor to INF even if a successor exists; also compares m < r."
+      },
+      "hint": "Fix predecessor of old value to its successor; for new value, predecessor points to k and k points to successor.",
+      "isCodeBuilding": true,
+      "codeSnippet": "out = []\nfor _ in range(q):\n    t = next(it); a = next(it); b = next(it)\n    if t == 1:\n        k = a - 1\n        u = b\n        v_old = arr[k]\n        if v_old != u:\n            L = occ[v_old]\n            pos = bisect_left(L, k)\n            prevOld = L[pos-1] if pos > 0 else None\n            nextOld = L[pos+1] if pos + 1 < len(L) else None\n            L.pop(pos)\n            if prevOld is not None:\n                newNext = nextOld if nextOld is not None else INF\n                nxt[prevOld] = newNext\n                tree.set(prevOld, newNext)\n            # update arr\n            arr[k] = u\n            L2 = occ.get(u)\n            if L2 is None:\n                L2 = []\n                occ[u] = L2\n            pos2 = bisect_left(L2, k)\n            prevNew = L2[pos2-1] if pos2 > 0 else None\n            nextNew = L2[pos2] if pos2 < len(L2) else None\n            L2.insert(pos2, k)\n            if prevNew is not None:\n                nxt[prevNew] = k\n                tree.set(prevNew, k)\n            nxt_k = nextNew if nextNew is not None else INF\n            nxt[k] = nxt_k\n            tree.set(k, nxt_k)\n    else:\n        l = a - 1; r = b - 1\n        m = tree.range_min(l, r)\n        out.append(\"NO\" if m <= r else \"YES\")",
+      "codeLabel": "Process queries (updates and checks)"
+    },
+    {
+      "id": "q22",
+      "phase": "Writing the Code",
+      "questionText": "Finally, output all answers for type 2 queries.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "sys.stdout.write(\"\\n\".join(out))",
+          "isCode": true
+        },
+        {
+          "label": "print(out)",
+          "isCode": true
+        },
+        {
+          "label": "for s in out: print(s, end=\" \")",
+          "isCode": true
+        },
+        {
+          "label": "sys.stdout.write(\" \".join(out))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Join by newlines to match required output format.",
+      "wrongExplanations": {
+        "1": "This prints a Python list representation, not the required format.",
+        "3": "Answers must be on separate lines."
+      },
+      "hint": "Each answer should be on its own line.",
+      "isCodeBuilding": true,
+      "codeSnippet": "sys.stdout.write(\"\\n\".join(out))",
+      "codeLabel": "Print answers"
+    },
+    {
+      "id": "q23",
+      "phase": "Verifying the Solution",
+      "questionText": "With array [3,2,7,2,8], next (1-based) is [∞,4,∞,∞,∞]. For query 2 3 5, what is min(next[3..5]) and the answer?",
+      "diagram": "next[3]=∞, next[4]=∞, next[5]=∞",
+      "options": [
+        {
+          "label": "min = ∞, answer YES",
+          "isCode": false
+        },
+        {
+          "label": "min = 4, answer NO",
+          "isCode": false
+        },
+        {
+          "label": "min = 5, answer NO",
+          "isCode": false
+        },
+        {
+          "label": "min = ∞, answer NO",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "min is ∞ which is > 5, so YES.",
+      "wrongExplanations": {
+        "1": "4 is not in next[3..5]; next[2]=4 is outside the query start."
+      },
+      "hint": "Only indices within [3,5] matter.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Verifying the Solution",
+      "questionText": "Continuing, for query 2 2 5 on the same array before any update, min(next[2..5]) is what, and the answer?",
+      "diagram": "next[2]=4, next[3]=∞, next[4]=∞, next[5]=∞",
+      "options": [
+        {
+          "label": "min = 4, answer NO",
+          "isCode": false
+        },
+        {
+          "label": "min = ∞, answer YES",
+          "isCode": false
+        },
+        {
+          "label": "min = 5, answer YES",
+          "isCode": false
+        },
+        {
+          "label": "min = 4, answer YES",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "min is 4 which ≤ 5, so a duplicate exists in [2,5]; answer NO.",
+      "wrongExplanations": {
+        "1": "next[2]=4 is inside [2,5], so not all distinct."
+      },
+      "hint": "Compare the min to b.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Analyzing Complexity",
+      "questionText": "Assuming neighbor search in a value's occurrence list is done by binary search on a sorted list, what are the costs?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Type 2 query: ~O(log n). Update: O(log t) to find neighbors, plus shifting cost for list insertion/removal",
+          "isCode": false
+        },
+        {
+          "label": "Both types are O(1)",
+          "isCode": false
+        },
+        {
+          "label": "Both types are O(n)",
+          "isCode": false
+        },
+        {
+          "label": "Type 2 query: O(n). Update: O(n log n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Min-range query and point updates are ~log n; neighbor location is via binary search; list insert/remove may shift elements.",
+      "wrongExplanations": {
+        "1": "No constant-time guarantees with these operations."
+      },
+      "hint": "Consider the per-operation costs of the structures used.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the overall extra space used by the structures (excluding input array values)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n) for next[], O(n) for range structure, and O(n) total across occurrence lists",
+          "isCode": false
+        },
+        {
+          "label": "O(1)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(log n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "next and the tree store O(n) elements; all indices appear once across lists.",
+      "wrongExplanations": {
+        "1": "We store arrays and lists proportional to n."
+      },
+      "hint": "Each index appears in exactly one occurrence list.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q27",
+      "phase": "Analyzing Complexity",
+      "questionText": "Which edge cases should be double-checked for correctness?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Ranges of length 1; updates where old value equals new; removing the first/last occurrence of a value",
+          "isCode": false
+        },
+        {
+          "label": "Only arrays with all equal values",
+          "isCode": false
+        },
+        {
+          "label": "Only arrays with all distinct values",
+          "isCode": false
+        },
+        {
+          "label": "Floating-point values in the array",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Boundary neighbors and no-op updates are common pitfalls.",
+      "wrongExplanations": {
+        "1": "Other cases can also be problematic.",
+        "3": "Values are integers by constraint."
+      },
+      "hint": "Think about neighbors not existing and no-ops.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\nfrom bisect import bisect_left\n\ndata = list(map(int, sys.stdin.buffer.read().split()))\nit = iter(data)\nn = next(it); q = next(it)\narr = [next(it) for _ in range(n)]\nINF = 10**18",
+    "class MinRange:\n    def __init__(self, n, default):\n        self.N = 1\n        while self.N < n:\n            self.N *= 2\n        self.default = default\n        self.seg = [default] * (2 * self.N)\n    def set(self, i, v):\n        i += self.N\n        self.seg[i] = v\n        i //= 2\n        while i:\n            self.seg[i] = min(self.seg[2*i], self.seg[2*i+1])\n            i //= 2\n    def range_min(self, l, r):\n        l += self.N; r += self.N\n        resL = self.default; resR = self.default\n        while l <= r:\n            if (l % 2) == 1:\n                resL = min(resL, self.seg[l]); l += 1\n            if (r % 2) == 0:\n                resR = min(self.seg[r], resR); r -= 1\n            l //= 2; r //= 2\n        return min(resL, resR)",
+    "occ = {}\nfor i, v in enumerate(arr):\n    occ.setdefault(v, []).append(i)\n\nnxt = [INF] * n\nfor v, L in occ.items():\n    # L is already in increasing order\n    for i in range(len(L) - 1):\n        nxt[L[i]] = L[i+1]",
+    "tree = MinRange(n, INF)\nfor i in range(n):\n    tree.set(i, nxt[i])",
+    "out = []\nfor _ in range(q):\n    t = next(it); a = next(it); b = next(it)\n    if t == 1:\n        k = a - 1\n        u = b\n        v_old = arr[k]\n        if v_old != u:\n            L = occ[v_old]\n            pos = bisect_left(L, k)\n            prevOld = L[pos-1] if pos > 0 else None\n            nextOld = L[pos+1] if pos + 1 < len(L) else None\n            L.pop(pos)\n            if prevOld is not None:\n                newNext = nextOld if nextOld is not None else INF\n                nxt[prevOld] = newNext\n                tree.set(prevOld, newNext)\n            # update arr\n            arr[k] = u\n            L2 = occ.get(u)\n            if L2 is None:\n                L2 = []\n                occ[u] = L2\n            pos2 = bisect_left(L2, k)\n            prevNew = L2[pos2-1] if pos2 > 0 else None\n            nextNew = L2[pos2] if pos2 < len(L2) else None\n            L2.insert(pos2, k)\n            if prevNew is not None:\n                nxt[prevNew] = k\n                tree.set(prevNew, k)\n            nxt_k = nextNew if nextNew is not None else INF\n            nxt[k] = nxt_k\n            tree.set(k, nxt_k)\n    else:\n        l = a - 1; r = b - 1\n        m = tree.range_min(l, r)\n        out.append(\"NO\" if m <= r else \"YES\")",
+    "sys.stdout.write(\"\\n\".join(out))"
+  ],
+  "reasoningChain": [
+    {
+      "question": "How can we detect duplicates in a range without scanning all elements each time?",
+      "insight": "Define next[i] as the next index with the same value; [a,b] is all distinct iff min(next[i] for i in [a,b]) > b."
+    },
+    {
+      "question": "How do we compute next[i] initially in linear time?",
+      "insight": "Build occurrence lists per value and set next of each occurrence to its successor (or scan right-to-left with last seen)."
+    },
+    {
+      "question": "What changes when a value at position k is updated?",
+      "insight": "Only links around k among equal values may change: predecessor (old), k, successor (old); and predecessor (new), k."
+    },
+    {
+      "question": "How do we quickly retrieve predecessors and successors of k among equal values?",
+      "insight": "Maintain, for each value, a sorted list of its indices and use binary search to find neighbor positions."
+    },
+    {
+      "question": "How do we answer range checks quickly once we maintain next[i]?",
+      "insight": "Use a structure supporting point updates and range minimum queries to get min(next) on [a,b] fast."
+    },
+    {
+      "question": "How do we handle boundary cases cleanly?",
+      "insight": "Use a sentinel +∞ (e.g., ≥ n) for no next occurrence so comparisons against b work uniformly."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1443,
+    "output_tokens": 21197,
+    "input_cost": 0.001804,
+    "output_cost": 0.21197,
+    "total_cost": 0.213774
+  }
+}

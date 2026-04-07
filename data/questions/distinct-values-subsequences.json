@@ -1,0 +1,1059 @@
+{
+  "id": "distinct-values-subsequences",
+  "title": "Distinct Values Subsequences",
+  "difficulty": "intermediate",
+  "tags": [
+    "sorting",
+    "two-pointer",
+    "binary-search"
+  ],
+  "estimatedMinutes": 45,
+  "language": "python",
+  "description": "Given an array of n integers, count the number of subsequences where each element is distinct. A subsequence is a sequence of array elements from left to right that may have gaps. Print the answer modulo 10^9+7.\n\nInput\n- First line: integer n\n- Second line: n integers x_1, x_2, ..., x_n\n\nOutput\n- One integer: the number of subsequences with distinct elements modulo 10^9+7",
+  "examples": [
+    {
+      "input": "4\n1 2 1 3\n",
+      "output": "11\n",
+      "explanation": "Each value can contribute at most one occurrence. Choices: for 1 -> 3 options (pick none or one of its two), for 2 -> 2 options, for 3 -> 2 options. Total 3*2*2 = 12 including empty; exclude empty gives 11."
+    }
+  ],
+  "constraints": [
+    "1 ≤ n ≤ 2⋅10^5",
+    "1 ≤ x_i ≤ 10^9",
+    "Answer modulo 10^9+7"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "For the array [1, 2, 1], which of the following is NOT a valid subsequence with distinct elements?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "[1] (taking the first element)",
+          "isCode": false
+        },
+        {
+          "label": "[2, 1] (taking indices 2 and 3)",
+          "isCode": false
+        },
+        {
+          "label": "[1, 1] (taking indices 1 and 3)",
+          "isCode": false
+        },
+        {
+          "label": "[] (empty subsequence)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "[1,1] contains a repeated value and is not allowed. The empty subsequence and [1] or [2,1] each have distinct values.",
+      "wrongExplanations": {
+        "0": "A single element [1] has distinct elements.",
+        "1": "[2,1] uses different values and valid increasing indices (2,3)."
+      },
+      "hint": "Distinct means no value repeats within the chosen elements.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "Consider the array [1, 1]. How many distinct-element subsequences of length 1 exist?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "It depends on whether we count positions separately.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "There are two: pick the first 1 or the second 1. Subsequences are defined by positions, not just values.",
+      "wrongExplanations": {
+        "0": "Both positions yield valid subsequences.",
+        "3": "By definition here, different positions create different subsequences."
+      },
+      "hint": "Subsequences are determined by indices chosen.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "For the array [1, 2, 1], how many valid subsequences of length 2 are there?",
+      "diagram": "Indices: 1  2  3\nValues:  1  2  1",
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Valid length-2 choices: (1,2)->[1,2] and (2,3)->[2,1]. (1,3) repeats value 1 and is invalid.",
+      "wrongExplanations": {
+        "0": "There are two valid pairs (1,2) and (2,3).",
+        "2": "One pair (1,3) is invalid due to repeated value."
+      },
+      "hint": "List index pairs (i<j) and check whether values are equal.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "In any valid subsequence, can you include both occurrences of the value 1 from [1, 2, 1, 3]?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, always allowed",
+          "isCode": false
+        },
+        {
+          "label": "No, because values must be distinct within the subsequence",
+          "isCode": false
+        },
+        {
+          "label": "Only if they are adjacent in the original array",
+          "isCode": false
+        },
+        {
+          "label": "Only if they are separated by at least one different value",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Distinct means no repeated values in the chosen elements, regardless of positions.",
+      "wrongExplanations": {
+        "0": "Including both 1s repeats a value.",
+        "2": "Adjacency does not change the distinctness requirement."
+      },
+      "hint": "The only restriction is no duplicate values in the subsequence.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Exploring Approaches",
+      "questionText": "n can be up to 200000. Is it feasible to enumerate all subsequences and check distinctness?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, because we can stop early",
+          "isCode": false
+        },
+        {
+          "label": "Yes, 2^n is manageable for n=200000",
+          "isCode": false
+        },
+        {
+          "label": "No, 2^n is astronomically large for n=200000",
+          "isCode": false
+        },
+        {
+          "label": "Only if the array has no duplicates",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "There are 2^n subsequences; for n=200000 this is impossible to enumerate.",
+      "wrongExplanations": {
+        "0": "Early stopping doesn't avoid the exponential blowup.",
+        "1": "2^200000 is far beyond any feasible computation."
+      },
+      "hint": "Estimate 2^20 ~ 1e6; what about 2^200000?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "If a value appears k times in the array, how many ways can that value contribute to a valid subsequence?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "k",
+          "isCode": false
+        },
+        {
+          "label": "k + 1 (choose none, or choose exactly one of k positions)",
+          "isCode": false
+        },
+        {
+          "label": "2^k",
+          "isCode": false
+        },
+        {
+          "label": "1 (either include it or not)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "You can either not choose it, or choose exactly one of its k occurrences: k+1 choices.",
+      "wrongExplanations": {
+        "2": "Choosing multiple occurrences breaks distinctness; it's not 2^k.",
+        "0": "You're missing the 'choose none' option."
+      },
+      "hint": "You cannot pick more than one occurrence of the same value.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "For two different values with frequencies k_a and k_b, how many combined choices are there for including them in a valid subsequence?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "(k_a + 1) * (k_b + 1)",
+          "isCode": false
+        },
+        {
+          "label": "k_a + k_b + 1",
+          "isCode": false
+        },
+        {
+          "label": "min(k_a, k_b) + 1",
+          "isCode": false
+        },
+        {
+          "label": "2^(k_a + k_b)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Choices are independent: pick none/one for each value. Multiply the counts.",
+      "wrongExplanations": {
+        "1": "This ignores combinations of independent choices.",
+        "3": "Multiple picks per value are not allowed."
+      },
+      "hint": "Think of making a separate choice for each value and combining them.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Exploring Approaches",
+      "questionText": "Should the empty subsequence be included in the final count?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, always include it",
+          "isCode": false
+        },
+        {
+          "label": "No, exclude it from the final answer",
+          "isCode": false
+        },
+        {
+          "label": "Include it only if there are no duplicates",
+          "isCode": false
+        },
+        {
+          "label": "Include it only when n = 0",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "The problem asks for subsequences with distinct elements; the example implies excluding the empty subsequence.",
+      "wrongExplanations": {
+        "0": "Including it would overcount relative to the sample example.",
+        "2": "Presence of duplicates doesn't change whether to exclude the empty subsequence."
+      },
+      "hint": "Check the sample: product of choices is 12, output is 11.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "For the array [1, 2, 1, 3], what are the value frequencies?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "{1: 2, 2: 1, 3: 1}",
+          "isCode": false
+        },
+        {
+          "label": "{1: 2, 2: 2, 3: 1}",
+          "isCode": false
+        },
+        {
+          "label": "{1: 2, 2: 1, 3: 0}",
+          "isCode": false
+        },
+        {
+          "label": "{1: 1, 2: 1, 3: 1}",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "1 appears twice, 2 once, 3 once.",
+      "wrongExplanations": {
+        "1": "2 appears only once in the array.",
+        "3": "1 appears twice, not once."
+      },
+      "hint": "Scan and tally each value's count.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "Using the frequencies from [1, 2, 1, 3], what is the product over values of (freq + 1)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "12",
+          "isCode": false
+        },
+        {
+          "label": "11",
+          "isCode": false
+        },
+        {
+          "label": "7",
+          "isCode": false
+        },
+        {
+          "label": "8",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "(2+1)*(1+1)*(1+1) = 3*2*2 = 12, which includes the empty subsequence.",
+      "wrongExplanations": {
+        "1": "11 is after excluding the empty subsequence.",
+        "2": "7 would be for three distinct singletons combined (2*2*2 - 1)."
+      },
+      "hint": "Multiply (2+1), (1+1), (1+1).",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "After excluding the empty subsequence for [1, 2, 1, 3], what is the final count?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "12",
+          "isCode": false
+        },
+        {
+          "label": "11",
+          "isCode": false
+        },
+        {
+          "label": "7",
+          "isCode": false
+        },
+        {
+          "label": "10",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "12 total minus 1 empty = 11.",
+      "wrongExplanations": {
+        "0": "Includes the empty subsequence.",
+        "3": "10 misses one valid subsequence."
+      },
+      "hint": "Subtract exactly one for the empty choice across all values.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "For array [5, 5, 5], how many valid subsequences are there (excluding empty)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "7",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Only single-element picks: 3 ways (choose one of three positions).",
+      "wrongExplanations": {
+        "1": "4 counts the empty subsequence too.",
+        "3": "There are three different positions to choose from."
+      },
+      "hint": "You can pick at most one 5.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "For array [1, 2, 3], how many valid subsequences are there (excluding empty)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "6",
+          "isCode": false
+        },
+        {
+          "label": "7",
+          "isCode": false
+        },
+        {
+          "label": "8",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Each value has 2 choices (pick or not): 2*2*2 = 8 including empty, so 7 after excluding empty.",
+      "wrongExplanations": {
+        "1": "6 counts only length-2 subsequences.",
+        "3": "8 includes the empty subsequence."
+      },
+      "hint": "Think (1+1) per value and subtract one.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Writing the Code",
+      "questionText": "Start by importing what you need for fast input handling.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys",
+          "isCode": true
+        },
+        {
+          "label": "from sys import stdin as sys",
+          "isCode": true
+        },
+        {
+          "label": "import io; io = sys.stdin",
+          "isCode": true
+        },
+        {
+          "label": "No import needed",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We'll use sys.stdin.buffer for fast input; 'import sys' is appropriate.",
+      "wrongExplanations": {
+        "1": "Aliasing may confuse later references to sys.",
+        "3": "We read from stdin; an import is needed."
+      },
+      "hint": "We'll access sys.stdin.buffer.read().",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys",
+      "codeLabel": "Import sys"
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Define the modulo constant.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "MOD = 1000000007",
+          "isCode": true
+        },
+        {
+          "label": "MOD = 10^9 + 7",
+          "isCode": true
+        },
+        {
+          "label": "MOD = 1e9 + 7",
+          "isCode": true
+        },
+        {
+          "label": "MOD = 10**9",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Use an integer 1000000007. 10^9 is XOR in Python, and 1e9 is a float.",
+      "wrongExplanations": {
+        "1": "In Python, ^ is bitwise XOR, not exponentiation.",
+        "2": "This makes MOD a float, which breaks modulo operations."
+      },
+      "hint": "Prefer an exact integer literal.",
+      "isCodeBuilding": true,
+      "codeSnippet": "MOD = 1000000007",
+      "codeLabel": "Modulo constant"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Read all integers from input efficiently and create an iterator over them.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "it = iter(map(int, sys.stdin.buffer.read().split()))",
+          "isCode": true
+        },
+        {
+          "label": "it = sys.stdin.read().split()",
+          "isCode": true
+        },
+        {
+          "label": "it = map(int, sys.stdin.read())",
+          "isCode": true
+        },
+        {
+          "label": "it = list(map(int, sys.stdin.buffer.readline().split()))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Reading all tokens and mapping to int, then iter() lets us pull n and the array cleanly.",
+      "wrongExplanations": {
+        "1": "Elements are strings; you'd still need to convert and handle iteration.",
+        "2": "sys.stdin.read() gives a string of all chars; mapping int on characters fails."
+      },
+      "hint": "We want an iterator of ints, not strings.",
+      "isCodeBuilding": true,
+      "codeSnippet": "it = iter(map(int, sys.stdin.buffer.read().split()))",
+      "codeLabel": "Token iterator"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Extract n from the iterator.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "n = next(it)",
+          "isCode": true
+        },
+        {
+          "label": "n = int(next(sys.stdin))",
+          "isCode": true
+        },
+        {
+          "label": "n = it[0]",
+          "isCode": true
+        },
+        {
+          "label": "n = len(it)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The first integer token is n, so next(it) gives it.",
+      "wrongExplanations": {
+        "1": "next(sys.stdin) reads a line string, not the next parsed int.",
+        "2": "Iterators are not subscriptable."
+      },
+      "hint": "Use the iterator you created.",
+      "isCodeBuilding": true,
+      "codeSnippet": "n = next(it)",
+      "codeLabel": "Read n"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Read the array of n integers from the iterator.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "arr = [next(it) for _ in range(n)]",
+          "isCode": true
+        },
+        {
+          "label": "arr = [int(it) for _ in range(n)]",
+          "isCode": true
+        },
+        {
+          "label": "arr = [it for _ in range(n)]",
+          "isCode": true
+        },
+        {
+          "label": "arr = [next(it)] * n",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Pull exactly n integers with next(it).",
+      "wrongExplanations": {
+        "1": "it is already an iterator of ints; int(it) is invalid.",
+        "3": "This repeats the same element n times."
+      },
+      "hint": "Use next(it) repeatedly.",
+      "isCodeBuilding": true,
+      "codeSnippet": "arr = [next(it) for _ in range(n)]",
+      "codeLabel": "Read array"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Initialize a structure to count frequencies.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "freq = {}",
+          "isCode": true
+        },
+        {
+          "label": "freq = []",
+          "isCode": true
+        },
+        {
+          "label": "freq = set()",
+          "isCode": true
+        },
+        {
+          "label": "freq = 0",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "A dictionary maps values to their counts.",
+      "wrongExplanations": {
+        "1": "A list is not keyed by arbitrary values.",
+        "2": "A set stores unique items, not counts."
+      },
+      "hint": "We need key->count mapping.",
+      "isCodeBuilding": true,
+      "codeSnippet": "freq = {}",
+      "codeLabel": "Init freq map"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Fill the frequency map using the array.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "for x in arr:\n    freq[x] = freq.get(x, 0) + 1",
+          "isCode": true
+        },
+        {
+          "label": "for x in arr:\n    freq[x] += 1",
+          "isCode": true
+        },
+        {
+          "label": "for i in range(n):\n    freq[i] = freq.get(i, 0) + 1",
+          "isCode": true
+        },
+        {
+          "label": "for x in set(arr):\n    freq[x] = 1",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Use get(x,0)+1 to handle first occurrences.",
+      "wrongExplanations": {
+        "1": "This raises KeyError on first occurrence.",
+        "3": "It sets all counts to 1, losing multiplicities."
+      },
+      "hint": "Handle unseen keys gracefully.",
+      "isCodeBuilding": true,
+      "codeSnippet": "for x in arr:\n    freq[x] = freq.get(x, 0) + 1",
+      "codeLabel": "Build freq map"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "Initialize the result accumulator for the product.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "res = 1",
+          "isCode": true
+        },
+        {
+          "label": "res = 0",
+          "isCode": true
+        },
+        {
+          "label": "res = None",
+          "isCode": true
+        },
+        {
+          "label": "res = []",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Start product at 1 so it doesn't change the first multiplication.",
+      "wrongExplanations": {
+        "1": "Starting at 0 makes the product always 0.",
+        "2": "None is not multiplicative."
+      },
+      "hint": "What's the neutral element for multiplication?",
+      "isCodeBuilding": true,
+      "codeSnippet": "res = 1",
+      "codeLabel": "Init product"
+    },
+    {
+      "id": "q22",
+      "phase": "Writing the Code",
+      "questionText": "Update the result by multiplying (count + 1) for each distinct value, taking modulo.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "for c in freq.values():\n    res = (res * (c + 1)) % MOD",
+          "isCode": true
+        },
+        {
+          "label": "for c in freq.values():\n    res = res * c + 1",
+          "isCode": true
+        },
+        {
+          "label": "for c in freq.values():\n    res = (res * c + 1) % MOD",
+          "isCode": true
+        },
+        {
+          "label": "for c in freq.values():\n    res = (res * c) % MOD + 1",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each value contributes (count+1) choices; multiply them under modulo.",
+      "wrongExplanations": {
+        "1": "This computes res*c + 1, not res*(c+1).",
+        "2": "Parentheses are wrong; +1 must be inside multiplication."
+      },
+      "hint": "Group (c + 1) together before multiplying.",
+      "isCodeBuilding": true,
+      "codeSnippet": "for c in freq.values():\n    res = (res * (c + 1)) % MOD",
+      "codeLabel": "Multiply choices"
+    },
+    {
+      "id": "q23",
+      "phase": "Writing the Code",
+      "questionText": "Exclude the empty subsequence safely with modulo arithmetic.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "res = (res - 1) % MOD",
+          "isCode": true
+        },
+        {
+          "label": "res = res - 1",
+          "isCode": true
+        },
+        {
+          "label": "res = (res + MOD - 1)",
+          "isCode": true
+        },
+        {
+          "label": "res = (res % MOD) - 1",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Subtract 1 and take modulo to keep the result in range and handle negative safely.",
+      "wrongExplanations": {
+        "1": "Could be negative before printing; safer to keep modulo.",
+        "3": "May be negative; missing final modulo."
+      },
+      "hint": "Keep the result in [0, MOD).",
+      "isCodeBuilding": true,
+      "codeSnippet": "res = (res - 1) % MOD",
+      "codeLabel": "Exclude empty"
+    },
+    {
+      "id": "q24",
+      "phase": "Writing the Code",
+      "questionText": "Output the final answer.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "print(res)",
+          "isCode": true
+        },
+        {
+          "label": "sys.stdout.write(res)",
+          "isCode": true
+        },
+        {
+          "label": "print(n)",
+          "isCode": true
+        },
+        {
+          "label": "print(MOD)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Print the computed result.",
+      "wrongExplanations": {
+        "1": "sys.stdout.write expects a string.",
+        "2": "n is the array length, not the answer."
+      },
+      "hint": "Use a simple print of the integer.",
+      "isCodeBuilding": true,
+      "codeSnippet": "print(res)",
+      "codeLabel": "Print result"
+    },
+    {
+      "id": "q25",
+      "phase": "Verifying the Solution",
+      "questionText": "What does your program output for input:\n4\n1 2 1 3",
+      "diagram": null,
+      "options": [
+        {
+          "label": "11",
+          "isCode": false
+        },
+        {
+          "label": "12",
+          "isCode": false
+        },
+        {
+          "label": "7",
+          "isCode": false
+        },
+        {
+          "label": "9",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Frequencies {1:2,2:1,3:1} -> (3*2*2) - 1 = 11.",
+      "wrongExplanations": {
+        "1": "Includes the empty subsequence.",
+        "2": "This is for three distinct elements only (2*2*2 - 1)."
+      },
+      "hint": "Multiply (count+1) and subtract one.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Verifying the Solution",
+      "questionText": "What is the output for input:\n1\n2",
+      "diagram": null,
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "1000000007",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Only one non-empty subsequence: [2]. (1+1)-1 = 1.",
+      "wrongExplanations": {
+        "0": "There is one valid subsequence.",
+        "2": "There aren't two different choices."
+      },
+      "hint": "One value, frequency 1.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q27",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the time complexity of your solution in terms of n (array length) and m (number of distinct values)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(2^n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n + m)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "One pass to build frequencies (O(n)) and one pass over m distinct values.",
+      "wrongExplanations": {
+        "1": "No sorting or logarithmic factor is needed.",
+        "3": "We don't use nested loops over n."
+      },
+      "hint": "Count each element once; then iterate over distinct keys.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q28",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the additional space complexity of your solution?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(1)",
+          "isCode": false
+        },
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(m), where m is the number of distinct values",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "We store counts for each distinct value: O(m), with m ≤ n.",
+      "wrongExplanations": {
+        "0": "We do allocate a map that grows with distinct values.",
+        "1": "Space depends on the number of distinct values, not necessarily n."
+      },
+      "hint": "Space grows with how many different values you see.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q29",
+      "phase": "Analyzing Complexity",
+      "questionText": "Which consideration is necessary to keep the result correct modulo 1e9+7?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Apply modulo after each multiplication and after subtracting 1 to avoid overflow/negative values",
+          "isCode": false
+        },
+        {
+          "label": "Sort the array before counting",
+          "isCode": false
+        },
+        {
+          "label": "Remove duplicates from the array first",
+          "isCode": false
+        },
+        {
+          "label": "Use floating point arithmetic for speed",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Take modulo during multiplication and after subtraction to stay in range and avoid negatives.",
+      "wrongExplanations": {
+        "1": "Sorting is unnecessary for counting frequencies.",
+        "3": "Floating point loses precision for large integers."
+      },
+      "hint": "Keep all operations within [0, MOD).",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys",
+    "MOD = 1000000007",
+    "it = iter(map(int, sys.stdin.buffer.read().split()))",
+    "n = next(it)",
+    "arr = [next(it) for _ in range(n)]",
+    "freq = {}",
+    "for x in arr:\n    freq[x] = freq.get(x, 0) + 1",
+    "res = 1",
+    "for c in freq.values():\n    res = (res * (c + 1)) % MOD",
+    "res = (res - 1) % MOD",
+    "print(res)"
+  ],
+  "reasoningChain": [
+    {
+      "question": "What makes a subsequence valid here?",
+      "insight": "A subsequence is valid if it uses increasing indices and no value appears more than once within it."
+    },
+    {
+      "question": "How to count choices for a single value that appears k times?",
+      "insight": "You can either not choose it or choose exactly one of its k occurrences: k+1 choices."
+    },
+    {
+      "question": "How to combine choices across different values?",
+      "insight": "Choices are independent across values, so multiply (k+1) over all distinct values."
+    },
+    {
+      "question": "How to handle the empty subsequence?",
+      "insight": "The product includes the empty choice; subtract 1 to exclude it from the final count."
+    },
+    {
+      "question": "How to implement this efficiently?",
+      "insight": "Build a frequency map in one pass and compute the product modulo 1e9+7."
+    },
+    {
+      "question": "How to keep results correct under modulo?",
+      "insight": "Apply modulo during multiplication and after the final subtraction to avoid overflow and negatives."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1357,
+    "output_tokens": 14074,
+    "input_cost": 0.001696,
+    "output_cost": 0.14074,
+    "total_cost": 0.142436
+  }
+}

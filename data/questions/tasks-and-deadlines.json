@@ -1,0 +1,885 @@
+{
+  "id": "tasks-and-deadlines-mcq-chain",
+  "title": "Tasks and Deadlines",
+  "difficulty": "intermediate",
+  "tags": [
+    "sorting",
+    "two-pointer",
+    "binary-search"
+  ],
+  "estimatedMinutes": 40,
+  "language": "python",
+  "description": "You have to process n tasks. Each task has a duration a and a deadline d, and you will process the tasks in some order one after another starting from time 0. Your reward for a task is d - f where f is the finishing time of that task in the chosen order. You must process all tasks, even if some yield negative reward. Find the maximum total reward over all orders.\n\nInput:\n- First line: integer n — number of tasks\n- Next n lines: two integers a and d — duration and deadline of each task\n\nOutput:\n- One integer: the maximum total reward",
+  "examples": [
+    {
+      "input": "3\n6 10\n8 15\n5 12\n",
+      "output": "2\n",
+      "explanation": "One optimal order is by durations: (5,12)->(6,10)->(8,15). Finishing times: 5, 11, 19. Rewards: 12-5=7, 10-11=-1, 15-19=-4. Total = 2."
+    }
+  ],
+  "constraints": [
+    "1 ≤ n ≤ 2⋅10^5",
+    "1 ≤ a,d ≤ 10^6"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "For a single task with duration a and deadline d, starting at time 0, what is its reward?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "d - a",
+          "isCode": false
+        },
+        {
+          "label": "a - d",
+          "isCode": false
+        },
+        {
+          "label": "d",
+          "isCode": false
+        },
+        {
+          "label": "a",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Finishing time equals a, so reward = d - finishing_time = d - a. Other expressions ignore the definition.",
+      "wrongExplanations": {
+        "1": "This flips the subtraction; reward is deadline minus finish time.",
+        "2": "Deadline alone is not the reward; finishing time matters."
+      },
+      "hint": "Finishing time equals the duration when starting at zero.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "Two tasks: (a1=2,d1=5), (a2=3,d2=5). Which order gives higher total reward?",
+      "diagram": "Order A: [1 then 2]\nFinish times: f1=2, f2=5\nOrder B: [2 then 1]\nFinish times: f2=3, f1=5",
+      "options": [
+        {
+          "label": "Do (2,5) then (3,5)",
+          "isCode": false
+        },
+        {
+          "label": "Do (3,5) then (2,5)",
+          "isCode": false
+        },
+        {
+          "label": "Both orders give same total reward",
+          "isCode": false
+        },
+        {
+          "label": "Cannot determine without more info",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Order A rewards: 5-2 + 5-5 = 3 + 0 = 3. Order B: 5-3 + 5-5 = 2 + 0 = 2. Shorter first is better here.",
+      "wrongExplanations": {
+        "1": "Compute the finishing times carefully; longer first increases the second finish time.",
+        "2": "The sums differ; check the arithmetic."
+      },
+      "hint": "Compute d - f for each task under both orders.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "For a fixed set of tasks, which quantity depends on the processing order?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Sum of all deadlines",
+          "isCode": false
+        },
+        {
+          "label": "Sum of all durations",
+          "isCode": false
+        },
+        {
+          "label": "Sum of all finishing times",
+          "isCode": false
+        },
+        {
+          "label": "Number of tasks",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Deadlines and durations are fixed inputs; only finishing times change with order, affecting the total reward.",
+      "wrongExplanations": {
+        "0": "Deadlines are given; reordering does not change them.",
+        "1": "Durations are given and do not change with order."
+      },
+      "hint": "Reordering changes when tasks finish, not their parameters.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "Are you allowed to skip tasks that would yield negative reward?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, skip negative-reward tasks",
+          "isCode": false
+        },
+        {
+          "label": "No, all tasks must be processed",
+          "isCode": false
+        },
+        {
+          "label": "You can partially process tasks",
+          "isCode": false
+        },
+        {
+          "label": "You can reorder parts within a task",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "The statement requires processing all tasks; you can only choose the order.",
+      "wrongExplanations": {
+        "0": "Skipping is not allowed in this problem.",
+        "2": "Tasks are indivisible here."
+      },
+      "hint": "Re-read the problem statement's requirement about processing tasks.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Exploring Approaches",
+      "questionText": "Since sum of deadlines is fixed, maximizing total reward reduces to which goal?",
+      "diagram": "Total reward = sum(d_i) - sum(f_i)",
+      "options": [
+        {
+          "label": "Minimize the maximum finishing time",
+          "isCode": false
+        },
+        {
+          "label": "Minimize the sum of finishing times",
+          "isCode": false
+        },
+        {
+          "label": "Minimize the sum of durations",
+          "isCode": false
+        },
+        {
+          "label": "Maximize the earliest finishing time",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Total reward differs across orders only via sum of finishing times. Minimizing that maximizes the reward.",
+      "wrongExplanations": {
+        "0": "Only the sum of finishing times appears in total reward, not the maximum.",
+        "2": "Sum of durations is fixed by input."
+      },
+      "hint": "Focus on sum(f_i) in the formula.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "For two tasks with durations x and y, which ordering minimizes the sum of their finishing times, regardless of deadlines?",
+      "diagram": "Order1: x first -> finishes at x, y finishes at x+y. Sum = x + (x+y) = 2x + y\nOrder2: y first -> finishes at y, x finishes at y+x. Sum = 2y + x",
+      "options": [
+        {
+          "label": "Put the longer one first",
+          "isCode": false
+        },
+        {
+          "label": "Put the shorter one first",
+          "isCode": false
+        },
+        {
+          "label": "Any order; the sum is equal",
+          "isCode": false
+        },
+        {
+          "label": "It depends on deadlines",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Compare 2x+y vs 2y+x: if x<y then 2x+y < 2y+x, so shorter first reduces the sum.",
+      "wrongExplanations": {
+        "0": "This increases the weighted contribution of the longer duration.",
+        "3": "Deadlines do not affect finishing times; only durations and order do."
+      },
+      "hint": "Compute sum of finishing times for both orders.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "For durations [3, 1, 2], which ordering minimizes the sum of finishing times?",
+      "diagram": "Consider prefix sums for each order.",
+      "options": [
+        {
+          "label": "[3, 2, 1]",
+          "isCode": false
+        },
+        {
+          "label": "[2, 3, 1]",
+          "isCode": false
+        },
+        {
+          "label": "[1, 2, 3]",
+          "isCode": false
+        },
+        {
+          "label": "Keep the original order [3,1,2]",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Sorting by increasing duration [1,2,3] minimizes cumulative sums, hence minimizes the sum of finishing times.",
+      "wrongExplanations": {
+        "0": "Largest-first maximizes early prefixes.",
+        "3": "Original order is not optimal for these durations."
+      },
+      "hint": "Compute prefix sums for each order and compare totals.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Building the Idea",
+      "questionText": "What ordering rule minimizes the sum of finishing times for any set of tasks?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Sort by increasing duration a",
+          "isCode": false
+        },
+        {
+          "label": "Sort by increasing deadline d",
+          "isCode": false
+        },
+        {
+          "label": "Sort by decreasing deadline d",
+          "isCode": false
+        },
+        {
+          "label": "Sort by decreasing (d - a)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Placing shorter durations earlier reduces every subsequent finishing time, minimizing the total sum.",
+      "wrongExplanations": {
+        "1": "Deadlines do not appear in the sum of finishing times.",
+        "3": "d - a does not control finishing times across tasks."
+      },
+      "hint": "Which sorting affects only the accumulation of durations?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "If two tasks have equal duration, how should ties be broken to maximize total reward?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Any tie-break order is fine",
+          "isCode": false
+        },
+        {
+          "label": "Place the smaller deadline first",
+          "isCode": false
+        },
+        {
+          "label": "Place the larger deadline first",
+          "isCode": false
+        },
+        {
+          "label": "Break ties by larger (d - a)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Equal durations give the same sum of finishing times regardless of their internal order; sum of deadlines is fixed.",
+      "wrongExplanations": {
+        "1": "This does not change finishing times or total reward.",
+        "2": "Likewise, it does not affect the sum of finishing times."
+      },
+      "hint": "Does reordering equal durations change prefix sums?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "After sorting by duration, how do you compute the total reward in one pass?",
+      "diagram": "Maintain current time t. For each task (a,d): update t, then add (d - t) to answer.",
+      "options": [
+        {
+          "label": "Keep t as sum of durations so far; for each task, answer += d - t",
+          "isCode": false
+        },
+        {
+          "label": "Keep t as sum of durations so far; for each task, answer += t - d",
+          "isCode": false
+        },
+        {
+          "label": "Keep t as remaining time; for each task, answer += d - a",
+          "isCode": false
+        },
+        {
+          "label": "Sum all deadlines and subtract total duration once",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Finishing time equals current time after adding a, so reward d - t accumulates correctly.",
+      "wrongExplanations": {
+        "1": "This negates the reward formula.",
+        "3": "You must subtract the sum of finishing times, not total duration once."
+      },
+      "hint": "Reward per task uses its finishing time, not its own duration alone.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "What is the finishing time for the i-th task in the sorted order?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Sum of durations of tasks up to i (including i)",
+          "isCode": false
+        },
+        {
+          "label": "Just the duration of task i",
+          "isCode": false
+        },
+        {
+          "label": "Its deadline",
+          "isCode": false
+        },
+        {
+          "label": "Sum of durations of tasks after i",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Finishing time is the prefix sum of durations up to that task.",
+      "wrongExplanations": {
+        "1": "That's the processing time, not the finish time.",
+        "2": "Deadline is unrelated to actual finish time."
+      },
+      "hint": "Think of a running total from the start time.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Writing the Code",
+      "questionText": "Read all input efficiently into a list of integers.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\ndata = list(map(int, sys.stdin.buffer.read().split()))",
+          "isCode": true
+        },
+        {
+          "label": "data = [int(x) for x in input().split()]",
+          "isCode": true
+        },
+        {
+          "label": "import sys\ndata = list(map(int, sys.stdin.read().splitlines()))",
+          "isCode": true
+        },
+        {
+          "label": "import sys\ndata = sys.stdin.buffer.readline().split()",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Reading the whole buffer and splitting is concise and fast for up to 2e5 pairs. Other options either read only one line or parse incorrectly.",
+      "wrongExplanations": {
+        "1": "This reads only the first line; we need all lines.",
+        "3": "Reads a single line; does not get the entire input."
+      },
+      "hint": "We need to read n and then 2n more integers.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\ndata = list(map(int, sys.stdin.buffer.read().split()))",
+      "codeLabel": "Import and read tokens"
+    },
+    {
+      "id": "q13",
+      "phase": "Writing the Code",
+      "questionText": "Extract n from the token list.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "n = data[0]",
+          "isCode": true
+        },
+        {
+          "label": "n = int(input())",
+          "isCode": true
+        },
+        {
+          "label": "n = len(data)//2",
+          "isCode": true
+        },
+        {
+          "label": "n = data.pop()",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The first integer is n by problem format. The rest are pairs.",
+      "wrongExplanations": {
+        "1": "We already read all input into data.",
+        "2": "This would be wrong if the first token is n, not a pair count check."
+      },
+      "hint": "The first token denotes the number of tasks.",
+      "isCodeBuilding": true,
+      "codeSnippet": "n = data[0]",
+      "codeLabel": "Parse n"
+    },
+    {
+      "id": "q14",
+      "phase": "Writing the Code",
+      "questionText": "Build the list of (duration, deadline) pairs from data.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "tasks = [(data[i], data[i+1]) for i in range(1, 2*n, 2)]",
+          "isCode": true
+        },
+        {
+          "label": "tasks = [(data[i+1], data[i]) for i in range(1, 2*n, 2)]",
+          "isCode": true
+        },
+        {
+          "label": "tasks = [(data[i], data[i+1]) for i in range(1, len(data), 2)]",
+          "isCode": true
+        },
+        {
+          "label": "tasks = [(data[i], data[i+1]) for i in range(0, 2*n, 2)]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "After n at index 0, pairs start at index 1. We need exactly n pairs, so stop at 2*n.",
+      "wrongExplanations": {
+        "1": "This swaps (a,d); the order matters for sorting.",
+        "3": "This starts from index 0; index 0 is n, not part of a pair."
+      },
+      "hint": "Skip the first token and take pairs in steps of 2.",
+      "isCodeBuilding": true,
+      "codeSnippet": "tasks = [(data[i], data[i+1]) for i in range(1, 2*n, 2)]",
+      "codeLabel": "Parse task pairs"
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Order the tasks to minimize the sum of finishing times.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "tasks.sort(key=lambda x: x[0])",
+          "isCode": true
+        },
+        {
+          "label": "tasks.sort(key=lambda x: x[1])",
+          "isCode": true
+        },
+        {
+          "label": "tasks.sort(key=lambda x: x[0], reverse=True)",
+          "isCode": true
+        },
+        {
+          "label": "tasks.sort()",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need to sort by duration (first element). Sorting by deadline or reversing would not minimize sum of finishing times.",
+      "wrongExplanations": {
+        "1": "Deadlines do not minimize sum of finishing times.",
+        "3": "Default tuple sort sorts by duration then deadline, but we only need duration; explicit key is clearer."
+      },
+      "hint": "Sort by the processing time of each task.",
+      "isCodeBuilding": true,
+      "codeSnippet": "tasks.sort(key=lambda x: x[0])",
+      "codeLabel": "Sort by duration"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Initialize accumulators.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "t = 0\nans = 0",
+          "isCode": true
+        },
+        {
+          "label": "t = 0.0\nans = 0.0",
+          "isCode": true
+        },
+        {
+          "label": "t, ans = 1, 0",
+          "isCode": true
+        },
+        {
+          "label": "t = ans = None",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "t is current time and ans is total reward; both start at 0 as integers.",
+      "wrongExplanations": {
+        "1": "Use integers; times and rewards are integral.",
+        "2": "Time should start at 0."
+      },
+      "hint": "We start at time 0 with zero reward.",
+      "isCodeBuilding": true,
+      "codeSnippet": "t = 0\nans = 0",
+      "codeLabel": "Initialize"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Iterate over tasks in the chosen order to update time and reward.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "for a, d in tasks:",
+          "isCode": true
+        },
+        {
+          "label": "for d, a in tasks:",
+          "isCode": true
+        },
+        {
+          "label": "for i in range(n):",
+          "isCode": true
+        },
+        {
+          "label": "for a in tasks:",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Unpack (a,d) correctly for each task. Other loops either swap or fail to unpack both values.",
+      "wrongExplanations": {
+        "1": "This swaps values; a would be the deadline.",
+        "2": "You still need to index and unpack each pair properly."
+      },
+      "hint": "Remember each element is a pair (a, d).",
+      "isCodeBuilding": true,
+      "codeSnippet": "for a, d in tasks:",
+      "codeLabel": "Loop header"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Update the current time inside the loop.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    t += a",
+          "isCode": true
+        },
+        {
+          "label": "    t = a",
+          "isCode": true
+        },
+        {
+          "label": "    t -= a",
+          "isCode": true
+        },
+        {
+          "label": "    t += d",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Current time increases by the task's duration. Assigning t=a or using deadline is incorrect.",
+      "wrongExplanations": {
+        "1": "t should accumulate, not reset.",
+        "4": "Deadline does not advance time."
+      },
+      "hint": "Time is cumulative sum of durations.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    t += a",
+      "codeLabel": "Update time"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Accumulate the reward for the current task and print the result at the end.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    ans += d - t\nprint(ans)",
+          "isCode": true
+        },
+        {
+          "label": "    ans += t - d\nprint(ans)",
+          "isCode": true
+        },
+        {
+          "label": "    ans += d - a\nprint(t)",
+          "isCode": true
+        },
+        {
+          "label": "    ans = d - t\nprint(ans)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "After updating t, the task's reward is d - t. Sum these and print at the end.",
+      "wrongExplanations": {
+        "1": "This negates the reward formula.",
+        "3": "This overwrites the total instead of accumulating."
+      },
+      "hint": "Use the finishing time just computed to get the reward.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    ans += d - t\nprint(ans)",
+      "codeLabel": "Update reward and output"
+    },
+    {
+      "id": "q20",
+      "phase": "Verifying the Solution",
+      "questionText": "Trace the algorithm on the sample: (6,10), (8,15), (5,12). What total does it print?",
+      "diagram": "Sorted by a: (5,12),(6,10),(8,15)\nTimes t: 5, 11, 19\nRewards: 12-5, 10-11, 15-19",
+      "options": [
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "-2",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Rewards: 7, -1, -4 → total 2.",
+      "wrongExplanations": {
+        "2": "Check the second and third task contributions.",
+        "3": "Signs matter on negative contributions."
+      },
+      "hint": "Compute each reward and sum.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q21",
+      "phase": "Verifying the Solution",
+      "questionText": "Consider tasks: (3,10),(1,3),(2,5),(1,2). What total does the algorithm output?",
+      "diagram": "Sorted by a: (1,3),(1,2),(2,5),(3,10)\nTimes t: 1,2,4,7\nRewards: 2,0,1,3",
+      "options": [
+        {
+          "label": "6",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        },
+        {
+          "label": "7",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Sum rewards: 2+0+1+3 = 6.",
+      "wrongExplanations": {
+        "1": "Recheck finishing times: 1,2,4,7.",
+        "3": "You may have missed a task's reward."
+      },
+      "hint": "Compute t step by step and add d - t.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q22",
+      "phase": "Verifying the Solution",
+      "questionText": "If all deadlines are the same constant C, what does the algorithm effectively maximize?",
+      "diagram": "Total = n*C - sum(f_i)",
+      "options": [
+        {
+          "label": "It minimizes the sum of finishing times",
+          "isCode": false
+        },
+        {
+          "label": "It maximizes the number of on-time tasks",
+          "isCode": false
+        },
+        {
+          "label": "It minimizes the maximum finishing time",
+          "isCode": false
+        },
+        {
+          "label": "It maximizes the total duration",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "n*C is fixed; only sum of finishing times changes, which we minimize by ordering by duration.",
+      "wrongExplanations": {
+        "1": "On-time count is not part of the objective.",
+        "3": "Total duration is fixed by input."
+      },
+      "hint": "Focus on the formula for total reward.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q23",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the time complexity of the algorithm?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n log n) due to sorting, then O(n) pass",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2) because of nested loops",
+          "isCode": false
+        },
+        {
+          "label": "O(n) because reading input dominates",
+          "isCode": false
+        },
+        {
+          "label": "O(log n) because we sort",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Sorting dominates at O(n log n). The single pass is linear.",
+      "wrongExplanations": {
+        "1": "There are no nested loops over tasks.",
+        "3": "Sorting n items is not O(log n)."
+      },
+      "hint": "Consider the sort plus one traversal.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Analyzing Complexity",
+      "questionText": "Which of the following is true about correctness and edge cases?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "n=1 works; equal durations can be in any order; totals fit in 64-bit",
+          "isCode": false
+        },
+        {
+          "label": "Equal durations must be ordered by larger deadline",
+          "isCode": false
+        },
+        {
+          "label": "We must avoid negative totals by skipping tasks",
+          "isCode": false
+        },
+        {
+          "label": "Sorting by deadline is equivalent when all deadlines are distinct",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Edge cases: single task, equal durations, and large sums are handled. Skipping is disallowed; sorting by deadline changes finishing times.",
+      "wrongExplanations": {
+        "1": "Tie-breaking by deadline is unnecessary for the objective.",
+        "3": "Deadlines do not determine finishing times; durations do."
+      },
+      "hint": "Revisit rules: all tasks processed, order affects finishing times via durations only.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\ndata = list(map(int, sys.stdin.buffer.read().split()))",
+    "n = data[0]",
+    "tasks = [(data[i], data[i+1]) for i in range(1, 2*n, 2)]",
+    "tasks.sort(key=lambda x: x[0])",
+    "t = 0\nans = 0",
+    "for a, d in tasks:",
+    "    t += a",
+    "    ans += d - t\nprint(ans)"
+  ],
+  "reasoningChain": [
+    {
+      "question": "q3",
+      "insight": "Total reward equals sum of deadlines minus sum of finishing times; only finishing times depend on order."
+    },
+    {
+      "question": "q6",
+      "insight": "For two tasks, placing the shorter duration first reduces the sum of finishing times."
+    },
+    {
+      "question": "q8",
+      "insight": "Extending pairwise reasoning, ordering all tasks by increasing duration minimizes the sum of finishing times."
+    },
+    {
+      "question": "q11",
+      "insight": "Finishing time of a task is the prefix sum of durations; we can compute it incrementally."
+    },
+    {
+      "question": "q10",
+      "insight": "After sorting, maintain a running time and add (d - time) for each task to get the total reward."
+    },
+    {
+      "question": "q24",
+      "insight": "Ties in duration do not affect the sum; all tasks must be processed; sums may be large but fit comfortably in Python integers."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1398,
+    "output_tokens": 10724,
+    "input_cost": 0.001747,
+    "output_cost": 0.10724,
+    "total_cost": 0.108988
+  }
+}

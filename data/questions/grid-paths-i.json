@@ -1,0 +1,1028 @@
+{
+  "id": "grid-paths-i",
+  "title": "Grid Paths I",
+  "difficulty": "intermediate",
+  "tags": [
+    "dp"
+  ],
+  "estimatedMinutes": 45,
+  "language": "python",
+  "description": "You are given an n × n grid where some cells may contain traps ('*'). You start at the upper-left cell and want to reach the lower-right cell by moving only right or down. You cannot step on a trap.\n\nInput:\n- First line: integer n (1 ≤ n ≤ 1000)\n- Next n lines: each line has n characters, '.' for empty and '*' for trap.\n\nOutput:\n- Print the number of valid paths from (0,0) to (n-1,n-1), modulo 10^9+7.",
+  "examples": [
+    {
+      "input": "4\n....\n.*..\n...*\n*...",
+      "output": "3",
+      "explanation": "There are exactly 3 valid right/down paths that avoid traps from the top-left to the bottom-right."
+    }
+  ],
+  "constraints": [
+    "1 ≤ n ≤ 1000",
+    "Grid cells are '.' or '*'",
+    "Only moves: right or down",
+    "Answer modulo 10^9+7",
+    "Time limit: 1 s, Memory limit: 512 MB"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "Which moves are allowed when traversing the grid from the upper-left to the lower-right?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Only right or down",
+          "isCode": false
+        },
+        {
+          "label": "Right, down, and diagonal down-right",
+          "isCode": false
+        },
+        {
+          "label": "Right, down, and left",
+          "isCode": false
+        },
+        {
+          "label": "Any of up, down, left, right",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Only right or down moves are allowed. Allowing diagonal or left would create extra paths not permitted by the problem.",
+      "wrongExplanations": {
+        "1": "Diagonal moves are not allowed by the statement.",
+        "2": "Left moves are not allowed.",
+        "3": "Up and left are not allowed; only right and down are permitted."
+      },
+      "hint": "Re-read the movement restriction.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "For a 2×2 grid with no traps:\n..\n..\nHow many valid paths exist from (0,0) to (1,1)?",
+      "diagram": "..\n..",
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "There are 2: Right→Down and Down→Right. Other counts include moves not allowed or overcount.",
+      "wrongExplanations": {
+        "0": "There are two sequences of moves, not one.",
+        "2": "Three would require an extra move or diagonal; not allowed."
+      },
+      "hint": "List all sequences of two moves using only R and D.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "If the starting cell (0,0) is a trap ('*'), what is the number of valid paths?",
+      "diagram": "*.",
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "1 (stay in place)",
+          "isCode": false
+        },
+        {
+          "label": "Depends on other traps",
+          "isCode": false
+        },
+        {
+          "label": "n (one for each row)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "You cannot start on a trap, so there are 0 valid paths.",
+      "wrongExplanations": {
+        "1": "Staying in place is not a valid path to the bottom-right unless n=1 and it's not a trap.",
+        "2": "If the start is blocked, no path exists regardless of other cells."
+      },
+      "hint": "If you cannot step on (0,0), can you begin a path?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "If the ending cell (n-1,n-1) is a trap ('*'), what is the number of valid paths?",
+      "diagram": "...\n..*",
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "1 (stop before the trap)",
+          "isCode": false
+        },
+        {
+          "label": "Depends on path shape",
+          "isCode": false
+        },
+        {
+          "label": "n-1 (paths that avoid last cell)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "You must reach the lower-right cell. If it is a trap, it's unreachable → 0 paths.",
+      "wrongExplanations": {
+        "1": "Stopping early does not reach the destination.",
+        "2": "Regardless of shape, the final cell is blocked."
+      },
+      "hint": "Destination must be reached to count a path.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Understanding the Problem",
+      "questionText": "For a 3×3 grid with no traps, how many valid paths are there?",
+      "diagram": "...\n...\n...",
+      "options": [
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "6",
+          "isCode": false
+        },
+        {
+          "label": "8",
+          "isCode": false
+        },
+        {
+          "label": "9",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "There are 6 paths (combinations of 2 rights and 2 downs).",
+      "wrongExplanations": {
+        "0": "This undercounts; try enumerating sequences of R and D.",
+        "2": "Eight would require extra move types or steps."
+      },
+      "hint": "You need 2 rights and 2 downs in some order.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "Is enumerating all paths and checking traps feasible for n up to 1000 within 1 second?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, the number of paths is small enough",
+          "isCode": false
+        },
+        {
+          "label": "No, the number of possible paths is astronomically large",
+          "isCode": false
+        },
+        {
+          "label": "Yes, as long as we use recursion",
+          "isCode": false
+        },
+        {
+          "label": "Yes, because modulo reduces the number of paths",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "The count of possible paths grows extremely fast; enumerating is infeasible for n=1000.",
+      "wrongExplanations": {
+        "0": "Even for moderate n, the count is huge.",
+        "2": "Recursion doesn’t reduce the number of paths to explore."
+      },
+      "hint": "Think about how many sequences of R and D there are for a large n.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "Let ways[i][j] be the number of valid paths to cell (i,j). Which relation correctly builds ways[i][j] when cell (i,j) is not a trap?",
+      "diagram": "Neighbors: (i-1,j) is above; (i,j-1) is left.",
+      "options": [
+        {
+          "label": "ways[i][j] = ways[i-1][j] + ways[i][j-1]; if cell is '*', ways[i][j] = 0",
+          "isCode": false
+        },
+        {
+          "label": "ways[i][j] = ways[i-1][j] * ways[i][j-1]",
+          "isCode": false
+        },
+        {
+          "label": "ways[i][j] = max(ways[i-1][j], ways[i][j-1])",
+          "isCode": false
+        },
+        {
+          "label": "ways[i][j] = ways[i-1][j] + ways[i][j-1] + ways[i-1][j-1]",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "A path to (i,j) must come from above or left. A trap cell cannot be entered, so it contributes 0.",
+      "wrongExplanations": {
+        "1": "We sum alternative counts; we don’t multiply them.",
+        "3": "Diagonal moves are not allowed."
+      },
+      "hint": "From which neighbors can you arrive at (i,j)?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Exploring Approaches",
+      "questionText": "How should boundary cells be handled when applying the relation for ways[i][j]?",
+      "diagram": "Top row and left column have only one neighbor.",
+      "options": [
+        {
+          "label": "Treat missing neighbors as 0, so top row uses only left and left column uses only above",
+          "isCode": false
+        },
+        {
+          "label": "Treat missing neighbors as 1",
+          "isCode": false
+        },
+        {
+          "label": "Wrap around the grid (mod n indexing)",
+          "isCode": false
+        },
+        {
+          "label": "Do not compute the top row and left column",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "If a neighbor is outside the grid, its contribution is 0. Thus top row comes only from left and left column only from above.",
+      "wrongExplanations": {
+        "1": "This would artificially add paths coming from outside the grid.",
+        "2": "Wrap-around is not defined in the problem."
+      },
+      "hint": "What does it mean if there is no above or left neighbor?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "What is the smallest additional storage sufficient to compute the answer while scanning the grid row by row from left to right?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "An n×n array of counts",
+          "isCode": false
+        },
+        {
+          "label": "Two rows of counts (current and previous)",
+          "isCode": false
+        },
+        {
+          "label": "One row of counts (length n)",
+          "isCode": false
+        },
+        {
+          "label": "No additional storage beyond the grid",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "One row suffices: dp[j] can hold the count from above, and dp[j-1] holds the count from the left in the current row.",
+      "wrongExplanations": {
+        "0": "This works but uses more memory than necessary.",
+        "1": "Two rows also work, but a single row is sufficient."
+      },
+      "hint": "When scanning left to right, what does dp[j] and dp[j-1] represent?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "Before processing any cell, what should the initial one-row array (dp) contain?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "[0, 0, ..., 0] (length n)",
+          "isCode": false
+        },
+        {
+          "label": "[1, 0, ..., 0] (length n)",
+          "isCode": false
+        },
+        {
+          "label": "[1, 1, ..., 1] (length n)",
+          "isCode": false
+        },
+        {
+          "label": "[0, 1, ..., 1] (length n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Initialize with zeros; when processing (0,0) we will set dp[0] = 1 if it’s not a trap.",
+      "wrongExplanations": {
+        "1": "Setting dp[0]=1 prematurely mixes initialization with processing logic.",
+        "2": "On the first row, only the left neighbor contributes; initial ones would be incorrect."
+      },
+      "hint": "Let the iteration set the base case when it reaches (0,0).",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "When the current cell (i,j) is a trap ('*'), what should dp[j] be set to during the scan?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Leave dp[j] unchanged (carry over from above)",
+          "isCode": false
+        },
+        {
+          "label": "Set dp[j] = -1 to mark blocked",
+          "isCode": false
+        },
+        {
+          "label": "Set dp[j] = 0",
+          "isCode": false
+        },
+        {
+          "label": "Set dp[j] = dp[j-1]",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "You cannot enter a trap, so the number of paths to that cell is 0.",
+      "wrongExplanations": {
+        "0": "Keeping the old value would falsely allow paths to a blocked cell.",
+        "1": "We want numeric counts; using -1 complicates and breaks sums."
+      },
+      "hint": "A blocked cell should contribute no paths.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "For a non-trap cell (i,j), which update correctly combines contributions from above and left using a single-row dp?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "dp[j] = (dp[j] + dp[j-1]) % MOD",
+          "isCode": true
+        },
+        {
+          "label": "dp[j] = ((dp[j] if i > 0 else 0) + (dp[j-1] if j > 0 else 0)) % MOD",
+          "isCode": true
+        },
+        {
+          "label": "dp[j] = (dp[i-1][j] + dp[i][j-1]) % MOD",
+          "isCode": true
+        },
+        {
+          "label": "dp[j] = dp[j-1] % MOD",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "dp[j] holds the count from above; dp[j-1] holds the left count in the current row. Handle boundaries with zeros and apply modulo.",
+      "wrongExplanations": {
+        "0": "This fails at the top row where dp[j] should not count above if i==0.",
+        "2": "We are not maintaining a 2D array; these indices are undefined."
+      },
+      "hint": "dp[j] is the value from the previous row until you overwrite it in this iteration.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "How should the base case at the starting cell be handled during the scan (only if it is not a trap)?",
+      "diagram": "Cell (0,0)",
+      "options": [
+        {
+          "label": "if i == 0 and j == 0: dp[j] = 1",
+          "isCode": true
+        },
+        {
+          "label": "if i == 0: dp[j] = 1",
+          "isCode": true
+        },
+        {
+          "label": "if i == 0 and j == 0: continue",
+          "isCode": true
+        },
+        {
+          "label": "if i == 0 or j == 0: dp[j] += 1",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Only the start cell should be initialized to 1. Other cells on the top row or left column depend on their neighbor.",
+      "wrongExplanations": {
+        "1": "This incorrectly sets all top-row non-trap cells to 1.",
+        "2": "Skipping initialization would leave dp[0] at 0 unless changed elsewhere."
+      },
+      "hint": "Exactly one cell should start with 1 if it's not blocked.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Building the Idea",
+      "questionText": "Consider the first row is \"....\" (no traps). After processing row 0 left-to-right, what should dp be?",
+      "diagram": "Row 0: ....",
+      "options": [
+        {
+          "label": "[1, 0, 0, 0]",
+          "isCode": false
+        },
+        {
+          "label": "[1, 1, 1, 1]",
+          "isCode": false
+        },
+        {
+          "label": "[1, 2, 3, 4]",
+          "isCode": false
+        },
+        {
+          "label": "[0, 0, 0, 0]",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "From (0,0) = 1, each next cell accumulates only from the left on the top row, so all become 1.",
+      "wrongExplanations": {
+        "0": "This forgets to propagate counts to the right.",
+        "2": "These would be cumulative sums, not counts from left-only neighbors."
+      },
+      "hint": "Top row cells can only be reached from the left.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Choose the correct import and modulus setup.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\nMOD = 10**9 + 7",
+          "isCode": true
+        },
+        {
+          "label": "import sys\nMOD = 10**9 + 9",
+          "isCode": true
+        },
+        {
+          "label": "from sys import *\nMOD = 10**9 + 7",
+          "isCode": true
+        },
+        {
+          "label": "import math\nMOD = 10**9 + 7",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need sys for fast input and the modulus 10^9+7 as specified.",
+      "wrongExplanations": {
+        "1": "Wrong modulus; the problem requires 10^9+7.",
+        "2": "Wildcard imports are discouraged; sys is sufficient with explicit import."
+      },
+      "hint": "Match the exact modulus from the statement.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\nMOD = 10**9 + 7",
+      "codeLabel": "Imports and MOD"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Read n from standard input efficiently.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "n = int(sys.stdin.readline().strip())",
+          "isCode": true
+        },
+        {
+          "label": "n = int(input())",
+          "isCode": true
+        },
+        {
+          "label": "n = sys.stdin.readline()",
+          "isCode": true
+        },
+        {
+          "label": "n = int(sys.stdin.read())",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Using sys.stdin.readline().strip() and int() parses n efficiently and correctly.",
+      "wrongExplanations": {
+        "1": "Works but mixing input methods can be slower; we stick with sys.stdin for consistency.",
+        "2": "This leaves a string and fails to convert to int."
+      },
+      "hint": "Use sys.stdin.readline and convert to int.",
+      "isCodeBuilding": true,
+      "codeSnippet": "n = int(sys.stdin.readline().strip())",
+      "codeLabel": "Read n"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Read the grid as n strings with no trailing newlines.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "grid = [sys.stdin.readline().strip() for _ in range(n)]",
+          "isCode": true
+        },
+        {
+          "label": "grid = [list(sys.stdin.readline()) for _ in range(n)]",
+          "isCode": true
+        },
+        {
+          "label": "grid = [sys.stdin.readline() for _ in range(n)]",
+          "isCode": true
+        },
+        {
+          "label": "grid = sys.stdin.read().split()",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Stripping newlines ensures exact n characters per row. Keeping as strings is sufficient for indexing.",
+      "wrongExplanations": {
+        "1": "This keeps newline characters unless stripped and changes data shape.",
+        "2": "Newlines remain and can break indexing length checks."
+      },
+      "hint": "Each line should be exactly n characters of '.' or '*'.",
+      "isCodeBuilding": true,
+      "codeSnippet": "grid = [sys.stdin.readline().strip() for _ in range(n)]",
+      "codeLabel": "Read grid"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Initialize the one-dimensional array for counts.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "dp = [0] * n",
+          "isCode": true
+        },
+        {
+          "label": "dp = [[0] * n for _ in range(n)]",
+          "isCode": true
+        },
+        {
+          "label": "dp = [1] + [0] * (n - 1)",
+          "isCode": true
+        },
+        {
+          "label": "dp = [0 for _ in range(n+1)]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We use a single row of length n initialized to zeros.",
+      "wrongExplanations": {
+        "1": "This allocates an n×n structure, more than needed.",
+        "2": "We shouldn’t pre-set dp[0] to 1; handle it during iteration."
+      },
+      "hint": "We only need one row of length n.",
+      "isCodeBuilding": true,
+      "codeSnippet": "dp = [0] * n",
+      "codeLabel": "Init dp"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Set up the nested loops to scan the grid row by row, left to right.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "for i in range(n):\n    for j in range(n):",
+          "isCode": true
+        },
+        {
+          "label": "for j in range(n):\n    for i in range(n):",
+          "isCode": true
+        },
+        {
+          "label": "for i in range(n+1):\n    for j in range(n+1):",
+          "isCode": true
+        },
+        {
+          "label": "for i in range(1, n):\n    for j in range(1, n):",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We iterate rows i=0..n-1 and columns j=0..n-1 in that order.",
+      "wrongExplanations": {
+        "1": "Column-major order would still work but complicates our dp interpretation.",
+        "2": "This iterates out of bounds for i==n or j==n."
+      },
+      "hint": "Use 0-based indices and avoid off-by-one errors.",
+      "isCodeBuilding": true,
+      "codeSnippet": "for i in range(n):\n    for j in range(n):",
+      "codeLabel": "Loops"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Handle traps during the scan.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "        if grid[i][j] == '*':\n            dp[j] = 0\n        else:",
+          "isCode": true
+        },
+        {
+          "label": "        if grid[i][j] == '*':\n            continue",
+          "isCode": true
+        },
+        {
+          "label": "        if grid[i][j] == '*':\n            dp[j] = -1",
+          "isCode": true
+        },
+        {
+          "label": "        if grid[i][j] == '*':\n            break",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Setting dp[j]=0 ensures the blocked cell contributes no paths; else we compute normally.",
+      "wrongExplanations": {
+        "1": "Continuing leaves dp[j] from above, incorrectly allowing entry into a trap.",
+        "2": "Using -1 breaks later sums and logic."
+      },
+      "hint": "A trap cell has zero ways to reach it.",
+      "isCodeBuilding": true,
+      "codeSnippet": "        if grid[i][j] == '*':\n            dp[j] = 0\n        else:",
+      "codeLabel": "Trap handling"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "Insert the base case for the starting cell inside the non-trap branch.",
+      "diagram": "Inside: else:",
+      "options": [
+        {
+          "label": "            if i == 0 and j == 0:\n                dp[j] = 1\n            else:",
+          "isCode": true
+        },
+        {
+          "label": "            if i == 0 or j == 0:\n                dp[j] = 1\n            else:",
+          "isCode": true
+        },
+        {
+          "label": "            if i == 0 and j == 0:\n                pass\n            else:",
+          "isCode": true
+        },
+        {
+          "label": "            if i + j == 0:\n                dp[j] = 1\n            else:",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Only (0,0) should be set to 1 when not a trap; other cells use neighbors.",
+      "wrongExplanations": {
+        "1": "This sets the entire first row/column to 1, which is incorrect.",
+        "3": "This is equivalent to the correct check but lacks clarity; we use explicit i==0 and j==0."
+      },
+      "hint": "Exactly one cell uses a direct initialization.",
+      "isCodeBuilding": true,
+      "codeSnippet": "            if i == 0 and j == 0:\n                dp[j] = 1\n            else:",
+      "codeLabel": "Base case"
+    },
+    {
+      "id": "q22",
+      "phase": "Writing the Code",
+      "questionText": "Add the general update combining above and left counts with modulo.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "                up = dp[j] if i > 0 else 0\n                left = dp[j-1] if j > 0 else 0\n                dp[j] = (up + left) % MOD",
+          "isCode": true
+        },
+        {
+          "label": "                up = dp[j-1] if i > 0 else 0\n                left = dp[j] if j > 0 else 0\n                dp[j] = (up + left) % MOD",
+          "isCode": true
+        },
+        {
+          "label": "                dp[j] = (dp[j-1] + dp[j+1]) % MOD",
+          "isCode": true
+        },
+        {
+          "label": "                dp[j] = (dp[j] + dp[j-1])",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "dp[j] is the value from above, dp[j-1] is from the left in the current row. Apply modulo after summing.",
+      "wrongExplanations": {
+        "1": "Swapping roles mixes left and above values and breaks boundaries.",
+        "3": "Missing modulo can overflow and violates the problem’s requirement."
+      },
+      "hint": "dp[j] is overwritten left-to-right; dp[j-1] is already current row’s left.",
+      "isCodeBuilding": true,
+      "codeSnippet": "                up = dp[j] if i > 0 else 0\n                left = dp[j-1] if j > 0 else 0\n                dp[j] = (up + left) % MOD",
+      "codeLabel": "Update rule"
+    },
+    {
+      "id": "q23",
+      "phase": "Writing the Code",
+      "questionText": "Finally, print the answer.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "print(dp[n-1])",
+          "isCode": true
+        },
+        {
+          "label": "print(dp[n])",
+          "isCode": true
+        },
+        {
+          "label": "print(dp[0])",
+          "isCode": true
+        },
+        {
+          "label": "print(dp[n-1] % (10**9 + 9))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "dp[n-1] holds the count for the last column in the last processed row. We have already applied the correct modulus.",
+      "wrongExplanations": {
+        "1": "Index n is out of bounds for a length-n array.",
+        "3": "Uses the wrong modulus; the problem specifies 10^9+7."
+      },
+      "hint": "After finishing all rows, dp at the last index is the answer.",
+      "isCodeBuilding": true,
+      "codeSnippet": "print(dp[n-1])",
+      "codeLabel": "Print answer"
+    },
+    {
+      "id": "q24",
+      "phase": "Verifying the Solution",
+      "questionText": "Run your logic on the example:\n4\n....\n.*..\n...*\n*...\nWhat should be printed?",
+      "diagram": "Row0: ....\nRow1: .*..\nRow2: ...*\nRow3: *...",
+      "options": [
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "The known answer for this input is 3.",
+      "wrongExplanations": {
+        "0": "Under-counts valid routes avoiding traps.",
+        "2": "Over-counts; some paths pass through traps."
+      },
+      "hint": "Manually sketch paths or trust the progression.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Verifying the Solution",
+      "questionText": "Consider:\n3\n..*\n...\n*..\nWhat should your program output?",
+      "diagram": "Row0: ..*\nRow1: ...\nRow2: *..",
+      "options": [
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Row-by-row counts yield 4 ways to reach the bottom-right.",
+      "wrongExplanations": {
+        "0": "Re-check contributions where traps reset counts to 0.",
+        "3": "Over-counting; verify each cell’s sum of left and above."
+      },
+      "hint": "Compute dp after each row: [1,1,0] → [1,2,2] → [0,2,4].",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the time complexity of the implemented solution with a single row of counts?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^3)",
+          "isCode": false
+        },
+        {
+          "label": "O(2^n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "We process each of the n×n cells once: O(n^2).",
+      "wrongExplanations": {
+        "0": "We do not process only a single row or column.",
+        "3": "We are not enumerating all paths."
+      },
+      "hint": "How many cells do you visit and update?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q27",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the additional space complexity of the solution (excluding the input grid)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(1)",
+          "isCode": false
+        },
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^3)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "We store a one-dimensional array of length n, so O(n) extra space.",
+      "wrongExplanations": {
+        "0": "We need an array of size n, not constant space.",
+        "2": "We do not store a full n×n count table."
+      },
+      "hint": "Consider the size of dp.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q28",
+      "phase": "Analyzing Complexity",
+      "questionText": "Which of the following conditions guarantees there are 0 valid paths?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "The start (0,0) or the end (n-1,n-1) is a trap",
+          "isCode": false
+        },
+        {
+          "label": "There is at least one trap somewhere in the grid",
+          "isCode": false
+        },
+        {
+          "label": "There is a trap on the top row",
+          "isCode": false
+        },
+        {
+          "label": "There are two traps anywhere",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "If the start or end is blocked, no path can exist. Traps elsewhere may still allow valid routes.",
+      "wrongExplanations": {
+        "1": "A single trap does not necessarily block all paths.",
+        "2": "A trap on the top row might be avoidable via lower rows."
+      },
+      "hint": "Think about unavoidable cells in any path.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\nMOD = 10**9 + 7",
+    "n = int(sys.stdin.readline().strip())",
+    "grid = [sys.stdin.readline().strip() for _ in range(n)]",
+    "dp = [0] * n",
+    "for i in range(n):\n    for j in range(n):",
+    "        if grid[i][j] == '*':\n            dp[j] = 0\n        else:",
+    "            if i == 0 and j == 0:\n                dp[j] = 1\n            else:",
+    "                up = dp[j] if i > 0 else 0\n                left = dp[j-1] if j > 0 else 0\n                dp[j] = (up + left) % MOD",
+    "print(dp[n-1])"
+  ],
+  "reasoningChain": [
+    {
+      "question": "From which cells can you arrive at (i,j) given only right and down moves?",
+      "insight": "Only from above (i-1,j) or from the left (i,j-1) if the cell is not a trap."
+    },
+    {
+      "question": "What happens if the start or end cell is a trap?",
+      "insight": "The answer is 0 because you cannot start or finish on a blocked cell."
+    },
+    {
+      "question": "How do you compute the number of paths to each cell from its neighbors?",
+      "insight": "Sum the counts from above and left for open cells; set to 0 for traps; handle boundaries as 0."
+    },
+    {
+      "question": "Can you reduce memory by avoiding storing all n×n counts?",
+      "insight": "Yes, a single row is sufficient because dp[j] holds the above value and dp[j-1] holds the left value."
+    },
+    {
+      "question": "How do you update the single-row array while scanning?",
+      "insight": "If trap: dp[j]=0; else if (0,0): dp[j]=1; otherwise dp[j]=(dp[j] (above) + dp[j-1] (left)) mod M."
+    },
+    {
+      "question": "Where should the modulus be applied?",
+      "insight": "Apply modulo when updating each cell to keep numbers bounded and meet the output requirement."
+    },
+    {
+      "question": "What are the final output and complexities?",
+      "insight": "Print dp[n-1]. Time is O(n^2), space is O(n) extra."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1345,
+    "output_tokens": 16769,
+    "input_cost": 0.001681,
+    "output_cost": 0.16769,
+    "total_cost": 0.169371
+  }
+}

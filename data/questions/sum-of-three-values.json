@@ -1,0 +1,909 @@
+{
+  "id": "sum-of-three-values",
+  "title": "Sum of Three Values",
+  "difficulty": "intermediate",
+  "tags": [
+    "sorting",
+    "two-pointer",
+    "binary-search"
+  ],
+  "estimatedMinutes": 45,
+  "language": "python",
+  "description": "You are given an array of n integers, and your task is to find three values (at distinct positions) whose sum is x.\n\nInput\n- The first line has two integers n and x: the array size and the target sum.\n- The second line has n integers a_1, a_2, ..., a_n: the array values.\n\nOutput\nPrint three integers: the positions of the values (1-based). If there are several solutions, you may print any of them. If there are no solutions, print IMPOSSIBLE.",
+  "examples": [
+    {
+      "input": "4 8\n2 7 5 1",
+      "output": "1 3 4",
+      "explanation": "a[1] + a[3] + a[4] = 2 + 5 + 1 = 8. Other valid orders of these positions are acceptable."
+    }
+  ],
+  "constraints": [
+    "1 ≤ n ≤ 5000",
+    "1 ≤ x, a_i ≤ 10^9"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "Given n=4, x=8 and array [2, 7, 5, 1], which triple of positions is a valid output?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "1 3 4",
+          "isCode": false
+        },
+        {
+          "label": "1 2 4",
+          "isCode": false
+        },
+        {
+          "label": "2 3 4",
+          "isCode": false
+        },
+        {
+          "label": "1 2 3",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Positions 1,3,4 give 2+5+1=8. Others sum to 10, 13, and 14 respectively.",
+      "wrongExplanations": {
+        "1": "2+7+1=10, not 8.",
+        "2": "7+5+1=13, not 8."
+      },
+      "hint": "Compute sums for each option.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "Do the three positions have to be distinct?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, all three positions must be different.",
+          "isCode": false
+        },
+        {
+          "label": "Yes, unless the same value appears multiple times.",
+          "isCode": false
+        },
+        {
+          "label": "No, reusing the same index is allowed.",
+          "isCode": false
+        },
+        {
+          "label": "The problem statement does not specify.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The problem asks for three values at distinct positions. Reusing an index is not allowed.",
+      "wrongExplanations": {
+        "2": "It explicitly requires distinct positions."
+      },
+      "hint": "Re-read the requirement: \"three values (at distinct positions)\".",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "If there are multiple valid triples, what should you output?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Any one triple of positions that satisfies the sum.",
+          "isCode": false
+        },
+        {
+          "label": "All possible triples in any order.",
+          "isCode": false
+        },
+        {
+          "label": "The triple with the smallest values.",
+          "isCode": false
+        },
+        {
+          "label": "The lexicographically smallest triple of positions.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Any one valid triple is acceptable. No need to enumerate or optimize ordering.",
+      "wrongExplanations": {
+        "1": "The task doesn't require listing all triples."
+      },
+      "hint": "The output section mentions what to print when several solutions exist.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "Is checking all triples feasible for n up to 5000 within 1 second?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "About n^3 ≈ 1.25e11 checks: not feasible.",
+          "isCode": false
+        },
+        {
+          "label": "About n^2 ≈ 2.5e7 checks: borderline but fine.",
+          "isCode": false
+        },
+        {
+          "label": "About n log n ≈ 6e4 checks: easily feasible.",
+          "isCode": false
+        },
+        {
+          "label": "About n ≈ 5e3 checks: easily feasible.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Triple loops are ~n^3. For n=5000 it's ~1.25e11 iterations, far too slow.",
+      "wrongExplanations": {
+        "1": "That's for pairs, not triples.",
+        "2": "This is not the cost of triple enumeration."
+      },
+      "hint": "How many ways to choose i, j, k? Think nested loops: n * n * n.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Exploring Approaches",
+      "questionText": "If you fix one position i, what subproblem remains?",
+      "diagram": "Let x be target and a[i] chosen.\nNeed: a[j] + a[k] = x - a[i], with j,k != i and j != k.",
+      "options": [
+        {
+          "label": "Find two remaining positions summing to x - a[i].",
+          "isCode": false
+        },
+        {
+          "label": "Find any position j with a[j] = x.",
+          "isCode": false
+        },
+        {
+          "label": "Find the largest element < x - a[i].",
+          "isCode": false
+        },
+        {
+          "label": "Find two values summing to x regardless of using i again.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The task reduces to a two-value sum among positions excluding i.",
+      "wrongExplanations": {
+        "3": "Positions must be distinct; cannot reuse i."
+      },
+      "hint": "Move a[i] to the other side: a[j]+a[k] = x - a[i].",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "How can sorting the values help find two numbers that sum to a target more efficiently than checking all pairs?",
+      "diagram": "Sorted values v0 <= v1 <= ... <= v_{n-1}\nCheck positions l (left) and r (right).",
+      "options": [
+        {
+          "label": "After sorting, keep one index at the left and one at the right and adjust them based on the current sum.",
+          "isCode": false
+        },
+        {
+          "label": "Sorting doesn't help; you still must try all remaining pairs explicitly.",
+          "isCode": false
+        },
+        {
+          "label": "After sorting, randomly sample pairs until one works.",
+          "isCode": false
+        },
+        {
+          "label": "After sorting, for each element, repeatedly narrow down the search range for its complement by comparing midpoints.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Ordering lets you steer the search from both ends using comparisons, avoiding all pairs.",
+      "wrongExplanations": {
+        "1": "Sorting enables directional moves to skip many pairs."
+      },
+      "hint": "Use order to decide whether to increase or decrease the sum without checking all pairs.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "If you sort the values, how do you still output the original positions?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Store pairs (value, original_index) and sort by value.",
+          "isCode": false
+        },
+        {
+          "label": "Sort values only, then use values.index to recover positions.",
+          "isCode": false
+        },
+        {
+          "label": "Sort values and keep a map from value to one position.",
+          "isCode": false
+        },
+        {
+          "label": "Sort values and reconstruct positions by comparing to the original array each time.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Pairing each value with its original index preserves positions even after sorting.",
+      "wrongExplanations": {
+        "1": "Values can repeat; index() may return the wrong occurrence.",
+        "2": "Duplicates break one-to-one mapping."
+      },
+      "hint": "Attach the index to each value before sorting.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Building the Idea",
+      "questionText": "After sorting pairs ascending by value, and fixing index i, where should you start the other two search indices?",
+      "diagram": "Indices: 0 ... i ... n-1\nStart left and right to search among remaining positions.",
+      "options": [
+        {
+          "label": "l = i + 1, r = n - 1",
+          "isCode": false
+        },
+        {
+          "label": "l = 0, r = n - 1",
+          "isCode": false
+        },
+        {
+          "label": "l = i, r = n - 1",
+          "isCode": false
+        },
+        {
+          "label": "l = i + 1, r = i",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Positions must be distinct; search among elements strictly after i with l=i+1 and r at the end.",
+      "wrongExplanations": {
+        "1": "Including positions before i risks reusing or double-counting with earlier i.",
+        "2": "l=i would reuse position i."
+      },
+      "hint": "Ensure j and k are different from i and from each other.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "Let t = x - value_at_i and s = value_at_l + value_at_r. If s < t, what should you do?",
+      "diagram": "Sorted ascending: increasing l increases sum; decreasing r decreases sum.",
+      "options": [
+        {
+          "label": "Increase l by 1 to try a larger left value.",
+          "isCode": false
+        },
+        {
+          "label": "Decrease l by 1 to try a smaller left value.",
+          "isCode": false
+        },
+        {
+          "label": "Decrease r by 1 to try a smaller right value.",
+          "isCode": false
+        },
+        {
+          "label": "Reset l to 0 and r to n-1.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Array is sorted; increasing l increases s, moving s closer to t when s < t.",
+      "wrongExplanations": {
+        "2": "Decreasing r reduces s further, moving away from t when s < t."
+      },
+      "hint": "Which move increases the pair sum in a sorted array?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "If s > t, which move is appropriate?",
+      "diagram": "Sorted ascending: moving r left decreases the sum.",
+      "options": [
+        {
+          "label": "Decrease r by 1 to try a smaller right value.",
+          "isCode": false
+        },
+        {
+          "label": "Increase l by 1 to try a larger left value.",
+          "isCode": false
+        },
+        {
+          "label": "Keep l and r and change i.",
+          "isCode": false
+        },
+        {
+          "label": "Restart the search from the ends.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Decreasing r lowers s in a sorted array when s is too large.",
+      "wrongExplanations": {
+        "1": "Increasing l increases s further when s > t."
+      },
+      "hint": "You want to reduce the pair sum.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "When s == t, what exactly should be output?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "The original indices of i, l, r: pairs[i][1], pairs[l][1], pairs[r][1].",
+          "isCode": false
+        },
+        {
+          "label": "The sorted positions i, l, r (0-based).",
+          "isCode": false
+        },
+        {
+          "label": "The values themselves: pairs[i][0], pairs[l][0], pairs[r][0].",
+          "isCode": false
+        },
+        {
+          "label": "The original indices in sorted order by value.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The problem asks for positions (1-based). We stored them as the second element of each pair.",
+      "wrongExplanations": {
+        "1": "Output must be original positions, not indices in the sorted array."
+      },
+      "hint": "Recall how we preserved positions after sorting.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "Do we risk repeating position i inside the inner search if we set l = i+1 and r = n-1?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "No, l always starts after i and r is beyond i, so they never equal i.",
+          "isCode": false
+        },
+        {
+          "label": "Yes, if duplicate values exist.",
+          "isCode": false
+        },
+        {
+          "label": "Yes, when i is near the end.",
+          "isCode": false
+        },
+        {
+          "label": "Only if x is very large.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Indices l and r are chosen from positions strictly after i, so i is never reused.",
+      "wrongExplanations": {
+        "1": "Duplicates don't affect indices; we track positions, not values."
+      },
+      "hint": "Think index ranges, not values.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "Example trace: array [1,2,3,4,5], x=12. After sorting (same array), pick i at value 2 (i=1). Then t=10, l=2 (value 3), r=4 (value 5). s=3+5=8 < 10. What next?",
+      "diagram": "i=1 (2), l=2 (3), r=4 (5)\ns=8, t=10",
+      "options": [
+        {
+          "label": "Increase l to 3 (value 4).",
+          "isCode": false
+        },
+        {
+          "label": "Decrease r to 3 (value 4).",
+          "isCode": false
+        },
+        {
+          "label": "Stop and change i.",
+          "isCode": false
+        },
+        {
+          "label": "Restart l=0, r=4.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "s < t, so increase l. Then s=4+5=9; next increase l again to reach s=5+5 invalid so r must move earlier.",
+      "wrongExplanations": {
+        "1": "That would reduce s further for s<t initially.",
+        "3": "No need to restart; continue directed search."
+      },
+      "hint": "Follow the rule for s < t from earlier.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Writing the Code",
+      "questionText": "Start by importing what you need.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys",
+          "isCode": true
+        },
+        {
+          "label": "from sys import stdin as sys",
+          "isCode": true
+        },
+        {
+          "label": "import os",
+          "isCode": true
+        },
+        {
+          "label": "from typing import *",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We will read all input from sys.stdin. Other imports are unnecessary or incorrect aliasing.",
+      "wrongExplanations": {
+        "1": "Aliasing stdin as sys is misleading and breaks later sys.exit calls."
+      },
+      "hint": "We need stdin and exit.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys",
+      "codeLabel": "Import"
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Read all tokens from standard input for flexible parsing.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "data = sys.stdin.read().split(); it = iter(data)",
+          "isCode": true
+        },
+        {
+          "label": "data = input().split(); it = iter(data)",
+          "isCode": true
+        },
+        {
+          "label": "it = iter(sys.stdin); data = list(it)",
+          "isCode": true
+        },
+        {
+          "label": "data = sys.stdin.readline().split(); it = iter(data)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Reading the entire stream handles both lines at once. Single-line reads may miss remaining tokens.",
+      "wrongExplanations": {
+        "1": "Reads only one line; we need both lines.",
+        "3": "Reads only the first line; insufficient for the whole input."
+      },
+      "hint": "The input can be split across lines; read everything.",
+      "isCodeBuilding": true,
+      "codeSnippet": "data = sys.stdin.read().split(); it = iter(data)",
+      "codeLabel": "Read tokens"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Parse n, x and then read the array of n integers.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "n = int(next(it)); x = int(next(it)); arr = [int(next(it)) for _ in range(n)]",
+          "isCode": true
+        },
+        {
+          "label": "n = int(data[0]); x = int(data[0]); arr = list(map(int, data[1:n+1]))",
+          "isCode": true
+        },
+        {
+          "label": "n = int(next(it)); x = int(next(it)); arr = [int(next(it)) for _ in range(x)]",
+          "isCode": true
+        },
+        {
+          "label": "n = int(next(it)); arr = [int(next(it)) for _ in range(n)]; x = int(next(it))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Read n and x first, then exactly n array values. Using x as the count or reading x after the array is wrong.",
+      "wrongExplanations": {
+        "2": "The array length is n, not x.",
+        "3": "x comes before the array in input."
+      },
+      "hint": "Follow the input format order precisely.",
+      "isCodeBuilding": true,
+      "codeSnippet": "n = int(next(it)); x = int(next(it)); arr = [int(next(it)) for _ in range(n)]",
+      "codeLabel": "Parse input"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Preserve original indices and sort by value.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "pairs = [(v, i+1) for i, v in enumerate(arr)]; pairs.sort(key=lambda t: t[0])",
+          "isCode": true
+        },
+        {
+          "label": "pairs = [(i+1, v) for i, v in enumerate(arr)]; pairs.sort()",
+          "isCode": true
+        },
+        {
+          "label": "pairs = sorted((v, i) for i, v in enumerate(arr))",
+          "isCode": true
+        },
+        {
+          "label": "pairs = list(enumerate(arr)); pairs.sort(key=lambda t: t[1])",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need (value, 1-based index) and sort by value. Other options misorder tuple fields or use 0-based indices.",
+      "wrongExplanations": {
+        "2": "This uses 0-based indices; output must be 1-based.",
+        "3": "This stores (index, value) requiring different indexing later."
+      },
+      "hint": "Store (value, index starting at 1) and sort by the value component.",
+      "isCodeBuilding": true,
+      "codeSnippet": "pairs = [(v, i+1) for i, v in enumerate(arr)]; pairs.sort(key=lambda t: t[0])",
+      "codeLabel": "Sort with indices"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Write the main search: iterate i and scan the remaining range from both ends to find a matching pair.",
+      "diagram": "for i in range(n):\n  target = x - pairs[i][0]\n  l = i+1, r = n-1\n  while l < r:\n    s = pairs[l][0] + pairs[r][0]\n    ...",
+      "options": [
+        {
+          "label": "for i in range(n):\n    target = x - pairs[i][0]; l = i + 1; r = n - 1\n    while l < r:\n        s = pairs[l][0] + pairs[r][0]\n        if s == target:\n            print(pairs[i][1], pairs[l][1], pairs[r][1]); sys.exit(0)\n        elif s < target:\n            l += 1\n        else:\n            r -= 1",
+          "isCode": true
+        },
+        {
+          "label": "for i in range(n):\n    target = x - pairs[l][0]; l = 0; r = n - 1\n    while l <= r:\n        s = pairs[l][0] + pairs[r][0]\n        if s == x:\n            print(i, l, r); sys.exit(0)\n        elif s < target:\n            r -= 1\n        else:\n            l += 1",
+          "isCode": true
+        },
+        {
+          "label": "for i in range(n):\n    t = x - pairs[i][0]; l = 0; r = n - 1\n    while l < r:\n        s = pairs[l][0] + pairs[r][0]\n        if s == t:\n            print(pairs[i][0], pairs[l][0], pairs[r][0]); sys.exit(0)\n        elif s < t:\n            l -= 1\n        else:\n            r += 1",
+          "isCode": true
+        },
+        {
+          "label": "for i in range(n):\n    target = x - pairs[i][1]; l = i + 1; r = n - 1\n    while l < r:\n        s = pairs[l][1] + pairs[r][1]\n        if s == target:\n            print(i+1, l+1, r+1); sys.exit(0)\n        elif s < target:\n            l += 1\n        else:\n            r -= 1",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Initialize l=i+1, r=n-1, compare s to target, and output original indices on match. Others misuse indices/values or bounds.",
+      "wrongExplanations": {
+        "1": "Uses target from pairs[l], wrong bounds (l<=r), compares s to x, and prints sorted-array indices.",
+        "2": "Moves l/r in wrong directions and prints values instead of positions.",
+        "3": "Combines wrong fields: using indices as values and computes target from pairs[i][1]."
+      },
+      "hint": "Careful: target uses value at i; comparisons use values; output uses original indices.",
+      "isCodeBuilding": true,
+      "codeSnippet": "for i in range(n):\n    target = x - pairs[i][0]; l = i + 1; r = n - 1\n    while l < r:\n        s = pairs[l][0] + pairs[r][0]\n        if s == target:\n            print(pairs[i][1], pairs[l][1], pairs[r][1]); sys.exit(0)\n        elif s < target:\n            l += 1\n        else:\n            r -= 1",
+      "codeLabel": "Main search"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "What should the program do if no triple is found after the loops?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "print(\"IMPOSSIBLE\")",
+          "isCode": true
+        },
+        {
+          "label": "print(-1)",
+          "isCode": true
+        },
+        {
+          "label": "raise ValueError(\"IMPOSSIBLE\")",
+          "isCode": true
+        },
+        {
+          "label": "print()",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The required output on failure is exactly the string IMPOSSIBLE.",
+      "wrongExplanations": {
+        "1": "The problem specifies a string, not -1.",
+        "3": "Printing nothing does not match the required output."
+      },
+      "hint": "Follow the output specification verbatim.",
+      "isCodeBuilding": true,
+      "codeSnippet": "print(\"IMPOSSIBLE\")",
+      "codeLabel": "No solution"
+    },
+    {
+      "id": "q20",
+      "phase": "Verifying the Solution",
+      "questionText": "Trace on: n=6, x=10, arr=[3,1,4,2,6,5]. Which triple of positions could be printed?",
+      "diagram": "Original indices: (1:3),(2:1),(3:4),(4:2),(5:6),(6:5)\nOne valid set of values: 3+2+5=10 => positions 1,4,6.",
+      "options": [
+        {
+          "label": "1 4 6",
+          "isCode": false
+        },
+        {
+          "label": "2 3 5",
+          "isCode": false
+        },
+        {
+          "label": "1 2 3",
+          "isCode": false
+        },
+        {
+          "label": "2 4 5",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Values at positions 1,4,6 are 3,2,5 summing to 10. Others sum to 1+4+6=11, 3+1+4=8, 1+2+6=9.",
+      "wrongExplanations": {
+        "1": "2+4+6=12, not 10."
+      },
+      "hint": "Check sums using the original array values.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q21",
+      "phase": "Verifying the Solution",
+      "questionText": "With the algorithm, when i is at the smallest value 1 (position 2 in original), what target t do we search for among the rest?",
+      "diagram": "x=10, value at i=1 => t = x - 1",
+      "options": [
+        {
+          "label": "t = 9",
+          "isCode": false
+        },
+        {
+          "label": "t = 10",
+          "isCode": false
+        },
+        {
+          "label": "t = 1",
+          "isCode": false
+        },
+        {
+          "label": "t = 11",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "t = x - a[i] = 10 - 1 = 9.",
+      "wrongExplanations": {
+        "1": "t is not x; it's reduced by a[i]."
+      },
+      "hint": "Subtract the fixed value from x.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q22",
+      "phase": "Verifying the Solution",
+      "questionText": "Consider arr=[2,2,2,2], x=6. What should the program output?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Any three distinct positions like 1 2 3",
+          "isCode": false
+        },
+        {
+          "label": "IMPOSSIBLE",
+          "isCode": false
+        },
+        {
+          "label": "1 1 1",
+          "isCode": false
+        },
+        {
+          "label": "2 2 3",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "2+2+2=6 exists at many distinct index triples; any one triple is valid.",
+      "wrongExplanations": {
+        "1": "A valid triple exists.",
+        "2": "Positions must be distinct; can't repeat the same index."
+      },
+      "hint": "Check distinct positions even when values repeat.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q23",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the time complexity of the algorithm?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n^2) dominated by the i-loop with a linear inner scan, plus O(n log n) for sorting.",
+          "isCode": false
+        },
+        {
+          "label": "O(n^3) due to triple nested loops.",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n) overall.",
+          "isCode": false
+        },
+        {
+          "label": "O(n) overall.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Sorting is O(n log n), then each i triggers an O(n) scan, giving O(n^2) total.",
+      "wrongExplanations": {
+        "1": "The inner search avoids trying all pairs explicitly."
+      },
+      "hint": "Count the outer iterations and the total movement of the inner indices.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the extra space complexity beyond the input array?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n) to store (value, index) pairs.",
+          "isCode": false
+        },
+        {
+          "label": "O(1) since everything is in-place.",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2) for all pair sums.",
+          "isCode": false
+        },
+        {
+          "label": "O(log n) for recursion stack.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We create an array of n pairs to keep original indices.",
+      "wrongExplanations": {
+        "1": "We allocate a separate list of pairs."
+      },
+      "hint": "Do we store any additional arrays proportional to n?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Analyzing Complexity",
+      "questionText": "Which edge cases must be handled?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "No solution: print IMPOSSIBLE; n < 3 also implies IMPOSSIBLE.",
+          "isCode": false
+        },
+        {
+          "label": "If multiple solutions exist, print all of them.",
+          "isCode": false
+        },
+        {
+          "label": "Values > x should be discarded beforehand.",
+          "isCode": false
+        },
+        {
+          "label": "Arrays with duplicates cannot be handled.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Print IMPOSSIBLE when not found; with n<3 it's impossible. Duplicates are fine; we use positions.",
+      "wrongExplanations": {
+        "1": "Only one solution is required.",
+        "2": "Large values may still be part of a valid triple."
+      },
+      "hint": "Revisit the output requirement and think about minimal n.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys",
+    "data = sys.stdin.read().split(); it = iter(data)",
+    "n = int(next(it)); x = int(next(it)); arr = [int(next(it)) for _ in range(n)]",
+    "pairs = [(v, i+1) for i, v in enumerate(arr)]; pairs.sort(key=lambda t: t[0])",
+    "for i in range(n):\n    target = x - pairs[i][0]; l = i + 1; r = n - 1\n    while l < r:\n        s = pairs[l][0] + pairs[r][0]\n        if s == target:\n            print(pairs[i][1], pairs[l][1], pairs[r][1]); sys.exit(0)\n        elif s < target:\n            l += 1\n        else:\n            r -= 1",
+    "print(\"IMPOSSIBLE\")"
+  ],
+  "reasoningChain": [
+    {
+      "question": "What does the problem ask exactly about positions and multiple answers?",
+      "insight": "We must output three distinct positions whose values sum to x; any valid triple is acceptable."
+    },
+    {
+      "question": "Is a naive triple enumeration feasible for n up to 5000?",
+      "insight": "No; enumerating all triples is ~n^3, which is too slow."
+    },
+    {
+      "question": "How to simplify the problem by fixing one element?",
+      "insight": "Fix one index i and search for two remaining values summing to x - a[i]."
+    },
+    {
+      "question": "How does sorting help find a pair quickly?",
+      "insight": "Sorting allows a directed scan from both ends to adjust the sum without trying all pairs."
+    },
+    {
+      "question": "How to maintain output positions after sorting?",
+      "insight": "Attach original indices to values as pairs and sort by value."
+    },
+    {
+      "question": "What is the correct movement logic during the scan?",
+      "insight": "Compare s with target: increase left if s < target, decrease right if s > target, output on equality."
+    },
+    {
+      "question": "How to implement the full search and handle the no-solution case?",
+      "insight": "Loop i over all positions, run the inner scan, exit on match, and print IMPOSSIBLE otherwise."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1365,
+    "output_tokens": 13328,
+    "input_cost": 0.001706,
+    "output_cost": 0.13328,
+    "total_cost": 0.134986
+  }
+}

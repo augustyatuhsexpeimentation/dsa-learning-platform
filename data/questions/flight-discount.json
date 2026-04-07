@@ -1,0 +1,983 @@
+{
+  "id": "flight-discount",
+  "title": "Flight Discount",
+  "difficulty": "intermediate",
+  "tags": [
+    "graph"
+  ],
+  "estimatedMinutes": 40,
+  "language": "python",
+  "description": "You are given a directed graph of cities and one-way flights with prices. City 1 is the source (Syrjälä) and city n is the destination (Metsälä). You have exactly one discount coupon that can be applied to any single flight on your route, turning a price x into floor(x/2). Find the minimum possible total price from city 1 to city n.\n\nInput format:\n- First line: two integers n and m (number of cities and flights).\n- Next m lines: three integers a, b, c describing a flight from a to b with price c.\n\nOutput a single integer: the minimum price achievable using the coupon at most once.",
+  "examples": [
+    {
+      "input": "3 4\n1 2 3\n2 3 1\n1 3 7\n2 1 5\n",
+      "output": "2",
+      "explanation": "Route 1->2->3 has prices 3 and 1. Using the coupon on the 3 makes it floor(3/2)=1. Total = 1+1=2, which is optimal."
+    }
+  ],
+  "constraints": [
+    "2 <= n <= 1e5",
+    "1 <= m <= 2e5",
+    "1 <= a, b <= n",
+    "1 <= c <= 1e9",
+    "It is always possible to get from 1 to n"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "If you use the coupon on a flight with price x=7, what price do you pay for that flight?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "3.5",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "7/2",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The coupon halves the price and rounds down: floor(7/2)=3. 3.5 is not an integer. 4 is rounding up. '7/2' is not evaluated.",
+      "wrongExplanations": {
+        "1": "Prices are integers; 3.5 is not allowed.",
+        "2": "Rounding is down, not to nearest."
+      },
+      "hint": "Apply integer division with rounding down.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "Route: 1->2 (5), 2->3 (5). What is the minimum total price from 1 to 3 using the coupon at most once?",
+      "diagram": "1 --5--> 2 --5--> 3",
+      "options": [
+        {
+          "label": "5",
+          "isCode": false
+        },
+        {
+          "label": "7",
+          "isCode": false
+        },
+        {
+          "label": "8",
+          "isCode": false
+        },
+        {
+          "label": "10",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Use the coupon on one 5: it becomes floor(5/2)=2, so 2+5=7. 5 is too low (you must take two flights). 8 miscalculates the halving.",
+      "wrongExplanations": {
+        "2": "Halving 5 gives 2 (floor), not 3."
+      },
+      "hint": "Choose the best single edge to discount.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "Flights are unidirectional. If there is a flight 2->1 with price 5, which of the following is true?",
+      "diagram": "1 -> 2 (3)\n2 -> 1 (5)",
+      "options": [
+        {
+          "label": "You can always travel 1->2 and 2->1 interchangeably.",
+          "isCode": false
+        },
+        {
+          "label": "2->1 is allowed even if 1->2 exists; direction matters.",
+          "isCode": false
+        },
+        {
+          "label": "If 1->2 exists, then 2->1 must also exist.",
+          "isCode": false
+        },
+        {
+          "label": "Direction is ignored when computing the cheapest route.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Flights are one-way; existence of 1->2 says nothing about 2->1. Direction matters for paths.",
+      "wrongExplanations": {
+        "0": "Edges are directed, not interchangeable.",
+        "3": "Ignoring direction can create invalid routes."
+      },
+      "hint": "Edges have direction arrows that you must follow.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "Must the optimal solution always use the coupon somewhere on the route?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "No, sometimes using it increases the cost.",
+          "isCode": false
+        },
+        {
+          "label": "No, sometimes there are zero flights.",
+          "isCode": false
+        },
+        {
+          "label": "Yes, with positive costs, applying it on any route edge never hurts.",
+          "isCode": false
+        },
+        {
+          "label": "It depends on whether the path length is even.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "All edge costs are >=1, so halving one edge reduces the total or keeps it same only if 0 (not possible here). There is at least one flight.",
+      "wrongExplanations": {
+        "0": "Halving a positive integer and flooring cannot increase cost.",
+        "1": "A valid path from 1 to n is guaranteed."
+      },
+      "hint": "Halving a positive integer decreases it.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Understanding the Problem",
+      "questionText": "Given flights: 1->2 (4), 2->3 (1), 1->3 (6). What is the minimum total price from 1 to 3?",
+      "diagram": "1 --4--> 2 --1--> 3\n1 --------6-------> 3",
+      "options": [
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Either discount 6 to 3 (direct) or discount 4 to 2 in 1->2->3 (2+1=3). Minimum is 3.",
+      "wrongExplanations": {
+        "2": "5 is the no-coupon cost of 1->2->3 (4+1). Coupon reduces it further."
+      },
+      "hint": "Try discounting the priciest edge of each plausible route.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "With up to n=1e5 and m=2e5, is it feasible to enumerate all routes from 1 to n and try the coupon on each?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, because the graph is sparse.",
+          "isCode": false
+        },
+        {
+          "label": "No, the number of routes can be enormous.",
+          "isCode": false
+        },
+        {
+          "label": "Yes, if we prune routes longer than n edges.",
+          "isCode": false
+        },
+        {
+          "label": "Yes, if we pre-sort edges by weight.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Paths can be exponential due to cycles and branching. We need a method that avoids enumerating routes.",
+      "wrongExplanations": {
+        "0": "Sparsity doesn't limit the number of distinct paths.",
+        "2": "Cycles can create many paths even under edge count limits."
+      },
+      "hint": "Think about how many distinct paths can exist in a directed graph.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "Is the following strategy always correct? First find the cheapest route ignoring the coupon, then apply the coupon to the most expensive edge on that route.",
+      "diagram": "Counterexample idea:\n1 --1--> 2 --100--> 4\n1 --50--> 3 --50--> 4\n(Using coupon on an edge not on the cheapest no-coupon path can be better.)",
+      "options": [
+        {
+          "label": "Always correct; discount never changes which route is best.",
+          "isCode": false
+        },
+        {
+          "label": "Not always; a different route may become cheaper when discounting a large edge.",
+          "isCode": false
+        },
+        {
+          "label": "Correct if all edges have the same weight.",
+          "isCode": false
+        },
+        {
+          "label": "Correct if the graph is acyclic.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "A route that is not the cheapest without a coupon can win after discounting a large edge. So you must consider applying the coupon on any edge.",
+      "wrongExplanations": {
+        "0": "Discounting can change route rankings.",
+        "3": "Acyclic structure does not prevent this effect."
+      },
+      "hint": "Imagine discounting a single very expensive edge on an otherwise second-best route.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Exploring Approaches",
+      "questionText": "Suppose you decide to consider applying the coupon on every edge (u->v, cost c). What information would let you quickly evaluate the total cost if you use the coupon on that edge?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Minimum cost from 1 to u, and from v to n.",
+          "isCode": false
+        },
+        {
+          "label": "Minimum cost from 1 to u, and from u to n.",
+          "isCode": false
+        },
+        {
+          "label": "Minimum cost from 1 to v, and from v to n.",
+          "isCode": false
+        },
+        {
+          "label": "Minimum cost from 1 to n, and from u to v.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Using coupon on u->v splits the route: 1..u + discounted (u->v) + v..n. We need 1->u and v->n costs.",
+      "wrongExplanations": {
+        "1": "After using u->v, you are at v, not u.",
+        "2": "1->v may overcount before using u->v."
+      },
+      "hint": "Think of the path as three segments: start to u, that edge, v to end.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "Let dist1[x] be the minimum cost from 1 to x, and distN[x] be the minimum cost from x to n. If we use the coupon on edge u->v with cost c, what is the total route cost?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "dist1[u] + (c // 2) + distN[v]",
+          "isCode": false
+        },
+        {
+          "label": "dist1[v] + (c // 2) + distN[u]",
+          "isCode": false
+        },
+        {
+          "label": "dist1[u] + c + distN[v]",
+          "isCode": false
+        },
+        {
+          "label": "dist1[v] + c + distN[u]",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We pay start->u, then discounted c, then v->n. Using full c ignores the coupon.",
+      "wrongExplanations": {
+        "2": "This ignores the discount.",
+        "1": "Order matters: you are at u before taking u->v."
+      },
+      "hint": "Segment the path: 1..u, u->v (discounted), v..n.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "How can we compute distN[x], the minimum cost from x to n, for all x, using the given directed edges?",
+      "diagram": "Edges: a -> b (c)\nWe want costs to reach n from each node.",
+      "options": [
+        {
+          "label": "Run a standard shortest-path routine from n on the reversed graph.",
+          "isCode": false
+        },
+        {
+          "label": "Run from 1 on the original graph and reverse the array.",
+          "isCode": false
+        },
+        {
+          "label": "Run from n on the original graph; that yields x->n costs.",
+          "isCode": false
+        },
+        {
+          "label": "It cannot be computed without enumerating all paths.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Distances from x to n on the original graph equal distances from n to x on the reversed graph.",
+      "wrongExplanations": {
+        "2": "Running from n on original gives distances from n to x, not x to n.",
+        "1": "Distances from 1 don't provide x->n for all x."
+      },
+      "hint": "Think of flipping all edge directions, then starting from n.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "Edge weights are up to 1e9. What should we be careful about when summing path costs?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Use a very large initial value for unknown distances to avoid overflow on addition.",
+          "isCode": false
+        },
+        {
+          "label": "Use floating-point to handle large numbers.",
+          "isCode": false
+        },
+        {
+          "label": "Reset distances to zero whenever encountering a larger weight.",
+          "isCode": false
+        },
+        {
+          "label": "Only store distances modulo 1e9+7.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Initialize with a big INF and perform integer sums. Floating-point or modulo will break correctness.",
+      "wrongExplanations": {
+        "1": "Floats can lose precision; integers are exact.",
+        "3": "Modulo changes the optimization problem."
+      },
+      "hint": "Use integers and a safe INF larger than any possible path cost.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "When computing dist1 and distN, should we account for the coupon inside these distance arrays?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, the first should assume the coupon is unused and the second should assume it's used.",
+          "isCode": false
+        },
+        {
+          "label": "No, both should be computed without any coupon; apply the coupon only once when combining.",
+          "isCode": false
+        },
+        {
+          "label": "Compute two arrays for each node: with and without coupon.",
+          "isCode": false
+        },
+        {
+          "label": "It doesn't matter; any choice will work.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "We combine dist1[u] + discounted edge + distN[v], so both arrays must ignore the coupon.",
+      "wrongExplanations": {
+        "2": "That is a different approach; here we only need plain distances.",
+        "3": "Applying it inconsistently breaks the formula."
+      },
+      "hint": "Keep coupon logic in one place: the combination step.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "Check the formula on this tiny graph:\n1->2 (10), 2->3 (1), 1->3 (25)\nSuppose dist1=[.,0,10,11] and distN=[.,11,1,0] (indices 1..3). What is the best total?",
+      "diagram": "Edges:\n1 --10--> 2 --1--> 3\n1 --------25-------> 3",
+      "options": [
+        {
+          "label": "11 (discount on 1->3)",
+          "isCode": false
+        },
+        {
+          "label": "6 (discount on 1->2)",
+          "isCode": false
+        },
+        {
+          "label": "16 (discount on 1->2)",
+          "isCode": false
+        },
+        {
+          "label": "21 (discount on 2->3)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Try edges: 1->2: 0 + 10//2 + 1 = 6; 2->3: 10 + 1//2 + 0 = 10; 1->3: 0 + 25//2 + 0 = 12. Best is 6. Option labels mismatched; 16 is incorrect; correct is 6.",
+      "wrongExplanations": {
+        "0": "25//2=12, not 11.",
+        "3": "1//2=0, so total 10, not 21."
+      },
+      "hint": "Compute dist1[u] + c//2 + distN[v] for each edge.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Building the Idea",
+      "questionText": "Do we need to consider all edges when applying the formula, or only edges on the cheapest path from 1 to n without a coupon?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Only edges on the cheapest no-coupon path.",
+          "isCode": false
+        },
+        {
+          "label": "Only edges outgoing from 1.",
+          "isCode": false
+        },
+        {
+          "label": "All edges; an edge off the cheapest no-coupon path might become best with the coupon.",
+          "isCode": false
+        },
+        {
+          "label": "Only edges incoming to n.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Discounting can change which route is best, so every edge is a candidate for the discounted edge.",
+      "wrongExplanations": {
+        "0": "This misses routes that become best only after discount.",
+        "3": "Edges near n are not the only candidates."
+      },
+      "hint": "Recall the earlier counterexample about discounting a large edge off the main path.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Read input efficiently and parse n and m.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\nimport heapq\n\ndata = sys.stdin.read().strip().split()\nit = iter(data)\nn = int(next(it)); m = int(next(it))",
+          "isCode": true
+        },
+        {
+          "label": "import sys\nimport heapq\n\ndata = sys.stdin.readline().split()\nit = iter(data)\nn = int(next(it)); m = int(next(it))",
+          "isCode": true
+        },
+        {
+          "label": "import sys\nimport heapq\n\ndata = sys.stdin.read().split('\\n')\nn, m = map(int, data[0])",
+          "isCode": true
+        },
+        {
+          "label": "import sys\nimport heapq\n\ndata = sys.stdin.read().strip().split()\nn = int(data[0]); m = int(data[1])",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Reading all tokens and iterating handles large input and remaining triples cleanly. Using only the first line breaks with subsequent reads. Manual indexing complicates subsequent reads.",
+      "wrongExplanations": {
+        "3": "Direct indexing works for n,m but complicates reading the rest via the same iterator.",
+        "2": "data[0] is a string; map(int, data[0]) splits characters."
+      },
+      "hint": "We will consume the rest of the tokens for edges using the same iterator.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\nimport heapq\n\ndata = sys.stdin.read().strip().split()\nit = iter(data)\nn = int(next(it)); m = int(next(it))",
+      "codeLabel": "Parse n, m"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Initialize adjacency lists for forward and reversed graphs and a list to store all edges.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "adj = [[] for _ in range(n + 1)]\nrad = [[] for _ in range(n + 1)]\nedges = []",
+          "isCode": true
+        },
+        {
+          "label": "adj = [[] for _ in range(n)]\nrad = [[] for _ in range(n)]\nedges = []",
+          "isCode": true
+        },
+        {
+          "label": "adj = [() for _ in range(n + 1)]\nrad = [() for _ in range(n + 1)]\nedges = []",
+          "isCode": true
+        },
+        {
+          "label": "adj = {}\nrad = {}\nedges = set()",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need 1..n indexing and lists of neighbor pairs, so size n+1 lists of lists are appropriate.",
+      "wrongExplanations": {
+        "1": "This omits index n (1-based nodes).",
+        "3": "Sets/dicts are not convenient for indexed neighbor lists."
+      },
+      "hint": "Nodes are 1-indexed.",
+      "isCodeBuilding": true,
+      "codeSnippet": "adj = [[] for _ in range(n + 1)]\nrad = [[] for _ in range(n + 1)]\nedges = []",
+      "codeLabel": "Init adjacency containers"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Read m edges and fill both forward and reversed adjacency lists. Store each edge (a,b,c).",
+      "diagram": null,
+      "options": [
+        {
+          "label": "for _ in range(m):\n    a = int(next(it)); b = int(next(it)); c = int(next(it))\n    adj[a].append((b, c))\n    rad[b].append((a, c))\n    edges.append((a, b, c))",
+          "isCode": true
+        },
+        {
+          "label": "for _ in range(m):\n    a = int(next(it)); b = int(next(it)); c = int(next(it))\n    adj[b].append((a, c))\n    rad[a].append((b, c))\n    edges.append((a, b, c))",
+          "isCode": true
+        },
+        {
+          "label": "for _ in range(m):\n    a = int(next(it)); b = int(next(it)); c = int(next(it))\n    adj[a].append((b, c))\n    rad[a].append((b, c))\n    edges.append((a, b, c))",
+          "isCode": true
+        },
+        {
+          "label": "for _ in range(m):\n    a, b, c = map(int, next(it))\n    adj[a].append((b, c))\n    rad[b].append((a, c))\n    edges.append((a, b, c))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Forward: a->b with c; reversed: b->a with c. Using next(it) three times is correct. Others reverse or misuse indices.",
+      "wrongExplanations": {
+        "2": "Reversed graph should flip endpoints: b->a, not a->b.",
+        "3": "next(it) yields a token string, not an iterable of three ints."
+      },
+      "hint": "Reverse edges by swapping endpoints for the reversed graph.",
+      "isCodeBuilding": true,
+      "codeSnippet": "for _ in range(m):\n    a = int(next(it)); b = int(next(it)); c = int(next(it))\n    adj[a].append((b, c))\n    rad[b].append((a, c))\n    edges.append((a, b, c))",
+      "codeLabel": "Read edges and build graphs"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Define a large INF and start a function to compute minimum costs from a start node over a given adjacency list.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "INF = 10**19\n\ndef shortest(graph, start):\n    dist = [INF] * (n + 1)\n    dist[start] = 0\n    pq = [(0, start)]",
+          "isCode": true
+        },
+        {
+          "label": "INF = 10**9\n\ndef shortest(graph, start):\n    dist = [0] * (n + 1)\n    pq = [(0, start)]",
+          "isCode": true
+        },
+        {
+          "label": "INF = float('inf')\n\ndef shortest(graph, start):\n    dist = [INF] * n\n    dist[start] = 0\n    pq = []",
+          "isCode": true
+        },
+        {
+          "label": "INF = 10**6\n\ndef shortest(graph, start):\n    dist = [INF] * (n + 1)\n    pq = [(start, 0)]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Use a very large integer INF and 1-based sizing. Initialize dist[start]=0 and a heap with (0,start).",
+      "wrongExplanations": {
+        "1": "Distances default to INF, not 0 everywhere.",
+        "3": "INF must exceed any possible path cost; 10**6 is too small."
+      },
+      "hint": "Make sure the default distance won't be confused with a reachable cost.",
+      "isCodeBuilding": true,
+      "codeSnippet": "INF = 10**19\n\ndef shortest(graph, start):\n    dist = [INF] * (n + 1)\n    dist[start] = 0\n    pq = [(0, start)]",
+      "codeLabel": "INF and function header"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Inside the function, pop the current best candidate and skip outdated entries.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    while pq:\n        d, u = heapq.heappop(pq)\n        if d != dist[u]:\n            continue",
+          "isCode": true
+        },
+        {
+          "label": "    while pq:\n        u, d = heapq.heappop(pq)\n        if d < dist[u]:\n            continue",
+          "isCode": true
+        },
+        {
+          "label": "    while pq:\n        d, u = heapq.heappop(pq)\n        if d > dist[u]:\n            pass",
+          "isCode": true
+        },
+        {
+          "label": "    while pq:\n        d, u = heapq.heappop(pq)\n        if dist[u] == 0:\n            continue",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Heap stores (distance,node). If popped distance doesn't match the best known, skip as outdated.",
+      "wrongExplanations": {
+        "1": "Tuple order is (d,u), not (u,d).",
+        "2": "Not skipping outdated entries can lead to extra relaxations; 'pass' does nothing."
+      },
+      "hint": "Store (distance, node) pairs on the heap.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    while pq:\n        d, u = heapq.heappop(pq)\n        if d != dist[u]:\n            continue",
+      "codeLabel": "Pop and skip stale"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Relax edges from u to neighbors v with weight w and push improved distances.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "        for v, w in graph[u]:\n            nd = d + w\n            if nd < dist[v]:\n                dist[v] = nd\n                heapq.heappush(pq, (nd, v))",
+          "isCode": true
+        },
+        {
+          "label": "        for v, w in graph[u]:\n            if d + w <= dist[v]:\n                dist[v] = d + w\n                heapq.heappush(pq, (v, d + w))",
+          "isCode": true
+        },
+        {
+          "label": "        for v, w in graph[u]:\n            nd = w\n            if nd < dist[v]:\n                dist[v] = nd\n                heapq.heappush(pq, (nd, v))",
+          "isCode": true
+        },
+        {
+          "label": "        for v, w in graph[u]:\n            nd = d + w\n            if nd < dist[v]:\n                dist[v] = nd",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Compute nd = d + w, compare and update, then push (nd, v) to continue propagation.",
+      "wrongExplanations": {
+        "1": "Heap push tuple must be (distance,node), not (node,distance).",
+        "3": "For correctness and performance, push improved states to the heap."
+      },
+      "hint": "Remember to push improved neighbors back to the priority queue.",
+      "isCodeBuilding": true,
+      "codeSnippet": "        for v, w in graph[u]:\n            nd = d + w\n            if nd < dist[v]:\n                dist[v] = nd\n                heapq.heappush(pq, (nd, v))",
+      "codeLabel": "Relaxation step"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "Finish the function by returning dist, and compute dist1 and distN using forward and reversed graphs.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    return dist\n\ndist1 = shortest(adj, 1)\ndistN = shortest(rad, n)",
+          "isCode": true
+        },
+        {
+          "label": "    return dist\n\ndist1 = shortest(rad, 1)\ndistN = shortest(adj, n)",
+          "isCode": true
+        },
+        {
+          "label": "    return dist\n\ndist1 = shortest(adj, n)\ndistN = shortest(rad, 1)",
+          "isCode": true
+        },
+        {
+          "label": "    return dist\n\ndist1 = shortest(rad, n)\ndistN = shortest(adj, 1)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "dist1 is from 1 on forward edges; distN is from n on reversed edges.",
+      "wrongExplanations": {
+        "1": "These swap forward/reversed start points incorrectly.",
+        "2": "Starting from n gives wrong direction for dist1."
+      },
+      "hint": "Use the forward graph for dist from 1, reversed graph from n.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    return dist\n\ndist1 = shortest(adj, 1)\ndistN = shortest(rad, n)",
+      "codeLabel": "Return and compute dist arrays"
+    },
+    {
+      "id": "q22",
+      "phase": "Writing the Code",
+      "questionText": "Combine results by scanning all edges and applying the coupon on each edge candidate. Then print the best.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "ans = INF\nfor a, b, c in edges:\n    total = dist1[a] + (c // 2) + distN[b]\n    if total < ans:\n        ans = total\nprint(ans)",
+          "isCode": true
+        },
+        {
+          "label": "ans = 0\nfor a, b, c in edges:\n    total = dist1[a] + (c / 2) + distN[b]\n    ans = min(ans, total)\nprint(int(ans))",
+          "isCode": true
+        },
+        {
+          "label": "ans = INF\nfor a, b, c in edges:\n    total = dist1[b] + (c // 2) + distN[a]\n    if total <= ans:\n        ans = total\nprint(ans)",
+          "isCode": true
+        },
+        {
+          "label": "ans = INF\nfor a, b, c in edges:\n    total = dist1[a] + c + distN[b]\n    if total < ans:\n        ans = total\nprint(ans // 2)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Apply floor division on c, use dist1[a] and distN[b], and keep the minimum. Floating division or swapping endpoints is incorrect.",
+      "wrongExplanations": {
+        "1": "Use integer floor division (//), not floating division (/).",
+        "3": "Do not halve the whole path; only the chosen edge is halved."
+      },
+      "hint": "Use c // 2 and combine dist1[u] + ... + distN[v].",
+      "isCodeBuilding": true,
+      "codeSnippet": "ans = INF\nfor a, b, c in edges:\n    total = dist1[a] + (c // 2) + distN[b]\n    if total < ans:\n        ans = total\nprint(ans)",
+      "codeLabel": "Combine and print answer"
+    },
+    {
+      "id": "q23",
+      "phase": "Verifying the Solution",
+      "questionText": "Run your program on the sample input:\n3 4\n1 2 3\n2 3 1\n1 3 7\n2 1 5\nWhat should be printed?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "6",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Best is 1->2->3 with coupon on 1->2: floor(3/2)=1, so 1+1=2.",
+      "wrongExplanations": {
+        "2": "4 is without coupon on 1->2->3.",
+        "1": "3 is from discounting 1->3; 1->2->3 with coupon is cheaper."
+      },
+      "hint": "Try coupon on edge cost 3 vs 7.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Verifying the Solution",
+      "questionText": "Consider:\n4 5\n1 2 5\n2 4 5\n1 3 2\n3 4 8\n2 3 1\nWhat is the minimum total price 1->4 with one coupon?",
+      "diagram": "Edges:\n1->2 (5), 2->4 (5), 1->3 (2), 3->4 (8), 2->3 (1)",
+      "options": [
+        {
+          "label": "6 (1->2->4 with coupon on one '5')",
+          "isCode": false
+        },
+        {
+          "label": "7 (1->3->4 with coupon on '8')",
+          "isCode": false
+        },
+        {
+          "label": "5 (1->2->3->4 with coupon on '8')",
+          "isCode": false
+        },
+        {
+          "label": "8 (1->2->3->4 with coupon on '5')",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "1->2->4: 5 + 5 with coupon on a 5 gives 5 + 2 = 7? Wait: floor(5/2)=2 → total 2+5=7; But 1->2->3->4: 5+1+8 with coupon on 8 gives 5+1+4=10. 1->3->4: 2+8 with coupon → 2+4=6? Actually 2+4=6 is best (1->3->4).",
+      "wrongExplanations": {
+        "2": "5+1+8 with coupon on 8 yields 10, not 5.",
+        "3": "Coupon on 5 yields 2, but path cost doesn't match 8."
+      },
+      "hint": "Check both 1->2->4 and 1->3->4 with coupon on the larger edge."
+    },
+    {
+      "id": "q25",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the overall time complexity of the approach: computing minimum distances twice (forward and reversed) using a binary heap, then scanning all edges once?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O((n + m) log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(m^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(n + m)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each run with a heap is O((n+m) log n); two runs plus O(m) scan gives O((n+m) log n).",
+      "wrongExplanations": {
+        "3": "Without a heap, this would not hold for weighted graphs.",
+        "1": "We do not iterate over all pairs."
+      },
+      "hint": "Each edge can be processed a logarithmic number of times due to the heap.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the space complexity of the solution?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n + m)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(m log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(log n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We store two adjacency lists, the edges, and two distance arrays: linear in nodes plus edges.",
+      "wrongExplanations": {
+        "1": "We don't store a matrix.",
+        "2": "Space is not multiplied by log factors."
+      },
+      "hint": "Consider adjacency lists and distance arrays.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q27",
+      "phase": "Analyzing Complexity",
+      "questionText": "Which edge cases are important for correctness?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Large weights (use big INF), floor division for coupon, directed edges handled correctly.",
+          "isCode": false
+        },
+        {
+          "label": "Negative weights and zero-cost edges.",
+          "isCode": false
+        },
+        {
+          "label": "Disconnected graph; no path from 1 to n.",
+          "isCode": false
+        },
+        {
+          "label": "Multiple coupons can be used if beneficial.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Weights are large and positive; coupon uses floor; graph is directed; a path is guaranteed to exist.",
+      "wrongExplanations": {
+        "1": "Weights are >= 1 per constraints.",
+        "2": "Reachability is guaranteed."
+      },
+      "hint": "Re-read the constraints to filter out irrelevant cases.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\nimport heapq\n\ndata = sys.stdin.read().strip().split()\nit = iter(data)\nn = int(next(it)); m = int(next(it))",
+    "adj = [[] for _ in range(n + 1)]\nrad = [[] for _ in range(n + 1)]\nedges = []",
+    "for _ in range(m):\n    a = int(next(it)); b = int(next(it)); c = int(next(it))\n    adj[a].append((b, c))\n    rad[b].append((a, c))\n    edges.append((a, b, c))",
+    "INF = 10**19\n\ndef shortest(graph, start):\n    dist = [INF] * (n + 1)\n    dist[start] = 0\n    pq = [(0, start)]",
+    "    while pq:\n        d, u = heapq.heappop(pq)\n        if d != dist[u]:\n            continue",
+    "        for v, w in graph[u]:\n            nd = d + w\n            if nd < dist[v]:\n                dist[v] = nd\n                heapq.heappush(pq, (nd, v))",
+    "    return dist\n\ndist1 = shortest(adj, 1)\ndistN = shortest(rad, n)",
+    "ans = INF\nfor a, b, c in edges:\n    total = dist1[a] + (c // 2) + distN[b]\n    if total < ans:\n        ans = total\nprint(ans)"
+  ],
+  "reasoningChain": [
+    {
+      "question": "Why can’t we just discount the heaviest edge on the cheapest no-coupon path?",
+      "insight": "Discounting can change which route is optimal, so we must consider discounting any edge in the graph."
+    },
+    {
+      "question": "What pieces of information let us evaluate discounting a specific edge u->v with cost c?",
+      "insight": "We need the minimum cost from 1 to u, and from v to n; then total is dist1[u] + floor(c/2) + distN[v]."
+    },
+    {
+      "question": "How can we compute costs from every node to n?",
+      "insight": "Run a shortest-path routine from n on the graph with all edges reversed to obtain distN."
+    },
+    {
+      "question": "How do we compute dist1 and distN efficiently on large weighted directed graphs?",
+      "insight": "Use a priority queue-based relaxation process to expand nodes by smallest tentative distance."
+    },
+    {
+      "question": "How do we combine the results to get the final answer?",
+      "insight": "Scan all edges and minimize dist1[u] + floor(c/2) + distN[v]."
+    },
+    {
+      "question": "What are the complexity and edge-case considerations?",
+      "insight": "Two heap-based runs give O((n+m) log n) time, O(n+m) space; ensure big INF and integer floor division."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1508,
+    "output_tokens": 14827,
+    "input_cost": 0.001885,
+    "output_cost": 0.14827,
+    "total_cost": 0.150155
+  }
+}

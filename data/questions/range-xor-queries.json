@@ -1,0 +1,910 @@
+{
+  "id": "range-xor-queries",
+  "title": "Range Xor Queries",
+  "difficulty": "hard",
+  "tags": [
+    "array"
+  ],
+  "estimatedMinutes": 45,
+  "language": "python",
+  "description": "Given an array of n integers, your task is to process q queries of the form: what is the xor sum of values in range [a,b]?\n\nInput:\n- First line: two integers n and q.\n- Second line: n integers x_1, x_2, ..., x_n.\n- Next q lines: each has two integers a and b.\n\nOutput:\n- Print the result of each query.\n\nNote: 1-based indices in queries.",
+  "examples": [
+    {
+      "input": "8 4\n3 2 4 5 1 1 5 3\n2 4\n5 6\n1 8\n3 3\n",
+      "output": "3\n0\n6\n4\n",
+      "explanation": "Range xors: [2,4] -> 2^4^5=3; [5,6] -> 1^1=0; [1,8] -> xor of all numbers=6; [3,3] -> 4."
+    }
+  ],
+  "constraints": [
+    "1 <= n,q <= 2 * 10^5",
+    "1 <= x_i <= 10^9",
+    "1 <= a <= b <= n",
+    "Time limit: 1s, Memory limit: 512MB"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "Given array [3,2,4,5,1,1,5,3], what is the xor of the range [2,4] (2^4^5)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "11",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "7",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "2^4=6 and 6^5=3. Be careful: xor is not addition.",
+      "wrongExplanations": {
+        "1": "11 is the sum, not xor.",
+        "2": "1 arises from 2^3 mistakenly using the wrong element."
+      },
+      "hint": "Compute step by step: (2^4)^5.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "What is the value of 5 ^ 5 ^ 5 ^ 5?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        },
+        {
+          "label": "10",
+          "isCode": false
+        },
+        {
+          "label": "20",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Pairs cancel: 5^5=0, then 0^5=5, and 5^5=0.",
+      "wrongExplanations": {
+        "1": "After three 5s it's 5, but the fourth cancels it to 0."
+      },
+      "hint": "x^x = 0; apply repeatedly.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "Array [1,1,1]. What is the xor of range [1,3]?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "Depends on order",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "1^1=0 and 0^1=1. Order doesn't affect xor.",
+      "wrongExplanations": {
+        "1": "0 would be if there were an even number of 1s.",
+        "3": "Xor is commutative, order doesn't change result."
+      },
+      "hint": "Even count cancels to 0; odd count leaves the value.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "Queries are 1-based. For array [a,b,c], which elements are included in range [1,2]?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "[a,b]",
+          "isCode": false
+        },
+        {
+          "label": "[b,c]",
+          "isCode": false
+        },
+        {
+          "label": "[a,b,c]",
+          "isCode": false
+        },
+        {
+          "label": "[a]",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "[1,2] includes the first and second elements.",
+      "wrongExplanations": {
+        "1": "That would be [2,3], not [1,2]."
+      },
+      "hint": "Start at index 1 and include up to index 2 inclusive.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Exploring Approaches",
+      "questionText": "If for each query [a,b] we xor every element from a to b directly, what is the worst-case total time for n and q up to 2e5?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n + q)",
+          "isCode": false
+        },
+        {
+          "label": "O(n q)",
+          "isCode": false
+        },
+        {
+          "label": "O(log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2 + q)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Each query may scan up to n elements: about n*q operations, which is too large.",
+      "wrongExplanations": {
+        "0": "We'd need extra work per query, not just a constant.",
+        "2": "There's no logarithmic shortcut if we scan ranges directly."
+      },
+      "hint": "Consider q queries each covering ~n elements.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "Let S[0]=0 and S[i] be the xor of the first i elements (1-based). For [3,2,4,5], what is S?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "[0,3,1,5,0]",
+          "isCode": false
+        },
+        {
+          "label": "[0,3,5,1,4]",
+          "isCode": false
+        },
+        {
+          "label": "[3,1,5,0]",
+          "isCode": false
+        },
+        {
+          "label": "[0,3,2,6,3]",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "S1=3, S2=3^2=1, S3=1^4=5, S4=5^5=0. Include S[0]=0.",
+      "wrongExplanations": {
+        "2": "Missing S[0]=0 and uses 0-based indexing implicitly."
+      },
+      "hint": "Compute cumulatively from S[0]=0.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "Using S as above, how can we get xor of range [2,4] quickly?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "S[4] ^ S[1]",
+          "isCode": false
+        },
+        {
+          "label": "S[4] ^ S[2]",
+          "isCode": false
+        },
+        {
+          "label": "S[4] - S[1]",
+          "isCode": false
+        },
+        {
+          "label": "S[2] ^ S[4] ^ S[1]",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Common elements up to index 1 cancel: (x1^...^x4)^(x1)=x2^x3^x4.",
+      "wrongExplanations": {
+        "1": "This cancels up to index 2, leaving x3^x4.",
+        "2": "Subtraction doesn't apply to xor."
+      },
+      "hint": "Think of cancelling the first (a-1) elements.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Building the Idea",
+      "questionText": "For any range [1,b], what expression using S returns its xor when S[0]=0?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "S[b] ^ S[0]",
+          "isCode": false
+        },
+        {
+          "label": "S[b] - S[0]",
+          "isCode": false
+        },
+        {
+          "label": "S[b-1]",
+          "isCode": false
+        },
+        {
+          "label": "S[1] ^ S[b]",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "S[0]=0, so S[b]^S[0]=S[b], the xor up to b.",
+      "wrongExplanations": {
+        "1": "Subtraction is not relevant for xor.",
+        "2": "S[b-1] misses x[b]."
+      },
+      "hint": "Xor with 0 leaves the value unchanged.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "Using S for array [3,2,4,5,1,1,5,3], what is xor of range [5,6]?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Elements 5 and 6 are 1 and 1: 1^1=0.",
+      "wrongExplanations": {
+        "1": "Odd/even counts matter; here both cancel."
+      },
+      "hint": "No need to expand S; see the pair (1,1).",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "If the array is 0-based in code, which definition correctly avoids off-by-one errors for S?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Let S[0]=0 and S[i+1]=S[i] ^ x[i]",
+          "isCode": false
+        },
+        {
+          "label": "Let S[0]=x[0] and S[i]=S[i-1] ^ x[i]",
+          "isCode": false
+        },
+        {
+          "label": "Let S[i]=x[i-1]",
+          "isCode": false
+        },
+        {
+          "label": "Let S[i]=S[i] ^ x[i]",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Shifting S by one with S[0]=0 aligns S[b] ^ S[a-1] with 1-based queries.",
+      "wrongExplanations": {
+        "1": "This makes S have length n and complicates a=1 cases.",
+        "3": "Self-referential update is undefined."
+      },
+      "hint": "Use a sentinel at index 0 for clean range handling.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "For a single-element query [a,a], what should the result be?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "x[a]",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "S[a]",
+          "isCode": false
+        },
+        {
+          "label": "S[a] ^ S[a]",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Xor of a single value is the value itself.",
+      "wrongExplanations": {
+        "1": "Only if x[a] were 0.",
+        "2": "S[a] includes earlier elements too."
+      },
+      "hint": "What is x[a] ^ with nothing else?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "Given S[r]=x1^...^xr and S[l-1]=x1^...^x(l-1), what does S[r] ^ S[l-1] simplify to?",
+      "diagram": "S[r] = x1 ^ x2 ^ ... ^ x(l-1) ^ xl ^ ... ^ xr\nS[l-1] = x1 ^ x2 ^ ... ^ x(l-1)",
+      "options": [
+        {
+          "label": "xl ^ x(l+1) ^ ... ^ xr",
+          "isCode": false
+        },
+        {
+          "label": "x1 ^ ... ^ x(r-1)",
+          "isCode": false
+        },
+        {
+          "label": "x1 ^ ... ^ x(l-1) ^ xr",
+          "isCode": false
+        },
+        {
+          "label": "xl ^ xr",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Common terms cancel, leaving the xor over [l,r].",
+      "wrongExplanations": {
+        "1": "This drops xl and keeps too many terms.",
+        "3": "Only endpoints is insufficient; middle terms don't vanish."
+      },
+      "hint": "Use x^x=0 on the shared prefix.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "With S built as above and 1-based queries [a,b], which expression returns the xor for [a,b]?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "S[b] ^ S[a-1]",
+          "isCode": false
+        },
+        {
+          "label": "S[b-1] ^ S[a]",
+          "isCode": false
+        },
+        {
+          "label": "S[b] - S[a-1]",
+          "isCode": false
+        },
+        {
+          "label": "S[b] ^ S[a]",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Cancels elements before a, leaving exactly a..b.",
+      "wrongExplanations": {
+        "1": "This cancels through a, missing x[a].",
+        "2": "Subtraction is not xor."
+      },
+      "hint": "Think: remove x1..x(a-1) from x1..xb.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Writing the Code",
+      "questionText": "Start with fast I/O. Which import do we need?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys",
+          "isCode": true
+        },
+        {
+          "label": "import io",
+          "isCode": true
+        },
+        {
+          "label": "from collections import deque",
+          "isCode": true
+        },
+        {
+          "label": "import math",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We'll use sys.stdin.buffer and sys.stdout.",
+      "wrongExplanations": {
+        "1": "io could work, but we won't use it explicitly.",
+        "2": "deque isn't needed here."
+      },
+      "hint": "We will read from stdin and write to stdout.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys",
+      "codeLabel": "Import"
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Read all integers and extract n and q using an iterator.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "data = list(map(int, sys.stdin.buffer.read().split()))\nit = iter(data)\nn = next(it); q = next(it)",
+          "isCode": true
+        },
+        {
+          "label": "n, q = map(int, input().split())\ndata = list(map(int, input().split()))\nit = iter([])",
+          "isCode": true
+        },
+        {
+          "label": "data = sys.stdin.read().split()\nn = int(data[0]); q = int(data[1])\nit = data",
+          "isCode": true
+        },
+        {
+          "label": "tokens = sys.stdin.buffer.readline().split()\nn = int(tokens[0]); q = int(tokens[1])\nit = iter([])",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Reading all tokens and iterating avoids repeated input calls and is robust.",
+      "wrongExplanations": {
+        "1": "Only reads one line of array; queries are not read, and iterator is empty.",
+        "2": "Leaves strings in it; later next(it) returns strings, not ints."
+      },
+      "hint": "We need a stream of all ints: n, q, array, then 2*q query ints.",
+      "isCodeBuilding": true,
+      "codeSnippet": "data = list(map(int, sys.stdin.buffer.read().split()))\nit = iter(data)\nn = next(it); q = next(it)",
+      "codeLabel": "Read n, q"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Read the array into 1-based storage with a zero at index 0.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "x = [0]*(n+1)\nfor i in range(1, n+1):\n    x[i] = next(it)",
+          "isCode": true
+        },
+        {
+          "label": "x = [next(it) for _ in range(n)]",
+          "isCode": true
+        },
+        {
+          "label": "x = [0]*n\nfor i in range(n):\n    x[i] = next(it)",
+          "isCode": true
+        },
+        {
+          "label": "x = [0]*(n+1)\nfor i in range(n):\n    x[i] = next(it)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We want x[1..n] filled and x[0]=0 to align with S indexing.",
+      "wrongExplanations": {
+        "1": "0-based storage makes S[a-1] alignment trickier.",
+        "3": "This writes at x[0..n-1], leaving x[n] unused and x[0] overwritten."
+      },
+      "hint": "Queries are 1-based; keep x[0] free as 0.",
+      "isCodeBuilding": true,
+      "codeSnippet": "x = [0]*(n+1)\nfor i in range(1, n+1):\n    x[i] = next(it)",
+      "codeLabel": "Read array"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Build S where S[i] is xor of x[1..i], with S[0]=0.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "s = [0]*(n+1)\nfor i in range(1, n+1):\n    s[i] = s[i-1] ^ x[i]",
+          "isCode": true
+        },
+        {
+          "label": "s = [0]*n\nfor i in range(n):\n    s[i] = s[i-1] ^ x[i]",
+          "isCode": true
+        },
+        {
+          "label": "s = [0]*(n+1)\nfor i in range(n):\n    s[i] = s[i] ^ x[i]",
+          "isCode": true
+        },
+        {
+          "label": "s = [0]*(n+1)\nfor i in range(1, n+1):\n    s[i] = s[i] ^ x[i]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Accumulate from s[i-1] with xor; s has length n+1 to keep s[0]=0.",
+      "wrongExplanations": {
+        "1": "Off-by-one: s[0] used before set; length is too short.",
+        "3": "s[i] references itself; should use s[i-1]."
+      },
+      "hint": "Each s[i] combines previous total with x[i].",
+      "isCodeBuilding": true,
+      "codeSnippet": "s = [0]*(n+1)\nfor i in range(1, n+1):\n    s[i] = s[i-1] ^ x[i]",
+      "codeLabel": "Build cumulative xor"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Prepare a place to collect answers before printing.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "out_lines = []",
+          "isCode": true
+        },
+        {
+          "label": "out_lines = ''",
+          "isCode": true
+        },
+        {
+          "label": "out_lines = set()",
+          "isCode": true
+        },
+        {
+          "label": "out_lines = dict()",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We'll append strings and join with newlines at the end.",
+      "wrongExplanations": {
+        "1": "Strings are immutable; repeated concatenation is slower and awkward here."
+      },
+      "hint": "We need ordered outputs, one per query.",
+      "isCodeBuilding": true,
+      "codeSnippet": "out_lines = []",
+      "codeLabel": "Prepare output list"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Process q queries using S and append each answer.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "for _ in range(q):\n    a = next(it); b = next(it)\n    out_lines.append(str(s[b] ^ s[a-1]))",
+          "isCode": true
+        },
+        {
+          "label": "for _ in range(q):\n    a = next(it); b = next(it)\n    out_lines.append(str(s[b] - s[a-1]))",
+          "isCode": true
+        },
+        {
+          "label": "for _ in range(q):\n    a = next(it); b = next(it)\n    out_lines.append(str(s[b-1] ^ s[a]))",
+          "isCode": true
+        },
+        {
+          "label": "for _ in range(q):\n    a = next(it); b = next(it)\n    out_lines.append(str(x[a] ^ x[b]))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Use S[b] ^ S[a-1] to get the range xor efficiently.",
+      "wrongExplanations": {
+        "1": "Subtraction is not applicable for xor.",
+        "2": "This misses x[a] and includes wrong indices."
+      },
+      "hint": "Recall the cancellation idea for [a,b].",
+      "isCodeBuilding": true,
+      "codeSnippet": "for _ in range(q):\n    a = next(it); b = next(it)\n    out_lines.append(str(s[b] ^ s[a-1]))",
+      "codeLabel": "Answer queries"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Finally, print all answers separated by newlines.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "sys.stdout.write(\"\\n\".join(out_lines))",
+          "isCode": true
+        },
+        {
+          "label": "print(out_lines)",
+          "isCode": true
+        },
+        {
+          "label": "for x in out_lines: print(x, end=' ')",
+          "isCode": true
+        },
+        {
+          "label": "sys.stdout.write(\" \".join(out_lines))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Join with newline to match required format (one per line).",
+      "wrongExplanations": {
+        "1": "This prints a list representation, not one value per line.",
+        "2": "Space-separated on one line, not acceptable here."
+      },
+      "hint": "Each answer must be on its own line.",
+      "isCodeBuilding": true,
+      "codeSnippet": "sys.stdout.write(\"\\n\".join(out_lines))",
+      "codeLabel": "Print output"
+    },
+    {
+      "id": "q21",
+      "phase": "Verifying the Solution",
+      "questionText": "Run your mental trace on the sample input. What lines are printed?",
+      "diagram": "Input:\n8 4\n3 2 4 5 1 1 5 3\n2 4\n5 6\n1 8\n3 3",
+      "options": [
+        {
+          "label": "3\\n0\\n6\\n4",
+          "isCode": false
+        },
+        {
+          "label": "3\\n2\\n4\\n4",
+          "isCode": false
+        },
+        {
+          "label": "11\\n0\\n6\\n4",
+          "isCode": false
+        },
+        {
+          "label": "3\\n0\\n7\\n4",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Computed earlier: 3, 0, 6, 4.",
+      "wrongExplanations": {
+        "2": "11 is sum, not xor on [2,4].",
+        "3": "Xor of all eight numbers is 6, not 7."
+      },
+      "hint": "Ensure you used xor for each range.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q22",
+      "phase": "Verifying the Solution",
+      "questionText": "For array [1,2,3,4] and queries: [1,1], [2,3], [1,4], what are the outputs?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "1, 1, 4",
+          "isCode": false
+        },
+        {
+          "label": "1, 5, 10",
+          "isCode": false
+        },
+        {
+          "label": "1, 6, 0",
+          "isCode": false
+        },
+        {
+          "label": "1, 3, 4",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Xors: 1; 2^3=1; 1^2^3^4=4.",
+      "wrongExplanations": {
+        "1": "These look like sums.",
+        "3": "2^3 is 1, not 3."
+      },
+      "hint": "Compute each query separately with xor.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q23",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the total time complexity of building S and answering q queries using S[b] ^ S[a-1]?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n + q)",
+          "isCode": false
+        },
+        {
+          "label": "O(n q)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n + q log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(q^2)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Building S is O(n); each query is O(1).",
+      "wrongExplanations": {
+        "1": "That's the direct scanning approach we avoided."
+      },
+      "hint": "Preprocessing once, then constant-time per query.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Analyzing Complexity",
+      "questionText": "What additional space (besides the input array and output) is used by this method?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n) for S",
+          "isCode": false
+        },
+        {
+          "label": "O(1)",
+          "isCode": false
+        },
+        {
+          "label": "O(q)",
+          "isCode": false
+        },
+        {
+          "label": "O(n + q log n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We store S of length n+1; the rest is constant aside from collected outputs.",
+      "wrongExplanations": {
+        "1": "We do store an array proportional to n."
+      },
+      "hint": "Consider the size of S.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Analyzing Complexity",
+      "questionText": "Which edge case must be handled so that queries like [1,b] work without special branches?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Initialize S[0] = 0",
+          "isCode": false
+        },
+        {
+          "label": "Use 64-bit integers to avoid overflow",
+          "isCode": false
+        },
+        {
+          "label": "Sort queries by b",
+          "isCode": false
+        },
+        {
+          "label": "Compress coordinates of indices",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "With S[0]=0, S[b]^S[0]=S[b] handles ranges starting at 1.",
+      "wrongExplanations": {
+        "1": "Python integers handle bitwise xor without overflow."
+      },
+      "hint": "Think about a=1 and the formula S[b] ^ S[a-1].",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys",
+    "data = list(map(int, sys.stdin.buffer.read().split()))\nit = iter(data)\nn = next(it); q = next(it)",
+    "x = [0]*(n+1)\nfor i in range(1, n+1):\n    x[i] = next(it)",
+    "s = [0]*(n+1)\nfor i in range(1, n+1):\n    s[i] = s[i-1] ^ x[i]",
+    "out_lines = []",
+    "for _ in range(q):\n    a = next(it); b = next(it)\n    out_lines.append(str(s[b] ^ s[a-1]))",
+    "sys.stdout.write(\"\\n\".join(out_lines))"
+  ],
+  "reasoningChain": [
+    {
+      "question": "How does xor behave in ranges (e.g., cancellations and order)?",
+      "insight": "Xor is associative/commutative and x^x=0, enabling cancellations of shared parts."
+    },
+    {
+      "question": "Is scanning each range per query fast enough for large n and q?",
+      "insight": "Direct scanning is O(nq) and too slow at 2e5, so we need per-query O(1) after preprocessing."
+    },
+    {
+      "question": "What can we precompute to reuse across queries?",
+      "insight": "Compute cumulative xor values S[i] of the first i elements with S[0]=0."
+    },
+    {
+      "question": "How to get the xor of [a,b] from cumulative values?",
+      "insight": "Use S[b] ^ S[a-1] to cancel the shared prefix up to a-1."
+    },
+    {
+      "question": "How to align indices with 1-based queries safely?",
+      "insight": "Store arrays with a sentinel at index 0 so S[0]=0 and arr at 1..n."
+    },
+    {
+      "question": "How to implement efficiently in Python?",
+      "insight": "Read all ints at once, iterate through them, build S in O(n), and answer queries in O(1) each, printing results line by line."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1406,
+    "output_tokens": 12070,
+    "input_cost": 0.001757,
+    "output_cost": 0.1207,
+    "total_cost": 0.122457
+  }
+}

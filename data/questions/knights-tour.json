@@ -1,0 +1,951 @@
+{
+  "id": "knights-tour-warned-move-ordering",
+  "title": "Knight's Tour",
+  "difficulty": "intermediate",
+  "tags": [
+    "graph"
+  ],
+  "estimatedMinutes": 70,
+  "language": "python",
+  "description": "Given a starting position (x, y) of a knight on an 8×8 chessboard (1-indexed, x is column, y is row), find a sequence of moves that visits every square exactly once. Output an 8×8 grid where each cell contains the step number (1..64) when the knight visited that cell.",
+  "examples": [
+    {
+      "input": "2 1",
+      "output": "8 1 10 13 6 3 20 17\n11 14 7 2 19 16 23 4\n26 9 12 15 24 5 18 21\n49 58 25 28 51 22 33 30\n40 27 50 59 32 29 52 35\n57 48 41 44 37 34 31 62\n42 39 46 55 60 63 36 53\n47 56 43 38 45 54 61 64",
+      "explanation": "The cell at row 1, column 2 starts with 1. Each subsequent number is a legal knight move from the previous cell. Any valid tour is accepted."
+    }
+  ],
+  "constraints": [
+    "1 ≤ x, y ≤ 8",
+    "Board size is fixed at 8×8"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "On an empty 8×8 board, how many legal knight moves are there from the corner (1,1)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "From (1,1) the knight can move to (2,3) or (3,2): exactly 2 moves. Corners have the fewest options.",
+      "wrongExplanations": {
+        "0": "There are two distinct landing squares from a corner.",
+        "3": "Four applies more to central squares, not corners."
+      },
+      "hint": "List all (±2,±1) and (±1,±2) moves and keep those inside 1..8.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "Input is x y with x=column and y=row (1-indexed). For input 2 1, where should the number 1 appear in the output grid?",
+      "diagram": "Columns: 1 2 3 ... 8 -> left to right\nRows:    1 at top to 8 at bottom",
+      "options": [
+        {
+          "label": "Row 1, Column 2",
+          "isCode": false
+        },
+        {
+          "label": "Row 2, Column 1",
+          "isCode": false
+        },
+        {
+          "label": "Row 8, Column 2",
+          "isCode": false
+        },
+        {
+          "label": "Row 2, Column 8",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Place 1 at (row=y, col=x) = (1,2): row 1, column 2. Top row, second column.",
+      "wrongExplanations": {
+        "1": "This swaps x and y. x is column, y is row.",
+        "2": "Row index is y=1, which is the top row, not bottom."
+      },
+      "hint": "Map (x,y) to (row=y, col=x).",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "Can a knight move from (2,1) to (2,2) in one move?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, it moves one square vertically",
+          "isCode": false
+        },
+        {
+          "label": "Yes, as long as the board is empty",
+          "isCode": false
+        },
+        {
+          "label": "Only if it captures a piece",
+          "isCode": false
+        },
+        {
+          "label": "No, that is neither (2,1) nor (1,2) in offsets",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 3,
+      "explanation": "A knight moves in L-shapes: (±2,±1) or (±1,±2). (2,1)→(2,2) is a one-step vertical move, which is illegal.",
+      "wrongExplanations": {
+        "0": "Knights never move one square straight.",
+        "1": "Board emptiness doesn't change move legality."
+      },
+      "hint": "List the allowed relative moves and compare.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "Which property must the output grid satisfy?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "It contains each integer from 1 to 64 exactly once",
+          "isCode": false
+        },
+        {
+          "label": "It may repeat numbers as long as moves are legal",
+          "isCode": false
+        },
+        {
+          "label": "It shows any sequence of legal moves on some cells",
+          "isCode": false
+        },
+        {
+          "label": "It contains numbers from 0 to 63 exactly once",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We must visit every square exactly once and label the visit order from 1 to 64.",
+      "wrongExplanations": {
+        "1": "Repetition violates 'visits every square exactly once'.",
+        "3": "The numbering starts at 1, not 0."
+      },
+      "hint": "Every square must be visited once, and the count starts at 1.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Exploring Approaches",
+      "questionText": "If you try all paths and assume up to 8 choices per move for the remaining squares, what's a rough upper bound on the number of sequences to explore after the first square?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "8^63",
+          "isCode": false
+        },
+        {
+          "label": "64!",
+          "isCode": false
+        },
+        {
+          "label": "63!",
+          "isCode": false
+        },
+        {
+          "label": "8×64",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "After placing 1, there are up to 63 moves left with ≤8 choices each: roughly 8^63, which is enormous.",
+      "wrongExplanations": {
+        "1": "Though very large, this doesn't reflect a branching upper bound per step.",
+        "3": "This is far too small; branching grows exponentially."
+      },
+      "hint": "Think branching factor per step for 63 steps.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "To avoid getting stuck early, which next-move choice is likely to work best?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Pick a move that stays closest to the center",
+          "isCode": false
+        },
+        {
+          "label": "Pick a move that has the most onward options",
+          "isCode": false
+        },
+        {
+          "label": "Pick a move that has the fewest onward options",
+          "isCode": false
+        },
+        {
+          "label": "Pick a random legal move",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Choosing a move with the fewest onward options tends to prevent blocking off tight areas later.",
+      "wrongExplanations": {
+        "1": "Favoring many onward options can trap sparse regions for later.",
+        "3": "Random choice does not systematically avoid dead ends."
+      },
+      "hint": "Count how many legal moves remain from each candidate and prefer the smallest count.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "What board representation best supports both checking visits and producing the required grid?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Use an 8×8 grid of booleans for visited and a separate list to record the path",
+          "isCode": false
+        },
+        {
+          "label": "Use an 8×8 grid of integers where 0=unvisited and >0 is the step number",
+          "isCode": false
+        },
+        {
+          "label": "Use only a set of visited coordinates",
+          "isCode": false
+        },
+        {
+          "label": "Use a single counter to track how many cells have been visited",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "An 8×8 integer grid directly stores the step number for each cell, exactly matching the output format.",
+      "wrongExplanations": {
+        "0": "This adds complexity to reconstruct numbering at the end.",
+        "2": "A set doesn't store step numbers needed for output."
+      },
+      "hint": "We must output when each cell was visited, not just whether it was visited.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Building the Idea",
+      "questionText": "Choose the correct set of knight move offsets as (dr, dc) where r=row, c=column.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "[(2,1),(1,2),(-1,2),(-2,1),(-2,-1),(-1,-2),(1,-2),(2,-1)]",
+          "isCode": true
+        },
+        {
+          "label": "[(1,2),(2,1),(-2,1),(-1,2),(-1,-2),(-2,-1),(2,-1),(1,-2)]  # same but shuffled",
+          "isCode": true
+        },
+        {
+          "label": "[(2,1),(1,2),(-1,-2),(-2,-1)]  # missing half the moves",
+          "isCode": true
+        },
+        {
+          "label": "[(1,2),(2,1),(-1,2),(-2,1),(2,-1),(1,-2),(-2,-1),(-1,-2)]  # using (dc,dr)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Use (dr,dc) offsets in row/column order; the listed 8 cover all L-shaped moves.",
+      "wrongExplanations": {
+        "2": "This omits four legal moves (wrongly halves the set).",
+        "3": "This treats the first as columns, second as rows, which mismatches (dr,dc)."
+      },
+      "hint": "dr changes rows; dc changes columns. Include all 8 sign combinations.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "Which function correctly checks that a cell (rr, cc) is inside the board and unvisited?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def inb(rr, cc):\n    return 0 <= rr <= n and 0 <= cc <= n and board[rr][cc] == 0",
+          "isCode": true
+        },
+        {
+          "label": "def inb(rr, cc):\n    return 0 <= rr < n and 0 <= cc < n and board[rr][cc] == 0",
+          "isCode": true
+        },
+        {
+          "label": "def inb(rr, cc):\n    return (0 <= rr < n or 0 <= cc < n) and board[rr][cc] == 0",
+          "isCode": true
+        },
+        {
+          "label": "def inb(rr, cc):\n    return 0 <= rr < n and 0 <= cc < n and board[rr][cc] != 0",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Use 0 ≤ index < n for bounds and check board[rr][cc] == 0 for unvisited.",
+      "wrongExplanations": {
+        "0": "Using ≤ n allows index n which is out of bounds in 0..n-1.",
+        "2": "Both row and column must be in range; use AND, not OR."
+      },
+      "hint": "Python indices go 0..n-1 for length n.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "On an empty board, how many legal knight moves does the center (4,4) have?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "8",
+          "isCode": false
+        },
+        {
+          "label": "6",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The center has all 8 L-shaped moves inside the board.",
+      "wrongExplanations": {
+        "1": "Corners/edges reduce options; center has all 8.",
+        "2": "Four is too low; only near-corner squares have about 4."
+      },
+      "hint": "List all 8 offsets and check they stay in 1..8.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "To choose a promising next move, what should we compute for each candidate square?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "The number of legal unvisited moves available from that candidate square",
+          "isCode": false
+        },
+        {
+          "label": "The distance from the board center",
+          "isCode": false
+        },
+        {
+          "label": "How many times the square has been visited so far",
+          "isCode": false
+        },
+        {
+          "label": "The row index only",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Count how many onward options each candidate allows and prefer the smallest count.",
+      "wrongExplanations": {
+        "1": "Center distance is not directly related to avoiding dead ends.",
+        "2": "Squares must be visited at most once; this count is always 0 or 1."
+      },
+      "hint": "Think of how constrained the move will leave you.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "When should the search stop and accept the tour?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "When step == n*n",
+          "isCode": false
+        },
+        {
+          "label": "When step == n",
+          "isCode": false
+        },
+        {
+          "label": "When step == n*n - 1",
+          "isCode": false
+        },
+        {
+          "label": "After visiting all neighbors of the start",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "There are n*n cells (64). When the placed step equals n*n, all cells are filled.",
+      "wrongExplanations": {
+        "1": "n is 8, not the total number of cells.",
+        "2": "n*n - 1 means one cell is still unfilled."
+      },
+      "hint": "How many total cells are there on an n×n board?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "If none of the next moves lead to completion, what should the algorithm do at the current square?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Leave the current step number and continue from another square",
+          "isCode": false
+        },
+        {
+          "label": "Set the current cell back to 0 and return failure",
+          "isCode": false
+        },
+        {
+          "label": "Decrease the step number by 1 and leave it",
+          "isCode": false
+        },
+        {
+          "label": "Skip one move ahead without changing the board",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Undo the current move (set to 0) so other choices can reuse this cell.",
+      "wrongExplanations": {
+        "0": "Leaving a number blocks that cell for future attempts.",
+        "2": "Numbers must reflect actual visit order; decrementing makes it inconsistent."
+      },
+      "hint": "To try alternatives, you must clear the marker you placed.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Writing the Code",
+      "questionText": "Read input, parse x and y, and set the board size n.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\ndata = sys.stdin.read().strip().split()\nx, y = map(int, data[:2])\nn = 8",
+          "isCode": true
+        },
+        {
+          "label": "x, y = map(int, input().split())\nn = 64",
+          "isCode": true
+        },
+        {
+          "label": "import sys\nx, y = map(int, sys.stdin.read().strip())\nn = 8",
+          "isCode": true
+        },
+        {
+          "label": "import sys\ndata = sys.stdin.readline().split()\ny, x = map(int, data[:2])\nn = 8",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Read two integers and set n=8. The wrong options either set n incorrectly, parse wrong, or swap x and y.",
+      "wrongExplanations": {
+        "1": "n is the board side length (8), not the cell count (64).",
+        "3": "This swaps x and y, which breaks coordinate mapping."
+      },
+      "hint": "Ensure you get exactly two ints and n is 8.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\ndata = sys.stdin.read().strip().split()\nx, y = map(int, data[:2])\nn = 8",
+      "codeLabel": "Input and constants"
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Initialize the board and convert (x,y) to 0-based (r,c) with y as row and x as column.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "board = [[0]*n for _ in range(n)]\nr, c = y-1, x-1",
+          "isCode": true
+        },
+        {
+          "label": "board = [[0]*n for _ in range(n)]\nr, c = x-1, y-1",
+          "isCode": true
+        },
+        {
+          "label": "board = [[0]*8 for _ in range(8)]\nr, c = y, x",
+          "isCode": true
+        },
+        {
+          "label": "board = [[None]*n for _ in range(n)]\nr, c = y-1, x-1",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "0-based indexing puts (y-1,x-1) as (r,c). The board stores integers and starts with 0 (unvisited).",
+      "wrongExplanations": {
+        "1": "This swaps row and column, contradicting x=column, y=row.",
+        "2": "Omitting -1 makes indices off by one and invalid for row 8/col 8."
+      },
+      "hint": "Rows correspond to y; columns correspond to x.",
+      "isCodeBuilding": true,
+      "codeSnippet": "board = [[0]*n for _ in range(n)]\nr, c = y-1, x-1",
+      "codeLabel": "Board and start"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Define knight moves and a helper to test bounds and unvisited.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "moves = [(2,1),(1,2),(-1,2),(-2,1),(-2,-1),(-1,-2),(1,-2),(2,-1)]\ndef inb(rr, cc):\n    return 0 <= rr < n and 0 <= cc < n and board[rr][cc] == 0",
+          "isCode": true
+        },
+        {
+          "label": "moves = [(1,2),(2,1),(-1,2),(-2,1),(1,-2),(2,-1),(-1,-2),(-2,-1)]\ndef inb(rr, cc):\n    return 0 <= rr <= n and 0 <= cc <= n and board[rr][cc] == 0",
+          "isCode": true
+        },
+        {
+          "label": "moves = [(2,1),(1,2),(-1,2),(-2,1)]\ndef inb(rr, cc):\n    return 0 <= rr < n or 0 <= cc < n and board[rr][cc] == 0",
+          "isCode": true
+        },
+        {
+          "label": "moves = [(2,1),(1,2),(-1,2),(-2,1),(-2,-1),(-1,-2),(1,-2),(2,-1)]\ndef inb(rr, cc):\n    return 0 <= rr < n and 0 <= cc < n and board[rr][cc] != 0",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "All 8 moves are included and inb uses strict bounds with board==0 for unvisited.",
+      "wrongExplanations": {
+        "1": "Bounds must be < n (0..n-1). Using ≤ n allows out-of-range index n.",
+        "3": "We need board==0 for unvisited, not !=0."
+      },
+      "hint": "Use AND for both in-bounds checks and unvisited check.",
+      "isCodeBuilding": true,
+      "codeSnippet": "moves = [(2,1),(1,2),(-1,2),(-2,1),(-2,-1),(-1,-2),(1,-2),(2,-1)]\ndef inb(rr, cc):\n    return 0 <= rr < n and 0 <= cc < n and board[rr][cc] == 0",
+      "codeLabel": "Moves and in-bounds"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Write a function that counts how many onward legal unvisited moves exist from (rr, cc).",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def degree(rr, cc):\n    cnt = 0\n    for dr, dc in moves:\n        nr, nc = rr+dr, cc+dc\n        if 0 <= nr < n and 0 <= nc < n and board[nr][nc] == 0:\n            cnt += 1\n    return cnt",
+          "isCode": true
+        },
+        {
+          "label": "def degree(rr, cc):\n    return sum(inb(rr+dc, cc+dr) for dr, dc in moves)",
+          "isCode": true
+        },
+        {
+          "label": "def degree(rr, cc):\n    return sum(inb(rr+dr, cc+dc) for dr, dc in moves if board[rr][cc] == 0)",
+          "isCode": true
+        },
+        {
+          "label": "def degree(rr, cc):\n    cnt = 0\n    for dc, dr in moves:\n        nr, nc = rr+dr, cc+dc\n        if inb(nr, nc):\n            cnt += 1\n    return cnt",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Count all (dr,dc) where the destination is in-bounds and unvisited. Keep row/column order consistent.",
+      "wrongExplanations": {
+        "1": "Swapping dr/dc mixes rows and columns and checks wrong cells.",
+        "3": "Iterating as (dc,dr) with dr/dc reversed mixes coordinates."
+      },
+      "hint": "Use (nr,nc) = (rr+dr, cc+dc) with the same ordering as your moves.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def degree(rr, cc):\n    cnt = 0\n    for dr, dc in moves:\n        nr, nc = rr+dr, cc+dc\n        if 0 <= nr < n and 0 <= nc < n and board[nr][nc] == 0:\n            cnt += 1\n    return cnt",
+      "codeLabel": "Degree function"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Start the recursive search: place the step, and return success if all cells are filled.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def dfs(step, rr, cc):\n    board[rr][cc] = step\n    if step == n*n:\n        return True",
+          "isCode": true
+        },
+        {
+          "label": "def dfs(step, rr, cc):\n    if step == n:\n        return True\n    board[rr][cc] = step",
+          "isCode": true
+        },
+        {
+          "label": "def dfs(step, rr, cc):\n    board[rr][cc] = step\n    if step >= n:\n        return True",
+          "isCode": true
+        },
+        {
+          "label": "def dfs(step, rr, cc):\n    if step == n*n:\n        board[rr][cc] = step\n        return True",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Mark the current cell, and if step equals the total number of cells (64), you are done.",
+      "wrongExplanations": {
+        "1": "Stopping at step==n stops after only 8 moves, not a full tour.",
+        "2": "step>=n is too early; we need n*n cells filled."
+      },
+      "hint": "Total cells is n*n, not n.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def dfs(step, rr, cc):\n    board[rr][cc] = step\n    if step == n*n:\n        return True",
+      "codeLabel": "DFS start and base case"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Collect candidate next moves from (rr, cc) and sort them by the number of onward moves (ascending).",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    candidates = []\n    for dr, dc in moves:\n        nr, nc = rr+dr, cc+dc\n        if inb(nr, nc):\n            candidates.append((degree(nr, nc), nr, nc))\n    candidates.sort(key=lambda x: x[0])",
+          "isCode": true
+        },
+        {
+          "label": "    candidates = []\n    for dr, dc in moves:\n        nr, nc = rr+dr, cc+dc\n        candidates.append((degree(rr, cc), nr, nc))\n    candidates.sort(key=lambda x: -x[0])",
+          "isCode": true
+        },
+        {
+          "label": "    candidates = []\n    for dr, dc in moves:\n        nr, nc = rr+dr, cc+dc\n        if inb(nr, nc):\n            candidates.append((degree(nr, nc), nr, nc))\n    candidates.sort(key=lambda x: x[0], reverse=True)",
+          "isCode": true
+        },
+        {
+          "label": "    candidates = [(degree(rr, cc), rr, cc) for dr, dc in moves if inb(rr, cc)]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Filter to legal moves, compute degree at the destination, and sort ascending by that degree.",
+      "wrongExplanations": {
+        "1": "This uses degree(rr,cc) for all candidates and sorts descending, both incorrect.",
+        "3": "This ignores actual neighbors and reuses (rr,cc) repeatedly."
+      },
+      "hint": "Compute counts at the destination squares and prefer smaller counts.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    candidates = []\n    for dr, dc in moves:\n        nr, nc = rr+dr, cc+dc\n        if inb(nr, nc):\n            candidates.append((degree(nr, nc), nr, nc))\n    candidates.sort(key=lambda x: x[0])",
+      "codeLabel": "Build and sort candidates"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Try candidate moves in order; if one leads to completion, return success; otherwise undo and fail.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    for _, nr, nc in candidates:\n        if dfs(step+1, nr, nc):\n            return True\n    board[rr][cc] = 0\n    return False",
+          "isCode": true
+        },
+        {
+          "label": "    board[rr][cc] = 0\n    for _, nr, nc in candidates:\n        if dfs(step+1, nr, nc):\n            return True\n    return False",
+          "isCode": true
+        },
+        {
+          "label": "    for _, nr, nc in candidates:\n        dfs(step+1, nr, nc)\n    return True",
+          "isCode": true
+        },
+        {
+          "label": "    for _, nr, nc in candidates:\n        if not dfs(step+1, nr, nc):\n            return False\n    return True",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Try each candidate; if none work, clear the current cell and report failure so previous choices can continue.",
+      "wrongExplanations": {
+        "1": "Clearing before exploring would erase the current step while still exploring from it.",
+        "2": "This ignores failure results and always returns True, even if no tour is found."
+      },
+      "hint": "Only clear the cell if all children fail.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    for _, nr, nc in candidates:\n        if dfs(step+1, nr, nc):\n            return True\n    board[rr][cc] = 0\n    return False",
+      "codeLabel": "Try moves and undo on failure"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "Start the search from the given start and print the resulting board.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "dfs(1, r, c)\nfor row in board:\n    print(' '.join(str(v) for v in row))",
+          "isCode": true
+        },
+        {
+          "label": "dfs(0, r, c)\nfor row in board:\n    print(' '.join(str(v) for v in row))",
+          "isCode": true
+        },
+        {
+          "label": "dfs(1, r, c)\nfor col in zip(*board):\n    print(' '.join(str(v) for v in col))",
+          "isCode": true
+        },
+        {
+          "label": "dfs(1, c, r)\nfor row in board:\n    print(' '.join(str(v) for v in row))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Begin with step=1 at (r,c) and print rows left-to-right. Transposing or wrong start step/coords breaks the output.",
+      "wrongExplanations": {
+        "1": "Starting from 0 would number cells 0..63 instead of 1..64.",
+        "3": "This swaps row and column and would start from the wrong cell."
+      },
+      "hint": "The start cell should be labeled 1, and rows are printed in order.",
+      "isCodeBuilding": true,
+      "codeSnippet": "dfs(1, r, c)\nfor row in board:\n    print(' '.join(str(v) for v in row))",
+      "codeLabel": "Run and print"
+    },
+    {
+      "id": "q22",
+      "phase": "Verifying the Solution",
+      "questionText": "After the search completes, what value should be at board[r][c], the starting cell?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "64",
+          "isCode": false
+        },
+        {
+          "label": "It depends on the path; could be any number",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We start by placing step=1 at the starting cell, so it remains 1.",
+      "wrongExplanations": {
+        "2": "64 appears at the last visited cell, not the start.",
+        "3": "The start is always labeled 1 by construction."
+      },
+      "hint": "The initial call was dfs(1, r, c).",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q23",
+      "phase": "Verifying the Solution",
+      "questionText": "Which relation must hold between any cell labeled k and the cell labeled k+1?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "They are adjacent horizontally or vertically",
+          "isCode": false
+        },
+        {
+          "label": "They are a legal knight move apart",
+          "isCode": false
+        },
+        {
+          "label": "They are on the same diagonal",
+          "isCode": false
+        },
+        {
+          "label": "They are at Manhattan distance 1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Each step moves like a knight, so k and k+1 must be connected by a legal knight move.",
+      "wrongExplanations": {
+        "0": "Knights do not move as rooks; they jump in L-shapes.",
+        "2": "Knights do not move along diagonals like bishops."
+      },
+      "hint": "Recall the allowed move offsets (±2,±1) and (±1,±2).",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Analyzing Complexity",
+      "questionText": "What are the maximum search depth and the maximum number of choices per step in this approach?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Depth 64, up to 8 choices per step",
+          "isCode": false
+        },
+        {
+          "label": "Depth 8, up to 64 choices per step",
+          "isCode": false
+        },
+        {
+          "label": "Depth 64, exactly 2 choices per step",
+          "isCode": false
+        },
+        {
+          "label": "Depth 8, exactly 8 choices per step",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "There are 64 steps (cells). A knight has at most 8 legal moves from a cell.",
+      "wrongExplanations": {
+        "1": "Depth is the number of cells to place, not the board side length.",
+        "2": "Choices vary by position; corner/edge reduce options."
+      },
+      "hint": "Think: 64 cells total; knights can have up to 8 options.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the space usage of this solution?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n^2) for the board and O(n^2) call stack in the worst case",
+          "isCode": false
+        },
+        {
+          "label": "O(1), constant space",
+          "isCode": false
+        },
+        {
+          "label": "O(n) for the board and O(1) stack",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2) for the board and O(n^2) extra arrays for moves",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We store an n×n board and can have up to n×n recursion depth in the worst case; moves are a fixed small list.",
+      "wrongExplanations": {
+        "1": "The board alone is 8×8 integers, not constant-sized in terms of n.",
+        "2": "The board is not O(n); it's n×n."
+      },
+      "hint": "Count board cells and the maximum chain of calls.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Analyzing Complexity",
+      "questionText": "To handle any valid input (x,y) with 1 ≤ x,y ≤ 8, how should you convert to 0-based indices (r,c)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "r = y-1, c = x-1",
+          "isCode": false
+        },
+        {
+          "label": "r = x-1, c = y-1",
+          "isCode": false
+        },
+        {
+          "label": "r = y, c = x",
+          "isCode": false
+        },
+        {
+          "label": "r = 8-y, c = 8-x",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Rows are y and columns are x; 0-based means subtract 1 from each.",
+      "wrongExplanations": {
+        "1": "This swaps row and column.",
+        "3": "This mirrors the board, not just converting index base."
+      },
+      "hint": "0-based indexing shifts 1..8 to 0..7 without swapping axes.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\ndata = sys.stdin.read().strip().split()\nx, y = map(int, data[:2])\nn = 8",
+    "board = [[0]*n for _ in range(n)]\nr, c = y-1, x-1",
+    "moves = [(2,1),(1,2),(-1,2),(-2,1),(-2,-1),(-1,-2),(1,-2),(2,-1)]\ndef inb(rr, cc):\n    return 0 <= rr < n and 0 <= cc < n and board[rr][cc] == 0",
+    "def degree(rr, cc):\n    cnt = 0\n    for dr, dc in moves:\n        nr, nc = rr+dr, cc+dc\n        if 0 <= nr < n and 0 <= nc < n and board[nr][nc] == 0:\n            cnt += 1\n    return cnt",
+    "def dfs(step, rr, cc):\n    board[rr][cc] = step\n    if step == n*n:\n        return True",
+    "    candidates = []\n    for dr, dc in moves:\n        nr, nc = rr+dr, cc+dc\n        if inb(nr, nc):\n            candidates.append((degree(nr, nc), nr, nc))\n    candidates.sort(key=lambda x: x[0])",
+    "    for _, nr, nc in candidates:\n        if dfs(step+1, nr, nc):\n            return True\n    board[rr][cc] = 0\n    return False",
+    "dfs(1, r, c)\nfor row in board:\n    print(' '.join(str(v) for v in row))"
+  ],
+  "reasoningChain": [
+    {
+      "question": "How do we interpret (x,y) and what must the output contain?",
+      "insight": "Map (x,y) to (row=y, col=x). The grid must contain each integer 1..64 exactly once with legal knight transitions."
+    },
+    {
+      "question": "Why not try all paths?",
+      "insight": "The branching explodes (~8 choices for ~63 steps). We need a smarter next-move choice to avoid dead ends."
+    },
+    {
+      "question": "How do we represent the board and moves?",
+      "insight": "Use an 8×8 integer board (0 unvisited) and predefine the 8 (dr,dc) knight offsets with a helper to test bounds/unvisited."
+    },
+    {
+      "question": "How do we pick promising next moves?",
+      "insight": "For each candidate, count how many onward legal moves it has and try candidates ordered by that count ascending."
+    },
+    {
+      "question": "How do we explore and ensure correctness?",
+      "insight": "Place the step number; if complete, succeed; otherwise try ordered candidates. If none work, reset the cell to 0 and return failure."
+    },
+    {
+      "question": "What about resource usage?",
+      "insight": "Depth up to 64 and up to 8 choices per step; space is O(n^2) for the board and similar for the call chain at most."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1452,
+    "output_tokens": 17628,
+    "input_cost": 0.001815,
+    "output_cost": 0.17628,
+    "total_cost": 0.178095
+  }
+}

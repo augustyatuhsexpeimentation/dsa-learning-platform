@@ -1,0 +1,1020 @@
+{
+  "id": "counting-tilings",
+  "title": "Counting Tilings",
+  "difficulty": "intermediate",
+  "tags": [
+    "dp",
+    "bitmask",
+    "tiling"
+  ],
+  "estimatedMinutes": 60,
+  "language": "python",
+  "description": "Count the number of ways to tile an n × m grid using 1 × 2 and 2 × 1 tiles. Print the answer modulo 10^9+7.\n\nInput: two integers n and m.\nOutput: one integer, the number of tilings modulo 10^9+7.",
+  "examples": [
+    {
+      "input": "4 7",
+      "output": "781",
+      "explanation": "There are 781 distinct domino tilings of a 4×7 grid."
+    }
+  ],
+  "constraints": [
+    "1 ≤ n ≤ 10",
+    "1 ≤ m ≤ 1000"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "For a 1×1 grid, how many ways can you tile it with 1×2 and 2×1 tiles?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "It depends on orientation",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "A 1×1 grid has 1 cell; each tile covers 2 cells. So it's impossible.",
+      "wrongExplanations": {
+        "1": "You can't place any tile to cover exactly one cell.",
+        "3": "Orientation doesn't help; both tiles cover 2 cells."
+      },
+      "hint": "Each tile covers exactly 2 cells.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "For a 1×2 grid, how many tilings are there?",
+      "diagram": "Cells: [ ][ ]",
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "Depends on n and m order",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Exactly one horizontal tile fits.",
+      "wrongExplanations": {
+        "2": "There's no way to place two tiles without overlap.",
+        "0": "A single horizontal 1×2 tile fits perfectly."
+      },
+      "hint": "A single 1×2 tile covers both cells.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "For a 2×1 grid, how many tilings are there?",
+      "diagram": "Cells:\n[ ]\n[ ]",
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "Infinite",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Exactly one vertical tile fits.",
+      "wrongExplanations": {
+        "2": "Only one tile can be placed without overlap.",
+        "0": "A vertical 2×1 tile covers both cells."
+      },
+      "hint": "Think vertical placement.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "For a 1×3 grid, how many tilings are there?",
+      "diagram": "Cells: [ ][ ][ ]",
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The grid has 3 cells (odd). Dominoes cover 2 cells each, so you cannot cover all cells.",
+      "wrongExplanations": {
+        "1": "A 1×2 tile leaves one uncovered cell.",
+        "2": "You cannot place more than one 1×2 without overlapping or leaving a cell."
+      },
+      "hint": "Check parity of total cells.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Understanding the Problem",
+      "questionText": "Which grids are impossible to tile with 1×2 and 2×1 tiles?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Those with an odd number of cells (n×m is odd)",
+          "isCode": false
+        },
+        {
+          "label": "Those where n and m are both odd and > 1",
+          "isCode": false
+        },
+        {
+          "label": "Those where n != m",
+          "isCode": false
+        },
+        {
+          "label": "Those where n or m is prime",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each tile covers 2 cells; odd total cells cannot be fully covered.",
+      "wrongExplanations": {
+        "1": "Even if both are odd, the total could be odd; the only condition is odd area.",
+        "2": "Rectangular shape is fine as long as the area is even."
+      },
+      "hint": "Think in pairs of cells.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "Is brute-force enumeration of all placements feasible for n≤10 and m≤1000?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "No, the number of possibilities grows exponentially with cells and is far too large",
+          "isCode": false
+        },
+        {
+          "label": "Yes, because 10×1000 is small enough",
+          "isCode": false
+        },
+        {
+          "label": "Yes, by trying all permutations of tiles",
+          "isCode": false
+        },
+        {
+          "label": "Only if we try all rows independently",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Brute force would need to consider astronomically many combinations for up to 10,000 cells.",
+      "wrongExplanations": {
+        "1": "10×1000 cells is large; combinations explode.",
+        "4": "Rows are not independent because tiles can span columns."
+      },
+      "hint": "Estimate 2 choices per cell; that's already 2^(nm) scale.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "When processing the grid column by column, what information must be carried from one column to the next to continue correctly?",
+      "diagram": "Current column (C) and next column (C+1)\nSome cells in C may already be covered by horizontal tiles from C-1.",
+      "options": [
+        {
+          "label": "Only the total number of tilings so far",
+          "isCode": false
+        },
+        {
+          "label": "The entire layout of all previous columns",
+          "isCode": false
+        },
+        {
+          "label": "Which row positions in the current column are already covered by tiles coming from the left",
+          "isCode": false
+        },
+        {
+          "label": "The parity (even/odd) of tiles used so far",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "You only need to know which cells in the current column are already filled by tiles extending from the previous column.",
+      "wrongExplanations": {
+        "1": "Total count alone loses crucial placement info.",
+        "2": "You don't need the whole history; only the current column's occupancy matters."
+      },
+      "hint": "Tiles only interact across the boundary between adjacent columns.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Exploring Approaches",
+      "questionText": "If the grid has n rows, how many possible \"current column occupancy\" configurations are there to consider?",
+      "diagram": "Represent occupancy as n bits (1 = already filled in this column).",
+      "options": [
+        {
+          "label": "n",
+          "isCode": false
+        },
+        {
+          "label": "2^n",
+          "isCode": false
+        },
+        {
+          "label": "n!",
+          "isCode": false
+        },
+        {
+          "label": "m",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Each of n positions may be filled or not, giving 2^n configurations.",
+      "wrongExplanations": {
+        "0": "Each position has 2 possibilities, not a single count.",
+        "2": "Ordering is irrelevant here."
+      },
+      "hint": "Think binary vector of length n.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "Within a column, at the first unfilled row r (0-indexed), what choices are valid to continue filling the column?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Skip r and move to r+1",
+          "isCode": false
+        },
+        {
+          "label": "Only place a vertical tile at r and r+1",
+          "isCode": false
+        },
+        {
+          "label": "Only place a horizontal tile starting at r",
+          "isCode": false
+        },
+        {
+          "label": "Either place a vertical tile at r and r+1 (if possible), or a horizontal tile at r extending to the next column",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 3,
+      "explanation": "You must cover r either vertically with r+1 (if free) or horizontally to the next column.",
+      "wrongExplanations": {
+        "0": "You cannot leave holes; every cell must be covered.",
+        "1": "Horizontal is also valid if vertical is not possible."
+      },
+      "hint": "Every unfilled cell must be covered by one of the two tile types.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "If you place a horizontal tile at row r in the current column, how does it affect the next column's occupancy?",
+      "diagram": "Current column C: place [r]— extending to C+1.\nNext column C+1: row r becomes pre-filled.",
+      "options": [
+        {
+          "label": "Mark row r in the next column as pre-filled",
+          "isCode": false
+        },
+        {
+          "label": "Mark row r+1 in the next column as pre-filled",
+          "isCode": false
+        },
+        {
+          "label": "Mark rows r and r+1 in the next column as pre-filled",
+          "isCode": false
+        },
+        {
+          "label": "It doesn't affect the next column",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "A horizontal tile at row r occupies current (r) and next column (r).",
+      "wrongExplanations": {
+        "1": "The tile stays in the same row when crossing the column boundary.",
+        "2": "A single horizontal tile only occupies one row across columns."
+      },
+      "hint": "Which exact cell in the next column does it cover?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "If you place a vertical tile at rows r and r+1 inside the current column, how does it affect the next column?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "It doesn't affect the next column; it only fills r and r+1 in the current column",
+          "isCode": false
+        },
+        {
+          "label": "It fills r in the next column",
+          "isCode": false
+        },
+        {
+          "label": "It fills r+1 in the next column",
+          "isCode": false
+        },
+        {
+          "label": "It fills r and r+1 in the next column"
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Vertical tiles stay within the current column.",
+      "wrongExplanations": {
+        "3": "No part of a vertical tile crosses into the next column.",
+        "1": "Only horizontal placements affect the next column."
+      },
+      "hint": "Which direction does a vertical tile extend?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null,
+      "options.3.isCode": false
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "When we've considered all n rows in the current column, when should we record a resulting configuration for the next column?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Always record the next configuration regardless of coverage",
+          "isCode": false
+        },
+        {
+          "label": "Only if every row of the current column is covered (no holes remain)",
+          "isCode": false
+        },
+        {
+          "label": "Only if at least one tile was placed",
+          "isCode": false
+        },
+        {
+          "label": "Only if the next configuration is empty",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "We can move to the next column only when the current one is fully covered.",
+      "wrongExplanations": {
+        "0": "Leaving holes breaks full tiling.",
+        "2": "Coverage, not count of tiles, matters."
+      },
+      "hint": "The goal is to cover every cell exactly once.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "Let n=2 (two rows). From a current column with no pre-filled cells (mask 00), which next-column masks are possible after filling this column completely?",
+      "diagram": "Row order top=bit0, bottom=bit1.\nOptions for a single column:\n- One vertical tile (covers both rows): next mask 00.\n- Two horizontal tiles: next mask 11.",
+      "options": [
+        {
+          "label": "{00}",
+          "isCode": false
+        },
+        {
+          "label": "{11}",
+          "isCode": false
+        },
+        {
+          "label": "{00, 11}",
+          "isCode": false
+        },
+        {
+          "label": "{01, 10}",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Either two horizontals (11) or one vertical (00) are valid.",
+      "wrongExplanations": {
+        "0": "You can also use two horizontals.",
+        "3": "You can't leave one row extending and the other not; that leaves holes."
+      },
+      "hint": "List all ways to cover 2 cells in the column.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Building the Idea",
+      "questionText": "Still with n=2. From a current mask 01 (top row pre-filled), which next masks are possible after filling this column?",
+      "diagram": "Top (bit0) already filled.\nRemaining cell: bottom (bit1).",
+      "options": [
+        {
+          "label": "{00}",
+          "isCode": false
+        },
+        {
+          "label": "{10}",
+          "isCode": false
+        },
+        {
+          "label": "{01}",
+          "isCode": false
+        },
+        {
+          "label": "{11}",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Only a horizontal at bottom fits, marking next mask bit1 (10 in bit1..bit0 order).",
+      "wrongExplanations": {
+        "0": "You can't place a vertical tile; only one cell is free.",
+        "3": "Both rows can't be marked in next; only bottom extends."
+      },
+      "hint": "You cannot place vertical because r+1 doesn't exist for the bottom cell.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q15",
+      "phase": "Building the Idea",
+      "questionText": "To reduce the number of configurations, which dimension should be used as the number of rows we track?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Use min(n, m) as rows (swap if n > m)",
+          "isCode": false
+        },
+        {
+          "label": "Use max(n, m) as rows",
+          "isCode": false
+        },
+        {
+          "label": "Always use the input n as rows",
+          "isCode": false
+        },
+        {
+          "label": "Pick randomly to average out",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The number of configurations is 2^(rows), so use the smaller dimension as rows.",
+      "wrongExplanations": {
+        "1": "Using the larger dimension increases configurations exponentially.",
+        "2": "Swapping can reduce the number of configurations."
+      },
+      "hint": "Configurations grow exponentially with the number of rows.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Read input, set MOD, and ensure the number of rows is the smaller dimension.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\nMOD = 10**9 + 7\ndata = sys.stdin.read().strip().split()\nn, m = map(int, data[:2])\nif n > m:\n    n, m = m, n",
+          "isCode": true
+        },
+        {
+          "label": "import sys\nMOD = 10**9 + 7\ndata = input().split()\nn, m = map(int, data)\n# no swap",
+          "isCode": true
+        },
+        {
+          "label": "import sys\nMOD = int(1e9+7)\nline = sys.stdin.read()\nn, m = map(int, line.split())\nif m > n:\n    n, m = m, n",
+          "isCode": true
+        },
+        {
+          "label": "import sys\nMOD = 10**9 + 7\nn, m = map(int, sys.stdin.read().split())\n# swap only if m > n\nif m > n:\n    n, m = m, n",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We read both integers, set MOD, and swap so that n ≤ m. Using sys.stdin.read is fine.",
+      "wrongExplanations": {
+        "1": "Not swapping may lead to many more configurations.",
+        "3": "The swap condition is reversed; we need n ≤ m."
+      },
+      "hint": "After this snippet, ensure n ≤ m holds.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\nMOD = 10**9 + 7\ndata = sys.stdin.read().strip().split()\nn, m = map(int, data[:2])\nif n > m:\n    n, m = m, n",
+      "codeLabel": "Input and normalize dimensions"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Start a function that lists all possible next-column configurations for each current column configuration.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def build_transitions(n):\n    W = 1 << n\n    trans = [[] for _ in range(W)]\n    def dfs(pos, curr_mask, next_mask, base):\n        if pos == n:\n            trans[base].append(next_mask)\n            return",
+          "isCode": true
+        },
+        {
+          "label": "def build_transitions(n):\n    W = 1 << n\n    trans = [[] for _ in range(W+1)]\n    def dfs(pos, curr_mask, next_mask, base):\n        if pos > n:\n            trans[base].append(next_mask)\n            return",
+          "isCode": true
+        },
+        {
+          "label": "def build_transitions(n):\n    W = 1 << n\n    trans = [0] * W\n    def dfs(pos, curr_mask, next_mask, base):\n        if pos == n:\n            trans[base] += 1\n            return",
+          "isCode": true
+        },
+        {
+          "label": "def build_transitions(n):\n    trans = [[]]\n    def dfs(pos, curr_mask, next_mask, base):\n        if pos == n:\n            trans.append(next_mask)\n            return",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need a list of lists for W=2^n configurations and append next_mask at pos==n.",
+      "wrongExplanations": {
+        "1": "W+1 creates an extra unused bucket and pos>n base can miss exact-end cases.",
+        "2": "We must store lists of next masks, not counts yet."
+      },
+      "hint": "Each current configuration maps to several possible next configurations.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def build_transitions(n):\n    W = 1 << n\n    trans = [[] for _ in range(W)]\n    def dfs(pos, curr_mask, next_mask, base):\n        if pos == n:\n            trans[base].append(next_mask)\n            return",
+      "codeLabel": "Transitions: header and base"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Fill the branch that skips filled cells and continues.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "        if curr_mask & (1 << pos):\n            dfs(pos + 1, curr_mask, next_mask, base)\n        else:",
+          "isCode": true
+        },
+        {
+          "label": "        if curr_mask & (1 << pos) != 0:\n            dfs(pos, curr_mask, next_mask, base)\n        else:",
+          "isCode": true
+        },
+        {
+          "label": "        if (curr_mask >> pos) == 0:\n            dfs(pos + 1, curr_mask, next_mask, base)\n        else:",
+          "isCode": true
+        },
+        {
+          "label": "        if curr_mask ^ (1 << pos):\n            dfs(pos + 1, curr_mask, next_mask, base)\n        else:",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "If bit pos is set, move to pos+1; otherwise we will place tiles.",
+      "wrongExplanations": {
+        "1": "Not advancing pos would cause infinite recursion.",
+        "3": "XOR check is not a valid test for the bit being set."
+      },
+      "hint": "Check the bit at position pos and advance to the next row if it's already covered.",
+      "isCodeBuilding": true,
+      "codeSnippet": "        if curr_mask & (1 << pos):\n            dfs(pos + 1, curr_mask, next_mask, base)\n        else:",
+      "codeLabel": "Skip filled cell"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Add the option to place a vertical tile (if possible).",
+      "diagram": null,
+      "options": [
+        {
+          "label": "            if pos + 1 < n and not (curr_mask & (1 << (pos + 1))):\n                dfs(pos + 2, curr_mask | (1 << pos) | (1 << (pos + 1)), next_mask, base)",
+          "isCode": true
+        },
+        {
+          "label": "            if pos + 1 <= n:\n                dfs(pos + 2, curr_mask | (1 << pos), next_mask | (1 << (pos + 1)), base)",
+          "isCode": true
+        },
+        {
+          "label": "            if pos + 1 < n and not (next_mask & (1 << (pos + 1))):\n                dfs(pos + 1, curr_mask | (1 << pos) | (1 << (pos + 1)), next_mask, base)",
+          "isCode": true
+        },
+        {
+          "label": "            if pos + 1 < n and (curr_mask & (1 << (pos + 1))):\n                dfs(pos + 2, curr_mask | (1 << pos) | (1 << (pos + 1)), next_mask, base)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Vertical placement requires pos+1 exists and is free in the current column; mark both as filled and advance by 2 rows.",
+      "wrongExplanations": {
+        "1": "This incorrectly sets next_mask and doesn't ensure row pos+1 is free.",
+        "3": "You must place vertical only if the next row is free, not occupied."
+      },
+      "hint": "A vertical tile covers two consecutive rows in the same column.",
+      "isCodeBuilding": true,
+      "codeSnippet": "            if pos + 1 < n and not (curr_mask & (1 << (pos + 1))):\n                dfs(pos + 2, curr_mask | (1 << pos) | (1 << (pos + 1)), next_mask, base)",
+      "codeLabel": "Vertical placement"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Add the option to place a horizontal tile and complete the function to generate transitions for all configurations.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "            dfs(pos + 1, curr_mask | (1 << pos), next_mask | (1 << pos), base)\n    for base in range(W):\n        dfs(0, base, 0, base)\n    return trans",
+          "isCode": true
+        },
+        {
+          "label": "            dfs(pos + 1, curr_mask | (1 << pos), next_mask | (1 << (pos + 1)), base)\n    for base in range(W):\n        dfs(0, 0, base, base)\n    return trans",
+          "isCode": true
+        },
+        {
+          "label": "            dfs(pos + 1, curr_mask | (1 << (pos + 1)), next_mask | (1 << pos), base)\n    for base in range(W):\n        dfs(0, base, base, 0)\n    return trans",
+          "isCode": true
+        },
+        {
+          "label": "            dfs(pos + 2, curr_mask | (1 << pos), next_mask | (1 << pos), base)\n    for base in range(W):\n        dfs(1, base, 0, base)\n    return trans",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "A horizontal tile marks the same row in next_mask and advances one row. We must start dfs at pos=0 for each base mask and return the table.",
+      "wrongExplanations": {
+        "1": "The next column mark should be at the same row, and the initial dfs args are wrong.",
+        "3": "Advancing by 2 for horizontal is incorrect; it covers only one row in this column."
+      },
+      "hint": "Horizontal affects only one row in current column and the same row in next.",
+      "isCodeBuilding": true,
+      "codeSnippet": "            dfs(pos + 1, curr_mask | (1 << pos), next_mask | (1 << pos), base)\n    for base in range(W):\n        dfs(0, base, 0, base)\n    return trans",
+      "codeLabel": "Horizontal and finalize transitions"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "Initialize the configuration count for column 0.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "W = 1 << n\ntrans = build_transitions(n)\ndp = [0] * W\ndp[0] = 1",
+          "isCode": true
+        },
+        {
+          "label": "trans = build_transitions(n)\nW = 1 << n\ndp = [1] * W\ndp[0] = 0",
+          "isCode": true
+        },
+        {
+          "label": "W = 1 << n\ntrans = build_transitions(n)\ndp = [0] * (W - 1)\ndp[0] = 1",
+          "isCode": true
+        },
+        {
+          "label": "W = n\ntrans = build_transitions(n)\ndp = [0] * W\ndp[1] = 1",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "There are W=2^n configurations; before any column is placed, only the empty mask (no pre-filled cells) has 1 way.",
+      "wrongExplanations": {
+        "2": "dp must have size W; masks go from 0..W-1.",
+        "4": "W is not n; it's the number of masks."
+      },
+      "hint": "Before processing any column, you haven't started any horizontal tiles.",
+      "isCodeBuilding": true,
+      "codeSnippet": "W = 1 << n\ntrans = build_transitions(n)\ndp = [0] * W\ndp[0] = 1",
+      "codeLabel": "Initialize counts"
+    },
+    {
+      "id": "q22",
+      "phase": "Writing the Code",
+      "questionText": "Update counts column by column using the precomputed transitions and output the final answer.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "for _ in range(m):\n    ndp = [0] * W\n    for mask in range(W):\n        val = dp[mask]\n        if val == 0:\n            continue\n        for nxt in trans[mask]:\n            ndp[nxt] = (ndp[nxt] + val) % MOD\n    dp = ndp\nprint(dp[0] % MOD)",
+          "isCode": true
+        },
+        {
+          "label": "for _ in range(m):\n    for mask in range(W):\n        for nxt in trans[mask]:\n            dp[mask] = (dp[mask] + dp[nxt]) % MOD\nprint(dp[0])",
+          "isCode": true
+        },
+        {
+          "label": "for _ in range(m):\n    ndp = [0] * W\n    for mask in range(W):\n        for nxt in trans[mask]:\n            ndp[mask] = (ndp[mask] + dp[nxt]) % MOD\n    dp = ndp\nprint(dp[-1] % MOD)",
+          "isCode": true
+        },
+        {
+          "label": "for _ in range(m):\n    ndp = [0] * W\n    for mask in range(W):\n        val = dp[mask]\n        for nxt in trans[mask]:\n            ndp[nxt] += val\n    dp = ndp\nprint(dp[0])",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "For each column, distribute dp[mask] to all reachable next masks, taking modulo, and the final answer is dp[0] after m columns.",
+      "wrongExplanations": {
+        "2": "You should add to ndp[nxt], not ndp[mask], and print dp[0], not dp[-1].",
+        "3": "Modulo should be applied to prevent overflow and keep the modulus requirement."
+      },
+      "hint": "Counts flow from current masks to next masks for each column.",
+      "isCodeBuilding": true,
+      "codeSnippet": "for _ in range(m):\n    ndp = [0] * W\n    for mask in range(W):\n        val = dp[mask]\n        if val == 0:\n            continue\n        for nxt in trans[mask]:\n            ndp[nxt] = (ndp[nxt] + val) % MOD\n    dp = ndp\nprint(dp[0] % MOD)",
+      "codeLabel": "Iterate columns and print"
+    },
+    {
+      "id": "q23",
+      "phase": "Verifying the Solution",
+      "questionText": "What should the program output for input: 1 2?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "MOD (10^9+7)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "A 1×2 grid has exactly one tiling (one horizontal domino).",
+      "wrongExplanations": {
+        "0": "There is a valid placement.",
+        "2": "You cannot place two tiles without overlap."
+      },
+      "hint": "Recall earlier answers for 1×2.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Verifying the Solution",
+      "questionText": "What should the program output for input: 2 2?",
+      "diagram": "2×2 grid can be tiled as:\n- Two verticals\n- Two horizontals",
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Two ways: two vertical tiles or two horizontal tiles.",
+      "wrongExplanations": {
+        "0": "There are more configurations than one.",
+        "3": "No diagonal tiles; only two distinct tilings."
+      },
+      "hint": "List basic configurations.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Verifying the Solution",
+      "questionText": "Given input: 4 7, what output should your program produce (mod 10^9+7)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "781",
+          "isCode": false
+        },
+        {
+          "label": "780",
+          "isCode": false
+        },
+        {
+          "label": "783",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "The sample states 4×7 has 781 tilings.",
+      "wrongExplanations": {
+        "0": "Area is even; there are valid tilings.",
+        "3": "Double-check by running the logic or trusting the sample."
+      },
+      "hint": "Check the provided example output.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Analyzing Complexity",
+      "questionText": "Roughly, what is the time complexity in terms of n (rows tracked) and m (columns processed), assuming we precompute transitions and for each column distribute counts over all configurations?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(m · 2^n · n)",
+          "isCode": false
+        },
+        {
+          "label": "O(2^m)",
+          "isCode": false
+        },
+        {
+          "label": "O(n · m)",
+          "isCode": false
+        },
+        {
+          "label": "O(m · n!)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "There are 2^n configurations; distributing counts touches each and iterates over possible placements per configuration, proportional to n.",
+      "wrongExplanations": {
+        "1": "The exponential factor is in n (rows), not m (columns).",
+        "2": "This underestimates; we process many configurations per column."
+      },
+      "hint": "Consider 2^n configurations per column.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q27",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the space used by the arrays that hold counts for configurations at a given column?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(2^n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n · m)",
+          "isCode": false
+        },
+        {
+          "label": "O(m)",
+          "isCode": false
+        },
+        {
+          "label": "O(n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The count arrays have one entry per configuration, i.e., 2^n entries.",
+      "wrongExplanations": {
+        "1": "Counts only depend on configurations, not both dimensions multiplied.",
+        "3": "n alone is not the number of configurations."
+      },
+      "hint": "How many possible configuration masks are there?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q28",
+      "phase": "Analyzing Complexity",
+      "questionText": "If n×m is odd, what will the program output without any special checks?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "It depends on transitions",
+          "isCode": false
+        },
+        {
+          "label": "MOD (10^9+7)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "No complete coverage is possible; all counts for complete configurations end up zero.",
+      "wrongExplanations": {
+        "2": "Transitions cannot produce a complete coverage with odd area.",
+        "1": "There is no valid tiling."
+      },
+      "hint": "Recall parity argument from earlier.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\nMOD = 10**9 + 7\ndata = sys.stdin.read().strip().split()\nn, m = map(int, data[:2])\nif n > m:\n    n, m = m, n",
+    "def build_transitions(n):\n    W = 1 << n\n    trans = [[] for _ in range(W)]\n    def dfs(pos, curr_mask, next_mask, base):\n        if pos == n:\n            trans[base].append(next_mask)\n            return",
+    "        if curr_mask & (1 << pos):\n            dfs(pos + 1, curr_mask, next_mask, base)\n        else:",
+    "            if pos + 1 < n and not (curr_mask & (1 << (pos + 1))):\n                dfs(pos + 2, curr_mask | (1 << pos) | (1 << (pos + 1)), next_mask, base)",
+    "            dfs(pos + 1, curr_mask | (1 << pos), next_mask | (1 << pos), base)\n    for base in range(W):\n        dfs(0, base, 0, base)\n    return trans",
+    "W = 1 << n\ntrans = build_transitions(n)\ndp = [0] * W\ndp[0] = 1",
+    "for _ in range(m):\n    ndp = [0] * W\n    for mask in range(W):\n        val = dp[mask]\n        if val == 0:\n            continue\n        for nxt in trans[mask]:\n            ndp[nxt] = (ndp[nxt] + val) % MOD\n    dp = ndp\nprint(dp[0] % MOD)"
+  ],
+  "reasoningChain": [
+    {
+      "question": "What grids are impossible to tile?",
+      "insight": "If n×m is odd, the answer is 0 because each tile covers 2 cells."
+    },
+    {
+      "question": "How to avoid brute-force over placements?",
+      "insight": "Process the grid column by column and only carry which cells in the current column are already occupied by tiles from the left."
+    },
+    {
+      "question": "How to represent carried information compactly?",
+      "insight": "Use an n-bit mask to represent which rows in the current column are pre-filled; there are 2^n configurations."
+    },
+    {
+      "question": "How to complete a column given an incoming configuration?",
+      "insight": "From the topmost free row, either place a vertical tile within the column (if possible) or a horizontal tile into the next column, building a next-column mask."
+    },
+    {
+      "question": "How to combine columns to get the total count?",
+      "insight": "Initialize the count for empty incoming configuration and iterate over m columns, distributing counts to all reachable next configurations modulo 1e9+7."
+    },
+    {
+      "question": "How to keep computation small?",
+      "insight": "Swap dimensions so that the number of rows tracked is the smaller of n and m, minimizing 2^rows."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1296,
+    "output_tokens": 17058,
+    "input_cost": 0.00162,
+    "output_cost": 0.17058,
+    "total_cost": 0.1722
+  }
+}

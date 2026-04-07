@@ -1,0 +1,918 @@
+{
+  "id": "school-dance-maximum-pairs",
+  "title": "School Dance",
+  "difficulty": "intermediate",
+  "tags": [
+    "graph",
+    "matching"
+  ],
+  "estimatedMinutes": 50,
+  "language": "python",
+  "description": "There are n boys and m girls in a school and k potential boy–girl pairs who are willing to dance together. Each person can be in at most one pair. Find the maximum number of dance pairs and output any set of pairs achieving this maximum.\n\nInput:\n- First line: three integers n, m, k\n- Next k lines: two integers a, b meaning boy a and girl b are willing to dance together.\n\nOutput:\n- First print r, the maximum number of pairs.\n- Then print r lines, each with two integers a b describing a pair.\n\nYou can print any valid set of pairs that achieves r.",
+  "examples": [
+    {
+      "input": "3 2 4\n1 1\n1 2\n2 1\n3 1\n",
+      "output": "2\n1 2\n3 1\n",
+      "explanation": "One optimal pairing is boy 1 with girl 2, and boy 3 with girl 1. Any valid maximum-sized pairing is accepted."
+    }
+  ],
+  "constraints": [
+    "1 ≤ n, m ≤ 500",
+    "1 ≤ k ≤ 1000",
+    "1 ≤ a ≤ n",
+    "1 ≤ b ≤ m"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "If n=1, m=1, k=1 with the single potential pair (1,1), what is the maximum number of dance pairs?",
+      "diagram": "Boys: [1]\nGirls: [1]\nEdges: 1-1",
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "It depends on input order",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "There is one possible boy–girl pair and each person can be used at most once, so the maximum is 1.",
+      "wrongExplanations": {
+        "0": "There is a valid pair (1,1), so 0 is too small.",
+        "2": "Order doesn't change the existence of the only possible pair."
+      },
+      "hint": "Each pair consumes one boy and one girl.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "If boy 1 is paired with girl 1, can girl 1 also be paired with another boy at the same time?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, if another boy also prefers girl 1",
+          "isCode": false
+        },
+        {
+          "label": "Only if boy 1 agrees to share",
+          "isCode": false
+        },
+        {
+          "label": "No, each person can be in at most one pair",
+          "isCode": false
+        },
+        {
+          "label": "Yes, if we need to maximize the count",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "A valid solution uses each boy and girl at most once. Girl 1 cannot be in two pairs.",
+      "wrongExplanations": {
+        "0": "Multiple boys can want her, but only one can be paired with her.",
+        "3": "Maximizing count still respects the one-pair-per-person rule."
+      },
+      "hint": "The constraint is per person, not per edge.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "Consider n=2, m=2, edges: (1,1), (1,2), (2,1). If you greedily pick (1,1) first and never reconsider, how many pairs might you end up with?",
+      "diagram": "Boys: 1 -- 1,2\n      2 -- 1\nGirls: 1,2",
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Choosing (1,1) blocks boy 2 from pairing with girl 1, and girl 2 is only connected to boy 1. You may end with just 1 pair.",
+      "wrongExplanations": {
+        "1": "2 is achievable overall, but not if you lock (1,1) and never reconsider.",
+        "3": "There are only 2 pairs possible at most with 2 boys and 2 girls."
+      },
+      "hint": "After fixing (1,1), what's left for boy 2?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "For the same instance (n=2, m=2, edges: (1,1), (1,2), (2,1)), what is the true maximum number of pairs?",
+      "diagram": "Edges: 1-1, 1-2, 2-1",
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "Cannot determine without weights",
+          "isCode": false
+        },
+        {
+          "label": "Depends on input order",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Pairs (1,2) and (2,1) give 2. Any valid maximum solution is acceptable.",
+      "wrongExplanations": {
+        "0": "Two disjoint pairs exist: (1,2) and (2,1).",
+        "3": "Maximum count is about existence of disjoint pairs, not order."
+      },
+      "hint": "Try pairing boy 2 with girl 1, then boy 1 with girl 2.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Understanding the Problem",
+      "questionText": "About the output format: Do the pairs need to be in any particular order?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, sorted by boy index",
+          "isCode": false
+        },
+        {
+          "label": "Yes, sorted by girl index",
+          "isCode": false
+        },
+        {
+          "label": "No, any order is allowed",
+          "isCode": false
+        },
+        {
+          "label": "Yes, same order as input edges",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Any valid set of pairs that achieves the maximum count is accepted in any order.",
+      "wrongExplanations": {
+        "0": "The problem doesn't require sorting.",
+        "1": "Sorting by girls is also not required."
+      },
+      "hint": "Only the count and validity matter.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "Is checking all subsets of the k edges feasible here? What is the number of subsets to consider?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(2^k) subsets, infeasible for k up to 1000",
+          "isCode": false
+        },
+        {
+          "label": "O(k!) subsets, feasible for k up to 1000",
+          "isCode": false
+        },
+        {
+          "label": "O(k^2) subsets, feasible",
+          "isCode": false
+        },
+        {
+          "label": "Exactly n*m subsets",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "There are 2^k subsets of edges; 2^1000 is astronomically large.",
+      "wrongExplanations": {
+        "1": "k! is even worse than 2^k; also not the right count.",
+        "3": "n*m is the number of possible edges, not subsets of the given k."
+      },
+      "hint": "Each edge can be included or not independently.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "Suppose boy X wants girl Y, but Y is currently paired with boy Z. What is a good strategy to still try to increase the total number of pairs?",
+      "diagram": "X -- Y (taken by Z)\nZ -- ? (maybe other options)",
+      "options": [
+        {
+          "label": "Always skip Y and try only other girls for X",
+          "isCode": false
+        },
+        {
+          "label": "Unpair Y and leave Z unmatched to free Y for X",
+          "isCode": false
+        },
+        {
+          "label": "Try to move Z to another acceptable girl, freeing Y for X if possible",
+          "isCode": false
+        },
+        {
+          "label": "Pair X with any random girl even if not acceptable",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Reassigning Y's current partner to another option can free Y without reducing the total count.",
+      "wrongExplanations": {
+        "0": "Skipping might miss opportunities to rearrange for a better overall result.",
+        "1": "Unpairing reduces the count; we want to keep or increase it."
+      },
+      "hint": "Consider chain reactions of reassignments.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Exploring Approaches",
+      "questionText": "Consider boys 1,2,3 and girls A,B with edges: 1-A, 1-B, 2-B, 3-A. Starting from (1,A), then (2,B), boy 3 wants A. What should we attempt to keep the total as large as possible?",
+      "diagram": "1: A,B\n2: B\n3: A\nCurrent: (1,A), (2,B)",
+      "options": [
+        {
+          "label": "Do nothing; keep (1,A) and leave 3 unmatched",
+          "isCode": false
+        },
+        {
+          "label": "Break (2,B) and pair (1,B) then (3,A) (still 2 total)",
+          "isCode": false
+        },
+        {
+          "label": "Ask 1 to try B; if B is free, move 1 to B and give A to 3; if B is taken but its boy can move, keep trying",
+          "isCode": false
+        },
+        {
+          "label": "Unpair both and try to pair everyone arbitrarily",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Trying to move the current holder along their options can maintain the total while accommodating the new request.",
+      "wrongExplanations": {
+        "0": "This misses a chance to still keep 2 pairs by rearranging.",
+        "1": "This rearranges but still keeps count at 2; the method should try to maintain or increase count systematically."
+      },
+      "hint": "Follow possible moves along acceptable edges without reducing the total.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "How should we store the potential pairs for efficient traversal given n,m ≤ 500 and k ≤ 1000?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Adjacency list: for each boy, store the list of acceptable girls",
+          "isCode": false
+        },
+        {
+          "label": "Adjacency matrix of size n×m with booleans",
+          "isCode": false
+        },
+        {
+          "label": "A flat list of pairs scanned afresh each time",
+          "isCode": false
+        },
+        {
+          "label": "A set of all pairs and iterate over the set",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "An adjacency list fits k edges and allows fast iteration over a boy’s options.",
+      "wrongExplanations": {
+        "1": "Matrix works but is larger than needed and slower to iterate per boy.",
+        "2": "Scanning all k pairs per step adds overhead when we only need neighbors."
+      },
+      "hint": "We need quick access to a boy’s neighbors.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "Which mapping is simplest for tracking who is using each girl during the process?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "An array girl_to_boy where girl_to_boy[b] is the boy currently paired with girl b (or 0 if free)",
+          "isCode": false
+        },
+        {
+          "label": "An array boy_to_girl where boy_to_girl[a] is the girl paired with boy a (or 0)",
+          "isCode": false
+        },
+        {
+          "label": "Both mappings are strictly necessary",
+          "isCode": false
+        },
+        {
+          "label": "No mapping; recompute by scanning all pairs each time",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We mainly need to know if a girl is taken and by whom to attempt reassignments.",
+      "wrongExplanations": {
+        "1": "boy_to_girl alone doesn’t tell us quickly if a target girl is free.",
+        "2": "One mapping (girl->boy) suffices for the algorithm."
+      },
+      "hint": "When exploring a desired girl, which check is needed first?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "Why do we need a 'visited' boolean array for girls during a single boy's attempt to find a place?",
+      "diagram": "Attempt for boy u:\nvisit girls as you explore options and reassignments",
+      "options": [
+        {
+          "label": "To avoid revisiting the same girls and prevent cycles during the search",
+          "isCode": false
+        },
+        {
+          "label": "To store the final matching",
+          "isCode": false
+        },
+        {
+          "label": "To ensure each girl is considered exactly once overall",
+          "isCode": false
+        },
+        {
+          "label": "To count how many girls each boy likes",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Without marking visited girls, reassignments could loop and waste time.",
+      "wrongExplanations": {
+        "1": "Final matching is stored in the mapping, not in visited.",
+        "3": "Degrees can be precomputed from adjacency; visited is for search control."
+      },
+      "hint": "Think about the possibility of bouncing between the same girls.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "When should the 'visited' array be reset?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Reset once at the very beginning",
+          "isCode": false
+        },
+        {
+          "label": "Reset after each successful pairing only",
+          "isCode": false
+        },
+        {
+          "label": "Reset before each boy's attempt to find a place",
+          "isCode": false
+        },
+        {
+          "label": "Never reset it",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Each boy’s attempt is an independent search over girls; we reset visited per attempt.",
+      "wrongExplanations": {
+        "0": "Visited needs to be fresh for each attempt, not just once.",
+        "3": "Never resetting would block exploring valid paths in future attempts."
+      },
+      "hint": "Consider that each attempt explores from a different starting boy.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "When exploring a desired girl inside one attempt, when should we mark visited[girl] = True?",
+      "diagram": "For each girl g that the boy tries\n- Check visited[g]\n- Mark visited[g]\n- Try to assign",
+      "options": [
+        {
+          "label": "Before attempting any reassignment through her current partner",
+          "isCode": false
+        },
+        {
+          "label": "Only after a successful reassignment",
+          "isCode": false
+        },
+        {
+          "label": "Only if the girl is free",
+          "isCode": false
+        },
+        {
+          "label": "Never; it’s unnecessary",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Marking before recursion prevents revisiting the same girl through different paths in the same attempt.",
+      "wrongExplanations": {
+        "1": "Marking after success doesn’t prevent cycles during exploration.",
+        "2": "Even taken girls must be marked to avoid cycles when attempting reassignments."
+      },
+      "hint": "Protect against multiple paths reaching the same girl during one attempt.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Building the Idea",
+      "questionText": "Does the order of iterating boys affect the maximum count found by this approach?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "It can block the optimal count if the order is unlucky",
+          "isCode": false
+        },
+        {
+          "label": "It might change which specific pairs are chosen, but not the maximum count",
+          "isCode": false
+        },
+        {
+          "label": "It always yields the same specific pairs",
+          "isCode": false
+        },
+        {
+          "label": "It doesn't matter only if the graph is a tree",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "This approach rearranges as needed; different orders may change which pairs appear but still reach the max count.",
+      "wrongExplanations": {
+        "0": "Reassignment attempts avoid getting stuck at a suboptimal count.",
+        "2": "Multiple maximum solutions can exist; pairs can differ."
+      },
+      "hint": "Focus on maximizing count, not on a unique solution.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Read input and build the adjacency list of girls for each boy (1-based indexing). Choose the correct code.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "data = input().split(); n,m,k = map(int, data[:3])\nadj = [[] for _ in range(n)]\nfor _ in range(k):\n    a,b = map(int, input().split())\n    adj[a-1].append(b-1)",
+          "isCode": true
+        },
+        {
+          "label": "import sys\ndata = sys.stdin.read().strip().split()\nit = iter(data)\nn = int(next(it)); m = int(next(it)); k = int(next(it))\nadj = [[] for _ in range(m+1)]\nfor _ in range(k):\n    a = int(next(it)); b = int(next(it))\n    adj[b].append(a)",
+          "isCode": true
+        },
+        {
+          "label": "import sys\ndata = sys.stdin.read().strip().split()\nit = iter(data)\nn = int(next(it)); m = int(next(it)); k = int(next(it))\nadj = [[] for _ in range(n+1)]\nfor _ in range(k):\n    a = int(next(it)); b = int(next(it))\n    adj[a].append(b)",
+          "isCode": true
+        },
+        {
+          "label": "n, m, k = map(int, input().split())\nadj = [[False]*(m+1) for _ in range(n+1)]\nfor _ in range(k):\n    a,b = map(int, input().split())\n    adj[a][b] = True",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "We need a list of girls per boy with 1-based indices. Reading all tokens is efficient and adj[a].append(b) matches edges.",
+      "wrongExplanations": {
+        "0": "Mixes 0-based indexing and uses input() per edge; we plan 1-based and adjacency lists sized n+1.",
+        "1": "Builds girls->boys instead of boys->girls and sizes the list by m, not n."
+      },
+      "hint": "adj should be length n+1 and store girls for each boy.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\ndata = sys.stdin.read().strip().split()\nit = iter(data)\nn = int(next(it)); m = int(next(it)); k = int(next(it))\nadj = [[] for _ in range(n+1)]\nfor _ in range(k):\n    a = int(next(it)); b = int(next(it))\n    adj[a].append(b)",
+      "codeLabel": "Read input and build adjacency"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Initialize the mapping from girls to their current boy (0 if free) and a counter for results.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "match_g = [0]*(n+1)\nres = 0",
+          "isCode": true
+        },
+        {
+          "label": "match_g = [0]*(m+1)\nres = 0",
+          "isCode": true
+        },
+        {
+          "label": "match_g = {}\nres = []",
+          "isCode": true
+        },
+        {
+          "label": "match_g = [-1]*(m)\nres = 0",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "We track for each girl (1..m) who she is paired with. res counts successful placements.",
+      "wrongExplanations": {
+        "0": "Size should be m+1 (girls), not n+1 (boys).",
+        "2": "A dict and list aren’t needed; a fixed-size array works well."
+      },
+      "hint": "We need quick lookup by girl index.",
+      "isCodeBuilding": true,
+      "codeSnippet": "match_g = [0] * (m + 1)\nres = 0",
+      "codeLabel": "Init matching and counter"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Define the function header that tries to place a given boy, using a 'visited' array of girls for this attempt.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def try_assign(u, visited):",
+          "isCode": true
+        },
+        {
+          "label": "def try_assign(u):",
+          "isCode": true
+        },
+        {
+          "label": "def assign_boy(girl, visited):",
+          "isCode": true
+        },
+        {
+          "label": "def try_assign(u, seen, match_g):",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We pass the current boy 'u' and the per-attempt 'visited' array.",
+      "wrongExplanations": {
+        "1": "We need the visited array per attempt.",
+        "2": "The function processes a boy; naming the parameter 'girl' is misleading."
+      },
+      "hint": "The function uses shared adj and match_g; pass only what varies per attempt.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def try_assign(u, visited):",
+      "codeLabel": "Function header"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Fill the function body: iterate over u's girls, skip visited, mark visited, try to assign, and return accordingly.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    for g in adj[u]:\n        if visited[g]:\n            continue\n        visited[g] = True\n        if match_g[g] == 0 or try_assign(match_g[g], visited):\n            match_g[g] = u\n            return True\n    return False",
+          "isCode": true
+        },
+        {
+          "label": "    for g in range(1, m+1):\n        if g in adj[u]:\n            if not visited[g]:\n                if match_g[g] == 0:\n                    return True\n    return False",
+          "isCode": true
+        },
+        {
+          "label": "    for g in adj[u]:\n        if not visited[g]:\n            if match_g[g] != 0 and not try_assign(match_g[g], visited):\n                continue\n            visited[g] = True\n            return True\n    return False",
+          "isCode": true
+        },
+        {
+          "label": "    for g in adj[u]:\n        visited[g] = True\n        if match_g[g] == 0:\n            match_g[g] = u\n            return True\n    return False",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We iterate only neighbors, skip visited, mark visited before recursion, and assign if girl is free or her current boy can be moved.",
+      "wrongExplanations": {
+        "1": "Scanning all girls is wasteful; it also never updates match_g or recurses correctly.",
+        "3": "Always marking visited without checking can cause incorrect behavior and no reassignment attempts."
+      },
+      "hint": "Try the standard pattern: mark, check free, else try to move current boy.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    for g in adj[u]:\n        if visited[g]:\n            continue\n        visited[g] = True\n        if match_g[g] == 0 or try_assign(match_g[g], visited):\n            match_g[g] = u\n            return True\n    return False",
+      "codeLabel": "Function body"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Write the main loop that tries to place each boy, resetting 'visited' each time and incrementing the result when successful.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "for u in range(1, n+1):\n    visited = [False] * (m + 1)\n    if try_assign(u, visited):\n        res += 1",
+          "isCode": true
+        },
+        {
+          "label": "for u in range(n):\n    visited = [False] * (n + 1)\n    if try_assign(u, visited):\n        res += 1",
+          "isCode": true
+        },
+        {
+          "label": "visited = [False] * (m + 1)\nfor u in range(1, n+1):\n    if try_assign(u, visited):\n        res += 1",
+          "isCode": true
+        },
+        {
+          "label": "for u in range(1, n+1):\n    if try_assign(u, [False] * (m + 1)):\n        res = 1",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We reset visited per boy and count each successful placement.",
+      "wrongExplanations": {
+        "1": "Wrong ranges and visited size; boys are 1..n and visited is per girl (size m+1).",
+        "2": "Visited must be fresh per attempt, not shared across all."
+      },
+      "hint": "Each attempt must have a clean visited array.",
+      "isCodeBuilding": true,
+      "codeSnippet": "for u in range(1, n+1):\n    visited = [False] * (m + 1)\n    if try_assign(u, visited):\n        res += 1",
+      "codeLabel": "Main placement loop"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Print the result and the pairs (boy, girl). Choose the correct code.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "print(res)\nfor g in range(1, m+1):\n    if match_g[g] != 0:\n        print(match_g[g], g)",
+          "isCode": true
+        },
+        {
+          "label": "print(res)\nfor a in range(1, n+1):\n    if match_g[a] != 0:\n        print(a, match_g[a])",
+          "isCode": true
+        },
+        {
+          "label": "print(res)\nfor g in range(m):\n    if match_g[g] > 0:\n        print(g, match_g[g])",
+          "isCode": true
+        },
+        {
+          "label": "print(res)\nfor g, a in enumerate(match_g):\n    if a:\n        print(g, a)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We iterate girls 1..m and print the mapped boy for each taken girl.",
+      "wrongExplanations": {
+        "1": "match_g indexes by girl, not by boy.",
+        "3": "Enumerating includes index 0 and reverses order; expected format is 'boy girl'."
+      },
+      "hint": "Our mapping is girl -> boy.",
+      "isCodeBuilding": true,
+      "codeSnippet": "print(res)\nfor g in range(1, m+1):\n    if match_g[g] != 0:\n        print(match_g[g], g)",
+      "codeLabel": "Output the result"
+    },
+    {
+      "id": "q21",
+      "phase": "Verifying the Solution",
+      "questionText": "Run the built approach on the sample input:\n3 2 4\n1 1\n1 2\n2 1\n3 1\nWhat number does it print first?",
+      "diagram": "Edges:\n1: 1,2\n2: 1\n3: 1",
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "It depends on iteration order and can be 1 or 2",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "The maximum number of pairs is 2; the code finds it.",
+      "wrongExplanations": {
+        "0": "Two disjoint pairs exist.",
+        "3": "With reassignment attempts, it will achieve the maximum count."
+      },
+      "hint": "Try constructing pairs (1,2) and (3,1).",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q22",
+      "phase": "Verifying the Solution",
+      "questionText": "Which of the following is a valid output pair list for the sample (after printing 2)?",
+      "diagram": "Possible pairs: (1,2), (3,1) or (2,1), (1,2)",
+      "options": [
+        {
+          "label": "1 1\n2 1",
+          "isCode": false
+        },
+        {
+          "label": "1 2\n3 1",
+          "isCode": false
+        },
+        {
+          "label": "2 1\n3 1\n",
+          "isCode": false
+        },
+        {
+          "label": "1 2\n2 1\n3 1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "1 2 and 3 1 are both valid edges and disjoint. Order doesn't matter.",
+      "wrongExplanations": {
+        "0": "Girl 1 would be used twice; invalid.",
+        "2": "Boy 3 with girl 1 is valid, but this lists only two pairs with the same girl; counts to 2 but repeats girl 1 twice which violates constraints."
+      },
+      "hint": "Each girl and each boy can appear at most once.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q23",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the time complexity of this approach in terms of n (boys), m (girls), and k (edges)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n * k)",
+          "isCode": false
+        },
+        {
+          "label": "O(k^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(n * m)",
+          "isCode": false
+        },
+        {
+          "label": "O(2^k)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each boy’s attempt explores at most all incident edges and may traverse others through reassignments; overall about O(n*k).",
+      "wrongExplanations": {
+        "2": "We don’t scan the full matrix; we follow edges.",
+        "3": "This is the brute-force subsets complexity, not our algorithm."
+      },
+      "hint": "Each attempt is roughly proportional to the number of edges it explores.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the space complexity of the solution?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n + m + k)",
+          "isCode": false
+        },
+        {
+          "label": "O(n * m)",
+          "isCode": false
+        },
+        {
+          "label": "O(k^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(n + m)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Adjacency list stores k edges; arrays for girls and visited add O(m), lists for boys add O(n).",
+      "wrongExplanations": {
+        "1": "We do not store an n×m matrix.",
+        "3": "We also store k edges; not just n+m."
+      },
+      "hint": "Consider adjacency list plus arrays.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Analyzing Complexity",
+      "questionText": "Edge case check: if k=0 (no potential pairs), what should the program output?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "0 and then no further lines",
+          "isCode": false
+        },
+        {
+          "label": "0 followed by n+m zero pairs",
+          "isCode": false
+        },
+        {
+          "label": "Nothing (empty output)",
+          "isCode": false
+        },
+        {
+          "label": "An error message",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "With no edges, the maximum is 0 and there are no pairs to list.",
+      "wrongExplanations": {
+        "1": "We should not print placeholder pairs.",
+        "2": "We must still print the count 0."
+      },
+      "hint": "The first line is always the count.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\ndata = sys.stdin.read().strip().split()\nit = iter(data)\nn = int(next(it)); m = int(next(it)); k = int(next(it))\nadj = [[] for _ in range(n+1)]\nfor _ in range(k):\n    a = int(next(it)); b = int(next(it))\n    adj[a].append(b)",
+    "match_g = [0] * (m + 1)\nres = 0",
+    "def try_assign(u, visited):",
+    "    for g in adj[u]:\n        if visited[g]:\n            continue\n        visited[g] = True\n        if match_g[g] == 0 or try_assign(match_g[g], visited):\n            match_g[g] = u\n            return True\n    return False",
+    "for u in range(1, n+1):\n    visited = [False] * (m + 1)\n    if try_assign(u, visited):\n        res += 1",
+    "print(res)\nfor g in range(1, m+1):\n    if match_g[g] != 0:\n        print(match_g[g], g)"
+  ],
+  "reasoningChain": [
+    {
+      "question": "What constitutes a valid pair and why each person can appear at most once?",
+      "insight": "Pairs are between a boy and a girl; the matching must be disjoint on both sides."
+    },
+    {
+      "question": "Why naive greedy choices can fail on small examples?",
+      "insight": "Locally picking available pairs without reconsideration can block better overall arrangements."
+    },
+    {
+      "question": "How can reassigning a currently paired person help?",
+      "insight": "Attempting to move a conflicted partner to another acceptable option can free a desired match without reducing the total."
+    },
+    {
+      "question": "What data structures allow efficient exploration and checks?",
+      "insight": "Use an adjacency list (boy -> girls) and an array mapping girl -> current boy; also maintain a per-attempt visited array for girls."
+    },
+    {
+      "question": "How to structure the search for each boy?",
+      "insight": "For each boy, try his girls; if a girl is free, take her; if taken, try to place her current boy elsewhere, marking visited girls to avoid cycles."
+    },
+    {
+      "question": "How to implement and output the result?",
+      "insight": "Implement the search as a function called per boy with a fresh visited array; count successes and print girl-mapped pairs."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1447,
+    "output_tokens": 14429,
+    "input_cost": 0.001809,
+    "output_cost": 0.14429,
+    "total_cost": 0.146099
+  }
+}

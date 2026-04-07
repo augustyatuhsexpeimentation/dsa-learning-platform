@@ -1,0 +1,983 @@
+{
+  "id": "reading-books-min-time",
+  "title": "Reading Books",
+  "difficulty": "intermediate",
+  "tags": [
+    "sorting",
+    "two-pointer",
+    "binary-search"
+  ],
+  "estimatedMinutes": 35,
+  "language": "python",
+  "description": "There are n books, and Kotivalo and Justiina are going to read them all. For each book, you know the time it takes to read it.\n\nThey both read each book from beginning to end, and they cannot read a book at the same time. What is the minimum total time required?\n\nInput:\n- The first line has an integer n: the number of books.\n- The second line has n integers t_1, t_2, ..., t_n: the time required to read each book.\n\nOutput:\n- Print one integer: the minimum total time.",
+  "examples": [
+    {
+      "input": "3\n2 8 3",
+      "output": "16",
+      "explanation": "Total sum is 13 and the longest book is 8, so the answer is max(13, 2*8)=16."
+    }
+  ],
+  "constraints": [
+    "1 ≤ n ≤ 2 · 10^5",
+    "1 ≤ t_i ≤ 10^9"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "Which statement correctly interprets the rules?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Each book is read by exactly one of them.",
+          "isCode": false
+        },
+        {
+          "label": "Each book is read fully by both, but they cannot read the same book at the same time.",
+          "isCode": false
+        },
+        {
+          "label": "They can split each book between them (e.g., each reads half).",
+          "isCode": false
+        },
+        {
+          "label": "They can read the same book together to finish it faster.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Both must read every book, and they cannot read the same book simultaneously. They may read different books at the same time.",
+      "wrongExplanations": {
+        "0": "The problem states both read each book.",
+        "2": "No splitting is allowed; each reads every book fully."
+      },
+      "hint": null,
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "If there is only one book with time 7, what is the minimum total time?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "7",
+          "isCode": false
+        },
+        {
+          "label": "14",
+          "isCode": false
+        },
+        {
+          "label": "0 (they read it together, so instant)",
+          "isCode": false
+        },
+        {
+          "label": "21",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "They both must read the single book and cannot do so simultaneously, so it takes 7 + 7 = 14.",
+      "wrongExplanations": {
+        "0": "One person needs 7, but both must read it separately.",
+        "2": "They cannot read the same book at the same time."
+      },
+      "hint": "They must read the same book one after the other.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "For two books with times [5, 5], what is the minimum total time?",
+      "diagram": "A timeline idea:\n0----5----10\nA: [B1][B2]\nB: [B2][B1]",
+      "options": [
+        {
+          "label": "10",
+          "isCode": false
+        },
+        {
+          "label": "15",
+          "isCode": false
+        },
+        {
+          "label": "20",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "One reads book1 while the other reads book2 (0–5), then they swap (5–10). Total time is 10.",
+      "wrongExplanations": {
+        "2": "20 is unnecessary; they can overlap on different books.",
+        "3": "Each person must spend at least 10 total reading time."
+      },
+      "hint": "Let them read different books in parallel, then swap.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "For books [2, 8, 3], is finishing in 13 time units possible?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, a schedule exists finishing in 13.",
+          "isCode": false
+        },
+        {
+          "label": "No, at least 16 is needed.",
+          "isCode": false
+        },
+        {
+          "label": "Yes, exactly 14 is achievable.",
+          "isCode": false
+        },
+        {
+          "label": "No, at least 21 is needed.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "They must each read the 8-length book at different times, forcing at least 16 time units overall.",
+      "wrongExplanations": {
+        "0": "13 equals the sum but ignores the longest book being read twice without overlap.",
+        "2": "14 still undercounts the non-overlap of the longest book's two readings."
+      },
+      "hint": "Consider the longest book and that both must read it without overlap.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Understanding the Problem",
+      "questionText": "While one person is reading a certain book, what can the other do?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Must wait idle until that book is finished.",
+          "isCode": false
+        },
+        {
+          "label": "May read any other book concurrently.",
+          "isCode": false
+        },
+        {
+          "label": "May read the same book starting from the end to avoid overlap.",
+          "isCode": false
+        },
+        {
+          "label": "Must alternate turns strictly after each book.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Only simultaneous reading of the same book is forbidden; reading different books in parallel is allowed.",
+      "wrongExplanations": {
+        "0": "Idling is not required; they can read different books.",
+        "2": "They must read each book from beginning to end, not from the end."
+      },
+      "hint": "The restriction is only about the same book at the same time.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "What is a basic lower bound for the minimum total time based on a single person's total reading?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "sum(t)",
+          "isCode": false
+        },
+        {
+          "label": "max(t)",
+          "isCode": false
+        },
+        {
+          "label": "sum(t) / 2",
+          "isCode": false
+        },
+        {
+          "label": "2 · sum(t)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each person must personally spend sum(t) time reading, so the total time cannot be less than sum(t).",
+      "wrongExplanations": {
+        "2": "Dividing by 2 assumes splitting the workload, but each must read all books."
+      },
+      "hint": "How long does one person spend in total across all books?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "What lower bound arises from the single longest book of time L = max(t)?",
+      "diagram": "Two non-overlapping intervals of length L (for the same book).",
+      "options": [
+        {
+          "label": "2 · max(t)",
+          "isCode": false
+        },
+        {
+          "label": "max(t)",
+          "isCode": false
+        },
+        {
+          "label": "max(t) / 2",
+          "isCode": false
+        },
+        {
+          "label": "sum(t) + max(t)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Both must read the longest book and cannot overlap on it, so these two intervals require at least 2·max(t) time in total.",
+      "wrongExplanations": {
+        "1": "This ignores that both must read that same book.",
+        "3": "This is not a justified lower bound; it can exceed necessity."
+      },
+      "hint": "Two readings of the same longest book cannot overlap.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Exploring Approaches",
+      "questionText": "Combining the two lower bounds, which expression is the strongest candidate for the minimum total time?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "max(sum(t), 2 · max(t))",
+          "isCode": false
+        },
+        {
+          "label": "sum(t) + max(t)",
+          "isCode": false
+        },
+        {
+          "label": "(sum(t) + 2 · max(t)) / 2",
+          "isCode": false
+        },
+        {
+          "label": "2 · sum(t)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The time must be at least both sum(t) and 2·max(t), hence at least their maximum.",
+      "wrongExplanations": {
+        "2": "Averaging bounds does not give a valid minimum; it can be too small.",
+        "1": "This often overshoots the true minimum."
+      },
+      "hint": "Take the larger of the two lower bounds.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Exploring Approaches",
+      "questionText": "Do we need to simulate a detailed schedule to know the answer, or does it always match the expression from the previous question?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "We must simulate; no short formula suffices.",
+          "isCode": false
+        },
+        {
+          "label": "It always equals max(sum(t), 2 · max(t)).",
+          "isCode": false
+        },
+        {
+          "label": "It equals sum(t) unless the largest book is unique.",
+          "isCode": false
+        },
+        {
+          "label": "It can sometimes be even larger than sum(t) + max(t).",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "The two lower bounds are tight; an arrangement achieving max(sum(t), 2·max(t)) always exists.",
+      "wrongExplanations": {
+        "0": "A full simulation is unnecessary; the formula suffices.",
+        "2": "Uniqueness of the largest book is irrelevant to the formula."
+      },
+      "hint": "Think about filling time while one reads the longest book(s) with other books.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "Apply the formula to [2, 8, 3]. What result do you get?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "13",
+          "isCode": false
+        },
+        {
+          "label": "16",
+          "isCode": false
+        },
+        {
+          "label": "11",
+          "isCode": false
+        },
+        {
+          "label": "8",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "sum=13, max=8 → max(13, 2*8)=16.",
+      "wrongExplanations": {
+        "0": "Ignores the 2*max constraint.",
+        "3": "Just the longest book time, not the final answer."
+      },
+      "hint": "Compute sum and 2*max, then take the larger.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "For [1, 1, 1, 1], what is the minimum total time?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "sum=4, max=1 → max(4, 2)=4.",
+      "wrongExplanations": {
+        "1": "3 is less than the time a single person needs.",
+        "0": "Less than a single person's total reading time."
+      },
+      "hint": "sum=4, 2*max=2.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "For [100, 1, 1], what is the minimum total time?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "102",
+          "isCode": false
+        },
+        {
+          "label": "100",
+          "isCode": false
+        },
+        {
+          "label": "200",
+          "isCode": false
+        },
+        {
+          "label": "202",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "sum=102, max=100 → max(102, 200)=200.",
+      "wrongExplanations": {
+        "0": "sum is too small because the longest book must be read twice without overlap."
+      },
+      "hint": "The 100-length book dominates via 2*max.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "For [4, 4, 4], what is the minimum total time?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "8",
+          "isCode": false
+        },
+        {
+          "label": "12",
+          "isCode": false
+        },
+        {
+          "label": "16",
+          "isCode": false
+        },
+        {
+          "label": "24",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "sum=12, max=4 → max(12, 8)=12.",
+      "wrongExplanations": {
+        "0": "2*max is only one bound; sum is larger here."
+      },
+      "hint": "Compare sum vs 2*max.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Building the Idea",
+      "questionText": "Does the answer depend on the order of the books?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, we must sort and then compute.",
+          "isCode": false
+        },
+        {
+          "label": "No, only sum and the largest value matter.",
+          "isCode": false
+        },
+        {
+          "label": "It depends on whether n is even or odd.",
+          "isCode": false
+        },
+        {
+          "label": "We must pair books carefully; order changes the result.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "The formula uses only sum(t) and max(t); ordering is irrelevant.",
+      "wrongExplanations": {
+        "0": "Sorting is unnecessary for computing sum and max.",
+        "3": "Pairing isn’t needed; both read all books."
+      },
+      "hint": "Which quantities are used in the formula?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Add the import needed for fast input reading.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import system",
+          "isCode": true
+        },
+        {
+          "label": "import sys",
+          "isCode": true
+        },
+        {
+          "label": "from sys import buffer as sys",
+          "isCode": true
+        },
+        {
+          "label": "import io as sys",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "We use sys.stdin.buffer, so importing sys is correct.",
+      "wrongExplanations": {
+        "0": "There is no module named 'system'.",
+        "2": "This shadows sys and breaks other attributes."
+      },
+      "hint": "Standard input is accessed via sys.stdin.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys",
+      "codeLabel": "Import sys"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Read all integers from stdin into a list named data (robust for large input). Choose the fastest common method.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "data = list(map(int, sys.stdin.buffer.read().split()))",
+          "isCode": true
+        },
+        {
+          "label": "data = list(map(int, sys.stdin.read().split()))",
+          "isCode": true
+        },
+        {
+          "label": "data = [int(x) for x in input().split()]",
+          "isCode": true
+        },
+        {
+          "label": "n = int(input()); t = list(map(int, input().split()))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Using sys.stdin.buffer.read().split() is a standard fast method in Python.",
+      "wrongExplanations": {
+        "1": "Works but typically slower than using buffer in CP settings.",
+        "2": "Reads only one line; might miss more lines."
+      },
+      "hint": "Use sys.stdin.buffer for speed with large input.",
+      "isCodeBuilding": true,
+      "codeSnippet": "data = list(map(int, sys.stdin.buffer.read().split()))",
+      "codeLabel": "Read all ints"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Extract n (the number of books) from data.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "n = data[0]",
+          "isCode": true
+        },
+        {
+          "label": "n = len(data)",
+          "isCode": true
+        },
+        {
+          "label": "n = data[1]",
+          "isCode": true
+        },
+        {
+          "label": "n = int(input())",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The first integer in data is n by the input format.",
+      "wrongExplanations": {
+        "1": "len(data) counts all integers, not just n.",
+        "2": "data[1] is the first book time, not n."
+      },
+      "hint": "We read all integers in order into data.",
+      "isCodeBuilding": true,
+      "codeSnippet": "n = data[0]",
+      "codeLabel": "Extract n"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Slice the next n integers as the list of book times t.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "t = data[1:1+n]",
+          "isCode": true
+        },
+        {
+          "label": "t = data[1:n]",
+          "isCode": true
+        },
+        {
+          "label": "t = data[0:n]",
+          "isCode": true
+        },
+        {
+          "label": "t = data[1:]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Book times occupy positions 1 through n in data, so [1:1+n] is correct.",
+      "wrongExplanations": {
+        "1": "Misses the last element; stop index is exclusive.",
+        "3": "Might include extra integers if any appear beyond the n times."
+      },
+      "hint": "Use a half-open slice covering exactly n elements after data[0].",
+      "isCodeBuilding": true,
+      "codeSnippet": "t = data[1:1+n]",
+      "codeLabel": "Extract t"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Compute the total sum s of reading times.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "s = sum(t)",
+          "isCode": true
+        },
+        {
+          "label": "s = sum(data)",
+          "isCode": true
+        },
+        {
+          "label": "s = sum(data[1:])",
+          "isCode": true
+        },
+        {
+          "label": "s = 0\nfor x in data:\n    s += x",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need the sum of the times only; sum(t) is direct and correct.",
+      "wrongExplanations": {
+        "1": "This includes n as well, inflating the sum.",
+        "3": "Also adds n and any extra integers."
+      },
+      "hint": "Use the list of times you just sliced.",
+      "isCodeBuilding": true,
+      "codeSnippet": "s = sum(t)",
+      "codeLabel": "Compute sum"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Compute the maximum time m among the books (handle empty t just in case).",
+      "diagram": null,
+      "options": [
+        {
+          "label": "m = max(t)",
+          "isCode": true
+        },
+        {
+          "label": "m = max(t) if t else 0",
+          "isCode": true
+        },
+        {
+          "label": "m = max(data)",
+          "isCode": true
+        },
+        {
+          "label": "m = t[0]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "max(t) is correct; adding a guard makes it safe even if t were empty.",
+      "wrongExplanations": {
+        "2": "Includes n among values; incorrect maximum.",
+        "3": "Only the first time, not necessarily the maximum."
+      },
+      "hint": "Use max over the times list you created.",
+      "isCodeBuilding": true,
+      "codeSnippet": "m = max(t) if t else 0",
+      "codeLabel": "Compute max"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "Compute the final answer using the derived formula.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "ans = min(s, 2*m)",
+          "isCode": true
+        },
+        {
+          "label": "ans = s + m",
+          "isCode": true
+        },
+        {
+          "label": "ans = max(s, 2*m)",
+          "isCode": true
+        },
+        {
+          "label": "ans = 2*s",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "The minimum total time equals max(sum(t), 2*max(t)).",
+      "wrongExplanations": {
+        "0": "We need the larger lower bound, not the smaller.",
+        "1": "Overcounts and is not justified."
+      },
+      "hint": "Use the larger of the two bounds we identified.",
+      "isCodeBuilding": true,
+      "codeSnippet": "ans = max(s, 2*m)",
+      "codeLabel": "Compute answer"
+    },
+    {
+      "id": "q22",
+      "phase": "Writing the Code",
+      "questionText": "Print the answer as a single integer with a newline.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "print(ans)",
+          "isCode": true
+        },
+        {
+          "label": "print(s, 2*m)",
+          "isCode": true
+        },
+        {
+          "label": "print(max)",
+          "isCode": true
+        },
+        {
+          "label": "sys.stdout.write(str(ans))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "print(ans) outputs the integer with a newline. The write() call lacks a newline.",
+      "wrongExplanations": {
+        "1": "Prints two numbers, not the final answer.",
+        "3": "No newline; many judges expect one."
+      },
+      "hint": "Use the simplest print that adds a newline automatically.",
+      "isCodeBuilding": true,
+      "codeSnippet": "print(ans)",
+      "codeLabel": "Output"
+    },
+    {
+      "id": "q23",
+      "phase": "Verifying the Solution",
+      "questionText": "Trace the program for input:\n4\\n5 1 7 3\nWhat is the output?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "14",
+          "isCode": false
+        },
+        {
+          "label": "16",
+          "isCode": false
+        },
+        {
+          "label": "18",
+          "isCode": false
+        },
+        {
+          "label": "20",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "sum=16, max=7 → max(16, 14)=16.",
+      "wrongExplanations": {
+        "0": "Underestimates sum.",
+        "2": "No justification; larger than needed."
+      },
+      "hint": "Compute sum and 2*max, then compare.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Verifying the Solution",
+      "questionText": "Trace the program for input:\n3\\n10 10 1\nWhat is the output?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "20",
+          "isCode": false
+        },
+        {
+          "label": "21",
+          "isCode": false
+        },
+        {
+          "label": "22",
+          "isCode": false
+        },
+        {
+          "label": "31",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "sum=21, max=10 → max(21, 20)=21.",
+      "wrongExplanations": {
+        "0": "2*max is smaller than sum here.",
+        "3": "Adds unnecessarily."
+      },
+      "hint": "Which is larger: sum or 2*max?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the time complexity of computing the answer (after reading input)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(1)",
+          "isCode": false
+        },
+        {
+          "label": "O(log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "We scan to compute sum and max once: linear time O(n).",
+      "wrongExplanations": {
+        "0": "We must inspect all elements.",
+        "3": "No sorting or extra logarithmic factor is used."
+      },
+      "hint": "How many passes over the list do sum and max take?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the additional space complexity beyond storing the input array of times?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(1)",
+          "isCode": false
+        },
+        {
+          "label": "O(log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We keep a few integers and reuse the input list: constant extra space.",
+      "wrongExplanations": {
+        "2": "No extra list proportional to n is created beyond the input list."
+      },
+      "hint": "Do we create any auxiliary arrays proportional to n?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q27",
+      "phase": "Analyzing Complexity",
+      "questionText": "Which edge case must be considered due to constraints?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "The sum of times can exceed 32-bit range; use an integer type that can hold large sums.",
+          "isCode": false
+        },
+        {
+          "label": "n can be 0; handle empty input.",
+          "isCode": false
+        },
+        {
+          "label": "Times can be negative; handle signs carefully.",
+          "isCode": false
+        },
+        {
+          "label": "We must sort to avoid timeouts.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "sum(t) can be up to about 2e14; ensure the type handles big values (Python int is fine).",
+      "wrongExplanations": {
+        "1": "Constraints guarantee n ≥ 1.",
+        "2": "Constraints guarantee t_i ≥ 1."
+      },
+      "hint": "Check limits of n and t_i to estimate max sum.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys",
+    "data = list(map(int, sys.stdin.buffer.read().split()))",
+    "n = data[0]",
+    "t = data[1:1+n]",
+    "s = sum(t)",
+    "m = max(t) if t else 0",
+    "ans = max(s, 2*m)",
+    "print(ans)"
+  ],
+  "reasoningChain": [
+    {
+      "question": "What exactly do the rules imply about who reads what and when?",
+      "insight": "Both must read every book; only simultaneous reading of the same book is forbidden, but reading different books in parallel is allowed."
+    },
+    {
+      "question": "What is an unavoidable lower bound from each individual's total reading?",
+      "insight": "Each person must spend sum(t) time reading in total, so the schedule cannot finish in less than sum(t)."
+    },
+    {
+      "question": "What is an unavoidable lower bound from the longest book?",
+      "insight": "The longest book must be read twice without overlap, requiring at least 2*max(t) time on the global timeline."
+    },
+    {
+      "question": "How do these bounds combine to give the exact answer?",
+      "insight": "The minimum achievable time equals the larger of the two bounds: max(sum(t), 2*max(t))."
+    },
+    {
+      "question": "Do examples match the formula and build confidence?",
+      "insight": "Testing several arrays (balanced and dominated by one large value) yields results consistent with max(sum, 2*max)."
+    },
+    {
+      "question": "How to implement efficiently under constraints?",
+      "insight": "Read input fast, compute sum and max in O(n), print max(sum, 2*max); this fits time and memory limits."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1366,
+    "output_tokens": 12828,
+    "input_cost": 0.001708,
+    "output_cost": 0.12828,
+    "total_cost": 0.129988
+  }
+}

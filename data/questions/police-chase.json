@@ -1,0 +1,938 @@
+{
+  "id": "police-chase-min-edge-cut",
+  "title": "Police Chase",
+  "difficulty": "intermediate",
+  "tags": [
+    "graph"
+  ],
+  "estimatedMinutes": 60,
+  "language": "python",
+  "description": "Kaaleppi has just robbed a bank and is now heading to the harbor. The police can close streets. What is the minimum number of streets that should be closed so that there is no route between the bank (crossing 1) and the harbor (crossing n)?\n\nInput:\n- First line: two integers n and m — number of crossings and streets.\n- Next m lines: two integers a and b — a two-way street between crossings a and b.\n- There is at most one street between any two crossings.\n\nOutput:\n- First print an integer k — the minimum number of streets to close.\n- Then print k lines describing the streets (any valid solution).",
+  "examples": [
+    {
+      "input": "4 5\n1 2\n1 3\n2 3\n3 4\n1 4\n",
+      "output": "2\n3 4\n1 4\n",
+      "explanation": "There are two edge-disjoint routes from 1 to 4: 1-4 and 1-3-4. Closing any two streets that separate these routes disconnects 1 and 4. One valid answer is closing streets (3,4) and (1,4)."
+    }
+  ],
+  "constraints": [
+    "2 <= n <= 500",
+    "1 <= m <= 1000",
+    "1 <= a, b <= n",
+    "Undirected simple graph (at most one street per pair)"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "Consider a tiny city: n=3, streets: (1,2), (2,3). What is the minimum number of streets to close so that there is no route from 1 to 3?",
+      "diagram": "1 -- 2 -- 3",
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "It depends on which street is closed.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Closing (1,2) or (2,3) breaks the only route, so 1 street is enough. Closing 0 leaves the route; 2 is more than needed.",
+      "wrongExplanations": {
+        "0": "With both streets open, 1→2→3 exists.",
+        "2": "One street already blocks the only path."
+      },
+      "hint": "There is only one simple route from 1 to 3.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "Use the sample:\nStreets: (1,2), (1,3), (2,3), (3,4), (1,4)\nWhat is the minimum number of streets to close to block all routes from 1 to 4?",
+      "diagram": "1 connected to 2,3,4; 3 connected to 4; 2 connected to 3",
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "There are two distinct routes: 1-4 and 1-3-4. You must close at least one edge from each route, so 2 is necessary and sufficient.",
+      "wrongExplanations": {
+        "0": "Closing only one street leaves the other route open.",
+        "2": "Three closures are not needed; two suffice."
+      },
+      "hint": "Count how many edge-disjoint routes 1→4 exist.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "Statement: \"Closing all streets along a single shortest route from 1 to n always yields an optimal solution.\" Is this correct?",
+      "diagram": "Example counterexample: 1 -- 4 and 1 -- 3 -- 4",
+      "options": [
+        {
+          "label": "Yes, because the shortest route is critical.",
+          "isCode": false
+        },
+        {
+          "label": "No, because there may be other routes of equal or longer length that avoid those streets.",
+          "isCode": false
+        },
+        {
+          "label": "Yes, if the graph has no cycles.",
+          "isCode": false
+        },
+        {
+          "label": "It depends only on the length of the shortest route.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "In the sample, removing 1-4 (a length-1 route) isn't enough due to 1-3-4. Shortest route edges alone may not block all routes.",
+      "wrongExplanations": {
+        "0": "Other routes may still exist via different streets."
+      },
+      "hint": "Think about multiple routes that don't share streets with the shortest one.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "In this graph: streets (1,2), (2,4), (1,3), (3,4). What is the minimum number of streets to close to block all routes 1→4?",
+      "diagram": "1 -- 2 -- 4\n|         ^\n+-- 3 ----+",
+      "options": [
+        {
+          "label": "1, close any single street",
+          "isCode": false
+        },
+        {
+          "label": "2, one on each route 1-2-4 and 1-3-4",
+          "isCode": false
+        },
+        {
+          "label": "3, must break both routes completely",
+          "isCode": false
+        },
+        {
+          "label": "0, because there is no route",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Two edge-disjoint routes exist, so at least two streets must be closed (one per route).",
+      "wrongExplanations": {
+        "0": "There are routes 1-2-4 and 1-3-4.",
+        "2": "Closing three is more than necessary."
+      },
+      "hint": "Count how many routes that share no street can be taken from 1 to 4.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Understanding the Problem",
+      "questionText": "Two routes that share a crossing but not a street (edge) — do they count as \"disjoint\" for this problem's purposes?",
+      "diagram": "1-2-4 and 1-3-2-5-4 share crossing 2 but not the exact same street twice.",
+      "options": [
+        {
+          "label": "Yes, because we close streets, not crossings.",
+          "isCode": false
+        },
+        {
+          "label": "No, sharing any crossing disqualifies them.",
+          "isCode": false
+        },
+        {
+          "label": "Only if they also have the same length.",
+          "isCode": false
+        },
+        {
+          "label": "Only if they share the start or end crossing.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We are closing streets (edges). Sharing crossings is allowed as long as no street is shared.",
+      "wrongExplanations": {
+        "1": "The restriction is on streets being shared, not crossings."
+      },
+      "hint": "Re-read: the police close streets, not intersections.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "Which quantity equals the minimum number of streets to close to separate 1 from n?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Length of the shortest route from 1 to n",
+          "isCode": false
+        },
+        {
+          "label": "Number of routes from 1 to n that do not share streets with each other (max possible)",
+          "isCode": false
+        },
+        {
+          "label": "Minimum degree of any crossing on any route",
+          "isCode": false
+        },
+        {
+          "label": "Number of streets incident to crossing 1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "You must block at least one street on each street-disjoint route, and you can achieve that number. This matches the minimum closures.",
+      "wrongExplanations": {
+        "0": "Shortest route length says nothing about other routes."
+      },
+      "hint": "Think in terms of how many fully independent routes could pass simultaneously.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "If you pick routes one-by-one and permanently block used streets, can you miss the true maximum number of disjoint routes?",
+      "diagram": "1-2-4, 1-3-4, plus street 2-3. If you first pick 1-2-3-4, you might block a better packing.",
+      "options": [
+        {
+          "label": "No, any greedy order works.",
+          "isCode": false
+        },
+        {
+          "label": "Yes; we should allow \"redirecting\" a previously chosen route by freeing a used street when a better alternative exists.",
+          "isCode": false
+        },
+        {
+          "label": "Only if all routes have the same length.",
+          "isCode": false
+        },
+        {
+          "label": "Only in directed graphs, not here.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "A poor first route can block others. Allowing a backward adjustment (freeing a street and rerouting through an alternative) avoids getting stuck.",
+      "wrongExplanations": {
+        "0": "Greedy choices can block future possibilities."
+      },
+      "hint": "Imagine swapping part of an earlier route to unlock a new one.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Exploring Approaches",
+      "questionText": "How should a two-way street between a and b be represented for counting and rerouting operations?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "As a single directed link a→b with capacity 1",
+          "isCode": false
+        },
+        {
+          "label": "As two opposite directed links a→b and b→a, each with usable capacity 1",
+          "isCode": false
+        },
+        {
+          "label": "As a single undirected link with capacity 2",
+          "isCode": false
+        },
+        {
+          "label": "As two opposite directed links each with capacity 0 initially",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Two opposite directed links with unit availability let you use the street in either direction once, and support backtracking adjustments.",
+      "wrongExplanations": {
+        "0": "That forbids using b→a.",
+        "2": "Capacity 2 would allow two uses of the same street, which is not allowed."
+      },
+      "hint": "Using a street once in either direction should consume it for further routes.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Exploring Approaches",
+      "questionText": "After packing as many 1→n routes as possible (consuming availability on streets), how can we extract a valid minimum set of streets to close?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Take the streets used by the last found route.",
+          "isCode": false
+        },
+        {
+          "label": "Find crossings reachable from 1 using only streets that still have availability; close all streets between reachable and unreachable crossings.",
+          "isCode": false
+        },
+        {
+          "label": "Close all streets whose availability is now zero.",
+          "isCode": false
+        },
+        {
+          "label": "Pick any k streets arbitrarily where k is the number of packed routes.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "The cut is exactly the set of streets with one endpoint reachable and the other not via currently available links.",
+      "wrongExplanations": {
+        "2": "Zero availability edges not crossing the boundary don't necessarily separate 1 from n."
+      },
+      "hint": "Think in terms of a frontier between what 1 can still reach and what it cannot.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "When searching for what is still reachable from 1 after packing routes, which links are traversable?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Links with remaining availability > 0",
+          "isCode": false
+        },
+        {
+          "label": "All links, even if fully used",
+          "isCode": false
+        },
+        {
+          "label": "Only links used by any route so far",
+          "isCode": false
+        },
+        {
+          "label": "Only links on the shortest route",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Availability > 0 indicates you can still traverse that street in that direction; fully used links block traversal.",
+      "wrongExplanations": {
+        "1": "Fully used links cannot be traversed any more."
+      },
+      "hint": "Think in terms of remaining capacity.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "To efficiently find multiple routes without getting stuck in cycles, we will compute a distance label from 1 using only links with availability > 0 and then push along links that increase this label by 1. What is the benefit of this rule?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "It prevents moving back and forth on the same link, guiding progress forward.",
+          "isCode": false
+        },
+        {
+          "label": "It always finds the globally shortest route length.",
+          "isCode": false
+        },
+        {
+          "label": "It guarantees using each crossing at most once.",
+          "isCode": false
+        },
+        {
+          "label": "It ensures we choose the lexicographically smallest route.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Restricting moves to increasing distance ensures forward progress, reduces unnecessary revisits, and accelerates route finding.",
+      "wrongExplanations": {
+        "1": "The rule doesn't promise globally shortest routes in weighted sense; it's for structure and efficiency."
+      },
+      "hint": "We want to avoid wandering around at the same distance or going backward.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "When we send 1 unit along a route, how should we update the link we used and its opposite bookkeeping link?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Decrease forward availability by 1 and increase the opposite bookkeeping link by 1.",
+          "isCode": false
+        },
+        {
+          "label": "Increase forward availability by 1 and decrease the opposite by 1.",
+          "isCode": false
+        },
+        {
+          "label": "Set both forward and opposite to 0.",
+          "isCode": false
+        },
+        {
+          "label": "Decrease both forward and opposite by 1.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Consuming forward capacity and adding the opposite bookkeeping allows potential rerouting that frees earlier choices.",
+      "wrongExplanations": {
+        "1": "Forward availability should drop when used, not increase."
+      },
+      "hint": "Using a street in one direction should make that direction less available but potentially allow reversing that choice later.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "Suppose after packing routes, from 1 you can still reach crossings {1,2,3} but not {4,5}. Which streets belong to a valid minimum set to close?",
+      "diagram": "Reachable set S = {1,2,3}. Unreachable T = {4,5}. Streets: (2,4), (3,5), (2,3), (4,5).",
+      "options": [
+        {
+          "label": "(2,4) and (3,5) only",
+          "isCode": false
+        },
+        {
+          "label": "(2,3) and (4,5) only",
+          "isCode": false
+        },
+        {
+          "label": "All four streets",
+          "isCode": false
+        },
+        {
+          "label": "None; already disconnected",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Only streets with one endpoint reachable and the other not (the boundary) form the minimum set.",
+      "wrongExplanations": {
+        "1": "These are entirely inside S or T; closing them doesn't separate S from T."
+      },
+      "hint": "Pick streets that cross S↔T.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Building the Idea",
+      "questionText": "When reading each undirected street (a,b), how do we add it to our internal directed structure with unit availability and proper backtracking bookkeeping?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Add a→b with availability 1 and its opposite bookkeeping link; and also add b→a with availability 1 and its opposite bookkeeping link.",
+          "isCode": false
+        },
+        {
+          "label": "Add only a→b with availability 1 and no opposite bookkeeping link.",
+          "isCode": false
+        },
+        {
+          "label": "Add a→b with availability 2 and a single opposite bookkeeping link.",
+          "isCode": false
+        },
+        {
+          "label": "Add both directions but with availability 0 initially.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Two directed links with unit availability and their bookkeeping counterparts capture undirected usage and allow reversals.",
+      "wrongExplanations": {
+        "1": "Ignoring b→a disallows using the street in that direction.",
+        "2": "Availability 2 would allow using the same street twice."
+      },
+      "hint": "Each undirected street can be used once in either direction.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Set up fast input and read n and m.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\nfrom collections import deque\nit = iter(map(int, sys.stdin.buffer.read().split()))\nn = next(it); m = next(it)",
+          "isCode": true
+        },
+        {
+          "label": "from collections import deque\nn, m = map(int, input().split())\n# then read m lines with input(), mixing buffered and unbuffered",
+          "isCode": true
+        },
+        {
+          "label": "import sys\nit = map(int, sys.stdin.read())\nn = next(it); m = next(it)",
+          "isCode": true
+        },
+        {
+          "label": "from collections import deque\nn = int(input()); m = int(input())",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Reading all tokens via sys.stdin.buffer and iterating is robust and fast for this input style.",
+      "wrongExplanations": {
+        "1": "Mixing input() repeatedly can be slower; also reading m lines separately later must be handled carefully.",
+        "3": "Two separate input() lines won't parse the pairs that follow."
+      },
+      "hint": "We will read all integers as a flat stream.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\nfrom collections import deque\nit = iter(map(int, sys.stdin.buffer.read().split()))\nn = next(it); m = next(it)",
+      "codeLabel": "Imports and read n, m"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Implement the structure to store links with availability and opposite bookkeeping links, with methods to add a directed link.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "class Dinic:\n    def __init__(self, n):\n        self.n = n\n        self.g = [[] for _ in range(n)]\n        self.level = [0]*n\n        self.it = [0]*n\n    def add_edge(self, u, v, c):\n        self.g[u].append([v, c, len(self.g[v])])\n        self.g[v].append([u, 0, len(self.g[u]) - 1])",
+          "isCode": true
+        },
+        {
+          "label": "class Dinic:\n    def __init__(self, n):\n        self.n = n\n        self.g = [[] for _ in range(n)]\n    def add_edge(self, u, v, c):\n        self.g[u].append([v, c, len(self.g[v])])\n        self.g[v].append([u, c, len(self.g[u]) - 1])",
+          "isCode": true
+        },
+        {
+          "label": "class Dinic:\n    def __init__(self, n):\n        self.g = {}\n    def add_edge(self, u, v, c):\n        self.g.setdefault(u, []).append([v, c, 0])",
+          "isCode": true
+        },
+        {
+          "label": "class Dinic:\n    def __init__(self, n):\n        self.n = n\n        self.g = [[] for _ in range(n)]\n        self.level = [0]*n\n    def add_edge(self, u, v, c):\n        self.g[u].append([v, c, 0])\n        self.g[v].append([u, 0, 0])",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need a reverse bookkeeping link with 0 initial availability and correct reverse indices to update both sides.",
+      "wrongExplanations": {
+        "1": "The reverse bookkeeping link must start at 0 availability, not c.",
+        "3": "Reverse indices must point to each other's positions to update capacities correctly."
+      },
+      "hint": "Each stored link should know the index of its opposite.",
+      "isCodeBuilding": true,
+      "codeSnippet": "class Dinic:\n    def __init__(self, n):\n        self.n = n\n        self.g = [[] for _ in range(n)]\n        self.level = [0]*n\n        self.it = [0]*n\n    def add_edge(self, u, v, c):\n        self.g[u].append([v, c, len(self.g[v])])\n        self.g[v].append([u, 0, len(self.g[u]) - 1])",
+      "codeLabel": "Graph structure and add_edge"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Write the method that computes distance labels from a source using only links with availability > 0.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def bfs(self, s, t):\n    self.level = [-1] * self.n\n    q = deque([s])\n    self.level[s] = 0\n    while q:\n        v = q.popleft()\n        for to, cap, rev in self.g[v]:\n            if cap > 0 and self.level[to] < 0:\n                self.level[to] = self.level[v] + 1\n                q.append(to)\n    return self.level[t] >= 0",
+          "isCode": true
+        },
+        {
+          "label": "def bfs(self, s, t):\n    self.level = [0] * self.n\n    q = deque([s])\n    while q:\n        v = q.popleft()\n        for to, cap, rev in self.g[v]:\n            if cap >= 0 and self.level[to] == 0:\n                self.level[to] = self.level[v] + 1\n                q.append(to)\n    return self.level[t] > 0",
+          "isCode": true
+        },
+        {
+          "label": "def bfs(self, s, t):\n    self.level = [-1] * self.n\n    for v in range(self.n):\n        for to, cap, rev in self.g[v]:\n            if cap > 0:\n                self.level[to] = 1\n    return self.level[t] >= 0",
+          "isCode": true
+        },
+        {
+          "label": "def bfs(self, s, t):\n    self.level = [-1] * self.n\n    self.level[s] = 0\n    for v in range(self.n):\n        for to, cap, rev in self.g[v]:\n            if cap > 0:\n                self.level[to] = self.level[v] + 1\n    return True",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We must traverse only links with cap>0, set levels once, and check if t was reached.",
+      "wrongExplanations": {
+        "1": "cap>=0 includes saturated links; also uninitialized level must use -1 to detect visitation."
+      },
+      "hint": "Initialize levels to -1 and expand frontier with a queue.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    def bfs(self, s, t):\n        self.level = [-1] * self.n\n        q = deque([s])\n        self.level[s] = 0\n        while q:\n            v = q.popleft()\n            for to, cap, rev in self.g[v]:\n                if cap > 0 and self.level[to] < 0:\n                    self.level[to] = self.level[v] + 1\n                    q.append(to)\n        return self.level[t] >= 0",
+      "codeLabel": "Distance labeling using available links"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Write the method that sends units along links that strictly increase the distance label, updating forward and reverse availabilities.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def dfs(self, v, t, f):\n    if v == t:\n        return f\n    for i in range(self.it[v], len(self.g[v])):\n        self.it[v] = i\n        to, cap, rev = self.g[v][i]\n        if cap > 0 and self.level[v] + 1 == self.level[to]:\n            d = self.dfs(to, t, min(f, cap))\n            if d > 0:\n                self.g[v][i][1] -= d\n                self.g[to][rev][1] += d\n                return d\n    return 0",
+          "isCode": true
+        },
+        {
+          "label": "def dfs(self, v, t, f):\n    if v == t:\n        return 0\n    for i in range(len(self.g[v])):\n        to, cap, rev = self.g[v][i]\n        if cap >= 0:\n            d = self.dfs(to, t, f)\n            if d:\n                self.g[v][i][1] += d\n                self.g[to][rev][1] -= d\n                return d\n    return 0",
+          "isCode": true
+        },
+        {
+          "label": "def dfs(self, v, t, f):\n    if v == t:\n        return f\n    for i in range(self.it[v], len(self.g[v])):\n        to, cap, rev = self.g[v][i]\n        if self.level[to] >= self.level[v]:\n            d = self.dfs(to, t, f)\n            if d > 0:\n                self.g[v][i][1] -= 1\n                self.g[to][rev][1] += 1\n                return d\n    return 0",
+          "isCode": true
+        },
+        {
+          "label": "def dfs(self, v, t, f):\n    if v == t:\n        return f\n    for i in range(self.it[v], len(self.g[v])):\n        self.it[v] = i\n        to, cap, rev = self.g[v][i]\n        if cap > 0 and self.level[to] + 1 == self.level[v]:\n            d = self.dfs(to, t, min(f, cap))\n            if d > 0:\n                self.g[v][i][1] -= d\n                self.g[to][rev][1] += d\n                return d\n    return 0",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We must follow links that increase level by 1, push up to cap, and update forward/backward. The iterator pointer avoids retrying dead links.",
+      "wrongExplanations": {
+        "3": "Direction of the level check is reversed; we must go from level L to L+1."
+      },
+      "hint": "Only move forward in terms of the computed levels.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    def dfs(self, v, t, f):\n        if v == t:\n            return f\n        for i in range(self.it[v], len(self.g[v])):\n            self.it[v] = i\n            to, cap, rev = self.g[v][i]\n            if cap > 0 and self.level[v] + 1 == self.level[to]:\n                d = self.dfs(to, t, min(f, cap))\n                if d > 0:\n                    self.g[v][i][1] -= d\n                    self.g[to][rev][1] += d\n                    return d\n        return 0",
+      "codeLabel": "Pushing along increasing levels"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Write the driver method that repeats labeling and sending until no more routes can be sent.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def max_flow(self, s, t):\n    flow = 0\n    INF = 10**9\n    while self.bfs(s, t):\n        self.it = [0] * self.n\n        while True:\n            f = self.dfs(s, t, INF)\n            if f == 0:\n                break\n            flow += f\n    return flow",
+          "isCode": true
+        },
+        {
+          "label": "def max_flow(self, s, t):\n    flow = 0\n    while True:\n        self.bfs(s, t)\n        f = self.dfs(s, t, 1)\n        if f == 0:\n            break\n        flow += 1\n    return flow",
+          "isCode": true
+        },
+        {
+          "label": "def max_flow(self, s, t):\n    flow = 0\n    INF = 10**9\n    self.bfs(s, t)\n    self.it = [0] * self.n\n    f = self.dfs(s, t, INF)\n    flow += f\n    return flow",
+          "isCode": true
+        },
+        {
+          "label": "def max_flow(self, s, t):\n    flow = 0\n    while self.bfs(s, t):\n        self.it = [0] * self.n\n        f = self.dfs(s, t, 1)\n        if f == 0:\n            return flow\n        flow += f\n    return flow",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We rebuild levels, reset iterators, and repeatedly push until no more can be sent for that labeling.",
+      "wrongExplanations": {
+        "1": "Pushing only 1 per labeling can be inefficient and incorrect; we should push as much as possible.",
+        "3": "Stopping after a single send per labeling misses available pushes."
+      },
+      "hint": "Exhaust all sends allowed by the current labeling before rebuilding it.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    def max_flow(self, s, t):\n        flow = 0\n        INF = 10**9\n        while self.bfs(s, t):\n            self.it = [0] * self.n\n            while True:\n                f = self.dfs(s, t, INF)\n                if f == 0:\n                    break\n                flow += f\n        return flow",
+      "codeLabel": "Repeat labeling and sending"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Read streets, add both directions with unit availability, and keep the original list for output.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "din = Dinic(n)\nedges = []\nfor _ in range(m):\n    a = next(it) - 1\n    b = next(it) - 1\n    din.add_edge(a, b, 1)\n    din.add_edge(b, a, 1)\n    edges.append((a, b))",
+          "isCode": true
+        },
+        {
+          "label": "din = Dinic(n)\nedges = []\nfor _ in range(m):\n    a = next(it)\n    b = next(it)\n    din.add_edge(a, b, 1)\n    edges.append((a-1, b-1))",
+          "isCode": true
+        },
+        {
+          "label": "din = Dinic(n)\nfor _ in range(m):\n    a = next(it) - 1\n    b = next(it) - 1\n    din.add_edge(a, b, 1)\n    din.add_edge(a, b, 1)",
+          "isCode": true
+        },
+        {
+          "label": "din = Dinic(n)\nedges = []\nfor _ in range(m):\n    a = next(it) - 1\n    b = next(it) - 1\n    din.add_edge(a, b, 2)\n    edges.append((a, b))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We must add both directions with unit availability and store the original (0-indexed) pair for later cut extraction.",
+      "wrongExplanations": {
+        "1": "Missing 0-indexing in add and missing b→a.",
+        "3": "Capacity 2 allows using the same street twice."
+      },
+      "hint": "Remember: undirected means two opposite directed unit links.",
+      "isCodeBuilding": true,
+      "codeSnippet": "din = Dinic(n)\nedges = []\nfor _ in range(m):\n    a = next(it) - 1\n    b = next(it) - 1\n    din.add_edge(a, b, 1)\n    din.add_edge(b, a, 1)\n    edges.append((a, b))",
+      "codeLabel": "Build graph and store streets"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "Compute the number of routes packed and find crossings still reachable from 1 using remaining availability.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "s = 0; t = n - 1\nk = din.max_flow(s, t)\nvis = [False] * n\nstack = [s]\nvis[s] = True\nwhile stack:\n    v = stack.pop()\n    for to, cap, rev in din.g[v]:\n        if cap > 0 and not vis[to]:\n            vis[to] = True\n            stack.append(to)",
+          "isCode": true
+        },
+        {
+          "label": "s = 0; t = n - 1\nk = din.max_flow(s, t)\nvis = [False] * n\nfrom collections import deque\nq = deque([s])\nwhile q:\n    v = q.popleft()\n    for to, cap, rev in din.g[v]:\n        if not vis[to]:\n            vis[to] = True\n            q.append(to)",
+          "isCode": true
+        },
+        {
+          "label": "s = 0; t = n - 1\nk = din.max_flow(s, t)\nvis = [True] * n\nfor v in range(n):\n    for to, cap, rev in din.g[v]:\n        if cap == 0:\n            vis[to] = False",
+          "isCode": true
+        },
+        {
+          "label": "s = 0; t = n - 1\nk = din.max_flow(s, t)\nvis = [False] * n\nfor v in range(n):\n    for to, cap, rev in din.g[v]:\n        if cap > 0:\n            vis[to] = True",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Start from 1 and traverse only links with cap>0 to mark reachable crossings.",
+      "wrongExplanations": {
+        "1": "It marks reachability but ignores cap>0 condition; must respect remaining availability."
+      },
+      "hint": "Traverse only links that still have availability.",
+      "isCodeBuilding": true,
+      "codeSnippet": "s = 0; t = n - 1\nk = din.max_flow(s, t)\nvis = [False] * n\nstack = [s]\nvis[s] = True\nwhile stack:\n    v = stack.pop()\n    for to, cap, rev in din.g[v]:\n        if cap > 0 and not vis[to]:\n            vis[to] = True\n            stack.append(to)",
+      "codeLabel": "Compute k and reachable set"
+    },
+    {
+      "id": "q22",
+      "phase": "Writing the Code",
+      "questionText": "Build the set of streets crossing reachable↔unreachable and print them.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "out = []\nfor a, b in edges:\n    if vis[a] != vis[b]:\n        out.append((a + 1, b + 1))\nprint(len(out))\nfor a, b in out:\n    print(a, b)",
+          "isCode": true
+        },
+        {
+          "label": "out = []\nfor a, b in edges:\n    if vis[a] and vis[b]:\n        out.append((a + 1, b + 1))\nprint(len(out))\nfor a, b in out:\n    print(a, b)",
+          "isCode": true
+        },
+        {
+          "label": "print(k)\nfor v in range(n):\n    for to, cap, rev in din.g[v]:\n        if cap == 0:\n            print(v+1, to+1)",
+          "isCode": true
+        },
+        {
+          "label": "print(0)\n# nothing else to print",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Edges with endpoints on different sides define the minimum set. Convert back to 1-based indices for output.",
+      "wrongExplanations": {
+        "1": "Edges entirely inside one side do not separate 1 from n.",
+        "2": "Zero-availability directed links include internal edges and duplicates."
+      },
+      "hint": "Use the stored original undirected list; check side membership by vis.",
+      "isCodeBuilding": true,
+      "codeSnippet": "out = []\nfor a, b in edges:\n    if vis[a] != vis[b]:\n        out.append((a + 1, b + 1))\nprint(len(out))\nfor a, b in out:\n    print(a, b)",
+      "codeLabel": "Extract and print cut edges"
+    },
+    {
+      "id": "q23",
+      "phase": "Verifying the Solution",
+      "questionText": "Test mentally on: n=5, streets (1,2),(2,5),(1,3),(3,5),(2,3). How many streets must be closed to separate 1 and 5?",
+      "diagram": "1-2-5 and 1-3-5 with a bridge 2-3",
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Two edge-disjoint routes exist: 1-2-5 and 1-3-5. You must close at least two streets (one per route).",
+      "wrongExplanations": {
+        "0": "Closing one leaves the other route open."
+      },
+      "hint": "Count disjoint routes sharing no street.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Verifying the Solution",
+      "questionText": "On the same graph, after the algorithm stops, suppose crossings reachable from 1 via available links are {1,2,3} and unreachable are {5}. Which streets could be printed?",
+      "diagram": "Reachable: 1,2,3; Unreachable: 5; Streets: (1,2),(2,5),(1,3),(3,5),(2,3)",
+      "options": [
+        {
+          "label": "(2,5) and (3,5)",
+          "isCode": false
+        },
+        {
+          "label": "(1,2) and (1,3)",
+          "isCode": false
+        },
+        {
+          "label": "(2,3) only",
+          "isCode": false
+        },
+        {
+          "label": "(1,2), (1,3), (2,3)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Only edges crossing from reachable to unreachable sides are printed.",
+      "wrongExplanations": {
+        "1": "These are internal edges inside the reachable set."
+      },
+      "hint": "Check which edges have endpoints on different sides.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is a reasonable worst-case upper bound for the runtime of this implementation in terms of n crossings and m streets?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(m * n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(n * m)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^3)",
+          "isCode": false
+        },
+        {
+          "label": "O(m^2 * n^2)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The routine that repeatedly labels and sends has a known worst-case of about O(m * n^2), which is fine for n<=500, m<=1000.",
+      "wrongExplanations": {
+        "1": "Too optimistic as a general worst-case bound.",
+        "3": "Overly pessimistic for this approach."
+      },
+      "hint": "Think roughly quadratic in n multiplied by m.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Analyzing Complexity",
+      "questionText": "Edge cases: If there is no route from 1 to n in the original graph, what should the program print?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "0 and then no streets",
+          "isCode": false
+        },
+        {
+          "label": "0 and then all streets",
+          "isCode": false
+        },
+        {
+          "label": "n and list of all streets",
+          "isCode": false
+        },
+        {
+          "label": "m and list of all streets",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "No closures are needed if 1 and n are already disconnected, so print 0 and nothing else.",
+      "wrongExplanations": {
+        "1": "Printing all streets contradicts the requirement of minimal closures."
+      },
+      "hint": "If already disconnected, the minimum is zero.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\nfrom collections import deque\nit = iter(map(int, sys.stdin.buffer.read().split()))\nn = next(it); m = next(it)",
+    "class Dinic:\n    def __init__(self, n):\n        self.n = n\n        self.g = [[] for _ in range(n)]\n        self.level = [0]*n\n        self.it = [0]*n\n    def add_edge(self, u, v, c):\n        self.g[u].append([v, c, len(self.g[v])])\n        self.g[v].append([u, 0, len(self.g[u]) - 1])",
+    "    def bfs(self, s, t):\n        self.level = [-1] * self.n\n        q = deque([s])\n        self.level[s] = 0\n        while q:\n            v = q.popleft()\n            for to, cap, rev in self.g[v]:\n                if cap > 0 and self.level[to] < 0:\n                    self.level[to] = self.level[v] + 1\n                    q.append(to)\n        return self.level[t] >= 0",
+    "    def dfs(self, v, t, f):\n        if v == t:\n            return f\n        for i in range(self.it[v], len(self.g[v])):\n            self.it[v] = i\n            to, cap, rev = self.g[v][i]\n            if cap > 0 and self.level[v] + 1 == self.level[to]:\n                d = self.dfs(to, t, min(f, cap))\n                if d > 0:\n                    self.g[v][i][1] -= d\n                    self.g[to][rev][1] += d\n                    return d\n        return 0",
+    "    def max_flow(self, s, t):\n        flow = 0\n        INF = 10**9\n        while self.bfs(s, t):\n            self.it = [0] * self.n\n            while True:\n                f = self.dfs(s, t, INF)\n                if f == 0:\n                    break\n                flow += f\n        return flow",
+    "din = Dinic(n)\nedges = []\nfor _ in range(m):\n    a = next(it) - 1\n    b = next(it) - 1\n    din.add_edge(a, b, 1)\n    din.add_edge(b, a, 1)\n    edges.append((a, b))",
+    "s = 0; t = n - 1\nk = din.max_flow(s, t)\nvis = [False] * n\nstack = [s]\nvis[s] = True\nwhile stack:\n    v = stack.pop()\n    for to, cap, rev in din.g[v]:\n        if cap > 0 and not vis[to]:\n            vis[to] = True\n            stack.append(to)",
+    "out = []\nfor a, b in edges:\n    if vis[a] != vis[b]:\n        out.append((a + 1, b + 1))\nprint(len(out))\nfor a, b in out:\n    print(a, b)"
+  ],
+  "reasoningChain": [
+    {
+      "question": "What quantity equals the minimum streets to close between 1 and n?",
+      "insight": "It equals the maximum number of routes from 1 to n that share no streets with each other."
+    },
+    {
+      "question": "How to avoid greedy choices blocking future routes?",
+      "insight": "Track remaining availability per direction and allow reversing parts of earlier choices via opposite bookkeeping links."
+    },
+    {
+      "question": "How to model undirected streets for this process?",
+      "insight": "Represent each undirected street as two opposite directed links with unit availability."
+    },
+    {
+      "question": "How to efficiently find multiple routes?",
+      "insight": "Iteratively compute distance labels from 1 using available links and send units only along links that increase the label, repeating until none can be sent."
+    },
+    {
+      "question": "How to extract the streets to close after no more routes can be sent?",
+      "insight": "Mark crossings reachable from 1 via available links, then pick original streets with endpoints on different sides; their count equals the number of routes sent."
+    },
+    {
+      "question": "How to output any valid solution?",
+      "insight": "Print the number of boundary streets and list those streets using their original endpoints."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1457,
+    "output_tokens": 17852,
+    "input_cost": 0.001821,
+    "output_cost": 0.17852,
+    "total_cost": 0.180341
+  }
+}
