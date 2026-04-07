@@ -1,0 +1,990 @@
+{
+  "id": "range-updates-and-sums",
+  "title": "Range Updates and Sums",
+  "difficulty": "hard",
+  "tags": [
+    "array"
+  ],
+  "estimatedMinutes": 110,
+  "language": "python",
+  "description": "Maintain an array of n values and efficiently process q queries of three types:\n- Increase each value in range [a,b] by x.\n- Set each value in range [a,b] to x.\n- Calculate the sum of values in range [a,b].\n\nInput:\n- First line: two integers n and q.\n- Second line: n integers t_1..t_n.\n- Next q lines: one of the following formats:\n  - \"1 a b x\" (increase in [a,b] by x)\n  - \"2 a b x\" (set in [a,b] to x)\n  - \"3 a b\"   (sum in [a,b])\n\nOutput:\n- For each sum query, print the result.\n\nAll ranges [a,b] are inclusive and given with 1-based indices.",
+  "examples": [
+    {
+      "input": "6 5\n2 3 1 1 5 3\n3 3 5\n1 2 4 2\n3 3 5\n2 2 4 5\n3 3 5\n",
+      "output": "7\n11\n15\n",
+      "explanation": "Initial: [2,3,1,1,5,3]\nSum [3,5]=1+1+5=7.\nAdd 2 to [2,4]: [2,5,3,3,5,3]. Sum [3,5]=3+3+5=11.\nSet [2,4] to 5: [2,5,5,5,5,3]. Sum [3,5]=5+5+5=15."
+    }
+  ],
+  "constraints": [
+    "1 <= n, q <= 2 * 10^5",
+    "1 <= t_i, x <= 10^6",
+    "1 <= a <= b <= n",
+    "Time limit: 1.00 s",
+    "Memory limit: 512 MB"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "Array = [1,2,3]. Apply query: \"1 1 2 5\" (increase positions 1..2 by 5). What is the array after the query?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "[6,7,3]",
+          "isCode": false
+        },
+        {
+          "label": "[6,7,8]",
+          "isCode": false
+        },
+        {
+          "label": "[1,7,8]",
+          "isCode": false
+        },
+        {
+          "label": "[1,2,8]",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Indices are 1-based and inclusive: positions 1 and 2 gain +5 => [6,7,3].",
+      "wrongExplanations": {
+        "1": "This adds to all three positions, but the range ends at 2.",
+        "2": "Position 1 stays 1 here; but it should be increased.",
+        "3": "Only position 3 is increased here, which is outside the range."
+      },
+      "hint": "Apply +5 to positions 1 and 2 only.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "Array = [0,0,0,0]. Apply two queries:\n1) \"1 2 3 4\" (increase positions 2..3 by 4)\n2) \"2 2 3 1\" (set positions 2..3 to 1)\nWhat is the final array?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "[0,4,4,0]",
+          "isCode": false
+        },
+        {
+          "label": "[0,1,1,0]",
+          "isCode": false
+        },
+        {
+          "label": "[0,5,5,0]",
+          "isCode": false
+        },
+        {
+          "label": "[0,4,4,1]",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "The set overwrites previous increases on 2..3, making them 1.",
+      "wrongExplanations": {
+        "0": "This ignores the later set operation.",
+        "2": "This treats set as add; set replaces values, not adds."
+      },
+      "hint": "A set on a range replaces prior accumulated changes on that range.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "Given array [2,3,1,1,5,3], what is the result of query \"3 3 5\"?",
+      "diagram": "Positions: 1 2 3 4 5 6\nValues:    2 3 1 1 5 3",
+      "options": [
+        {
+          "label": "7",
+          "isCode": false
+        },
+        {
+          "label": "9",
+          "isCode": false
+        },
+        {
+          "label": "6",
+          "isCode": false
+        },
+        {
+          "label": "8",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Sum positions 3..5 inclusive: 1+1+5=7.",
+      "wrongExplanations": {
+        "1": "This would be 3..5 as 3+1+5=9 if you took arr[2]. But arr[2]=3 is at position 2.",
+        "2": "This omits one of the elements.",
+        "3": "Check the indices again; it's 1+1+5."
+      },
+      "hint": "Sum indices 3, 4, and 5 (1-based).",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "Input indices a and b are 1-based. If your internal array is 0-based, how should you convert a and b for inclusive [a,b]?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Use [a,b] directly",
+          "isCode": false
+        },
+        {
+          "label": "Use [a-1, b-1]",
+          "isCode": false
+        },
+        {
+          "label": "Use [a, b-1]",
+          "isCode": false
+        },
+        {
+          "label": "Use [a-1, b]",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Subtract 1 from both endpoints to get 0-based inclusive bounds.",
+      "wrongExplanations": {
+        "0": "Mixing 1-based with 0-based will offset ranges by 1.",
+        "3": "Only shifting one end misaligns the range."
+      },
+      "hint": "Both ends shift by the same offset.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Exploring Approaches",
+      "questionText": "If we update each element in [a,b] one-by-one per query and compute sums by looping, what's the worst-case time for n=q=2e5?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "About 4e10 operations (too slow)",
+          "isCode": false
+        },
+        {
+          "label": "About 4e5 operations (fine)",
+          "isCode": false
+        },
+        {
+          "label": "About 2e5 operations (fine)",
+          "isCode": false
+        },
+        {
+          "label": "About 2e10 operations (maybe okay)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Updating O(n) per query for O(q) queries gives O(nq) ≈ 4e10.",
+      "wrongExplanations": {
+        "1": "You’re not accounting for per-element work per query.",
+        "2": "That’s per query, not total."
+      },
+      "hint": "Consider the case where each query covers nearly the entire array.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "Can one running prefix-sum array support both range increases and range set-to-x easily while answering range sums fast?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "No, because set overwrites prior values and conflicts with accumulated adds",
+          "isCode": false
+        },
+        {
+          "label": "Yes, prefix sums handle both directly",
+          "isCode": false
+        },
+        {
+          "label": "Yes, if we keep two prefix arrays it’s straightforward",
+          "isCode": false
+        },
+        {
+          "label": "Only if x is always zero",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Range set breaks add-only accumulation; we need per-range overwrite handling.",
+      "wrongExplanations": {
+        "1": "Prefix sums are fine for adds only, not overwrites.",
+        "2": "Two arrays won’t fix overwrite semantics without more structure."
+      },
+      "hint": "Overwrites must erase previous effects in a range.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "If we organize the array into nested intervals and answer sums over intervals, what value should each interval store?",
+      "diagram": "Interval [l..r] should summarize its elements for fast sum queries.",
+      "options": [
+        {
+          "label": "The sum of values in [l..r]",
+          "isCode": false
+        },
+        {
+          "label": "Only the length r-l+1",
+          "isCode": false
+        },
+        {
+          "label": "The minimum in [l..r]",
+          "isCode": false
+        },
+        {
+          "label": "The last updated x applied to [l..r]",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "To answer sum queries, store sums; length helps compute deltas but isn’t enough alone.",
+      "wrongExplanations": {
+        "1": "Length alone doesn’t give the total sum.",
+        "3": "There can be multiple overlapping updates; a single x isn’t reliable."
+      },
+      "hint": "What do you need to return for a full-cover query quickly?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Building the Idea",
+      "questionText": "For an interval node covering [l..r], if we increase its whole range by +v without touching children, how should its stored sum change?",
+      "diagram": "Length L = r-l+1",
+      "options": [
+        {
+          "label": "sum += (r - l + 1) * v",
+          "isCode": false
+        },
+        {
+          "label": "sum += v",
+          "isCode": false
+        },
+        {
+          "label": "sum = v",
+          "isCode": false
+        },
+        {
+          "label": "sum *= v",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each of L elements increases by v, so total increases by L*v.",
+      "wrongExplanations": {
+        "1": "This treats the whole interval like one element.",
+        "2": "Setting the sum loses previous values."
+      },
+      "hint": "Total change equals number of elements times v.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "For an interval node covering [l..r], if we set its whole range to x, what should its stored sum become?",
+      "diagram": "Length L = r-l+1",
+      "options": [
+        {
+          "label": "sum = (r - l + 1) * x",
+          "isCode": false
+        },
+        {
+          "label": "sum += (r - l + 1) * x",
+          "isCode": false
+        },
+        {
+          "label": "sum = x",
+          "isCode": false
+        },
+        {
+          "label": "sum = sum + x if sum < x else sum",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "All L elements become x, so the sum is L*x.",
+      "wrongExplanations": {
+        "1": "That would double count prior values.",
+        "2": "This ignores interval length."
+      },
+      "hint": "Replace each element with x, then sum.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "We keep two deferred markers per node: pending set-to-x and pending add v. When adding v to a node that already has a pending set-to-x, how should we update the markers?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Increase the pending set value by v",
+          "isCode": false
+        },
+        {
+          "label": "Keep set and also add v to lazyAdd",
+          "isCode": false
+        },
+        {
+          "label": "Discard the set and keep only the add",
+          "isCode": false
+        },
+        {
+          "label": "Do nothing to markers; only change the node sum",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Setting to x then adding v is equivalent to setting to x+v; fold v into the set value.",
+      "wrongExplanations": {
+        "1": "It works too, but we’ll simplify by folding into the set value.",
+        "2": "The set should not be discarded; it defines base values."
+      },
+      "hint": "Set then add equals a single set to (x+v).",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "When setting a node’s range to x, what should happen to any pending add marker on that node?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Reset the pending add to 0",
+          "isCode": false
+        },
+        {
+          "label": "Keep the pending add as is",
+          "isCode": false
+        },
+        {
+          "label": "Add the pending add to x and keep it",
+          "isCode": false
+        },
+        {
+          "label": "Swap set and add values",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Set overwrites the base; pending add should be cleared at this node.",
+      "wrongExplanations": {
+        "1": "It would re-apply to children later incorrectly.",
+        "2": "We already encode add by adjusting x when needed."
+      },
+      "hint": "Set fully defines the future value for that interval.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "When pushing deferred work from a parent to its children, which order should be applied per node?",
+      "diagram": "Parent markers: maybe both set=x and add=v exist.",
+      "options": [
+        {
+          "label": "Apply set to children first, then apply add",
+          "isCode": false
+        },
+        {
+          "label": "Apply add first, then set",
+          "isCode": false
+        },
+        {
+          "label": "Order does not matter",
+          "isCode": false
+        },
+        {
+          "label": "Combine into a single add only",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Children must first adopt base x, then receive extra v.",
+      "wrongExplanations": {
+        "1": "Add then set would wipe the add.",
+        "2": "Order changes the result."
+      },
+      "hint": "Set defines base values; add is an increment on top.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "At a node with pending set=x and pending add=v, what is the effective value this interval represents (ignoring children)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "All elements equal x+v",
+          "isCode": false
+        },
+        {
+          "label": "All elements equal x",
+          "isCode": false
+        },
+        {
+          "label": "All elements equal v",
+          "isCode": false
+        },
+        {
+          "label": "All elements unchanged",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Set then add increases the set value by v.",
+      "wrongExplanations": {
+        "1": "You’re ignoring the pending add.",
+        "2": "Add alone is not correct without the set."
+      },
+      "hint": "Think of applying set first, then add.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Building the Idea",
+      "questionText": "In an update function over [ql,qr] and node [l,r], when should you return immediately without doing anything?",
+      "diagram": "Intervals inclusive",
+      "options": [
+        {
+          "label": "If ql > r or qr < l",
+          "isCode": false
+        },
+        {
+          "label": "If ql >= r and qr <= l",
+          "isCode": false
+        },
+        {
+          "label": "If ql < l and qr > r",
+          "isCode": false
+        },
+        {
+          "label": "If ql == l or qr == r",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "No overlap when the query is completely to one side.",
+      "wrongExplanations": {
+        "1": "This condition is rarely true and not the correct definition of no overlap.",
+        "2": "That’s full cover of the node, not no overlap."
+      },
+      "hint": "Check if the intervals are disjoint.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q15",
+      "phase": "Building the Idea",
+      "questionText": "In an update function, when can you apply the operation to the node directly and return without recursing?",
+      "diagram": "Node interval [l,r], query [ql,qr]",
+      "options": [
+        {
+          "label": "If ql <= l and r <= qr",
+          "isCode": false
+        },
+        {
+          "label": "If l <= ql and qr <= r",
+          "isCode": false
+        },
+        {
+          "label": "If ql == l or r == qr",
+          "isCode": false
+        },
+        {
+          "label": "Only when ql == l and qr == r",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Full cover: the node interval is entirely inside the query interval.",
+      "wrongExplanations": {
+        "1": "This is also true for full cover but not the check we need at the node.",
+        "3": "Exact boundary match is not necessary; containment is."
+      },
+      "hint": "Node’s interval completely lies within the update interval.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Choose the correct input and main skeleton to read all integers efficiently and store the initial array.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\nsys.setrecursionlimit(1 << 25)\n\ndef main():\n    data = list(map(int, sys.stdin.buffer.read().split()))\n    it = iter(data)\n    n = next(it); q = next(it)\n    arr = [next(it) for _ in range(n)]",
+          "isCode": true
+        },
+        {
+          "label": "def main():\n    n, q = map(int, input().split())\n    arr = list(map(int, input().split()))\n    data = []",
+          "isCode": true
+        },
+        {
+          "label": "import sys\n\ndef main():\n    data = sys.stdin.read().split()\n    n = int(data[0]); q = int(data[1])\n    arr = [int(x) for x in data[2:q]]",
+          "isCode": true
+        },
+        {
+          "label": "def main():\n    import sys\n    data = sys.stdin.buffer.read()\n    n = data[0]; q = data[1]\n    arr = data[2:2+n]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We read all ints, iterate them, and build arr of length n.",
+      "wrongExplanations": {
+        "1": "Repeated input() is slower and data list is unused.",
+        "3": "Raw bytes are not parsed to ints; indexing bytes won’t give numbers."
+      },
+      "hint": "Use sys.stdin.buffer.read and an iterator over ints.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\nsys.setrecursionlimit(1 << 25)\n\ndef main():\n    data = list(map(int, sys.stdin.buffer.read().split()))\n    it = iter(data)\n    n = next(it); q = next(it)\n    arr = [next(it) for _ in range(n)]",
+      "codeLabel": "I/O and main skeleton"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Initialize storage for interval sums and deferred markers.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    size = 4 * n\n    tree = [0] * size\n    lazyAdd = [0] * size\n    lazySet = [None] * size",
+          "isCode": true
+        },
+        {
+          "label": "    size = 2 * n\n    tree = [0] * size\n    lazyAdd = [0] * size\n    lazySet = [0] * size",
+          "isCode": true
+        },
+        {
+          "label": "    size = n\n    tree = [0] * (size * 4)\n    lazyAdd = [None] * (size * 4)\n    lazySet = [0] * (size * 4)",
+          "isCode": true
+        },
+        {
+          "label": "    tree = []\n    lazyAdd = []\n    lazySet = []",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Size 4*n is safe; lazySet uses None to indicate no pending set.",
+      "wrongExplanations": {
+        "1": "Size 2*n may be too small; lazySet should distinguish 'no set' from 0.",
+        "3": "We need fixed-size arrays for performance."
+      },
+      "hint": "Allocate arrays with enough capacity and a sentinel for 'no set'.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    size = 4 * n\n    tree = [0] * size\n    lazyAdd = [0] * size\n    lazySet = [None] * size",
+      "codeLabel": "Allocate arrays"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Build the initial sums from arr into the structure.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    def build(idx, l, r):\n        if l == r:\n            tree[idx] = arr[l]\n        else:\n            m = (l + r) // 2\n            build(idx * 2, l, m)\n            build(idx * 2 + 1, m + 1, r)\n            tree[idx] = tree[idx * 2] + tree[idx * 2 + 1]",
+          "isCode": true
+        },
+        {
+          "label": "    def build(idx, l, r):\n        if l == r:\n            tree[idx] = arr[r]\n        else:\n            m = (l + r) // 2\n            build(idx * 2, l, m)\n            build(idx * 2 + 1, m, r)\n            tree[idx] = max(tree[idx * 2], tree[idx * 2 + 1])",
+          "isCode": true
+        },
+        {
+          "label": "    def build(idx, l, r):\n        tree[idx] = sum(arr[l:r])",
+          "isCode": true
+        },
+        {
+          "label": "    def build(idx, l, r):\n        if l > r:\n            return\n        tree[idx] += arr[(l+r)//2]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Build recursively with correct mid split and sum combination.",
+      "wrongExplanations": {
+        "1": "Wrong child range and wrong combine (max).",
+        "2": "sum(arr[l:r]) excludes r and is O(n) per call."
+      },
+      "hint": "Leaf when l==r; otherwise recurse on [l..m] and [m+1..r].",
+      "isCodeBuilding": true,
+      "codeSnippet": "    def build(idx, l, r):\n        if l == r:\n            tree[idx] = arr[l]\n        else:\n            m = (l + r) // 2\n            build(idx * 2, l, m)\n            build(idx * 2 + 1, m + 1, r)\n            tree[idx] = tree[idx * 2] + tree[idx * 2 + 1]",
+      "codeLabel": "Build function"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Implement helpers to apply a pending set or add to a node interval [l..r].",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    def apply_set(idx, l, r, val):\n        tree[idx] = (r - l + 1) * val\n        lazySet[idx] = val\n        lazyAdd[idx] = 0\n\n    def apply_add(idx, l, r, val):\n        tree[idx] += (r - l + 1) * val\n        if lazySet[idx] is not None:\n            lazySet[idx] += val\n        else:\n            lazyAdd[idx] += val",
+          "isCode": true
+        },
+        {
+          "label": "    def apply_set(idx, l, r, val):\n        tree[idx] += (r - l + 1) * val\n        lazySet[idx] = val\n\n    def apply_add(idx, l, r, val):\n        tree[idx] += val\n        lazyAdd[idx] += val",
+          "isCode": true
+        },
+        {
+          "label": "    def apply_set(idx, l, r, val):\n        tree[idx] = val\n        lazySet[idx] = val\n        lazyAdd[idx] = 0\n\n    def apply_add(idx, l, r, val):\n        tree[idx] += (r - l + 1) * val\n        lazyAdd[idx] = 0",
+          "isCode": true
+        },
+        {
+          "label": "    def apply_set(idx, l, r, val):\n        tree[idx] = (r - l + 1) * val\n        lazySet[idx] = None\n\n    def apply_add(idx, l, r, val):\n        tree[idx] += (r - l + 1) * val\n        lazySet[idx] = None",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Set overwrites sum and clears add; add increases sum by length*v and folds into set if present.",
+      "wrongExplanations": {
+        "1": "Set must overwrite, not add; add must scale by length.",
+        "2": "Setting sum=val ignores length; add marker should accumulate."
+      },
+      "hint": "Use length (r-l+1) and reset add when setting.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    def apply_set(idx, l, r, val):\n        tree[idx] = (r - l + 1) * val\n        lazySet[idx] = val\n        lazyAdd[idx] = 0\n\n    def apply_add(idx, l, r, val):\n        tree[idx] += (r - l + 1) * val\n        if lazySet[idx] is not None:\n            lazySet[idx] += val\n        else:\n            lazyAdd[idx] += val",
+      "codeLabel": "Apply set/add"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Implement pushing deferred markers from a parent to its children.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    def push(idx, l, r):\n        if l == r:\n            return\n        m = (l + r) // 2\n        left = idx * 2\n        right = idx * 2 + 1\n        if lazySet[idx] is not None:\n            apply_set(left, l, m, lazySet[idx])\n            apply_set(right, m + 1, r, lazySet[idx])\n            lazySet[idx] = None\n        if lazyAdd[idx] != 0:\n            apply_add(left, l, m, lazyAdd[idx])\n            apply_add(right, m + 1, r, lazyAdd[idx])\n            lazyAdd[idx] = 0",
+          "isCode": true
+        },
+        {
+          "label": "    def push(idx, l, r):\n        if l == r:\n            return\n        left = idx * 2\n        right = idx * 2 + 1\n        if lazyAdd[idx] != 0:\n            apply_add(left, l, r, lazyAdd[idx])\n            apply_add(right, l, r, lazyAdd[idx])\n            lazyAdd[idx] = 0\n        if lazySet[idx] is not None:\n            apply_set(left, l, r, lazySet[idx])\n            apply_set(right, l, r, lazySet[idx])\n            lazySet[idx] = None",
+          "isCode": true
+        },
+        {
+          "label": "    def push(idx, l, r):\n        if l == r:\n            return\n        m = (l + r) // 2\n        left = idx * 2\n        right = idx * 2 + 1\n        if lazyAdd[idx] != 0:\n            apply_add(left, l, m, lazyAdd[idx])\n            apply_add(right, m + 1, r, lazyAdd[idx])\n            lazyAdd[idx] = 0\n        if lazySet[idx] is not None:\n            apply_set(left, l, m, lazySet[idx])\n            apply_set(right, m + 1, r, lazySet[idx])\n            lazySet[idx] = None",
+          "isCode": true
+        },
+        {
+          "label": "    def push(idx, l, r):\n        pass",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Propagate set first with correct child ranges, then add; clear markers.",
+      "wrongExplanations": {
+        "2": "Applying add before set loses the add effect.",
+        "1": "Using [l,r] for children miscomputes lengths."
+      },
+      "hint": "Use children intervals [l..m] and [m+1..r]; set then add.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    def push(idx, l, r):\n        if l == r:\n            return\n        m = (l + r) // 2\n        left = idx * 2\n        right = idx * 2 + 1\n        if lazySet[idx] is not None:\n            apply_set(left, l, m, lazySet[idx])\n            apply_set(right, m + 1, r, lazySet[idx])\n            lazySet[idx] = None\n        if lazyAdd[idx] != 0:\n            apply_add(left, l, m, lazyAdd[idx])\n            apply_add(right, m + 1, r, lazyAdd[idx])\n            lazyAdd[idx] = 0",
+      "codeLabel": "Push markers"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "Implement range increase and range set over [ql,qr] on node [l,r].",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    def range_add(idx, l, r, ql, qr, val):\n        if ql > r or qr < l:\n            return\n        if ql <= l and r <= qr:\n            apply_add(idx, l, r, val)\n            return\n        push(idx, l, r)\n        m = (l + r) // 2\n        range_add(idx * 2, l, m, ql, qr, val)\n        range_add(idx * 2 + 1, m + 1, r, ql, qr, val)\n        tree[idx] = tree[idx * 2] + tree[idx * 2 + 1]\n\n    def range_set(idx, l, r, ql, qr, val):\n        if ql > r or qr < l:\n            return\n        if ql <= l and r <= qr:\n            apply_set(idx, l, r, val)\n            return\n        push(idx, l, r)\n        m = (l + r) // 2\n        range_set(idx * 2, l, m, ql, qr, val)\n        range_set(idx * 2 + 1, m + 1, r, ql, qr, val)\n        tree[idx] = tree[idx * 2] + tree[idx * 2 + 1]",
+          "isCode": true
+        },
+        {
+          "label": "    def range_add(idx, l, r, ql, qr, val):\n        if ql <= l and r <= qr:\n            apply_add(idx, l, r, val)\n        else:\n            m = (l + r) // 2\n            range_add(idx * 2, l, m, ql, qr, val)\n            range_add(idx * 2 + 1, m + 1, r, ql, qr, val)\n\n    def range_set(idx, l, r, ql, qr, val):\n        if ql <= l and r <= qr:\n            apply_set(idx, l, r, val)\n        else:\n            m = (l + r) // 2\n            range_set(idx * 2, l, m, ql, qr, val)\n            range_set(idx * 2 + 1, m + 1, r, ql, qr, val)",
+          "isCode": true
+        },
+        {
+          "label": "    def range_add(idx, l, r, ql, qr, val):\n        if qr < l or ql > r:\n            return\n        push(idx, l, r)\n        m = (l + r) // 2\n        range_add(idx * 2, l, m, ql, qr, val)\n        range_add(idx * 2 + 1, m + 1, r, ql, qr, val)\n\n    def range_set(idx, l, r, ql, qr, val):\n        if ql <= l and r <= qr:\n            apply_set(idx, l, r, val)\n            return",
+          "isCode": true
+        },
+        {
+          "label": "    def range_add(idx, l, r, ql, qr, val):\n        if ql > r and qr < l:\n            return\n        if ql <= l and r <= qr:\n            apply_add(idx, l, r, val)\n        push(idx, l, r)\n        m = (l + r) // 2\n        range_add(idx * 2, l, m, ql, qr, val)\n        range_add(idx * 2 + 1, m + 1, r, ql, qr, val)\n\n    def range_set(idx, l, r, ql, qr, val):\n        if ql >= l and r >= qr:\n            apply_set(idx, l, r, val)\n            return",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Handle no-overlap, full-cover, push then recurse, and recompute sums.",
+      "wrongExplanations": {
+        "1": "Missing no-overlap and recomputation; also no push before recursion.",
+        "3": "Wrong overlap checks; logic errors in conditions."
+      },
+      "hint": "Three cases: no overlap, full cover, partial cover (push and split).",
+      "isCodeBuilding": true,
+      "codeSnippet": "    def range_add(idx, l, r, ql, qr, val):\n        if ql > r or qr < l:\n            return\n        if ql <= l and r <= qr:\n            apply_add(idx, l, r, val)\n            return\n        push(idx, l, r)\n        m = (l + r) // 2\n        range_add(idx * 2, l, m, ql, qr, val)\n        range_add(idx * 2 + 1, m + 1, r, ql, qr, val)\n        tree[idx] = tree[idx * 2] + tree[idx * 2 + 1]\n\n    def range_set(idx, l, r, ql, qr, val):\n        if ql > r or qr < l:\n            return\n        if ql <= l and r <= qr:\n            apply_set(idx, l, r, val)\n            return\n        push(idx, l, r)\n        m = (l + r) // 2\n        range_set(idx * 2, l, m, ql, qr, val)\n        range_set(idx * 2 + 1, m + 1, r, ql, qr, val)\n        tree[idx] = tree[idx * 2] + tree[idx * 2 + 1]",
+      "codeLabel": "Range updates"
+    },
+    {
+      "id": "q22",
+      "phase": "Writing the Code",
+      "questionText": "Implement the range sum query and the query-processing loop.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    def range_sum(idx, l, r, ql, qr):\n        if ql > r or qr < l:\n            return 0\n        if ql <= l and r <= qr:\n            return tree[idx]\n        push(idx, l, r)\n        m = (l + r) // 2\n        return range_sum(idx * 2, l, m, ql, qr) + range_sum(idx * 2 + 1, m + 1, r, ql, qr)\n\n    build(1, 0, n - 1)\n    out = []\n    for _ in range(q):\n        typ = next(it)\n        if typ == 1:\n            a = next(it) - 1; b = next(it) - 1; x = next(it)\n            range_add(1, 0, n - 1, a, b, x)\n        elif typ == 2:\n            a = next(it) - 1; b = next(it) - 1; x = next(it)\n            range_set(1, 0, n - 1, a, b, x)\n        else:\n            a = next(it) - 1; b = next(it) - 1\n            out.append(str(range_sum(1, 0, n - 1, a, b)))\n    sys.stdout.write(\"\\n\".join(out))",
+          "isCode": true
+        },
+        {
+          "label": "    def range_sum(idx, l, r, ql, qr):\n        if ql <= l and r <= qr:\n            return tree[idx]\n        m = (l + r) // 2\n        return range_sum(idx * 2, l, m, ql, qr) + range_sum(idx * 2 + 1, m + 1, r, ql, qr)\n\n    build(1, 0, n - 1)\n    for _ in range(q):\n        typ, a, b, *rest = map(int, input().split())\n        if typ == 1:\n            range_add(1, 0, n - 1, a, b, rest[0])\n        elif typ == 2:\n            range_set(1, 0, n - 1, a, b, rest[0])\n        else:\n            print(range_sum(1, 0, n - 1, a, b))",
+          "isCode": true
+        },
+        {
+          "label": "    def range_sum(idx, l, r, ql, qr):\n        if ql > r or qr < l:\n            return 0\n        if ql <= l and r <= qr:\n            return tree[idx]\n        return tree[idx]\n\n    build(1, 1, n)\n    out = []\n    for _ in range(q):\n        typ = next(it)\n        if typ == 3:\n            a = next(it); b = next(it)\n            out.append(str(range_sum(1, 1, n, a, b)))\n        elif typ == 1:\n            a = next(it); b = next(it); x = next(it)\n            range_add(1, 1, n, a, b, x)\n        else:\n            a = next(it); b = next(it); x = next(it)\n            range_set(1, 1, n, a, b, x)\n    sys.stdout.write(\"\\n\".join(out))",
+          "isCode": true
+        },
+        {
+          "label": "    def range_sum(idx, l, r, ql, qr):\n        if ql >= l and qr <= r:\n            return tree[idx]\n        push(idx, l, r)\n        return 0\n\n    build(1, 0, n - 1)\n    out = []\n    for _ in range(q):\n        typ = next(it)\n        if typ == 1:\n            a = next(it); b = next(it); x = next(it)\n            range_add(1, 0, n - 1, a, b, x)\n        elif typ == 2:\n            a = next(it); b = next(it); x = next(it)\n            range_set(1, 0, n - 1, a, b, x)\n        else:\n            a = next(it); b = next(it)\n            out.append(str(range_sum(1, 0, n - 1, a, b)))\n    print(\"\\n\".join(out))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Handles no/full overlap, pushes before splitting, 0-based conversion, buffered output.",
+      "wrongExplanations": {
+        "2": "Mixes 1-based build with 0-based logic; also lacks push and mid split.",
+        "1": "Slow input per line and no index conversion to 0-based."
+      },
+      "hint": "Reuse the same overlap logic; convert a,b to 0-based.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    def range_sum(idx, l, r, ql, qr):\n        if ql > r or qr < l:\n            return 0\n        if ql <= l and r <= qr:\n            return tree[idx]\n        push(idx, l, r)\n        m = (l + r) // 2\n        return range_sum(idx * 2, l, m, ql, qr) + range_sum(idx * 2 + 1, m + 1, r, ql, qr)\n\n    build(1, 0, n - 1)\n    out = []\n    for _ in range(q):\n        typ = next(it)\n        if typ == 1:\n            a = next(it) - 1; b = next(it) - 1; x = next(it)\n            range_add(1, 0, n - 1, a, b, x)\n        elif typ == 2:\n            a = next(it) - 1; b = next(it) - 1; x = next(it)\n            range_set(1, 0, n - 1, a, b, x)\n        else:\n            a = next(it) - 1; b = next(it) - 1\n            out.append(str(range_sum(1, 0, n - 1, a, b)))\n    sys.stdout.write(\"\\n\".join(out))",
+      "codeLabel": "Range sum and loop"
+    },
+    {
+      "id": "q23",
+      "phase": "Writing the Code",
+      "questionText": "Add the standard guard to execute main.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "if __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "if __main__:\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "main()",
+          "isCode": true
+        },
+        {
+          "label": "if name == \"main__\":\n    main()",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Use the conventional guard to allow import without running.",
+      "wrongExplanations": {
+        "2": "This runs on import and isn’t configurable.",
+        "1": "The special variable is __name__, not __main__."
+      },
+      "hint": "Two underscores on both sides of name and main.",
+      "isCodeBuilding": true,
+      "codeSnippet": "if __name__ == \"__main__\":\n    main()",
+      "codeLabel": "Main guard"
+    },
+    {
+      "id": "q24",
+      "phase": "Verifying the Solution",
+      "questionText": "Using your code logic, start with [2,3,1,1,5,3]. After processing \"1 2 4 2\" (increase 2..4 by 2), what is sum on [3,5]?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "11",
+          "isCode": false
+        },
+        {
+          "label": "7",
+          "isCode": false
+        },
+        {
+          "label": "9",
+          "isCode": false
+        },
+        {
+          "label": "13",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Array becomes [2,5,3,3,5,3]; sum 3..5 = 3+3+5 = 11.",
+      "wrongExplanations": {
+        "1": "7 was the sum before the add.",
+        "2": "You likely summed 2..4 or missed an element."
+      },
+      "hint": "Apply +2 to indices 2,3,4 then sum 3..5.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Verifying the Solution",
+      "questionText": "Continuing from the previous array [2,5,3,3,5,3], process \"2 2 4 5\" (set 2..4 to 5). Now what is sum on [3,5]?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "15",
+          "isCode": false
+        },
+        {
+          "label": "11",
+          "isCode": false
+        },
+        {
+          "label": "13",
+          "isCode": false
+        },
+        {
+          "label": "10",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Array becomes [2,5,5,5,5,3]; sum 3..5 = 5+5+5 = 15.",
+      "wrongExplanations": {
+        "1": "11 was before the set.",
+        "2": "Check indices and values after the set."
+      },
+      "hint": "Set overwrites prior +2 on 3 and 4; all 3..5 are 5 now.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the time complexity per query (add, set, or sum) with this interval-based structure?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(1)",
+          "isCode": false
+        },
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(log^2 n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each query touches at most a logarithmic number of interval nodes.",
+      "wrongExplanations": {
+        "1": "We still traverse a path and a few splits.",
+        "2": "We avoid touching all elements."
+      },
+      "hint": "Depth of the recursion is proportional to splitting the interval in halves.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q27",
+      "phase": "Analyzing Complexity",
+      "questionText": "What extra space does the structure use in terms of n?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(1)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(q)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We allocate arrays proportional to n (e.g., ~4n).",
+      "wrongExplanations": {
+        "1": "We store multiple arrays over intervals.",
+        "2": "We do not store separate structures per depth."
+      },
+      "hint": "Consider sizes of tree, lazyAdd, and lazySet.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\nsys.setrecursionlimit(1 << 25)\n\ndef main():\n    data = list(map(int, sys.stdin.buffer.read().split()))\n    it = iter(data)\n    n = next(it); q = next(it)\n    arr = [next(it) for _ in range(n)]",
+    "    size = 4 * n\n    tree = [0] * size\n    lazyAdd = [0] * size\n    lazySet = [None] * size",
+    "    def build(idx, l, r):\n        if l == r:\n            tree[idx] = arr[l]\n        else:\n            m = (l + r) // 2\n            build(idx * 2, l, m)\n            build(idx * 2 + 1, m + 1, r)\n            tree[idx] = tree[idx * 2] + tree[idx * 2 + 1]",
+    "    def apply_set(idx, l, r, val):\n        tree[idx] = (r - l + 1) * val\n        lazySet[idx] = val\n        lazyAdd[idx] = 0\n\n    def apply_add(idx, l, r, val):\n        tree[idx] += (r - l + 1) * val\n        if lazySet[idx] is not None:\n            lazySet[idx] += val\n        else:\n            lazyAdd[idx] += val",
+    "    def push(idx, l, r):\n        if l == r:\n            return\n        m = (l + r) // 2\n        left = idx * 2\n        right = idx * 2 + 1\n        if lazySet[idx] is not None:\n            apply_set(left, l, m, lazySet[idx])\n            apply_set(right, m + 1, r, lazySet[idx])\n            lazySet[idx] = None\n        if lazyAdd[idx] != 0:\n            apply_add(left, l, m, lazyAdd[idx])\n            apply_add(right, m + 1, r, lazyAdd[idx])\n            lazyAdd[idx] = 0",
+    "    def range_add(idx, l, r, ql, qr, val):\n        if ql > r or qr < l:\n            return\n        if ql <= l and r <= qr:\n            apply_add(idx, l, r, val)\n            return\n        push(idx, l, r)\n        m = (l + r) // 2\n        range_add(idx * 2, l, m, ql, qr, val)\n        range_add(idx * 2 + 1, m + 1, r, ql, qr, val)\n        tree[idx] = tree[idx * 2] + tree[idx * 2 + 1]\n\n    def range_set(idx, l, r, ql, qr, val):\n        if ql > r or qr < l:\n            return\n        if ql <= l and r <= qr:\n            apply_set(idx, l, r, val)\n            return\n        push(idx, l, r)\n        m = (l + r) // 2\n        range_set(idx * 2, l, m, ql, qr, val)\n        range_set(idx * 2 + 1, m + 1, r, ql, qr, val)\n        tree[idx] = tree[idx * 2] + tree[idx * 2 + 1]",
+    "    def range_sum(idx, l, r, ql, qr):\n        if ql > r or qr < l:\n            return 0\n        if ql <= l and r <= qr:\n            return tree[idx]\n        push(idx, l, r)\n        m = (l + r) // 2\n        return range_sum(idx * 2, l, m, ql, qr) + range_sum(idx * 2 + 1, m + 1, r, ql, qr)\n\n    build(1, 0, n - 1)\n    out = []\n    for _ in range(q):\n        typ = next(it)\n        if typ == 1:\n            a = next(it) - 1; b = next(it) - 1; x = next(it)\n            range_add(1, 0, n - 1, a, b, x)\n        elif typ == 2:\n            a = next(it) - 1; b = next(it) - 1; x = next(it)\n            range_set(1, 0, n - 1, a, b, x)\n        else:\n            a = next(it) - 1; b = next(it) - 1\n            out.append(str(range_sum(1, 0, n - 1, a, b)))\n    sys.stdout.write(\"\\n\".join(out))",
+    "if __name__ == \"__main__\":\n    main()"
+  ],
+  "reasoningChain": [
+    {
+      "question": "Why is per-element processing too slow for n,q up to 2e5?",
+      "insight": "Brute-force per query is O(n) leading to O(nq) ≈ 4e10 operations, exceeding time limits."
+    },
+    {
+      "question": "What should an interval store to answer sum queries quickly?",
+      "insight": "Store the sum over the interval so full-cover queries can be answered in O(1) at that node."
+    },
+    {
+      "question": "How to update an interval’s stored sum for full-cover add/set without touching children?",
+      "insight": "Use length-based formulas: sum += L*v for add, sum = L*x for set."
+    },
+    {
+      "question": "How to defer work to children correctly for both add and set?",
+      "insight": "Keep two markers: pending set and pending add, with set overriding add; when adding onto a set, fold v into the set value; when setting, clear add."
+    },
+    {
+      "question": "In what order should deferred markers be pushed to children?",
+      "insight": "Apply set first to establish base values, then apply add on top to preserve semantics."
+    },
+    {
+      "question": "How to handle indices and overlap checks robustly?",
+      "insight": "Convert 1-based to 0-based (a-1,b-1), and use three standard overlap cases: no overlap, full cover, partial cover."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1458,
+    "output_tokens": 18932,
+    "input_cost": 0.001822,
+    "output_cost": 0.18932,
+    "total_cost": 0.191142
+  }
+}

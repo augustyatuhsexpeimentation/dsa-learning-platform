@@ -1,0 +1,973 @@
+{
+  "id": "subarray-sums-i",
+  "title": "Subarray Sums I",
+  "difficulty": "intermediate",
+  "tags": [
+    "sorting",
+    "two-pointer",
+    "binary-search"
+  ],
+  "estimatedMinutes": 35,
+  "language": "python",
+  "description": "Given an array of n positive integers, count the number of subarrays whose sum equals x.\n\nInput:\n- First line: two integers n and x\n- Second line: n integers a_1 ... a_n\n\nOutput:\n- One integer: the number of subarrays with sum x\n\nImportant: All a_i are positive.",
+  "examples": [
+    {
+      "input": "5 7\n2 4 1 2 7",
+      "output": "3",
+      "explanation": "Valid subarrays: [2,4,1], [4,1,2], and [7]."
+    }
+  ],
+  "constraints": [
+    "1 ≤ n ≤ 2 * 10^5",
+    "1 ≤ x, a_i ≤ 10^9",
+    "All a_i are positive"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "What does “subarray” mean in this problem?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Any selection of elements in any order",
+          "isCode": false
+        },
+        {
+          "label": "A contiguous block of elements",
+          "isCode": false
+        },
+        {
+          "label": "Any set of elements ignoring positions",
+          "isCode": false
+        },
+        {
+          "label": "Only prefixes or suffixes of the array",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "A subarray is a contiguous sequence. Non-contiguous selections are subsequences, not subarrays.",
+      "wrongExplanations": {
+        "0": "This describes subsequences, not subarrays.",
+        "3": "Subarrays can be any contiguous block, not just prefixes/suffixes."
+      },
+      "hint": "Think about whether elements must be adjacent.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "For array [1, 2, 1, 1] and x = 3, how many subarrays have sum x?",
+      "diagram": "All subarrays:\n[1], [1,2], [1,2,1], [1,2,1,1]\n[2], [2,1], [2,1,1]\n[1], [1,1]\n[1]",
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Subarrays with sum 3: [1,2] (idx 0..1) and [2,1] (idx 1..2). Total = 2.",
+      "wrongExplanations": {
+        "2": "List them carefully; only two match exactly 3."
+      },
+      "hint": "List all contiguous segments and add their sums.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "Using the example input 5 7 / 2 4 1 2 7, what is the number of subarrays with sum 7?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Subarrays: [2,4,1], [4,1,2], and [7] at the end. Total 3.",
+      "wrongExplanations": {
+        "0": "There are more than two; check [7] as a single-element subarray."
+      },
+      "hint": "Consider single-element subarrays too.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "All a_i are positive. If you extend a current subarray by adding the next element to the right, the sum:",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Always increases",
+          "isCode": false
+        },
+        {
+          "label": "May decrease",
+          "isCode": false
+        },
+        {
+          "label": "May stay the same",
+          "isCode": false
+        },
+        {
+          "label": "Cannot be determined",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Adding a positive integer strictly increases the sum.",
+      "wrongExplanations": {
+        "1": "With all positive numbers, sum cannot decrease.",
+        "2": "Sum cannot stay the same when adding a positive number."
+      },
+      "hint": "Each a_i ≥ 1.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Understanding the Problem",
+      "questionText": "Fix an ending index r. With all a_i > 0, how many starting positions l can give a subarray sum exactly x for that r?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Zero only",
+          "isCode": false
+        },
+        {
+          "label": "At most one",
+          "isCode": false
+        },
+        {
+          "label": "Possibly many",
+          "isCode": false
+        },
+        {
+          "label": "Always exactly one",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "As l moves right, the sum strictly decreases. So at most one l can hit x for a fixed r.",
+      "wrongExplanations": {
+        "2": "Strict positivity makes sums strictly monotonic with l."
+      },
+      "hint": "Consider how the sum changes when you move the left boundary right.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "Is it feasible to check all O(n^2) subarrays under n up to 2⋅10^5?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, O(n^2) fits comfortably in 1s",
+          "isCode": false
+        },
+        {
+          "label": "No, O(n^2) is too slow",
+          "isCode": false
+        },
+        {
+          "label": "Only if we precompute prefix sums",
+          "isCode": false
+        },
+        {
+          "label": "Only if x is small",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "O(n^2) ~ 4e10 operations is far too large for 1s.",
+      "wrongExplanations": {
+        "0": "n^2 grows to tens of billions of checks at max n."
+      },
+      "hint": "Estimate n^2 when n = 2e5.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "Even if you can compute any subarray sum in O(1) for a given (l, r), how many (l, r) pairs exist in total?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(1)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "There are about n(n+1)/2 distinct (l, r) pairs, which is O(n^2).",
+      "wrongExplanations": {
+        "0": "Counting all (l,r) is quadratic, not linear."
+      },
+      "hint": "How many segments are in an n-length array?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Exploring Approaches",
+      "questionText": "While scanning rightward and maintaining a current sum, if the sum exceeds x (with all a_i > 0), what action can reduce the sum toward x without missing answers?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Move the left boundary one step right",
+          "isCode": false
+        },
+        {
+          "label": "Move the right boundary further right",
+          "isCode": false
+        },
+        {
+          "label": "Reset both boundaries to the next index",
+          "isCode": false
+        },
+        {
+          "label": "Do nothing and continue",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Removing elements from the left decreases the sum safely with positive a_i.",
+      "wrongExplanations": {
+        "1": "Moving right increases the sum even more.",
+        "2": "A full reset needlessly skips candidates."
+      },
+      "hint": "Only one way reduces the sum when values are positive.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "What quantity should we maintain while scanning the array with two indices l and r?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "The sum of elements in the window from l to r inclusive",
+          "isCode": false
+        },
+        {
+          "label": "The sum of all elements seen so far",
+          "isCode": false
+        },
+        {
+          "label": "The difference a[r] - a[l]",
+          "isCode": false
+        },
+        {
+          "label": "The maximum element between l and r",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need the current window sum to compare with x and adjust l or r.",
+      "wrongExplanations": {
+        "1": "We need the sum of the current segment, not the entire prefix."
+      },
+      "hint": "We compare against x for a specific contiguous segment.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "Trace the process on arr = [1,2,1,1,1], x = 3. Using the rule: increase r, add a[r], while sum > x move l right subtracting, and when sum == x increment count. How many subarrays are found?",
+      "diagram": "Steps (s = window sum):\nr=0: s=1\nr=1: s=3 -> count?\nr=2: s=4 -> shrink l\nr=3: s=2 -> ...\nr=4: s=3 -> count?",
+      "options": [
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Matches are [1,2], [2,1], and the last three [1,1,1] ending at r=4. Total 3.",
+      "wrongExplanations": {
+        "0": "There is also a match at the end (three 1s)."
+      },
+      "hint": "List the windows when s == x during the trace.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "What should be the condition to move l right in the inner adjustment loop?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "while sum > x",
+          "isCode": false
+        },
+        {
+          "label": "while sum >= x",
+          "isCode": false
+        },
+        {
+          "label": "while sum > x or l <= r",
+          "isCode": false
+        },
+        {
+          "label": "No inner loop needed",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "When sum == x we should count before shrinking; using >= would skip exact matches.",
+      "wrongExplanations": {
+        "1": "This would remove elements even when sum == x, missing counts."
+      },
+      "hint": "We must detect equality exactly.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "After detecting sum == x at some (l, r), what should we do next before moving to the next r?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Move l right once to look for another start for the same r",
+          "isCode": false
+        },
+        {
+          "label": "Do nothing extra; proceed to grow r further",
+          "isCode": false
+        },
+        {
+          "label": "Reset l = 0",
+          "isCode": false
+        },
+        {
+          "label": "Move r back by one",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "With positive a_i, there is at most one start for this r. No need to shift l immediately.",
+      "wrongExplanations": {
+        "0": "There is no second start for the same r when a_i > 0."
+      },
+      "hint": "Recall the at-most-one-start property from earlier.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "Should the inner loop also check a boundary condition on l and r?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes: include 'and l <= r' for safety",
+          "isCode": false
+        },
+        {
+          "label": "No: no boundary condition is ever needed",
+          "isCode": false
+        },
+        {
+          "label": "Use 'l < r' only",
+          "isCode": false
+        },
+        {
+          "label": "Check 'l < n/2' to limit shifts",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Including 'l <= r' is a safe guard. It avoids over-shrinking in edge cases.",
+      "wrongExplanations": {
+        "2": "Equal indices are valid; 'l < r' may skip necessary removal."
+      },
+      "hint": "Think about the case l == r when sum > x.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Building the Idea",
+      "questionText": "Do we need special handling when x is much larger than any single a_i (still all positive)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "No special handling; the process works as-is",
+          "isCode": false
+        },
+        {
+          "label": "Yes, pre-terminate if a_i < x for all i",
+          "isCode": false
+        },
+        {
+          "label": "Yes, sort the array first",
+          "isCode": false
+        },
+        {
+          "label": "Yes, use 64-bit counters only",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The method works regardless of x; the sum just rarely exceeds x and shrinking happens less.",
+      "wrongExplanations": {
+        "1": "We still need to scan; subarrays can combine to x even if a_i < x."
+      },
+      "hint": "The logic only depends on comparisons with x during scan.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Choose the correct import for reading from standard input.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys",
+          "isCode": true
+        },
+        {
+          "label": "from sys import stdin as sys",
+          "isCode": true
+        },
+        {
+          "label": "import io",
+          "isCode": true
+        },
+        {
+          "label": "import os",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We will use sys.stdin.read().",
+      "wrongExplanations": {
+        "1": "This shadows sys with stdin and breaks sys.stdin.read() usage.",
+        "2": "io isn't needed for this straightforward input."
+      },
+      "hint": "Think about using sys.stdin.read().",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys",
+      "codeLabel": "Import"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Define the main function header correctly.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def main()",
+          "isCode": true
+        },
+        {
+          "label": "def main():",
+          "isCode": true
+        },
+        {
+          "label": "def main(args):",
+          "isCode": true
+        },
+        {
+          "label": "def main:",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "A proper Python function header requires parentheses and a colon.",
+      "wrongExplanations": {
+        "0": "Missing colon ':' makes it invalid.",
+        "2": "We don't pass args; we'll read from stdin."
+      },
+      "hint": "Standard Python function definition syntax.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def main():",
+      "codeLabel": "Main header"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Read all input integers and parse n, x, and the array.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "data = list(map(int, sys.stdin.read().strip().split())); n, x = data[0], data[1]; arr = data[2:2+n]",
+          "isCode": true
+        },
+        {
+          "label": "data = list(map(int, sys.stdin.read().split())); n, x = data[0], data[1]; arr = data[2:n]",
+          "isCode": true
+        },
+        {
+          "label": "n, x = map(int, sys.stdin.readline().split()); arr = list(map(int, sys.stdin.readline().split()))[:n-1]",
+          "isCode": true
+        },
+        {
+          "label": "parts = sys.stdin.read().split(); n, x = int(parts[0]), int(parts[1]); arr = list(map(int, parts[2:2+n+1]))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We read all ints then slice exactly n values for the array.",
+      "wrongExplanations": {
+        "1": "Slice 2:n misses elements; it should be 2:2+n.",
+        "2": "Truncates the array by one; off-by-one error."
+      },
+      "hint": "The array starts right after the first two integers and has length n.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    data = list(map(int, sys.stdin.read().strip().split())); n, x = data[0], data[1]; arr = data[2:2+n]",
+      "codeLabel": "Read & parse"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Initialize variables for counting and tracking the current window.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "count = 0; s = 0; left = 0",
+          "isCode": true
+        },
+        {
+          "label": "count = 0; s = arr[0]; left = 0",
+          "isCode": true
+        },
+        {
+          "label": "count = 0; s = 0; left = 1",
+          "isCode": true
+        },
+        {
+          "label": "count = 0.0; s = 0; left = 0",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Start with an empty window and zero count.",
+      "wrongExplanations": {
+        "1": "s should start at 0; we add arr[right] inside the loop.",
+        "2": "left should start at 0 to cover prefixes."
+      },
+      "hint": "No elements are in the window initially.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    count = 0; s = 0; left = 0",
+      "codeLabel": "Initialize"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Write the loop to expand the right boundary and add the new element to the current sum.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    for right in range(n):\n        s += arr[right]",
+          "isCode": true
+        },
+        {
+          "label": "    for right in range(n-1):\n        s += arr[right]",
+          "isCode": true
+        },
+        {
+          "label": "    for right in range(n):\n        s = arr[right]",
+          "isCode": true
+        },
+        {
+          "label": "    while right < n:\n        s += arr[right]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We must process all n elements and accumulate s.",
+      "wrongExplanations": {
+        "1": "This skips the last element; off-by-one in range.",
+        "2": "This overwrites the sum instead of accumulating."
+      },
+      "hint": "Use a for-loop over all indices and add to s.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    for right in range(n):\n        s += arr[right]",
+      "codeLabel": "Expand right"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Add the inner adjustment to shrink from the left while the sum is too large.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "        while s > x and left <= right:\n            s -= arr[left]; left += 1",
+          "isCode": true
+        },
+        {
+          "label": "        while s >= x and left <= right:\n            s -= arr[left]; left += 1",
+          "isCode": true
+        },
+        {
+          "label": "        while s > x or left <= right:\n            s -= arr[left]; left += 1",
+          "isCode": true
+        },
+        {
+          "label": "        while s > x and left < right:\n            s -= arr[left]; left += 1",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Shrink only while s > x and keep l within [0..r].",
+      "wrongExplanations": {
+        "1": "Using >= would skip counting exact matches.",
+        "3": "l == r may also need removal if s > x."
+      },
+      "hint": "Do not remove when s == x; we need to count that first.",
+      "isCodeBuilding": true,
+      "codeSnippet": "        while s > x and left <= right:\n            s -= arr[left]; left += 1",
+      "codeLabel": "Shrink left"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "Check for equality with x and update the count.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "        if s == x:\n            count += 1",
+          "isCode": true
+        },
+        {
+          "label": "        if s >= x:\n            count += 1",
+          "isCode": true
+        },
+        {
+          "label": "        if s is x:\n            count += 1",
+          "isCode": true
+        },
+        {
+          "label": "        if s == x:\n            count = 1",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We only count exact matches and must increment, not reset.",
+      "wrongExplanations": {
+        "1": "This would overcount sums greater than x.",
+        "2": "Identity comparison is not the right way to compare integers."
+      },
+      "hint": "Use equality and increment.",
+      "isCodeBuilding": true,
+      "codeSnippet": "        if s == x:\n            count += 1",
+      "codeLabel": "Count match"
+    },
+    {
+      "id": "q22",
+      "phase": "Writing the Code",
+      "questionText": "Print the result and add the standard entry point.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    print(count)\nif __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "print(count)\nif __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "    print(count)\nif __name__ == \"__main__\":\n    main(main)",
+          "isCode": true
+        },
+        {
+          "label": "    print(count)\nif __name__ == \"__main__\":\n    main",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Print inside main and call main() under the standard guard.",
+      "wrongExplanations": {
+        "1": "This prints at top level, outside main, breaking indentation structure.",
+        "3": "main without parentheses does not call the function."
+      },
+      "hint": "Keep print inside main; call main under the usual guard.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    print(count)\nif __name__ == \"__main__\":\n    main()",
+      "codeLabel": "Output & entry"
+    },
+    {
+      "id": "q23",
+      "phase": "Verifying the Solution",
+      "questionText": "Run the logic on n=5, x=3, arr=[3,2,1,1,1]. How many subarrays sum to 3?",
+      "diagram": "Candidates: [3], [2,1], [1,1,1], ...",
+      "options": [
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Matches: [3], [2,1], and [1,1,1]. Total 3.",
+      "wrongExplanations": {
+        "0": "You missed the three 1s at the end forming 3."
+      },
+      "hint": "Remember: at most one start per fixed end, but different ends can match.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Verifying the Solution",
+      "questionText": "For n=3, x=2, arr=[1,1,1], what output should the program print?",
+      "diagram": "Subarrays: [1,1] at (0..1), [1,1] at (1..2)",
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Two subarrays of sum 2: (0..1) and (1..2).",
+      "wrongExplanations": {
+        "2": "There are only two contiguous pairs in length 3."
+      },
+      "hint": "List contiguous pairs only.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the time complexity of this approach?",
+      "diagram": "Each index advances at most n times: l and r move forward only.",
+      "options": [
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(log n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each element is added once and removed at most once. Total linear time.",
+      "wrongExplanations": {
+        "2": "We never examine all O(n^2) subarrays."
+      },
+      "hint": "How many times can l and r each move?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the extra space complexity?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(1) additional space",
+          "isCode": false
+        },
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(x)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We store a few integers and reuse the input array.",
+      "wrongExplanations": {
+        "1": "We do not store any extra arrays proportional to n."
+      },
+      "hint": "Only a handful of integers are kept.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q27",
+      "phase": "Analyzing Complexity",
+      "questionText": "Under the given constraints (all a_i ≥ 1), which edge case needs extra handling in code?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "None; the logic handles all valid inputs directly",
+          "isCode": false
+        },
+        {
+          "label": "x = 0 requires a special case",
+          "isCode": false
+        },
+        {
+          "label": "Arrays with negative numbers need a different approach",
+          "isCode": false
+        },
+        {
+          "label": "The array must be sorted first",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "With all positives and n ≥ 1, no special-case code is required.",
+      "wrongExplanations": {
+        "1": "x ≥ 1 by constraints; no zero-sum case.",
+        "2": "Negatives are not allowed here."
+      },
+      "hint": "Check the constraints carefully.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys",
+    "def main():",
+    "    data = list(map(int, sys.stdin.read().strip().split())); n, x = data[0], data[1]; arr = data[2:2+n]",
+    "    count = 0; s = 0; left = 0",
+    "    for right in range(n):\n        s += arr[right]",
+    "        while s > x and left <= right:\n            s -= arr[left]; left += 1",
+    "        if s == x:\n            count += 1",
+    "    print(count)\nif __name__ == \"__main__\":\n    main()"
+  ],
+  "reasoningChain": [
+    {
+      "question": "What does a subarray mean here?",
+      "insight": "A subarray is a contiguous segment; the task counts contiguous sums equal to x."
+    },
+    {
+      "question": "Is checking all subarrays feasible?",
+      "insight": "Enumerating all segments is O(n^2) and too slow for n up to 2e5."
+    },
+    {
+      "question": "How does positivity help?",
+      "insight": "With all a_i > 0, expanding right increases sum and shrinking left decreases sum, enabling a monotonic scan."
+    },
+    {
+      "question": "How to adjust when sum deviates from x?",
+      "insight": "If sum > x, move the left boundary right; if sum == x, count; otherwise expand right."
+    },
+    {
+      "question": "How many starts per end when a_i > 0?",
+      "insight": "At most one start index for a fixed end hits x, so one check per step suffices."
+    },
+    {
+      "question": "How to implement efficiently?",
+      "insight": "Maintain running sum with two indices, update in a single pass, and parse input correctly."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1343,
+    "output_tokens": 16787,
+    "input_cost": 0.001679,
+    "output_cost": 0.16787,
+    "total_cost": 0.169549
+  }
+}

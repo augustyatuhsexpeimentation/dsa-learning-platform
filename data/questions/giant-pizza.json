@@ -1,0 +1,987 @@
+{
+  "id": "giant-pizza-mcq-chain",
+  "title": "Giant Pizza",
+  "difficulty": "intermediate",
+  "tags": [
+    "graph"
+  ],
+  "estimatedMinutes": 70,
+  "language": "python",
+  "description": "Uolevi's family is going to order a large pizza and eat it together. A total of n family members will join the order, and there are m possible toppings. The pizza may have any number of toppings.\n\nEach family member gives two wishes concerning the toppings of the pizza. The wishes are of the form \"topping x is good/bad\". Your task is to choose the toppings so that at least one wish from everybody becomes true (a good topping is included in the pizza or a bad topping is not included).\n\nInput:\n- The first input line has two integers n and m: the number of family members and toppings. The toppings are numbered 1,2,\\dots,m.\n- After this, there are n lines describing the wishes. Each line has two wishes of the form \"+ x\" (topping x is good) or \"- x\" (topping x is bad).\n\nOutput:\n- Print a line with m symbols: for each topping \"+\" if it is included and \"-\" if it is not included. You can print any valid solution.\n- If there are no valid solutions, print \"IMPOSSIBLE\".",
+  "examples": [
+    {
+      "input": "3 5\n+ 1 + 2\n- 1 + 3\n+ 4 - 2",
+      "output": "- + + + -",
+      "explanation": "One valid choice: exclude 1,2,5 and include 3,4. Each member has at least one satisfied wish."
+    }
+  ],
+  "constraints": [
+    "1 <= n, m <= 1e5",
+    "1 <= x <= m"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "For n=1, m=1 with wishes: \n+ 1 - 1\nIs there always a valid output for the single topping?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, always.",
+          "isCode": false
+        },
+        {
+          "label": "Only if we include topping 1.",
+          "isCode": false
+        },
+        {
+          "label": "Only if we exclude topping 1.",
+          "isCode": false
+        },
+        {
+          "label": "Sometimes impossible.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "At least one of (+1) or (-1) will be true regardless of include/exclude, so it's always satisfiable.",
+      "wrongExplanations": {
+        "1": "Including 1 makes +1 true, but excluding also works (makes -1 true).",
+        "3": "With a single topping, one of the two opposite wishes must hold."
+      },
+      "hint": "At least one of the two opposite statements must be true.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "n=1, m=2; wishes:\n+ 1 + 2\nWhich of the following is a valid output line (m symbols for toppings 1..2)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "+ -",
+          "isCode": false
+        },
+        {
+          "label": "- -",
+          "isCode": false
+        },
+        {
+          "label": "- +",
+          "isCode": false
+        },
+        {
+          "label": "+ +",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Any output with at least one '+' among toppings 1 or 2 works. '+ -' satisfies '+ 1'.",
+      "wrongExplanations": {
+        "1": "Both toppings excluded violates '+ 1 + 2'.",
+        "2": "Also valid, but only one option can be marked correct here."
+      },
+      "hint": "At least one of topping 1 or 2 must be included.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "n=2, m=1; wishes:\n+ 1 + 1\n- 1 - 1\nIs there a valid output?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, if we include topping 1.",
+          "isCode": false
+        },
+        {
+          "label": "Yes, if we exclude topping 1.",
+          "isCode": false
+        },
+        {
+          "label": "Yes, always.",
+          "isCode": false
+        },
+        {
+          "label": "No, impossible.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 3,
+      "explanation": "First line forces include 1; second forces exclude 1. Can't satisfy both lines.",
+      "wrongExplanations": {
+        "0": "Including 1 satisfies the first but violates the second line.",
+        "1": "Excluding 1 satisfies the second but violates the first line."
+      },
+      "hint": "Each line must have at least one wish true. Here each line imposes a single forced choice.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "If a topping is never mentioned in any wish, what can we print for it?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Must be '+' to be safe.",
+          "isCode": false
+        },
+        {
+          "label": "Must be '-' to be safe.",
+          "isCode": false
+        },
+        {
+          "label": "Either '+' or '-' works.",
+          "isCode": false
+        },
+        {
+          "label": "It makes the instance impossible.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Unconstrained toppings can be assigned arbitrarily.",
+      "wrongExplanations": {
+        "0": "No wish involves it, so no requirement forces '+'.",
+        "1": "Similarly, not forced to '-' either."
+      },
+      "hint": "No constraints mention it.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Understanding the Problem",
+      "questionText": "Is trying all 2^m topping choices feasible under m up to 10^5?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, with bit tricks.",
+          "isCode": false
+        },
+        {
+          "label": "No, it's far too large.",
+          "isCode": false
+        },
+        {
+          "label": "Yes, if n is small.",
+          "isCode": false
+        },
+        {
+          "label": "Only if we parallelize.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "2^100000 is astronomically large; we need a different approach.",
+      "wrongExplanations": {
+        "0": "Bit tricks don't change exponential growth.",
+        "2": "n doesn't reduce the number of assignments to check."
+      },
+      "hint": "Compare 2^m with time limit 1s.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "Model each topping x as a boolean: '+' x means x is true (included), '-' x means x is false (excluded). Each line has two wishes. What constraint does a single line impose?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "(a OR b) must be true",
+          "isCode": false
+        },
+        {
+          "label": "(a AND b) must be true",
+          "isCode": false
+        },
+        {
+          "label": "Exactly one of a, b is true",
+          "isCode": false
+        },
+        {
+          "label": "a == b must hold",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "At least one of the two wishes must be true, i.e., a OR b.",
+      "wrongExplanations": {
+        "1": "Both don't need to be true; at least one suffices.",
+        "2": "They can both be true, so not exclusive."
+      },
+      "hint": "The statement: at least one becomes true.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "From (a OR b) must be true, what can we infer if a is false?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "b must be true.",
+          "isCode": false
+        },
+        {
+          "label": "b must be false.",
+          "isCode": false
+        },
+        {
+          "label": "Nothing follows.",
+          "isCode": false
+        },
+        {
+          "label": "a must be true.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "If a is false, to satisfy a OR b, b must be true.",
+      "wrongExplanations": {
+        "2": "The clause forces a requirement when one side is false."
+      },
+      "hint": "Think of the only way a OR b can fail.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Exploring Approaches",
+      "questionText": "We can model these \"if one is false, the other must be true\" relations using a directed graph. How many nodes should the graph have?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "m nodes (one per topping)",
+          "isCode": false
+        },
+        {
+          "label": "2m nodes (one per literal: '+' x and '-' x)",
+          "isCode": false
+        },
+        {
+          "label": "n nodes (one per member)",
+          "isCode": false
+        },
+        {
+          "label": "m + n nodes",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "We need separate states for x being true and x being false.",
+      "wrongExplanations": {
+        "0": "One node per topping can't distinguish true vs false states.",
+        "2": "Constraints are between literals, not members."
+      },
+      "hint": "Each topping has two possible literal states.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "Choose a compact index mapping for literals. Let v = x-1 (0-based topping). Which mapping works well?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "'+' x -> 2*v, '-' x -> 2*v + 1",
+          "isCode": false
+        },
+        {
+          "label": "'+' x -> v, '-' x -> v + m",
+          "isCode": false
+        },
+        {
+          "label": "'+' x -> 2*v + 1, '-' x -> 2*v",
+          "isCode": false
+        },
+        {
+          "label": "'+' x -> v, '-' x -> v - 1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Even index for true and odd for false is convenient; toggling uses XOR 1.",
+      "wrongExplanations": {
+        "1": "Works too but complicates toggling and size assumptions.",
+        "2": "Swapping is arbitrary but we'll rely on even=true in code later."
+      },
+      "hint": "Aim for a simple way to toggle true/false for the same topping.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "Given a literal index e with mapping '+' -> even, '-' -> odd, how to compute the opposite literal of the same topping?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "e + 1",
+          "isCode": false
+        },
+        {
+          "label": "e ^ 1",
+          "isCode": false
+        },
+        {
+          "label": "e - 1",
+          "isCode": false
+        },
+        {
+          "label": "e ^ 0",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "XOR 1 flips the least significant bit: toggles even<->odd.",
+      "wrongExplanations": {
+        "0": "Fails for odd e; you need to toggle both ways.",
+        "2": "Fails for even e; also negative for e=0."
+      },
+      "hint": "A bit trick toggles the last bit.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "For a line with literals a and b (each is '+' x or '-' y), which directed edges should we add to enforce \"a OR b\"?",
+      "diagram": "Think in terms: if a is false, then b must be true; and if b is false, then a must be true.",
+      "options": [
+        {
+          "label": "(a -> b) and (b -> a)",
+          "isCode": false
+        },
+        {
+          "label": "(not a -> b) and (not b -> a)",
+          "isCode": false
+        },
+        {
+          "label": "(a -> not b) and (b -> not a)",
+          "isCode": false
+        },
+        {
+          "label": "(not a -> not b) and (not b -> not a)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Both implications force the clause to hold in all cases where one side is false.",
+      "wrongExplanations": {
+        "0": "This would wrongly force both to be true together.",
+        "2": "This enforces they can't both be true, which is not required."
+      },
+      "hint": "Use the inference from Q7 twice, symmetrically.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "When does the graph imply a contradiction for a topping x?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "If there's any cycle anywhere.",
+          "isCode": false
+        },
+        {
+          "label": "If x's true node reaches its false node OR the reverse holds.",
+          "isCode": false
+        },
+        {
+          "label": "If x's true and false nodes are in the same mutually-reachable group.",
+          "isCode": false
+        },
+        {
+          "label": "If a node has out-degree 0.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Mutual reachability of both states means the system forces x to be both true and false.",
+      "wrongExplanations": {
+        "0": "Cycles are common and not necessarily contradictions.",
+        "1": "Only one-way reachability doesn't force both states simultaneously."
+      },
+      "hint": "Think \"they force each other\" both ways.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "Suppose we group nodes so that within a group, every node can reach every other. In what order should we assign truth values to these groups to avoid conflicts?",
+      "diagram": "- Perform a traversal that appends a node after exploring all its outgoing edges.\n- Collect a list 'order' of nodes in that manner.",
+      "options": [
+        {
+          "label": "Process groups in the same order as 'order'.",
+          "isCode": false
+        },
+        {
+          "label": "Process groups in reverse of 'order'.",
+          "isCode": false
+        },
+        {
+          "label": "Any order works.",
+          "isCode": false
+        },
+        {
+          "label": "Process from smallest group to largest.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Reversing this finishing list respects dependencies so we decide later groups first.",
+      "wrongExplanations": {
+        "0": "This can assign a group before its requirements are decided.",
+        "2": "Ordering matters to avoid forcing contradictions."
+      },
+      "hint": "Choose an order that resolves dependencies already.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Building the Idea",
+      "questionText": "After grouping and ordering, we compute an integer id for each node's group. For topping v, when should we set it to included ('+')?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "When group(true_v) > group(false_v).",
+          "isCode": false
+        },
+        {
+          "label": "When group(true_v) < group(false_v).",
+          "isCode": false
+        },
+        {
+          "label": "Always '+', since more toppings is better.",
+          "isCode": false
+        },
+        {
+          "label": "When true_v has higher out-degree.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Using reverse finishing order, a larger group id indicates later decision, making this rule consistent.",
+      "wrongExplanations": {
+        "1": "In this setup, that would invert the intended assignment.",
+        "2": "The task is not to maximize '+' count."
+      },
+      "hint": "Compare the order in which the two literal nodes are decided.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Start by setting up input reading and a main function with a higher recursion limit.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\nsys.setrecursionlimit(1<<25)\n\ndef main():\n    data = sys.stdin.read().split()\n    if not data:\n        return\n    it = iter(data)\n    n = int(next(it)); m = int(next(it))",
+          "isCode": true
+        },
+        {
+          "label": "from sys import *\n\n\ndef main():\n    data = input().split()\n    it = iter(data)\n    n = int(next(it)); m = int(next(it))",
+          "isCode": true
+        },
+        {
+          "label": "import sys\n\ndef main():\n    data = sys.stdin.readline().split()\n    it = iter(data)\n    n = int(next(it)); m = int(next(it))",
+          "isCode": true
+        },
+        {
+          "label": "import sys\nsys.setrecursionlimit(10**3)\n\ndef main():\n    tokens = sys.stdin.read().split()\n    it = iter(tokens)\n    n = int(next(it)); m = int(next(it))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We read all tokens for robustness and set a high recursion limit. Also guard empty input.",
+      "wrongExplanations": {
+        "1": "input().split() reads only one line; we need all tokens.",
+        "3": "Recursion limit is too low for deep traversals."
+      },
+      "hint": "Use sys.stdin.read().split() and a large recursionlimit.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\nsys.setrecursionlimit(1<<25)\n\ndef main():\n    data = sys.stdin.read().split()\n    if not data:\n        return\n    it = iter(data)\n    n = int(next(it)); m = int(next(it))",
+      "codeLabel": "Setup I/O and main()"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Initialize the graph with 2*m nodes and their reverse graph.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    V = 2*m\n    g = [[] for _ in range(V)]\n    gr = [[] for _ in range(V)]",
+          "isCode": true
+        },
+        {
+          "label": "    V = m\n    g = [[] for _ in range(V)]\n    gr = [[] for _ in range(V)]",
+          "isCode": true
+        },
+        {
+          "label": "    V = 2*m\n    g = [set() for _ in range(V)]\n    gr = [set() for _ in range(V)]",
+          "isCode": true
+        },
+        {
+          "label": "    V = 2*m\n    g = {}\n    gr = {}",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need adjacency lists for 2*m literal nodes and their reverse.",
+      "wrongExplanations": {
+        "1": "We need separate nodes for true and false literals.",
+        "2": "Sets add overhead; lists suffice and preserve insertion order for reproducibility."
+      },
+      "hint": "We will push neighbors with append operations.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    V = 2*m\n    g = [[] for _ in range(V)]\n    gr = [[] for _ in range(V)]",
+      "codeLabel": "Init graphs"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Implement the literal-to-node mapping function.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    def node(sign, x):\n        v = int(x) - 1\n        return 2*v if sign == '+' else (2*v) ^ 1",
+          "isCode": true
+        },
+        {
+          "label": "    def node(sign, x):\n        v = int(x) - 1\n        return 2*v + 1 if sign == '+' else 2*v",
+          "isCode": true
+        },
+        {
+          "label": "    def node(sign, x):\n        v = int(x)\n        return 2*v if sign == '+' else 2*v + 1",
+          "isCode": true
+        },
+        {
+          "label": "    def node(sign, x):\n        return int(x) if sign == '+' else int(x) ^ 1",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We use 0-based v=x-1, '+' -> 2*v, '-' -> 2*v^1 (which is 2*v+1).",
+      "wrongExplanations": {
+        "1": "This flips the mapping; later toggling and checks assume '+' is even.",
+        "3": "This fails to map different toppings to disjoint index pairs."
+      },
+      "hint": "Even index for '+', odd for '-'.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    def node(sign, x):\n        v = int(x) - 1\n        return 2*v if sign == '+' else (2*v) ^ 1",
+      "codeLabel": "Literal index mapping"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Read each line’s two wishes and add the two directed constraints.",
+      "diagram": "For literals a and b:\n- add (not a -> b)\n- add (not b -> a)\nAlso add edges to the reverse graph.",
+      "options": [
+        {
+          "label": "    for _ in range(n):\n        s1 = next(it); x1 = next(it)\n        s2 = next(it); x2 = next(it)\n        a = node(s1, x1)\n        b = node(s2, x2)\n        na = a ^ 1\n        nb = b ^ 1\n        g[na].append(b)\n        gr[b].append(na)\n        g[nb].append(a)\n        gr[a].append(nb)",
+          "isCode": true
+        },
+        {
+          "label": "    for _ in range(n):\n        s1 = next(it); x1 = next(it)\n        s2 = next(it); x2 = next(it)\n        a = node(s1, x1)\n        b = node(s2, x2)\n        na = a ^ 1\n        nb = b ^ 1\n        g[a].append(nb)\n        gr[nb].append(a)\n        g[b].append(na)\n        gr[na].append(b)",
+          "isCode": true
+        },
+        {
+          "label": "    for _ in range(n):\n        s1 = next(it); x1 = next(it)\n        s2 = next(it); x2 = next(it)\n        a = node(s1, x1)\n        b = node(s2, x2)\n        g[a].append(b)\n        gr[b].append(a)\n        g[b].append(a)\n        gr[a].append(b)",
+          "isCode": true
+        },
+        {
+          "label": "    for _ in range(n):\n        s1 = next(it); x1 = next(it)\n        s2 = next(it); x2 = next(it)\n        a = node(s1, x1)\n        b = node(s2, x2)\n        na = a + 1\n        nb = b + 1\n        g[na].append(b)\n        g[nb].append(a)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We add both implications and mirror them in the reverse graph.",
+      "wrongExplanations": {
+        "1": "These edges correspond to (a -> not b) and (b -> not a), which is wrong.",
+        "3": "Opposites must be toggled with XOR 1, not '+1' (fails for odd indices)."
+      },
+      "hint": "Use XOR 1 to get the opposite literal.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    for _ in range(n):\n        s1 = next(it); x1 = next(it)\n        s2 = next(it); x2 = next(it)\n        a = node(s1, x1)\n        b = node(s2, x2)\n        na = a ^ 1\n        nb = b ^ 1\n        g[na].append(b)\n        gr[b].append(na)\n        g[nb].append(a)\n        gr[a].append(nb)",
+      "codeLabel": "Add constraints"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Write the first traversal that records nodes after exploring all outgoing edges.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    vis = [False] * V\n    order = []\n    def dfs1(u):\n        vis[u] = True\n        for v in g[u]:\n            if not vis[v]:\n                dfs1(v)\n        order.append(u)\n    for u in range(V):\n        if not vis[u]:\n            dfs1(u)",
+          "isCode": true
+        },
+        {
+          "label": "    vis = [False] * V\n    order = []\n    def dfs1(u):\n        for v in g[u]:\n            if not vis[v]:\n                vis[v] = True\n                dfs1(v)\n        order.append(u)\n    for u in range(V):\n        dfs1(u)",
+          "isCode": true
+        },
+        {
+          "label": "    vis = [False] * V\n    order = []\n    def dfs1(u):\n        vis[u] = True\n        order.append(u)\n        for v in g[u]:\n            if not vis[v]:\n                dfs1(v)\n    for u in range(V):\n        if not vis[u]:\n            dfs1(u)",
+          "isCode": true
+        },
+        {
+          "label": "    vis = [False] * V\n    order = []\n    def dfs1(u):\n        for v in g[u]:\n            dfs1(v)\n        order.append(u)\n    for u in range(V):\n        dfs1(u)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We mark visited, explore neighbors, and append to order after recursion.",
+      "wrongExplanations": {
+        "1": "Doesn't mark the start node as visited and calls dfs1 on all nodes unconditionally.",
+        "3": "No visited checks leads to infinite recursion in cycles."
+      },
+      "hint": "Append after exploring all outgoing edges.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    vis = [False] * V\n    order = []\n    def dfs1(u):\n        vis[u] = True\n        for v in g[u]:\n            if not vis[v]:\n                dfs1(v)\n        order.append(u)\n    for u in range(V):\n        if not vis[u]:\n            dfs1(u)",
+      "codeLabel": "First traversal"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Write the second traversal over the reverse graph to label groups, processing nodes in reverse of the recorded list.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    comp = [-1] * V\n    def dfs2(u, c):\n        comp[u] = c\n        for v in gr[u]:\n            if comp[v] == -1:\n                dfs2(v, c)\n    c = 0\n    for u in reversed(order):\n        if comp[u] == -1:\n            dfs2(u, c)\n            c += 1",
+          "isCode": true
+        },
+        {
+          "label": "    comp = [0] * V\n    def dfs2(u, c):\n        for v in gr[u]:\n            if comp[v] == 0:\n                dfs2(v, c)\n        comp[u] = c\n    c = 0\n    for u in order:\n        if comp[u] == 0:\n            dfs2(u, c)\n            c += 1",
+          "isCode": true
+        },
+        {
+          "label": "    comp = [-1] * V\n    def dfs2(u, c):\n        comp[u] = c\n        for v in g[u]:\n            if comp[v] == -1:\n                dfs2(v, c)\n    c = 0\n    for u in reversed(order):\n        if comp[u] == -1:\n            dfs2(u, c)\n            c += 1",
+          "isCode": true
+        },
+        {
+          "label": "    comp = [-1] * V\n    def dfs2(u, c):\n        comp[u] = c\n        for v in gr[u]:\n            if comp[v] == -1:\n                dfs2(v, c)\n    c = 0\n    for u in order:\n        if comp[u] == -1:\n            dfs2(u, c)\n            c += 1",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We traverse the reverse graph and iterate nodes in reversed finishing order.",
+      "wrongExplanations": {
+        "2": "Must traverse the reverse graph here, not the original.",
+        "3": "Order must be reversed to respect dependencies."
+      },
+      "hint": "Use reversed(order) and the reverse graph.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    comp = [-1] * V\n    def dfs2(u, c):\n        comp[u] = c\n        for v in gr[u]:\n            if comp[v] == -1:\n                dfs2(v, c)\n    c = 0\n    for u in reversed(order):\n        if comp[u] == -1:\n            dfs2(u, c)\n            c += 1",
+      "codeLabel": "Second traversal and grouping"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "Finish by checking contradictions and printing any valid assignment. Include the standard main guard.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    ans = []\n    for v in range(m):\n        if comp[2*v] == comp[(2*v) ^ 1]:\n            print(\"IMPOSSIBLE\")\n            return\n        val = comp[2*v] > comp[(2*v) ^ 1]\n        ans.append('+' if val else '-')\n    print(' '.join(ans))\n\nif __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "    ans = []\n    for v in range(m):\n        if comp[2*v] != comp[(2*v) ^ 1]:\n            print(\"IMPOSSIBLE\")\n            return\n        val = comp[2*v] < comp[(2*v) ^ 1]\n        ans.append('+' if val else '-')\n    print(' '.join(ans))\n\nif __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "    for v in range(m):\n        if comp[2*v] == comp[(2*v) ^ 1]:\n            print(\"IMPOSSIBLE\")\n            break\n        print('+', end=' ')\n    print()\n\nif __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "    ans = []\n    for v in range(m):\n        if comp[2*v] == comp[(2*v) ^ 1]:\n            return\n        val = comp[2*v] > comp[(2*v) ^ 1]\n        ans.append('+' if val else '-')\n    print(' '.join(ans))\n\nif __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We detect contradictions, choose '+' if the true-literal group comes later, and print the line. Include the main guard.",
+      "wrongExplanations": {
+        "1": "The contradiction check is inverted; it declares impossible when it's actually fine.",
+        "3": "On contradiction it should print \"IMPOSSIBLE\", not silently return without output."
+      },
+      "hint": "Compare group ids and ensure to output or explicitly print \"IMPOSSIBLE\".",
+      "isCodeBuilding": true,
+      "codeSnippet": "    ans = []\n    for v in range(m):\n        if comp[2*v] == comp[(2*v) ^ 1]:\n            print(\"IMPOSSIBLE\")\n            return\n        val = comp[2*v] > comp[(2*v) ^ 1]\n        ans.append('+' if val else '-')\n    print(' '.join(ans))\n\nif __name__ == \"__main__\":\n    main()",
+      "codeLabel": "Finalize and print"
+    },
+    {
+      "id": "q22",
+      "phase": "Verifying the Solution",
+      "questionText": "Run the built logic conceptually on:\n2 1\n+ 1 + 1\n- 1 - 1\nWhat will the program print?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "+",
+          "isCode": false
+        },
+        {
+          "label": "-",
+          "isCode": false
+        },
+        {
+          "label": "IMPOSSIBLE",
+          "isCode": false
+        },
+        {
+          "label": "+ -",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "The first line forces include 1, the second forces exclude 1, so it's impossible.",
+      "wrongExplanations": {
+        "0": "Choosing '+' violates the second line.",
+        "1": "Choosing '-' violates the first line."
+      },
+      "hint": "Each line enforces a single literal decisively.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q23",
+      "phase": "Verifying the Solution",
+      "questionText": "Consider:\n1 2\n- 1 - 2\nWhich of the following outputs is valid?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "+ +",
+          "isCode": false
+        },
+        {
+          "label": "- +",
+          "isCode": false
+        },
+        {
+          "label": "+ -",
+          "isCode": false
+        },
+        {
+          "label": "- -",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Any output with at least one '-' among toppings 1 or 2 is valid. '- +' is one such example.",
+      "wrongExplanations": {
+        "0": "Both included makes '- 1 - 2' false.",
+        "3": "Also valid, but only one option is marked correct here."
+      },
+      "hint": "At least one of the two toppings must be excluded.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Verifying the Solution",
+      "questionText": "If no constraints mention topping 3, can the program output either '+' or '-' for it while still being correct?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, either is fine.",
+          "isCode": false
+        },
+        {
+          "label": "No, it must be '+'.",
+          "isCode": false
+        },
+        {
+          "label": "No, it must be '-'.",
+          "isCode": false
+        },
+        {
+          "label": "It depends on n.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Unconstrained toppings can be freely set; any consistent choice works.",
+      "wrongExplanations": {
+        "1": "There's no rule forcing '+'.",
+        "2": "There's no rule forcing '-'."
+      },
+      "hint": "See Q4.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Analyzing Complexity",
+      "questionText": "Let V=2m be the number of nodes and E the number of edges added. How many edges are added from n lines?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "E = n",
+          "isCode": false
+        },
+        {
+          "label": "E = 2n",
+          "isCode": false
+        },
+        {
+          "label": "E = m",
+          "isCode": false
+        },
+        {
+          "label": "E = n + m",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Each line adds two implications, so 2 edges per line.",
+      "wrongExplanations": {
+        "0": "We add two edges per line, not one.",
+        "3": "m is unrelated to the number of edges added per line."
+      },
+      "hint": "See Q11: two directed relations per line.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the overall time complexity of building the graph and performing the two traversals?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O((m + n))",
+          "isCode": false
+        },
+        {
+          "label": "O(mn)",
+          "isCode": false
+        },
+        {
+          "label": "O(2^m)",
+          "isCode": false
+        },
+        {
+          "label": "O(m log m + n log n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Graph build is O(n). Two traversals are O(V+E)=O(m+n).",
+      "wrongExplanations": {
+        "1": "We never nest over both m and n.",
+        "2": "No exponential step remains."
+      },
+      "hint": "Think linear in nodes plus edges.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q27",
+      "phase": "Analyzing Complexity",
+      "questionText": "Space complexity for storing both the graph and its reverse (adjacency lists) is:",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(m + n)",
+          "isCode": false
+        },
+        {
+          "label": "O(mn)",
+          "isCode": false
+        },
+        {
+          "label": "O(m)",
+          "isCode": false
+        },
+        {
+          "label": "O(n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We store O(V+E) = O(m + n) across both graphs since V=2m and E=2n.",
+      "wrongExplanations": {
+        "2": "Nodes alone are insufficient; edges dominate too.",
+        "3": "Edges depend on n, so this is incomplete."
+      },
+      "hint": "Count both nodes and edges in both graphs.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\nsys.setrecursionlimit(1<<25)\n\ndef main():\n    data = sys.stdin.read().split()\n    if not data:\n        return\n    it = iter(data)\n    n = int(next(it)); m = int(next(it))",
+    "    V = 2*m\n    g = [[] for _ in range(V)]\n    gr = [[] for _ in range(V)]",
+    "    def node(sign, x):\n        v = int(x) - 1\n        return 2*v if sign == '+' else (2*v) ^ 1",
+    "    for _ in range(n):\n        s1 = next(it); x1 = next(it)\n        s2 = next(it); x2 = next(it)\n        a = node(s1, x1)\n        b = node(s2, x2)\n        na = a ^ 1\n        nb = b ^ 1\n        g[na].append(b)\n        gr[b].append(na)\n        g[nb].append(a)\n        gr[a].append(nb)",
+    "    vis = [False] * V\n    order = []\n    def dfs1(u):\n        vis[u] = True\n        for v in g[u]:\n            if not vis[v]:\n                dfs1(v)\n        order.append(u)\n    for u in range(V):\n        if not vis[u]:\n            dfs1(u)",
+    "    comp = [-1] * V\n    def dfs2(u, c):\n        comp[u] = c\n        for v in gr[u]:\n            if comp[v] == -1:\n                dfs2(v, c)\n    c = 0\n    for u in reversed(order):\n        if comp[u] == -1:\n            dfs2(u, c)\n            c += 1",
+    "    ans = []\n    for v in range(m):\n        if comp[2*v] == comp[(2*v) ^ 1]:\n            print(\"IMPOSSIBLE\")\n            return\n        val = comp[2*v] > comp[(2*v) ^ 1]\n        ans.append('+' if val else '-')\n    print(' '.join(ans))\n\nif __name__ == \"__main__\":\n    main()"
+  ],
+  "reasoningChain": [
+    {
+      "question": "What does each member’s two wishes impose logically?",
+      "insight": "Each line is an (a OR b) constraint on literals (+x or -x)."
+    },
+    {
+      "question": "How to turn (a OR b) into forced relations when one side is false?",
+      "insight": "Use the implications: (not a -> b) and (not b -> a)."
+    },
+    {
+      "question": "How to model the problem with a directed graph compactly?",
+      "insight": "Create 2*m nodes (one per literal), add two directed edges per line to encode the implications."
+    },
+    {
+      "question": "When is the set of constraints contradictory for a topping?",
+      "insight": "If a topping’s true and false literals end up in the same mutually-reachable group, both are forced, so impossible."
+    },
+    {
+      "question": "How to decide a consistent assignment once groups are labeled?",
+      "insight": "Process groups in reverse finishing order; for each topping, set it to '+' if the true-literal group comes later than the false-literal group."
+    },
+    {
+      "question": "What is an efficient literal indexing and toggling scheme?",
+      "insight": "Map '+' x to 2*(x-1) and '-' x to that index XOR 1; negation toggles with lit ^ 1."
+    },
+    {
+      "question": "What are the time and space costs?",
+      "insight": "Linear in nodes plus edges: O(m + n) time and O(m + n) space."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1478,
+    "output_tokens": 17032,
+    "input_cost": 0.001847,
+    "output_cost": 0.17032,
+    "total_cost": 0.172168
+  }
+}

@@ -1,0 +1,996 @@
+{
+  "id": "range-interval-queries",
+  "title": "Range Interval Queries",
+  "difficulty": "hard",
+  "tags": [
+    "array"
+  ],
+  "estimatedMinutes": 60,
+  "language": "python",
+  "description": "Given an array x of n integers, process q queries of the form: how many integers i satisfy a \\le i \\le b and c \\le x_i \\le d?\n\nInput:\n- First line: two integers n and q\n- Second line: n integers x_1, x_2, ..., x_n\n- Next q lines: each has four integers a, b, c, d describing a query\n\nOutput:\n- Print the result of each query on its own line.\n\nConstraints:\n- 1 \\le n, q \\le 2 \\cdot 10^5\n- 1 \\le x_i \\le 10^9\n- 1 \\le a \\le b \\le n\n- 1 \\le c \\le d \\le 10^9",
+  "examples": [
+    {
+      "input": "8 4\n3 2 4 5 1 1 5 3\n2 4 2 4\n5 6 2 9\n1 8 1 5\n3 3 4 4",
+      "output": "2\n0\n8\n1",
+      "explanation": "For query (2,4,2,4): indices 2..4 have values [2,4,5], two are in [2,4]. For (5,6,2,9): indices 5..6 are [1,1], none in [2,9]. For (1,8,1,5): all 8 values are in [1,5]. For (3,3,4,4): index 3 has value 4."
+    }
+  ],
+  "constraints": [
+    "1 <= n, q <= 2 * 10^5",
+    "1 <= x_i <= 10^9",
+    "1 <= a <= b <= n",
+    "1 <= c <= d <= 10^9"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "Array x = [3,2,4,5,1,1,5,3]. For query a=2, b=4, c=2, d=4, how many i satisfy a ≤ i ≤ b and c ≤ x_i ≤ d?",
+      "diagram": "Indices: 1 2 3 4 5 6 7 8\nValues:  3 2 4 5 1 1 5 3\nRange i: [2..4] -> values [2,4,5]\nValue range: [2..4]",
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Within indices 2..4, values are [2,4,5]. Only 2 and 4 lie in [2..4], so count=2. 3 would include 5, which exceeds 4.",
+      "wrongExplanations": {
+        "2": "Counting 5 as within [2..4] is incorrect; 5 > 4."
+      },
+      "hint": "Check each index in [2..4] and test if its value lies in [2..4].",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "Using the same array, for query a=3, b=3, c=4, d=4, what is the result?",
+      "diagram": "Index 3 has value 4. Range i: [3..3]. Value range: [4..4].",
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "Depends on surrounding values",
+          "isCode": false
+        },
+        {
+          "label": "Undefined because a=b",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Index 3 is included and x_3=4 which is within [4..4]. Count is 1.",
+      "wrongExplanations": {
+        "1": "Zero would be correct only if x_3 were not 4."
+      },
+      "hint": null,
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "For the sample array, query a=1, b=8, c=1, d=5 returns 8 in the example. Why?",
+      "diagram": "All values: [3,2,4,5,1,1,5,3]\nValue range [1..5] covers all entries.",
+      "options": [
+        {
+          "label": "Because every value x_i in indices 1..8 is within [1..5]",
+          "isCode": false
+        },
+        {
+          "label": "Because there are exactly 8 indices in total, independent of values",
+          "isCode": false
+        },
+        {
+          "label": "Because [1..5] excludes 5 but includes 6",
+          "isCode": false
+        },
+        {
+          "label": "Because only indices 1..5 are counted",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each of the 8 values lies within [1..5], so the count is 8.",
+      "wrongExplanations": {
+        "1": "Values do matter; it's not just index count."
+      },
+      "hint": "Check if any value is outside [1..5].",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "Does the order of indices in [a..b] affect the count for a single query?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, order changes which values are counted",
+          "isCode": false
+        },
+        {
+          "label": "No, only membership in the interval and value range matters",
+          "isCode": false
+        },
+        {
+          "label": "Yes, because we need consecutive values",
+          "isCode": false
+        },
+        {
+          "label": "Yes, if values are strictly increasing",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "We count indices that satisfy both bounds; order does not change the set.",
+      "wrongExplanations": {
+        "0": "Order doesn't change whether an index lies in [a..b] nor its value."
+      },
+      "hint": "We're counting, not reordering or matching patterns.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Understanding the Problem",
+      "questionText": "For the sample array, query a=5, b=6, c=2, d=9, what is the result?",
+      "diagram": "Indices 5..6: values [1,1]. Value range: [2..9].",
+      "options": [
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "Depends on other indices",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Indices 5 and 6 have value 1, which is < 2, so none are counted.",
+      "wrongExplanations": {
+        "0": "You would count 2 only if both were within [2..9], but they're not."
+      },
+      "hint": "Test each of the two values against [2..9].",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "If for each query you scan all indices i in [a..b] and test c ≤ x_i ≤ d, what is the worst-case time complexity?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n + q)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n + q)",
+          "isCode": false
+        },
+        {
+          "label": "O(nq)",
+          "isCode": false
+        },
+        {
+          "label": "O(log n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Each query can be length n, so O(n) per query x q gives O(nq).",
+      "wrongExplanations": {
+        "0": "We do more than linear in total; we may scan up to n for each of q queries."
+      },
+      "hint": "Consider queries where a=1 and b=n.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "Values x_i can be up to 10^9. Is a direct frequency array over values feasible for answering ranges [c..d] fast?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, because we only need counts",
+          "isCode": false
+        },
+        {
+          "label": "No, the value domain is too large to index directly",
+          "isCode": false
+        },
+        {
+          "label": "Yes, if we precompute cumulative sums for all values 1..10^9",
+          "isCode": false
+        },
+        {
+          "label": "Yes, with slight tweaks to value bounds",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "A direct array over 1..1e9 is not feasible in time/memory.",
+      "wrongExplanations": {
+        "2": "Precomputing over 1e9 entries is not possible within limits."
+      },
+      "hint": "Think about memory and initialization time.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Exploring Approaches",
+      "questionText": "Define count_leq(t, a, b) = number of i in [a..b] with x_i ≤ t. Which expression equals the number of i in [a..b] with c ≤ x_i ≤ d?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "count_leq(c, a, b) + count_leq(d, a, b)",
+          "isCode": false
+        },
+        {
+          "label": "count_leq(d, a, b) - count_leq(c-1, a, b)",
+          "isCode": false
+        },
+        {
+          "label": "count_leq(d, a, b) - count_leq(c, a, b)",
+          "isCode": false
+        },
+        {
+          "label": "count_leq(c-1, a, b) - count_leq(d, a, b)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Values in [c..d] are those ≤ d minus those ≤ c-1.",
+      "wrongExplanations": {
+        "2": "Subtracting ≤ c excludes c itself, which should be included."
+      },
+      "hint": "Split by threshold at d and c-1.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "Suppose we gradually increase a threshold t and \"activate\" all indices i where x_i ≤ t. What happens to count_leq(t, a, b) as t increases?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "It never changes after first activation",
+          "isCode": false
+        },
+        {
+          "label": "It may decrease when t grows",
+          "isCode": false
+        },
+        {
+          "label": "It is non-decreasing; new indices may get included",
+          "isCode": false
+        },
+        {
+          "label": "It oscillates unpredictably",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Increasing t can only add indices with values newly ≤ t.",
+      "wrongExplanations": {
+        "1": "We never remove activated indices as t grows."
+      },
+      "hint": "Once an index with value v is included at t=v, it stays included for larger t.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "You need count_leq for many thresholds t from different queries. What's an efficient way to handle many thresholds without restarting work for each?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Sort all thresholds and process them in increasing order, adding indices as needed",
+          "isCode": false
+        },
+        {
+          "label": "Compute count_leq via scanning [a..b] for each threshold independently",
+          "isCode": false
+        },
+        {
+          "label": "Randomly pick thresholds to average time",
+          "isCode": false
+        },
+        {
+          "label": "Precompute answers for all t from 1 to 10^9",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Processing thresholds in increasing order lets us add each index once when its value is crossed.",
+      "wrongExplanations": {
+        "1": "Independent scans cause O(nq) time, too slow."
+      },
+      "hint": "Think about a single pass over array values and multiple queries.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "For each original query (a, b, c, d), how many threshold evaluations do you need to compute the answer?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "One: at t=d",
+          "isCode": false
+        },
+        {
+          "label": "Two: at t=d and at t=c-1",
+          "isCode": false
+        },
+        {
+          "label": "Three: at t=c, t=d, t=(c+d)/2",
+          "isCode": false
+        },
+        {
+          "label": "Four: split [c..d] into quarters",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Answer is count_leq(d,a,b) - count_leq(c-1,a,b), so two thresholds suffice.",
+      "wrongExplanations": {
+        "0": "Using only t=d includes values below c that must be excluded."
+      },
+      "hint": "Use inclusion-exclusion logic from earlier.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "If the smallest array value is v_min and t < v_min, what is count_leq(t, a, b) for any range [a..b]?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "It equals b-a+1",
+          "isCode": false
+        },
+        {
+          "label": "It equals 0",
+          "isCode": false
+        },
+        {
+          "label": "It equals t - v_min",
+          "isCode": false
+        },
+        {
+          "label": "Undefined",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "No values are ≤ t when t is less than the minimum value.",
+      "wrongExplanations": {
+        "0": "That would count all indices regardless of values, which is wrong."
+      },
+      "hint": "No element value is ≤ t in this case.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "Do you need to remap (compress) values x_i to small integers to implement the threshold sweep?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, otherwise comparisons to t are impossible",
+          "isCode": false
+        },
+        {
+          "label": "No, you only compare x_i to t and sort by value",
+          "isCode": false
+        },
+        {
+          "label": "Yes, to reduce space from O(n) to O(log n)",
+          "isCode": false
+        },
+        {
+          "label": "Yes, because queries require exact value positions",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Sorting by actual values and comparing to t is sufficient; no remapping needed.",
+      "wrongExplanations": {
+        "0": "Comparisons work on original values; no remapping is required."
+      },
+      "hint": "You will sort pairs (value, index) and compare to t.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Building the Idea",
+      "questionText": "When multiple elements share the same value, how should they be handled during the value sweep?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Add them in any order once t reaches that value",
+          "isCode": false
+        },
+        {
+          "label": "Skip duplicates to avoid double counting",
+          "isCode": false
+        },
+        {
+          "label": "Add only one of them",
+          "isCode": false
+        },
+        {
+          "label": "Add them only if their indices are consecutive",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "All indices with value ≤ t should be added; duplicates are separate indices.",
+      "wrongExplanations": {
+        "1": "Duplicates refer to equal values, not identical indices; each index is distinct."
+      },
+      "hint": "Each index counts once if its value ≤ t.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Read input efficiently and store x as a 1-indexed array.\nPick the correct snippet.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\ndata = list(map(int, sys.stdin.buffer.read().split()))\nit = iter(data)\nn = next(it); q = next(it)\nx = [0]*(n+1)\nfor i in range(1, n+1):\n    x[i] = next(it)",
+          "isCode": true
+        },
+        {
+          "label": "import sys\nitems = sys.stdin.read().split()\nnums = list(map(int, items))\nit = iter(nums)\nn = next(it); q = next(it)\nx = [0]*n\nfor i in range(n):\n    x[i] = next(it)",
+          "isCode": true
+        },
+        {
+          "label": "n, q = map(int, input().split())\nx = [int(v) for v in input().split()]\n# x is 0-indexed and may be shorter than n if extra spaces occur",
+          "isCode": true
+        },
+        {
+          "label": "import sys\narr = list(map(int, sys.stdin.buffer.read().split()))\n# Forgot to read n and q; x will be misaligned",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Using buffered read and a 1-indexed array matches later logic. Other options use 0-indexing or misread counts.",
+      "wrongExplanations": {
+        "1": "0-indexed x breaks later index-based operations expecting 1..n."
+      },
+      "hint": "Later code will iterate i from 1..n.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\ndata = list(map(int, sys.stdin.buffer.read().split()))\nit = iter(data)\nn = next(it); q = next(it)\nx = [0]*(n+1)\nfor i in range(1, n+1):\n    x[i] = next(it)",
+      "codeLabel": "Read input and build 1-indexed x"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Create (value, index) pairs and sort them by value.\nPick the correct snippet.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "arr = sorted((x[i], i) for i in range(1, n+1))",
+          "isCode": true
+        },
+        {
+          "label": "arr = sorted(range(1, n+1))  # sorts indices, not by values",
+          "isCode": true
+        },
+        {
+          "label": "arr = [(i, x[i]) for i in range(n)]  # 0-indexed and unsorted",
+          "isCode": true
+        },
+        {
+          "label": "arr = sorted(x[1:])  # loses index positions",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need value-index pairs sorted by value. Sorting indices or losing indices is incorrect.",
+      "wrongExplanations": {
+        "3": "Sorting values alone discards their original index positions needed later."
+      },
+      "hint": "Keep both value and its index.",
+      "isCodeBuilding": true,
+      "codeSnippet": "arr = sorted((x[i], i) for i in range(1, n+1))",
+      "codeLabel": "Pairs sorted by value"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Implement a structure supporting point increases at an index and prefix sums up to an index.\nPick the correct snippet.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "bit = [0]*(n+1)\n\ndef add(i, delta):\n    while i <= n:\n        bit[i] += delta\n        i += i & -i\n\ndef prefix(i):\n    s = 0\n    while i > 0:\n        s += bit[i]\n        i -= i & -i\n    return s",
+          "isCode": true
+        },
+        {
+          "label": "bit = [0]*n\n\ndef add(i, delta):\n    while i < n:\n        bit[i] += delta\n        i += 1\n\ndef prefix(i):\n    return sum(bit[:i])",
+          "isCode": true
+        },
+        {
+          "label": "bit = [0]*(n+1)\n\ndef add(i, delta):\n    while i <= n:\n        bit[i] += delta\n        i += (i | -i)\n\ndef prefix(i):\n    s = 0\n    while i >= 0:\n        s += bit[i]\n        i -= (i | -i)\n    return s",
+          "isCode": true
+        },
+        {
+          "label": "bit = [0]*(n+1)\n\ndef add(i, delta):\n    bit[i] += delta  # single position only\n\ndef prefix(i):\n    s = 0\n    for k in range(1, i+1):\n        s += bit[k]\n    return s",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "This supports O(log n) point updates and prefix queries. Others are O(n) or have incorrect index jumps.",
+      "wrongExplanations": {
+        "1": "Updating by i+=1 makes updates O(n), too slow overall.",
+        "3": "Linear scan per query is too slow for 2e5 operations."
+      },
+      "hint": "Aim for logarithmic updates and queries.",
+      "isCodeBuilding": true,
+      "codeSnippet": "bit = [0]*(n+1)\n\ndef add(i, delta):\n    while i <= n:\n        bit[i] += delta\n        i += i & -i\n\ndef prefix(i):\n    s = 0\n    while i > 0:\n        s += bit[i]\n        i -= i & -i\n    return s",
+      "codeLabel": "Point update and prefix sum"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Prepare threshold events for each query. Each event is (t, a, b, idx, sign) with sign +1 for d and -1 for c-1.\nPick the correct snippet.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "events = []\nans = [0]*q\nfor idx in range(q):\n    a = next(it); b = next(it); c = next(it); d = next(it)\n    events.append((d, a, b, idx, 1))\n    events.append((c-1, a, b, idx, -1))",
+          "isCode": true
+        },
+        {
+          "label": "events = []\nans = [0]*q\nfor idx in range(q):\n    a = next(it); b = next(it); c = next(it); d = next(it)\n    events.append((d, a, b, idx, 1))\n    events.append((c, a, b, idx, -1))  # uses c instead of c-1",
+          "isCode": true
+        },
+        {
+          "label": "events = []\nans = [0]*q\nfor idx in range(q):\n    a = next(it); b = next(it); c = next(it); d = next(it)\n    events.append((d, a, b, idx, -1))\n    events.append((c-1, a, b, idx, 1))  # signs swapped",
+          "isCode": true
+        },
+        {
+          "label": "events = []\nans = [0]*q\nfor idx in range(q):\n    a = next(it); b = next(it); c = next(it); d = next(it)\n    events.append((a, b, c, d, idx))  # wrong tuple format",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need two events per query: at d with +1 and at c-1 with -1 to compute the difference.",
+      "wrongExplanations": {
+        "1": "Using c instead of c-1 excludes values equal to c, which should be included.",
+        "2": "Swapping signs would compute count_leq(c-1) - count_leq(d), negating the answer."
+      },
+      "hint": "Remember count in [c..d] equals ≤d minus ≤(c-1).",
+      "isCodeBuilding": true,
+      "codeSnippet": "events = []\nans = [0]*q\nfor idx in range(q):\n    a = next(it); b = next(it); c = next(it); d = next(it)\n    events.append((d, a, b, idx, 1))\n    events.append((c-1, a, b, idx, -1))",
+      "codeLabel": "Build events and answer array"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Sort events by threshold t and prepare a pointer for the value sweep.\nPick the correct snippet.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "events.sort(key=lambda e: e[0])\np = 0",
+          "isCode": true
+        },
+        {
+          "label": "events.sort(key=lambda e: e[1])  # sorts by a, not t\np = 0",
+          "isCode": true
+        },
+        {
+          "label": "events.sort(reverse=True)  # sorts by entire tuple descending\np = n",
+          "isCode": true
+        },
+        {
+          "label": "p = 0  # do not sort events",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We must process thresholds in increasing order, so sort by e[0] (t) and start the sweep at p=0.",
+      "wrongExplanations": {
+        "3": "Without sorting by t, the sweep cannot ensure all needed values are activated."
+      },
+      "hint": "Thresholds should be handled in ascending order.",
+      "isCodeBuilding": true,
+      "codeSnippet": "events.sort(key=lambda e: e[0])\np = 0",
+      "codeLabel": "Sort events and init pointer"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Process events and add indices whose values are ≤ current t.\nPick the correct snippet.",
+      "diagram": "arr[p] is (value, index) sorted by value.\nFor each event threshold t, add all arr[p] with value ≤ t.",
+      "options": [
+        {
+          "label": "for t, a, b, idx, sign in events:\n    while p < n and arr[p][0] <= t:\n        _, pos = arr[p]\n        add(pos, 1)\n        p += 1",
+          "isCode": true
+        },
+        {
+          "label": "for t, a, b, idx, sign in events:\n    while p < n and arr[p][1] <= t:  # compares index to t\n        _, pos = arr[p]\n        add(pos, 1)\n        p += 1",
+          "isCode": true
+        },
+        {
+          "label": "for t, a, b, idx, sign in events:\n    while p <= n and arr[p][0] < t:  # off-by-one and strict\n        _, pos = arr[p]\n        add(pos, 1)\n        p += 1",
+          "isCode": true
+        },
+        {
+          "label": "for t, a, b, idx, sign in events:\n    add(t, 1)  # adds at t as if it were index\n    # no sweep",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Compare the value arr[p][0] to t and add its index pos. Others compare wrong field or update wrong index.",
+      "wrongExplanations": {
+        "1": "arr[p][1] is the index, not the value; comparing index≤t is meaningless.",
+        "3": "We must add at the value's index, not at t."
+      },
+      "hint": "arr is (value, index). Use the value for comparison and index for updates.",
+      "isCodeBuilding": true,
+      "codeSnippet": "for t, a, b, idx, sign in events:\n    while p < n and arr[p][0] <= t:\n        _, pos = arr[p]\n        add(pos, 1)\n        p += 1",
+      "codeLabel": "Sweep and add indices"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "Compute the range count for each event and accumulate into ans.\nPick the correct snippet.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    res = prefix(b) - prefix(a-1)\n    ans[idx] += sign * res",
+          "isCode": true
+        },
+        {
+          "label": "    res = prefix(b) - prefix(a)\n    ans[idx] += sign * res",
+          "isCode": true
+        },
+        {
+          "label": "    res = prefix(b)\n    ans[idx] = res  # overwrites and ignores sign",
+          "isCode": true
+        },
+        {
+          "label": "    res = prefix(b) + prefix(a-1)\n    ans[idx] += sign * res",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Range [a..b] equals prefix(b) - prefix(a-1). We accumulate with the event's sign.",
+      "wrongExplanations": {
+        "1": "Using prefix(a) excludes index a itself.",
+        "2": "We need difference of two thresholds per query; overwriting breaks that."
+      },
+      "hint": "Standard range count from prefix sums.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    res = prefix(b) - prefix(a-1)\n    ans[idx] += sign * res",
+      "codeLabel": "Range count and accumulate"
+    },
+    {
+      "id": "q22",
+      "phase": "Writing the Code",
+      "questionText": "Finish by printing all answers, one per line.\nPick the correct snippet.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "out = '\\n'.join(str(v) for v in ans)\nsys.stdout.write(out)",
+          "isCode": true
+        },
+        {
+          "label": "for v in sorted(ans):\n    print(v)  # sorts answers, wrong order",
+          "isCode": true
+        },
+        {
+          "label": "print(' '.join(map(str, ans)))  # single line",
+          "isCode": true
+        },
+        {
+          "label": "sys.stdout.write(str(ans))  # prints list repr",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Print in original query order, each on its own line.",
+      "wrongExplanations": {
+        "1": "Sorting changes the correspondence to queries."
+      },
+      "hint": "Match the exact expected output format.",
+      "isCodeBuilding": true,
+      "codeSnippet": "out = '\\n'.join(str(v) for v in ans)\nsys.stdout.write(out)",
+      "codeLabel": "Output answers"
+    },
+    {
+      "id": "q23",
+      "phase": "Verifying the Solution",
+      "questionText": "Using the sample, for query (2,4,2,4): after processing the event at t=4, what is prefix(4) - prefix(1)?",
+      "diagram": "Activated indices after t=4: values ≤4 are at positions with values [3,2,4,1,1,3] -> indices 1,2,3,5,6,8.\nRange [2..4]: prefix(4)=count up to 4; prefix(1)=count up to 1.",
+      "options": [
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Up to index 4, activated are 1,2,3; up to index 1, activated is 1. 3-1 = 2.",
+      "wrongExplanations": {
+        "1": "3 counts indices 1..3 but the range is [2..4], so subtract prefix(1)."
+      },
+      "hint": "Compute counts up to indices 4 and 1 separately, then subtract.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Verifying the Solution",
+      "questionText": "For query (1,8,1,5): after processing t=5 and t=0, what is the final answer?",
+      "diagram": "At t=5: all indices activated. At t=0: none activated.",
+      "options": [
+        {
+          "label": "8",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "Depends on the order of events",
+          "isCode": false
+        },
+        {
+          "label": "7",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Answer = count_leq(5,1,8) - count_leq(0,1,8) = 8 - 0 = 8.",
+      "wrongExplanations": {
+        "2": "Sorting by t ensures consistent processing; the difference is independent of event order."
+      },
+      "hint": "Use the difference of the two thresholds.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the time complexity of the overall approach?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(nq)",
+          "isCode": false
+        },
+        {
+          "label": "O((n + q) log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n + q^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(q log q + n^2)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Sorting is O(n log n + q log q). Each add/query is O(log n) over O(n + q) events, giving O((n + q) log n).",
+      "wrongExplanations": {
+        "0": "We avoid scanning per query by using threshold sweep and prefix sums."
+      },
+      "hint": "Count events and consider logarithmic operations.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the extra space usage of this approach (excluding input storage)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(1)",
+          "isCode": false
+        },
+        {
+          "label": "O(n + q)",
+          "isCode": false
+        },
+        {
+          "label": "O(nq)",
+          "isCode": false
+        },
+        {
+          "label": "O(log n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "We store arr (size n), events (size 2q), ans (size q), and a helper array of size n.",
+      "wrongExplanations": {
+        "0": "We need arrays proportional to n and q."
+      },
+      "hint": "Count the main arrays used.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q27",
+      "phase": "Analyzing Complexity",
+      "questionText": "Which edge cases are correctly handled by the implementation?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "c=1 leads to c-1=0, correctly giving zero for ≤0; a=b works; duplicates counted per index",
+          "isCode": false
+        },
+        {
+          "label": "Requires c≥2; fails if a=b",
+          "isCode": false
+        },
+        {
+          "label": "Fails when d is larger than all values",
+          "isCode": false
+        },
+        {
+          "label": "Skips indices where x_i equals c",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Using c-1 handles c=1; range count uses prefix(b)-prefix(a-1) so a=b works; adding all values ≤t covers large d and duplicates.",
+      "wrongExplanations": {
+        "3": "Values equal to c are included via the ≤d minus ≤(c-1) difference."
+      },
+      "hint": "Consider c=1, a=b, and d exceeding max(x).",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys",
+    "data = list(map(int, sys.stdin.buffer.read().split()))",
+    "it = iter(data)",
+    "n = next(it); q = next(it)",
+    "x = [0]*(n+1)",
+    "for i in range(1, n+1):",
+    "    x[i] = next(it)",
+    "arr = sorted((x[i], i) for i in range(1, n+1))",
+    "events = []",
+    "ans = [0]*q",
+    "for idx in range(q):",
+    "    a = next(it); b = next(it); c = next(it); d = next(it)",
+    "    events.append((d, a, b, idx, 1))",
+    "    events.append((c-1, a, b, idx, -1))",
+    "events.sort(key=lambda e: e[0])",
+    "p = 0",
+    "bit = [0]*(n+1)",
+    "def add(i, delta):",
+    "    while i <= n:",
+    "        bit[i] += delta",
+    "        i += i & -i",
+    "def prefix(i):",
+    "    s = 0",
+    "    while i > 0:",
+    "        s += bit[i]",
+    "        i -= i & -i",
+    "    return s",
+    "for t, a, b, idx, sign in events:",
+    "    while p < n and arr[p][0] <= t:",
+    "        _, pos = arr[p]",
+    "        add(pos, 1)",
+    "        p += 1",
+    "    res = prefix(b) - prefix(a-1)",
+    "    ans[idx] += sign * res",
+    "out = '\\n'.join(str(v) for v in ans)",
+    "sys.stdout.write(out)"
+  ],
+  "reasoningChain": [
+    {
+      "question": "Why is scanning [a..b] per query too slow under given limits?",
+      "insight": "The worst case is O(n) per query, yielding O(nq) which exceeds time limits for n,q up to 2e5."
+    },
+    {
+      "question": "How to express counts in a value range [c..d] using thresholds?",
+      "insight": "Count in [c..d] equals count of values ≤ d minus count of values ≤ (c-1) within the index range."
+    },
+    {
+      "question": "How to handle many different thresholds efficiently?",
+      "insight": "Sort all thresholds and process them in increasing order, adding indices with x_i ≤ t once when their value is crossed."
+    },
+    {
+      "question": "How to support fast updates and range counts over indices?",
+      "insight": "Maintain a helper array supporting point increments at indices and prefix sums up to a given index to derive range counts."
+    },
+    {
+      "question": "How to compute counts for arbitrary [a..b]?",
+      "insight": "Use prefix(b) - prefix(a-1) on the helper structure to get counts within [a..b]."
+    },
+    {
+      "question": "How to combine threshold results for each query?",
+      "insight": "For each query, accumulate +count_leq(d,a,b) and -count_leq(c-1,a,b) to get the final answer."
+    },
+    {
+      "question": "How are edge cases handled?",
+      "insight": "If c=1, c-1=0 yields zero; if d is large, all values are included; a=b works naturally with prefix differences."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1455,
+    "output_tokens": 15147,
+    "input_cost": 0.001819,
+    "output_cost": 0.15147,
+    "total_cost": 0.153289
+  }
+}

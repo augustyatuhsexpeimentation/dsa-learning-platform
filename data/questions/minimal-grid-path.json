@@ -1,0 +1,1179 @@
+{
+  "id": "minimal-grid-path",
+  "title": "Minimal Grid Path",
+  "difficulty": "intermediate",
+  "tags": [
+    "dp",
+    "strings",
+    "grid"
+  ],
+  "estimatedMinutes": 60,
+  "language": "python",
+  "description": "You are given an n × n grid where each cell contains an uppercase letter (A–Z). Start at the top-left cell and move to the bottom-right cell, moving only right or down. Collect the letters along your path to form a string. Among all such paths, output the lexicographically minimal string.\n\nInput:\n- First line: integer n (1 ≤ n ≤ 3000)\n- Next n lines: each a string of length n consisting of letters A–Z\n\nOutput:\n- The lexicographically minimal string of length 2n−1.\n",
+  "examples": [
+    {
+      "input": "4\nAACA\nBABC\nABDA\nAACA\n",
+      "output": "AAABACA",
+      "explanation": "Among all paths from (0,0) to (3,3) moving only right/down, the path producing AAABACA is lexicographically smallest."
+    }
+  ],
+  "constraints": [
+    "1 ≤ n ≤ 3000",
+    "Grid contains only letters 'A' to 'Z'",
+    "Moves allowed: right or down only",
+    "Path string length is 2n − 1"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "If n = 1 and the grid is a single cell containing 'Z', what should the output be?",
+      "diagram": "Z",
+      "options": [
+        {
+          "label": "Z",
+          "isCode": false
+        },
+        {
+          "label": "ZZ",
+          "isCode": false
+        },
+        {
+          "label": "",
+          "isCode": false
+        },
+        {
+          "label": "A",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Only one cell is visited, so the string is just that letter.",
+      "wrongExplanations": {
+        "1": "String length is 2n−1 = 1 here, not 2.",
+        "2": "You must output the collected letters, not an empty string."
+      },
+      "hint": "The path starts and ends at the same cell.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "Consider this 2×2 grid:\n\nRow 0: A C\nRow 1: B A\n\nWhich path string is lexicographically minimal?",
+      "diagram": "A C\nB A",
+      "options": [
+        {
+          "label": "ABA (Down, Right)",
+          "isCode": false
+        },
+        {
+          "label": "ACA (Right, Down)",
+          "isCode": false
+        },
+        {
+          "label": "AA",
+          "isCode": false
+        },
+        {
+          "label": "BCA",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Paths: Right→Down gives ACA, Down→Right gives ABA. ABA < ACA.",
+      "wrongExplanations": {
+        "1": "ACA is larger because 'B'<'C' at the second character.",
+        "2": "Path length must be 3 for n=2.",
+        "3": "This path isn't even available from top-left with right/down moves."
+      },
+      "hint": "Compare the strings character by character from the start.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "For an n × n grid, how many letters are in any valid path string from top-left to bottom-right?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "2n − 1",
+          "isCode": false
+        },
+        {
+          "label": "n",
+          "isCode": false
+        },
+        {
+          "label": "n^2",
+          "isCode": false
+        },
+        {
+          "label": "2n",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "You make (n−1) rights and (n−1) downs, visiting 2n−1 cells including start.",
+      "wrongExplanations": {
+        "1": "You visit more than one cell; 2n−1 not n.",
+        "2": "You don't visit every cell of the grid.",
+        "3": "You count cells, not moves; cells = moves+1."
+      },
+      "hint": "Moves are (n−1) right and (n−1) down; cells visited = moves + 1.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "Which is lexicographically smaller?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "AZA",
+          "isCode": false
+        },
+        {
+          "label": "BAA",
+          "isCode": false
+        },
+        {
+          "label": "They are equal",
+          "isCode": false
+        },
+        {
+          "label": "Depends on length only",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Compare from the first character: 'A' < 'B', so AZA < BAA.",
+      "wrongExplanations": {
+        "1": "The first character decides when they differ.",
+        "3": "Lex order is not about length unless prefixes are equal."
+      },
+      "hint": "Compare leftmost differing characters first.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Exploring Approaches",
+      "questionText": "How many distinct right/down paths exist from (0,0) to (n−1,n−1) in an n×n grid?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "C(2n−2, n−1)",
+          "isCode": false
+        },
+        {
+          "label": "n!",
+          "isCode": false
+        },
+        {
+          "label": "2^(n−1)",
+          "isCode": false
+        },
+        {
+          "label": "n^2",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "There are (n−1) rights and (n−1) downs in any order: choose positions of rights.",
+      "wrongExplanations": {
+        "1": "Factorial doesn’t apply to choosing fixed counts of moves.",
+        "2": "Each step isn't independent binary across varying lengths.",
+        "3": "Count of paths is not grid cell count."
+      },
+      "hint": "You choose positions for (n−1) moves among (2n−2) steps.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "n can be up to 3000. Enumerating all paths is infeasible. What incremental strategy fits the lexicographic goal?",
+      "diagram": "At each step k, consider all cells reachable in k moves.",
+      "options": [
+        {
+          "label": "Build the answer from left to right: at each step, consider all next cells from currently reachable cells and choose the minimal next letter.",
+          "isCode": false
+        },
+        {
+          "label": "Pick the locally smallest neighbor from the current single best path only.",
+          "isCode": false
+        },
+        {
+          "label": "Try every path but stop early if the prefix is large.",
+          "isCode": false
+        },
+        {
+          "label": "Randomly sample many paths and take the best.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Considering all reachable cells at each step and keeping those with minimal next letter preserves the globally minimal prefix.",
+      "wrongExplanations": {
+        "1": "A single path choice can block a better future; need to consider all positions with the same prefix.",
+        "2": "Still exponential in worst case.",
+        "3": "Sampling gives no guarantee of minimality."
+      },
+      "hint": "Compare all possible next letters from the frontier of reachable cells.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "After examining all candidate next cells at step k+1, which positions should we keep?",
+      "diagram": "Current frontier (step k) -> candidates (step k+1).",
+      "options": [
+        {
+          "label": "Keep only candidate positions whose cell letter equals the minimal letter at step k+1.",
+          "isCode": false
+        },
+        {
+          "label": "Keep all candidates; a larger letter now may lead to better later.",
+          "isCode": false
+        },
+        {
+          "label": "Keep just one arbitrary position with the minimal letter.",
+          "isCode": false
+        },
+        {
+          "label": "Keep candidates whose letter is within 1 of the minimal (e.g., 'A' or 'B').",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Any candidate with a larger letter would make the prefix worse; only minimal-letter positions can still achieve the minimal prefix.",
+      "wrongExplanations": {
+        "1": "A larger letter at this step already loses lex order.",
+        "2": "There may be multiple positions with the same minimal letter leading to different futures."
+      },
+      "hint": "Lexicographic comparison is decided at the first differing character.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Building the Idea",
+      "questionText": "After k moves (starting from k=0 at (0,0)), which relation holds for every reachable cell (i,j)?",
+      "diagram": "Diagonal k: cells with i + j = k",
+      "options": [
+        {
+          "label": "i + j = k",
+          "isCode": false
+        },
+        {
+          "label": "i * j = k",
+          "isCode": false
+        },
+        {
+          "label": "i + j = n",
+          "isCode": false
+        },
+        {
+          "label": "i − j = k",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each move increases i or j by 1; after k moves, i + j = k.",
+      "wrongExplanations": {
+        "1": "Moves add to i or j, not multiply.",
+        "2": "This holds only for a fixed diagonal sum, not always n.",
+        "3": "Difference doesn't stay constant with right/down moves."
+      },
+      "hint": "Count how many rights and downs have occurred.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "If at step k we track positions by their column j along the diagonal, how do we compute the row i for that position?",
+      "diagram": "Diagonal index k, column j => row i = ?",
+      "options": [
+        {
+          "label": "i = k − j",
+          "isCode": false
+        },
+        {
+          "label": "i = j − k",
+          "isCode": false
+        },
+        {
+          "label": "i = k + j",
+          "isCode": false
+        },
+        {
+          "label": "i = n − 1 − j",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "For diagonal k, i + j = k, so i = k − j.",
+      "wrongExplanations": {
+        "1": "Sign is reversed; i must be nonnegative within diagonal bounds.",
+        "2": "i+j=k, not i=k+j.",
+        "3": "That’s unrelated to the diagonal index."
+      },
+      "hint": "Use the invariant from the previous question.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "From a cell (i,j) at step k (i+j=k), what are the column indices j' on the next step (k+1) when moving down or right?",
+      "diagram": "Down: (i+1,j) | Right: (i,j+1)",
+      "options": [
+        {
+          "label": "Down: j' = j; Right: j' = j + 1",
+          "isCode": false
+        },
+        {
+          "label": "Down: j' = j + 1; Right: j' = j",
+          "isCode": false
+        },
+        {
+          "label": "Down: j' = j − 1; Right: j' = j + 1",
+          "isCode": false
+        },
+        {
+          "label": "Down: j' = j; Right: j' = j",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Down increases i, so j stays; right increases j by 1.",
+      "wrongExplanations": {
+        "1": "Right increases j, not down.",
+        "3": "Right must increase j by 1."
+      },
+      "hint": "Only j changes when moving right.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "When two different parents on step k reach the same cell on step k+1, how can we deduplicate efficiently without clearing a size-n array each step?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Use an array 'visited' initialized to -1 once, and mark visited[j'] = current_step_id; add j' only if visited[j'] != current_step_id.",
+          "isCode": false
+        },
+        {
+          "label": "Use a set of (i,j) pairs for candidates every step.",
+          "isCode": false
+        },
+        {
+          "label": "Sort candidate indices and remove duplicates.",
+          "isCode": false
+        },
+        {
+          "label": "Use a single boolean that flips each step.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "A step-id stamp avoids O(n) resets by reusing the same array.",
+      "wrongExplanations": {
+        "1": "Works but heavier; we only need j per diagonal.",
+        "2": "Sorting adds extra O(m log m) per step."
+      },
+      "hint": "Store at which step an index was last seen.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "Given a list of candidate column indices cand on diagonal k+1, how do we compute the minimal next letter?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "min(g[(k+1) - j][j] for j in cand)",
+          "isCode": true
+        },
+        {
+          "label": "min(g[k - j][j] for j in cand)",
+          "isCode": true
+        },
+        {
+          "label": "min(g[i][j] for (i,j) in cand)",
+          "isCode": true
+        },
+        {
+          "label": "min(g[(k+1)][j] for j in cand)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "On diagonal k+1, the row is i = (k+1) − j.",
+      "wrongExplanations": {
+        "1": "This uses the previous diagonal (k), not k+1.",
+        "3": "Row index must vary with j; not a fixed row."
+      },
+      "hint": "Use i + j = k + 1 on the next diagonal.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "After finding the minimal character mc on diagonal k+1, how should the frontier be updated for the next iteration?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Keep only j in cand where g[(k+1) − j][j] == mc",
+          "isCode": false
+        },
+        {
+          "label": "Keep all j in cand",
+          "isCode": false
+        },
+        {
+          "label": "Keep any single j with g[(k+1) − j][j] == mc",
+          "isCode": false
+        },
+        {
+          "label": "Keep j in cand where g[(k+1) − j][j] >= mc",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Only positions with the minimal letter can maintain the minimal prefix.",
+      "wrongExplanations": {
+        "1": "This loses pruning needed for minimality and efficiency.",
+        "2": "There may be multiple minimal-letter positions with different futures."
+      },
+      "hint": "Prune by equality to the minimal letter.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "cb1",
+      "phase": "Writing the Code",
+      "questionText": "Add the import needed to read all input at once.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys",
+          "isCode": true
+        },
+        {
+          "label": "import io",
+          "isCode": true
+        },
+        {
+          "label": "from os import stdin",
+          "isCode": true
+        },
+        {
+          "label": "import math",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We read from sys.stdin; importing sys is sufficient.",
+      "wrongExplanations": {
+        "2": "Not using os.stdin in the solution.",
+        "3": "No math functions are needed."
+      },
+      "hint": "Use the standard module for stdin access.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys",
+      "codeLabel": "Import"
+    },
+    {
+      "id": "cb2",
+      "phase": "Writing the Code",
+      "questionText": "Read all tokens from standard input (split by whitespace).",
+      "diagram": null,
+      "options": [
+        {
+          "label": "data = sys.stdin.read().strip().split()",
+          "isCode": true
+        },
+        {
+          "label": "data = sys.stdin.readlines()",
+          "isCode": true
+        },
+        {
+          "label": "data = input().split()",
+          "isCode": true
+        },
+        {
+          "label": "data = sys.stdin.read().split('\\n')",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Reading and splitting once handles all lines and avoids repeated input calls.",
+      "wrongExplanations": {
+        "1": "readlines keeps newlines and needs more parsing.",
+        "2": "Single input() won't read all lines."
+      },
+      "hint": "Use read() then split().",
+      "isCodeBuilding": true,
+      "codeSnippet": "data = sys.stdin.read().strip().split()",
+      "codeLabel": "Read input"
+    },
+    {
+      "id": "cb3",
+      "phase": "Writing the Code",
+      "questionText": "Guard against empty input before parsing.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "if data:",
+          "isCode": true
+        },
+        {
+          "label": "if not data: pass",
+          "isCode": true
+        },
+        {
+          "label": "assert data",
+          "isCode": true
+        },
+        {
+          "label": "while data:",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Checking if data exists is clean; the rest of the logic will be inside this block.",
+      "wrongExplanations": {
+        "1": "pass would not prevent later errors unless you also branch the rest.",
+        "2": "Assertions may be disabled and are not control flow.",
+        "3": "A loop is not appropriate here."
+      },
+      "hint": "Use a simple conditional to nest the solution.",
+      "isCodeBuilding": true,
+      "codeSnippet": "if data:",
+      "codeLabel": "Guard"
+    },
+    {
+      "id": "cb4",
+      "phase": "Writing the Code",
+      "questionText": "Parse n and the grid from the token list inside the guard.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    it = iter(data); n = int(next(it)); g = [next(it).strip() for _ in range(n)]",
+          "isCode": true
+        },
+        {
+          "label": "    n = int(data[0]); g = data[1:]",
+          "isCode": true
+        },
+        {
+          "label": "    n = int(data.pop(0)); g = [data.pop(0) for _ in range(n)]",
+          "isCode": true
+        },
+        {
+          "label": "    it = iter(data); n = next(it); g = [next(it) for _ in range(n)]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Using an iterator keeps parsing simple and avoids extra slicing.",
+      "wrongExplanations": {
+        "1": "g would include extra tokens if there are spaces; also no validation.",
+        "3": "next(it) returns strings; must cast n to int."
+      },
+      "hint": "Advance a token iterator, cast n, then read n rows.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    it = iter(data); n = int(next(it)); g = [next(it).strip() for _ in range(n)]",
+      "codeLabel": "Parse"
+    },
+    {
+      "id": "cb5",
+      "phase": "Writing the Code",
+      "questionText": "Initialize the result list, frontier (as list of j indices), visited stamps, and step id.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    res = [g[0][0]]; fr = [0]; vis = [-1]*n; sid = 0",
+          "isCode": true
+        },
+        {
+          "label": "    res = []; fr = [(0,0)]; vis = set(); sid = 1",
+          "isCode": true
+        },
+        {
+          "label": "    res = g[0][0]; fr = [0]; vis = [False]*n; sid = 0",
+          "isCode": true
+        },
+        {
+          "label": "    res = [g[0][0]]; fr = []; vis = [-1]*n; sid = 0",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We collect characters in a list, track columns j on the diagonal, use a stamp array, and start sid at 0.",
+      "wrongExplanations": {
+        "1": "We track j per diagonal, not (i,j) pairs; sid should start at 0.",
+        "2": "res should be a list to append; booleans do not support stamp trick.",
+        "3": "Frontier should start at j=0 (the start cell)."
+      },
+      "hint": "Start with the first letter, and the frontier containing column 0.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    res = [g[0][0]]; fr = [0]; vis = [-1]*n; sid = 0",
+      "codeLabel": "Init"
+    },
+    {
+      "id": "cb6",
+      "phase": "Writing the Code",
+      "questionText": "Write the main loop over diagonals (excluding the first cell). How many iterations?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    for k in range(2*n-2):",
+          "isCode": true
+        },
+        {
+          "label": "    for k in range(2*n-1):",
+          "isCode": true
+        },
+        {
+          "label": "    for k in range(2*n):",
+          "isCode": true
+        },
+        {
+          "label": "    for k in range(2*n-3):",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "There are 2n−1 letters; we already have the first, so we need 2n−2 steps.",
+      "wrongExplanations": {
+        "1": "This would add one extra character.",
+        "3": "This misses the last step."
+      },
+      "hint": "Total letters = 2n−1, starting with one already collected.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    for k in range(2*n-2):",
+      "codeLabel": "Loop"
+    },
+    {
+      "id": "cb7",
+      "phase": "Writing the Code",
+      "questionText": "At each step, advance the step id and start a fresh candidate list.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "        sid += 1; cand = []",
+          "isCode": true
+        },
+        {
+          "label": "        cand = []; sid = 0",
+          "isCode": true
+        },
+        {
+          "label": "        sid = sid; cand = []",
+          "isCode": true
+        },
+        {
+          "label": "        sid += 1; cand = set()",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Increment the stamp and use a list for candidates; set is unnecessary with stamp dedup.",
+      "wrongExplanations": {
+        "1": "sid must increase every iteration.",
+        "3": "A set adds overhead we avoid via stamps."
+      },
+      "hint": "We rely on sid to mark this iteration in the visited array.",
+      "isCodeBuilding": true,
+      "codeSnippet": "        sid += 1; cand = []",
+      "codeLabel": "Step start"
+    },
+    {
+      "id": "cb8",
+      "phase": "Writing the Code",
+      "questionText": "Iterate over current frontier columns j.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "        for j in fr:",
+          "isCode": true
+        },
+        {
+          "label": "        for (i,j) in fr:",
+          "isCode": true
+        },
+        {
+          "label": "        for j in range(n):",
+          "isCode": true
+        },
+        {
+          "label": "        while fr:",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We stored frontier as columns j on the current diagonal.",
+      "wrongExplanations": {
+        "1": "fr contains j values, not (i,j).",
+        "2": "We only iterate over the frontier, not all columns.",
+        "3": "A while loop requires popping; we just iterate."
+      },
+      "hint": "The frontier is a list of j indices.",
+      "isCodeBuilding": true,
+      "codeSnippet": "        for j in fr:",
+      "codeLabel": "Iterate frontier"
+    },
+    {
+      "id": "cb9",
+      "phase": "Writing the Code",
+      "questionText": "Compute the row index i for this j on diagonal k.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "            i = k - j",
+          "isCode": true
+        },
+        {
+          "label": "            i = j - k",
+          "isCode": true
+        },
+        {
+          "label": "            i = k + j",
+          "isCode": true
+        },
+        {
+          "label": "            i = n - 1 - j",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "On diagonal k, i + j = k, so i = k − j.",
+      "wrongExplanations": {
+        "1": "This yields negative i for small j.",
+        "2": "Would exceed bounds; diagonal sum must be k."
+      },
+      "hint": "Use the diagonal invariant i + j = k.",
+      "isCodeBuilding": true,
+      "codeSnippet": "            i = k - j",
+      "codeLabel": "Row index"
+    },
+    {
+      "id": "cb10",
+      "phase": "Writing the Code",
+      "questionText": "Handle the down move (i+1, j): bounds check and dedup via stamps.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "            if i+1 < n and vis[j] != sid: vis[j] = sid; cand.append(j)",
+          "isCode": true
+        },
+        {
+          "label": "            if i < n and vis[j] == -1: vis[j] = sid; cand.append(j)",
+          "isCode": true
+        },
+        {
+          "label": "            if i+1 <= n and vis[j] != sid: vis[j] = sid; cand.append(j)",
+          "isCode": true
+        },
+        {
+          "label": "            if i+1 < n: cand.append(j)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Down is valid if i+1 < n. Use the stamp to avoid duplicates within this step.",
+      "wrongExplanations": {
+        "1": "vis[j] == -1 doesn't reset per step; stamp is needed.",
+        "2": "i+1 <= n allows i+1==n which is out of bounds."
+      },
+      "hint": "Check i+1 against n and use vis[j] with the current sid.",
+      "isCodeBuilding": true,
+      "codeSnippet": "            if i+1 < n and vis[j] != sid: vis[j] = sid; cand.append(j)",
+      "codeLabel": "Down move"
+    },
+    {
+      "id": "cb11",
+      "phase": "Writing the Code",
+      "questionText": "Handle the right move (i, j+1): bounds check and dedup via stamps.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "            if j+1 < n and vis[j+1] != sid: vis[j+1] = sid; cand.append(j+1)",
+          "isCode": true
+        },
+        {
+          "label": "            if j+1 <= n and vis[j+1] != sid: vis[j+1] = sid; cand.append(j+1)",
+          "isCode": true
+        },
+        {
+          "label": "            if j < n and vis[j] != sid: vis[j] = sid; cand.append(j)",
+          "isCode": true
+        },
+        {
+          "label": "            if j+1 < n: cand.append(j+1)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Right is valid if j+1 < n. Use vis[j+1] with sid to dedup.",
+      "wrongExplanations": {
+        "1": "j+1 == n is out of bounds.",
+        "2": "This checks/mutates the wrong index (j not j+1)."
+      },
+      "hint": "Check the column boundary and stamp j+1.",
+      "isCodeBuilding": true,
+      "codeSnippet": "            if j+1 < n and vis[j+1] != sid: vis[j+1] = sid; cand.append(j+1)",
+      "codeLabel": "Right move"
+    },
+    {
+      "id": "cb12",
+      "phase": "Writing the Code",
+      "questionText": "Compute k+1 and the minimal character on the next diagonal among candidates.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "        kk = k+1; mc = min(g[kk - j][j] for j in cand)",
+          "isCode": true
+        },
+        {
+          "label": "        kk = k; mc = min(g[kk - j][j] for j in cand)",
+          "isCode": true
+        },
+        {
+          "label": "        kk = k+1; mc = max(g[kk - j][j] for j in cand)",
+          "isCode": true
+        },
+        {
+          "label": "        kk = k+1; mc = min(g[k - j][j] for j in cand)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need the minimal letter on diagonal k+1: row index is kk−j.",
+      "wrongExplanations": {
+        "1": "Uses the wrong diagonal.",
+        "2": "We need minimal, not maximal letter."
+      },
+      "hint": "Use kk = k + 1 and take min over candidates.",
+      "isCodeBuilding": true,
+      "codeSnippet": "        kk = k+1; mc = min(g[kk - j][j] for j in cand)",
+      "codeLabel": "Min next char"
+    },
+    {
+      "id": "cb13",
+      "phase": "Writing the Code",
+      "questionText": "Append mc to the result and update the frontier to positions that have mc.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "        res.append(mc); fr = [j for j in cand if g[kk - j][j] == mc]",
+          "isCode": true
+        },
+        {
+          "label": "        res += mc; fr = cand",
+          "isCode": true
+        },
+        {
+          "label": "        res.append(mc); fr = cand",
+          "isCode": true
+        },
+        {
+          "label": "        res.append(mc); fr = [j for j in fr if g[kk - j][j] == mc]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Keep only candidates on diagonal k+1 whose letter equals mc.",
+      "wrongExplanations": {
+        "1": "res is a list; '+=' would iterate characters incorrectly and no pruning.",
+        "2": "No pruning means larger letters may remain."
+      },
+      "hint": "Filter cand, not the old frontier.",
+      "isCodeBuilding": true,
+      "codeSnippet": "        res.append(mc); fr = [j for j in cand if g[kk - j][j] == mc]",
+      "codeLabel": "Update frontier"
+    },
+    {
+      "id": "cb14",
+      "phase": "Writing the Code",
+      "questionText": "Finally, print the constructed string.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    print(\"\".join(res))",
+          "isCode": true
+        },
+        {
+          "label": "    print(res)",
+          "isCode": true
+        },
+        {
+          "label": "    print(''.join(map(str,res)))",
+          "isCode": true
+        },
+        {
+          "label": "    print(*res)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Join the list of characters into a single string.",
+      "wrongExplanations": {
+        "1": "This prints a list representation, not the string.",
+        "3": "res already contains strings; map is unnecessary and output formatting differs."
+      },
+      "hint": "Combine characters into one string before printing.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    print(\"\".join(res))",
+      "codeLabel": "Output"
+    },
+    {
+      "id": "q14",
+      "phase": "Verifying the Solution",
+      "questionText": "On this 3×3 grid, what final string does the algorithm produce?\n\nCAB\nAAA\nBAA",
+      "diagram": "C A B\nA A A\nB A A",
+      "options": [
+        {
+          "label": "CAAAA",
+          "isCode": false
+        },
+        {
+          "label": "CAAAB",
+          "isCode": false
+        },
+        {
+          "label": "CBAAA",
+          "isCode": false
+        },
+        {
+          "label": "CAAAB A",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Step-by-step minimal choices yield C→A→A→A→A.",
+      "wrongExplanations": {
+        "1": "An extra 'B' would be larger on the third character.",
+        "2": "Choosing 'B' early breaks minimality."
+      },
+      "hint": "Track candidates on each diagonal and pick the minimal letter.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q15",
+      "phase": "Verifying the Solution",
+      "questionText": "For the sample input (n=4) in the problem, what should the program print?",
+      "diagram": "AACA\nBABC\nABDA\nAACA",
+      "options": [
+        {
+          "label": "AAABACA",
+          "isCode": false
+        },
+        {
+          "label": "AAAABCA",
+          "isCode": false
+        },
+        {
+          "label": "AABAACA",
+          "isCode": false
+        },
+        {
+          "label": "AAABCAA",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Given in the sample: AAABACA is the minimal path string.",
+      "wrongExplanations": {
+        "1": "Check the third and fourth letters against candidates.",
+        "2": "This ordering fails at a later step."
+      },
+      "hint": "Trust the step-by-step minimal choice across each diagonal.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q16",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the time complexity of the frontier-by-diagonal approach?",
+      "diagram": "Each step processes O(width of diagonal) positions; sum widths over all diagonals.",
+      "options": [
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^3)",
+          "isCode": false
+        },
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(2^n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each diagonal has width O(n); summing over 2n−1 diagonals gives O(n^2).",
+      "wrongExplanations": {
+        "1": "We never have triple nested loops over n uniformly.",
+        "2": "We process more than linear work overall.",
+        "3": "We’re not enumerating all paths."
+      },
+      "hint": "Add the widths of all diagonals.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q17",
+      "phase": "Analyzing Complexity",
+      "questionText": "What additional space (besides storing the grid) does the algorithm use?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n) for frontier and visited stamps",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2) to store all diagonals",
+          "isCode": false
+        },
+        {
+          "label": "O(1) constant space",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2) to store all paths' prefixes",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We store frontier (O(n)) and a visited array of size n; no need for O(n^2) extra.",
+      "wrongExplanations": {
+        "1": "We do not materialize all diagonals.",
+        "2": "Frontier and visited scale with n."
+      },
+      "hint": "Count the size of frontier and visited array.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q18",
+      "phase": "Analyzing Complexity",
+      "questionText": "Which edge cases must the solution handle correctly?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "n=1 and grids where many cells share the same minimal letter",
+          "isCode": false
+        },
+        {
+          "label": "Only grids with strictly increasing letters",
+          "isCode": false
+        },
+        {
+          "label": "Grids with lowercase letters only",
+          "isCode": false
+        },
+        {
+          "label": "Paths that move left or up if needed",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "n=1 reduces to a single letter; many equal letters mean the frontier may be wide.",
+      "wrongExplanations": {
+        "1": "Letters can repeat arbitrarily and need not increase.",
+        "3": "Only uppercase letters A–Z are given and moves are only right/down."
+      },
+      "hint": "Check minimal input and cases with ties.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys",
+    "data = sys.stdin.read().strip().split()",
+    "if data:",
+    "    it = iter(data); n = int(next(it)); g = [next(it).strip() for _ in range(n)]",
+    "    res = [g[0][0]]; fr = [0]; vis = [-1]*n; sid = 0",
+    "    for k in range(2*n-2):",
+    "        sid += 1; cand = []",
+    "        for j in fr:",
+    "            i = k - j",
+    "            if i+1 < n and vis[j] != sid: vis[j] = sid; cand.append(j)",
+    "            if j+1 < n and vis[j+1] != sid: vis[j+1] = sid; cand.append(j+1)",
+    "        kk = k+1; mc = min(g[kk - j][j] for j in cand)",
+    "        res.append(mc); fr = [j for j in cand if g[kk - j][j] == mc]",
+    "    print(\"\".join(res))"
+  ],
+  "reasoningChain": [
+    {
+      "question": "How long is any path string in an n×n grid?",
+      "insight": "Every valid path visits 2n−1 cells, since it makes (n−1) right and (n−1) down moves."
+    },
+    {
+      "question": "Why can’t we enumerate all paths for n up to 3000?",
+      "insight": "The number of paths is C(2n−2, n−1), which is astronomically large; enumeration is infeasible."
+    },
+    {
+      "question": "How to build the minimal string incrementally?",
+      "insight": "At each step, consider all cells reachable in k moves and pick the minimal next letter among their neighbors; keep only positions achieving that letter."
+    },
+    {
+      "question": "What structure captures all cells after k moves?",
+      "insight": "All reachable cells lie on diagonal i+j=k; tracking column j suffices because i=k−j."
+    },
+    {
+      "question": "How to avoid duplicate candidates efficiently?",
+      "insight": "Use a visited array with step-id stamps to deduplicate j indices per iteration without clearing."
+    },
+    {
+      "question": "How to transition frontiers correctly?",
+      "insight": "From j at diagonal k, next j' are j (down) and j+1 (right) if in bounds; filter candidates by the minimal character at diagonal k+1."
+    },
+    {
+      "question": "What are the complexity bounds?",
+      "insight": "Processing each diagonal’s width yields O(n^2) time; extra space is O(n) besides the grid."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1335,
+    "output_tokens": 19984,
+    "input_cost": 0.001669,
+    "output_cost": 0.19984,
+    "total_cost": 0.201509
+  }
+}

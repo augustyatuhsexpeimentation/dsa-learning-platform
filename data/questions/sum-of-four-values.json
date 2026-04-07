@@ -1,0 +1,993 @@
+{
+  "id": "sum-of-four-values",
+  "title": "Sum of Four Values",
+  "difficulty": "intermediate",
+  "tags": [
+    "sorting",
+    "two-pointer",
+    "binary-search"
+  ],
+  "estimatedMinutes": 45,
+  "language": "python",
+  "description": "You are given an array of n integers, and your task is to find four values (at distinct positions) whose sum is x.\n\nInput:\n- First line: two integers n and x\n- Second line: n integers a_1, a_2, ..., a_n\n\nOutput:\n- Print four integers: the positions (1-indexed) of the values forming the sum x. If several solutions exist, print any.\n- If no solution exists, print IMPOSSIBLE.\n\nConstraints:\n- 1 ≤ n ≤ 1000\n- 1 ≤ x, a_i ≤ 10^9",
+  "examples": [
+    {
+      "input": "8 15\n3 2 5 8 1 3 2 3",
+      "output": "2 4 6 7",
+      "explanation": "Values at positions 2,4,6,7 are 2,8,3,2. Their sum is 15. Positions are distinct."
+    }
+  ],
+  "constraints": [
+    "1 ≤ n ≤ 1000",
+    "1 ≤ x, a_i ≤ 10^9",
+    "Positions must be distinct",
+    "Print any one solution or IMPOSSIBLE"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "Given array [1, 2, 3, 4] and x = 10, which output satisfies the requirement?",
+      "diagram": "Index:   1 2 3 4\nValue:   1 2 3 4",
+      "options": [
+        {
+          "label": "1 2 3 4",
+          "isCode": false
+        },
+        {
+          "label": "1 2 4 4",
+          "isCode": false
+        },
+        {
+          "label": "values: 1 2 3 4",
+          "isCode": false
+        },
+        {
+          "label": "IMPOSSIBLE",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Positions must be distinct and sum to x. 1,2,3,4 are distinct and sum to 10.",
+      "wrongExplanations": {
+        "1": "Repeats position 4; positions must be distinct.",
+        "2": "You must print positions, not values."
+      },
+      "hint": "Check distinct positions and sum equal to 10.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "If no such four positions exist, what exactly should be printed?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "IMPOSSIBLE",
+          "isCode": false
+        },
+        {
+          "label": "Impossible",
+          "isCode": false
+        },
+        {
+          "label": "-1",
+          "isCode": false
+        },
+        {
+          "label": "None",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The problem states to print IMPOSSIBLE in uppercase.",
+      "wrongExplanations": {
+        "1": "Case must match exactly: uppercase IMPOSSIBLE."
+      },
+      "hint": "Use the exact word from the statement.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "Do the four positions need to be printed in increasing order?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "No; any order is acceptable as long as positions are distinct and sum equals x.",
+          "isCode": false
+        },
+        {
+          "label": "Yes; positions must be strictly increasing.",
+          "isCode": false
+        },
+        {
+          "label": "Yes; positions must be sorted by their values.",
+          "isCode": false
+        },
+        {
+          "label": "Yes; positions must be sorted by original index parity.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Any valid set of positions is acceptable; sorting isn't required.",
+      "wrongExplanations": {
+        "1": "The statement allows any solution; no increasing order requirement."
+      },
+      "hint": "Re-read: \"If there are several solutions, you may print any of them.\"",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "Array may contain equal values. For [2,2,2,2,2] and x=8, which output is valid?",
+      "diagram": "Index:   1 2 3 4 5\nValue:   2 2 2 2 2",
+      "options": [
+        {
+          "label": "1 2 3 4",
+          "isCode": false
+        },
+        {
+          "label": "1 1 2 4",
+          "isCode": false
+        },
+        {
+          "label": "values: 2 2 2 2",
+          "isCode": false
+        },
+        {
+          "label": "IMPOSSIBLE",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Positions must be distinct; 1,2,3,4 works. Repeating a position is invalid.",
+      "wrongExplanations": {
+        "1": "Position 1 is repeated; not allowed."
+      },
+      "hint": "Distinct positions, not distinct values.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Exploring Approaches",
+      "questionText": "For n = 1000, roughly how many 4-position combinations exist if trying all quadruples?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "On the order of 10^11",
+          "isCode": false
+        },
+        {
+          "label": "On the order of 10^6",
+          "isCode": false
+        },
+        {
+          "label": "On the order of 10^3",
+          "isCode": false
+        },
+        {
+          "label": "On the order of 10^9",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Choosing 4 from 1000 is ~ (1000^4)/24 ≈ 4.2×10^10. Too large to iterate.",
+      "wrongExplanations": {
+        "1": "Pairs are ~5×10^5, not quadruples.",
+        "2": "This would be n, not combinations of 4."
+      },
+      "hint": "C(1000,4) grows roughly as n^4/24.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "Which plan is more practical under the limits?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Enumerate all quadruples; it fits in 1 second.",
+          "isCode": false
+        },
+        {
+          "label": "Work with pair sums; there are about 5×10^5 pairs when n=1000.",
+          "isCode": false
+        },
+        {
+          "label": "Sort the array and try all triples only.",
+          "isCode": false
+        },
+        {
+          "label": "Pick random indices repeatedly until success.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Pairs are ~500k, which is feasible to scan/store; quadruples are too many.",
+      "wrongExplanations": {
+        "0": "Quadruples are ~10^11; not feasible.",
+        "2": "Triples still leave O(n^3) which is too slow at n=1000."
+      },
+      "hint": "How many pairs exist for n=1000?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "Which observation connects four numbers summing to x with pairs?",
+      "diagram": "a[p] + a[q] + a[j] + a[i] = x  =>  (a[p] + a[q]) + (a[j] + a[i]) = x",
+      "options": [
+        {
+          "label": "Four numbers sum to x iff there exist two disjoint pairs whose sums add to x.",
+          "isCode": false
+        },
+        {
+          "label": "Four numbers sum to x iff one number equals x and the rest are zero.",
+          "isCode": false
+        },
+        {
+          "label": "Four numbers sum to x iff their average equals x/4.",
+          "isCode": false
+        },
+        {
+          "label": "Four numbers sum to x iff some triple equals x then add any number.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Grouping into two pair sums reduces the check to finding two disjoint pairs adding to x.",
+      "wrongExplanations": {
+        "2": "Average doesn't guarantee the sum equals x for a chosen set."
+      },
+      "hint": "Group the sum into two parenthesized pairs.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Building the Idea",
+      "questionText": "To avoid overlapping positions, how should we organize the search across indices?",
+      "diagram": "We want p,q < j < i so {p,q} and {j,i} are disjoint.",
+      "options": [
+        {
+          "label": "Store sums of pairs from indices strictly less than current j, and check pairs with j and i>j.",
+          "isCode": false
+        },
+        {
+          "label": "Store sums from all indices, then check pairs with i<j.",
+          "isCode": false
+        },
+        {
+          "label": "Store single values and check triples on the fly.",
+          "isCode": false
+        },
+        {
+          "label": "Store only pairs that include j and reuse j in both pairs.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Keeping stored pairs entirely before j and checking pairs (j,i) with i>j ensures no overlap.",
+      "wrongExplanations": {
+        "1": "Including all indices risks overlapping positions.",
+        "3": "Reusing j would violate distinct positions."
+      },
+      "hint": "Think p,q before j and i after j.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "When should pairs containing j be inserted into the storage?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Before checking any i>j pairs.",
+          "isCode": false
+        },
+        {
+          "label": "After checking all i>j pairs at this j.",
+          "isCode": false
+        },
+        {
+          "label": "Only after processing the entire array.",
+          "isCode": false
+        },
+        {
+          "label": "Both before and after.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Insert after checking i>j ensures stored pairs are strictly before j, avoiding overlap.",
+      "wrongExplanations": {
+        "0": "Inserting before could allow j to appear in both pairs."
+      },
+      "hint": "We want stored pairs to be strictly earlier than j.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "Do we need to store all pairs for a given sum, or is one pair sufficient?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Store the first found pair for each sum; it's sufficient.",
+          "isCode": false
+        },
+        {
+          "label": "Store all pairs for each sum to be safe.",
+          "isCode": false
+        },
+        {
+          "label": "Store only the last pair found for each sum.",
+          "isCode": false
+        },
+        {
+          "label": "Store counts of pairs per sum, not the pairs.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Any one earlier pair per sum suffices; if a solution exists, one match is enough.",
+      "wrongExplanations": {
+        "1": "Keeping all pairs increases memory without necessity under this ordering."
+      },
+      "hint": "We just need any one disjoint match.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "Using the sample (0-indexed for this trace):\nIndex: 0 1 2 3 4 5 6 7\nValue: 3 2 5 8 1 3 2 3\nLet x=15. At j=5 (value 3) and i=6 (value 2), what value do we need from earlier pair sums?",
+      "diagram": "need = x - a[j] - a[i]",
+      "options": [
+        {
+          "label": "10",
+          "isCode": false
+        },
+        {
+          "label": "8",
+          "isCode": false
+        },
+        {
+          "label": "11",
+          "isCode": false
+        },
+        {
+          "label": "7",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "need = 15 - 3 - 2 = 10.",
+      "wrongExplanations": {
+        "2": "15 - 3 - 2 = 10, not 11."
+      },
+      "hint": "Subtract both a[j] and a[i] from x.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "Which earlier pair (both indices < 5) sums to 10?",
+      "diagram": "Check indices among {0,1,2,3,4}",
+      "options": [
+        {
+          "label": "(1, 3) because 2 + 8 = 10",
+          "isCode": false
+        },
+        {
+          "label": "(0, 4) because 3 + 1 = 4",
+          "isCode": false
+        },
+        {
+          "label": "(2, 4) because 5 + 1 = 6",
+          "isCode": false
+        },
+        {
+          "label": "(0, 3) because 3 + 8 = 11",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Indices (1,3) give 2+8=10, matching need.",
+      "wrongExplanations": {
+        "3": "3+8=11, not 10."
+      },
+      "hint": "Test sums among indices < 5.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "With p=1, q=3, j=5, i=6 (0-indexed), are the positions distinct and valid to output?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes; all four indices are distinct.",
+          "isCode": false
+        },
+        {
+          "label": "No; j is used twice.",
+          "isCode": false
+        },
+        {
+          "label": "No; i equals q.",
+          "isCode": false
+        },
+        {
+          "label": "No; p equals j.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "1,3,5,6 are distinct; valid. Convert to 1-indexed at output.",
+      "wrongExplanations": {
+        "2": "i=6 and q=3 are different.",
+        "3": "p=1 and j=5 are different."
+      },
+      "hint": "Check for any equal pair among {p,q,j,i}.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Writing the Code",
+      "questionText": "Start the program structure. Which snippet correctly begins the file?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\n\ndef solve():\n    tokens = sys.stdin.read().strip().split()",
+          "isCode": true
+        },
+        {
+          "label": "def solve():\n    tokens = input().split()",
+          "isCode": true
+        },
+        {
+          "label": "import sys\n\ndef solve(tokens):\n    pass",
+          "isCode": true
+        },
+        {
+          "label": "tokens = sys.stdin.read().split()\n\ndef solve():\n    pass",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We define solve() and will read all input tokens inside it using sys.stdin.read.",
+      "wrongExplanations": {
+        "1": "input() alone reads one line; we need all tokens.",
+        "3": "Reading at top-level complicates testing; keep inside solve()."
+      },
+      "hint": "Use sys.stdin.read inside solve().",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\n\ndef solve():\n    tokens = sys.stdin.read().strip().split()",
+      "codeLabel": "Header and token read"
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Handle empty input and parse n, x, and the array a.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    if not tokens:\n        return\n    it = iter(tokens)\n    n = int(next(it)); x = int(next(it))\n    a = [int(next(it)) for _ in range(n)]",
+          "isCode": true
+        },
+        {
+          "label": "    it = iter(tokens)\n    x = int(next(it)); n = int(next(it))\n    a = [int(next(it)) for _ in range(x)]",
+          "isCode": true
+        },
+        {
+          "label": "    n, x = map(int, tokens[:2])\n    a = list(map(int, tokens[2:n]))",
+          "isCode": true
+        },
+        {
+          "label": "    if not tokens:\n        print(\"IMPOSSIBLE\")\n        return\n    n = int(tokens[0]); x = int(tokens[1])\n    a = list(map(int, tokens[2:]))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Correctly guards empty input and parses n numbers into a using an iterator.",
+      "wrongExplanations": {
+        "1": "n and x order is wrong; array length must be n, not x.",
+        "3": "Printing IMPOSSIBLE on empty input is not required; just return."
+      },
+      "hint": "First two tokens are n and x; then read n integers.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    if not tokens:\n        return\n    it = iter(tokens)\n    n = int(next(it)); x = int(next(it))\n    a = [int(next(it)) for _ in range(n)]",
+      "codeLabel": "Parse input"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Create a storage for earlier pair sums.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    sums = {}",
+          "isCode": true
+        },
+        {
+          "label": "    sums = []",
+          "isCode": true
+        },
+        {
+          "label": "    sums = set()",
+          "isCode": true
+        },
+        {
+          "label": "    sums = dict(); sums_default = []",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need mapping sum -> (index1, index2), so use a dict.",
+      "wrongExplanations": {
+        "2": "A set cannot store associated pair indices."
+      },
+      "hint": "We must retrieve indices given a sum.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    sums = {}",
+      "codeLabel": "Initialize storage"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Write the outer loop over j.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    for j in range(n):",
+          "isCode": true
+        },
+        {
+          "label": "    for j in range(1, n):",
+          "isCode": true
+        },
+        {
+          "label": "    for j in range(n-1):",
+          "isCode": true
+        },
+        {
+          "label": "    for j in a:",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We consider j from 0..n-1 so that pairs (j,i) for i>j cover all forward pairs.",
+      "wrongExplanations": {
+        "2": "range(n-1) skips j = n-1; we still need to add its earlier pairs to storage."
+      },
+      "hint": "Use 0..n-1 inclusive for j.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    for j in range(n):",
+      "codeLabel": "Outer loop j"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Write the inner loop over i and compute the needed value.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "        for i in range(j+1, n):\n            need = x - a[j] - a[i]",
+          "isCode": true
+        },
+        {
+          "label": "        for i in range(n):\n            need = x - a[i] - a[j]",
+          "isCode": true
+        },
+        {
+          "label": "        for i in range(j, n):\n            need = x - a[j] + a[i]",
+          "isCode": true
+        },
+        {
+          "label": "        for i in range(j+1, n):\n            need = a[j] + a[i] - x",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We must consider i>j and need = x - a[j] - a[i] to match with earlier pair sums.",
+      "wrongExplanations": {
+        "2": "Signs wrong; need should be x minus the pair sum."
+      },
+      "hint": "i must be greater than j to avoid overlap.",
+      "isCodeBuilding": true,
+      "codeSnippet": "        for i in range(j+1, n):\n            need = x - a[j] - a[i]",
+      "codeLabel": "Inner loop i and need"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Check if need exists in storage and output immediately.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "            if need in sums:\n                p, q = sums[need]\n                print(p+1, q+1, j+1, i+1)\n                return",
+          "isCode": true
+        },
+        {
+          "label": "            if sums.get(need, None):\n                p, q = sums[need]\n                print(a[p], a[q], a[j], a[i])\n                return",
+          "isCode": true
+        },
+        {
+          "label": "            if need in sums:\n                p, q = sums[need]\n                print(p, q, j, i)\n                return",
+          "isCode": true
+        },
+        {
+          "label": "            if need in sums:\n                p, q = sums[need]\n                print(p+1, q+1, j+1, i+1)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We print 1-indexed positions and return to stop after finding a valid quadruple.",
+      "wrongExplanations": {
+        "1": "Must print positions, not values.",
+        "2": "Positions must be 1-indexed in output."
+      },
+      "hint": "Remember 1-indexed output and early exit.",
+      "isCodeBuilding": true,
+      "codeSnippet": "            if need in sums:\n                p, q = sums[need]\n                print(p+1, q+1, j+1, i+1)\n                return",
+      "codeLabel": "Match and output"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "After checking all i>j, add pairs (k, j) with k<j to storage (only first occurrence per sum).",
+      "diagram": null,
+      "options": [
+        {
+          "label": "        for k in range(j):\n            s = a[k] + a[j]\n            if s not in sums:\n                sums[s] = (k, j)",
+          "isCode": true
+        },
+        {
+          "label": "        for k in range(j+1):\n            s = a[k] + a[j]\n            sums[s] = (k, j)",
+          "isCode": true
+        },
+        {
+          "label": "        for k in range(j):\n            s = a[k] + a[j]\n            sums[s] = (j, k)",
+          "isCode": true
+        },
+        {
+          "label": "        for k in range(j):\n            s = a[k] + a[j]\n            if s in sums:\n                sums[s] = (k, j)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We add only k<j pairs after checks, and keep the first pair per sum to avoid unnecessary overwrites.",
+      "wrongExplanations": {
+        "1": "range(j+1) includes k=j, creating a pair with equal indices.",
+        "4": "Overwriting existing pairs discards earlier valid ones needlessly."
+      },
+      "hint": "Pairs are (k, j) with k strictly less than j.",
+      "isCodeBuilding": true,
+      "codeSnippet": "        for k in range(j):\n            s = a[k] + a[j]\n            if s not in sums:\n                sums[s] = (k, j)",
+      "codeLabel": "Add earlier pairs"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "If no solution was found after all loops, what should be printed?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    print(\"IMPOSSIBLE\")",
+          "isCode": true
+        },
+        {
+          "label": "    print(-1)",
+          "isCode": true
+        },
+        {
+          "label": "    return",
+          "isCode": true
+        },
+        {
+          "label": "    print(\"Impossible\")",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Print exactly IMPOSSIBLE when no quadruple is found.",
+      "wrongExplanations": {
+        "2": "We must produce an explicit output per the statement."
+      },
+      "hint": "Match the required wording exactly.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    print(\"IMPOSSIBLE\")",
+      "codeLabel": "No solution output"
+    },
+    {
+      "id": "q22",
+      "phase": "Writing the Code",
+      "questionText": "Finish with the entry point to run solve().",
+      "diagram": null,
+      "options": [
+        {
+          "label": "if __name__ == \"__main__\":\n    solve()",
+          "isCode": true
+        },
+        {
+          "label": "if __name__ == \"main\":\n    solve()",
+          "isCode": true
+        },
+        {
+          "label": "solve()",
+          "isCode": true
+        },
+        {
+          "label": "def __main__():\n    solve()",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Use the standard Python main guard to call solve().",
+      "wrongExplanations": {
+        "2": "Calling solve() unguarded runs on import, which is not ideal."
+      },
+      "hint": "Use the conventional main guard string.",
+      "isCodeBuilding": true,
+      "codeSnippet": "if __name__ == \"__main__\":\n    solve()",
+      "codeLabel": "Main guard"
+    },
+    {
+      "id": "q23",
+      "phase": "Verifying the Solution",
+      "questionText": "On the sample input, which output will our code produce first (1-indexed)?\nInput:\n8 15\n3 2 5 8 1 3 2 3",
+      "diagram": null,
+      "options": [
+        {
+          "label": "2 4 6 7",
+          "isCode": false
+        },
+        {
+          "label": "1 4 6 7",
+          "isCode": false
+        },
+        {
+          "label": "2 3 6 7",
+          "isCode": false
+        },
+        {
+          "label": "IMPOSSIBLE",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "At j=5,i=6, need=10; earlier pair (1,3) has sum 10, yielding 2 4 6 7.",
+      "wrongExplanations": {
+        "1": "Index 1 is value 3; 3+8+3+2=16, not 15."
+      },
+      "hint": "Trace j=5 and i=6; match with earlier pair (1,3).",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Verifying the Solution",
+      "questionText": "Input:\n4 100\n1 2 3 4\nWhat does the program print?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "IMPOSSIBLE",
+          "isCode": false
+        },
+        {
+          "label": "1 2 3 4",
+          "isCode": false
+        },
+        {
+          "label": "1 2 3 5",
+          "isCode": false
+        },
+        {
+          "label": "2 3 4 5",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "No quadruple sums to 100; prints IMPOSSIBLE.",
+      "wrongExplanations": {
+        "1": "1+2+3+4=10, not 100."
+      },
+      "hint": "Sum the largest four values: it's much less than 100.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the time complexity of this approach?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^3)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^4)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Two nested loops over j and i yield about n^2 steps plus constant-time lookups.",
+      "wrongExplanations": {
+        "1": "We do not have three nested loops.",
+        "3": "We avoid enumerating quadruples."
+      },
+      "hint": "Count the j,i iterations.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the space complexity in the worst case?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(1)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We may store up to one pair per distinct sum among earlier pairs, which can be O(n^2).",
+      "wrongExplanations": {
+        "2": "Storage grows with number of pair sums, not constant."
+      },
+      "hint": "How many earlier pairs can there be?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q27",
+      "phase": "Analyzing Complexity",
+      "questionText": "How should the program behave when n < 4?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Print IMPOSSIBLE since there aren't four distinct positions.",
+          "isCode": false
+        },
+        {
+          "label": "Crash due to insufficient input.",
+          "isCode": false
+        },
+        {
+          "label": "Print any positions with repeats.",
+          "isCode": false
+        },
+        {
+          "label": "Skip output.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "No quadruple can be formed; the loops naturally find nothing and print IMPOSSIBLE.",
+      "wrongExplanations": {
+        "2": "Positions must be distinct; repeats are invalid."
+      },
+      "hint": "The loops won't find any valid quadruple.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys",
+    "",
+    "def solve():",
+    "    tokens = sys.stdin.read().strip().split()",
+    "    if not tokens:",
+    "        return",
+    "    it = iter(tokens)",
+    "    n = int(next(it)); x = int(next(it))",
+    "    a = [int(next(it)) for _ in range(n)]",
+    "    sums = {}",
+    "    for j in range(n):",
+    "        for i in range(j+1, n):",
+    "            need = x - a[j] - a[i]",
+    "            if need in sums:",
+    "                p, q = sums[need]",
+    "                print(p+1, q+1, j+1, i+1)",
+    "                return",
+    "        for k in range(j):",
+    "            s = a[k] + a[j]",
+    "            if s not in sums:",
+    "                sums[s] = (k, j)",
+    "    print(\"IMPOSSIBLE\")",
+    "",
+    "if __name__ == \"__main__\":",
+    "    solve()"
+  ],
+  "reasoningChain": [
+    {
+      "question": "What should the output look like and must positions be distinct or ordered?",
+      "insight": "Outputs are 1-indexed positions; they must be distinct but ordering is not required."
+    },
+    {
+      "question": "Is trying all quadruples feasible for n up to 1000?",
+      "insight": "No; the number of quadruples is huge. We need a more efficient reduction."
+    },
+    {
+      "question": "How to reduce four-number sum checks?",
+      "insight": "Group into two pair sums; we need two disjoint pairs whose sums add to x."
+    },
+    {
+      "question": "How to avoid overlapping indices while searching pairs?",
+      "insight": "Store sums of pairs from indices strictly before j, and check pairs (j,i) with i>j."
+    },
+    {
+      "question": "When to insert pairs with j?",
+      "insight": "Insert after checking all i>j to ensure stored pairs are strictly earlier than j."
+    },
+    {
+      "question": "Is one stored pair per sum sufficient?",
+      "insight": "Yes; any earlier pair per sum suffices to find a valid match if it exists."
+    },
+    {
+      "question": "How to implement efficiently in code?",
+      "insight": "Use a dictionary: two nested loops over j and i, compute need, check dict, add earlier pairs, print solution or IMPOSSIBLE."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1375,
+    "output_tokens": 16087,
+    "input_cost": 0.001719,
+    "output_cost": 0.16087,
+    "total_cost": 0.162589
+  }
+}

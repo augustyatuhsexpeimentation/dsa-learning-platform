@@ -1,0 +1,924 @@
+{
+  "id": "visible-buildings-queries",
+  "title": "Visible Buildings Queries",
+  "difficulty": "hard",
+  "tags": [
+    "array"
+  ],
+  "estimatedMinutes": 90,
+  "language": "python",
+  "description": "There are n buildings in a row numbered 1, 2, …, n from left to right. You are standing to the left of the first building. You can see a building if it is taller than all buildings to its left.\n\nYou need to process q queries: If only buildings in range [a, b] existed, how many buildings would you see?\n\nInput:\n- First line: two integers n and q\n- Second line: n integers h_1, h_2, …, h_n (heights)\n- Next q lines: each has two integers a and b\n\nOutput:\n- For each query, print one integer: the number of visible buildings in [a, b].",
+  "examples": [
+    {
+      "input": "5 3\n4 1 2 2 3\n1 5\n2 5\n3 4",
+      "output": "1\n3\n1",
+      "explanation": "For [1,5], only 4 is visible. For [2,5]: heights [1,2,2,3] → visible: 1,2,3 → 3. For [3,4]: heights [2,2] → only the first 2 is visible → 1."
+    }
+  ],
+  "constraints": [
+    "1 ≤ n ≤ 1e5",
+    "1 ≤ q ≤ 2e5",
+    "1 ≤ h_i ≤ 1e9",
+    "1 ≤ a ≤ b ≤ n",
+    "Time limit: 1.00 s",
+    "Memory limit: 512 MB"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "Given heights [2, 2, 5] and the query range [1, 3], how many buildings are visible from the left within this range?",
+      "diagram": "Index:   1  2  3\nHeights: 2  2  5",
+      "options": [
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Visible: first 2, then 5 (the second 2 is not taller than the first 2). So 2.",
+      "wrongExplanations": {
+        "1": "Only the first 2 is counted; but 5 is also taller than all to its left.",
+        "2": "You cannot see all three because the second 2 is not taller than the first 2."
+      },
+      "hint": "A building is visible only if it is strictly taller than all to its left in the range.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "For heights [1, 1, 1] and the query range [2, 3], how many buildings are visible?",
+      "diagram": "Range [2,3] → [1, 1]",
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "It depends on global max in [1,3]",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "In [1,1], only the first 1 is visible. Equal heights do not create a new visible building.",
+      "wrongExplanations": {
+        "0": "The first building in a non-empty range is always visible.",
+        "2": "The second 1 is not taller than the first 1."
+      },
+      "hint": "Within the subarray [a,b], only the subarray matters.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "For any single-building query [i, i], what is the number of visible buildings?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "Depends on neighbors outside [i, i]",
+          "isCode": false
+        },
+        {
+          "label": "Depends on the height h_i",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "With only one building present, it is visible since there are no buildings to its left.",
+      "wrongExplanations": {
+        "0": "No left buildings means the single building is visible.",
+        "2": "Only buildings in the range matter; outside heights are irrelevant."
+      },
+      "hint": "There are no buildings to the left within [i,i].",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "Use the sample heights [4, 1, 2, 2, 3]. For the query [2, 5], how many buildings are visible?",
+      "diagram": "Range [2,5] → [1, 2, 2, 3]",
+      "options": [
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Visible sequence: 1, then 2, then 3 → total 3.",
+      "wrongExplanations": {
+        "0": "You miss that 3 increases over the previous maximum.",
+        "3": "Second 2 is not taller than the previous 2."
+      },
+      "hint": "Track the running maximum within the subarray.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Exploring Approaches",
+      "questionText": "Why is answering each query by scanning [a, b] and counting new maxima too slow in the worst case?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Because heights can be up to 1e9",
+          "isCode": false
+        },
+        {
+          "label": "Because q·(b−a+1) can be up to ~2e10 operations",
+          "isCode": false
+        },
+        {
+          "label": "Because we cannot store arrays of length n",
+          "isCode": false
+        },
+        {
+          "label": "Because input reading is the bottleneck",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Worst case q≈2e5 and range length≈1e5 gives ~2e10 checks, exceeding time limits.",
+      "wrongExplanations": {
+        "0": "Large heights do not affect counting cost if we only compare.",
+        "3": "Input IO is not the dominant cost compared to 2e10 operations."
+      },
+      "hint": "Estimate q times average scan length.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "For an index i within [a, b], which condition correctly captures that building i is visible within [a, b]?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "No j in [a, i-1] with h_j > h_i",
+          "isCode": false
+        },
+        {
+          "label": "No j in [a, i-1] with h_j >= h_i",
+          "isCode": false
+        },
+        {
+          "label": "h_i is the maximum in [1, i]",
+          "isCode": false
+        },
+        {
+          "label": "h_i >= max(a..i-1)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Visibility requires h_i to be strictly greater than all to its left; equal height to the left blocks it.",
+      "wrongExplanations": {
+        "0": "Equal-height to the left still blocks visibility.",
+        "3": "Using >= would wrongly count equal heights as visible."
+      },
+      "hint": "Is a building with equal height to the left visible?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "Define L[i] as the nearest index j < i with h_j >= h_i (or 0 if none). Which statement is correct?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "i is visible in [a,b] iff a ≥ L[i]",
+          "isCode": false
+        },
+        {
+          "label": "i is visible in [a,b] iff a > L[i] and a ≤ i ≤ b",
+          "isCode": false
+        },
+        {
+          "label": "i is visible in [a,b] iff L[i] = 0 only",
+          "isCode": false
+        },
+        {
+          "label": "i is visible in [a,b] iff i ≤ L[i] < a",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Within [a,b], i is visible if no blocking index lies in [a, i-1], i.e., L[i] < a.",
+      "wrongExplanations": {
+        "0": "If a = L[i], the blocker at L[i] lies inside and i is not visible.",
+        "2": "Even with L[i] > 0, i can be visible if L[i] < a."
+      },
+      "hint": "Compare L[i] to the left boundary a.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Building the Idea",
+      "questionText": "Given the definition of L[i], how can we express the answer to a query [a, b]?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Count i in [a, b] with L[i] = 0",
+          "isCode": false
+        },
+        {
+          "label": "Count i in [a, b] with L[i] < a",
+          "isCode": false
+        },
+        {
+          "label": "Count i in [a, b] with L[i] ≤ a",
+          "isCode": false
+        },
+        {
+          "label": "Count i in [a, b] with L[i] > b",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "i is visible in [a,b] iff L[i] < a. Summing this over i ∈ [a,b] gives the answer.",
+      "wrongExplanations": {
+        "0": "L[i]=0 is sufficient but not necessary; L[i] can be positive yet < a.",
+        "2": "If L[i]=a, the blocker is inside [a,i-1], so i is not visible."
+      },
+      "hint": "Visibility means the blocker lies before a.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "Suppose we process queries in increasing order of a. At step a, we want to quickly count how many indices i in [a, b] satisfy L[i] < a. What is a good strategy?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Maintain a set of active indices i with L[i] ≤ a and count",
+          "isCode": false
+        },
+        {
+          "label": "Maintain a set of active indices i with L[i] < a and count",
+          "isCode": false
+        },
+        {
+          "label": "Maintain a set of indices i ≥ a and count",
+          "isCode": false
+        },
+        {
+          "label": "Recompute maxima for each query",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "At step a, active indices are exactly those with L[i] < a. Then answering [a,b] reduces to counting active indices in [a,b].",
+      "wrongExplanations": {
+        "0": "L[i] ≤ a would include L[i] = a, but those are blocked by a.",
+        "3": "Recomputing per query is too slow."
+      },
+      "hint": "Which indices i become newly visible when a increases by 1?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "As we move from a to a+1, which indices become newly active (i.e., begin satisfying L[i] < current a)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "All i with i = a+1",
+          "isCode": false
+        },
+        {
+          "label": "All i with L[i] + 1 = a + 1",
+          "isCode": false
+        },
+        {
+          "label": "All i with L[i] = a + 1",
+          "isCode": false
+        },
+        {
+          "label": "All i with L[i] < a + 1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "At step a+1, the set adds indices i for which L[i] < a+1 but not < a, i.e., L[i] = a. So L[i]+1 = a+1.",
+      "wrongExplanations": {
+        "0": "i=a+1 might be blocked by an earlier index.",
+        "3": "This describes the entire active set, not just the newly added elements."
+      },
+      "hint": "New actives are those with L[i] exactly equal to the previous a.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "If we maintain an array over indices i, where active indices have value 1 and others 0, how can we answer a query [a, b] at step a?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Compute sum over [a, b] using prefix sums that support fast updates",
+          "isCode": false
+        },
+        {
+          "label": "Scan [a, b] and count 1s",
+          "isCode": false
+        },
+        {
+          "label": "Keep a running total of active indices and return it",
+          "isCode": false
+        },
+        {
+          "label": "Return the number of indices i with i ≤ b",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need fast point-activation and range sum queries; prefix sums with efficient updates (logarithmic) work well.",
+      "wrongExplanations": {
+        "1": "Scanning per query is too slow.",
+        "2": "The total number of actives counts indices outside [a,b] too."
+      },
+      "hint": "We need to update points and query sums on intervals quickly.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "Which precomputation helps to get L[i] for all i efficiently?",
+      "diagram": "Process from left to right; keep indices of a decreasing-by-height list.\nWhen h[top] < h[i], pop; then L[i] = top if exists.",
+      "options": [
+        {
+          "label": "Scan left for each i until finding h_j >= h_i",
+          "isCode": false
+        },
+        {
+          "label": "Maintain a structure of candidates; for each i, pop while last < h[i], then last is L[i]",
+          "isCode": false
+        },
+        {
+          "label": "Sort indices by height and compare neighbors",
+          "isCode": false
+        },
+        {
+          "label": "Build a prefix maximum array only",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Processing left to right and keeping decreasing heights lets us find nearest >= to the left in amortized O(1) per i.",
+      "wrongExplanations": {
+        "0": "Scanning left per i is O(n^2) in worst case.",
+        "3": "Prefix max isn’t enough to know the nearest index with height ≥ h_i."
+      },
+      "hint": "Keep potential blockers in a decreasing-by-height list.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Writing the Code",
+      "questionText": "Start by reading all integers quickly and preparing containers. Which snippet correctly initializes reading, arrays, and the answer holder?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\n\ndef main():\n    data = list(map(int, sys.stdin.buffer.read().split()))\n    it = iter(data)\n    n = next(it); q = next(it)\n    h = [0] + [next(it) for _ in range(n)]\n    queries_by_a = [[] for _ in range(n+2)]\n    ans = [0]*q\n",
+          "isCode": true
+        },
+        {
+          "label": "import sys\n\ndef main():\n    n, q = map(int, sys.stdin.readline().split())\n    h = [0] + list(map(int, sys.stdin.readline().split()))\n    queries_by_a = [[] for _ in range(n)]\n    ans = []\n",
+          "isCode": true
+        },
+        {
+          "label": "import sys\n\ndef main():\n    data = sys.stdin.read().split()\n    n = int(data[0]); q = int(data[1])\n    h = [int(x) for x in data[2:2+n]]\n    queries_by_a = [[]]*(n+1)\n    ans = [0 for _ in range(q)]\n",
+          "isCode": true
+        },
+        {
+          "label": "import sys\n\ndef main():\n    n = int(sys.stdin.readline())\n    q = int(sys.stdin.readline())\n    h = [0]*n\n    queries_by_a = [[] for _ in range(q)]\n    ans = [0]*n\n",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Reads all ints, 1-indexes heights with a leading 0, allocates queries_by_a for indices up to n+1, and ans of length q.",
+      "wrongExplanations": {
+        "1": "queries_by_a too small (n not n+2) and ans not sized; reading line-by-line may time out but main issue is containers.",
+        "3": "Reads n and q incorrectly, and sizes for queries/answers are wrong."
+      },
+      "hint": "Prefer a 1-based index for h and enough space for per-a buckets.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\n\ndef main():\n    data = list(map(int, sys.stdin.buffer.read().split()))\n    it = iter(data)\n    n = next(it); q = next(it)\n    h = [0] + [next(it) for _ in range(n)]\n    queries_by_a = [[] for _ in range(n+2)]\n    ans = [0]*q",
+      "codeLabel": "Read input and init"
+    },
+    {
+      "id": "q14",
+      "phase": "Writing the Code",
+      "questionText": "Fill queries_by_a by grouping queries by their starting index a, preserving query order via an ID. Which snippet is correct?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    for qi in range(q):\n        a = next(it); b = next(it)\n        queries_by_a[a].append((b, qi, a))\n",
+          "isCode": true
+        },
+        {
+          "label": "    for qi in range(q):\n        a = next(it); b = next(it)\n        queries_by_a[b].append((a, qi))\n",
+          "isCode": true
+        },
+        {
+          "label": "    for qi in range(q):\n        a = next(it); b = next(it)\n        queries_by_a[a].append((a, b))\n",
+          "isCode": true
+        },
+        {
+          "label": "    for qi in range(q):\n        a = next(it); b = next(it)\n        queries_by_a[a].append(qi)\n",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Group by 'a' so we can answer at step a; store (b, qi, a) for later answering.",
+      "wrongExplanations": {
+        "1": "Grouping by b is not aligned with the sweep over a.",
+        "2": "Missing query id; cannot place answer in correct order."
+      },
+      "hint": "We will sweep by a; store enough to compute and index the answer.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    for qi in range(q):\n        a = next(it); b = next(it)\n        queries_by_a[a].append((b, qi, a))",
+      "codeLabel": "Read queries by a"
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Compute L[i] = nearest j < i with h[j] >= h[i] (or 0). Which snippet computes L correctly?",
+      "diagram": "Maintain indices with non-increasing heights.\nFor each i: pop while h[top] < h[i]; then L[i] = top if any.",
+      "options": [
+        {
+          "label": "    L = [0]*(n+1)\n    stack = []\n    for i in range(1, n+1):\n        while stack and h[stack[-1]] < h[i]:\n            stack.pop()\n        L[i] = stack[-1] if stack else 0\n        stack.append(i)\n",
+          "isCode": true
+        },
+        {
+          "label": "    L = [0]*(n+1)\n    stack = []\n    for i in range(1, n+1):\n        while stack and h[stack[-1]] <= h[i]:\n            stack.pop()\n        L[i] = stack[-1] if stack else 0\n        stack.append(i)\n",
+          "isCode": true
+        },
+        {
+          "label": "    L = [0]*(n+1)\n    stack = []\n    for i in range(1, n+1):\n        while stack and h[stack[-1]] > h[i]:\n            stack.pop()\n        L[i] = stack[-1] if stack else 0\n        stack.append(i)\n",
+          "isCode": true
+        },
+        {
+          "label": "    L = [0]*(n+1)\n    stack = []\n    for i in range(1, n+1):\n        while stack and h[stack[-1]] < h[i]:\n            stack.pop()\n        L[i] = 0\n        stack.append(h[i])\n",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Pop strictly smaller heights; equal heights remain to block. Then L[i] is the top index if it exists.",
+      "wrongExplanations": {
+        "1": "Popping on <= removes equal heights; equality should block visibility.",
+        "3": "Push indices, not heights; and L[i] isn't always 0."
+      },
+      "hint": "Be careful with equality: an equal-height to the left blocks.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    L = [0]*(n+1)\n    stack = []\n    for i in range(1, n+1):\n        while stack and h[stack[-1]] < h[i]:\n            stack.pop()\n        L[i] = stack[-1] if stack else 0\n        stack.append(i)",
+      "codeLabel": "Compute L via stack"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Bucket indices by key k = L[i] + 1 so they become active when a == k. Which snippet builds the buckets correctly?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    buckets = [[] for _ in range(n+2)]\n    for i in range(1, n+1):\n        buckets[L[i] + 1].append(i)\n",
+          "isCode": true
+        },
+        {
+          "label": "    buckets = [[] for _ in range(n+1)]\n    for i in range(1, n+1):\n        buckets[L[i]].append(i)\n",
+          "isCode": true
+        },
+        {
+          "label": "    buckets = [[] for _ in range(n+2)]\n    for i in range(n):\n        buckets[L[i] + 1].append(i)\n",
+          "isCode": true
+        },
+        {
+          "label": "    buckets = [[] for _ in range(n+2)]\n    for i in range(1, n+1):\n        buckets[i].append(L[i] + 1)\n",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each index i is added to bucket L[i]+1 so it activates when a reaches that value.",
+      "wrongExplanations": {
+        "1": "Using L[i] misses the +1 shift and may index bucket 0.",
+        "2": "Iterates i from 0..n-1 while L is 1-based; off-by-one errors."
+      },
+      "hint": "Indices are 1-based; ensure room for key == n+1 if needed.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    buckets = [[] for _ in range(n+2)]\n    for i in range(1, n+1):\n        buckets[L[i] + 1].append(i)",
+      "codeLabel": "Build buckets"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Implement a structure for point increments and prefix sums over indices 1..n. Which snippet is correct?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    size = n+2\n    bit = [0]*size\n    def update(i, delta):\n        while i < size:\n            bit[i] += delta\n            i += i & -i\n    def query(i):\n        s = 0\n        while i > 0:\n            s += bit[i]\n            i -= i & -i\n        return s\n",
+          "isCode": true
+        },
+        {
+          "label": "    size = n\n    bit = [0]*size\n    def update(i, delta):\n        while i > 0:\n            bit[i] += delta\n            i -= i & -i\n    def query(i):\n        s = 0\n        while i < size:\n            s += bit[i]\n            i += i & -i\n        return s\n",
+          "isCode": true
+        },
+        {
+          "label": "    size = n+2\n    bit = [0]*size\n    def update(i, delta):\n        bit[i] += delta\n    def query(i):\n        return sum(bit[:i+1])\n",
+          "isCode": true
+        },
+        {
+          "label": "    size = n+2\n    bit = [0]*size\n    def update(i, delta):\n        while i < size:\n            bit[i] = delta\n            i += i & -i\n    def query(i):\n        s = 0\n        while i > 0:\n            s = bit[i]\n            i -= i & -i\n        return s\n",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "This provides logarithmic point updates and prefix sums over 1-based indices.",
+      "wrongExplanations": {
+        "1": "Update and query loops are swapped; this breaks semantics.",
+        "2": "Query is O(n), too slow for many queries."
+      },
+      "hint": "Use 1-based indexing and i += i & -i for updates.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    size = n+2\n    bit = [0]*size\n    def update(i, delta):\n        while i < size:\n            bit[i] += delta\n            i += i & -i\n    def query(i):\n        s = 0\n        while i > 0:\n            s += bit[i]\n            i -= i & -i\n        return s",
+      "codeLabel": "BIT functions"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Sweep over a from 1 to n, activate indices in buckets[a], and answer queries at a. Which snippet is correct?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    for a in range(1, n+1):\n        for idx in buckets[a]:\n            update(idx, 1)\n        for b, qi, a0 in queries_by_a[a]:\n            ans[qi] = query(b) - query(a-1)\n",
+          "isCode": true
+        },
+        {
+          "label": "    for a in range(1, n+1):\n        for idx in buckets[a]:\n            update(idx, 1)\n        for b, qi, a0 in queries_by_a[a]:\n            ans[qi] = query(b) - query(a)\n",
+          "isCode": true
+        },
+        {
+          "label": "    for a in range(1, n+1):\n        for b, qi, a0 in queries_by_a[a]:\n            ans[qi] = query(b)\n        for idx in buckets[a]:\n            update(idx, 1)\n",
+          "isCode": true
+        },
+        {
+          "label": "    for a in range(n, 0, -1):\n        for idx in buckets[a]:\n            update(idx, 1)\n        for b, qi, a0 in queries_by_a[a]:\n            ans[qi] = query(b) - query(a-1)\n",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Activate indices before answering queries at that a; range sum is prefix(b) - prefix(a-1).",
+      "wrongExplanations": {
+        "1": "Subtracting query(a) excludes index a incorrectly.",
+        "2": "Answering before activating misses indices that start at this a."
+      },
+      "hint": "Remember to include index a in the count if active.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    for a in range(1, n+1):\n        for idx in buckets[a]:\n            update(idx, 1)\n        for b, qi, a0 in queries_by_a[a]:\n            ans[qi] = query(b) - query(a-1)",
+      "codeLabel": "Sweep and answer"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Finish by outputting answers in the original query order and wiring main. Which snippet is correct?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    out = '\\n'.join(str(x) for x in ans)\n    sys.stdout.write(out)\n\nif __name__ == \"__main__\":\n    main()\n",
+          "isCode": true
+        },
+        {
+          "label": "    print(*ans)\n\nif __name__ == \"__main__\":\n    main()\n",
+          "isCode": true
+        },
+        {
+          "label": "    for x in sorted(ans):\n        print(x)\n\nif __name__ == \"__main__\":\n    main()\n",
+          "isCode": true
+        },
+        {
+          "label": "    print(ans)\n\nif __name__ == \"__main__\":\n    main()\n",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Join with newlines to match required format and print in the stored order.",
+      "wrongExplanations": {
+        "1": "This prints on one line separated by spaces, not per line.",
+        "3": "Printing a Python list includes brackets and commas."
+      },
+      "hint": "Each answer must be on its own line.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    out = '\\n'.join(str(x) for x in ans)\n    sys.stdout.write(out)\n\nif __name__ == \"__main__\":\n    main()",
+      "codeLabel": "Print and main guard"
+    },
+    {
+      "id": "q20",
+      "phase": "Verifying the Solution",
+      "questionText": "Trace the algorithm on the sample: n=5, h=[4,1,2,2,3]. What is L for indices 1..5?",
+      "diagram": "i:     1 2 3 4 5\nh[i]:  4 1 2 2 3",
+      "options": [
+        {
+          "label": "L = [0, 0, 1, 3, 1]",
+          "isCode": false
+        },
+        {
+          "label": "L = [0, 1, 2, 2, 4]",
+          "isCode": false
+        },
+        {
+          "label": "L = [0, 0, 1, 1, 1]",
+          "isCode": false
+        },
+        {
+          "label": "L = [0, 0, 1, 3, 4]",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "L[1]=0; L[2]=1 (4>=1); L[3]=1 (4>=2); L[4]=3 (2>=2 at i=3); L[5]=1 (4>=3).",
+      "wrongExplanations": {
+        "2": "L[4] should be 3 due to equal height 2 at i=3 blocking.",
+        "3": "L[5] should be 1 since 4 at i=1 blocks; index 4 (h=2) is too small."
+      },
+      "hint": "For each i, find nearest j<i with h[j] >= h[i].",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q21",
+      "phase": "Verifying the Solution",
+      "questionText": "Using the computed L and the sweep, what answer does the algorithm produce for the sample query [2,5]?",
+      "diagram": "Active at a=2: indices with L[i] < 2 → L[i] ∈ {0,1} and i≥2.\nFrom L: i=2(L=1),3(1),4(3),5(1) → active: 2,3,5.",
+      "options": [
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "At a=2, active in [2,5] are i=2,3,5 → 3.",
+      "wrongExplanations": {
+        "0": "You likely missed i=3 (h=2) being active with L=1.",
+        "3": "i=4 is not active since L[4]=3 (not <2)."
+      },
+      "hint": "Count i in [2,5] with L[i] < 2.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q22",
+      "phase": "Verifying the Solution",
+      "questionText": "Consider heights [3,3,3,3] and query [1,4]. What should the algorithm output?",
+      "diagram": "All equal heights.",
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Only index 1 is visible; all others have an equal-height blocker to their left.",
+      "wrongExplanations": {
+        "1": "Equal heights do not create new visible buildings beyond the first.",
+        "3": "You cannot see all when all heights are equal."
+      },
+      "hint": "Equal heights block visibility.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q23",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the overall time complexity of the approach (including building L, processing buckets, and answering q queries)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n + q)",
+          "isCode": false
+        },
+        {
+          "label": "O((n + q) log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n + q log q)",
+          "isCode": false
+        },
+        {
+          "label": "O(nq)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Building L is O(n); each activation/update and each query costs O(log n), so total O((n+q) log n).",
+      "wrongExplanations": {
+        "0": "We use logarithmic updates/queries, not pure linear time.",
+        "3": "We avoid per-query scanning."
+      },
+      "hint": "Activation and query operations are logarithmic.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the space complexity of the solution?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(1)",
+          "isCode": false
+        },
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n + q)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "We store h, L, buckets, the tree structure, queries_by_a, and ans: all together O(n + q).",
+      "wrongExplanations": {
+        "1": "Queries_by_a and ans depend on q as well.",
+        "4": "There is no extra log factor in space."
+      },
+      "hint": "Count arrays proportional to n and to q.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Analyzing Complexity",
+      "questionText": "Which edge case must be handled correctly when computing L so equal heights do not falsely appear visible?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Pop while h[top] <= h[i]",
+          "isCode": false
+        },
+        {
+          "label": "Pop while h[top] < h[i]",
+          "isCode": false
+        },
+        {
+          "label": "Pop while h[top] >= h[i]",
+          "isCode": false
+        },
+        {
+          "label": "Never pop equal heights and set L[i]=0",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Use '<' so equal heights remain as blockers (h[top] >= h[i]).",
+      "wrongExplanations": {
+        "0": "This removes equal heights; equal heights should block.",
+        "2": "Popping on '>=' removes blockers incorrectly."
+      },
+      "hint": "Equal heights to the left should block visibility.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\n\ndef main():\n    data = list(map(int, sys.stdin.buffer.read().split()))\n    it = iter(data)\n    n = next(it); q = next(it)\n    h = [0] + [next(it) for _ in range(n)]\n    queries_by_a = [[] for _ in range(n+2)]\n    ans = [0]*q",
+    "    for qi in range(q):\n        a = next(it); b = next(it)\n        queries_by_a[a].append((b, qi, a))",
+    "    L = [0]*(n+1)\n    stack = []\n    for i in range(1, n+1):\n        while stack and h[stack[-1]] < h[i]:\n            stack.pop()\n        L[i] = stack[-1] if stack else 0\n        stack.append(i)",
+    "    buckets = [[] for _ in range(n+2)]\n    for i in range(1, n+1):\n        buckets[L[i] + 1].append(i)",
+    "    size = n+2\n    bit = [0]*size\n    def update(i, delta):\n        while i < size:\n            bit[i] += delta\n            i += i & -i\n    def query(i):\n        s = 0\n        while i > 0:\n            s += bit[i]\n            i -= i & -i\n        return s",
+    "    for a in range(1, n+1):\n        for idx in buckets[a]:\n            update(idx, 1)\n        for b, qi, a0 in queries_by_a[a]:\n            ans[qi] = query(b) - query(a-1)",
+    "    out = '\\n'.join(str(x) for x in ans)\n    sys.stdout.write(out)\n\nif __name__ == \"__main__\":\n    main()"
+  ],
+  "reasoningChain": [
+    {
+      "question": "What exactly does it mean for a building to be visible within [a, b]?",
+      "insight": "Within [a, b], i is visible iff no j in [a, i-1] has height ≥ h[i]."
+    },
+    {
+      "question": "How can we characterize visibility using a precomputed array?",
+      "insight": "Let L[i] be the nearest j < i with h[j] ≥ h[i] (or 0). Then i is visible in [a,b] iff L[i] < a."
+    },
+    {
+      "question": "How do we reduce the query to a counting problem?",
+      "insight": "Answer for [a,b] is the count of indices i ∈ [a, b] with L[i] < a."
+    },
+    {
+      "question": "How can we process all queries efficiently?",
+      "insight": "Process queries grouped by a; maintain active indices where L[i] < current a, activated when a = L[i] + 1."
+    },
+    {
+      "question": "What operations are needed during the sweep?",
+      "insight": "We need to add 1 at index i when it becomes active and query the sum over [a, b] quickly."
+    },
+    {
+      "question": "How to compute L[i] efficiently for all i?",
+      "insight": "Use a single pass with a decreasing-by-height stack, popping while h[top] < h[i]."
+    },
+    {
+      "question": "What are the complexity characteristics?",
+      "insight": "Precompute L in O(n); perform O(n + q) updates/queries with O(log n) each → O((n+q) log n) time, O(n+q) space."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1444,
+    "output_tokens": 15105,
+    "input_cost": 0.001805,
+    "output_cost": 0.15105,
+    "total_cost": 0.152855
+  }
+}

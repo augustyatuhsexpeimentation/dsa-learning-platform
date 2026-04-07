@@ -1,0 +1,954 @@
+{
+  "id": "mountain-range-glide-longest-route",
+  "title": "Mountain Range",
+  "difficulty": "intermediate",
+  "tags": [
+    "dp"
+  ],
+  "estimatedMinutes": 60,
+  "language": "python",
+  "description": "You are given n mountains in a row, each with a specific height. You may start your hang gliding route from any mountain.\n\nYou can glide from mountain a to mountain b if both conditions hold:\n- height[a] > height[b]\n- all mountains strictly between a and b have height < height[a]\n\nWhat is the maximum number of mountains you can visit on your route?\n\nInput\n- First line: integer n\n- Second line: n integers h_1, h_2, ..., h_n\n\nOutput\n- A single integer: the maximum number of mountains you can visit.\n",
+  "examples": [
+    {
+      "input": "10\n20 15 17 35 25 40 12 19 13 12\n",
+      "output": "5",
+      "explanation": "One optimal route is 40 → 25 → 19 → 13 → 12 (indices 6 → 5 → 8 → 9 → 10 in 1-based). Each glide goes from a higher to a lower mountain, and all mountains between are lower than the starting mountain of that glide."
+    }
+  ],
+  "constraints": [
+    "1 ≤ n ≤ 2 ⋅ 10^5",
+    "1 ≤ h_i ≤ 10^9"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "Complete the glide rule: You can glide from mountain a to mountain b if height[a] > height[b] and all mountains between a and b ...?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "…are lower than mountain a.",
+          "isCode": false
+        },
+        {
+          "label": "…are lower than both mountain a and b.",
+          "isCode": false
+        },
+        {
+          "label": "…form a strictly decreasing sequence.",
+          "isCode": false
+        },
+        {
+          "label": "…are lower than every mountain in the array.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The path is blocked if any intermediate height is ≥ height[a]. Only the start height matters for the in-between check. The destination must also be lower than a.",
+      "wrongExplanations": {
+        "1": "Requiring all between to be lower than both a and b is stricter than needed; only lower than a is required.",
+        "2": "The sequence between a and b need not be decreasing; they just must be all < height[a]."
+      },
+      "hint": "Think about what would block the glide from a: an intermediate mountain not lower than a.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "For heights [7, 3, 5], what is the maximum number of mountains you can visit on a route?",
+      "diagram": "Indices: 1  2  3\nHeights: 7  3  5",
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Start at 7 → 5 (3 between is <7), then 5 → 3. Heights strictly decrease and in-between checks pass. So 3 mountains.",
+      "wrongExplanations": {
+        "1": "You can do at least 7→5; stopping at one is not optimal.",
+        "0": "Routes longer than 3 aren't possible here; there are only 3 mountains."
+      },
+      "hint": "Try 7→5 and then 5→3. Check the in-between condition for each glide.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "Along any valid route, how do the heights change?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Strictly decreasing",
+          "isCode": false
+        },
+        {
+          "label": "Non-increasing (equal allowed)",
+          "isCode": false
+        },
+        {
+          "label": "Arbitrary (can increase or decrease)",
+          "isCode": false
+        },
+        {
+          "label": "Strictly increasing",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each glide must go from a taller to a shorter mountain (height[a] > height[b]). Hence strictly decreasing.",
+      "wrongExplanations": {
+        "1": "Equal heights are not allowed in a glide; must be strictly lower.",
+        "2": "Increases are never allowed by the rule."
+      },
+      "hint": "The rule requires height[a] > height[b] for each glide.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "Consider heights [5, 5, 1]. Can you glide directly from the first 5 (index 1) to 1 (index 3)?",
+      "diagram": "1:5  2:5  3:1",
+      "options": [
+        {
+          "label": "Yes, because 5 > 1 and 5 in the middle is not higher than 5.",
+          "isCode": false
+        },
+        {
+          "label": "No, because the middle 5 is not lower than the starting 5.",
+          "isCode": false
+        },
+        {
+          "label": "Yes, if you skip index 2 when checking.",
+          "isCode": false
+        },
+        {
+          "label": "No, because 1 is too far.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "The middle 5 is equal to the start height, so it violates the requirement that all in-between heights must be < start height.",
+      "wrongExplanations": {
+        "0": "Equal is not lower; it blocks the glide.",
+        "2": "You cannot skip intermediate mountains when checking the condition."
+      },
+      "hint": "Between a and b, all heights must be strictly less than height[a].",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Understanding the Problem",
+      "questionText": "Why is a brute force enumeration of all possible routes infeasible for n up to 2⋅10^5?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "It takes about O(n^2) time.",
+          "isCode": false
+        },
+        {
+          "label": "It can take exponential time in n.",
+          "isCode": false
+        },
+        {
+          "label": "It needs O(n log n) time.",
+          "isCode": false
+        },
+        {
+          "label": "It needs only O(n) time but lots of memory.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Routes correspond to many subsequences; trying all valid ones is exponential in the worst case.",
+      "wrongExplanations": {
+        "0": "Even checking all pairs is insufficient; enumerating routes is far more than n^2.",
+        "2": "n log n suggests an efficient method, not brute force."
+      },
+      "hint": "How many decreasing subsequences could there be in worst case?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "Fix a mountain i. To the right, how far can you glide before being blocked by taller or equal heights?",
+      "diagram": "… i … → → → …\nBlock occurs when you first meet height ≥ height[i].",
+      "options": [
+        {
+          "label": "Until the first mountain with height > height[i].",
+          "isCode": false
+        },
+        {
+          "label": "Until the first mountain with height ≥ height[i].",
+          "isCode": false
+        },
+        {
+          "label": "Until the first mountain with height ≥ height[i+1].",
+          "isCode": false
+        },
+        {
+          "label": "No blocking to the right; you can go to any lower mountain.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Any intermediate height ≥ height[i] blocks gliding past it. Strictly higher is not enough; equality also blocks.",
+      "wrongExplanations": {
+        "0": "Equality also blocks, not only strictly higher.",
+        "3": "A taller or equal mountain in between blocks; you cannot go arbitrarily far."
+      },
+      "hint": "Remember the in-between requirement is strict: all must be < height[i].",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "Similarly on the left of i, which mountain blocks further gliding?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "The nearest to the left with height ≥ height[i].",
+          "isCode": false
+        },
+        {
+          "label": "The nearest to the left with height > height[i].",
+          "isCode": false
+        },
+        {
+          "label": "The nearest to the left with height ≥ height[i−1].",
+          "isCode": false
+        },
+        {
+          "label": "None; only the right side matters.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Symmetric to the right: the first left mountain with height ≥ height[i] blocks.",
+      "wrongExplanations": {
+        "1": "Equal heights also block, not only strictly higher.",
+        "3": "Both sides can be blocked."
+      },
+      "hint": "Mirror the right-side reasoning for the left side.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Exploring Approaches",
+      "questionText": "Given the left/right blocking positions for i, which mountains are reachable from i in one glide?",
+      "diagram": "… L | [ i … … ] | R …  where L and R are blockers (≥ height[i])",
+      "options": [
+        {
+          "label": "Any j strictly between L and R with height[j] < height[i].",
+          "isCode": false
+        },
+        {
+          "label": "Any j with height[j] < height[i] anywhere in the array.",
+          "isCode": false
+        },
+        {
+          "label": "Only immediate neighbors lower than i.",
+          "isCode": false
+        },
+        {
+          "label": "Any j between L and R, regardless of height.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Within (L,R), all in-between are < height[i], so any lower destination j inside is valid.",
+      "wrongExplanations": {
+        "1": "Being outside (L,R) introduces a blocking height ≥ height[i].",
+        "2": "You are not limited to immediate neighbors."
+      },
+      "hint": "Combine the block boundaries with the strict height decrease requirement.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Exploring Approaches",
+      "questionText": "If each mountain (except the tallest in a region) attaches to a nearby taller blocker so that the entire order is preserved, what is true about the set of indices under any mountain in this hierarchy?",
+      "diagram": "A mountain’s \"region\" is a contiguous block of indices where all heights are lower than it.",
+      "options": [
+        {
+          "label": "It forms a contiguous segment of indices with all heights strictly less than the mountain.",
+          "isCode": false
+        },
+        {
+          "label": "It is scattered across the array but all lower than the mountain.",
+          "isCode": false
+        },
+        {
+          "label": "It includes some higher heights as long as they are close.",
+          "isCode": false
+        },
+        {
+          "label": "It is always just one side (left only).",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The blocker boundaries define a contiguous region where all heights are < the mountain’s height.",
+      "wrongExplanations": {
+        "1": "Blocker boundaries make the region contiguous, not scattered.",
+        "2": "By definition, all inside must be strictly lower."
+      },
+      "hint": "Think of the first ≥ blockers on both sides defining a continuous interval.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "Consider heights [20, 15, 17, 35, 25]. For index 3 (1-based, height 17), which index to the right first blocks gliding past it?",
+      "diagram": "1:20  2:15  3:17  4:35  5:25",
+      "options": [
+        {
+          "label": "Index 4 (35)",
+          "isCode": false
+        },
+        {
+          "label": "Index 5 (25)",
+          "isCode": false
+        },
+        {
+          "label": "None, 17 is small",
+          "isCode": false
+        },
+        {
+          "label": "Index 3 itself",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The first ≥17 to the right is 35 at index 4; it blocks gliding beyond.",
+      "wrongExplanations": {
+        "1": "25 is ≥17 but it's not the first; 35 at 4 appears earlier.",
+        "2": "There is a blocker at index 4."
+      },
+      "hint": "Scan rightward until you meet the first height ≥ 17.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "With the same array, can you glide from index 3 (17) to index 5 (25)?",
+      "diagram": "1:20  2:15  3:17  4:35  5:25",
+      "options": [
+        {
+          "label": "Yes, because 25 is within the region",
+          "isCode": false
+        },
+        {
+          "label": "No, because 17 is not taller than 25",
+          "isCode": false
+        },
+        {
+          "label": "Yes, because 35 blocks only beyond index 4",
+          "isCode": false
+        },
+        {
+          "label": "No, because 35 is between them",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Even if the in-between were fine, height[3]=17 is not > 25. The glide must strictly decrease.",
+      "wrongExplanations": {
+        "0": "Being inside the region is not enough; destination must be lower.",
+        "3": "35 is between 3 and 5, but the stricter failure is 17<25."
+      },
+      "hint": "Both conditions must hold: in-between check and strict decrease.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "From a mountain i, to maximize total visited mountains, is it enough to move first into the side (left or right) whose best chain is longer among its immediate children?",
+      "diagram": "i\n├─ left child subtree\n└─ right child subtree",
+      "options": [
+        {
+          "label": "Yes, because any longer chain to a deeper node starts with one of the children anyway.",
+          "isCode": false
+        },
+        {
+          "label": "No, you must always jump as far as possible.",
+          "isCode": false
+        },
+        {
+          "label": "No, you must alternate sides.",
+          "isCode": false
+        },
+        {
+          "label": "Yes, but only if both children are smaller than i.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Any descent path begins via a child. Stopping at the child cannot reduce the length versus skipping it.",
+      "wrongExplanations": {
+        "1": "Skipping intermediate lower nodes only reduces opportunities; it doesn’t help.",
+        "3": "If a child is not lower, that side is blocked entirely anyway."
+      },
+      "hint": "You can always choose to stop at an intermediate lower node without blocking future moves.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "If a child has the same height as its parent, can the parent glide into that child's side?",
+      "diagram": "parent (h)\n└─ child (h)",
+      "options": [
+        {
+          "label": "No, equal height blocks both landing on the child and gliding past it from the parent.",
+          "isCode": false
+        },
+        {
+          "label": "Yes, but only by skipping the child.",
+          "isCode": false
+        },
+        {
+          "label": "Yes, equal heights are allowed.",
+          "isCode": false
+        },
+        {
+          "label": "No, because the child is higher.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Equal height in between is not lower than the start, so it blocks passing, and landing on equal is forbidden.",
+      "wrongExplanations": {
+        "1": "You cannot skip a blocking equal height in-between.",
+        "2": "Glides require strict decrease."
+      },
+      "hint": "Revisit the equal-height blocking example [5,5,1].",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Building the Idea",
+      "questionText": "Which statement gives the overall answer?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "The maximum, over all starting mountains, of the best chain length reachable by descending to lower heights.",
+          "isCode": false
+        },
+        {
+          "label": "The best chain starting at the tallest mountain only.",
+          "isCode": false
+        },
+        {
+          "label": "The sum of best chains from left and right of the tallest.",
+          "isCode": false
+        },
+        {
+          "label": "The number of distinct heights.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "You can start anywhere; take the maximum chain length among all starting points.",
+      "wrongExplanations": {
+        "1": "Equal-height blocks may make a non-tallest start optimal.",
+        "2": "You cannot combine left and right in one route arbitrarily."
+      },
+      "hint": "You may start at any index; take the max over all.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Read input robustly and prepare heights into a list h (length n). Choose the correct code.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\nsys.setrecursionlimit(1_000_000)\ndata = list(map(int, sys.stdin.read().split()))\nif not data:\n    print(0)\n    raise SystemExit()\nn = data[0]\nh = data[1:1+n]",
+          "isCode": true
+        },
+        {
+          "label": "import sys\nsys.setrecursionlimit(1_000)\nparts = sys.stdin.readline().split()\nn = int(parts[0])\nh = list(map(int, sys.stdin.readline().split()))",
+          "isCode": true
+        },
+        {
+          "label": "import sys\nn = int(sys.stdin.read())\nh = list(map(int, sys.stdin.read().split()))",
+          "isCode": true
+        },
+        {
+          "label": "import sys\ndata = sys.stdin.read().split()\nh = list(map(int, data))\nn = len(h)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Reading all ints then slicing ensures exactly n heights are used and works for one/two-line inputs. Also sets recursion limit safely.",
+      "wrongExplanations": {
+        "1": "Recursion limit may be too low; also fails if heights wrap to multiple lines or extra spaces.",
+        "3": "This assumes all tokens are heights and sets n incorrectly."
+      },
+      "hint": "Prefer reading all integers and slicing based on the first value n.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\nsys.setrecursionlimit(1_000_000)\ndata = list(map(int, sys.stdin.read().split()))\nif not data:\n    print(0)\n    raise SystemExit()\nn = data[0]\nh = data[1:1+n]",
+      "codeLabel": "Read input"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Initialize helper arrays for building the hierarchy.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "left = [-1] * n\nright = [-1] * n\nparent = [-1] * n\nstack = []",
+          "isCode": true
+        },
+        {
+          "label": "left = [0] * n\nright = [0] * n\nparent = [0] * n\nstack = []",
+          "isCode": true
+        },
+        {
+          "label": "left = [None] * n\nright = [None] * n\nparent = [None] * n\nstack = set()",
+          "isCode": true
+        },
+        {
+          "label": "left = []\nright = []\nparent = []\nstack = []",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "-1 marks \"no link\" for indices. We'll use a list as a stack for indices.",
+      "wrongExplanations": {
+        "1": "0 is a valid index; would confuse with first element.",
+        "3": "These arrays need fixed size n for index access."
+      },
+      "hint": "Use -1 as a sentinel for missing links.",
+      "isCodeBuilding": true,
+      "codeSnippet": "left = [-1] * n\nright = [-1] * n\nparent = [-1] * n\nstack = []",
+      "codeLabel": "Init arrays"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Build the hierarchy by scanning left-to-right, maintaining a non-increasing stack of indices. Choose the correct loop.",
+      "diagram": "While current height is greater than the stack's top height, pop and attach as left child of current. If stack not empty, current becomes right child of stack top.",
+      "options": [
+        {
+          "label": "for i in range(n):\n    last = -1\n    while stack and h[stack[-1]] < h[i]:\n        last = stack.pop()\n    if stack:\n        right[stack[-1]] = i\n        parent[i] = stack[-1]\n    if last != -1:\n        left[i] = last\n        parent[last] = i\n    stack.append(i)",
+          "isCode": true
+        },
+        {
+          "label": "for i in range(n):\n    last = -1\n    while stack and h[stack[-1]] <= h[i]:\n        last = stack.pop()\n    if stack:\n        left[stack[-1]] = i\n        parent[i] = stack[-1]\n    if last != -1:\n        right[i] = last\n        parent[last] = i\n    stack.append(i)",
+          "isCode": true
+        },
+        {
+          "label": "for i in range(n):\n    last = -1\n    while stack and h[stack[-1]] < h[i]:\n        last = stack.pop()\n    if last != -1:\n        right[last] = i\n        parent[i] = last\n    if stack:\n        left[i] = stack[-1]\n        parent[stack[-1]] = i\n    stack.append(i)",
+          "isCode": true
+        },
+        {
+          "label": "for i in range(n):\n    while stack and h[stack[-1]] > h[i]:\n        stack.pop()\n    if stack:\n        right[stack[-1]] = i\n        parent[i] = stack[-1]\n    stack.append(i)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We pop strictly smaller heights (keep equals to block). Popped chain becomes left child of current. If a taller/equal remains, current is its right child.",
+      "wrongExplanations": {
+        "1": "Popping on <= breaks equal-height blocking. Left/right assignments are also swapped.",
+        "3": "This ignores linking the popped node as a left child and loses structure."
+      },
+      "hint": "Equal heights must remain on stack to act as blockers; popped node attaches as left child of current.",
+      "isCodeBuilding": true,
+      "codeSnippet": "for i in range(n):\n    last = -1\n    while stack and h[stack[-1]] < h[i]:\n        last = stack.pop()\n    if stack:\n        right[stack[-1]] = i\n        parent[i] = stack[-1]\n    if last != -1:\n        left[i] = last\n        parent[last] = i\n    stack.append(i)",
+      "codeLabel": "Build hierarchy"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Find the root index of the hierarchy.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "root = -1\nfor i in range(n):\n    if parent[i] == -1:\n        root = i\n        break",
+          "isCode": true
+        },
+        {
+          "label": "root = stack[0]",
+          "isCode": true
+        },
+        {
+          "label": "root = right.index(-1)",
+          "isCode": true
+        },
+        {
+          "label": "root = n - 1",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The root is the unique node with no parent (parent == -1).",
+      "wrongExplanations": {
+        "1": "While often true, relying on stack state can be fragile across implementations.",
+        "2": "right == -1 indicates no right child, not the root."
+      },
+      "hint": "Which node never gets assigned a parent?",
+      "isCodeBuilding": true,
+      "codeSnippet": "root = -1\nfor i in range(n):\n    if parent[i] == -1:\n        root = i\n        break",
+      "codeLabel": "Find root"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Build adjacency lists of children for each node.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "children = [[] for _ in range(n)]\nfor i in range(n):\n    if left[i] != -1:\n        children[i].append(left[i])\n    if right[i] != -1:\n        children[i].append(right[i])",
+          "isCode": true
+        },
+        {
+          "label": "children = [[]] * n\nfor i in range(n):\n    if left[i] != -1:\n        children[left[i]].append(i)\n    if right[i] != -1:\n        children[right[i]].append(i)",
+          "isCode": true
+        },
+        {
+          "label": "children = [[] for _ in range(n)]\nfor i in range(n):\n    if parent[i] != -1:\n        children[parent[i]].append(i)",
+          "isCode": true
+        },
+        {
+          "label": "children = [set() for _ in range(n)]\nfor i in range(n):\n    if left[i] != -1:\n        children[left[i]].add(i)\n    if right[i] != -1:\n        children[right[i]].add(i)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each node i has up to two children: left[i] and right[i]. Use independent lists to avoid aliasing.",
+      "wrongExplanations": {
+        "1": "Using [[]] * n aliases lists; also reverses parent-child direction.",
+        "2": "This also works, but duplicates the child discovery; we already have left/right for each parent."
+      },
+      "hint": "Attach left[i] and right[i] as children of i if they exist.",
+      "isCodeBuilding": true,
+      "codeSnippet": "children = [[] for _ in range(n)]\nfor i in range(n):\n    if left[i] != -1:\n        children[i].append(left[i])\n    if right[i] != -1:\n        children[i].append(right[i])",
+      "codeLabel": "Children adjacency"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Write a DFS that returns the best chain starting at u by only descending to strictly lower children, and also updates a global maximum.",
+      "diagram": "best(u) = 1 + max(best(v) for children v with h[v] < h[u])",
+      "options": [
+        {
+          "label": "ans = 0\ndef dfs(u):\n    global ans\n    best = 1\n    for v in children[u]:\n        t = dfs(v)\n        if h[v] < h[u]:\n            if 1 + t > best:\n                best = 1 + t\n    if best > ans:\n        ans = best\n    return best",
+          "isCode": true
+        },
+        {
+          "label": "ans = 0\ndef dfs(u):\n    global ans\n    best = 0\n    for v in children[u]:\n        t = dfs(v)\n        if h[v] <= h[u]:\n            best = max(best, t)\n    ans = max(ans, best)\n    return best",
+          "isCode": true
+        },
+        {
+          "label": "ans = 0\ndef dfs(u):\n    global ans\n    best = 1\n    for v in children[u]:\n        if h[v] < h[u]:\n            best = max(best, 1 + dfs(v))\n    return best",
+          "isCode": true
+        },
+        {
+          "label": "ans = 0\ndef dfs(u):\n    best = 1\n    for v in children[u]:\n        t = dfs(v)\n        best = max(best, 1 + t)\n    ans = max(ans, best)\n    return best",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Initialize best=1 (count u), only extend through children with h[v]<h[u], and update a global ans to cover all starting points.",
+      "wrongExplanations": {
+        "1": "Allows equal heights and loses the +1 for counting u.",
+        "3": "Extends through all children even when not strictly lower; violates the rule."
+      },
+      "hint": "Include u itself, only extend to strictly lower children, and update a global maximum.",
+      "isCodeBuilding": true,
+      "codeSnippet": "ans = 0\ndef dfs(u):\n    global ans\n    best = 1\n    for v in children[u]:\n        t = dfs(v)\n        if h[v] < h[u]:\n            if 1 + t > best:\n                best = 1 + t\n    if best > ans:\n        ans = best\n    return best",
+      "codeLabel": "DFS and best chain"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "Finish by invoking the DFS from the root and printing the answer.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "dfs(root)\nprint(ans)",
+          "isCode": true
+        },
+        {
+          "label": "print(dfs(root))",
+          "isCode": true
+        },
+        {
+          "label": "for i in range(n):\n    ans = max(ans, dfs(i))\nprint(root)",
+          "isCode": true
+        },
+        {
+          "label": "dfs(0)\nprint(ans)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "DFS from root visits all nodes (updating ans for every subtree), then print the global maximum.",
+      "wrongExplanations": {
+        "1": "dfs(root) returns best starting at root only; we need the global maximum across all starts.",
+        "3": "Index 0 may not be the root and may miss parts of the structure."
+      },
+      "hint": "Your DFS updates a global maximum while visiting all nodes from the root.",
+      "isCodeBuilding": true,
+      "codeSnippet": "dfs(root)\nprint(ans)",
+      "codeLabel": "Run and output"
+    },
+    {
+      "id": "q22",
+      "phase": "Verifying the Solution",
+      "questionText": "On the sample input:\n10\n20 15 17 35 25 40 12 19 13 12\nwhat does the program print?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        },
+        {
+          "label": "6",
+          "isCode": false
+        },
+        {
+          "label": "7",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "An optimal route is 40 → 25 → 19 → 13 → 12, so 5 mountains.",
+      "wrongExplanations": {
+        "0": "You can include more than 4 by stepping through intermediate allowed mountains.",
+        "2": "You cannot get 6 because heights must strictly decrease and blockers exist."
+      },
+      "hint": "Try starting from the tallest (40) and descend through allowed lower mountains.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q23",
+      "phase": "Verifying the Solution",
+      "questionText": "Test a case with duplicates: n=5, h=[5,5,4,4,3]. What is the maximum number of mountains you can visit?",
+      "diagram": "1:5  2:5  3:4  4:4  5:3",
+      "options": [
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Start at index 2 (5) → index 4 (4) → index 5 (3): 3 mountains. Equal heights block passing when necessary.",
+      "wrongExplanations": {
+        "0": "You can do 5→4→3 by choosing indices that avoid equal-height blockers.",
+        "2": "Four is impossible due to equal-height blockers."
+      },
+      "hint": "Equal-height mountains block passing; choose a start that lets you reach 4 and then 3.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the time complexity of this solution?",
+      "diagram": "One pass to build structure + one pass DFS over n nodes",
+      "options": [
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(2^n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each index is pushed/popped at most once in building, and DFS visits each node once.",
+      "wrongExplanations": {
+        "1": "There is no sorting or balanced tree; operations are linear.",
+        "2": "We never consider all pairs; nested loops are avoided."
+      },
+      "hint": "Stack-based building and DFS both visit each element a constant number of times.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the space complexity (excluding input storage)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(1)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We store several arrays of length n and adjacency lists with O(n) total size.",
+      "wrongExplanations": {
+        "2": "We allocate arrays and a recursion stack; not constant.",
+        "3": "No quadratic storage is used."
+      },
+      "hint": "Count arrays: left, right, parent, children adjacency.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Analyzing Complexity",
+      "questionText": "Edge cases: What is the answer when all heights are equal, and when heights are strictly monotonic (increasing or decreasing)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "All equal → 1; strictly monotonic → n",
+          "isCode": false
+        },
+        {
+          "label": "All equal → n; strictly monotonic → 1",
+          "isCode": false
+        },
+        {
+          "label": "All equal → 2; strictly monotonic → n/2",
+          "isCode": false
+        },
+        {
+          "label": "All equal → 1; strictly monotonic → floor(n/2)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Equal heights block any move, so 1. In strictly monotonic arrays, you can step down one by one to include all n.",
+      "wrongExplanations": {
+        "1": "Equal heights forbid any glide; you cannot visit more than one.",
+        "3": "You can always chain all in monotonic cases."
+      },
+      "hint": "Try tiny examples like [5,5,5] and [1,2,3,4].",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\nsys.setrecursionlimit(1_000_000)\ndata = list(map(int, sys.stdin.read().split()))\nif not data:\n    print(0)\n    raise SystemExit()\nn = data[0]\nh = data[1:1+n]",
+    "left = [-1] * n\nright = [-1] * n\nparent = [-1] * n\nstack = []",
+    "for i in range(n):\n    last = -1\n    while stack and h[stack[-1]] < h[i]:\n        last = stack.pop()\n    if stack:\n        right[stack[-1]] = i\n        parent[i] = stack[-1]\n    if last != -1:\n        left[i] = last\n        parent[last] = i\n    stack.append(i)",
+    "root = -1\nfor i in range(n):\n    if parent[i] == -1:\n        root = i\n        break",
+    "children = [[] for _ in range(n)]\nfor i in range(n):\n    if left[i] != -1:\n        children[i].append(left[i])\n    if right[i] != -1:\n        children[i].append(right[i])",
+    "ans = 0\ndef dfs(u):\n    global ans\n    best = 1\n    for v in children[u]:\n        t = dfs(v)\n        if h[v] < h[u]:\n            if 1 + t > best:\n                best = 1 + t\n    if best > ans:\n        ans = best\n    return best",
+    "dfs(root)\nprint(ans)"
+  ],
+  "reasoningChain": [
+    {
+      "question": "What exactly blocks a glide between two mountains?",
+      "insight": "A glide from a to b is blocked if any intermediate mountain has height ≥ height[a]. Equality blocks."
+    },
+    {
+      "question": "How far can a mountain \"see\" on either side?",
+      "insight": "Visibility extends until the first mountain on that side with height ≥ current height; within those bounds, any lower destination is reachable."
+    },
+    {
+      "question": "How to model all possible glides compactly?",
+      "insight": "The nearest taller-or-equal blockers on both sides induce a rooted hierarchy where each node’s region is a contiguous index segment of strictly lower heights."
+    },
+    {
+      "question": "What is the optimal next move from a mountain?",
+      "insight": "Any longer route going deeper starts via one of its two children; stopping at a lower child never reduces the route length."
+    },
+    {
+      "question": "How to handle equal heights in the hierarchy?",
+      "insight": "Equal-height links exist but cannot be traversed by a glide; they block passing and cannot be part of a strictly decreasing route."
+    },
+    {
+      "question": "How to compute the maximum route length efficiently?",
+      "insight": "Compute, for each node, 1 + max over strictly lower children’s best values; the answer is the maximum over all nodes, obtained during a single DFS."
+    },
+    {
+      "question": "Can this be done in linear time and space?",
+      "insight": "Yes: build the hierarchy in O(n) with a single pass using a stack, then a single DFS in O(n), using O(n) space overall."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1360,
+    "output_tokens": 20910,
+    "input_cost": 0.0017,
+    "output_cost": 0.2091,
+    "total_cost": 0.2108
+  }
+}

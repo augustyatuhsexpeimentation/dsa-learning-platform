@@ -1,0 +1,979 @@
+{
+  "id": "download-speed-max-flow",
+  "title": "Download Speed",
+  "difficulty": "intermediate",
+  "tags": [
+    "graph"
+  ],
+  "estimatedMinutes": 60,
+  "language": "python",
+  "description": "Time limit: 1.00 s  Memory limit: 512 MB\n\nConsider a network consisting of n computers and m connections. Each connection specifies how fast a computer can send data to another computer.\n\nKotivalo wants to download some data from a server. What is the maximum speed he can do this, using the connections in the network?\n\nInput:\n- The first input line has two integers n and m: the number of computers and connections. The computers are numbered 1,2,\\dots,n. Computer 1 is the server and computer n is Kotivalo's computer.\n- After this, there are m lines describing the connections. Each line has three integers a, b and c: computer a can send data to computer b at speed c.\n\nOutput:\nPrint one integer: the maximum speed Kotivalo can download data.",
+  "examples": [
+    {
+      "input": "4 5\n1 2 3\n2 4 2\n1 3 4\n3 4 5\n4 1 3\n",
+      "output": "6\n",
+      "explanation": "Two disjoint routes from 1 to 4 exist: 1->2->4 with capacity min(3,2)=2 and 1->3->4 with min(4,5)=4, totaling 6."
+    }
+  ],
+  "constraints": [
+    "1 ≤ n ≤ 500",
+    "1 ≤ m ≤ 1000",
+    "1 ≤ a,b ≤ n",
+    "1 ≤ c ≤ 10^9",
+    "Directed connections"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "Given a single path 1 → 2 → 3 with speeds c(1,2)=5 and c(2,3)=7, what is the maximum download speed from 1 to 3?",
+      "diagram": "1 --5--> 2 --7--> 3",
+      "options": [
+        {
+          "label": "5",
+          "isCode": false
+        },
+        {
+          "label": "7",
+          "isCode": false
+        },
+        {
+          "label": "12",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The speed along a path is limited by its smallest edge: min(5,7)=5. You cannot exceed the bottleneck.",
+      "wrongExplanations": {
+        "1": "7 ignores the smaller upstream edge which limits the throughput.",
+        "2": "You cannot add capacities along a single path; the smallest edge limits the flow."
+      },
+      "hint": "Think about the slowest connection on the path.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "Now there are two disjoint paths from 1 to 3:\n- 1 → 2 → 3 with c(1,2)=3, c(2,3)=3\n- 1 → 4 → 3 with c(1,4)=4, c(4,3)=4\nWhat is the maximum download speed from 1 to 3?",
+      "diagram": "1 --3--> 2 --3--> 3\n1 --4--> 4 --4--> 3",
+      "options": [
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "7",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Disjoint paths can be used simultaneously: 3 via (1,2,3) and 4 via (1,4,3), totaling 7.",
+      "wrongExplanations": {
+        "0": "3 accounts for only one path; both can be used in parallel.",
+        "1": "4 accounts for only one path; there are two disjoint paths."
+      },
+      "hint": "Can you sum the path bottlenecks if paths are edge-disjoint?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "Edges are directed. If the network has only an edge 2 → 1 with speed 5 and you want to download from 1 to 2, what is the maximum speed?",
+      "diagram": "2 --5--> 1",
+      "options": [
+        {
+          "label": "5",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "Depends on another path",
+          "isCode": false
+        },
+        {
+          "label": "Infinite due to cycle",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Direction matters; there’s no path from 1 to 2 using 2→1. So the speed is 0.",
+      "wrongExplanations": {
+        "0": "The given edge goes the wrong way for downloading from 1 to 2.",
+        "3": "There is no cycle enabling unlimited flow here."
+      },
+      "hint": "Can you traverse from 1 to 2 following arrow directions?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "Consider a cycle: 1 → 2 (5), 2 → 1 (5), and a path 2 → 3 (1). From 1 to 3, what is the maximum speed?",
+      "diagram": "1 --5--> 2 --1--> 3\n^         |\n|---------| (2->1 is 5)",
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        },
+        {
+          "label": "6",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Only path 1→2→3 is usable; bottleneck is min(5,1)=1. The back edge 2→1 doesn’t increase capacity to 3.",
+      "wrongExplanations": {
+        "1": "5 ignores the edge 2→3 which limits throughput to 1."
+      },
+      "hint": "Cycles don’t create new capacity to the destination unless they enable rerouting.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Understanding the Problem",
+      "questionText": "A single path 1 → 2 → 4 has c(1,2)=100 and c(2,4)=2. What is the speed from 1 to 4 along this path?",
+      "diagram": "1 --100--> 2 --2--> 4",
+      "options": [
+        {
+          "label": "100",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "102",
+          "isCode": false
+        },
+        {
+          "label": "Depends on other edges",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "On a single path, the smallest edge is the limit: min(100,2)=2.",
+      "wrongExplanations": {
+        "0": "The downstream edge 2→4 only allows 2 units."
+      },
+      "hint": "Bottleneck decides the path's throughput.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "Is choosing just one path from 1 to n with the largest bottleneck always optimal for maximum download speed?",
+      "diagram": "Example: 1→2→n (5,5) and 1→3→n (4,4): one path gives 5, but both give 9.",
+      "options": [
+        {
+          "label": "Yes, because only the best path matters",
+          "isCode": false
+        },
+        {
+          "label": "No, because multiple paths can send data simultaneously",
+          "isCode": false
+        },
+        {
+          "label": "Yes, if all edges are disjoint",
+          "isCode": false
+        },
+        {
+          "label": "It depends on edge directions only",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Multiple paths can be used in parallel; the best single path may not maximize total throughput.",
+      "wrongExplanations": {
+        "0": "Ignoring other paths underestimates capacity.",
+        "2": "Even with disjoint edges, picking only one path is suboptimal."
+      },
+      "hint": "Can you use two disjoint paths at once?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "Consider the network:\n- 1→2(3), 1→3(3), 2→3(3), 2→4(2), 3→4(2)\nIf you first send 2 units along 1→2→3→4, can you improve total throughput by rerouting later?",
+      "diagram": "1 --3--> 2 --3--> 3 --2--> 4\n \\--3--> 3      2 --2--> 4",
+      "options": [
+        {
+          "label": "No, the first choice locks the capacity permanently",
+          "isCode": false
+        },
+        {
+          "label": "Yes, by reducing flow on 2→3 and using 1→2→4 and 1→3→4 instead",
+          "isCode": false
+        },
+        {
+          "label": "No, because 3→4 is the only bottleneck",
+          "isCode": false
+        },
+        {
+          "label": "Yes, if we add new edges",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Rerouting frees 3→4 for 1→3→4 and uses 1→2→4: total 4. Allowing ‘send back’ along used edges enables this.",
+      "wrongExplanations": {
+        "0": "We can conceptually reduce previously used segments via opposite-direction allowances.",
+        "2": "Bottlenecks can change after rerouting earlier choices."
+      },
+      "hint": "Think about being able to cancel part of a previous choice along an edge.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Exploring Approaches",
+      "questionText": "A practical strategy is to repeatedly find any path from 1 to n with positive remaining capacity, push as much as allowed (the path’s bottleneck), and update the remaining capacities (including opposite-direction allowances on used edges). When should this process stop?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "When all original edges are fully used",
+          "isCode": false
+        },
+        {
+          "label": "When there is no path with positive remaining capacity from 1 to n",
+          "isCode": false
+        },
+        {
+          "label": "After sending along each edge once",
+          "isCode": false
+        },
+        {
+          "label": "When the total sent equals sum of outgoing capacities of node 1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Stop when no path with positive remaining capacity exists. Then no further improvement is possible.",
+      "wrongExplanations": {
+        "0": "Some edges may be unused yet still no path exists.",
+        "3": "Outgoing sum may be larger than what reaches n due to downstream limits."
+      },
+      "hint": "What condition tells you that nothing more can reach n?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "When we track remaining capacities, what edges should we include when searching the next path?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Only edges with remaining capacity > 0 in their original direction",
+          "isCode": false
+        },
+        {
+          "label": "Only edges with remaining capacity > 0 plus all original edges regardless of remaining",
+          "isCode": false
+        },
+        {
+          "label": "Edges with remaining capacity > 0 and opposite-direction edges where we have already sent some amount (allowing cancellation)",
+          "isCode": false
+        },
+        {
+          "label": "All edges in both directions regardless of remaining",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Include usable edges (remaining>0) and opposite-direction allowances equal to used amounts to enable rerouting.",
+      "wrongExplanations": {
+        "0": "This forbids rerouting along used edges, which may block improvements.",
+        "3": "Edges with zero remaining do not help and mislead searches."
+      },
+      "hint": "Think about how to ‘send back’ along previously used edges.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "Suppose path 1→2→4 is used to send 2 units where c(1,2)=3 and c(2,4)=2. After this, what are the remaining capacities on (1,2) and (2,4), and what opposite-direction allowances appear?",
+      "diagram": "1 --3--> 2 --2--> 4, sent 2 along the path",
+      "options": [
+        {
+          "label": "(1,2): 1 remaining; (2,4): 0 remaining; new (2,1):2 and (4,2):2 allowances",
+          "isCode": false
+        },
+        {
+          "label": "(1,2): 3; (2,4): 2; no opposite-direction allowances",
+          "isCode": false
+        },
+        {
+          "label": "(1,2): 1; (2,4): 0; only (2,1):1 allowance",
+          "isCode": false
+        },
+        {
+          "label": "(1,2): 0; (2,4): 0; new (4,2):2 only",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Subtract sent amount; remaining (1,2)=1, (2,4)=0. Add equal allowances back on both edges for possible cancellation.",
+      "wrongExplanations": {
+        "1": "Remaining capacities must decrease by the sent amount.",
+        "2": "Opposite-direction allowance equals the sent amount on each used edge."
+      },
+      "hint": "Remaining = original − sent; back-allowance = sent.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "How do you determine how much to send along a found path with positive remaining capacities?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Send the maximum remaining capacity among edges on the path",
+          "isCode": false
+        },
+        {
+          "label": "Send the minimum remaining capacity among edges on the path",
+          "isCode": false
+        },
+        {
+          "label": "Send the average remaining capacity over the path",
+          "isCode": false
+        },
+        {
+          "label": "Send 1 unit repeatedly until blocked",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "The path is limited by the smallest remaining capacity along it; send exactly that amount.",
+      "wrongExplanations": {
+        "0": "The largest edge doesn’t bypass the smallest one.",
+        "3": "Inefficient and can be too slow; the bottleneck determines the maximal single push."
+      },
+      "hint": "Which edge constrains the path most?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "When should the iterative sending process terminate to guarantee maximality?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "When no path with positive remaining capacity from 1 to n exists",
+          "isCode": false
+        },
+        {
+          "label": "After k iterations for some fixed k",
+          "isCode": false
+        },
+        {
+          "label": "When all nodes have been visited once",
+          "isCode": false
+        },
+        {
+          "label": "When capacities on edges out of node 1 are zero",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "If no usable path exists, no further increase is possible; this characterizes optimality.",
+      "wrongExplanations": {
+        "3": "Even if some capacity remains out of 1, it might not reach n due to downstream limits."
+      },
+      "hint": "Focus on reachability with positive remaining capacities.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "To efficiently find usable paths, exploring nodes by increasing number of edges (using a queue) helps limit unnecessary moves. What key condition should we enforce when moving along an edge during such exploration?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Only move if the edge has positive remaining capacity and leads to a node one step further than current",
+          "isCode": false
+        },
+        {
+          "label": "Move along any edge regardless of remaining capacity to explore more",
+          "isCode": false
+        },
+        {
+          "label": "Only move along edges with the largest remaining capacity",
+          "isCode": false
+        },
+        {
+          "label": "Avoid revisiting any node even if a better route exists",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Requiring positive remaining capacity and progressing in steps ensures efficient layer-by-layer exploration.",
+      "wrongExplanations": {
+        "1": "Zero remaining capacity edges cannot carry more data.",
+        "3": "Some nodes may need revisiting at deeper steps to find valid layered paths."
+      },
+      "hint": "Track a distance (number of edges) from the source and only move forward.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Writing the Code",
+      "questionText": "Start with imports and a class to store the network structure. Which snippet correctly initializes storage for n nodes?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\nfrom collections import deque\n\nclass MaxFlow:\n    def __init__(self, n):\n        self.n = n\n        self.adj = [[] for _ in range(n)]",
+          "isCode": true
+        },
+        {
+          "label": "import sys\nfrom collections import deque\n\nclass MaxFlow:\n    def __init__(self, n):\n        self.n = n\n        self.adj = []\n        for _ in range(n): self.adj.append([])\n        self.adj.append([])",
+          "isCode": true
+        },
+        {
+          "label": "import sys\n\nclass MaxFlow:\n    def __init__(self, n):\n        self.n = n\n        self.adj = [[]] * n",
+          "isCode": true
+        },
+        {
+          "label": "import sys\nfrom collections import deque\n\nclass MaxFlow:\n    def __init__(self, n):\n        self.n = n\n        self.adj = None",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Use a list of independent empty lists: `[[] for _ in range(n)]`. Other options create aliasing, extra slots, or leave None.",
+      "wrongExplanations": {
+        "2": "This creates n references to the same list, causing shared mutations."
+      },
+      "hint": "Each node needs its own adjacency list.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\nfrom collections import deque\n\nclass MaxFlow:\n    def __init__(self, n):\n        self.n = n\n        self.adj = [[] for _ in range(n)]",
+      "codeLabel": "Imports and class skeleton"
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Add edges: forward with capacity c and opposite-direction allowance initially 0. Which method correctly appends both?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def add_edge(self, u, v, c):\n    self.adj[u].append([v, len(self.adj[v]), c])\n    self.adj[v].append([u, len(self.adj[u]) - 1, 0])",
+          "isCode": true
+        },
+        {
+          "label": "def add_edge(self, u, v, c):\n    self.adj[u].append([v, len(self.adj[v]), c])\n    self.adj[v].append([u, len(self.adj[v]) - 1, 0])",
+          "isCode": true
+        },
+        {
+          "label": "def add_edge(self, u, v, c):\n    self.adj[u].append([v, len(self.adj[v]), c])",
+          "isCode": true
+        },
+        {
+          "label": "def add_edge(self, u, v, c):\n    self.adj[u].append([v, len(self.adj[u]), c])\n    self.adj[v].append([u, len(self.adj[u]) - 1, 0])",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Store index of the reverse edge: forward uses len(adj[v]); reverse uses len(adj[u])-1 to point back. Others break indexing or omit reverse.",
+      "wrongExplanations": {
+        "1": "The reverse should point to the position just added in u’s list, not v’s.",
+        "2": "Missing the opposite-direction allowance prevents rerouting."
+      },
+      "hint": "Each edge should know the index of its counterpart in the other node’s list.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    def add_edge(self, u, v, c):\n        self.adj[u].append([v, len(self.adj[v]), c])\n        self.adj[v].append([u, len(self.adj[u]) - 1, 0])",
+      "codeLabel": "Add forward and reverse edges"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "We need to build distance labels from source using a queue, only along edges with positive remaining capacity. Which snippet sets up and starts this correctly?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def build_levels(self, s, t):\n    self.level = [-1] * self.n\n    q = deque()\n    self.level[s] = 0\n    q.append(s)",
+          "isCode": true
+        },
+        {
+          "label": "def build_levels(self, s, t):\n    self.level = [0] * self.n\n    q = []\n    q.append(s)",
+          "isCode": true
+        },
+        {
+          "label": "def build_levels(self, s, t):\n    self.level = [-1] * self.n\n    q = deque([s])",
+          "isCode": true
+        },
+        {
+          "label": "def build_levels(self, s, t):\n    self.level = [float('inf')] * self.n\n    q = deque()\n    q.append(0)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Initialize all levels to -1, set source to 0, and push s into a deque. Other options miss level init or wrong start.",
+      "wrongExplanations": {
+        "1": "Levels should be -1 initially to mark unvisited; also a list is not an efficient queue.",
+        "3": "Start from s, not node 0 in general."
+      },
+      "hint": "Mark s with distance 0 and others unvisited.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    def build_levels(self, s, t):\n        self.level = [-1] * self.n\n        q = deque()\n        self.level[s] = 0\n        q.append(s)",
+      "codeLabel": "Initialize level structure"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Complete the queue loop to set levels only through edges with cap>0. Which body and return are correct?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "        while q:\n            u = q.popleft()\n            for v, rev, cap in self.adj[u]:\n                if cap > 0 and self.level[v] < 0:\n                    self.level[v] = self.level[u] + 1\n                    q.append(v)\n        return self.level[t] >= 0",
+          "isCode": true
+        },
+        {
+          "label": "        while q:\n            u = q.pop()\n            for v, rev, cap in self.adj[u]:\n                if self.level[v] == -1:\n                    self.level[v] = self.level[u] + 1\n                    q.appendleft(v)\n        return True",
+          "isCode": true
+        },
+        {
+          "label": "        while q:\n            u = q.popleft()\n            for v, rev, cap in self.adj[u]:\n                if self.level[v] < 0:\n                    self.level[v] = self.level[u] + 1\n        return self.level[t] >= 0",
+          "isCode": true
+        },
+        {
+          "label": "        while q:\n            u = q.popleft()\n            for v, rev, cap in self.adj[u]:\n                if cap >= 0 and self.level[v] < 0:\n                    self.level[v] = 0\n                    q.append(v)\n        return self.level[t] > 0",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Process in FIFO order, only traverse cap>0, assign next layer, and return whether t is reachable.",
+      "wrongExplanations": {
+        "1": "Popping from the right and arbitrary appends breaks layer order; also ignores cap>0 and returns True unconditionally.",
+        "3": "cap>=0 allows zero-capacity edges; level assignment is wrong; t may be at level 0 when s==t."
+      },
+      "hint": "Only follow edges that can carry more flow.",
+      "isCodeBuilding": true,
+      "codeSnippet": "        while q:\n            u = q.popleft()\n            for v, rev, cap in self.adj[u]:\n                if cap > 0 and self.level[v] < 0:\n                    self.level[v] = self.level[u] + 1\n                    q.append(v)\n        return self.level[t] >= 0",
+      "codeLabel": "Build levels and check reachability"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Implement sending flow along edges that respect the levels, updating capacities and opposite-direction allowances. Which function is correct?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def send(self, u, t, f, it):\n    if u == t:\n        return f\n    adj_u = self.adj[u]\n    i = it[u]\n    while i < len(adj_u):\n        it[u] = i\n        v, rev, cap = adj_u[i]\n        if cap > 0 and self.level[v] == self.level[u] + 1:\n            pushed = self.send(v, t, f if f < cap else cap, it)\n            if pushed:\n                adj_u[i][2] -= pushed\n                self.adj[v][rev][2] += pushed\n                return pushed\n        i += 1\n    it[u] = i\n    return 0",
+          "isCode": true
+        },
+        {
+          "label": "def send(self, u, t, f, it):\n    if u == t:\n        return f\n    for i,(v, rev, cap) in enumerate(self.adj[u]):\n        if self.level[v] >= self.level[u]:\n            pushed = self.send(v, t, min(f, cap), it)\n            if pushed:\n                self.adj[u][i][2] -= pushed\n                self.adj[v][rev][2] += pushed\n                return pushed\n    return 0",
+          "isCode": true
+        },
+        {
+          "label": "def send(self, u, t, f, it):\n    if u == t:\n        return f\n    for i,(v, rev, cap) in enumerate(self.adj[u]):\n        if cap > 0 and self.level[v] == self.level[u] + 1:\n            pushed = self.send(v, t, max(f, cap), it)\n            if pushed:\n                self.adj[u][i][2] -= pushed\n                return pushed\n    return 0",
+          "isCode": true
+        },
+        {
+          "label": "def send(self, u, t, f, it):\n    if u == t:\n        return f\n    for i,(v, rev, cap) in enumerate(self.adj[u]):\n        if cap > 0:\n            pushed = self.send(v, t, min(f, cap), it)\n            if pushed:\n                self.adj[u][i][2] -= pushed\n                self.adj[v][rev][2] += pushed\n    return 0",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Respect level constraint, use current-edge pointer it[u], push up to min(f, cap), and update both directions.",
+      "wrongExplanations": {
+        "1": "Allows moving to same or lower level and lacks current-edge pointer, risking inefficiency/loops.",
+        "3": "Ignores level constraint and may over-explore; also never returns pushed on success."
+      },
+      "hint": "Only move to nodes one level deeper and remember where you left off for each node.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    def send(self, u, t, f, it):\n        if u == t:\n            return f\n        adj_u = self.adj[u]\n        i = it[u]\n        while i < len(adj_u):\n            it[u] = i\n            v, rev, cap = adj_u[i]\n            if cap > 0 and self.level[v] == self.level[u] + 1:\n                pushed = self.send(v, t, f if f < cap else cap, it)\n                if pushed:\n                    adj_u[i][2] -= pushed\n                    self.adj[v][rev][2] += pushed\n                    return pushed\n            i += 1\n        it[u] = i\n        return 0",
+      "codeLabel": "Send flow respecting levels"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Write the driver that repeats: build levels, then try sending while possible, accumulating total. Which is correct?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def max_flow(self, s, t):\n    flow = 0\n    INF = 10 ** 18\n    while self.build_levels(s, t):\n        it = [0] * self.n\n        while True:\n            pushed = self.send(s, t, INF, it)\n            if pushed == 0:\n                break\n            flow += pushed\n    return flow",
+          "isCode": true
+        },
+        {
+          "label": "def max_flow(self, s, t):\n    flow = 0\n    while True:\n        it = [0] * self.n\n        pushed = self.send(s, t, 10**18, it)\n        if pushed == 0:\n            break\n        flow += pushed\n    return flow",
+          "isCode": true
+        },
+        {
+          "label": "def max_flow(self, s, t):\n    flow = 0\n    INF = 10 ** 18\n    while self.build_levels(s, t):\n        pushed = self.send(s, t, INF, [0])\n        flow += pushed\n    return flow",
+          "isCode": true
+        },
+        {
+          "label": "def max_flow(self, s, t):\n    flow = 0\n    while self.build_levels(s, t):\n        it = [0] * self.n\n        pushed = self.send(s, t, 1, it)\n        while pushed:\n            flow += 1\n            pushed -= 1\n    return flow",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Rebuild levels each phase, reset per-node iterators, and repeatedly send as long as possible before rebuilding.",
+      "wrongExplanations": {
+        "1": "Without rebuilding levels, the structure guiding paths may be stale.",
+        "2": "The iterator list must have size n and multiple sends per level are needed."
+      },
+      "hint": "There are two nested loops: per-level and per-send.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    def max_flow(self, s, t):\n        flow = 0\n        INF = 10 ** 18\n        while self.build_levels(s, t):\n            it = [0] * self.n\n            while True:\n                pushed = self.send(s, t, INF, it)\n                if pushed == 0:\n                    break\n                flow += pushed\n        return flow",
+      "codeLabel": "Driver to accumulate total flow"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Parse input and build the graph with 0-based indices. Which main() start correctly reads all tokens and guards empty input?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def main():\n    data = sys.stdin.read().strip().split()\n    if not data:\n        return\n    it = iter(data)\n    n = int(next(it)); m = int(next(it))\n    mf = MaxFlow(n)\n    for _ in range(m):\n        a = int(next(it)); b = int(next(it)); c = int(next(it))\n        mf.add_edge(a - 1, b - 1, c)",
+          "isCode": true
+        },
+        {
+          "label": "def main():\n    n, m = map(int, sys.stdin.readline().split())\n    mf = MaxFlow(n)\n    for _ in range(m):\n        a, b, c = map(int, sys.stdin.readline().split())\n        mf.add_edge(a, b, c)",
+          "isCode": true
+        },
+        {
+          "label": "def main():\n    data = sys.stdin.readlines()\n    it = iter(data)\n    n = int(next(it)); m = int(next(it))\n    mf = MaxFlow(n)",
+          "isCode": true
+        },
+        {
+          "label": "def main():\n    tokens = sys.stdin.read().split()\n    n = int(tokens[0]); m = int(tokens[1])\n    mf = MaxFlow(n)\n    for i in range(m):\n        a = int(tokens[i]); b = int(tokens[i+1]); c = int(tokens[i+2])\n        mf.add_edge(a-1, b-1, c)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Read all tokens for robustness, guard empty input, iterate and convert to 0-based indices when adding edges.",
+      "wrongExplanations": {
+        "1": "Adds edges with 1-based indices and may fail if lines are not strictly per edge.",
+        "3": "Indexing into tokens like this misaligns triples; an iterator is safer."
+      },
+      "hint": "Be careful with 1-based to 0-based conversions.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def main():\n    data = sys.stdin.read().strip().split()\n    if not data:\n        return\n    it = iter(data)\n    n = int(next(it)); m = int(next(it))\n    mf = MaxFlow(n)\n    for _ in range(m):\n        a = int(next(it)); b = int(next(it)); c = int(next(it))\n        mf.add_edge(a - 1, b - 1, c)",
+      "codeLabel": "Parse input and build graph"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "Finish main: compute the maximum speed from node 0 to node n-1 and print it. Which tail is correct?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "ans = mf.max_flow(0, n - 1)\nprint(ans)\n\nif __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "ans = mf.max_flow(1, n)\nprint(ans)\n\nif __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "ans = mf.max_flow(0, n)\nprint(ans)\n\nif __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "print(mf.max_flow(1, n))\n\nif __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We used 0-based indices: source is 0, sink is n-1. Then call main under the standard guard.",
+      "wrongExplanations": {
+        "1": "This uses 1-based indices, inconsistent with earlier conversion.",
+        "3": "Again, indices are off by one here."
+      },
+      "hint": "Remember we subtracted 1 from a and b when adding edges.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    ans = mf.max_flow(0, n - 1)\n    print(ans)\n\nif __name__ == \"__main__\":\n    main()",
+      "codeLabel": "Compute and print answer"
+    },
+    {
+      "id": "q22",
+      "phase": "Verifying the Solution",
+      "questionText": "Using the provided example input:\n4 5\n1 2 3\n2 4 2\n1 3 4\n3 4 5\n4 1 3\nWhat total speed should the program print?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "7",
+          "isCode": false
+        },
+        {
+          "label": "6",
+          "isCode": false
+        },
+        {
+          "label": "9",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Two routes: 1→2→4 gives 2; 1→3→4 gives 4; total 6.",
+      "wrongExplanations": {
+        "0": "There is no extra disjoint capacity beyond 6 in this network."
+      },
+      "hint": "Compute bottleneck on each path and sum if edges do not overlap.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q23",
+      "phase": "Verifying the Solution",
+      "questionText": "In a phase where level labels are built from source 1 (0-based index 0), which edges are considered while labeling next nodes?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Only edges with remaining capacity > 0",
+          "isCode": false
+        },
+        {
+          "label": "All edges, even if remaining is 0",
+          "isCode": false
+        },
+        {
+          "label": "Only edges with the largest remaining capacity",
+          "isCode": false
+        },
+        {
+          "label": "Only edges that lead directly to the sink",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Labels are built through edges that can carry more data: remaining capacity must be positive.",
+      "wrongExplanations": {
+        "1": "Including zero-capacity edges pollutes labels with unusable moves."
+      },
+      "hint": "Can an edge with zero remaining carry any more data?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Verifying the Solution",
+      "questionText": "Suppose during sending, an attempted path reaches a dead end (no forward edges to the sink at the next level). What does the code do next?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Backtracks and tries the next edge from the last node where a choice existed",
+          "isCode": false
+        },
+        {
+          "label": "Stops the whole process immediately",
+          "isCode": false
+        },
+        {
+          "label": "Adds a new edge to continue",
+          "isCode": false
+        },
+        {
+          "label": "Restarts from the source and discards all progress in this phase",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The recursive send function returns 0 and proceeds to try the next edge from the last node with alternatives.",
+      "wrongExplanations": {
+        "1": "The algorithm continues exploring other options within the current phase."
+      },
+      "hint": "Look at how send(...) advances the iterator i and returns 0 when stuck.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Analyzing Complexity",
+      "questionText": "Roughly, what is the time complexity of the implemented approach in the general case in terms of n nodes and m edges?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(m * n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^3)",
+          "isCode": false
+        },
+        {
+          "label": "O(m^2 * n)",
+          "isCode": false
+        },
+        {
+          "label": "O(m * n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Building levels costs O(m) per phase; the number of phases is O(n^2) in the worst case for general networks.",
+      "wrongExplanations": {
+        "3": "Too optimistic for general capacities; many phases may be needed."
+      },
+      "hint": "Consider: per phase work and number of phases until no more paths.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the auxiliary space usage of the solution (excluding input storage)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(m + n), due to adjacency lists, reverse edges, levels, and iterators",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2), due to a full matrix",
+          "isCode": false
+        },
+        {
+          "label": "O(m^2), tracking all possible paths",
+          "isCode": false
+        },
+        {
+          "label": "O(1), constant extra memory",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Adjacency lists with reverse edges use O(m); level array and iterator array use O(n).",
+      "wrongExplanations": {
+        "1": "We do not store a dense matrix.",
+        "3": "We maintain arrays proportional to nodes and edges."
+      },
+      "hint": "Count arrays and lists stored per node and per edge.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q27",
+      "phase": "Analyzing Complexity",
+      "questionText": "Which edge cases should the implementation handle to be correct?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "No path from 1 to n (answer 0), multiple edges between same nodes, large capacities, cycles",
+          "isCode": false
+        },
+        {
+          "label": "Only simple paths without cycles",
+          "isCode": false
+        },
+        {
+          "label": "Must reject multiple edges between same nodes",
+          "isCode": false
+        },
+        {
+          "label": "Assume at least one path always exists",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The approach supports disconnected graphs, parallel edges, and cycles; it should return 0 if no path exists.",
+      "wrongExplanations": {
+        "2": "Parallel edges are common and must be supported."
+      },
+      "hint": "Think about the input’s generality: directed with arbitrary connectivity.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\nfrom collections import deque\n\nclass MaxFlow:\n    def __init__(self, n):\n        self.n = n\n        self.adj = [[] for _ in range(n)]",
+    "    def add_edge(self, u, v, c):\n        self.adj[u].append([v, len(self.adj[v]), c])\n        self.adj[v].append([u, len(self.adj[u]) - 1, 0])",
+    "    def build_levels(self, s, t):\n        self.level = [-1] * self.n\n        q = deque()\n        self.level[s] = 0\n        q.append(s)",
+    "        while q:\n            u = q.popleft()\n            for v, rev, cap in self.adj[u]:\n                if cap > 0 and self.level[v] < 0:\n                    self.level[v] = self.level[u] + 1\n                    q.append(v)\n        return self.level[t] >= 0",
+    "    def send(self, u, t, f, it):\n        if u == t:\n            return f\n        adj_u = self.adj[u]\n        i = it[u]\n        while i < len(adj_u):\n            it[u] = i\n            v, rev, cap = adj_u[i]\n            if cap > 0 and self.level[v] == self.level[u] + 1:\n                pushed = self.send(v, t, f if f < cap else cap, it)\n                if pushed:\n                    adj_u[i][2] -= pushed\n                    self.adj[v][rev][2] += pushed\n                    return pushed\n            i += 1\n        it[u] = i\n        return 0",
+    "    def max_flow(self, s, t):\n        flow = 0\n        INF = 10 ** 18\n        while self.build_levels(s, t):\n            it = [0] * self.n\n            while True:\n                pushed = self.send(s, t, INF, it)\n                if pushed == 0:\n                    break\n                flow += pushed\n        return flow",
+    "def main():\n    data = sys.stdin.read().strip().split()\n    if not data:\n        return\n    it = iter(data)\n    n = int(next(it)); m = int(next(it))\n    mf = MaxFlow(n)\n    for _ in range(m):\n        a = int(next(it)); b = int(next(it)); c = int(next(it))\n        mf.add_edge(a - 1, b - 1, c)",
+    "    ans = mf.max_flow(0, n - 1)\n    print(ans)\n\nif __name__ == \"__main__\":\n    main()"
+  ],
+  "reasoningChain": [
+    {
+      "question": "What limits speed along a single path, and can multiple disjoint paths be combined?",
+      "insight": "A path’s throughput is the minimum edge on it; disjoint paths’ throughputs sum."
+    },
+    {
+      "question": "Why is a one-path choice insufficient, and why might we need to adjust earlier choices?",
+      "insight": "Total throughput may require splitting across paths and rerouting earlier decisions."
+    },
+    {
+      "question": "How should we model remaining capacity and the ability to send back along used edges?",
+      "insight": "Track remaining capacity on original edges and add opposite-direction allowances equal to used amounts."
+    },
+    {
+      "question": "What iterative process guarantees improvement and a stopping condition?",
+      "insight": "Repeatedly find a usable path, push the bottleneck amount, update remaining capacities, and stop when none exists."
+    },
+    {
+      "question": "How to efficiently find such paths and constrain moves?",
+      "insight": "Use level labels from the source, only traversing edges with positive remaining capacity and moving to the next level."
+    },
+    {
+      "question": "What are the key implementation details to avoid pitfalls?",
+      "insight": "Store reverse edges, maintain per-node iterators during sending, convert indices properly, and sum flow until no more can be sent."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1432,
+    "output_tokens": 17049,
+    "input_cost": 0.00179,
+    "output_cost": 0.17049,
+    "total_cost": 0.17228
+  }
+}

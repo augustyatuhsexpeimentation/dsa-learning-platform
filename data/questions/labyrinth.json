@@ -1,0 +1,997 @@
+{
+  "id": "labyrinth-shortest-path-grid",
+  "title": "Labyrinth",
+  "difficulty": "intermediate",
+  "tags": [
+    "graph"
+  ],
+  "estimatedMinutes": 70,
+  "language": "python",
+  "description": "You are given a map of a labyrinth, and your task is to determine if there exists a path from A (start) to B (end), moving only up, down, left, or right through floor cells ('.') and avoiding walls ('#'). If a path exists, output the shortest path length and one valid shortest path using characters L, R, U, D.\n\nInput:\n- First line: integers n and m (height and width)\n- Next n lines: m characters per line describing the grid using '.', '#', 'A', 'B'\n\nOutput:\n- Print \"YES\" if a path exists, otherwise \"NO\"\n- If \"YES\", print the length of the shortest path and a string with its moves",
+  "examples": [
+    {
+      "input": "5 8\n########\n#.A#...#\n#.##.#B#\n#......#\n########\n",
+      "output": "YES\n9\nLDDRRRRRU\n",
+      "explanation": "One shortest path has length 9 and is shown by the printed sequence of moves."
+    }
+  ],
+  "constraints": [
+    "1 ≤ n, m ≤ 1000",
+    "Exactly one 'A' and one 'B' exist in the grid",
+    "Moves allowed: up, down, left, right",
+    "Walls '#' are impassable"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "On a 3x3 empty grid with A at top-left and B at bottom-right:\n\nA..\n...\n..B\n\nWhat is the minimum number of steps from A to B (no diagonal moves)?",
+      "diagram": "A..\n...\n..B",
+      "options": [
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Only up/down/left/right moves are allowed. The Manhattan distance is 2+2=4, which is the minimum.",
+      "wrongExplanations": {
+        "0": "2 would require diagonal moves, which are not allowed.",
+        "1": "3 is less than the Manhattan distance; impossible without diagonals."
+      },
+      "hint": "Count horizontal plus vertical differences.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "Which cells are impassable according to the problem?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Only 'A' and 'B' are impassable",
+          "isCode": false
+        },
+        {
+          "label": "Only '.' cells are impassable",
+          "isCode": false
+        },
+        {
+          "label": "Only '#' cells are impassable",
+          "isCode": false
+        },
+        {
+          "label": "All cells are passable",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Walls '#' are impassable. '.' is floor, 'A' and 'B' are passable endpoints.",
+      "wrongExplanations": {
+        "0": "'A' and 'B' are traversable endpoints.",
+        "1": "'.' represents floor, which is passable."
+      },
+      "hint": "Check the character meanings in the statement.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "If there are multiple paths from A to B, what must you output?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Any path, not necessarily shortest",
+          "isCode": false
+        },
+        {
+          "label": "The shortest path length and one shortest path",
+          "isCode": false
+        },
+        {
+          "label": "All possible paths and their lengths",
+          "isCode": false
+        },
+        {
+          "label": "Only the length of the shortest path",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "You must output YES, then the length of the shortest path, and any one shortest path.",
+      "wrongExplanations": {
+        "0": "The problem requires the shortest path.",
+        "3": "You must also print the actual path string."
+      },
+      "hint": "Re-read the output section.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "Is it guaranteed that a path from A to B exists?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, always",
+          "isCode": false
+        },
+        {
+          "label": "No, we must detect if no path exists",
+          "isCode": false
+        },
+        {
+          "label": "Only if n and m are both even",
+          "isCode": false
+        },
+        {
+          "label": "Only if A and B are on the same row",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "A path may not exist. You must print NO if unreachable.",
+      "wrongExplanations": {
+        "0": "There may be walls blocking any path."
+      },
+      "hint": "Consider maps full of walls.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Understanding the Problem",
+      "questionText": "Given the grid below, what is the minimum number of steps from A to B?\n\nA#.\n.#.\n..B",
+      "diagram": "A#.\n.#.\n..B",
+      "options": [
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        },
+        {
+          "label": "6",
+          "isCode": false
+        },
+        {
+          "label": "No path exists",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "One shortest route: Down, Down, Right, Right, Up (5 steps).",
+      "wrongExplanations": {
+        "0": "4 ignores blocked cells ('#').",
+        "3": "There is a valid route around the walls."
+      },
+      "hint": "Try to route around the walls step by step.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "If you simply wander and stop when you first reach B, can you be sure that path is shortest?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, if you avoid revisiting cells",
+          "isCode": false
+        },
+        {
+          "label": "Yes, because the grid is rectangular",
+          "isCode": false
+        },
+        {
+          "label": "No, you might find a longer path first",
+          "isCode": false
+        },
+        {
+          "label": "Only if you always turn right when possible",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "An arbitrary exploration may reach B via a longer route before a shorter one.",
+      "wrongExplanations": {
+        "0": "Avoiding revisits doesn't guarantee shortest order of discovery."
+      },
+      "hint": "Shortest paths require exploring by increasing distance.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "To guarantee the shortest path length, in what order should you process reachable cells?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Always go toward B using Manhattan heuristic",
+          "isCode": false
+        },
+        {
+          "label": "By increasing number of steps from A (layer by layer)",
+          "isCode": false
+        },
+        {
+          "label": "Random order to avoid bias",
+          "isCode": false
+        },
+        {
+          "label": "Deeply follow one direction before others",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Processing cells by increasing distance from A ensures the first time you see B is via a shortest route.",
+      "wrongExplanations": {
+        "0": "A heuristic does not ensure optimality in grids with walls."
+      },
+      "hint": "Think in terms of distance layers from A.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Exploring Approaches",
+      "questionText": "Which data structure naturally processes items in the order they were added, suitable for handling 'layer by layer' exploration?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Queue",
+          "isCode": false
+        },
+        {
+          "label": "Stack",
+          "isCode": false
+        },
+        {
+          "label": "Priority queue (min-heap)",
+          "isCode": false
+        },
+        {
+          "label": "Set",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "A queue processes in first-in-first-out order, matching increasing step counts.",
+      "wrongExplanations": {
+        "1": "A stack is last-in-first-out and explores deeply before others.",
+        "2": "A priority queue changes order by keys; not needed for uniform steps."
+      },
+      "hint": "First-in-first-out maintains discovery order.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "To avoid revisiting cells (which can cause redundant work), what should you maintain?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "A 2D array marking whether each cell has been seen",
+          "isCode": false
+        },
+        {
+          "label": "A counter of steps taken so far",
+          "isCode": false
+        },
+        {
+          "label": "A list of all paths tried so far",
+          "isCode": false
+        },
+        {
+          "label": "Nothing; revisiting doesn't hurt correctness",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Mark cells as seen when enqueuing to prevent enqueuing them again.",
+      "wrongExplanations": {
+        "3": "Revisiting can cause exponential blowup and break shortest guarantees if not careful."
+      },
+      "hint": "Think in terms of a boolean grid of the same size.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "How can you reconstruct the path after reaching B without storing whole paths?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Store, for each cell, the direction used to enter it",
+          "isCode": false
+        },
+        {
+          "label": "Store the entire path string at each cell",
+          "isCode": false
+        },
+        {
+          "label": "Store only the distance at each cell; reconstruct later",
+          "isCode": false
+        },
+        {
+          "label": "Do not store anything; guess the path at the end",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Storing the entering direction lets you backtrack from B to A by reversing moves.",
+      "wrongExplanations": {
+        "1": "Storing full strings per cell is memory-heavy.",
+        "2": "Distance alone isn't enough to reconstruct the exact moves."
+      },
+      "hint": "One character per cell can encode the step taken to reach it.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "When should you mark a neighbor cell as seen to avoid multiple enqueues of the same cell?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "When you pop it from the queue",
+          "isCode": false
+        },
+        {
+          "label": "When you enqueue it for the first time",
+          "isCode": false
+        },
+        {
+          "label": "After you reach B",
+          "isCode": false
+        },
+        {
+          "label": "Only after exploring all its neighbors",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Mark at enqueue-time so you don't enqueue the same cell again from other parents.",
+      "wrongExplanations": {
+        "0": "Marking at pop-time can enqueue duplicates from multiple parents."
+      },
+      "hint": "Mark as soon as you commit to exploring it later.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "Which boundary and obstacle check is correct for a neighbor (nr, nc)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "0 <= nr <= n and 0 <= nc <= m and grid[nr][nc] != '#'",
+          "isCode": false
+        },
+        {
+          "label": "0 <= nr < n and 0 <= nc < m and grid[nr][nc] != '#'",
+          "isCode": false
+        },
+        {
+          "label": "nr < n and nc < m and grid[nr][nc] != '#'",
+          "isCode": false
+        },
+        {
+          "label": "0 <= nr < n and 0 <= nc < m and grid[nr][nc] == '#'",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Indices must be within 0..n-1 and 0..m-1, and cell must not be a wall.",
+      "wrongExplanations": {
+        "0": "Using <= allows nr==n or nc==m which is out of bounds.",
+        "3": "This checks for walls instead of floors."
+      },
+      "hint": "Remember Python indexing is 0-based and upper bound is exclusive.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "You stored, for each cell, the direction used to enter it ('L','R','U','D'). If you are at cell (r,c) and parent[r][c] == 'L', what is the previous cell you came from?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "(r, c-1)",
+          "isCode": false
+        },
+        {
+          "label": "(r, c+1)",
+          "isCode": false
+        },
+        {
+          "label": "(r-1, c)",
+          "isCode": false
+        },
+        {
+          "label": "(r+1, c)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "'L' means you moved left from the previous cell to reach (r,c). So previous is to the right: (r, c+1).",
+      "wrongExplanations": {
+        "0": "(r, c-1) would be moving left again, not the previous position."
+      },
+      "hint": "Invert the move stored for the cell.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Building the Idea",
+      "questionText": "Similarly, if parent[r][c] == 'U', what is the previous cell?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "(r-1, c)",
+          "isCode": false
+        },
+        {
+          "label": "(r+1, c)",
+          "isCode": false
+        },
+        {
+          "label": "(r, c-1)",
+          "isCode": false
+        },
+        {
+          "label": "(r, c+1)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "'U' means you moved up from the previous cell to reach (r,c). Previous is below: (r+1, c).",
+      "wrongExplanations": {
+        "0": "(r-1, c) is where you'd go next if moving up from (r,c), not previous."
+      },
+      "hint": "Invert the direction: U's inverse is down.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q15",
+      "phase": "Building the Idea",
+      "questionText": "When should you stop backtracking during path reconstruction?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "When you reach a cell with parent[r][c] == ''",
+          "isCode": false
+        },
+        {
+          "label": "After a fixed number of steps",
+          "isCode": false
+        },
+        {
+          "label": "When you reach A's coordinates",
+          "isCode": false
+        },
+        {
+          "label": "When the queue becomes empty",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Backtrack from B until you arrive at A.",
+      "wrongExplanations": {
+        "0": "An empty parent marker coincides with A, but explicitly checking A's coordinates is clearer.",
+        "1": "The length isn't known until backtracking completes."
+      },
+      "hint": "You start at B and must reach A.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Read input, build the grid, and locate A and B.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\nfrom collections import deque\n\ndata = sys.stdin.read().split()\nit = iter(data)\nn = int(next(it)); m = int(next(it))\ngrid = []\nstart = (-1, -1)\nend = (-1, -1)\nfor i in range(n):\n    row = list(next(it))\n    for j, ch in enumerate(row):\n        if ch == 'A':\n            start = (i, j)\n        elif ch == 'B':\n            end = (i, j)\n    grid.append(row)",
+          "isCode": true
+        },
+        {
+          "label": "import sys\nfrom collections import deque\n\ndata = sys.stdin.read().split()\nit = iter(data)\nm = int(next(it)); n = int(next(it))\ngrid = []\nstart = (-1, -1)\nend = (-1, -1)\nfor i in range(n):\n    row = list(next(it))\n    grid.append(row)",
+          "isCode": true
+        },
+        {
+          "label": "import sys\nfrom collections import deque\n\ndata = sys.stdin.read().split()\nit = iter(data)\nn = int(next(it)); m = int(next(it))\ngrid = [list(next(it)) for _ in range(m)]\nstart = (-1, -1)\nend = (-1, -1)",
+          "isCode": true
+        },
+        {
+          "label": "import sys\nfrom collections import deque\n\nn, m = map(int, sys.stdin.readline().split())\ngrid = []\nstart = (-1, -1)\nend = (-1, -1)\nfor i in range(m):\n    row = sys.stdin.readline().strip()\n    grid.append(row)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "This correctly reads n lines, stores rows, and records A and B positions.",
+      "wrongExplanations": {
+        "1": "n and m are reversed; also A and B are not located.",
+        "2": "Reads m rows instead of n.",
+        "3": "Reads m lines instead of n and does not find A/B."
+      },
+      "hint": "Iterate n lines and find coordinates of 'A' and 'B'.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\nfrom collections import deque\n\ndata = sys.stdin.read().split()\nit = iter(data)\nn = int(next(it)); m = int(next(it))\ngrid = []\nstart = (-1, -1)\nend = (-1, -1)\nfor i in range(n):\n    row = list(next(it))\n    for j, ch in enumerate(row):\n        if ch == 'A':\n            start = (i, j)\n        elif ch == 'B':\n            end = (i, j)\n    grid.append(row)",
+      "codeLabel": "Read grid and find A/B"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Initialize visitation tracking, parent directions, and the queue with the start.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "sr, sc = start\ner, ec = end\nseen = [[False]*m for _ in range(n)]\nparent = [['']*m for _ in range(n)]\nq = deque()\nq.append((sr, sc))\nseen[sr][sc] = True\ndirs = [(-1,0,'U'), (1,0,'D'), (0,-1,'L'), (0,1,'R')]",
+          "isCode": true
+        },
+        {
+          "label": "sr, sc = start\ner, ec = end\nseen = [[False]*n for _ in range(m)]\nparent = [['']*n for _ in range(m)]\nq = deque()\nq.append((sr, sc))\ndirs = [(-1,0,'U'), (1,0,'D'), (0,-1,'L'), (0,1,'R')]",
+          "isCode": true
+        },
+        {
+          "label": "sr, sc = start\ner, ec = end\nseen = [[False]*m for _ in range(n)]\nparent = [['']*m for _ in range(n)]\nq = deque()\ndirs = [(-1,0,'U'), (1,0,'D'), (0,-1,'L'), (0,1,'R')]",
+          "isCode": true
+        },
+        {
+          "label": "sr, sc = start\ner, ec = end\nseen = [[False]*m for _ in range(n)]\nparent = [['']*m for _ in range(n)]\nq = deque([(sr, sc)])\n# do not mark start seen yet\ndirs = [(-1,0,'U'), (1,0,'D'), (0,-1,'L'), (0,1,'R')]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Correct grid-shaped arrays, start enqueued and marked seen; direction list provided.",
+      "wrongExplanations": {
+        "1": "Dimensions of seen/parent are swapped; indexing will break.",
+        "2": "Start not marked seen may allow re-enqueueing from neighbors."
+      },
+      "hint": "Use n rows by m columns; mark the start before exploration.",
+      "isCodeBuilding": true,
+      "codeSnippet": "sr, sc = start\ner, ec = end\nseen = [[False]*m for _ in range(n)]\nparent = [['']*m for _ in range(n)]\nq = deque()\nq.append((sr, sc))\nseen[sr][sc] = True\ndirs = [(-1,0,'U'), (1,0,'D'), (0,-1,'L'), (0,1,'R')]",
+      "codeLabel": "Init arrays and queue"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Process cells in increasing step count order until done.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "while q:\n    r, c = q.popleft()\n    if (r, c) == (er, ec):\n        break\n    for dr, dc, ch in dirs:\n        nr = r + dr; nc = c + dc\n        if 0 <= nr < n and 0 <= nc < m and not seen[nr][nc] and grid[nr][nc] != '#':\n            seen[nr][nc] = True\n            parent[nr][nc] = ch\n            q.append((nr, nc))",
+          "isCode": true
+        },
+        {
+          "label": "while q:\n    r, c = q.pop()\n    if (r, c) == (er, ec):\n        break\n    for dr, dc, ch in dirs:\n        nr = r + dr; nc = c + dc\n        if 0 <= nr < n and 0 <= nc < m and grid[nr][nc] != '#':\n            parent[nr][nc] = ch\n            q.append((nr, nc))",
+          "isCode": true
+        },
+        {
+          "label": "while q:\n    r, c = q.popleft()\n    for dr, dc, ch in dirs:\n        nr = r + dr; nc = c + dc\n        if 0 <= nr < n and 0 <= nc < m and not seen[nr][nc] and grid[nr][nc] != '#':\n            parent[nr][nc] = ch\n            q.append((nr, nc))",
+          "isCode": true
+        },
+        {
+          "label": "while q:\n    r, c = q.popleft()\n    if grid[r][c] == '#':\n        continue\n    for dr, dc, ch in dirs:\n        nr = r + dr; nc = c + dc\n        if 0 <= nr < n and 0 <= nc < m and grid[nr][nc] != '#':\n            seen[nr][nc] = True\n            parent[nr][nc] = ch\n            # do not enqueue, process immediately",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "This processes in FIFO order, marks seen at enqueue, records direction, and stops early when end is reached.",
+      "wrongExplanations": {
+        "1": "Using pop() processes most recently added first and never marks seen.",
+        "2": "Not marking seen allows multiple enqueues of the same cell."
+      },
+      "hint": "Use popleft to maintain first-in-first-out and mark at enqueue.",
+      "isCodeBuilding": true,
+      "codeSnippet": "while q:\n    r, c = q.popleft()\n    if (r, c) == (er, ec):\n        break\n    for dr, dc, ch in dirs:\n        nr = r + dr; nc = c + dc\n        if 0 <= nr < n and 0 <= nc < m and not seen[nr][nc] and grid[nr][nc] != '#':\n            seen[nr][nc] = True\n            parent[nr][nc] = ch\n            q.append((nr, nc))",
+      "codeLabel": "Explore grid by layers"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "After exploration, handle the case when B was not reached.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "if not seen[er][ec]:\n    print(\"NO\")\n    sys.exit(0)",
+          "isCode": true
+        },
+        {
+          "label": "if seen[er][ec]:\n    print(\"NO\")\n    sys.exit(0)",
+          "isCode": true
+        },
+        {
+          "label": "if grid[er][ec] == '#':\n    print(\"NO\")\n    sys.exit(0)",
+          "isCode": true
+        },
+        {
+          "label": "if parent[er][ec] == '':\n    print(\"NO\")\n    sys.exit(0)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "If end cell was never seen, there is no path.",
+      "wrongExplanations": {
+        "1": "This inverts the logic.",
+        "3": "Parent may be '' only at A; rely on seen for reachability."
+      },
+      "hint": "Check whether the end was discovered.",
+      "isCodeBuilding": true,
+      "codeSnippet": "if not seen[er][ec]:\n    print(\"NO\")\n    sys.exit(0)",
+      "codeLabel": "Print NO if unreachable"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Reconstruct the path from B back to A using stored directions.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "path = []\nr, c = er, ec\nwhile (r, c) != (sr, sc):\n    ch = parent[r][c]\n    path.append(ch)\n    if ch == 'L':\n        c += 1\n    elif ch == 'R':\n        c -= 1\n    elif ch == 'U':\n        r += 1\n    elif ch == 'D':\n        r -= 1\npath.reverse()",
+          "isCode": true
+        },
+        {
+          "label": "path = []\nr, c = er, ec\nwhile (r, c) != (sr, sc):\n    ch = parent[r][c]\n    path.append(ch)\n    if ch == 'L':\n        c -= 1\n    elif ch == 'R':\n        c += 1\n    elif ch == 'U':\n        r -= 1\n    elif ch == 'D':\n        r += 1\n# no reverse",
+          "isCode": true
+        },
+        {
+          "label": "path = []\nr, c = er, ec\nwhile (r, c) != (sr, sc):\n    ch = parent[r][c]\n    if ch == 'L':\n        c += 1\n    elif ch == 'R':\n        c -= 1\n    elif ch == 'U':\n        r += 1\n    elif ch == 'D':\n        r -= 1\npath.reverse()",
+          "isCode": true
+        },
+        {
+          "label": "path = []\nr, c = er, ec\nwhile (r, c) != (sr, sc):\n    ch = parent[r][c]\n    path.append(ch)\n    if ch == 'L':\n        c += 1\n    elif ch == 'R':\n        c -= 1\n    elif ch == 'U':\n        r += 1\n    elif ch == 'D':\n        r -= 1\n# do not reverse",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Move inversely while collecting moves, then reverse to get path from A to B.",
+      "wrongExplanations": {
+        "1": "This moves forward, not backward, and also forgets to reverse.",
+        "3": "Without reversing, moves are from B to A."
+      },
+      "hint": "At each step, invert the stored direction; the collected sequence is backward.",
+      "isCodeBuilding": true,
+      "codeSnippet": "path = []\nr, c = er, ec\nwhile (r, c) != (sr, sc):\n    ch = parent[r][c]\n    path.append(ch)\n    if ch == 'L':\n        c += 1\n    elif ch == 'R':\n        c -= 1\n    elif ch == 'U':\n        r += 1\n    elif ch == 'D':\n        r -= 1\npath.reverse()",
+      "codeLabel": "Reconstruct path"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "Print the required output when a path exists.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "print(\"YES\")\nprint(len(path))\nprint(''.join(path))",
+          "isCode": true
+        },
+        {
+          "label": "print(\"YES\")\nprint(path)\nprint(len(path))",
+          "isCode": true
+        },
+        {
+          "label": "print(len(path))\nprint(''.join(path))",
+          "isCode": true
+        },
+        {
+          "label": "print(\"YES\", len(path), ''.join(path))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The output requires YES, then the length, then the path string on separate lines.",
+      "wrongExplanations": {
+        "2": "Must also print YES first.",
+        "3": "All values should be on separate lines per the problem format."
+      },
+      "hint": "Three lines: YES, number, string.",
+      "isCodeBuilding": true,
+      "codeSnippet": "print(\"YES\")\nprint(len(path))\nprint(''.join(path))",
+      "codeLabel": "Print YES, length, path"
+    },
+    {
+      "id": "q22",
+      "phase": "Verifying the Solution",
+      "questionText": "Consider the grid:\n\n3 4\nA..#\n##.#\n..#B\n\nIs there a path from A to B? What should be printed first?",
+      "diagram": "A..#\n##.#\n..#B",
+      "options": [
+        {
+          "label": "YES",
+          "isCode": false
+        },
+        {
+          "label": "NO",
+          "isCode": false
+        },
+        {
+          "label": "YES (but length may be zero)",
+          "isCode": false
+        },
+        {
+          "label": "YES (path exists only with diagonals)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Walls block all routes; there is no path without diagonals. Print NO.",
+      "wrongExplanations": {
+        "0": "Trace carefully; every route is blocked by '#'.",
+        "3": "Diagonals are not allowed."
+      },
+      "hint": "Try to navigate around the walls; you can't reach the last column.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q23",
+      "phase": "Verifying the Solution",
+      "questionText": "For the grid:\n\n4 4\nA...\n####\n...#\n...B\n\nWhat does your program print first?",
+      "diagram": "A...\n####\n...#\n...B",
+      "options": [
+        {
+          "label": "YES",
+          "isCode": false
+        },
+        {
+          "label": "NO",
+          "isCode": false
+        },
+        {
+          "label": "YES and length 0",
+          "isCode": false
+        },
+        {
+          "label": "YES and a path using diagonals",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "The wall row '####' blocks any route from top to bottom; print NO.",
+      "wrongExplanations": {
+        "0": "There is no connection between top and bottom due to the full wall."
+      },
+      "hint": "Check if there's any opening in the second row.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Verifying the Solution",
+      "questionText": "On a simple grid:\n\n2 3\nAB.\n###\n\nWhat should the length be and what path might be printed?",
+      "diagram": "AB.\n###",
+      "options": [
+        {
+          "label": "Length 1, path \"R\"",
+          "isCode": false
+        },
+        {
+          "label": "Length 0, path \"\"",
+          "isCode": false
+        },
+        {
+          "label": "Length 2, path \"RR\"",
+          "isCode": false
+        },
+        {
+          "label": "NO",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "B is immediately to the right of A; one move 'R'.",
+      "wrongExplanations": {
+        "1": "A and B are distinct; not the same cell.",
+        "3": "They are adjacent; a path exists."
+      },
+      "hint": "Count moves from A to B along the first row.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the time complexity in terms of n and m?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n * m)",
+          "isCode": false
+        },
+        {
+          "label": "O((n * m)^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(n + m)",
+          "isCode": false
+        },
+        {
+          "label": "O(log(n * m))",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each cell is processed at most once and each edge considered once, so time is proportional to n*m.",
+      "wrongExplanations": {
+        "1": "We do not reprocess cells multiple times.",
+        "2": "We must consider all reachable cells, not just rows+columns."
+      },
+      "hint": "How many cells can be enqueued at most?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the space complexity of the approach?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n * m) for seen, parent, and the queue",
+          "isCode": false
+        },
+        {
+          "label": "O(1) extra space",
+          "isCode": false
+        },
+        {
+          "label": "O(n + m)",
+          "isCode": false
+        },
+        {
+          "label": "O((n * m)^2)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We store seen and parent for each cell and the queue can hold up to O(n*m) cells.",
+      "wrongExplanations": {
+        "1": "We store information per cell.",
+        "2": "Both seen and parent are 2D."
+      },
+      "hint": "Consider the 2D arrays and the queue in the worst case.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys",
+    "from collections import deque",
+    "",
+    "data = sys.stdin.read().split()",
+    "it = iter(data)",
+    "n = int(next(it)); m = int(next(it))",
+    "grid = []",
+    "start = (-1, -1)",
+    "end = (-1, -1)",
+    "for i in range(n):",
+    "    row = list(next(it))",
+    "    for j, ch in enumerate(row):",
+    "        if ch == 'A':",
+    "            start = (i, j)",
+    "        elif ch == 'B':",
+    "            end = (i, j)",
+    "    grid.append(row)",
+    "sr, sc = start",
+    "er, ec = end",
+    "seen = [[False]*m for _ in range(n)]",
+    "parent = [['']*m for _ in range(n)]",
+    "q = deque()",
+    "q.append((sr, sc))",
+    "seen[sr][sc] = True",
+    "dirs = [(-1,0,'U'), (1,0,'D'), (0,-1,'L'), (0,1,'R')]",
+    "while q:",
+    "    r, c = q.popleft()",
+    "    if (r, c) == (er, ec):",
+    "        break",
+    "    for dr, dc, ch in dirs:",
+    "        nr = r + dr; nc = c + dc",
+    "        if 0 <= nr < n and 0 <= nc < m and not seen[nr][nc] and grid[nr][nc] != '#':",
+    "            seen[nr][nc] = True",
+    "            parent[nr][nc] = ch",
+    "            q.append((nr, nc))",
+    "if not seen[er][ec]:",
+    "    print(\"NO\")",
+    "    sys.exit(0)",
+    "path = []",
+    "r, c = er, ec",
+    "while (r, c) != (sr, sc):",
+    "    ch = parent[r][c]",
+    "    path.append(ch)",
+    "    if ch == 'L':",
+    "        c += 1",
+    "    elif ch == 'R':",
+    "        c -= 1",
+    "    elif ch == 'U':",
+    "        r += 1",
+    "    elif ch == 'D':",
+    "        r -= 1",
+    "path.reverse()",
+    "print(\"YES\")",
+    "print(len(path))",
+    "print(''.join(path))"
+  ],
+  "reasoningChain": [
+    {
+      "question": "How do moves and obstacles work on the grid, and what exactly must be printed?",
+      "insight": "Only U/D/L/R moves on '.' plus A/B are allowed; '#' are blocked. We must print YES/NO, and if YES, the shortest path length and one corresponding move string."
+    },
+    {
+      "question": "Why is arbitrary exploration insufficient for shortest paths?",
+      "insight": "Reaching B early via a longer detour is possible; we must explore by increasing distance layers to guarantee the first discovery of B is shortest."
+    },
+    {
+      "question": "What structure and state must be maintained during exploration?",
+      "insight": "Use a FIFO queue to process cells in discovery order, a seen matrix to avoid repeats, and store one direction per cell to reconstruct the path."
+    },
+    {
+      "question": "When to mark cells and how to check neighbors?",
+      "insight": "Mark a neighbor as seen at enqueue-time to prevent duplicates; only enqueue in-bounds non-wall cells."
+    },
+    {
+      "question": "How to reconstruct the path efficiently?",
+      "insight": "Backtrack from B using stored direction per cell, invert each step to move to the previous cell, collect moves, then reverse the collected list."
+    },
+    {
+      "question": "How to implement reading and scanning efficiently?",
+      "insight": "Read n and m, then n lines; scan to find start and end positions while storing the grid."
+    },
+    {
+      "question": "What are the complexity and edge cases?",
+      "insight": "Time and space are O(n*m). Handle unreachable cases (print NO) and simple adjacency or already-at-end cases naturally via the exploration and reconstruction."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1428,
+    "output_tokens": 15186,
+    "input_cost": 0.001785,
+    "output_cost": 0.15186,
+    "total_cost": 0.153645
+  }
+}

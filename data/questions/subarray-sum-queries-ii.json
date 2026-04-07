@@ -1,0 +1,986 @@
+{
+  "id": "subarray-sum-queries-ii-guided",
+  "title": "Subarray Sum Queries II",
+  "difficulty": "hard",
+  "tags": [
+    "array"
+  ],
+  "estimatedMinutes": 70,
+  "language": "python",
+  "description": "You are given an array of n integers and q queries. In each query, your task is to calculate the maximum subarray sum in the range [a,b].\n\nEmpty subarrays (with sum 0) are allowed.\n\nInput:\n- The first line contains two integers n and q: the number of elements and the number of queries.\n- Then there are n integers x1, x2, ..., xn: the contents of the array.\n- Finally there are q lines that describe the queries. Each line has two integers a and b.\n\nOutput:\nPrint the answer for each query on its own line.",
+  "examples": [
+    {
+      "input": "8 4\n2 5 1 -2 3 -1 -7 1\n2 4\n2 5\n6 7\n4 8\n",
+      "output": "6\n7\n0\n3\n",
+      "explanation": "Range [2,4]: [5,1,-2] -> best is 6. Range [2,5]: [5,1,-2,3] -> best is 7. Range [6,7]: [-1,-7] -> empty allowed, best is 0. Range [4,8]: [-2,3,-1,-7,1] -> best is 3."
+    }
+  ],
+  "constraints": [
+    "1 ≤ n, q ≤ 2⋅10^5",
+    "-10^9 ≤ x_i ≤ 10^9",
+    "1 ≤ a ≤ b ≤ n",
+    "Time limit: 1.00 s",
+    "Memory limit: 512 MB"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "Given array [2, -5, 3] and the range [1,3], what is the maximum subarray sum when empty subarrays are allowed?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Best non-empty subarray is [3] with sum 3; empty gives 0, so answer is 3. 5 would incorrectly skip -5.",
+      "wrongExplanations": {
+        "1": "Empty subarray (0) is allowed but not better than 3 here.",
+        "2": "2 + 3 is not contiguous in this array due to -5 in between."
+      },
+      "hint": "Check all contiguous subarrays and also compare with 0.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "For array [-4, -1, -7] and a query covering the whole range, what is the answer when empty subarrays are allowed?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "-1",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "-4",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "All sums are negative, so choosing the empty subarray (0) is best.",
+      "wrongExplanations": {
+        "0": "That's the best non-empty sum, but empty subarray gives 0 which is larger.",
+        "2": "This is even smaller than -1; empty subarray wins."
+      },
+      "hint": "If all numbers are negative, 0 beats any non-empty subarray.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "Array [1, 2, -3, 4], query [2,4] (1-indexed). Which is the maximum subarray sum in that range?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Range is [2,-3,4], best subarray is [4] with sum 4.",
+      "wrongExplanations": {
+        "1": "[2,-3,4] sums to 3, but [4] gives 4 which is better.",
+        "3": "There is no contiguous subarray with sum 5 in this range."
+      },
+      "hint": "Check [2], [-3], [4], [2,-3], [-3,4], [2,-3,4].",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "Array [5, -2, 6], query [2,3] (1-indexed). What is the correct answer?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "5",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "6",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Range is [-2,6], best subarray is [6] with sum 6.",
+      "wrongExplanations": {
+        "0": "5 is not in the query range [2,3].",
+        "1": "There is no contiguous subarray with sum 4 here."
+      },
+      "hint": "Make sure to slice the array using 1-indexed bounds.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Understanding the Problem",
+      "questionText": "With empty subarrays allowed, which statement is always true for any query range?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "The answer is always ≥ 0.",
+          "isCode": false
+        },
+        {
+          "label": "The answer equals the largest element in the range.",
+          "isCode": false
+        },
+        {
+          "label": "The answer is the sum of the entire range if it's non-negative.",
+          "isCode": false
+        },
+        {
+          "label": "The answer is ≥ 0 only if there is at least one non-negative element.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "You can always pick the empty subarray with sum 0, so the answer is ≥ 0.",
+      "wrongExplanations": {
+        "1": "Sometimes a longer subarray beats the single largest element.",
+        "3": "Even if all elements are negative, choosing empty yields 0."
+      },
+      "hint": "Remember you can choose no elements.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "If we recompute the maximum subarray sum by scanning the range for each query independently, what is the worst-case overall time for n = q = 2⋅10^5?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(q * n), which is too slow here.",
+          "isCode": false
+        },
+        {
+          "label": "O(q * log n), which easily fits.",
+          "isCode": false
+        },
+        {
+          "label": "O(n + q), which easily fits.",
+          "isCode": false
+        },
+        {
+          "label": "O(q), independent of n.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Recomputing by scanning is O(length of range) per query, leading to O(q*n) worst-case.",
+      "wrongExplanations": {
+        "1": "A scan per query is linear in range length, not logarithmic.",
+        "2": "You would be redoing work per query, not just a single pass."
+      },
+      "hint": "Consider the case where each query covers the whole array.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "Could we precompute the answer for every possible [a,b] range and answer queries in O(1)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "No; it needs O(n^2) memory/time, which is infeasible for n=2⋅10^5.",
+          "isCode": false
+        },
+        {
+          "label": "Yes; we can store all answers in O(n).",
+          "isCode": false
+        },
+        {
+          "label": "Yes; a single pass can fill all pairs.",
+          "isCode": false
+        },
+        {
+          "label": "No; but only because of time limit, memory would be fine.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "There are Θ(n^2) ranges; storing/compute all is impossible at these sizes.",
+      "wrongExplanations": {
+        "1": "There are far more than O(n) ranges.",
+        "3": "Memory for Θ(n^2) values is also infeasible."
+      },
+      "hint": "Count how many pairs (a,b) with a ≤ b exist.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Exploring Approaches",
+      "questionText": "To quickly combine answers for adjacent blocks [L,M] and [M+1,R], what information should we keep for each block?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Total sum, best prefix sum, best suffix sum, best subarray sum.",
+          "isCode": false
+        },
+        {
+          "label": "Only the total sum.",
+          "isCode": false
+        },
+        {
+          "label": "Total sum and the maximum element.",
+          "isCode": false
+        },
+        {
+          "label": "Best prefix sum only.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "These four values let us compute the best for the union by considering cross-boundary subarrays.",
+      "wrongExplanations": {
+        "1": "Sum alone can't capture internal peaks.",
+        "2": "Max element and sum miss cross-boundary combinations."
+      },
+      "hint": "Think about subarrays that cross the boundary and those that don't.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "Let A and B be adjacent segments. If best(S) is the maximum subarray sum within segment S, which formula gives best(A∪B)?",
+      "diagram": "A | B",
+      "options": [
+        {
+          "label": "max(best(A), best(B), suffix(A) + prefix(B))",
+          "isCode": false
+        },
+        {
+          "label": "best(A) + best(B)",
+          "isCode": false
+        },
+        {
+          "label": "max(prefix(A), suffix(B))",
+          "isCode": false
+        },
+        {
+          "label": "sum(A) + sum(B)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The best in the union is either entirely in A, entirely in B, or crosses using A's best suffix + B's best prefix.",
+      "wrongExplanations": {
+        "1": "The best subarrays might overlap; sums don't just add.",
+        "3": "The total sum isn't necessarily the best subarray sum."
+      },
+      "hint": "Consider subarrays that don't cross and those that do.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "For adjacent segments A and B, what is sum(A∪B)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "sum(A) + sum(B)",
+          "isCode": false
+        },
+        {
+          "label": "max(sum(A), sum(B))",
+          "isCode": false
+        },
+        {
+          "label": "sum(A) - sum(B)",
+          "isCode": false
+        },
+        {
+          "label": "sum(B) - sum(A)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The total sum over the union is the sum over the parts.",
+      "wrongExplanations": {
+        "1": "We're not choosing; we need the sum over both segments."
+      },
+      "hint": "Sums over disjoint adjacent parts add up.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "Define prefix(S) as the maximum sum of a subarray starting at S's left edge. What is prefix(A∪B)?",
+      "diagram": "A | B",
+      "options": [
+        {
+          "label": "max(prefix(A), sum(A) + prefix(B))",
+          "isCode": false
+        },
+        {
+          "label": "prefix(A) + prefix(B)",
+          "isCode": false
+        },
+        {
+          "label": "prefix(B)",
+          "isCode": false
+        },
+        {
+          "label": "sum(A) + sum(B)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "A prefix of the union is either entirely in A or spans A fully and continues with a prefix of B.",
+      "wrongExplanations": {
+        "1": "This double-counts overlaps; not all concatenations are valid prefixes.",
+        "2": "A prefix must start at the left edge of A∪B, not B."
+      },
+      "hint": "A prefix must start at the left boundary of A∪B.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "Define suffix(S) as the maximum sum of a subarray ending at S's right edge. What is suffix(A∪B)?",
+      "diagram": "A | B",
+      "options": [
+        {
+          "label": "max(suffix(B), suffix(A) + sum(B))",
+          "isCode": false
+        },
+        {
+          "label": "suffix(A) + suffix(B)",
+          "isCode": false
+        },
+        {
+          "label": "suffix(A)",
+          "isCode": false
+        },
+        {
+          "label": "sum(A) + sum(B)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "A suffix of the union is either entirely in B or spans B fully after a suffix from A.",
+      "wrongExplanations": {
+        "1": "Not all combinations form a valid suffix ending at the union's right edge.",
+        "2": "A suffix must end at the right boundary of A∪B, not A."
+      },
+      "hint": "A suffix must end at the right boundary of A∪B.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "For a single element v (a leaf segment), what should (sum, prefix, suffix, best) be if we define these values for non-empty subarrays?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "(v, v, v, v)",
+          "isCode": false
+        },
+        {
+          "label": "(v, max(0,v), max(0,v), max(0,v))",
+          "isCode": false
+        },
+        {
+          "label": "(v, max(v,0), v, v)",
+          "isCode": false
+        },
+        {
+          "label": "(0, v, v, v)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "For non-empty definitions, all four values at a leaf are v.",
+      "wrongExplanations": {
+        "1": "Including empty here changes merge logic; it's cleaner to allow empty only at the end.",
+        "3": "sum over the leaf should be v, not 0."
+      },
+      "hint": "We will allow empty only at the final answer, not inside the segment values.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Building the Idea",
+      "questionText": "After computing the (sum, prefix, suffix, best) for a query range, how do we adjust for empty subarrays being allowed?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Return max(0, best).",
+          "isCode": false
+        },
+        {
+          "label": "Clamp prefix and suffix to be at least 0 before merging.",
+          "isCode": false
+        },
+        {
+          "label": "Set the leaf values to max(0, v).",
+          "isCode": false
+        },
+        {
+          "label": "Subtract negative sums from the result.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Compute best for non-empty subarrays and then take max with 0 at the end.",
+      "wrongExplanations": {
+        "1": "Changing prefix/suffix mid-merge breaks correctness.",
+        "2": "This would propagate emptiness internally and complicate merges."
+      },
+      "hint": "Keep internal values for non-empty; adjust only the final answer.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Start by reading all input quickly. Which snippet correctly reads all integers into a list and prepares an iterator?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\nnums = list(map(int, sys.stdin.read().split()))\nit = iter(nums)",
+          "isCode": true
+        },
+        {
+          "label": "import sys\ndata = list(map(int, sys.stdin.buffer.read().split()))\nit = iter(data)",
+          "isCode": true
+        },
+        {
+          "label": "import sys\nit = sys.stdin.buffer.read()",
+          "isCode": true
+        },
+        {
+          "label": "import sys\nnums = sys.stdin.read().split()  # strings only\nit = iter(nums)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Using sys.stdin.buffer.read with map(int) is fast and gives integers. We then iterate over them.",
+      "wrongExplanations": {
+        "0": "Works but may be slightly slower; we'll stick to buffer for performance consistency.",
+        "3": "Leaves strings; we'd need to convert to int later."
+      },
+      "hint": "Use sys.stdin.buffer.read and map to int.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\ndata = list(map(int, sys.stdin.buffer.read().split()))\nit = iter(data)",
+      "codeLabel": "Read all ints"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Parse n, q and the array values from the iterator.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "n = next(it); q = next(it)\narr = [next(it) for _ in range(n)]",
+          "isCode": true
+        },
+        {
+          "label": "q = next(it); n = next(it)\narr = [next(it) for _ in range(q)]",
+          "isCode": true
+        },
+        {
+          "label": "n, q = next(it)\narr = list(next(it) for _ in range(q))",
+          "isCode": true
+        },
+        {
+          "label": "n = int(next(it)); q = int(next(it))\narr = [int(next(it)) for _ in range(q)]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "First two integers are n and q, then exactly n array values.",
+      "wrongExplanations": {
+        "1": "Swapping n and q and reading q array values is wrong.",
+        "2": "next(it) yields a single int; unpacking into (n,q) fails."
+      },
+      "hint": "Read n, q, then consume n numbers for the array.",
+      "isCodeBuilding": true,
+      "codeSnippet": "n = next(it); q = next(it)\narr = [next(it) for _ in range(n)]",
+      "codeLabel": "Parse n, q, arr"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "We will store segment information in an array of size about 4*n. Initialize it.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "tree = [None] * (4 * n)",
+          "isCode": true
+        },
+        {
+          "label": "tree = [0] * n",
+          "isCode": true
+        },
+        {
+          "label": "tree = [[] for _ in range(n)]",
+          "isCode": true
+        },
+        {
+          "label": "tree = [()] * (2 * n)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "A size around 4*n is standard to safely store a full binary structure for n leaves.",
+      "wrongExplanations": {
+        "1": "n slots are insufficient for internal nodes.",
+        "3": "2*n may be too small for arbitrary n (not necessarily a power of two)."
+      },
+      "hint": "Allocate extra space for internal nodes.",
+      "isCodeBuilding": true,
+      "codeSnippet": "tree = [None] * (4 * n)",
+      "codeLabel": "Init storage"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Implement the function to combine two adjacent segments' tuples (sum, prefix, suffix, best). Handle None as a neutral element for out-of-range cases.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def merge(L, R):\n    if L is None:\n        return R\n    if R is None:\n        return L\n    s = L[0] + R[0]\n    pref = max(L[1], L[0] + R[1])\n    suff = max(R[2], R[0] + L[2])\n    best = max(L[3], R[3], L[2] + R[1])\n    return (s, pref, suff, best)",
+          "isCode": true
+        },
+        {
+          "label": "def merge(L, R):\n    s = L[0] + R[0]\n    pref = max(L[1], R[1])\n    suff = max(L[2], R[2])\n    best = max(L[3], R[3])\n    return (s, pref, suff, best)",
+          "isCode": true
+        },
+        {
+          "label": "def merge(L, R):\n    if L is None: return (0,0,0,0)\n    if R is None: return (0,0,0,0)\n    s = L[0] + R[0]\n    pref = max(L[1] + R[1], s)\n    suff = max(L[2] + R[2], s)\n    best = max(pref, suff)\n    return (s, pref, suff, best)",
+          "isCode": true
+        },
+        {
+          "label": "def merge(L, R):\n    if L is None: return R\n    if R is None: return L\n    s = L[0] + R[0]\n    pref = max(L[1], R[1])\n    suff = max(L[2], R[2])\n    best = max(L[3], R[3], L[1] + R[2])\n    return (s, pref, suff, best)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need the exact formulas: s=L.sum+R.sum, pref=max(L.pref, L.sum+R.pref), suff=max(R.suff, R.sum+L.suff), best=max(L.best,R.best,L.suff+R.pref).",
+      "wrongExplanations": {
+        "1": "Ignores cross-boundary combinations entirely.",
+        "3": "prefix/suffix must combine with sums, not simply pick max; and best cross is L.suff + R.pref."
+      },
+      "hint": "Use the formulas established earlier for combining.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def merge(L, R):\n    if L is None:\n        return R\n    if R is None:\n        return L\n    s = L[0] + R[0]\n    pref = max(L[1], L[0] + R[1])\n    suff = max(R[2], R[0] + L[2])\n    best = max(L[3], R[3], L[2] + R[1])\n    return (s, pref, suff, best)",
+      "codeLabel": "Merge function"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Build the structure over the array using recursion. Which build function is correct?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def build(idx, l, r):\n    if l == r:\n        v = arr[l]\n        tree[idx] = (v, v, v, v)\n        return\n    m = (l + r) // 2\n    left = idx * 2\n    right = left + 1\n    build(left, l, m)\n    build(right, m + 1, r)\n    tree[idx] = merge(tree[left], tree[right])",
+          "isCode": true
+        },
+        {
+          "label": "def build(idx, l, r):\n    if l == r:\n        tree[idx] = (arr[l], max(0, arr[l]), max(0, arr[l]), max(0, arr[l]))\n        return\n    m = (l + r) // 2\n    build(idx*2, l, m)\n    build(idx*2+1, m+1, r)\n    tree[idx] = merge(tree[idx*2], tree[idx*2+1])",
+          "isCode": true
+        },
+        {
+          "label": "def build(idx, l, r):\n    if l > r:\n        return\n    if l == r:\n        v = arr[l]\n        tree[idx] = (0, v, v, v)\n        return\n    m = (l + r) // 2\n    build(idx*2, l, m-1)\n    build(idx*2+1, m+1, r)\n    tree[idx] = merge(tree[idx*2], tree[idx*2+1])",
+          "isCode": true
+        },
+        {
+          "label": "def build(idx, l, r):\n    tree[idx] = (arr[l], arr[l], arr[l], arr[l])\n    if l == r: return\n    m = (l + r) // 2\n    build(idx*2, l, m)\n    build(idx*2+1, m+1, r)\n    tree[idx] = merge(tree[idx*2], tree[idx*2+1])",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Leaf stores (v,v,v,v); internal node merges its children built over [l,m] and [m+1,r].",
+      "wrongExplanations": {
+        "1": "Including empty at leaf (max(0,v)) changes semantics; emptiness handled at final answer.",
+        "3": "Initializing tree[idx] before building children may use incomplete values."
+      },
+      "hint": "At a leaf, all four values equal the element; otherwise recursively build children and merge.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def build(idx, l, r):\n    if l == r:\n        v = arr[l]\n        tree[idx] = (v, v, v, v)\n        return\n    m = (l + r) // 2\n    left = idx * 2\n    right = left + 1\n    build(left, l, m)\n    build(right, m + 1, r)\n    tree[idx] = merge(tree[left], tree[right])",
+      "codeLabel": "Build function"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Implement a query function that returns the (sum,prefix,suffix,best) tuple for a range [ql, qr] (0-indexed) or None if disjoint.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def query(idx, l, r, ql, qr):\n    if qr < l or r < ql:\n        return None\n    if ql <= l and r <= qr:\n        return tree[idx]\n    m = (l + r) // 2\n    left = query(idx * 2, l, m, ql, qr)\n    right = query(idx * 2 + 1, m + 1, r, ql, qr)\n    return merge(left, right)",
+          "isCode": true
+        },
+        {
+          "label": "def query(idx, l, r, ql, qr):\n    if ql <= l and r <= qr:\n        return tree[idx]\n    if l == r:\n        return tree[idx]\n    m = (l + r) // 2\n    return merge(query(idx*2, l, m, ql, qr), query(idx*2+1, m+1, r, ql, qr))",
+          "isCode": true
+        },
+        {
+          "label": "def query(idx, l, r, ql, qr):\n    if ql > r or qr < l:\n        return (0,0,0,0)\n    if l == r:\n        return tree[idx]\n    m = (l + r) // 2\n    return merge(query(idx*2, l, m, ql, qr), query(idx*2+1, m+1, r, ql, qr))",
+          "isCode": true
+        },
+        {
+          "label": "def query(idx, l, r, ql, qr):\n    if ql <= l and r <= qr:\n        return tree[idx]\n    if qr < l and r < ql:\n        return None\n    m = (l + r) // 2\n    left = query(idx*2, l, m, ql, qr)\n    right = query(idx*2+1, m+1, r, ql, qr)\n    return merge(left, right)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We must return None for no overlap, the node for full cover, otherwise merge recursive results.",
+      "wrongExplanations": {
+        "1": "Missing the no-overlap base case causes unnecessary merging over disjoint ranges.",
+        "3": "The disjoint check condition is incorrect (should be qr<l or r<ql)."
+      },
+      "hint": "Check disjoint first, then full cover, otherwise split and merge.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def query(idx, l, r, ql, qr):\n    if qr < l or r < ql:\n        return None\n    if ql <= l and r <= qr:\n        return tree[idx]\n    m = (l + r) // 2\n    left = query(idx * 2, l, m, ql, qr)\n    right = query(idx * 2 + 1, m + 1, r, ql, qr)\n    return merge(left, right)",
+      "codeLabel": "Query function"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "Finish main logic: build the structure and answer q queries, adjusting for empty subarrays.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "build(1, 0, n - 1)\nout = []\nfor _ in range(q):\n    a = next(it); b = next(it)\n    node = query(1, 0, n - 1, a - 1, b - 1)\n    best = node[3]\n    if best < 0:\n        best = 0\n    out.append(str(best))\nsys.stdout.write(\"\\n\".join(out))",
+          "isCode": true
+        },
+        {
+          "label": "build(1, 0, n)\nout = []\nfor _ in range(q):\n    a = next(it); b = next(it)\n    node = query(1, 0, n - 1, a, b)\n    out.append(str(max(0, node[1])))\nsys.stdout.write(\"\\n\".join(out))",
+          "isCode": true
+        },
+        {
+          "label": "build(0, 0, n - 1)\nres = []\nfor _ in range(q):\n    a = next(it); b = next(it)\n    node = query(0, 0, n - 1, a - 1, b - 1)\n    res.append(str(node[3]))\nprint(\"\\n\".join(res))",
+          "isCode": true
+        },
+        {
+          "label": "build(1, 0, n - 1)\nans = []\nfor _ in range(q):\n    l = next(it); r = next(it)\n    node = query(1, 0, n - 1, l, r)\n    best = max(node[0], 0)\n    ans.append(str(best))\nsys.stdout.write(\"\\n\".join(ans))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Build on indices [0..n-1], convert 1-indexed queries to 0-indexed, take max(0, best) before output.",
+      "wrongExplanations": {
+        "1": "Off-by-one in build and wrong fields in query/answer.",
+        "3": "Did not convert a,b to 0-based, and compares 0 with total sum instead of best."
+      },
+      "hint": "Careful with 1-indexed inputs and which tuple element is the result.",
+      "isCodeBuilding": true,
+      "codeSnippet": "build(1, 0, n - 1)\nout = []\nfor _ in range(q):\n    a = next(it); b = next(it)\n    node = query(1, 0, n - 1, a - 1, b - 1)\n    best = node[3]\n    if best < 0:\n        best = 0\n    out.append(str(best))\nsys.stdout.write(\"\\n\".join(out))",
+      "codeLabel": "Main loop and output"
+    },
+    {
+      "id": "q22",
+      "phase": "Verifying the Solution",
+      "questionText": "On array [2, 5, 1, -2, 3, -1, -7, 1], what should the output be for query [2,5]?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "7",
+          "isCode": false
+        },
+        {
+          "label": "6",
+          "isCode": false
+        },
+        {
+          "label": "8",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Range [5,1,-2,3] has best subarray [5,1,-2,3] with sum 7. No empty needed.",
+      "wrongExplanations": {
+        "1": "6 is best for [5,1,-2] range, not [2,5].",
+        "3": "5 ignores the positive continuation after 5."
+      },
+      "hint": "Try a quick pass summing while resetting at negatives.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q23",
+      "phase": "Verifying the Solution",
+      "questionText": "On the same array, what is the correct output for query [6,7]?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "-1",
+          "isCode": false
+        },
+        {
+          "label": "-7",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Range [-1, -7] has all negatives; empty subarray gives 0.",
+      "wrongExplanations": {
+        "1": "That's best non-empty, but empty (0) is allowed and better.",
+        "2": "Even worse than -1; empty is best."
+      },
+      "hint": "Empty subarray is allowed.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Verifying the Solution",
+      "questionText": "On the same array, what is the correct output for query [2,4]?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "6",
+          "isCode": false
+        },
+        {
+          "label": "7",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Range [5,1,-2] best subarray is [5,1] with sum 6.",
+      "wrongExplanations": {
+        "1": "7 corresponds to [2,5], not [2,4].",
+        "2": "5 misses the +1 after 5."
+      },
+      "hint": "Check subarrays ending before -2.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the time complexity to answer one query with this approach (after preprocessing)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(1)",
+          "isCode": false
+        },
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(log^2 n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We combine a logarithmic number of blocks due to splitting the range.",
+      "wrongExplanations": {
+        "1": "We still traverse multiple blocks per query.",
+        "3": "We traverse a single path depth, not nested logs."
+      },
+      "hint": "How many subranges are combined per query?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the extra space used by the data structure (excluding the input array and outputs)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(1)",
+          "isCode": false
+        },
+        {
+          "label": "O(q)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We store a constant-sized tuple at each node for about 4*n nodes: O(n).",
+      "wrongExplanations": {
+        "1": "The height is logarithmic, but total nodes are linear.",
+        "3": "Storage does not depend on the number of queries."
+      },
+      "hint": "How many nodes are there relative to n?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q27",
+      "phase": "Analyzing Complexity",
+      "questionText": "Where should we account for the 'empty subarray allowed' rule in our implementation?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Only when producing the final answer for a query: print max(0, best).",
+          "isCode": false
+        },
+        {
+          "label": "By setting leaf prefix/suffix/best to max(0, v).",
+          "isCode": false
+        },
+        {
+          "label": "By clamping negative prefixes/suffixes during merges.",
+          "isCode": false
+        },
+        {
+          "label": "By skipping negative elements during building.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Keep internal values for non-empty subarrays; apply max with 0 only at the end.",
+      "wrongExplanations": {
+        "1": "That propagates emptiness internally and complicates correctness.",
+        "2": "Clamping during merge loses necessary information."
+      },
+      "hint": "Avoid changing how segments combine; adjust only the final number.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\ndata = list(map(int, sys.stdin.buffer.read().split()))\nit = iter(data)",
+    "n = next(it); q = next(it)\narr = [next(it) for _ in range(n)]",
+    "tree = [None] * (4 * n)",
+    "def merge(L, R):\n    if L is None:\n        return R\n    if R is None:\n        return L\n    s = L[0] + R[0]\n    pref = max(L[1], L[0] + R[1])\n    suff = max(R[2], R[0] + L[2])\n    best = max(L[3], R[3], L[2] + R[1])\n    return (s, pref, suff, best)",
+    "def build(idx, l, r):\n    if l == r:\n        v = arr[l]\n        tree[idx] = (v, v, v, v)\n        return\n    m = (l + r) // 2\n    left = idx * 2\n    right = left + 1\n    build(left, l, m)\n    build(right, m + 1, r)\n    tree[idx] = merge(tree[left], tree[right])",
+    "def query(idx, l, r, ql, qr):\n    if qr < l or r < ql:\n        return None\n    if ql <= l and r <= qr:\n        return tree[idx]\n    m = (l + r) // 2\n    left = query(idx * 2, l, m, ql, qr)\n    right = query(idx * 2 + 1, m + 1, r, ql, qr)\n    return merge(left, right)",
+    "build(1, 0, n - 1)\nout = []\nfor _ in range(q):\n    a = next(it); b = next(it)\n    node = query(1, 0, n - 1, a - 1, b - 1)\n    best = node[3]\n    if best < 0:\n        best = 0\n    out.append(str(best))\nsys.stdout.write(\"\\n\".join(out))"
+  ],
+  "reasoningChain": [
+    {
+      "question": "What exactly is being asked for each [a,b] and how does allowing empty subarrays affect the result?",
+      "insight": "We need the maximum sum over all contiguous subarrays within [a,b], but can return 0 if all sums are negative."
+    },
+    {
+      "question": "Is recomputing from scratch per query feasible at the given constraints?",
+      "insight": "No; O(q * n) is too slow. We need per-query near-logarithmic time using reusable information."
+    },
+    {
+      "question": "What information about a segment allows fast combination over adjacent segments?",
+      "insight": "Store four values per segment: total sum, best prefix sum, best suffix sum, and best subarray sum."
+    },
+    {
+      "question": "How do we combine two adjacent segments' four values to obtain the four for their union?",
+      "insight": "Use formulas: sum add; prefix=max(L.prefix, L.sum+R.prefix); suffix=max(R.suffix, R.sum+L.suffix); best=max(L.best,R.best,L.suffix+R.prefix)."
+    },
+    {
+      "question": "How do we structure queries so each answer combines only a logarithmic number of segments?",
+      "insight": "Organize segments hierarchically and query by combining along a path, merging results as we go."
+    },
+    {
+      "question": "Where do we account for empty subarrays to ensure correctness and simplicity?",
+      "insight": "Compute best for non-empty subarrays and take max(0, best) only when outputting each query result."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1414,
+    "output_tokens": 14833,
+    "input_cost": 0.001767,
+    "output_cost": 0.14833,
+    "total_cost": 0.150097
+  }
+}

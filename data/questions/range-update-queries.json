@@ -1,0 +1,958 @@
+{
+  "id": "range-update-queries-guided",
+  "title": "Range Update Queries",
+  "difficulty": "hard",
+  "tags": [
+    "array"
+  ],
+  "estimatedMinutes": 75,
+  "language": "python",
+  "description": "You are given an array of n integers and q queries of two types:\n- Type 1: `1 a b u` — increase each value in the inclusive range [a, b] by u.\n- Type 2: `2 k` — query the value at position k.\n\nInput format:\n- First line: two integers n and q.\n- Second line: n integers x_1 ... x_n (1-indexed in queries).\n- Next q lines: each query is either `1 a b u` or `2 k`.\n\nOutput:\n- For each type 2 query, print the value at position k.",
+  "examples": [
+    {
+      "input": "8 3\n3 2 4 5 1 1 5 3\n2 4\n1 2 5 1\n2 4\n",
+      "output": "5\n6\n",
+      "explanation": "Initial x_4 = 5. After increasing indices 2..5 by 1, x_4 becomes 6."
+    }
+  ],
+  "constraints": [
+    "1 ≤ n, q ≤ 2⋅10^5",
+    "1 ≤ x_i, u ≤ 10^9",
+    "1 ≤ k ≤ n",
+    "1 ≤ a ≤ b ≤ n",
+    "Inclusive ranges [a, b]"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "After processing a query `1 2 5 3`, which positions change?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Positions 2,3,4,5 (inclusive)",
+          "isCode": false
+        },
+        {
+          "label": "Positions 3 and 4 only",
+          "isCode": false
+        },
+        {
+          "label": "Positions 1,2,3,4,5",
+          "isCode": false
+        },
+        {
+          "label": "Positions 2,3,4,5,6",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Ranges are inclusive: both endpoints a and b are updated. So indices 2..5 increase by 3.",
+      "wrongExplanations": {
+        "1": "This excludes endpoints incorrectly; 2 and 5 should change.",
+        "3": "6 is outside [2,5], so it should not change."
+      },
+      "hint": "Check if both a and b are included.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "Given array: [3, 2, 4, 5, 1, 1, 5, 3]. What is the answer to query `2 4` before any updates?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        },
+        {
+          "label": "6",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Position k=4 has value 5 in the given array.",
+      "wrongExplanations": {
+        "0": "4 is the value at position 3, not 4.",
+        "1": "3 is the value at position 2."
+      },
+      "hint": "Positions are 1-based in queries.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "Using the same array, after `1 2 5 1`, what is the value at position 4?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "5",
+          "isCode": false
+        },
+        {
+          "label": "6",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "7",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "x_4 was 5 and gets +1 because 4 ∈ [2,5], so it becomes 6.",
+      "wrongExplanations": {
+        "0": "Ignoring the update would leave it at 5, but it should increase.",
+        "3": "Only a single +1 update was applied."
+      },
+      "hint": "Check if 4 lies inside [2,5].",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "Are both ends included? After `1 2 5 1`, what happens to x_5?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "It stays the same",
+          "isCode": false
+        },
+        {
+          "label": "It increases by 1 only if there is another query",
+          "isCode": false
+        },
+        {
+          "label": "It increases by 1 only if we later query it",
+          "isCode": false
+        },
+        {
+          "label": "It increases by 1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 3,
+      "explanation": "5 is inside [2,5]. The increase applies immediately whether or not we query.",
+      "wrongExplanations": {
+        "0": "Endpoint b is included in the range.",
+        "2": "Querying does not change values; it only reports them."
+      },
+      "hint": "Consider inclusivity of [a,b].",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Exploring Approaches",
+      "questionText": "If we process each `1 a b u` by looping from a to b and adding u, what is the worst-case total work for n,q up to 2e5?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n + q), acceptable",
+          "isCode": false
+        },
+        {
+          "label": "O(n·q), which can be ~4×10^10 operations (too slow)",
+          "isCode": false
+        },
+        {
+          "label": "O(q log n), acceptable",
+          "isCode": false
+        },
+        {
+          "label": "O(n log q), acceptable",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Each update may touch up to O(n) positions, across q updates gives O(n·q).",
+      "wrongExplanations": {
+        "0": "Looping across ranges is not linear in n+q.",
+        "2": "There’s no logarithmic factor without additional structure."
+      },
+      "hint": "How many positions can a single range cover?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "Alternative: store all past updates; for a `2 k` query, scan all updates and sum u for those with a ≤ k ≤ b. Worst-case complexity per query?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(q) per query → O(q^2) overall in worst case",
+          "isCode": false
+        },
+        {
+          "label": "O(1) per query",
+          "isCode": false
+        },
+        {
+          "label": "O(n) per query",
+          "isCode": false
+        },
+        {
+          "label": "O(q log n) per query",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each query might scan all previous updates: O(q) per query yields O(q^2) total.",
+      "wrongExplanations": {
+        "1": "Scanning all updates is not constant time.",
+        "2": "n is unrelated to number of recorded updates."
+      },
+      "hint": "Consider many updates followed by many queries.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "Consider marking +u at index a and −u at index b+1 for each `1 a b u`. What does the running sum of these marks from 1..k represent?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "The total amount added to position k by all updates",
+          "isCode": false
+        },
+        {
+          "label": "Only the total amount subtracted from position k",
+          "isCode": false
+        },
+        {
+          "label": "The final array value at k (including the base)",
+          "isCode": false
+        },
+        {
+          "label": "A value that only matters for k = b",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The running sum counts all u for which a ≤ k ≤ b. That’s exactly the net increment at k.",
+      "wrongExplanations": {
+        "2": "You still need to add the base array value at k.",
+        "3": "It matters for all k in the array."
+      },
+      "hint": "Try with one update and see the running sum at different k.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Building the Idea",
+      "questionText": "n=8; updates: add +1 to [2,5], add +3 to [4,7]. Marks: +1 at 2, −1 at 6; +3 at 4, −3 at 8. What is the running sum up to k=4?",
+      "diagram": "Index: 1 2 3 4 5 6 7 8\nMarks:  0 +1 0 +3 0 -1 0 -3",
+      "options": [
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Running sum: at 2 → +1, at 4 add +3 → total 4. So k=4 gets +4.",
+      "wrongExplanations": {
+        "0": "Misses one of the increments.",
+        "2": "Only accounts for one update."
+      },
+      "hint": "Sum markers at indices ≤ 4.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "If the array length is n and an update has b = n, how should we handle the '−u at b+1' marker?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Place it at index n (same as b)",
+          "isCode": false
+        },
+        {
+          "label": "Skip it because there is no index n+1",
+          "isCode": false
+        },
+        {
+          "label": "Place it at index 1 (wrap around)",
+          "isCode": false
+        },
+        {
+          "label": "Split −u across two nearby indices",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "There is no index n+1, so that marker is simply omitted; the range naturally ends at n.",
+      "wrongExplanations": {
+        "0": "Placing at n cancels the update itself, which is wrong.",
+        "2": "There’s no wrap-around in indexing."
+      },
+      "hint": "Think of the marker as 'stopping' the effect after b.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "After many updates and marks, how do we compute the current value at position k?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "x_k = base[k-1] + running_sum(1..k)",
+          "isCode": false
+        },
+        {
+          "label": "x_k = base[k] + running_sum(1..k)",
+          "isCode": false
+        },
+        {
+          "label": "x_k = running_sum(1..k)",
+          "isCode": false
+        },
+        {
+          "label": "x_k = base[k-1] − running_sum(1..b)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Value at k equals its initial value plus total increment affecting k (the running sum up to k).",
+      "wrongExplanations": {
+        "1": "Array is 0-based in code; k is 1-based in queries.",
+        "2": "You must include the base array value."
+      },
+      "hint": "Combine base value with accumulated increments at k.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "Queries use 1-based indices, but Python lists are 0-based. How do we access the base value for query `2 k`?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "arr[k]",
+          "isCode": true
+        },
+        {
+          "label": "arr[k-1]",
+          "isCode": true
+        },
+        {
+          "label": "arr[k+1]",
+          "isCode": true
+        },
+        {
+          "label": "arr[k-2]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Convert 1-based k to 0-based index: arr[k-1].",
+      "wrongExplanations": {
+        "0": "arr[k] is off by one and may IndexError at k=n.",
+        "2": "k+1 is two off; also risks IndexError."
+      },
+      "hint": "Position 1 should map to index 0.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "Why should we avoid recomputing the running sum from the start for each `2 k` query?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Recomputing changes the array values",
+          "isCode": false
+        },
+        {
+          "label": "It costs up to O(n) per query; too slow for 2×10^5 queries",
+          "isCode": false
+        },
+        {
+          "label": "It is incorrect when u can be negative",
+          "isCode": false
+        },
+        {
+          "label": "It requires floating-point arithmetic",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "A full scan per query is linear in n; with many queries this is too slow.",
+      "wrongExplanations": {
+        "0": "Reading the array doesn’t modify it.",
+        "2": "Sign of u doesn’t affect correctness of summation."
+      },
+      "hint": "Estimate how many operations per query you can afford.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "To make queries fast, what operations should a helper structure support on the marks?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Add u to a range and get sum over a range",
+          "isCode": false
+        },
+        {
+          "label": "Add to a single index and get the sum from 1..i",
+          "isCode": false
+        },
+        {
+          "label": "Set a single index and get the maximum over a range",
+          "isCode": false
+        },
+        {
+          "label": "Sort the array and do binary search",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "We mark +u and −u at single positions and need prefix sums up to k.",
+      "wrongExplanations": {
+        "0": "We’re not directly applying range adds to the base array.",
+        "2": "We never need maximum; we need sums."
+      },
+      "hint": "Marks are placed at single indices; queries ask for a prefix sum.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "cb1",
+      "phase": "Writing the Code",
+      "questionText": "Read all input fast into a list of integers.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\ndata = list(map(int, sys.stdin.buffer.read().split()))",
+          "isCode": true
+        },
+        {
+          "label": "import sys\ndata = sys.stdin.buffer.read().split()",
+          "isCode": true
+        },
+        {
+          "label": "import sys\ndata = list(map(int, sys.stdin.readline().split()))",
+          "isCode": true
+        },
+        {
+          "label": "data = list(map(int, input().split()))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Reading all tokens and mapping to int is both correct and fast.",
+      "wrongExplanations": {
+        "1": "Leaves tokens as bytes, not integers.",
+        "2": "Reads only one line; queries won’t be read."
+      },
+      "hint": "You need all tokens as ints, not just the first line.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\ndata = list(map(int, sys.stdin.buffer.read().split()))",
+      "codeLabel": "Fast input"
+    },
+    {
+      "id": "cb2",
+      "phase": "Writing the Code",
+      "questionText": "Parse n, q, and the base array from the token list.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "it = iter(data)\nn = next(it); q = next(it)\narr = [next(it) for _ in range(n)]",
+          "isCode": true
+        },
+        {
+          "label": "it = iter(data)\nq = next(it); n = next(it)\narr = [next(it) for _ in range(n)]",
+          "isCode": true
+        },
+        {
+          "label": "it = iter(data)\nn = next(it); q = next(it)\narr = [next(it) for _ in range(q)]",
+          "isCode": true
+        },
+        {
+          "label": "it = iter(data)\nn, q = data[:2]\narr = data[2:2+n]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "First two tokens are n and q; then read n numbers for the base array.",
+      "wrongExplanations": {
+        "1": "Swaps n and q; array length becomes wrong downstream.",
+        "2": "Uses q instead of n for array length."
+      },
+      "hint": "Follow the input format exactly.",
+      "isCodeBuilding": true,
+      "codeSnippet": "it = iter(data)\nn = next(it); q = next(it)\narr = [next(it) for _ in range(n)]",
+      "codeLabel": "Parse header and array"
+    },
+    {
+      "id": "cb3",
+      "phase": "Writing the Code",
+      "questionText": "Define a helper class to store marks and support point add + prefix sum queries (1-based indexing inside). Choose the correct initializer.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "class IndexTree:\n    def __init__(self, n):\n        self.n = n\n        self.bit = [0]*(n+1)",
+          "isCode": true
+        },
+        {
+          "label": "class IndexTree:\n    def __init__(self, n):\n        self.n = n\n        self.bit = [0]*n",
+          "isCode": true
+        },
+        {
+          "label": "class IndexTree:\n    def __init__(self, n):\n        self.n = n-1\n        self.bit = [0]*(n+1)",
+          "isCode": true
+        },
+        {
+          "label": "class IndexTree:\n    def __init__(self, n):\n        self.n = n\n        self.bit = [0]*(n)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We keep indices 1..n; so allocate n+1 slots and store n for bounds.",
+      "wrongExplanations": {
+        "1": "No slot for index n (and index 0 is unused).",
+        "2": "Self.n should reflect actual last valid index n."
+      },
+      "hint": "You will use indices 1..n; index 0 stays unused.",
+      "isCodeBuilding": true,
+      "codeSnippet": "class IndexTree:\n    def __init__(self, n):\n        self.n = n\n        self.bit = [0]*(n+1)",
+      "codeLabel": "Helper init"
+    },
+    {
+      "id": "cb4",
+      "phase": "Writing the Code",
+      "questionText": "Add the method to apply a delta to a single index and propagate it upwards.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def add(self, i, delta):\n    while i <= self.n:\n        self.bit[i] += delta\n        i += i & -i",
+          "isCode": true
+        },
+        {
+          "label": "def add(self, i, delta):\n    while i < self.n:\n        self.bit[i] += delta\n        i += i & -i",
+          "isCode": true
+        },
+        {
+          "label": "def add(self, i, delta):\n    while i <= self.n:\n        self.bit[i] = delta\n        i += i & -i",
+          "isCode": true
+        },
+        {
+          "label": "def add(self, i, delta):\n    while i > 0:\n        self.bit[i] += delta\n        i -= i & -i",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We must include index n and accumulate deltas rather than overwrite values.",
+      "wrongExplanations": {
+        "1": "Excludes index n when i==n.",
+        "2": "Overwrites instead of adding; loses previous updates."
+      },
+      "hint": "Think inclusive bounds and accumulation.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    def add(self, i, delta):\n        while i <= self.n:\n            self.bit[i] += delta\n            i += i & -i",
+      "codeLabel": "Point add"
+    },
+    {
+      "id": "cb5",
+      "phase": "Writing the Code",
+      "questionText": "Add the method that returns the sum from index 1..i.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def sum(self, i):\n    s = 0\n    while i >= 0:\n        s += self.bit[i]\n        i -= i & -i\n    return s",
+          "isCode": true
+        },
+        {
+          "label": "def sum(self, i):\n    s = 0\n    while i > 0:\n        s += self.bit[i]\n        i -= i & -i\n    return s",
+          "isCode": true
+        },
+        {
+          "label": "def sum(self, i):\n    s = 0\n    while i > 0:\n        s += self.bit[i]\n        i += i & -i\n    return s",
+          "isCode": true
+        },
+        {
+          "label": "def sum(self, i):\n    return self.bit[i]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "We accumulate while i>0 and move toward 0 by subtracting the step.",
+      "wrongExplanations": {
+        "0": "At i=0 the loop would still run and try to access bit[0] repeatedly.",
+        "2": "This moves i away from 0 and may never terminate."
+      },
+      "hint": "Ensure the loop terminates at i=0.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    def sum(self, i):\n        s = 0\n        while i > 0:\n            s += self.bit[i]\n            i -= i & -i\n        return s",
+      "codeLabel": "Prefix sum"
+    },
+    {
+      "id": "cb6",
+      "phase": "Writing the Code",
+      "questionText": "Instantiate the helper and prepare an output list.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "tree = IndexTree(n)\nout_lines = []",
+          "isCode": true
+        },
+        {
+          "label": "tree = IndexTree(n+1)\nout_lines = []",
+          "isCode": true
+        },
+        {
+          "label": "tree = IndexTree(n)\nout_lines = None",
+          "isCode": true
+        },
+        {
+          "label": "tree = IndexTree(n-1)\nout_lines = []",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need indices 1..n and a list to collect answers.",
+      "wrongExplanations": {
+        "1": "Changing size here breaks consistency with update bounds.",
+        "2": "You need a list to append answers."
+      },
+      "hint": "Use the same n you parsed.",
+      "isCodeBuilding": true,
+      "codeSnippet": "tree = IndexTree(n)\nout_lines = []",
+      "codeLabel": "Create helper and outputs"
+    },
+    {
+      "id": "cb7",
+      "phase": "Writing the Code",
+      "questionText": "Process q queries. For `1 a b u`, mark +u at a and −u at b+1 if b < n. For `2 k`, compute base[k-1] + prefix(k). Choose the correct snippet.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "for _ in range(q):\n    t = next(it)\n    if t == 1:\n        a = next(it); b = next(it); u = next(it)\n        tree.add(a, u)\n        if b < n:\n            tree.add(b+1, -u)\n    else:\n        k = next(it)\n        out_lines.append(str(arr[k] + tree.sum(k-1)))",
+          "isCode": true
+        },
+        {
+          "label": "for _ in range(q):\n    t = next(it)\n    if t == 1:\n        a = next(it); b = next(it); u = next(it)\n        tree.add(a, u)\n        tree.add(b, -u)\n    else:\n        k = next(it)\n        out_lines.append(str(arr[k-1] + tree.sum(k)))",
+          "isCode": true
+        },
+        {
+          "label": "for _ in range(q):\n    t = next(it)\n    if t == 1:\n        a = next(it); b = next(it); u = next(it)\n        tree.add(a, u)\n        if b < n:\n            tree.add(b+1, -u)\n    else:\n        k = next(it)\n        out_lines.append(str(arr[k-1] + tree.sum(k)))",
+          "isCode": true
+        },
+        {
+          "label": "for _ in range(q):\n    t = next(it)\n    if t == 1:\n        a = next(it); b = next(it); u = next(it)\n        tree.add(a, u)\n        if b <= n:\n            tree.add(b+1, -u)\n    else:\n        k = next(it)\n        out_lines.append(str(arr[k-1] + tree.sum(k)))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "We add +u at a and −u at b+1 only when b<n; for type 2, use arr[k-1] + prefix(k).",
+      "wrongExplanations": {
+        "1": "Subtracting at b (not b+1) shortens the range by one.",
+        "3": "When b==n, b+1 is out of bounds; the check should be b < n."
+      },
+      "hint": "Remember to handle the b==n boundary.",
+      "isCodeBuilding": true,
+      "codeSnippet": "for _ in range(q):\n    t = next(it)\n    if t == 1:\n        a = next(it); b = next(it); u = next(it)\n        tree.add(a, u)\n        if b < n:\n            tree.add(b+1, -u)\n    else:\n        k = next(it)\n        out_lines.append(str(arr[k-1] + tree.sum(k)))",
+      "codeLabel": "Process queries"
+    },
+    {
+      "id": "cb8",
+      "phase": "Writing the Code",
+      "questionText": "Output all answers, one per line.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "sys.stdout.write(\"\\n\".join(out_lines))",
+          "isCode": true
+        },
+        {
+          "label": "print(*out_lines)",
+          "isCode": true
+        },
+        {
+          "label": "sys.stdout.write(out_lines)",
+          "isCode": true
+        },
+        {
+          "label": "for s in out_lines:\n    sys.stdout.write(s)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Joining with newlines writes each answer on its own line as required.",
+      "wrongExplanations": {
+        "1": "This separates by spaces, not newlines.",
+        "3": "Writes answers back-to-back without newlines."
+      },
+      "hint": "Ensure each answer appears on its own line.",
+      "isCodeBuilding": true,
+      "codeSnippet": "sys.stdout.write(\"\\n\".join(out_lines))",
+      "codeLabel": "Emit output"
+    },
+    {
+      "id": "q14",
+      "phase": "Verifying the Solution",
+      "questionText": "Run the code on the sample:\n8 3\n3 2 4 5 1 1 5 3\n2 4\n1 2 5 1\n2 4\nWhat is the exact output?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "5\\n5\\n",
+          "isCode": false
+        },
+        {
+          "label": "6\\n6\\n",
+          "isCode": false
+        },
+        {
+          "label": "5\\n6\\n",
+          "isCode": false
+        },
+        {
+          "label": "4\\n6\\n",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "First query reports 5. After updating [2,5] by 1, x_4 becomes 6.",
+      "wrongExplanations": {
+        "0": "Second answer ignores the update.",
+        "1": "First answer is before updates."
+      },
+      "hint": "Trace x_4 before and after the update.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q15",
+      "phase": "Verifying the Solution",
+      "questionText": "Check the boundary b = n. Suppose n=5, arr=[1,1,1,1,1]. Apply `1 2 5 2`, then query `2 5`. What is printed?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "x_5 starts at 1 and gets +2 from the update covering 2..5, so it is 3.",
+      "wrongExplanations": {
+        "0": "Ignores the update effect at position 5.",
+        "1": "2 would be correct if base were 0, but base is 1."
+      },
+      "hint": "Remember to skip placing −u at b+1 when b=n.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q16",
+      "phase": "Verifying the Solution",
+      "questionText": "Multiple updates: n=6, arr=[2,2,2,2,2,2]. Apply `1 1 3 5`, `1 2 6 1`. Query `2 1`, `2 3`, `2 6`. What are the three outputs?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "7, 8, 3",
+          "isCode": false
+        },
+        {
+          "label": "7, 9, 3",
+          "isCode": false
+        },
+        {
+          "label": "7, 8, 8",
+          "isCode": false
+        },
+        {
+          "label": "2, 2, 2",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Positions: 1 gets +5, 3 gets +5 and +1, 6 gets +1. So 2+5=7, 2+6=8, 2+1=3.",
+      "wrongExplanations": {
+        "1": "Position 3 gains +6, not +7.",
+        "2": "Position 6 is only in the second update."
+      },
+      "hint": "Sum contributions per position and add the base value.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q17",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the time per operation for updates and queries in this implementation?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(1) for both",
+          "isCode": false
+        },
+        {
+          "label": "O(log n) for both",
+          "isCode": false
+        },
+        {
+          "label": "O(n) for both",
+          "isCode": false
+        },
+        {
+          "label": "O(q) for both",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Each add and sum uses a loop moving by i & -i, touching O(log n) indices.",
+      "wrongExplanations": {
+        "0": "The inner loops visit several indices.",
+        "2": "We do not scan the entire array per operation."
+      },
+      "hint": "How many times can i change before reaching 0 or exceeding n?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q18",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the additional space used by the helper structure?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(1)",
+          "isCode": false
+        },
+        {
+          "label": "O(log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n q)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "The helper keeps an array of size about n to store accumulated marks.",
+      "wrongExplanations": {
+        "0": "We store more than a constant number of values.",
+        "1": "Space does not depend logarithmically on n."
+      },
+      "hint": "Consider the size of the internal array storing marks.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\ndata = list(map(int, sys.stdin.buffer.read().split()))",
+    "it = iter(data)\nn = next(it); q = next(it)\narr = [next(it) for _ in range(n)]",
+    "class IndexTree:\n    def __init__(self, n):\n        self.n = n\n        self.bit = [0]*(n+1)",
+    "    def add(self, i, delta):\n        while i <= self.n:\n            self.bit[i] += delta\n            i += i & -i",
+    "    def sum(self, i):\n        s = 0\n        while i > 0:\n            s += self.bit[i]\n            i -= i & -i\n        return s",
+    "tree = IndexTree(n)\nout_lines = []",
+    "for _ in range(q):\n    t = next(it)\n    if t == 1:\n        a = next(it); b = next(it); u = next(it)\n        tree.add(a, u)\n        if b < n:\n            tree.add(b+1, -u)\n    else:\n        k = next(it)\n        out_lines.append(str(arr[k-1] + tree.sum(k)))",
+    "sys.stdout.write(\"\\n\".join(out_lines))"
+  ],
+  "reasoningChain": [
+    {
+      "question": "Are ranges [a,b] inclusive and how do type 1 vs type 2 queries affect values?",
+      "insight": "Type 1 adds u to every index a..b (inclusive). Type 2 reports the current value at k without changing anything."
+    },
+    {
+      "question": "Is directly looping from a to b for each update feasible under constraints?",
+      "insight": "No; in the worst case this is O(n·q), which is too slow for 2×10^5."
+    },
+    {
+      "question": "How can we represent a range add using simple marks at endpoints?",
+      "insight": "Place +u at a and −u at b+1; the running sum up to k equals the total added to position k."
+    },
+    {
+      "question": "How do we compute the current value at k after many updates?",
+      "insight": "x_k = base[k-1] plus the running sum of marks from 1..k."
+    },
+    {
+      "question": "What operations are needed to support many queries fast?",
+      "insight": "We need to add to a single index and query prefix sums efficiently, avoiding O(n) per query."
+    },
+    {
+      "question": "How to handle indexing and boundaries robustly?",
+      "insight": "Use 1-based indexing inside the helper, map query k to arr[k-1], and skip placing −u at b+1 when b = n."
+    },
+    {
+      "question": "How to implement the helper so adds and prefix sums run fast?",
+      "insight": "Maintain an internal array; implement add(i,delta) and sum(i) with loops that move i by i & -i, achieving O(log n) per operation."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1418,
+    "output_tokens": 17854,
+    "input_cost": 0.001772,
+    "output_cost": 0.17854,
+    "total_cost": 0.180313
+  }
+}

@@ -1,0 +1,1013 @@
+{
+  "id": "building-roads",
+  "title": "Building Roads",
+  "difficulty": "intermediate",
+  "tags": [
+    "graph"
+  ],
+  "estimatedMinutes": 60,
+  "language": "python",
+  "description": "Byteland has n cities, and m roads between them. The goal is to construct new roads so that there is a route between any two cities.\n\nYour task is to find out the minimum number of roads required, and also determine which roads should be built.\n\nThe first input line has two integers n and m : the number of cities and roads. The cities are numbered 1,2,\\dots,n .\n\nAfter that, there are m lines describing the roads. Each line has two integers a and b : there is a road between those cities.\n\nA road always connects two different cities, and there is at most one road between any two cities.\n\nOutput:\n- First print an integer k : the number of required roads.\n- Then, print k lines that describe the new roads. You can print any valid solution.",
+  "examples": [
+    {
+      "input": "4 2\n1 2\n3 4\n",
+      "output": "1\n2 3\n",
+      "explanation": "There are two components {1,2} and {3,4}, so 1 road is enough, for example 2-3."
+    }
+  ],
+  "constraints": [
+    "1 <= n <= 1e5",
+    "1 <= m <= 2e5",
+    "1 <= a,b <= n",
+    "Undirected simple graph (no self-loops, no multi-edges)"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "If n=4 and there are no existing roads, what is the minimum number of new roads needed so every city can reach every other?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 3,
+      "explanation": "With 4 isolated cities, there are 4 separate groups. Connecting 4 groups needs 3 new roads.",
+      "wrongExplanations": {
+        "2": "2 roads leave at least 2 groups unconnected."
+      },
+      "hint": "Think: components = 4; how many edges to connect them into one?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "For n=4 and roads: 1-2, 2-3. How many connected groups (components) are there?",
+      "diagram": "1--2--3   4",
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "It depends on direction of roads",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Cities {1,2,3} are together; city {4} is alone. So there are 2 groups.",
+      "wrongExplanations": {
+        "0": "All cities aren't connected because 4 is isolated.",
+        "3": "Roads are undirected, so direction doesn't apply."
+      },
+      "hint": "Count the isolated sets of cities.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "For n=5 and roads: 1-2, 3-4. What is the minimum number of new roads needed to connect all cities?",
+      "diagram": "1--2   3--4   5",
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "It depends on which roads you choose",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Groups are {1,2}, {3,4}, {5} → 3 groups → need 2 roads.",
+      "wrongExplanations": {
+        "0": "One road connects only two groups, leaving three or more disconnected."
+      },
+      "hint": "Minimum roads = components − 1.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "If there are 4 separate components, can two new roads ever be enough to connect the whole graph?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, always",
+          "isCode": false
+        },
+        {
+          "label": "Only if the existing roads form a cycle",
+          "isCode": false
+        },
+        {
+          "label": "No, you need 3 new roads",
+          "isCode": false
+        },
+        {
+          "label": "It depends on which cities you choose",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "To merge 4 groups into one, you must add 3 roads at minimum.",
+      "wrongExplanations": {
+        "0": "Two roads can connect at most three groups into one."
+      },
+      "hint": "Each new road reduces the number of groups by at most 1.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Understanding the Problem",
+      "questionText": "Which strategy is guaranteed to yield a valid minimal set of new roads?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Connect every city in one component to every city in another",
+          "isCode": false
+        },
+        {
+          "label": "Pick one city from each component and connect them in a chain",
+          "isCode": false
+        },
+        {
+          "label": "Connect the smallest-numbered city in each component to city 1 only",
+          "isCode": false
+        },
+        {
+          "label": "Add roads only within existing components",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Selecting one representative per component and chaining them connects all with minimal edges.",
+      "wrongExplanations": {
+        "0": "This adds far more roads than necessary.",
+        "2": "A star works but still uses c−1 roads; chain is sufficient without singling out city 1."
+      },
+      "hint": "You only need to connect the components, not all pairs of cities.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "What information do we actually need from the current road network to build a minimal solution?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Exact shortest paths between all city pairs",
+          "isCode": false
+        },
+        {
+          "label": "The list of connected components and one representative city from each",
+          "isCode": false
+        },
+        {
+          "label": "The degree (number of roads) of each city",
+          "isCode": false
+        },
+        {
+          "label": "Whether there is any cycle in the graph",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "With the components and a representative per component, we can connect them with minimal roads.",
+      "wrongExplanations": {
+        "0": "Shortest paths aren’t needed to connect components.",
+        "2": "Degrees don’t tell you how many components there are."
+      },
+      "hint": "Focus on grouping cities that are already reachable from each other.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "Why is trying all potential new roads and checking connectivity after each a poor approach here?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "It is too slow for n up to 1e5 and m up to 2e5",
+          "isCode": false
+        },
+        {
+          "label": "It cannot ever find a minimal solution",
+          "isCode": false
+        },
+        {
+          "label": "It violates the memory limit",
+          "isCode": false
+        },
+        {
+          "label": "It requires recursion",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Trying many pairs and rechecking connectivity would be far too slow for the limits.",
+      "wrongExplanations": {
+        "1": "It could find a solution but it’s inefficient; minimality isn’t the issue here."
+      },
+      "hint": "Consider the number of potential pairs of cities.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Exploring Approaches",
+      "questionText": "Suppose we found representatives r1, r2, ..., rc of the c components. Which set of roads always connects all cities?",
+      "diagram": "r1 - r2 - r3 - ... - rc",
+      "options": [
+        {
+          "label": "Connect r1 to r2, r2 to r3, ..., r{c-1} to rc",
+          "isCode": false
+        },
+        {
+          "label": "Connect r1 to every other representative",
+          "isCode": false
+        },
+        {
+          "label": "Connect the smallest-numbered representative to the largest only",
+          "isCode": false
+        },
+        {
+          "label": "Connect any c-2 random pairs among the representatives",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Connecting representatives in a chain merges all components with c−1 roads.",
+      "wrongExplanations": {
+        "1": "This star also uses c−1 roads, but a chain is simpler and sufficient.",
+        "3": "Using only c−2 roads can leave the graph disconnected."
+      },
+      "hint": "Think of merging c groups into one with minimal links.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "Which graph representation is most suitable for n up to 1e5 and m up to 2e5?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Adjacency list of size n with m total entries",
+          "isCode": false
+        },
+        {
+          "label": "n x n adjacency matrix",
+          "isCode": false
+        },
+        {
+          "label": "Only a list of edges without neighbor access",
+          "isCode": false
+        },
+        {
+          "label": "A boolean visited matrix of size n x n",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Adjacency lists give O(n+m) storage and efficient neighbor iteration.",
+      "wrongExplanations": {
+        "1": "An n x n matrix uses too much memory and is slower to iterate.",
+        "2": "You need to quickly access neighbors to traverse components."
+      },
+      "hint": "We need to iterate neighbors of a node efficiently and save memory.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "How should we mark which cities have already been explored?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "A list visited of length n+1 where visited[i] is True/False",
+          "isCode": false
+        },
+        {
+          "label": "A dict mapping city to number of visits",
+          "isCode": false
+        },
+        {
+          "label": "Modify the adjacency list to remove visited cities",
+          "isCode": false
+        },
+        {
+          "label": "A set of visited edges",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "A boolean list indexed by city id is simple and O(1) per check.",
+      "wrongExplanations": {
+        "2": "Removing entries is error-prone and not necessary."
+      },
+      "hint": "City IDs are 1..n; direct indexing is convenient.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "To explore all cities in a component without risking recursion depth issues, what will you use?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "An explicit stack to traverse neighbors iteratively",
+          "isCode": false
+        },
+        {
+          "label": "Deep recursion and hope the limit is enough",
+          "isCode": false
+        },
+        {
+          "label": "Sort all adjacency lists first",
+          "isCode": false
+        },
+        {
+          "label": "Randomly jump between cities",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "An explicit stack avoids recursion limits while exploring connected cities.",
+      "wrongExplanations": {
+        "1": "n can be up to 1e5; recursion depth may be exceeded."
+      },
+      "hint": "Use an iterative structure to manage which city to process next.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "When should you record the representative of a component?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "As soon as you find an unvisited city before exploring its neighbors",
+          "isCode": false
+        },
+        {
+          "label": "After finishing exploring the component",
+          "isCode": false
+        },
+        {
+          "label": "Pick the smallest city ID in the component only",
+          "isCode": false
+        },
+        {
+          "label": "Pick the city with the most neighbors",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The first unvisited city encountered in the scan can serve as the representative.",
+      "wrongExplanations": {
+        "1": "Waiting isn’t necessary; the first unvisited city is in that component.",
+        "2": "Smallest ID isn’t required; any city works."
+      },
+      "hint": "You scan cities 1..n; when you hit an unvisited one, you’re starting a new component.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "After collecting all representatives in a list reps, what is k (the number of new roads to print)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "len(reps)",
+          "isCode": false
+        },
+        {
+          "label": "len(reps) - 1",
+          "isCode": false
+        },
+        {
+          "label": "m - (n - 1)",
+          "isCode": false
+        },
+        {
+          "label": "max(0, len(reps) - 1)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 3,
+      "explanation": "k should be max(0, len(reps)-1) to avoid negative when there are 0 or 1 components.",
+      "wrongExplanations": {
+        "1": "len(reps)-1 is correct but can be negative if reps is empty (e.g., no input)."
+      },
+      "hint": "Handle the case where the graph is already connected.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Building the Idea",
+      "questionText": "Which edges should we output using the reps list?",
+      "diagram": "reps = [r1, r2, r3, ..., rc]",
+      "options": [
+        {
+          "label": "Pairs: (reps[i], reps[i+1]) for i=0..len(reps)-2",
+          "isCode": false
+        },
+        {
+          "label": "Pairs: (reps[0], reps[i]) for all i>0",
+          "isCode": false
+        },
+        {
+          "label": "All pairs among reps",
+          "isCode": false
+        },
+        {
+          "label": "Any len(reps)-2 pairs among reps",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Consecutive pairs connect components in a chain with minimal edges.",
+      "wrongExplanations": {
+        "1": "A star also works but the chain already suffices and matches our plan.",
+        "3": "Using fewer than len(reps)-1 edges may leave it disconnected."
+      },
+      "hint": "Build a simple chain through the representatives.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Start by reading all input fast and parsing n and m. Which snippet is correct?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\n\ndef main():\n    data = sys.stdin.buffer.read().split()\n    it = iter(data)\n    try:\n        n = int(next(it))\n        m = int(next(it))\n    except StopIteration:\n        return",
+          "isCode": true
+        },
+        {
+          "label": "def main():\n    n, m = map(int, input().split())\n    lines = [input().split() for _ in range(m)]",
+          "isCode": true
+        },
+        {
+          "label": "import sys\n\ndef main():\n    tokens = sys.stdin.read().split()\n    n = int(tokens[0])\n    # m is unknown here",
+          "isCode": true
+        },
+        {
+          "label": "def main():\n    n = int(input())\n    m = int(input())\n    # edges will be read later",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Reading all tokens and iterating is robust and fast for large inputs.",
+      "wrongExplanations": {
+        "1": "Multiple input() calls can be slow but also this leaves parsing edges unclear here.",
+        "2": "It ignores m and doesn’t set an iterator for edges."
+      },
+      "hint": "Use sys.stdin.buffer and iterate tokens.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\n\ndef main():\n    data = sys.stdin.buffer.read().split()\n    it = iter(data)\n    try:\n        n = int(next(it))\n        m = int(next(it))\n    except StopIteration:\n        return",
+      "codeLabel": "Read input header"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Build the adjacency list and read m undirected roads.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "adj = [[] for _ in range(n+1)]\nfor _ in range(m):\n    a = int(next(it)); b = int(next(it))\n    adj[a].append(b)\n    adj[b].append(a)",
+          "isCode": true
+        },
+        {
+          "label": "adj = [[] for _ in range(n)]\nfor _ in range(m):\n    a = int(next(it)); b = int(next(it))\n    adj[a-1].append(b-1)",
+          "isCode": true
+        },
+        {
+          "label": "adj = {i: [] for i in range(1, n)}\nfor _ in range(m):\n    a = int(next(it)); b = int(next(it))\n    adj[a].append(b)",
+          "isCode": true
+        },
+        {
+          "label": "adj = [[] for _ in range(n+1)]\nfor _ in range(m):\n    a = int(next(it)); b = int(next(it))\n    adj[a].append(b)\n    # undirected edge omitted",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need n+1 slots for 1..n, and add both directions for an undirected road.",
+      "wrongExplanations": {
+        "1": "Mixes 0-based with 1-based and misses reverse edge.",
+        "3": "Missing the reverse edge breaks adjacency."
+      },
+      "hint": "Remember: 1-based indexing and undirected edges need both sides.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    adj = [[] for _ in range(n+1)]\n    for _ in range(m):\n        a = int(next(it)); b = int(next(it))\n        adj[a].append(b)\n        adj[b].append(a)",
+      "codeLabel": "Build adjacency list"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Initialize structures to track visited cities and component representatives.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "visited = [False]*(n+1)\nreps = []",
+          "isCode": true
+        },
+        {
+          "label": "visited = set()\nreps = set()",
+          "isCode": true
+        },
+        {
+          "label": "visited = [0]*n\nreps = [0]*n",
+          "isCode": true
+        },
+        {
+          "label": "visited = {}\nreps = []",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "A boolean list visited[1..n] and a list of reps are simple and efficient.",
+      "wrongExplanations": {
+        "1": "Sets here complicate indexing; we need O(1) array access.",
+        "2": "visited length should be n+1 for 1-based IDs, and reps isn’t a fixed-size array."
+      },
+      "hint": "Use direct indexing with 1..n.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    visited = [False]*(n+1)\n    reps = []",
+      "codeLabel": "Init visited and reps"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Write the outer loop to start exploring each unvisited city and seed the stack.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "for i in range(1, n+1):\n    if not visited[i]:\n        reps.append(i)\n        stack = [i]\n        visited[i] = True",
+          "isCode": true
+        },
+        {
+          "label": "for i in range(n):\n    if not visited[i]:\n        reps.append(i)\n        stack = [i]\n        visited[i] = True",
+          "isCode": true
+        },
+        {
+          "label": "for i in range(1, n+1):\n    if visited[i]:\n        reps.append(i)\n        stack = [i]\n        visited[i] = True",
+          "isCode": true
+        },
+        {
+          "label": "for i in range(1, n+1):\n    if not visited[i]:\n        stack = []\n        reps.append(i)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Scan 1..n, if unvisited then record rep, create stack with i, and mark visited.",
+      "wrongExplanations": {
+        "1": "Uses 0..n-1 indices but cities are 1..n.",
+        "3": "Stack must start with i and mark it visited to avoid reprocessing."
+      },
+      "hint": "Indexing is 1-based; seed the stack with the new node.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    for i in range(1, n+1):\n        if not visited[i]:\n            reps.append(i)\n            stack = [i]\n            visited[i] = True",
+      "codeLabel": "Seed exploration per component"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Fill in the iterative neighbor exploration to mark the whole component.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "while stack:\n    u = stack.pop()\n    for v in adj[u]:\n        if not visited[v]:\n            visited[v] = True\n            stack.append(v)",
+          "isCode": true
+        },
+        {
+          "label": "while stack:\n    u = stack.pop(0)\n    for v in adj[u]:\n        if not visited[v]:\n            stack.append(v)",
+          "isCode": true
+        },
+        {
+          "label": "while stack:\n    u = stack[-1]\n    for v in adj[u]:\n        if visited[v]:\n            break",
+          "isCode": true
+        },
+        {
+          "label": "while stack:\n    for v in adj[stack.pop()]:\n        visited[v] = True",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Pop a node, push unvisited neighbors, and mark them visited.",
+      "wrongExplanations": {
+        "1": "Popping from front is inefficient and it never marks visited.",
+        "3": "Marks neighbors visited without checking, and can push duplicates."
+      },
+      "hint": "Mark before pushing to avoid duplicates.",
+      "isCodeBuilding": true,
+      "codeSnippet": "            while stack:\n                u = stack.pop()\n                for v in adj[u]:\n                    if not visited[v]:\n                        visited[v] = True\n                        stack.append(v)",
+      "codeLabel": "Iterative exploration"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Compute k and prepare the output lines list.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "k = len(reps)\nout_lines = [str(k)]",
+          "isCode": true
+        },
+        {
+          "label": "k = max(0, len(reps)-1)\nout_lines = [str(k)]",
+          "isCode": true
+        },
+        {
+          "label": "k = len(reps)-1\nout_lines = []",
+          "isCode": true
+        },
+        {
+          "label": "k = max(0, len(reps))\nout_lines = []",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "k is the number of new roads (components−1, not below 0), and we start output with it.",
+      "wrongExplanations": {
+        "0": "len(reps) is the number of components, not the number of required roads.",
+        "2": "We must include k as the first output line."
+      },
+      "hint": "First line should be the count of new roads.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    k = max(0, len(reps)-1)\n    out_lines = [str(k)]",
+      "codeLabel": "Compute k and init output"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "Append the new roads based on consecutive representatives.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "for i in range(len(reps)-1):\n    out_lines.append(f\"{reps[i]} {reps[i+1]}\")",
+          "isCode": true
+        },
+        {
+          "label": "for i in range(1, len(reps)):\n    out_lines.append(f\"{reps[0]} {reps[i]}\")",
+          "isCode": true
+        },
+        {
+          "label": "for i in range(len(reps)):\n    for j in range(i+1, len(reps)):\n        out_lines.append(f\"{reps[i]} {reps[j]}\")",
+          "isCode": true
+        },
+        {
+          "label": "if reps:\n    out_lines.append(f\"{reps[0]} {reps[-1]}\")",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Consecutive pairs connect all components with minimal roads.",
+      "wrongExplanations": {
+        "1": "This creates a star; though valid, it is different from the intended chain here.",
+        "3": "Only adds one road; insufficient when more than two components."
+      },
+      "hint": "Link r1-r2, r2-r3, ..., r{c-1}-rc.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    for i in range(len(reps)-1):\n        out_lines.append(f\"{reps[i]} {reps[i+1]}\")",
+      "codeLabel": "Append edges"
+    },
+    {
+      "id": "q22",
+      "phase": "Writing the Code",
+      "questionText": "Finish by writing the output and adding the main guard.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "print(\"\\n\".join(out_lines))\n\nif __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "sys.stdout.write(\"\\n\".join(out_lines))\n\nif __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "for line in out_lines:\n    print(line)\n\nmain()",
+          "isCode": true
+        },
+        {
+          "label": "sys.stdout.write(\"\\n\".join(out_lines))\n\nmain()",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Writing via sys.stdout is fine and the main guard ensures correct execution when run as a script.",
+      "wrongExplanations": {
+        "0": "Using print is ok, but we’ve been using sys.stdout and need the main guard.",
+        "3": "Calling main() without the guard may run on import."
+      },
+      "hint": "Keep consistent with sys.stdin/sys.stdout and protect main.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    sys.stdout.write(\"\\n\".join(out_lines))\n\nif __name__ == \"__main__\":\n    main()",
+      "codeLabel": "Output and guard"
+    },
+    {
+      "id": "q23",
+      "phase": "Verifying the Solution",
+      "questionText": "Run the code on:\n6 3\n1 2\n2 3\n4 5\nHow many new roads (k) will be printed?",
+      "diagram": "1--2--3   4--5   6",
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "There are 3 components: {1,2,3}, {4,5}, {6} → k = 2.",
+      "wrongExplanations": {
+        "1": "One road would connect only two of the three components."
+      },
+      "hint": "Count components first, then subtract 1.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Verifying the Solution",
+      "questionText": "For the same input, which specific new roads will this code print?",
+      "diagram": "Scan order: 1..6; reps likely [1, 4, 6]",
+      "options": [
+        {
+          "label": "1 4 and 4 6",
+          "isCode": false
+        },
+        {
+          "label": "1 4 and 1 6",
+          "isCode": false
+        },
+        {
+          "label": "3 4 and 5 6",
+          "isCode": false
+        },
+        {
+          "label": "1 6 only",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Scanning 1..6 yields reps [1,4,6], so edges are 1 4 and 4 6.",
+      "wrongExplanations": {
+        "1": "This star pattern isn’t what the code builds; it chains consecutive reps.",
+        "3": "One edge cannot connect three components."
+      },
+      "hint": "Edges are between consecutive representatives in the reps list.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the time complexity of this approach in terms of n and m?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n + m)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(m log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n + m log m)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each city and road is processed a constant number of times.",
+      "wrongExplanations": {
+        "1": "We never iterate all pairs of cities."
+      },
+      "hint": "Consider adjacency list traversal with a simple stack.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the space complexity of this solution?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n + m)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(m^2)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Adjacency list stores O(n + m) entries; visited and reps are O(n).",
+      "wrongExplanations": {
+        "2": "Adjacency storage dominates and is proportional to m as well."
+      },
+      "hint": "Consider adjacency list plus visited and reps arrays.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q27",
+      "phase": "Analyzing Complexity",
+      "questionText": "Edge case: If n=1 and m=0, what should the program output?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "1\\n1 1",
+          "isCode": false
+        },
+        {
+          "label": "0 followed by a blank line",
+          "isCode": false
+        },
+        {
+          "label": "Nothing",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "There is only one city; it is trivially connected. No new roads are needed.",
+      "wrongExplanations": {
+        "2": "Only the count line is required; no edges since k=0."
+      },
+      "hint": "If k=0, just print the number 0.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q28",
+      "phase": "Analyzing Complexity",
+      "questionText": "If the graph is already connected (only 1 component), what should k be and how many edges should be printed?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "k=0 and print no edges",
+          "isCode": false
+        },
+        {
+          "label": "k=1 and print one arbitrary edge",
+          "isCode": false
+        },
+        {
+          "label": "k=0 and print one self-loop",
+          "isCode": false
+        },
+        {
+          "label": "k equals the number of cities",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Already connected means no new roads are needed, so k=0 and no edge lines.",
+      "wrongExplanations": {
+        "1": "Adding edges is unnecessary and could violate problem constraints."
+      },
+      "hint": "Minimal means don't add roads when not needed.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\n\ndef main():\n    data = sys.stdin.buffer.read().split()\n    it = iter(data)\n    try:\n        n = int(next(it))\n        m = int(next(it))\n    except StopIteration:\n        return",
+    "    adj = [[] for _ in range(n+1)]\n    for _ in range(m):\n        a = int(next(it)); b = int(next(it))\n        adj[a].append(b)\n        adj[b].append(a)",
+    "    visited = [False]*(n+1)\n    reps = []",
+    "    for i in range(1, n+1):\n        if not visited[i]:\n            reps.append(i)\n            stack = [i]\n            visited[i] = True",
+    "            while stack:\n                u = stack.pop()\n                for v in adj[u]:\n                    if not visited[v]:\n                        visited[v] = True\n                        stack.append(v)",
+    "    k = max(0, len(reps)-1)\n    out_lines = [str(k)]",
+    "    for i in range(len(reps)-1):\n        out_lines.append(f\"{reps[i]} {reps[i+1]}\")",
+    "    sys.stdout.write(\"\\n\".join(out_lines))\n\nif __name__ == \"__main__\":\n    main()"
+  ],
+  "reasoningChain": [
+    {
+      "question": "How many new roads are minimally required to connect all cities?",
+      "insight": "The minimal number equals the number of connected components minus one."
+    },
+    {
+      "question": "What do we need to construct the actual roads to add?",
+      "insight": "Identify each connected component and choose one representative city from each."
+    },
+    {
+      "question": "How to find components efficiently on large graphs?",
+      "insight": "Use an adjacency list and iterate through neighbors while marking visited nodes to group cities."
+    },
+    {
+      "question": "How to avoid recursion depth issues in Python?",
+      "insight": "Traverse components iteratively using an explicit stack while marking visited nodes."
+    },
+    {
+      "question": "When to record a component representative?",
+      "insight": "When encountering an unvisited city during the 1..n scan, record it before exploring that component."
+    },
+    {
+      "question": "How to form the set of roads to add from representatives?",
+      "insight": "Connect consecutive representatives to form a chain, yielding exactly components−1 edges."
+    },
+    {
+      "question": "How to ensure performance within limits?",
+      "insight": "Traverse each node and edge a constant number of times (O(n+m)) and read input efficiently."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1424,
+    "output_tokens": 13253,
+    "input_cost": 0.00178,
+    "output_cost": 0.13253,
+    "total_cost": 0.13431
+  }
+}

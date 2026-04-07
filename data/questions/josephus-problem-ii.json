@@ -1,0 +1,979 @@
+{
+  "id": "josephus-problem-ii-mcq-chain",
+  "title": "Josephus Problem II",
+  "difficulty": "intermediate",
+  "tags": [
+    "sorting",
+    "two-pointer",
+    "binary-search"
+  ],
+  "estimatedMinutes": 50,
+  "language": "python",
+  "description": "There are n children (numbered 1..n) in a circle. Repeatedly, skip k children and remove the next one. Starting from child 1 initially, continue until all are removed. Print the removal order.\n\nInput: two integers n and k.\n\nOutput: n integers, the removal order.\n\nExample:\nInput: 7 2\nOutput: 3 6 2 7 5 1 4",
+  "examples": [
+    {
+      "input": "7 2",
+      "output": "3 6 2 7 5 1 4",
+      "explanation": "Starting from 1, skip 2 children each time. Removal order: 3,6,2,7,5,1,4."
+    }
+  ],
+  "constraints": [
+    "1 ≤ n ≤ 2·10^5",
+    "0 ≤ k ≤ 10^9"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "If n=4 and k=0, what is the removal order?",
+      "diagram": "Circle: 1 2 3 4\nk=0 means remove current each time.",
+      "options": [
+        {
+          "label": "1 2 3 4",
+          "isCode": false
+        },
+        {
+          "label": "2 4 1 3",
+          "isCode": false
+        },
+        {
+          "label": "4 3 2 1",
+          "isCode": false
+        },
+        {
+          "label": "2 3 4 1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "k=0 removes the current child each time, starting at 1, so 1 2 3 4. No skipping happens.",
+      "wrongExplanations": {
+        "1": "This assumes k=1 pattern, not k=0.",
+        "3": "This rotates before removing, which is not what k=0 means."
+      },
+      "hint": "With k=0, do not advance before removing.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "For n=5 and k=1, which child is removed first?",
+      "diagram": "Start at 1. Skip 1 child, remove next.",
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Skip child 1, remove child 2. So first removed is 2.",
+      "wrongExplanations": {
+        "0": "Child 1 is skipped once when k=1; it's not removed first."
+      },
+      "hint": "Skip exactly one child and remove the next.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "Continuing n=5, k=1 after removing 2, which child is removed second?",
+      "diagram": "Remaining: 1 3 4 5 (in a circle). Start counting from the next child after 2.",
+      "options": [
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Start at 3, skip 3, remove 4. So second removed is 4.",
+      "wrongExplanations": {
+        "0": "3 is skipped because k=1; the next (4) is removed."
+      },
+      "hint": "After removing a child, start from the next child in the circle.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "Let m be the number of children remaining and cur be the current index among them (0-based). What is the index of the next child to remove?",
+      "diagram": "Indices among remaining: 0..m-1. Move k steps forward.",
+      "options": [
+        {
+          "label": "(cur + k) % m",
+          "isCode": false
+        },
+        {
+          "label": "(cur + k + 1) % m",
+          "isCode": false
+        },
+        {
+          "label": "(cur + k) % (m-1)",
+          "isCode": false
+        },
+        {
+          "label": "(cur + k - 1) % m",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Moving k steps ahead from cur among m items gives (cur + k) % m. The removed child is at that index.",
+      "wrongExplanations": {
+        "1": "Adding 1 would count the removed child itself as a skip.",
+        "2": "Modulo should be current m; (m-1) applies after removal, not before."
+      },
+      "hint": "Think 0-based steps around m elements.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Understanding the Problem",
+      "questionText": "If k is very large, how should we handle the step size during the simulation as children are removed?",
+      "diagram": "m decreases from n to 1.",
+      "options": [
+        {
+          "label": "Reduce k modulo m at each step using (cur + k) % m",
+          "isCode": false
+        },
+        {
+          "label": "Reduce k once by n at the start and keep it fixed",
+          "isCode": false
+        },
+        {
+          "label": "Do not reduce k; step k positions each time",
+          "isCode": false
+        },
+        {
+          "label": "Reduce k by the original n at each step",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each step uses the current m, so (cur + k) % m is correct. Reducing by n or never reducing is incorrect.",
+      "wrongExplanations": {
+        "1": "m changes over time; one-time reduction by n is not enough.",
+        "2": "Stepping k positions without modulo is too slow and wrong logically."
+      },
+      "hint": "Use the current circle size m when taking modulo.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "Suppose we use a Python list of remaining children and repeatedly do pop(index). What is the worst-case time complexity up to n=2·10^5?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(log n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Removing from the middle of a list is O(n) due to shifting, done n times gives O(n^2), too slow.",
+      "wrongExplanations": {
+        "1": "List removals are not logarithmic; they shift elements.",
+        "2": "Only true if removals were always from an end, which they aren’t."
+      },
+      "hint": "Consider the cost of shifting elements on each pop(index).",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "We want to simulate removals fast. Consider an array of size n where 1 means alive and 0 means removed. Which pair of operations do we need to support efficiently?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Point update (set removed) and get prefix count up to index",
+          "isCode": false
+        },
+        {
+          "label": "Range update (toggle range) and range sum",
+          "isCode": false
+        },
+        {
+          "label": "Point update and get maximum in a range",
+          "isCode": false
+        },
+        {
+          "label": "Range assignment and range minimum",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need to mark a single position as removed and count how many alive up to a position to find ranks.",
+      "wrongExplanations": {
+        "1": "We never toggle ranges; we remove one child at a time.",
+        "2": "Maximums are irrelevant; we need counts."
+      },
+      "hint": "We need to translate a rank (e.g., 5th alive) to an index and remove it.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Exploring Approaches",
+      "questionText": "At each step with m remaining, if cur is the 0-based index of the next removal among the remaining, what rank t among alive children should we search for?",
+      "diagram": "Remaining children ranked 1..m by alive order.",
+      "options": [
+        {
+          "label": "t = cur + 1",
+          "isCode": false
+        },
+        {
+          "label": "t = cur",
+          "isCode": false
+        },
+        {
+          "label": "t = cur + k",
+          "isCode": false
+        },
+        {
+          "label": "t = (cur + 1) % m",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Ranks are 1-based; index cur corresponds to the (cur+1)-th alive child.",
+      "wrongExplanations": {
+        "1": "Ranks start at 1, not 0.",
+        "3": "Ranks don’t wrap; rank m means last alive, not 0."
+      },
+      "hint": "Think: which alive child number is at index 0?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "For n=7, k=2, using cur=(cur+k)%m starting with cur=0, what are the first two values of t=cur+1?",
+      "diagram": "m goes 7→6 after first removal.",
+      "options": [
+        {
+          "label": "t=3 then t=5",
+          "isCode": false
+        },
+        {
+          "label": "t=2 then t=4",
+          "isCode": false
+        },
+        {
+          "label": "t=3 then t=4",
+          "isCode": false
+        },
+        {
+          "label": "t=2 then t=5",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Start: cur=(0+2)%7=2→t=3. After removal m=6, cur remains 2, next cur=(2+2)%6=4→t=5.",
+      "wrongExplanations": {
+        "1": "This confuses index and rank; t should be cur+1.",
+        "2": "Second t should be 5, not 4, because cur is 4."
+      },
+      "hint": "Compute cur for m=7, then for m=6, then add 1 each time.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "We will initialize an array of size n with all children alive (1s). If we repeatedly apply a point-add of +1 for each index, what is the total cost?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n log n), acceptable for n ≤ 2·10^5",
+          "isCode": false
+        },
+        {
+          "label": "O(n), unacceptable",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2), unacceptable",
+          "isCode": false
+        },
+        {
+          "label": "O(log n), unacceptable",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each point update is logarithmic; repeated n times is O(n log n), which fits.",
+      "wrongExplanations": {
+        "2": "Only if each update were O(n), which we will avoid."
+      },
+      "hint": "We’ll use a structure that supports point add in logarithmic time.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "If all children are alive initially, what should the function that finds the t-th alive return when t=1?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Index 1",
+          "isCode": false
+        },
+        {
+          "label": "Index 0",
+          "isCode": false
+        },
+        {
+          "label": "Index 2",
+          "isCode": false
+        },
+        {
+          "label": "Index n",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The first alive is at index 1 (since we number children 1..n).",
+      "wrongExplanations": {
+        "1": "Indices are 1-based for children.",
+        "3": "Only if t equals the total number alive."
+      },
+      "hint": "Children are numbered from 1.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "To quickly find the position with a given cumulative count, we will step down using powers of two. What initial step size should we choose?",
+      "diagram": "Let size=n. Choose a power-of-two step.",
+      "options": [
+        {
+          "label": "The largest power of two ≤ n",
+          "isCode": false
+        },
+        {
+          "label": "n itself",
+          "isCode": false
+        },
+        {
+          "label": "The smallest power of two ≥ n",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Start from the largest power-of-two not exceeding n, then halve it each time.",
+      "wrongExplanations": {
+        "1": "n may not be a power of two; we need a step that fits the tree layout.",
+        "3": "Starting from 1 loses the efficiency of larger jumps."
+      },
+      "hint": "Think about jumping with decreasing powers: max, then halve.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "While stepping with a current index idx and step bit, if at position nxt=idx+bit the cumulative stored value is still less than t, what should we do?",
+      "diagram": "If tree[nxt] < t, we haven’t reached the target.",
+      "options": [
+        {
+          "label": "Set idx=nxt and subtract tree[nxt] from t",
+          "isCode": false
+        },
+        {
+          "label": "Keep idx, double t",
+          "isCode": false
+        },
+        {
+          "label": "Set idx=nxt and add tree[nxt] to t",
+          "isCode": false
+        },
+        {
+          "label": "Return nxt immediately",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We skip past nxt and reduce t by how many we skipped. Then continue with smaller steps.",
+      "wrongExplanations": {
+        "2": "t represents the remaining rank to find; it should decrease when you pass counts.",
+        "3": "We haven’t reached the target rank yet."
+      },
+      "hint": "We pass over some alive entries; adjust both position and remaining target.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Building the Idea",
+      "questionText": "When k=0, how does cur evolve and what rank t do we remove each time?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "cur stays the same; t=1 each time",
+          "isCode": false
+        },
+        {
+          "label": "cur increases by 1; t cycles 1..m",
+          "isCode": false
+        },
+        {
+          "label": "cur stays the same; t=0 each time",
+          "isCode": false
+        },
+        {
+          "label": "cur decreases by 1; t=m each time",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "cur=(cur+0)%m keeps cur; t=cur+1=1, so we always remove the first alive in order.",
+      "wrongExplanations": {
+        "2": "Rank t is 1-based; t=0 is invalid."
+      },
+      "hint": "With no skipping, always remove the current one.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q15",
+      "phase": "Building the Idea",
+      "questionText": "Why do we convert the 0-based index cur to a 1-based rank t with t=cur+1?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Because ranks count alive children starting from 1",
+          "isCode": false
+        },
+        {
+          "label": "Because children are 0-indexed",
+          "isCode": false
+        },
+        {
+          "label": "To skip one extra child",
+          "isCode": false
+        },
+        {
+          "label": "To avoid modulo operations",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The selection function expects a 1..m rank among alive children, while cur is 0-based.",
+      "wrongExplanations": {
+        "1": "Children are numbered 1..n, not 0..n-1."
+      },
+      "hint": "Indexing among remaining uses 0..m-1; ranks use 1..m.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Choose the correct code to read input and initialize the main variables and array inside a main function.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\n\ndef main():\n    data = sys.stdin.read().strip().split()\n    if not data:\n        return\n    n = int(data[0]); k = int(data[1])\n    size = n\n    tree = [0]*(size+1)",
+          "isCode": true
+        },
+        {
+          "label": "def main():\n    import sys\n    n, k = map(int, sys.stdin.readline().split())\n    size = n\n    tree = [0]*size",
+          "isCode": true
+        },
+        {
+          "label": "import sys\n\ndef main():\n    line = sys.stdin.read()\n    n = int(line); k = 0\n    size = n\n    tree = [0]*(size+1)",
+          "isCode": true
+        },
+        {
+          "label": "def main():\n    data = input().split()\n    n = int(data[1]); k = int(data[0])\n    tree = [0]*(n+2)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We read two integers, handle empty input, set size, and allocate tree with size+1 for 1-based indexing.",
+      "wrongExplanations": {
+        "1": "Allocates size not size+1; off-by-one for 1-based operations.",
+        "3": "Swaps n and k; also tree size differs from our plan."
+      },
+      "hint": "We need 1-based indexing, and both n and k come from the same line.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\n\ndef main():\n    data = sys.stdin.read().strip().split()\n    if not data:\n        return\n    n = int(data[0]); k = int(data[1])\n    size = n\n    tree = [0]*(size+1)",
+      "codeLabel": "Input and init"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Choose the correct helper functions to update a position and get a prefix count.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    def add(i, delta):\n        while i <= size:\n            tree[i] += delta\n            i += i & -i\n\n    def sum_(i):\n        s = 0\n        while i > 0:\n            s += tree[i]\n            i -= i & -i\n        return s",
+          "isCode": true
+        },
+        {
+          "label": "    def add(i, delta):\n        while i < size:\n            tree[i] += delta\n            i += 1\n\n    def sum_(i):\n        return sum(tree[:i+1])",
+          "isCode": true
+        },
+        {
+          "label": "    def add(i, delta):\n        tree[i] += delta\n\n    def sum_(i):\n        s = 0\n        while i <= size:\n            s += tree[i]\n            i += i & -i\n        return s",
+          "isCode": true
+        },
+        {
+          "label": "    def add(i, delta):\n        while i >= 1:\n            tree[i] += delta\n            i -= i & -i\n\n    def sum_(i):\n        s = 0\n        while i <= size:\n            s += tree[i]\n            i += i & -i\n        return s",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The update climbs upward with i += i & -i; the prefix sum climbs downward with i -= i & -i.",
+      "wrongExplanations": {
+        "1": "This makes both operations linear time.",
+        "3": "Both directions are reversed; update should go up, sum should go down."
+      },
+      "hint": "One helper moves i upward, the other downward along index jumps.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    def add(i, delta):\n        while i <= size:\n            tree[i] += delta\n            i += i & -i\n\n    def sum_(i):\n        s = 0\n        while i > 0:\n            s += tree[i]\n            i -= i & -i\n        return s",
+      "codeLabel": "Helpers: add and sum_"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Initialize all children as alive and prepare the largest power-of-two step size.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    for i in range(1, size+1):\n        add(i, 1)\n    max_pow = 1\n    while (max_pow << 1) <= size:\n        max_pow <<= 1",
+          "isCode": true
+        },
+        {
+          "label": "    for i in range(size):\n        add(i, 1)\n    max_pow = size",
+          "isCode": true
+        },
+        {
+          "label": "    for i in range(1, size+1):\n        add(i, 1)\n    max_pow = 1\n    while max_pow <= size:\n        max_pow <<= 1",
+          "isCode": true
+        },
+        {
+          "label": "    for i in range(1, size+1):\n        add(i, 1)\n    max_pow = size // 2",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We add 1 at indices 1..size and compute the largest power of two ≤ size by doubling while the next double fits.",
+      "wrongExplanations": {
+        "2": "This produces a power strictly greater than size.",
+        "1": "add should start at 1; and max_pow should be a power of two, not size itself."
+      },
+      "hint": "Be careful with 1-based indices and not overshooting the power-of-two.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    for i in range(1, size+1):\n        add(i, 1)\n    max_pow = 1\n    while (max_pow << 1) <= size:\n        max_pow <<= 1",
+      "codeLabel": "Init alive and step size"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Implement the function that returns the index of the t-th alive child among 1..n.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    def find_by_order(t):\n        idx = 0\n        bit = max_pow\n        while bit:\n            nxt = idx + bit\n            if nxt <= size and tree[nxt] < t:\n                t -= tree[nxt]\n                idx = nxt\n            bit >>= 1\n        return idx + 1",
+          "isCode": true
+        },
+        {
+          "label": "    def find_by_order(t):\n        lo, hi = 1, size\n        while lo < hi:\n            mid = (lo + hi) // 2\n            if sum_(mid) <= t:\n                lo = mid + 1\n            else:\n                hi = mid\n        return lo",
+          "isCode": true
+        },
+        {
+          "label": "    def find_by_order(t):\n        s = 0\n        for i in range(1, size+1):\n            s += tree[i]\n            if s == t:\n                return i\n        return size",
+          "isCode": true
+        },
+        {
+          "label": "    def find_by_order(t):\n        idx = 0\n        bit = max_pow\n        while bit:\n            nxt = idx + bit\n            if nxt <= size and tree[nxt] <= t:\n                t -= tree[nxt]\n                idx = nxt\n            bit >>= 1\n        return idx",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We jump by powers of two, subtracting counts when we pass them. Finally return idx+1.",
+      "wrongExplanations": {
+        "1": "The condition should compare sum strictly less than t; here it moves wrong at equality.",
+        "3": "Returning idx misses +1 offset and the condition should be '< t', not '<= t'."
+      },
+      "hint": "If cumulative at nxt is still below t, skip it and reduce t.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    def find_by_order(t):\n        idx = 0\n        bit = max_pow\n        while bit:\n            nxt = idx + bit\n            if nxt <= size and tree[nxt] < t:\n                t -= tree[nxt]\n                idx = nxt\n            bit >>= 1\n        return idx + 1",
+      "codeLabel": "find_by_order"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Write the main simulation loop to accumulate the removal order.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    res = []\n    cur = 0\n    m = n\n    for _ in range(n):\n        cur = (cur + k) % m\n        t = cur + 1\n        pos = find_by_order(t)\n        res.append(str(pos))\n        add(pos, -1)\n        m -= 1",
+          "isCode": true
+        },
+        {
+          "label": "    res = []\n    cur = 1\n    m = n\n    for _ in range(n):\n        cur = (cur + k) % m\n        t = cur\n        pos = find_by_order(t)\n        res.append(str(pos))\n        add(pos, -1)\n        m -= 1",
+          "isCode": true
+        },
+        {
+          "label": "    res = []\n    cur = 0\n    m = n\n    for _ in range(n):\n        cur = (cur + k) % (m-1)\n        t = cur + 1\n        pos = find_by_order(t)\n        res.append(str(pos))\n        add(pos, -1)\n        m -= 1",
+          "isCode": true
+        },
+        {
+          "label": "    res = []\n    cur = 0\n    m = n\n    for _ in range(n):\n        cur = (cur + k + 1) % m\n        t = cur + 1\n        pos = find_by_order(t)\n        res.append(str(pos))\n        add(pos, -1)\n        m -= 1",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We use cur=(cur+k)%m, convert to rank t=cur+1, find position, remove it, and decrease m.",
+      "wrongExplanations": {
+        "1": "cur should be 0-based and t=cur+1, not t=cur.",
+        "2": "Modulo must use current m before removal, not m-1."
+      },
+      "hint": "Follow the earlier formula for cur and t exactly.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    res = []\n    cur = 0\n    m = n\n    for _ in range(n):\n        cur = (cur + k) % m\n        t = cur + 1\n        pos = find_by_order(t)\n        res.append(str(pos))\n        add(pos, -1)\n        m -= 1",
+      "codeLabel": "Simulation loop"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "Output the result at the end of main.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    sys.stdout.write(\" \".join(res))",
+          "isCode": true
+        },
+        {
+          "label": "    print(res)",
+          "isCode": true
+        },
+        {
+          "label": "    print(*res, sep=' ')\n    sys.stdout.flush()",
+          "isCode": true
+        },
+        {
+          "label": "    for x in res:\n        print(x)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need space-separated integers on one line; joining and writing matches the required output format.",
+      "wrongExplanations": {
+        "1": "This prints a Python list representation, not the required format.",
+        "3": "This prints each number on its own line, not space-separated on one line."
+      },
+      "hint": "Ensure exactly one space between numbers on a single line.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    sys.stdout.write(\" \".join(res))",
+      "codeLabel": "Print result"
+    },
+    {
+      "id": "q22",
+      "phase": "Writing the Code",
+      "questionText": "Add the standard entry point to call main().",
+      "diagram": null,
+      "options": [
+        {
+          "label": "if __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "if __name__ == \"main\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "main()",
+          "isCode": true
+        },
+        {
+          "label": "if __name__ == \"__main__\":\n    main\n",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Use the standard guard and call main().",
+      "wrongExplanations": {
+        "2": "This calls main unconditionally on import; not desired for many judges.",
+        "3": "This references main without calling it."
+      },
+      "hint": "Use the common Python idiom with __main__.",
+      "isCodeBuilding": true,
+      "codeSnippet": "if __name__ == \"__main__\":\n    main()",
+      "codeLabel": "Entry point"
+    },
+    {
+      "id": "q23",
+      "phase": "Verifying the Solution",
+      "questionText": "Trace the first two removals for n=7, k=2 with the implemented logic. What should res contain after two iterations?",
+      "diagram": "cur: (0+2)%7=2 → t=3 → pos=3; then m=6, cur=2 → (2+2)%6=4 → t=5 → pos=6.",
+      "options": [
+        {
+          "label": "['3', '6']",
+          "isCode": false
+        },
+        {
+          "label": "['2', '4']",
+          "isCode": false
+        },
+        {
+          "label": "['3', '5']",
+          "isCode": false
+        },
+        {
+          "label": "['6', '3']",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The first two removals are 3 and 6, matching the sample.",
+      "wrongExplanations": {
+        "1": "Those would be the ranks, not the actual labels.",
+        "3": "Order is wrong; we remove 3 first."
+      },
+      "hint": "Remember t is a rank among alive mapped to original index.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Verifying the Solution",
+      "questionText": "What does your program print for n=4, k=0?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "1 2 3 4",
+          "isCode": false
+        },
+        {
+          "label": "2 3 4 1",
+          "isCode": false
+        },
+        {
+          "label": "4 3 2 1",
+          "isCode": false
+        },
+        {
+          "label": "2 4 1 3",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "With k=0, it removes current each time in order: 1 2 3 4.",
+      "wrongExplanations": {
+        "1": "This rotates before removing, which k=0 does not do."
+      },
+      "hint": "Check q1’s logic matches the code path when k=0.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the overall time complexity of the implemented solution?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(log n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each of n removals does logarithmic work to find and update the position, so O(n log n).",
+      "wrongExplanations": {
+        "1": "That would be using naive list pops.",
+        "2": "We do more than constant-time work per removal."
+      },
+      "hint": "Count the cost per removal and multiply by n.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the space complexity of the solution?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(1)",
+          "isCode": false
+        },
+        {
+          "label": "O(log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We allocate arrays proportional to n and the result list, so linear space.",
+      "wrongExplanations": {
+        "1": "We store arrays and results of size proportional to n."
+      },
+      "hint": "Consider the size of the auxiliary array plus the output list.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q27",
+      "phase": "Analyzing Complexity",
+      "questionText": "Which edge cases must be correctly handled by the solution?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "k=0, k very large, n=1",
+          "isCode": false
+        },
+        {
+          "label": "Only k=0",
+          "isCode": false
+        },
+        {
+          "label": "Only k very large",
+          "isCode": false
+        },
+        {
+          "label": "No special cases are needed",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "All listed cases appear in constraints and must be handled: k=0, large k, and n=1.",
+      "wrongExplanations": {
+        "1": "Large k also must be handled via modulo with current m.",
+        "3": "Ignoring edge cases can lead to wrong results or errors."
+      },
+      "hint": "Check problem constraints and how cur and t behave.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\n\ndef main():\n    data = sys.stdin.read().strip().split()\n    if not data:\n        return\n    n = int(data[0]); k = int(data[1])\n    size = n\n    tree = [0]*(size+1)",
+    "    def add(i, delta):\n        while i <= size:\n            tree[i] += delta\n            i += i & -i\n\n    def sum_(i):\n        s = 0\n        while i > 0:\n            s += tree[i]\n            i -= i & -i\n        return s",
+    "    for i in range(1, size+1):\n        add(i, 1)\n    max_pow = 1\n    while (max_pow << 1) <= size:\n        max_pow <<= 1",
+    "    def find_by_order(t):\n        idx = 0\n        bit = max_pow\n        while bit:\n            nxt = idx + bit\n            if nxt <= size and tree[nxt] < t:\n                t -= tree[nxt]\n                idx = nxt\n            bit >>= 1\n        return idx + 1",
+    "    res = []\n    cur = 0\n    m = n\n    for _ in range(n):\n        cur = (cur + k) % m\n        t = cur + 1\n        pos = find_by_order(t)\n        res.append(str(pos))\n        add(pos, -1)\n        m -= 1",
+    "    sys.stdout.write(\" \".join(res))",
+    "if __name__ == \"__main__\":\n    main()"
+  ],
+  "reasoningChain": [
+    {
+      "question": "How do we compute the next removal index among remaining children?",
+      "insight": "With m remaining and 0-based current index cur, the next index is (cur + k) % m."
+    },
+    {
+      "question": "Why is naive list pop too slow?",
+      "insight": "Removing from the middle of a list is O(n), repeated n times yields O(n^2), which is too slow for n up to 2e5."
+    },
+    {
+      "question": "What operations let us select the t-th alive quickly?",
+      "insight": "Maintain 1/0 alive flags with fast point updates and fast prefix counts to map a rank t to an index."
+    },
+    {
+      "question": "How can we find the index with a given cumulative count efficiently?",
+      "insight": "Use a step-down approach starting from the largest power-of-two, moving when the cumulative count is still less than t and subtracting passed counts."
+    },
+    {
+      "question": "How do we convert between index and rank each step?",
+      "insight": "Compute rank t = cur + 1 (1-based) to find the t-th alive; after removal, m decreases and cur stays as the index for the next start."
+    },
+    {
+      "question": "What are the overall complexity and edge cases?",
+      "insight": "Each removal takes logarithmic time leading to O(n log n); handle k=0, large k via modulo m, and small n like n=1."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1333,
+    "output_tokens": 15020,
+    "input_cost": 0.001666,
+    "output_cost": 0.1502,
+    "total_cost": 0.151866
+  }
+}

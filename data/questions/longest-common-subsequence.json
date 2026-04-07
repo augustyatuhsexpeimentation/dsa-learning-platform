@@ -1,0 +1,944 @@
+{
+  "id": "longest-common-subsequence-guided-builder",
+  "title": "Longest Common Subsequence",
+  "difficulty": "intermediate",
+  "tags": [
+    "dp"
+  ],
+  "estimatedMinutes": 70,
+  "language": "python",
+  "description": "Given two arrays of integers, find their longest common subsequence.\n\nA subsequence is a sequence of array elements from left to right that can contain gaps. A common subsequence is a subsequence that appears in both arrays.\n\nInput:\n- The first line has two integers n and m: the sizes of the arrays.\n- The second line has n integers a_1,a_2,\\dots,a_n: the contents of the first array.\n- The third line has m integers b_1,b_2,\\dots,b_m: the contents of the second array.\n\nOutput:\n- First print the length of the longest common subsequence.\n- After that, print an example of such a sequence. If there are several solutions, you can print any of them.",
+  "examples": [
+    {
+      "input": "8 6\n3 1 3 2 7 4 8 2\n6 5 1 2 3 4",
+      "output": "3\n1 2 4",
+      "explanation": "One longest common subsequence is [1, 2, 4]; its length is 3."
+    }
+  ],
+  "constraints": [
+    "1 <= n, m <= 1000",
+    "1 <= a_i, b_i <= 1e9",
+    "Time Limit: 1.00 s",
+    "Memory Limit: 512 MB"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "For arrays a = [1, 2, 3] and b = [2, 1, 3], what is the length of their longest common subsequence?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "One LCS is [1, 3] or [2, 3], length 2. Order matters and gaps are allowed.",
+      "wrongExplanations": {
+        "2": "Length 3 would require both sequences to be identical in order.",
+        "0": "There is at least a common element (e.g., 3)."
+      },
+      "hint": "Try to align elements while keeping order in both arrays.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "For a = [2, 1] and b = [1, 2], what is the length of the longest common subsequence?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "Depends on which elements you pick",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "You can take [2] or [1], but not both in order in both arrays. So length is 1.",
+      "wrongExplanations": {
+        "0": "There is at least one common element."
+      },
+      "hint": "Check if [2,1] or [1,2] appears in both while maintaining order.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "How many subsequences does an array of length 5 have (including the empty subsequence)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "5",
+          "isCode": false
+        },
+        {
+          "label": "10",
+          "isCode": false
+        },
+        {
+          "label": "32",
+          "isCode": false
+        },
+        {
+          "label": "120",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Each element is included or not: 2^5 = 32 subsequences.",
+      "wrongExplanations": {
+        "1": "10 is C(5,2), not the total number of subsequences.",
+        "3": "120 = 5!, which counts permutations, not subsequences."
+      },
+      "hint": "Each position has two choices: in or out.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "Which statement is correct about a subsequence?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "It must be contiguous (no gaps).",
+          "isCode": false
+        },
+        {
+          "label": "It can have gaps but must preserve relative order.",
+          "isCode": false
+        },
+        {
+          "label": "It must be the same length as the original array.",
+          "isCode": false
+        },
+        {
+          "label": "It cannot contain repeated values.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "A subsequence can skip elements but must keep order.",
+      "wrongExplanations": {
+        "0": "Contiguity is for subarrays, not subsequences."
+      },
+      "hint": "Consider [1,3] as a subsequence of [1,2,3].",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Exploring Approaches",
+      "questionText": "Let L(i, j) be the LCS length of the first i elements of a and first j elements of b. If a[i-1] == b[j-1], what relation holds?",
+      "diagram": "L(i,j) compares prefixes a[0..i-1], b[0..j-1]",
+      "options": [
+        {
+          "label": "L(i, j) = L(i-1, j-1) + 1",
+          "isCode": false
+        },
+        {
+          "label": "L(i, j) = max(L(i-1, j), L(i, j-1))",
+          "isCode": false
+        },
+        {
+          "label": "L(i, j) = L(i-1, j) + 1",
+          "isCode": false
+        },
+        {
+          "label": "L(i, j) = L(i, j-1) + 1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "If the last elements match, they extend a common subsequence by 1.",
+      "wrongExplanations": {
+        "1": "This is for the non-equal case.",
+        "2": "Adding 1 without moving both prefixes ignores alignment."
+      },
+      "hint": "A matching pair at the end contributes one to the best of smaller prefixes.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "If a[i-1] != b[j-1], which relation for L(i, j) is correct?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "L(i, j) = L(i-1, j-1)",
+          "isCode": false
+        },
+        {
+          "label": "L(i, j) = max(L(i-1, j), L(i, j-1))",
+          "isCode": false
+        },
+        {
+          "label": "L(i, j) = L(i-1, j-1) + 1",
+          "isCode": false
+        },
+        {
+          "label": "L(i, j) = min(L(i-1, j), L(i, j-1))",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "When the last elements differ, drop one side and take the better of the two possibilities.",
+      "wrongExplanations": {
+        "0": "Ignoring both last elements can miss longer subsequences.",
+        "2": "You cannot add 1 when the elements are unequal."
+      },
+      "hint": "Try excluding a[i-1] or b[j-1] and see which yields more.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "What are the base values for L(i, j) when i = 0 or j = 0?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "L(0, j) = j and L(i, 0) = i",
+          "isCode": false
+        },
+        {
+          "label": "L(0, j) = 0 and L(i, 0) = 0",
+          "isCode": false
+        },
+        {
+          "label": "L(0, j) = -1 and L(i, 0) = -1",
+          "isCode": false
+        },
+        {
+          "label": "L(0, j) and L(i, 0) are undefined",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "The LCS with an empty prefix is 0.",
+      "wrongExplanations": {
+        "0": "The number of elements doesn't translate directly to LCS length."
+      },
+      "hint": "Empty means no common elements.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Building the Idea",
+      "questionText": "We will store L(i, j) in a 2D table. What size should the table be for arrays of lengths n and m?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "n x m",
+          "isCode": false
+        },
+        {
+          "label": "(n+1) x (m+1)",
+          "isCode": false
+        },
+        {
+          "label": "(n-1) x (m-1)",
+          "isCode": false
+        },
+        {
+          "label": "1 x max(n, m)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "We need an extra row and column for the 0 prefixes.",
+      "wrongExplanations": {
+        "0": "This misses base cases for i=0 or j=0."
+      },
+      "hint": "Include index 0 for both dimensions.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "Which nested loop order correctly fills the table so that needed previous values are already computed?",
+      "diagram": "We need L(i-1, j), L(i, j-1), and L(i-1, j-1) before L(i, j).",
+      "options": [
+        {
+          "label": "for i in 1..n: for j in 1..m",
+          "isCode": false
+        },
+        {
+          "label": "for i in n..1: for j in m..1 (both descending)",
+          "isCode": false
+        },
+        {
+          "label": "for j in 1..m: for i in 1..n",
+          "isCode": false
+        },
+        {
+          "label": "for i in 0..n-1: for j in 0..m-1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Increasing i and j ensures L(i-1, j), L(i, j-1), L(i-1, j-1) are available.",
+      "wrongExplanations": {
+        "1": "Descending breaks the availability of L(i-1, j) and others.",
+        "3": "Starting at 0 causes indexing issues for L(i-1, j-1) without extra checks."
+      },
+      "hint": "Compute from small prefixes to larger prefixes.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "For a = [1, 2] and b = [2, 2], what is L(1, 1)? (i.e., LCS of [1] and [2])",
+      "diagram": null,
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "-1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "1 != 2, so L(1,1) = max(L(0,1), L(1,0)) = 0.",
+      "wrongExplanations": {
+        "1": "Length 1 would require a match."
+      },
+      "hint": "Use the non-equal relation.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "For a = [1, 2] and b = [2, 1], what is L(2, 2), the LCS length of the full arrays?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Only one element can be aligned in order. L(2,2) = 1.",
+      "wrongExplanations": {
+        "2": "Both elements cannot appear in the same order in both arrays."
+      },
+      "hint": "Check if [1,2] or [2,1] is present in both arrays.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "To recover an actual LCS from the table, starting at (n, m), what should you do when a[i-1] == b[j-1]?",
+      "diagram": "Start at bottom-right of table and move based on comparisons.",
+      "options": [
+        {
+          "label": "Append a[i-1] to the result and move to (i-1, j-1).",
+          "isCode": false
+        },
+        {
+          "label": "Move to (i-1, j) without appending.",
+          "isCode": false
+        },
+        {
+          "label": "Move to (i, j-1) without appending.",
+          "isCode": false
+        },
+        {
+          "label": "Append nothing and move to whichever neighbor is larger.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "A match at the ends is part of the LCS; move diagonally and include it.",
+      "wrongExplanations": {
+        "3": "Choosing a neighbor applies only when elements differ."
+      },
+      "hint": "A matched element belongs to the sequence and reduces both prefixes.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "When a[i-1] != b[j-1], how should you move while reconstructing the sequence?",
+      "diagram": "Consider L(i-1, j) vs L(i, j-1).",
+      "options": [
+        {
+          "label": "Always move left to (i, j-1).",
+          "isCode": false
+        },
+        {
+          "label": "Always move up to (i-1, j).",
+          "isCode": false
+        },
+        {
+          "label": "Move toward the neighbor with the larger value; for a tie, either is fine.",
+          "isCode": false
+        },
+        {
+          "label": "Move diagonally to (i-1, j-1).",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Pick the direction that preserves the larger LCS length; ties allow either.",
+      "wrongExplanations": {
+        "0": "Always moving left can miss optimal paths.",
+        "1": "Always moving up can miss optimal paths."
+      },
+      "hint": "Follow the larger of the two neighbors.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Writing the Code",
+      "questionText": "Start by setting up imports and the main function.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\n\ndef main():",
+          "isCode": true
+        },
+        {
+          "label": "from sys import stdin\n\ndef main(self):",
+          "isCode": true
+        },
+        {
+          "label": "import io\n\ndef main():",
+          "isCode": true
+        },
+        {
+          "label": "def main(args):\n    import sys",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need sys and a standard main() with no parameters.",
+      "wrongExplanations": {
+        "1": "Using a self parameter is for methods, not a standalone function.",
+        "2": "We'll read from sys.stdin; importing io is unnecessary here."
+      },
+      "hint": "We'll read from standard input using sys.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\n\ndef main():",
+      "codeLabel": "Import and main header"
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Read all input, parse n, m, and the two arrays inside main().",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    data = sys.stdin.read().strip().split()\n    if not data:\n        return\n    it = iter(data)\n    n = int(next(it)); m = int(next(it))\n    a = [int(next(it)) for _ in range(n)]\n    b = [int(next(it)) for _ in range(m)]",
+          "isCode": true
+        },
+        {
+          "label": "    n, m = map(int, sys.stdin.readline().split())\n    a = list(map(int, sys.stdin.readline().split()))\n    b = list(map(int, sys.stdin.readline().split()))\n    if len(a) != n or len(b) != m:\n        return",
+          "isCode": true
+        },
+        {
+          "label": "    tokens = sys.stdin.read().split()\n    n = int(tokens[0]); m = int(tokens[1])\n    a = list(map(int, tokens[2:2+n]))\n    b = list(map(int, tokens[2+n:2+n+m+1]))",
+          "isCode": true
+        },
+        {
+          "label": "    line1 = input().strip().split()\n    n = int(line1[0]); m = int(line1[0])\n    a = list(map(int, input().split()))\n    b = list(map(int, input().split()))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "This robustly tokenizes all input and builds arrays of exact sizes.",
+      "wrongExplanations": {
+        "1": "Line-based reads can work, but mixing with early return risks silent failure and relies on exact line formatting.",
+        "2": "The slice for b uses 2+n:2+n+m+1, which overreads one extra token."
+      },
+      "hint": "Tokenize once and iterate through values in order.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    data = sys.stdin.read().strip().split()\n    if not data:\n        return\n    it = iter(data)\n    n = int(next(it)); m = int(next(it))\n    a = [int(next(it)) for _ in range(n)]\n    b = [int(next(it)) for _ in range(m)]",
+      "codeLabel": "Read and parse input"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Initialize the 2D table for L(i, j) with base zeros.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    dp = [[0]*(m+1) for _ in range(n+1)]",
+          "isCode": true
+        },
+        {
+          "label": "    dp = [[0]*(m) for _ in range(n)]",
+          "isCode": true
+        },
+        {
+          "label": "    dp = [[0]*(m+1)]*(n+1)",
+          "isCode": true
+        },
+        {
+          "label": "    dp = [[0]*(n+1) for _ in range(m+1)]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need (n+1) rows and (m+1) columns to handle empty prefixes correctly.",
+      "wrongExplanations": {
+        "2": "This creates repeated references; updating one row updates all rows.",
+        "3": "Swapping dimensions risks index errors when n != m."
+      },
+      "hint": "Include row 0 and column 0 and avoid aliasing rows.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    dp = [[0]*(m+1) for _ in range(n+1)]",
+      "codeLabel": "Initialize table"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Fill the table using the relations for equal and non-equal end elements.",
+      "diagram": "Use a nested loop over i in [1..n], j in [1..m].",
+      "options": [
+        {
+          "label": "    for i in range(1, n+1):\n        ai = a[i-1]\n        for j in range(1, m+1):\n            if ai == b[j-1]:\n                dp[i][j] = dp[i-1][j-1] + 1\n            else:\n                if dp[i-1][j] >= dp[i][j-1]:\n                    dp[i][j] = dp[i-1][j]\n                else:\n                    dp[i][j] = dp[i][j-1]",
+          "isCode": true
+        },
+        {
+          "label": "    for i in range(0, n):\n        for j in range(0, m):\n            if a[i] == b[j]:\n                dp[i][j] = dp[i-1][j-1] + 1\n            else:\n                dp[i][j] = max(dp[i-1][j], dp[i][j-1])",
+          "isCode": true
+        },
+        {
+          "label": "    for i in range(1, n+1):\n        for j in range(1, m+1):\n            if a[i-1] == b[j]:\n                dp[i][j] = dp[i-1][j-1] + 1\n            else:\n                dp[i][j] = max(dp[i][j-1], dp[i][j])",
+          "isCode": true
+        },
+        {
+          "label": "    for i in range(1, n+1):\n        for j in range(1, m+1):\n            if a[i] == b[j-1]:\n                dp[i][j] = dp[i-1][j] + 1\n            else:\n                dp[i][j] = max(dp[i-1][j-1], dp[i][j-1])",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "This loops over prefixes and uses the correct indices and relations.",
+      "wrongExplanations": {
+        "1": "Indexing at 0..n-1 with dp[i-1][...] breaks at i=0 without extra base offset.",
+        "2": "b[j] is out of range at j=m; also max uses dp[i][j] itself.",
+        "3": "a[i] is out of range; and the transition is incorrect for the non-equal case."
+      },
+      "hint": "Carefully shift array indices by 1 to align with table indices.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    for i in range(1, n+1):\n        ai = a[i-1]\n        for j in range(1, m+1):\n            if ai == b[j-1]:\n                dp[i][j] = dp[i-1][j-1] + 1\n            else:\n                if dp[i-1][j] >= dp[i][j-1]:\n                    dp[i][j] = dp[i-1][j]\n                else:\n                    dp[i][j] = dp[i][j-1]",
+      "codeLabel": "Fill table"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Reconstruct one LCS by walking back from (n, m). Choose the correct snippet.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    res = []\n    i, j = n, m\n    while i > 0 and j > 0:\n        if a[i-1] == b[j-1]:\n            res.append(a[i-1])\n            i -= 1; j -= 1\n        else:\n            if dp[i-1][j] >= dp[i][j-1]:\n                i -= 1\n            else:\n                j -= 1\n    res.reverse()",
+          "isCode": true
+        },
+        {
+          "label": "    res = []\n    i, j = 0, 0\n    while i < n and j < m:\n        if a[i] == b[j]:\n            res.append(a[i]); i += 1; j += 1\n        else:\n            if dp[i+1][j] >= dp[i][j+1]:\n                i += 1\n            else:\n                j += 1",
+          "isCode": true
+        },
+        {
+          "label": "    res = []\n    i, j = n, m\n    while i > 0 and j > 0:\n        if a[i-1] == b[j-1]:\n            i -= 1; j -= 1\n        else:\n            j -= 1\n    res.reverse()",
+          "isCode": true
+        },
+        {
+          "label": "    res = []\n    i, j = n, m\n    while i > 0 and j > 0:\n        if a[i-1] == b[j-1]:\n            res.append(b[j-1])\n            i -= 1\n        else:\n            if dp[i-1][j] > dp[i][j-1]:\n                j -= 1\n            else:\n                i -= 1",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Start at (n,m), include matches, and move toward larger neighbor otherwise. Reverse at the end.",
+      "wrongExplanations": {
+        "1": "Walking forward requires different logic and isn't aligned with our table.",
+        "2": "It never appends the matched elements, so the result is empty.",
+        "3": "Movement on comparison is swapped; also missing j decrement on match."
+      },
+      "hint": "Walk backward, include equal elements, and follow the larger neighbor.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    res = []\n    i, j = n, m\n    while i > 0 and j > 0:\n        if a[i-1] == b[j-1]:\n            res.append(a[i-1])\n            i -= 1; j -= 1\n        else:\n            if dp[i-1][j] >= dp[i][j-1]:\n                i -= 1\n            else:\n                j -= 1\n    res.reverse()",
+      "codeLabel": "Reconstruct sequence"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Output the length and the sequence on separate lines.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    out = []\n    out.append(str(dp[n][m]))\n    if res:\n        out.append(' '.join(map(str, res)))\n    else:\n        out.append('')\n    sys.stdout.write('\\n'.join(out))",
+          "isCode": true
+        },
+        {
+          "label": "    print(' '.join(map(str, res)))\n    print(dp[n][m])",
+          "isCode": true
+        },
+        {
+          "label": "    print(dp[n][m])\n    print(res)",
+          "isCode": true
+        },
+        {
+          "label": "    sys.stdout.write(str(dp[n][m]) + ' ' + ' '.join(map(str, res)))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "First the length, then the sequence (or empty line) on separate lines.",
+      "wrongExplanations": {
+        "1": "Order must be length first, then sequence.",
+        "3": "Both should be on separate lines, not the same line."
+      },
+      "hint": "Two lines: one for length, one for the sequence.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    out = []\n    out.append(str(dp[n][m]))\n    if res:\n        out.append(' '.join(map(str, res)))\n    else:\n        out.append('')\n    sys.stdout.write('\\n'.join(out))",
+      "codeLabel": "Print output"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Wrap up with the usual Python entry point.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "if __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "if __name__ == '__main__':\n    main\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "main()",
+          "isCode": true
+        },
+        {
+          "label": "if __name__ == \"__main__\":\n    pass",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Standard guard and a call to main().",
+      "wrongExplanations": {
+        "2": "Calling main() without guard runs on import, which is not ideal here."
+      },
+      "hint": "Use the conventional guard to call main.",
+      "isCodeBuilding": true,
+      "codeSnippet": "if __name__ == \"__main__\":\n    main()",
+      "codeLabel": "Main guard"
+    },
+    {
+      "id": "q21",
+      "phase": "Verifying the Solution",
+      "questionText": "Given the sample input, what length should the program print on the first line?",
+      "diagram": "Input:\n8 6\n3 1 3 2 7 4 8 2\n6 5 1 2 3 4",
+      "options": [
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "An example LCS is [1, 2, 4], so the length is 3.",
+      "wrongExplanations": {
+        "0": "There exists a common subsequence longer than 2.",
+        "2": "Length 4 is not achievable for these arrays."
+      },
+      "hint": "Trace the table or check sequences like [1,2,4].",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q22",
+      "phase": "Verifying the Solution",
+      "questionText": "Which of the following is a valid common subsequence of length 3 for the sample input?",
+      "diagram": "a = [3, 1, 3, 2, 7, 4, 8, 2]\nb = [6, 5, 1, 2, 3, 4]",
+      "options": [
+        {
+          "label": "1 3 4",
+          "isCode": false
+        },
+        {
+          "label": "3 4 8",
+          "isCode": false
+        },
+        {
+          "label": "1 2 3",
+          "isCode": false
+        },
+        {
+          "label": "1 7 8",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "[1, 3, 4] appears in both: in a at positions 2,3,6 and in b at 3,5,6.",
+      "wrongExplanations": {
+        "1": "Value 8 does not appear in the second array.",
+        "2": "In a, 3 occurs before 2, so [1,2,3] is not in order."
+      },
+      "hint": "Check order in both arrays.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q23",
+      "phase": "Verifying the Solution",
+      "questionText": "Why do we reverse the reconstructed list before printing?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Because we collected elements from the end toward the start.",
+          "isCode": false
+        },
+        {
+          "label": "To sort the sequence in increasing order.",
+          "isCode": false
+        },
+        {
+          "label": "To remove duplicates.",
+          "isCode": false
+        },
+        {
+          "label": "To maximize the length.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Walking from (n, m) to (0, 0) collects the sequence in reverse order.",
+      "wrongExplanations": {
+        "1": "We preserve the original order, not sort.",
+        "2": "Reversing does not deduplicate."
+      },
+      "hint": "Consider the direction of traversal during reconstruction.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the time complexity of this approach in terms of n and m?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n + m)",
+          "isCode": false
+        },
+        {
+          "label": "O(n * m)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2 * m^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(2^n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "We fill an (n+1) x (m+1) table and do O(1) work per cell.",
+      "wrongExplanations": {
+        "0": "We examine all pairs of prefixes, not just linear scans."
+      },
+      "hint": "Count the number of table entries computed.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the space complexity of the implemented solution?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(1)",
+          "isCode": false
+        },
+        {
+          "label": "O(n + m)",
+          "isCode": false
+        },
+        {
+          "label": "O(n * m)",
+          "isCode": false
+        },
+        {
+          "label": "O(n * m * log(n+m))",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "We store an (n+1) x (m+1) table plus the result list.",
+      "wrongExplanations": {
+        "1": "We keep the entire 2D table, not just two arrays."
+      },
+      "hint": "Consider the table size.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Analyzing Complexity",
+      "questionText": "If we only needed the length (not the sequence), how could we reduce memory usage?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Keep only the current and previous row of the table.",
+          "isCode": false
+        },
+        {
+          "label": "Use a single scalar variable.",
+          "isCode": false
+        },
+        {
+          "label": "It's impossible to reduce memory below O(n*m).",
+          "isCode": false
+        },
+        {
+          "label": "Use only the first row of the table.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each new row depends only on the previous row, so two rows suffice for lengths.",
+      "wrongExplanations": {
+        "2": "You don't need the entire table if you don't reconstruct the sequence.",
+        "3": "You still need values from the previous row."
+      },
+      "hint": "Check the dependencies in the transition.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\n\ndef main():",
+    "    data = sys.stdin.read().strip().split()\n    if not data:\n        return\n    it = iter(data)\n    n = int(next(it)); m = int(next(it))\n    a = [int(next(it)) for _ in range(n)]\n    b = [int(next(it)) for _ in range(m)]",
+    "    dp = [[0]*(m+1) for _ in range(n+1)]",
+    "    for i in range(1, n+1):\n        ai = a[i-1]\n        for j in range(1, m+1):\n            if ai == b[j-1]:\n                dp[i][j] = dp[i-1][j-1] + 1\n            else:\n                if dp[i-1][j] >= dp[i][j-1]:\n                    dp[i][j] = dp[i-1][j]\n                else:\n                    dp[i][j] = dp[i][j-1]",
+    "    res = []\n    i, j = n, m\n    while i > 0 and j > 0:\n        if a[i-1] == b[j-1]:\n            res.append(a[i-1])\n            i -= 1; j -= 1\n        else:\n            if dp[i-1][j] >= dp[i][j-1]:\n                i -= 1\n            else:\n                j -= 1\n    res.reverse()",
+    "    out = []\n    out.append(str(dp[n][m]))\n    if res:\n        out.append(' '.join(map(str, res)))\n    else:\n        out.append('')\n    sys.stdout.write('\\n'.join(out))",
+    "if __name__ == \"__main__\":\n    main()"
+  ],
+  "reasoningChain": [
+    {
+      "question": "What does a subsequence require and how long can the LCS be on small examples?",
+      "insight": "Order must be preserved with gaps allowed; small traces show LCS lengths and avoid confusing with subarrays."
+    },
+    {
+      "question": "Why not brute force all subsequences?",
+      "insight": "There are 2^n subsequences; we need a more systematic approach using relations on prefixes."
+    },
+    {
+      "question": "How to define L(i, j) and what are the base cases?",
+      "insight": "L(i, j) is the LCS length of first i and j elements; L(0, j)=L(i,0)=0."
+    },
+    {
+      "question": "What relations connect L(i, j) to smaller prefixes?",
+      "insight": "If last elements match: add 1 to L(i-1, j-1); else take max of L(i-1, j) and L(i, j-1)."
+    },
+    {
+      "question": "How to compute and store values and then recover a sequence?",
+      "insight": "Use a (n+1)x(m+1) table filled from small to large prefixes; reconstruct by walking back from (n, m)."
+    },
+    {
+      "question": "How to implement reading, filling the table, reconstructing, and printing correctly?",
+      "insight": "Tokenize input, build the table with correct indices, backtrack carefully, reverse the result, and print two lines."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1422,
+    "output_tokens": 16473,
+    "input_cost": 0.001778,
+    "output_cost": 0.16473,
+    "total_cost": 0.166507
+  }
+}

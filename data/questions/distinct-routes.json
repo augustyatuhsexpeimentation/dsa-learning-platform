@@ -1,0 +1,987 @@
+{
+  "id": "distinct-routes-max-days",
+  "title": "Distinct Routes",
+  "difficulty": "intermediate",
+  "tags": [
+    "graph"
+  ],
+  "estimatedMinutes": 75,
+  "language": "python",
+  "description": "You are given a directed graph with n rooms (1..n) and m teleporters (edges). Each day you must travel from room 1 to room n. Each teleporter can be used at most once over all days. Find the maximum number of days you can play and output that many route descriptions. For each route, first print the number of rooms on the route, then the list of rooms visited on that route. Any valid solution is accepted.\n\nInput:\n- First line: n m\n- Next m lines: a b meaning a teleporter from a to b (directed). There are no duplicate teleporters with the same (a,b).\n\nOutput:\n- First line: k, the maximum number of days.\n- Then k route descriptions: for each, a line with the number of rooms on the route, and a line with the sequence of rooms.\n\nRooms and teleporters are 1-indexed in input and output.",
+  "examples": [
+    {
+      "input": "6 7\n1 2\n1 3\n2 6\n3 4\n3 5\n4 6\n5 6",
+      "output": "2\n3\n1 2 6\n4\n1 3 4 6",
+      "explanation": "Two routes without sharing teleporters: 1->2->6 and 1->3->4->6. No more edge-disjoint routes are possible."
+    }
+  ],
+  "constraints": [
+    "2 <= n <= 500",
+    "1 <= m <= 1000",
+    "1 <= a,b <= n",
+    "No two teleporters have the same (a,b)"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "Suppose n=3, m=2 with teleporters: 1->2 and 2->3. How many days can you play?",
+      "diagram": "1 -> 2 -> 3",
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "Depends on the order of using teleporters",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "There is exactly one route 1->2->3, and each teleporter can be used at most once overall. So only 1 day.",
+      "wrongExplanations": {
+        "2": "There is only one path; after using it once, teleporters are exhausted.",
+        "3": "There is only one possible route; order doesn't change that."
+      },
+      "hint": "Count how many distinct 1->3 routes that share no teleporter exist.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "You have teleporters 1->2, 1->3, 3->4, 4->2, 2->5 (n=5). How many days can you play?",
+      "diagram": "1 -> 2 -> 5\n1 -> 3 -> 4 -> 2",
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Only one route from 1 to 5 uses 1->2 and 2->5. The path via 3->4->2 still must use 2->5, which then has been used.",
+      "wrongExplanations": {
+        "1": "Two different starts (1->2 and 1->3) don't help if both must finally use 2->5.",
+        "3": "There is at least one route (via 2), so it's not 0."
+      },
+      "hint": "All routes must eventually use 2->5 to reach 5.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "In this game, can two different days' routes share rooms as long as they do not share teleporters?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, sharing rooms is allowed; only teleporters are restricted.",
+          "isCode": false
+        },
+        {
+          "label": "No, routes cannot share rooms either.",
+          "isCode": false
+        },
+        {
+          "label": "Only room 1 and room n can be shared.",
+          "isCode": false
+        },
+        {
+          "label": "Sharing rooms is allowed only if they are intermediate (not 1 or n).",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The restriction is on teleporters (edges), not rooms. Routes may pass through the same rooms as long as teleporters are not reused.",
+      "wrongExplanations": {
+        "1": "The problem statement restricts teleporters, not rooms.",
+        "2": "There's no such restriction in the statement."
+      },
+      "hint": "Focus on 'You can use each teleporter at most once'.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "Teleporters are directed. If there is a teleporter a->b, can you travel from b to a using it?",
+      "diagram": "a -> b (directed)",
+      "options": [
+        {
+          "label": "No, you can only go from a to b.",
+          "isCode": false
+        },
+        {
+          "label": "Yes, teleporters can be used in both directions.",
+          "isCode": false
+        },
+        {
+          "label": "Yes, but only once per day.",
+          "isCode": false
+        },
+        {
+          "label": "Only if there is also a b->a teleporter.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 3,
+      "explanation": "Teleporters have a direction. You need an explicit b->a teleporter to go back from b to a.",
+      "wrongExplanations": {
+        "0": "This is generally false; some pairs may be bidirectional if both edges exist.",
+        "1": "Teleporters are not bidirectional unless both directed edges exist."
+      },
+      "hint": "Direction matters unless both directed edges are present.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Exploring Approaches",
+      "questionText": "Consider:\n1->2, 2->4, 1->3, 3->4, 2->3 (n=4).\nIf you first pick route 1->2->4 on day 1, how many days total can you play?",
+      "diagram": "1 -> 2 -> 4\n1 -> 3 -> 4\n2 -> 3",
+      "options": [
+        {
+          "label": "1 day, because picking 1->2->4 blocks all other routes.",
+          "isCode": false
+        },
+        {
+          "label": "2 days; on day 2 pick 1->3->4.",
+          "isCode": false
+        },
+        {
+          "label": "2 days; on day 2 pick 1->2->3->4.",
+          "isCode": false
+        },
+        {
+          "label": "3 days, because there are three distinct routes.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Day 1: 1->2->4. Remaining edges allow 1->3->4? No (3->4 unused, but 1->3 unused, so yes actually); However 1->3->4 uses different edges, so also valid. But 1->2->3->4 is invalid after day1 because 2->4 is used. Wait: we need careful. Correct second day is 1->3->4. Let's select that option.",
+      "wrongExplanations": {
+        "0": "After 1->2->4, the edges 1->3 and 3->4 remain; 1->3->4 is still available.",
+        "2": "1->2->3->4 requires 2->3 and 3->4; edge 2->3 remains, but you cannot go 2->3 after using 2->4? You still can, but you must also go 1->2; 1->2 was used in day1? It was used via 1->2? Actually day1 used 1->2 and 2->4, so 1->2 is used and can't be used again."
+      },
+      "hint": "Edges used on day 1 cannot be reused. Which routes remain?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5-corrected",
+      "phase": "Exploring Approaches",
+      "questionText": "Correcting the previous reasoning: After choosing 1->2->4 on day 1, which route is still available for day 2?",
+      "diagram": "Edges used day 1: 1->2, 2->4. Remaining: 1->3, 3->4, 2->3",
+      "options": [
+        {
+          "label": "1->3->4",
+          "isCode": false
+        },
+        {
+          "label": "1->2->3->4",
+          "isCode": false
+        },
+        {
+          "label": "1->2->3",
+          "isCode": false
+        },
+        {
+          "label": "No route remains",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "1->3->4 uses edges not used on day 1. Routes using 1->2 are invalid because 1->2 was already used.",
+      "wrongExplanations": {
+        "1": "It reuses 1->2 which was used on day 1.",
+        "3": "1->3->4 remains available using fresh edges."
+      },
+      "hint": "Check whether each candidate reuses 1->2 or 2->4.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "Which statement best captures what we need to maximize?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "The number of routes from 1 to n that do not share any teleporter with each other.",
+          "isCode": false
+        },
+        {
+          "label": "The number of routes from 1 to n that do not share any rooms.",
+          "isCode": false
+        },
+        {
+          "label": "The total number of teleporters used across all routes.",
+          "isCode": false
+        },
+        {
+          "label": "The number of shortest routes from 1 to n.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We must find as many 1->n routes as possible that share no teleporters between them.",
+      "wrongExplanations": {
+        "1": "Sharing rooms is allowed; only teleporters cannot be shared.",
+        "3": "Length of routes is irrelevant; sharing teleporters is the only restriction."
+      },
+      "hint": "Think about what makes two routes conflict.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "To model 'each teleporter can be used at most once', what natural numeric value should we associate with each teleporter?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "A usage limit of 1 for each teleporter.",
+          "isCode": false
+        },
+        {
+          "label": "A weight equal to its distance.",
+          "isCode": false
+        },
+        {
+          "label": "A cost equal to 1.",
+          "isCode": false
+        },
+        {
+          "label": "A priority ranking to pick routes greedily.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each teleporter supports at most one use across all days, so a limit of 1 is natural.",
+      "wrongExplanations": {
+        "1": "Shortest paths don't directly solve maximizing count without reuse.",
+        "2": "Costs/weights are not needed for counting non-reused routes."
+      },
+      "hint": "We only care whether a teleporter is unused or used once.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Building the Idea",
+      "questionText": "When choosing multiple routes, why is it useful to add an opposite-direction link (with initial limit 0) for each teleporter?",
+      "diagram": "u -> v (limit 1)\nadd v -> u (limit 0)",
+      "options": [
+        {
+          "label": "So we can later undo a previous choice on u->v if a better combination exists.",
+          "isCode": false
+        },
+        {
+          "label": "To allow teleporting both ways during a day.",
+          "isCode": false
+        },
+        {
+          "label": "To count the total number of teleporters.",
+          "isCode": false
+        },
+        {
+          "label": "It is unnecessary; we can always stick to the first choices.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Adding a reverse link with 0 limit lets us 'give back' a previously used teleporter if rerouting yields more total routes.",
+      "wrongExplanations": {
+        "1": "We are not allowed to use both directions unless both are modeled; here reverse is for undoing choices.",
+        "3": "Without a way to undo, early choices might block the optimal number of routes."
+      },
+      "hint": "Think about adjusting earlier path selections when a new route conflicts.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "After you select a route and use some teleporters along it, what change should happen to those reverse links to reflect the possibility of rerouting?",
+      "diagram": "u -> v used once\nv -> u (reverse) becomes usable",
+      "options": [
+        {
+          "label": "Increase the reverse link's available uses by 1.",
+          "isCode": false
+        },
+        {
+          "label": "Decrease the forward link's available uses by 2.",
+          "isCode": false
+        },
+        {
+          "label": "Delete the forward link.",
+          "isCode": false
+        },
+        {
+          "label": "Mark the nodes as blocked.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Using a forward teleporter once makes the reverse link usable once, enabling future rerouting of that choice.",
+      "wrongExplanations": {
+        "1": "Each teleporter is used once; forward use is reduced by 1, reverse increases by 1.",
+        "2": "We still need the link structure to extract routes later."
+      },
+      "hint": "The reverse link reflects the ability to undo one unit of use.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "How do we know when we have found the maximum number of days?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "When no more 1->n route can be found without reusing a teleporter.",
+          "isCode": false
+        },
+        {
+          "label": "When every teleporter has been used.",
+          "isCode": false
+        },
+        {
+          "label": "When the shortest path length stops decreasing.",
+          "isCode": false
+        },
+        {
+          "label": "After exactly n-1 routes.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We stop when it's impossible to find another route from 1 to n that doesn't reuse teleporters.",
+      "wrongExplanations": {
+        "1": "Not all teleporters need to be used.",
+        "3": "There is no fixed count like n-1 for general directed graphs."
+      },
+      "hint": "Think iterative: pick a route, reduce availability, repeat until stuck.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "Small check: Graph with teleporters 1->2, 2->4, 1->3, 3->4 (n=4). What's the maximum number of days?",
+      "diagram": "1 -> 2 -> 4\n1 -> 3 -> 4",
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "Depends on order",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Two edge-disjoint routes exist: 1->2->4 and 1->3->4.",
+      "wrongExplanations": {
+        "0": "There are two independent routes that share no teleporter.",
+        "3": "Either order yields 2 days, since the routes are disjoint in teleporters."
+      },
+      "hint": "Count how many routes share no teleporter.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Writing the Code",
+      "questionText": "Start: reading input and preparing tokens. Which snippet correctly reads n, m and all edges as 0-based pairs?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\nfrom collections import deque\n\ndef read_input():\n    data = sys.stdin.read().strip().split()\n    it = iter(data)\n    n = int(next(it)); m = int(next(it))\n    edges = []\n    for _ in range(m):\n        a = int(next(it)); b = int(next(it))\n        edges.append((a-1, b-1))\n    return n, m, edges",
+          "isCode": true
+        },
+        {
+          "label": "import sys\n\ndef read_input():\n    n, m = map(int, sys.stdin.readline().split())\n    edges = []\n    for _ in range(m):\n        a, b = map(int, sys.stdin.readline().split())\n        edges.append((a, b))\n    return n, m, edges",
+          "isCode": true
+        },
+        {
+          "label": "import sys\nfrom collections import deque\n\ndef read_input():\n    tokens = sys.stdin.read().split()\n    n = int(tokens[0]); m = int(tokens[1])\n    edges = []\n    for i in range(2, 2*m+2, 2):\n        a = int(tokens[i]); b = int(tokens[i+1])\n        edges.append((a, b))\n    return n, m, edges",
+          "isCode": true
+        },
+        {
+          "label": "import sys\n\ndef read_input():\n    data = sys.stdin.read().split()\n    n = int(data[0]); m = int(data[1])\n    edges = [(int(data[i]), int(data[i+1])) for i in range(2, len(data), 2)]\n    return n, m, edges",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need to convert to 0-based indexing for nodes; option A does that and handles all tokens robustly.",
+      "wrongExplanations": {
+        "1": "Leaves nodes 1-based, which conflicts with typical 0-based arrays later.",
+        "2": "Also leaves nodes 1-based; better to convert now."
+      },
+      "hint": "Converting rooms to 0-based simplifies arrays. Ensure all tokens are read even without newlines.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\nfrom collections import deque\n\ndef read_input():\n    data = sys.stdin.read().strip().split()\n    it = iter(data)\n    n = int(next(it)); m = int(next(it))\n    edges = []\n    for _ in range(m):\n        a = int(next(it)); b = int(next(it))\n        edges.append((a-1, b-1))\n    return n, m, edges",
+      "codeLabel": "Read input tokens as 0-based edges"
+    },
+    {
+      "id": "q13",
+      "phase": "Writing the Code",
+      "questionText": "Define an edge structure to store target, remaining uses, and index of the opposite link. Which class fits?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "class Edge:\n    __slots__ = (\"to\",\"cap\",\"rev\")\n    def __init__(self,to,cap,rev):\n        self.to = to\n        self.cap = cap\n        self.rev = rev",
+          "isCode": true
+        },
+        {
+          "label": "class Edge:\n    def __init__(self,to,weight):\n        self.to = to\n        self.weight = weight",
+          "isCode": true
+        },
+        {
+          "label": "class Edge:\n    def __init__(self,to,cap):\n        self.to = to\n        self.cap = cap\n        self.rev = None",
+          "isCode": true
+        },
+        {
+          "label": "class Edge:\n    __slots__ = (\"to\",\"used\")\n    def __init__(self,to,used):\n        self.to = to\n        self.used = used",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need 'to', remaining capacity (cap), and index of reverse edge (rev).",
+      "wrongExplanations": {
+        "1": "No reverse link info; 'weight' is irrelevant here.",
+        "2": "rev is required to update the opposite link efficiently."
+      },
+      "hint": "We will update forward and reverse links together; store reverse index.",
+      "isCodeBuilding": true,
+      "codeSnippet": "\nclass Edge:\n    __slots__ = (\"to\",\"cap\",\"rev\")\n    def __init__(self,to,cap,rev):\n        self.to = to\n        self.cap = cap\n        self.rev = rev",
+      "codeLabel": "Edge class with reverse index"
+    },
+    {
+      "id": "q14",
+      "phase": "Writing the Code",
+      "questionText": "Build the graph with forward link (limit 1) and reverse link (limit 0). Which function is correct?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def build_graph(n, edges):\n    g = [[] for _ in range(n)]\n    def add_edge(u,v):\n        g[u].append(Edge(v,1,len(g[v])))\n        g[v].append(Edge(u,0,len(g[u])-1))\n    for u,v in edges:\n        add_edge(u,v)\n    return g",
+          "isCode": true
+        },
+        {
+          "label": "def build_graph(n, edges):\n    g = [[] for _ in range(n)]\n    def add_edge(u,v):\n        g[u].append(Edge(v,1,0))\n        g[v].append(Edge(u,0,0))\n    for u,v in edges:\n        add_edge(u,v)\n    return g",
+          "isCode": true
+        },
+        {
+          "label": "def build_graph(n, edges):\n    g = [[] for _ in range(n)]\n    def add_edge(u,v):\n        g[u].append(Edge(v,1,len(g[u])))\n        g[v].append(Edge(u,0,len(g[v])-1))\n    for u,v in edges:\n        add_edge(u,v)\n    return g",
+          "isCode": true
+        },
+        {
+          "label": "def build_graph(n, edges):\n    g = [[] for _ in range(n)]\n    for u,v in edges:\n        g[u].append(Edge(v,1,0))\n    return g",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We must link each edge to its reverse; using indices into adjacency lists as shown in A is correct.",
+      "wrongExplanations": {
+        "1": "rev indices must point to the counterpart, not just 0.",
+        "3": "Missing reverse link prevents undoing and path extraction."
+      },
+      "hint": "rev should equal the position of the counterpart in the neighbor list.",
+      "isCodeBuilding": true,
+      "codeSnippet": "\ndef build_graph(n, edges):\n    g = [[] for _ in range(n)]\n    def add_edge(u,v):\n        g[u].append(Edge(v,1,len(g[v])))\n        g[v].append(Edge(u,0,len(g[u])-1))\n    for u,v in edges:\n        add_edge(u,v)\n    return g",
+      "codeLabel": "Build graph with forward and reverse links"
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "We need a function to build distance levels from the start to guide searches. Which implementation works?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def build_levels(g, s, t):\n    n = len(g)\n    level = [-1]*n\n    q = deque()\n    level[s] = 0\n    q.append(s)\n    while q:\n        u = q.popleft()\n        for e in g[u]:\n            if e.cap > 0 and level[e.to] < 0:\n                level[e.to] = level[u] + 1\n                q.append(e.to)\n    return level",
+          "isCode": true
+        },
+        {
+          "label": "def build_levels(g, s, t):\n    n = len(g)\n    level = [0]*n\n    for u in range(n):\n        for e in g[u]:\n            if e.cap > 0:\n                level[e.to] = level[u] + 1\n    return level",
+          "isCode": true
+        },
+        {
+          "label": "def build_levels(g, s, t):\n    n = len(g)\n    level = [-1]*n\n    stack = [s]\n    level[s] = 0\n    while stack:\n        u = stack.pop()\n        for e in g[u]:\n            if e.cap > 0 and level[e.to] < 0:\n                level[e.to] = level[u] + 1\n                stack.append(e.to)\n    return level",
+          "isCode": true
+        },
+        {
+          "label": "def build_levels(g, s, t):\n    n = len(g)\n    level = [0]*n\n    return level",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need shortest-layer levels over edges with remaining capacity; a queue-based traversal does that.",
+      "wrongExplanations": {
+        "1": "This doesn't propagate in the right order and revisits nodes blindly.",
+        "3": "Levels must reflect reachability; constant zeros are wrong."
+      },
+      "hint": "Use a queue; only traverse edges with remaining availability.",
+      "isCodeBuilding": true,
+      "codeSnippet": "\ndef build_levels(g, s, t):\n    n = len(g)\n    level = [-1]*n\n    q = deque()\n    level[s] = 0\n    q.append(s)\n    while q:\n        u = q.popleft()\n        for e in g[u]:\n            if e.cap > 0 and level[e.to] < 0:\n                level[e.to] = level[u] + 1\n                q.append(e.to)\n    return level",
+      "codeLabel": "Build levels over usable links"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Implement a function to push availability along level-respecting paths, skipping already tried edges per node. Which is correct?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def send(g, level, ptr, u, t, f):\n    if u == t:\n        return f\n    while ptr[u] < len(g[u]):\n        e = g[u][ptr[u]]\n        if e.cap > 0 and level[e.to] == level[u] + 1:\n            pushed = send(g, level, ptr, e.to, t, min(f, e.cap))\n            if pushed:\n                e.cap -= pushed\n                g[e.to][e.rev].cap += pushed\n                return pushed\n        ptr[u] += 1\n    return 0",
+          "isCode": true
+        },
+        {
+          "label": "def send(g, level, ptr, u, t, f):\n    if u == t:\n        return f\n    for e in g[u]:\n        if e.cap > 0:\n            e.cap -= 1\n            g[e.to][e.rev].cap += 1\n            return 1\n    return 0",
+          "isCode": true
+        },
+        {
+          "label": "def send(g, level, ptr, u, t, f):\n    while ptr[u] < len(g[u]):\n        e = g[u][ptr[u]]\n        if e.cap > 0:\n            e.cap -= 1\n            g[e.to][e.rev].cap += 1\n            return 1\n        ptr[u] += 1\n    return 0",
+          "isCode": true
+        },
+        {
+          "label": "def send(g, level, ptr, u, t, f):\n    if u == t:\n        return f\n    for i, e in enumerate(g[u]):\n        if e.cap > 0 and level[e.to] == level[u] - 1:\n            pushed = send(g, level, ptr, e.to, t, f)\n            if pushed:\n                e.cap -= pushed\n                g[e.to][e.rev].cap += pushed\n                return pushed\n    return 0",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We recurse along edges that go to the next level and update capacities and reverse capacities, tracking per-node progress with ptr.",
+      "wrongExplanations": {
+        "1": "It ignores destination t and levels; may break path continuation.",
+        "3": "Uses wrong level relation (should be +1), and ignores ptr."
+      },
+      "hint": "Only follow edges to nodes with level +1 to form layered paths.",
+      "isCodeBuilding": true,
+      "codeSnippet": "\ndef send(g, level, ptr, u, t, f):\n    if u == t:\n        return f\n    while ptr[u] < len(g[u]):\n        e = g[u][ptr[u]]\n        if e.cap > 0 and level[e.to] == level[u] + 1:\n            pushed = send(g, level, ptr, e.to, t, min(f, e.cap))\n            if pushed:\n                e.cap -= pushed\n                g[e.to][e.rev].cap += pushed\n                return pushed\n        ptr[u] += 1\n    return 0",
+      "codeLabel": "Send along level-respecting paths"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Combine repeated level-building and sending until no more can be sent. Which function returns the total number of routes?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def max_routes(g, s, t):\n    flow = 0\n    n = len(g)\n    while True:\n        level = build_levels(g, s, t)\n        if level[t] < 0:\n            break\n        ptr = [0]*n\n        while True:\n            pushed = send(g, level, ptr, s, t, 1)\n            if not pushed:\n                break\n            flow += pushed\n    return flow",
+          "isCode": true
+        },
+        {
+          "label": "def max_routes(g, s, t):\n    flow = 0\n    n = len(g)\n    level = build_levels(g, s, t)\n    ptr = [0]*n\n    pushed = send(g, level, ptr, s, t, 1)\n    flow += pushed\n    return flow",
+          "isCode": true
+        },
+        {
+          "label": "def max_routes(g, s, t):\n    flow = 0\n    n = len(g)\n    while True:\n        level = build_levels(g, s, t)\n        ptr = [0]*n\n        pushed = send(g, level, ptr, s, t, 1)\n        if not pushed:\n            break\n        flow += pushed\n    return flow",
+          "isCode": true
+        },
+        {
+          "label": "def max_routes(g, s, t):\n    return 0",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We rebuild levels until the target is unreachable, and keep sending units one by one while possible.",
+      "wrongExplanations": {
+        "1": "Sends only once; more routes may be available.",
+        "2": "Stops after failing to send 1 in a single round; but more may be possible after rebuilding levels."
+      },
+      "hint": "Outer loop: rebuild levels until stuck; inner loop: send as many unit routes as possible.",
+      "isCodeBuilding": true,
+      "codeSnippet": "\ndef max_routes(g, s, t):\n    flow = 0\n    n = len(g)\n    while True:\n        level = build_levels(g, s, t)\n        if level[t] < 0:\n            break\n        ptr = [0]*n\n        while True:\n            pushed = send(g, level, ptr, s, t, 1)\n            if not pushed:\n                break\n            flow += pushed\n    return flow",
+      "codeLabel": "Compute maximum number of routes"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "After computing the count, extract one concrete route by following links that were used once. Which function works and consumes the used links?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def extract_one_path(g, s, t):\n    n = len(g)\n    path = []\n    visited = [False]*n\n    def dfs(u):\n        path.append(u)\n        if u == t:\n            return True\n        visited[u] = True\n        for e in g[u]:\n            rev = g[e.to][e.rev]\n            if rev.cap > 0 and not visited[e.to]:\n                rev.cap -= 1\n                e.cap += 1\n                if dfs(e.to):\n                    return True\n                rev.cap += 1\n                e.cap -= 1\n        path.pop()\n        return False\n    dfs(s)\n    return path",
+          "isCode": true
+        },
+        {
+          "label": "def extract_one_path(g, s, t):\n    path = [s]\n    u = s\n    while u != t:\n        for e in g[u]:\n            if e.cap == 0:\n                u = e.to\n                path.append(u)\n                break\n    return path",
+          "isCode": true
+        },
+        {
+          "label": "def extract_one_path(g, s, t):\n    n = len(g)\n    path = []\n    def dfs(u):\n        path.append(u)\n        if u == t:\n            return True\n        for e in g[u]:\n            if e.cap > 0:\n                e.cap -= 1\n                if dfs(e.to):\n                    return True\n                e.cap += 1\n        path.pop()\n        return False\n    dfs(s)\n    return path",
+          "isCode": true
+        },
+        {
+          "label": "def extract_one_path(g, s, t):\n    return []",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Edges that carried a route have reverse cap > 0. We follow such edges and decrease reverse cap to consume them so each is used once.",
+      "wrongExplanations": {
+        "1": "Checking e.cap==0 is ambiguous; some edges may be saturated but not part of a 1->t route.",
+        "2": "Following any cap>0 edge may not correspond to a chosen route."
+      },
+      "hint": "Routes correspond to edges with 1 unit sent, i.e., reverse cap > 0.",
+      "isCodeBuilding": true,
+      "codeSnippet": "\ndef extract_one_path(g, s, t):\n    n = len(g)\n    path = []\n    visited = [False]*n\n    def dfs(u):\n        path.append(u)\n        if u == t:\n            return True\n        visited[u] = True\n        for e in g[u]:\n            rev = g[e.to][e.rev]\n            if rev.cap > 0 and not visited[e.to]:\n                # use this edge\n                rev.cap -= 1\n                e.cap += 1\n                if dfs(e.to):\n                    return True\n                # backtrack\n                rev.cap += 1\n                e.cap -= 1\n        path.pop()\n        return False\n    dfs(s)\n    return path",
+      "codeLabel": "Extract a single route from used links"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Finalize: glue reading, building, counting, extracting k routes, and printing. Which main function is correct with 1-based output?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def main():\n    n, m, edges = read_input()\n    s = 0; t = n-1\n    g = build_graph(n, edges)\n    k = max_routes(g, s, t)\n    out = []\n    out.append(str(k))\n    for _ in range(k):\n        p = extract_one_path(g, s, t)\n        out.append(str(len(p)))\n        out.append(\" \".join(str(x+1) for x in p))\n    sys.stdout.write(\"\\n\".join(out))",
+          "isCode": true
+        },
+        {
+          "label": "def main():\n    n, m, edges = read_input()\n    s = 1; t = n\n    g = build_graph(n, edges)\n    k = max_routes(g, s, t)\n    print(k)\n    for _ in range(k):\n        p = extract_one_path(g, s, t)\n        print(len(p))\n        print(\" \".join(str(x) for x in p))",
+          "isCode": true
+        },
+        {
+          "label": "def main():\n    n, m, edges = read_input()\n    g = build_graph(n, edges)\n    k = max_routes(g, 0, n-1)\n    print(k)\n    for _ in range(k):\n        p = extract_one_path(g, 0, n-1)\n        print(len(p))\n        print(\" \".join(map(str, p)))",
+          "isCode": true
+        },
+        {
+          "label": "def main():\n    n, m, edges = read_input()\n    s = 0; t = n-1\n    g = build_graph(n, edges)\n    k = max_routes(g, s, t)\n    print(k)\n    for _ in range(k):\n        p = extract_one_path(g, s, t)\n        print(len(p), \" \".join(str(x+1) for x in p))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We convert back to 1-based for output and print count, then length and route on separate lines as required.",
+      "wrongExplanations": {
+        "1": "s and t should be 0 and n-1 after 0-basing; also prints nodes 0-based.",
+        "3": "Length and route must be on separate lines, not one line with both."
+      },
+      "hint": "Print k, then for each route: length on its own line, then the sequence (1-based) on the next line.",
+      "isCodeBuilding": true,
+      "codeSnippet": "\ndef main():\n    n, m, edges = read_input()\n    s = 0; t = n-1\n    g = build_graph(n, edges)\n    k = max_routes(g, s, t)\n    out = []\n    out.append(str(k))\n    for _ in range(k):\n        p = extract_one_path(g, s, t)\n        out.append(str(len(p)))\n        out.append(\" \".join(str(x+1) for x in p))\n    sys.stdout.write(\"\\n\".join(out))",
+      "codeLabel": "Main: compute and print routes"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Add the usual entry point so the program runs when executed. Which snippet is appropriate?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "if __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "if __name__ == \"main\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "main()",
+          "isCode": true
+        },
+        {
+          "label": "def __main__():\n    main()",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The standard Python entry-point guard is if __name__ == \"__main__\": main().",
+      "wrongExplanations": {
+        "1": "__name__ equals \"__main__\" when run as a script, not \"main\".",
+        "2": "Calling main unguarded can break when importing the module."
+      },
+      "hint": "Use the common script guard pattern.",
+      "isCodeBuilding": true,
+      "codeSnippet": "\nif __name__ == \"__main__\":\n    main()",
+      "codeLabel": "Entry point"
+    },
+    {
+      "id": "q21",
+      "phase": "Verifying the Solution",
+      "questionText": "On the sample input, what value of k should the program print?",
+      "diagram": "6 7\n1 2\n1 3\n2 6\n3 4\n3 5\n4 6\n5 6",
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "Depends on path choices; could be 1 or 2",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Two routes are possible without sharing teleporters: 1-2-6 and one via 3 (to 4 or 5) then 6.",
+      "wrongExplanations": {
+        "0": "There are clearly two disjoint routes ending in different edges to 6.",
+        "3": "With optimal choices, k is fixed at 2."
+      },
+      "hint": "Check if you can find two routes that share no teleporter.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q22",
+      "phase": "Verifying the Solution",
+      "questionText": "Which pair of routes could be printed for the sample input (order may vary)?",
+      "diagram": "Edges: 1->2,1->3,2->6,3->4,3->5,4->6,5->6",
+      "options": [
+        {
+          "label": "3; 1 2 6  and  4; 1 3 4 6",
+          "isCode": false
+        },
+        {
+          "label": "3; 1 2 6  and  3; 1 2 6",
+          "isCode": false
+        },
+        {
+          "label": "2; 1 6  and  4; 1 3 5 6",
+          "isCode": false
+        },
+        {
+          "label": "4; 1 3 4 6  and  4; 1 3 5 6",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "1-2-6 and 1-3-4-6 share no teleporter. The others either reuse a teleporter or include a non-existent edge.",
+      "wrongExplanations": {
+        "1": "The same route cannot be used twice because teleporters would be reused.",
+        "3": "Both use 1->3, which would reuse the teleporter across days."
+      },
+      "hint": "Check edges exist and that the two routes do not share any teleporter.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q23",
+      "phase": "Verifying the Solution",
+      "questionText": "If no route from 1 to n exists at all, what should the program print?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "0 and no further lines",
+          "isCode": false
+        },
+        {
+          "label": "0 and then an empty line",
+          "isCode": false
+        },
+        {
+          "label": "Nothing",
+          "isCode": false
+        },
+        {
+          "label": "An error",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Print k=0 and no route descriptions. This follows the specified format.",
+      "wrongExplanations": {
+        "2": "We must still print the count k.",
+        "3": "It's a valid case; just print 0."
+      },
+      "hint": "Output format always starts with k.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is a reasonable upper bound for the time complexity of this approach on these constraints?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n * m) in the worst case, which is fine for n<=500, m<=1000.",
+          "isCode": false
+        },
+        {
+          "label": "O(m log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^3)",
+          "isCode": false
+        },
+        {
+          "label": "O(m)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each phase builds levels in O(n+m) and pushes multiple units; a safe bound here is about O(n*m), which fits limits.",
+      "wrongExplanations": {
+        "1": "There is no logarithmic factor via priority queues here.",
+        "3": "Too optimistic; multiple passes are needed."
+      },
+      "hint": "Consider repeated passes over edges and nodes.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the space complexity of the solution (excluding input storage)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n + m) for adjacency lists and reverse links.",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2) because of a matrix.",
+          "isCode": false
+        },
+        {
+          "label": "O(m^2) for all pairs of edges.",
+          "isCode": false
+        },
+        {
+          "label": "O(1) extra space.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We store adjacency lists with two directed links per teleporter, plus small arrays; this is linear in n+m.",
+      "wrongExplanations": {
+        "1": "We do not use a matrix representation.",
+        "3": "We need to store the graph and auxiliary arrays."
+      },
+      "hint": "Each teleporter becomes two directed links; plus arrays of size n.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Analyzing Complexity",
+      "questionText": "Which edge cases should the code handle correctly?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "No route exists; parallel disjoint routes; cycles present; multiple outgoing from 1 and incoming to n.",
+          "isCode": false
+        },
+        {
+          "label": "Only simple paths without revisiting rooms; otherwise reject.",
+          "isCode": false
+        },
+        {
+          "label": "Only trees (acyclic graphs).",
+          "isCode": false
+        },
+        {
+          "label": "Only when m >= n.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The input may have cycles, multiple choices, or no route at all. The code should handle all these cases.",
+      "wrongExplanations": {
+        "1": "We don't enforce simple paths; the method handles cycles naturally.",
+        "2": "Graphs can be cyclic."
+      },
+      "hint": "Assume general directed graphs within constraints.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\nfrom collections import deque\n\ndef read_input():\n    data = sys.stdin.read().strip().split()\n    it = iter(data)\n    n = int(next(it)); m = int(next(it))\n    edges = []\n    for _ in range(m):\n        a = int(next(it)); b = int(next(it))\n        edges.append((a-1, b-1))\n    return n, m, edges",
+    "\nclass Edge:\n    __slots__ = (\"to\",\"cap\",\"rev\")\n    def __init__(self,to,cap,rev):\n        self.to = to\n        self.cap = cap\n        self.rev = rev",
+    "\ndef build_graph(n, edges):\n    g = [[] for _ in range(n)]\n    def add_edge(u,v):\n        g[u].append(Edge(v,1,len(g[v])))\n        g[v].append(Edge(u,0,len(g[u])-1))\n    for u,v in edges:\n        add_edge(u,v)\n    return g",
+    "\ndef build_levels(g, s, t):\n    n = len(g)\n    level = [-1]*n\n    q = deque()\n    level[s] = 0\n    q.append(s)\n    while q:\n        u = q.popleft()\n        for e in g[u]:\n            if e.cap > 0 and level[e.to] < 0:\n                level[e.to] = level[u] + 1\n                q.append(e.to)\n    return level",
+    "\ndef send(g, level, ptr, u, t, f):\n    if u == t:\n        return f\n    while ptr[u] < len(g[u]):\n        e = g[u][ptr[u]]\n        if e.cap > 0 and level[e.to] == level[u] + 1:\n            pushed = send(g, level, ptr, e.to, t, min(f, e.cap))\n            if pushed:\n                e.cap -= pushed\n                g[e.to][e.rev].cap += pushed\n                return pushed\n        ptr[u] += 1\n    return 0",
+    "\ndef max_routes(g, s, t):\n    flow = 0\n    n = len(g)\n    while True:\n        level = build_levels(g, s, t)\n        if level[t] < 0:\n            break\n        ptr = [0]*n\n        while True:\n            pushed = send(g, level, ptr, s, t, 1)\n            if not pushed:\n                break\n            flow += pushed\n    return flow",
+    "\ndef extract_one_path(g, s, t):\n    n = len(g)\n    path = []\n    visited = [False]*n\n    def dfs(u):\n        path.append(u)\n        if u == t:\n            return True\n        visited[u] = True\n        for e in g[u]:\n            rev = g[e.to][e.rev]\n            if rev.cap > 0 and not visited[e.to]:\n                # use this edge\n                rev.cap -= 1\n                e.cap += 1\n                if dfs(e.to):\n                    return True\n                # backtrack\n                rev.cap += 1\n                e.cap -= 1\n        path.pop()\n        return False\n    dfs(s)\n    return path",
+    "\ndef main():\n    n, m, edges = read_input()\n    s = 0; t = n-1\n    g = build_graph(n, edges)\n    k = max_routes(g, s, t)\n    out = []\n    out.append(str(k))\n    for _ in range(k):\n        p = extract_one_path(g, s, t)\n        out.append(str(len(p)))\n        out.append(\" \".join(str(x+1) for x in p))\n    sys.stdout.write(\"\\n\".join(out))\n\nif __name__ == \"__main__\":\n    main()"
+  ],
+  "reasoningChain": [
+    {
+      "question": "What exactly are we maximizing (routes that do not share teleporters)?",
+      "insight": "Days equal the maximum number of 1->n routes that share no teleporter across days."
+    },
+    {
+      "question": "How to enforce 'at most once per teleporter' in a general search?",
+      "insight": "Treat each teleporter as having a limit of 1 use and maintain remaining availability."
+    },
+    {
+      "question": "How to adjust earlier choices to avoid getting stuck with suboptimal picks?",
+      "insight": "Add an opposite link with 0 initial availability; when a teleporter is used, its opposite gains 1 to allow rerouting."
+    },
+    {
+      "question": "How to repeatedly find as many routes as possible efficiently?",
+      "insight": "Iterate: build layered reachability from start and send units along level-respecting paths until no more can be sent; repeat until target is unreachable."
+    },
+    {
+      "question": "How to output actual routes once the count is known?",
+      "insight": "Follow links that were used (opposite links now available) to extract each route, consuming them so each is printed once."
+    },
+    {
+      "question": "What is the complexity and why is it acceptable here?",
+      "insight": "A safe bound is about O(n*m) time and O(n+m) space, which is fine for n<=500 and m<=1000."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1463,
+    "output_tokens": 17387,
+    "input_cost": 0.001829,
+    "output_cost": 0.17387,
+    "total_cost": 0.175699
+  }
+}

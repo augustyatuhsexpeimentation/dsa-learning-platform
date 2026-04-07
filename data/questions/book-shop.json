@@ -1,0 +1,982 @@
+{
+  "id": "book-shop-guided-builder",
+  "title": "Book Shop",
+  "difficulty": "intermediate",
+  "tags": [
+    "dp"
+  ],
+  "estimatedMinutes": 60,
+  "language": "python",
+  "description": "You are in a book shop which sells n different books. You know the price and number of pages of each book. You have decided that the total price of your purchases will be at most x. What is the maximum number of pages you can buy? You can buy each book at most once.\n\nInput:\n- First line: two integers n and x — the number of books and the maximum total price.\n- Second line: n integers h_1..h_n — the price of each book.\n- Third line: n integers s_1..s_n — the number of pages of each book.\n\nOutput:\nPrint one integer: the maximum number of pages.",
+  "examples": [
+    {
+      "input": "4 10\n4 8 5 3\n5 12 8 1",
+      "output": "13",
+      "explanation": "Pick books with prices 4 and 5 → total price 9 ≤ 10, total pages 5 + 8 = 13. No other valid selection yields more pages."
+    }
+  ],
+  "constraints": [
+    "1 ≤ n ≤ 1000",
+    "1 ≤ x ≤ 100000",
+    "1 ≤ h_i, s_i ≤ 1000",
+    "Each book can be chosen at most once"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "If x = 10, is a total price of exactly 10 allowed?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, the total price can be at most x, so 10 is allowed.",
+          "isCode": false
+        },
+        {
+          "label": "No, the total price must be strictly less than x.",
+          "isCode": false
+        },
+        {
+          "label": "No, the total price must be exactly x.",
+          "isCode": false
+        },
+        {
+          "label": "It depends on the number of pages.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "“At most x” means ≤ x, so 10 is allowed when x=10. The objective only affects which books you choose, not the budget definition.",
+      "wrongExplanations": {
+        "1": "Strictly less than x would be “< x”, but the problem says “at most x”.",
+        "2": "You are not required to spend exactly x; any total ≤ x is fine."
+      },
+      "hint": "Focus on the wording: at most x.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "If all book prices are greater than x, what should the output be?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "0, because you can’t buy any book.",
+          "isCode": false
+        },
+        {
+          "label": "−1, to indicate impossible.",
+          "isCode": false
+        },
+        {
+          "label": "The minimum number of pages among the books.",
+          "isCode": false
+        },
+        {
+          "label": "The minimum price minus x.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "If you can’t buy any book, the maximum pages is 0. The task asks for a number of pages, not a special error code.",
+      "wrongExplanations": {
+        "1": "The output should be the maximum pages achievable, not an error code.",
+        "2": "You aren’t required to pick a book; the maximum pages can be 0."
+      },
+      "hint": "No books is a valid choice.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "Tiny check: n=3, x=7; prices=[2,4,5], pages=[3,5,6]. What is the maximum pages?",
+      "diagram": "Books: (2,3), (4,5), (5,6)\nBudget: 7",
+      "options": [
+        {
+          "label": "9 (pick prices 2 and 5: 3+6)",
+          "isCode": false
+        },
+        {
+          "label": "8 (pick prices 2 and 4: 3+5)",
+          "isCode": false
+        },
+        {
+          "label": "6 (pick price 5 only)",
+          "isCode": false
+        },
+        {
+          "label": "5 (pick price 4 only)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "2+5=7 yields pages 3+6=9, the best. 2+4=6 gives 8; 4+5=9 exceeds budget.",
+      "wrongExplanations": {
+        "1": "2+4=6 is valid but not the maximum pages.",
+        "2": "Single book 5 is valid but lower than 9."
+      },
+      "hint": "Try all valid combinations with sum of prices ≤ 7.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "You must maximize the number of pages, not the number of books. Which choice is better if both cost the same?",
+      "diagram": "Choice A: 2 books, total pages 10\nChoice B: 1 book, total pages 12\nSame total price ≤ x",
+      "options": [
+        {
+          "label": "Choice B (12 pages).",
+          "isCode": false
+        },
+        {
+          "label": "Choice A (10 pages).",
+          "isCode": false
+        },
+        {
+          "label": "Either, since the number of books matters.",
+          "isCode": false
+        },
+        {
+          "label": "Neither; you must spend exactly x.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The objective is to maximize pages; the number of books doesn’t matter.",
+      "wrongExplanations": {
+        "1": "More books doesn’t imply more pages; the total pages decide.",
+        "3": "Spending exactly x is not required."
+      },
+      "hint": "Check the objective carefully.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Understanding the Problem",
+      "questionText": "For book i, which pair matches the input meaning?",
+      "diagram": "Lines:\n- h1 h2 ... hn (prices)\n- s1 s2 ... sn (pages)",
+      "options": [
+        {
+          "label": "(h_i = price, s_i = pages)",
+          "isCode": false
+        },
+        {
+          "label": "(h_i = pages, s_i = price)",
+          "isCode": false
+        },
+        {
+          "label": "Both lines are prices.",
+          "isCode": false
+        },
+        {
+          "label": "Both lines are pages.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The second line gives prices (h_i), the third gives pages (s_i).",
+      "wrongExplanations": {
+        "1": "It’s the other way: h is price, s is pages."
+      },
+      "hint": "Check the statement: h are prices; s are pages.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "Is trying all subsets of books feasible for n up to 1000 within the limits?",
+      "diagram": "Number of subsets = 2^n",
+      "options": [
+        {
+          "label": "No, 2^1000 is astronomically large.",
+          "isCode": false
+        },
+        {
+          "label": "Yes, because 1000 is small.",
+          "isCode": false
+        },
+        {
+          "label": "Yes, if we prune some cases.",
+          "isCode": false
+        },
+        {
+          "label": "Only if x is also very small.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "2^1000 is far beyond feasible. We need a different approach.",
+      "wrongExplanations": {
+        "1": "Even with 1000, the subsets are exponential.",
+        "2": "Pruning doesn’t solve exponential growth here."
+      },
+      "hint": "Compute 2^30 ≈ 1e9; compare to 2^1000.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "Will picking books by the highest pages/price ratio always give the optimal answer (buy at most once)?",
+      "diagram": "Counterexample idea:\nprices: [3,4], pages: [5,6], x=6\nRatio picks 3 first → total pages 5, but 4 alone gives 6.",
+      "options": [
+        {
+          "label": "No, it can fail, e.g., prices [3,4], pages [5,6], x=6.",
+          "isCode": false
+        },
+        {
+          "label": "Yes, it always works.",
+          "isCode": false
+        },
+        {
+          "label": "Yes, but only if n ≤ 100.",
+          "isCode": false
+        },
+        {
+          "label": "Yes, but only if x is a multiple of all prices.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Picking by ratio can miss better combinations; the given example shows a failure.",
+      "wrongExplanations": {
+        "1": "There are counterexamples where ratio-based choice is suboptimal."
+      },
+      "hint": "Try small counterexamples where greedy gets stuck.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Exploring Approaches",
+      "questionText": "Suppose we keep an array best[c] for 0 ≤ c ≤ x. What should best[c] represent to directly read the final answer?",
+      "diagram": "best[c] = ?",
+      "options": [
+        {
+          "label": "The max pages with total price at most c.",
+          "isCode": false
+        },
+        {
+          "label": "The max pages with total price exactly c.",
+          "isCode": false
+        },
+        {
+          "label": "The min price to get exactly c pages.",
+          "isCode": false
+        },
+        {
+          "label": "The number of ways to reach cost c.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "If best[c] is for price ≤ c, then the answer is best[x], directly matching the goal.",
+      "wrongExplanations": {
+        "1": "“Exactly c” requires a final max over c ≤ x; using “at most” is simpler here."
+      },
+      "hint": "We want the maximum pages under budget x, not necessarily spending all of it.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Exploring Approaches",
+      "questionText": "You add a new book with price h and pages s. How should best[c] be updated using previous values?",
+      "diagram": "For c from h..x:\nnew_best[c] = max(old_best[c], old_best[c - h] + s)",
+      "options": [
+        {
+          "label": "new_best[c] = max(old_best[c], old_best[c - h] + s)",
+          "isCode": false
+        },
+        {
+          "label": "new_best[c] = old_best[c - h] + s (always take it)",
+          "isCode": false
+        },
+        {
+          "label": "new_best[c] = max(old_best[c], new_best[c - h] + s)",
+          "isCode": false
+        },
+        {
+          "label": "new_best[c] = old_best[c] + s (add pages to all c)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Either skip the book (old_best[c]) or take it (old_best[c-h]+s) if affordable. Use previous values to avoid reusing the same book.",
+      "wrongExplanations": {
+        "2": "Using new_best on the right risks reusing the current book multiple times.",
+        "3": "You can’t add pages to all budgets; you must pay h to get s."
+      },
+      "hint": "Consider two choices at each budget: take or skip the current book.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "Can you update a single array in place instead of keeping old_best and new_best separately for each book?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, by iterating budgets in descending order for each book.",
+          "isCode": false
+        },
+        {
+          "label": "No, you must keep both arrays.",
+          "isCode": false
+        },
+        {
+          "label": "Yes, by iterating budgets in ascending order.",
+          "isCode": false
+        },
+        {
+          "label": "Yes, but only if all prices are distinct.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Descending order prevents using the current book more than once during the same pass.",
+      "wrongExplanations": {
+        "2": "Keeping two arrays is not required if you iterate budgets carefully.",
+        "3": "Ascending order would allow reusing the same book within the pass."
+      },
+      "hint": "Think about whether newly updated entries could influence later updates.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "Why must budgets be processed from high to low when using one array per book?",
+      "diagram": "Example: x=6, one book (h=3, s=5)\nIf you go c=0..6:\n- After c=3, best[3]=5\n- At c=6, best[6] might use best[3] (just updated), doubling the book.",
+      "options": [
+        {
+          "label": "To prevent using the current book more than once in the same pass.",
+          "isCode": false
+        },
+        {
+          "label": "To keep the array sorted.",
+          "isCode": false
+        },
+        {
+          "label": "Because low-to-high is always wrong.",
+          "isCode": false
+        },
+        {
+          "label": "To minimize memory usage.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Descending ensures best[c - h] is from the previous state of this pass, so each book is used at most once.",
+      "wrongExplanations": {
+        "1": "Sorting isn’t relevant here.",
+        "2": "Low-to-high can work only if you allow taking a book multiple times, which is not allowed."
+      },
+      "hint": "Focus on whether best[c-h] could have been updated with the same book moments ago.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "How should best be initialized before processing any books?",
+      "diagram": "best: index is budget 0..x",
+      "options": [
+        {
+          "label": "best[c] = 0 for all c (since pages are positive).",
+          "isCode": false
+        },
+        {
+          "label": "best[0]=0 and best[c]=−∞ for c>0.",
+          "isCode": false
+        },
+        {
+          "label": "best[c] = c.",
+          "isCode": false
+        },
+        {
+          "label": "best[c] = −1 for all c.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "With nonnegative gains and only adding when affordable, starting at 0 is safe and simple.",
+      "wrongExplanations": {
+        "1": "We track maximum pages up to c; a uniform 0 baseline works here."
+      },
+      "hint": "Before any books, the maximum pages you can get under any budget is 0.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "Given best[c] means max pages with total price at most c, how do you read the final answer?",
+      "diagram": "best: 0 .. x",
+      "options": [
+        {
+          "label": "best[x]",
+          "isCode": false
+        },
+        {
+          "label": "max(best[c] for c < x)",
+          "isCode": false
+        },
+        {
+          "label": "min(best[c] for c ≤ x)",
+          "isCode": false
+        },
+        {
+          "label": "The budget c where best[c] is first maximal.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "best[x] already stores the maximum pages achievable with total price at most x.",
+      "wrongExplanations": {
+        "1": "best[x] is at least as large as any best[c] for c < x.",
+        "2": "We want maximum pages, not minimum."
+      },
+      "hint": "We defined best to directly answer at budget x.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Building the Idea",
+      "questionText": "When updating best[c] with a book of price h and pages s, which c values should be considered?",
+      "diagram": "We need c − h ≥ 0 to look back safely.",
+      "options": [
+        {
+          "label": "Only c where c ≥ h; leave c < h unchanged.",
+          "isCode": false
+        },
+        {
+          "label": "All c from 0..x; if c < h, treat best[c − h] as 0.",
+          "isCode": false
+        },
+        {
+          "label": "Only c where c ≤ h.",
+          "isCode": false
+        },
+        {
+          "label": "Only c where c is a multiple of h.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need c − h ≥ 0 to avoid out-of-bounds and to ensure we can pay the book’s price.",
+      "wrongExplanations": {
+        "1": "Using c − h when c < h is invalid and conceptually wrong.",
+        "2": "Budgets below h can’t include this book."
+      },
+      "hint": "The previous state index is c − h.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q15",
+      "phase": "Building the Idea",
+      "questionText": "What is the per-book update formula using one array best (processed in descending c)?",
+      "diagram": "for c in x..h:\n  best[c] = max(best[c], best[c − h] + s)",
+      "options": [
+        {
+          "label": "best[c] = max(best[c], best[c − h] + s)",
+          "isCode": false
+        },
+        {
+          "label": "best[c] = best[c − h] + s (always include)",
+          "isCode": false
+        },
+        {
+          "label": "best[c] = max(best[c], best[c + h] + s)",
+          "isCode": false
+        },
+        {
+          "label": "best[c] = min(best[c], best[c − h] + s)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Choose the better of skipping or including the book when affordable, iterating c downward.",
+      "wrongExplanations": {
+        "1": "You must compare including vs skipping.",
+        "2": "c + h doesn’t reflect paying h to reach c."
+      },
+      "hint": "Two choices: include or skip.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Start the Python program: choose the correct import and function skeleton to structure the solution.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\n\ndef main():",
+          "isCode": true
+        },
+        {
+          "label": "import os\n\ndef main()",
+          "isCode": true
+        },
+        {
+          "label": "def main():\n    import sys",
+          "isCode": true
+        },
+        {
+          "label": "from sys import stdin()\n\ndef main():",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We’ll use sys.stdin for fast input; define main properly with a colon.",
+      "wrongExplanations": {
+        "1": "Missing colon and wrong module; we need sys for stdin.",
+        "3": "stdin is an object, not a callable; this import is invalid."
+      },
+      "hint": "We will read all input via sys.stdin.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\n\ndef main():",
+      "codeLabel": "Import and skeleton"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Read all input tokens safely and handle empty input.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    data = sys.stdin.read().strip().split()\n    if not data:\n        return",
+          "isCode": true
+        },
+        {
+          "label": "    data = input().split()\n    if data is None:\n        return",
+          "isCode": true
+        },
+        {
+          "label": "    data = sys.stdin.readline().split()\n    if len(data) == 0:\n        pass",
+          "isCode": true
+        },
+        {
+          "label": "    data = sys.stdin.read().split('\\n')\n    if not data:\n        return",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Reading the whole stdin and splitting into tokens is robust; checking not data handles empty input.",
+      "wrongExplanations": {
+        "1": "input() reads only one line and may miss data split across lines.",
+        "3": "Splitting by newline leaves non-integer tokens mixed; later parsing becomes awkward."
+      },
+      "hint": "Use sys.stdin.read() to get all numbers regardless of line breaks.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    data = sys.stdin.read().strip().split()\n    if not data:\n        return",
+      "codeLabel": "Read tokens"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Parse integers from tokens and extract n and x.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    it = iter(map(int, data))\n    n = next(it); x = next(it)",
+          "isCode": true
+        },
+        {
+          "label": "    it = iter(data)\n    n = int(next(it)); x = next(it)",
+          "isCode": true
+        },
+        {
+          "label": "    n, x = map(int, data)",
+          "isCode": true
+        },
+        {
+          "label": "    n = int(data[0]); x = int(data[2])",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Mapping all tokens to int and iterating lets us read n, x, then the arrays cleanly.",
+      "wrongExplanations": {
+        "1": "Mixing int and str in iteration leads to type issues when reading arrays.",
+        "2": "There are more than two numbers; this would fail unpacking."
+      },
+      "hint": "We need an iterator to consume numbers in order.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    it = iter(map(int, data))\n    n = next(it); x = next(it)",
+      "codeLabel": "Parse n and x"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Read the two length-n arrays: prices then pages.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    prices = [next(it) for _ in range(n)]\n    pages = [next(it) for _ in range(n)]",
+          "isCode": true
+        },
+        {
+          "label": "    pages = [next(it) for _ in range(n)]\n    prices = [next(it) for _ in range(n)]",
+          "isCode": true
+        },
+        {
+          "label": "    prices = [int(next(it)) for _ in range(x)]\n    pages = [int(next(it)) for _ in range(x)]",
+          "isCode": true
+        },
+        {
+          "label": "    prices = list(map(int, data[2:2+n]))\n    pages = list(map(int, data[2+n:2+2*n]))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The order in input is prices first, then pages, each of length n; consuming from the iterator matches that.",
+      "wrongExplanations": {
+        "1": "This swaps the arrays, mixing price/page roles.",
+        "2": "These should be length n, not x."
+      },
+      "hint": "Consume exactly n numbers for prices, then n for pages.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    prices = [next(it) for _ in range(n)]\n    pages = [next(it) for _ in range(n)]",
+      "codeLabel": "Read arrays"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Initialize the array of best pages for budgets 0..x.",
+      "diagram": "dp[c] = max pages within budget c",
+      "options": [
+        {
+          "label": "    dp = [0] * (x + 1)",
+          "isCode": true
+        },
+        {
+          "label": "    dp = [0] * (n + 1)",
+          "isCode": true
+        },
+        {
+          "label": "    dp = [-1] * (x + 1)",
+          "isCode": true
+        },
+        {
+          "label": "    dp = {}",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need one entry per budget from 0 to x, starting at 0 pages.",
+      "wrongExplanations": {
+        "1": "The array should be sized by budget, not number of books.",
+        "2": "Starting at −1 complicates handling; 0 is a valid baseline."
+      },
+      "hint": "The index is the budget, not the book index.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    dp = [0] * (x + 1)",
+      "codeLabel": "Init dp"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "Fill in the core loops and update to process each book once and budgets in descending order.",
+      "diagram": "for each book (h,s): for c=x..h: dp[c] = max(dp[c], dp[c-h]+s)",
+      "options": [
+        {
+          "label": "    for i in range(n):\n        h = prices[i]; s = pages[i]\n        for cost in range(x, h - 1, -1):\n            if dp[cost - h] + s > dp[cost]:\n                dp[cost] = dp[cost - h] + s",
+          "isCode": true
+        },
+        {
+          "label": "    for i in range(n):\n        h = prices[i]; s = pages[i]\n        for cost in range(0, x + 1):\n            dp[cost] = max(dp[cost], dp[cost - h] + s)",
+          "isCode": true
+        },
+        {
+          "label": "    for i in range(n):\n        h = prices[i]; s = pages[i]\n        for cost in range(h, x + 1):\n            dp[cost] = max(dp[cost], dp[cost] + s)",
+          "isCode": true
+        },
+        {
+          "label": "    for i in range(n):\n        for cost in range(x, -1, -1):\n            dp[cost] = max(dp[cost], dp[cost - prices[i]] + pages[i])",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Iterate cost downward and compare dp[cost] with dp[cost−h]+s only when cost ≥ h. The if avoids negative indexing.",
+      "wrongExplanations": {
+        "1": "Ascending order risks reusing the current book multiple times and negative indexing for cost < h.",
+        "2": "Using dp[cost] + s ignores paying the price; you must use dp[cost − h] when affordable."
+      },
+      "hint": "Mind the direction and the boundary (cost ≥ h).",
+      "isCodeBuilding": true,
+      "codeSnippet": "    for i in range(n):\n        h = prices[i]; s = pages[i]\n        for cost in range(x, h - 1, -1):\n            if dp[cost - h] + s > dp[cost]:\n                dp[cost] = dp[cost - h] + s",
+      "codeLabel": "Core update"
+    },
+    {
+      "id": "q22",
+      "phase": "Writing the Code",
+      "questionText": "Print the result and add the main guard.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    print(max(dp))\n\nif __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "    print(dp[x])\n\nif __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "    print(sum(dp))\n\nif __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "print(max(dp))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "max(dp) equals dp[x] here since dp tracks at most c and is non-decreasing. The main guard ensures execution.",
+      "wrongExplanations": {
+        "2": "We want the maximum pages, not the sum of all entries.",
+        "3": "This prints before dp is even defined if not inside main."
+      },
+      "hint": "Either dp[x] or max(dp) works; choose the version with proper structure.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    print(max(dp))\n\nif __name__ == \"__main__\":\n    main()",
+      "codeLabel": "Output and guard"
+    },
+    {
+      "id": "q23",
+      "phase": "Verifying the Solution",
+      "questionText": "Run the code mentally on the example:\n4 10\n4 8 5 3\n5 12 8 1\nWhat does it print?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "13",
+          "isCode": false
+        },
+        {
+          "label": "12",
+          "isCode": false
+        },
+        {
+          "label": "14",
+          "isCode": false
+        },
+        {
+          "label": "9",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Choosing prices 4 and 5 yields pages 5+8=13 within budget 10; this is the maximum.",
+      "wrongExplanations": {
+        "1": "12 is from picking price 8 only; 13 is better.",
+        "3": "14 exceeds what’s possible within budget."
+      },
+      "hint": "Check combinations (4,5) and (8) in particular.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Verifying the Solution",
+      "questionText": "Another check: n=3, x=6; prices=3 4 5; pages=4 5 6. What does the program output?",
+      "diagram": "Options:\n- 3+4=7 (invalid)\n- 3 only → 4 pages\n- 4 only → 5 pages\n- 5 only → 6 pages",
+      "options": [
+        {
+          "label": "6",
+          "isCode": false
+        },
+        {
+          "label": "9",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Best is picking price 5 only → 6 pages. 3+4 is over budget.",
+      "wrongExplanations": {
+        "1": "9 would require 3+4, which exceeds budget 6.",
+        "2": "5 pages is feasible but not maximal; 6 is better."
+      },
+      "hint": "Try all single-book choices since pairs exceed budget.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the time complexity of the implemented solution in terms of n and x?",
+      "diagram": "Nested loops: for each book, iterate budgets up to x",
+      "options": [
+        {
+          "label": "O(n · x)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log x)",
+          "isCode": false
+        },
+        {
+          "label": "O(x^n)",
+          "isCode": false
+        },
+        {
+          "label": "O(2^n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "For each of n books, we process up to x budgets → O(n·x).",
+      "wrongExplanations": {
+        "1": "There is no sorting or logarithmic factor here.",
+        "3": "We are not trying all subsets; loops are bounded by x."
+      },
+      "hint": "Count the loop iterations.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the extra space used by this approach (excluding input arrays)?",
+      "diagram": "dp of size x+1",
+      "options": [
+        {
+          "label": "O(x)",
+          "isCode": false
+        },
+        {
+          "label": "O(n · x)",
+          "isCode": false
+        },
+        {
+          "label": "O(1)",
+          "isCode": false
+        },
+        {
+          "label": "O(n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We only keep a one-dimensional array of length x+1.",
+      "wrongExplanations": {
+        "1": "We don’t keep a 2D table here.",
+        "2": "Space grows with x, not constant."
+      },
+      "hint": "How many entries does dp have?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q27",
+      "phase": "Analyzing Complexity",
+      "questionText": "Which edge cases must be handled by this code?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "x smaller than every price → answer 0; works with dp initialized to 0.",
+          "isCode": false
+        },
+        {
+          "label": "Books with zero pages.",
+          "isCode": false
+        },
+        {
+          "label": "Reusing the same book multiple times.",
+          "isCode": false
+        },
+        {
+          "label": "Negative prices or pages.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "If no book fits, dp remains zeros and the answer is 0. The problem guarantees positive prices/pages and at most once per book.",
+      "wrongExplanations": {
+        "1": "Constraints say pages ≥ 1.",
+        "3": "Constraints say prices, pages ≥ 1."
+      },
+      "hint": "Use given constraints to filter unrealistic cases.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\n\ndef main():",
+    "    data = sys.stdin.read().strip().split()\n    if not data:\n        return",
+    "    it = iter(map(int, data))\n    n = next(it); x = next(it)",
+    "    prices = [next(it) for _ in range(n)]\n    pages = [next(it) for _ in range(n)]",
+    "    dp = [0] * (x + 1)",
+    "    for i in range(n):\n        h = prices[i]; s = pages[i]\n        for cost in range(x, h - 1, -1):\n            if dp[cost - h] + s > dp[cost]:\n                dp[cost] = dp[cost - h] + s",
+    "    print(max(dp))\n\nif __name__ == \"__main__\":\n    main()"
+  ],
+  "reasoningChain": [
+    {
+      "question": "What does “at most x” imply and what is the exact objective?",
+      "insight": "The total price can be ≤ x, and we want to maximize total pages; buying nothing is allowed."
+    },
+    {
+      "question": "Is brute force feasible and is picking by pages/price reliable?",
+      "insight": "Enumerating all subsets is impossible for n up to 1000; ratio-based greedy can fail."
+    },
+    {
+      "question": "What state representation lets us build solutions under a budget?",
+      "insight": "Track best[c] as the max pages achievable with total price at most c for c from 0..x."
+    },
+    {
+      "question": "How to update when considering a new book, and in what order?",
+      "insight": "For cost c ≥ h: best[c] = max(best[c], best[c−h] + s), iterating c downward to avoid reusing the book."
+    },
+    {
+      "question": "How to initialize and read the final answer?",
+      "insight": "Initialize best to zeros; the answer is best[x] (equivalently max(best))."
+    },
+    {
+      "question": "What are the complexity bounds and memory usage?",
+      "insight": "Time is O(n·x) due to nested loops; space is O(x) for the single array."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1407,
+    "output_tokens": 14440,
+    "input_cost": 0.001759,
+    "output_cost": 0.1444,
+    "total_cost": 0.146159
+  }
+}

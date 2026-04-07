@@ -1,0 +1,948 @@
+{
+  "id": "sum-of-two-values",
+  "title": "Sum of Two Values",
+  "difficulty": "intermediate",
+  "tags": [
+    "sorting",
+    "two-pointer",
+    "binary-search"
+  ],
+  "estimatedMinutes": 40,
+  "language": "python",
+  "description": "You are given an array of n integers, and your task is to find two values (at distinct positions) whose sum is x.\n\nInput:\n- The first line has two integers n and x: the array size and the target sum.\n- The second line has n integers a_1, a_2, ..., a_n: the array values.\n\nOutput:\n- Print two integers: the positions (1-indexed) of the values whose sum is x. If there are several solutions, you may print any of them. If there are no solutions, print IMPOSSIBLE.",
+  "examples": [
+    {
+      "input": "4 8\n2 7 5 1",
+      "output": "2 4",
+      "explanation": "The values at positions 2 and 4 are 7 and 1, and 7 + 1 = 8."
+    }
+  ],
+  "constraints": [
+    "1 ≤ n ≤ 2 · 10^5",
+    "1 ≤ x, a_i ≤ 10^9",
+    "Time Limit: 1.00 s",
+    "Memory Limit: 512 MB"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "Given n=4, x=8 and array [2, 7, 5, 1], which pair of positions (1-indexed) sums to x?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "1 3",
+          "isCode": false
+        },
+        {
+          "label": "2 4",
+          "isCode": false
+        },
+        {
+          "label": "1 4",
+          "isCode": false
+        },
+        {
+          "label": "2 3",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Positions 2 and 4 hold 7 and 1, and 7+1=8. 1+3 is 2+5=7. 1+4 is 2+1=3. 2+3 is 7+5=12.",
+      "wrongExplanations": {
+        "0": "2+5=7, not 8",
+        "3": "7+5=12, too large"
+      },
+      "hint": null,
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "For array [4, 4, 3], x=8, which output is valid?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "1 1",
+          "isCode": false
+        },
+        {
+          "label": "1 2",
+          "isCode": false
+        },
+        {
+          "label": "2 2",
+          "isCode": false
+        },
+        {
+          "label": "IMPOSSIBLE",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Positions must be distinct. 1 2 uses two different positions with values 4 and 4, summing to 8.",
+      "wrongExplanations": {
+        "0": "Uses the same position twice",
+        "3": "There is a valid pair, so IMPOSSIBLE is incorrect"
+      },
+      "hint": "Positions must be distinct even if values are equal.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "If the two values are at Python indices 0 and 3, what should be printed?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "0 3",
+          "isCode": false
+        },
+        {
+          "label": "1 4",
+          "isCode": false
+        },
+        {
+          "label": "1 3",
+          "isCode": false
+        },
+        {
+          "label": "2 4",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Output positions are 1-indexed. Python indices 0 and 3 correspond to positions 1 and 4.",
+      "wrongExplanations": {
+        "0": "Output must be 1-indexed, not 0-indexed"
+      },
+      "hint": "Convert 0-based indices to 1-based positions.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "Array [1, 3, 2, 5, 4], x=6. Which output is correct?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "1 5",
+          "isCode": false
+        },
+        {
+          "label": "2 3",
+          "isCode": false
+        },
+        {
+          "label": "3 5",
+          "isCode": false
+        },
+        {
+          "label": "2 5",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Positions 3 and 5 hold 2 and 4. 2+4=6. Others do not sum to 6.",
+      "wrongExplanations": {
+        "0": "1+4=5",
+        "1": "3+2=5"
+      },
+      "hint": "Check sums carefully for each pair.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Exploring Approaches",
+      "questionText": "If you check all unordered pairs with two loops, about how many checks are there when n=200000?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "about 2×10^10",
+          "isCode": false
+        },
+        {
+          "label": "about 2×10^5",
+          "isCode": false
+        },
+        {
+          "label": "about 2×10^7",
+          "isCode": false
+        },
+        {
+          "label": "about 2×10^8",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Pairs are n(n−1)/2 ≈ 2×10^10 for n=2×10^5, far too many for 1 second.",
+      "wrongExplanations": {
+        "1": "This is linear, not quadratic in n",
+        "3": "Still far smaller than the true quadratic count"
+      },
+      "hint": "Compute n(n−1)/2 with n=200000.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "Suppose the values are sorted ascending while remembering original positions. How can you systematically approach finding two values that sum to x?",
+      "diagram": "Sorted: v0 <= v1 <= ... <= v_{n-1}",
+      "options": [
+        {
+          "label": "Always move the left index forward until you find x",
+          "isCode": false
+        },
+        {
+          "label": "Compare smallest and largest; if sum is too small, advance the left side; if too large, move the right side inward",
+          "isCode": false
+        },
+        {
+          "label": "Only compare adjacent values in the sorted list",
+          "isCode": false
+        },
+        {
+          "label": "Try all pairs even after sorting",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Checking extremes and adjusting sides narrows the search efficiently. Only moving one side blindly or checking all pairs wastes work.",
+      "wrongExplanations": {
+        "0": "If sum is too large, moving left forward may worsen it",
+        "2": "The pair may not be adjacent; extremes guide adjustments"
+      },
+      "hint": "Use both ends of the sorted list to steer the sum toward x.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "After sorting, how do you ensure you can print original positions?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Store tuples (value, original_index) and sort by value",
+          "isCode": false
+        },
+        {
+          "label": "Sort values and forget indices; positions can be recovered later",
+          "isCode": false
+        },
+        {
+          "label": "Store only original positions and sort them",
+          "isCode": false
+        },
+        {
+          "label": "Create a mapping from position to value, then sort values",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Pairing each value with its original index preserves position information after sorting.",
+      "wrongExplanations": {
+        "1": "You lose the mapping from value to where it came from",
+        "2": "Sorting positions doesn't align with value order"
+      },
+      "hint": "Keep the index attached to each value.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Building the Idea",
+      "questionText": "In the sorted pairs list, where are the smallest and largest values located?",
+      "diagram": "pairs[0] ... pairs[n-1]",
+      "options": [
+        {
+          "label": "Both at the beginning",
+          "isCode": false
+        },
+        {
+          "label": "Smallest at pairs[0], largest at pairs[n-1]",
+          "isCode": false
+        },
+        {
+          "label": "Smallest at pairs[1], largest at pairs[n-2]",
+          "isCode": false
+        },
+        {
+          "label": "Random positions after sorting",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Sorting ascending places the smallest first and the largest last.",
+      "wrongExplanations": {
+        "0": "Only one value can be smallest",
+        "3": "Sorting fixes order deterministically"
+      },
+      "hint": "Think about ascending order boundaries.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "If v_left + v_right < x, how should you adjust the indices?",
+      "diagram": "left -->       <-- right",
+      "options": [
+        {
+          "label": "Move left index rightward to increase the sum",
+          "isCode": false
+        },
+        {
+          "label": "Move right index leftward to decrease the sum",
+          "isCode": false
+        },
+        {
+          "label": "Move both inward at the same time",
+          "isCode": false
+        },
+        {
+          "label": "Do nothing and retry the same pair",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Increasing the left value makes the sum larger. Moving right inward would reduce the sum further.",
+      "wrongExplanations": {
+        "1": "This reduces the sum when it is already too small"
+      },
+      "hint": "To increase the sum, pick a larger value on the left.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "If v_left + v_right > x, what adjustment is appropriate?",
+      "diagram": "left -->       <-- right",
+      "options": [
+        {
+          "label": "Move left index rightward to increase the sum",
+          "isCode": false
+        },
+        {
+          "label": "Move right index leftward to reduce the sum",
+          "isCode": false
+        },
+        {
+          "label": "Move both outward",
+          "isCode": false
+        },
+        {
+          "label": "Keep indices and try again",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Reducing the right value lowers the sum toward x.",
+      "wrongExplanations": {
+        "0": "This increases the sum further when it's already too large"
+      },
+      "hint": "To decrease the sum, pick a smaller value on the right side.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "When v_left + v_right == x, what do you output?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "The values themselves",
+          "isCode": false
+        },
+        {
+          "label": "The original positions (1-indexed) of these two values",
+          "isCode": false
+        },
+        {
+          "label": "The 0-indexed positions",
+          "isCode": false
+        },
+        {
+          "label": "Nothing; continue searching for another pair",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "The task requires printing the positions (1-indexed). Any solution is acceptable; no need to continue.",
+      "wrongExplanations": {
+        "0": "Output requires positions, not values",
+        "2": "Positions must be 1-indexed"
+      },
+      "hint": "Remember the output format specifies positions.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "Array [4, 4, 4], x=8. If the sorted extremes yield 4+4=8, is outputting their distinct positions valid?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, positions are distinct even if values equal",
+          "isCode": false
+        },
+        {
+          "label": "No, values must be different",
+          "isCode": false
+        },
+        {
+          "label": "No, duplicates cannot be used",
+          "isCode": false
+        },
+        {
+          "label": "Only if they are adjacent in the original array",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Positions must be distinct; values may be equal.",
+      "wrongExplanations": {
+        "1": "The problem does not require distinct values, only positions"
+      },
+      "hint": "Check the requirement: distinct positions.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "If the search completes without finding a matching pair, what should be printed?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "IMPOSSIBLE",
+          "isCode": false
+        },
+        {
+          "label": "-1 -1",
+          "isCode": false
+        },
+        {
+          "label": "0 0",
+          "isCode": false
+        },
+        {
+          "label": "Nothing",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The problem specifies printing IMPOSSIBLE when no solution exists.",
+      "wrongExplanations": {
+        "1": "This format is not requested",
+        "2": "Positions are 1-indexed; 0 0 isn't specified"
+      },
+      "hint": "Read the Output section carefully.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Building the Idea",
+      "questionText": "Which loop condition ensures you never use the same element twice?",
+      "diagram": "l starts at 0, r starts at n-1",
+      "options": [
+        {
+          "label": "while l < r",
+          "isCode": false
+        },
+        {
+          "label": "while l <= r",
+          "isCode": false
+        },
+        {
+          "label": "while l != r",
+          "isCode": false
+        },
+        {
+          "label": "while True",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "l<r guarantees distinct positions; l<=r allows equal indices at the end.",
+      "wrongExplanations": {
+        "1": "This permits l==r, using one element twice",
+        "2": "May spin if indices cross and return to same values"
+      },
+      "hint": "Stop before indices meet.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Read input robustly: n, x, then n array values.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\nit = iter(map(int, sys.stdin.read().split()))\nn = next(it); x = next(it)\narr = [next(it) for _ in range(n)]",
+          "isCode": true
+        },
+        {
+          "label": "n, x = map(int, input().split())\narr = list(map(int, input().split()))\n# assumes arr length equals n but fails if inputs span multiple lines",
+          "isCode": true
+        },
+        {
+          "label": "data = input().split()\nn = int(data[0]); x = int(data[1])\narr = list(map(int, data[2:]))  # may miss values if separated by newlines",
+          "isCode": true
+        },
+        {
+          "label": "n = int(input()); x = int(input())\narr = [int(input()) for _ in range(n)]  # different format than problem",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Using sys.stdin.read handles any whitespace/newlines. The other options assume specific line formats that may break.",
+      "wrongExplanations": {
+        "1": "Works only if the second line contains all n values",
+        "3": "The problem does not provide one integer per line for the array"
+      },
+      "hint": "Consider inputs that might span multiple lines or have extra spaces.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\nit = iter(map(int, sys.stdin.read().split()))\nn = next(it); x = next(it)\narr = [next(it) for _ in range(n)]",
+      "codeLabel": "Read input"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Create pairs of (value, original index) and sort by value.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "pairs = [(arr[i], i) for i in range(n)]\npairs.sort(key=lambda t: t[0])",
+          "isCode": true
+        },
+        {
+          "label": "pairs = sorted(arr)\n# loses original indices",
+          "isCode": true
+        },
+        {
+          "label": "pairs = [(i, arr[i]) for i in range(n)]\npairs.sort(key=lambda t: t[0])  # sorts by original index",
+          "isCode": true
+        },
+        {
+          "label": "pairs = [arr[i], i for i in range(n)]\npairs.sort()",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Pairing value with index and sorting by value preserves positions. Other choices lose or sort by the wrong key.",
+      "wrongExplanations": {
+        "1": "Drops indices; you can't recover positions",
+        "3": "Invalid list construction syntax"
+      },
+      "hint": "Attach index to each value and sort by the value.",
+      "isCodeBuilding": true,
+      "codeSnippet": "pairs = [(arr[i], i) for i in range(n)]\npairs.sort(key=lambda t: t[0])",
+      "codeLabel": "Pair and sort"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Initialize the two indices for scanning the sorted pairs.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "l = 0\nr = n - 1",
+          "isCode": true
+        },
+        {
+          "label": "l = 1\nr = n - 1",
+          "isCode": true
+        },
+        {
+          "label": "l = 0\nr = n",
+          "isCode": true
+        },
+        {
+          "label": "l = 0\nr = len(arr) - 1  # sorts changed arr length?",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Indices should refer to the sorted list of length n: start at 0 and n-1.",
+      "wrongExplanations": {
+        "2": "r=n is out of bounds",
+        "1": "Starting at 1 skips the first value"
+      },
+      "hint": "Use boundaries of the sorted pairs list.",
+      "isCodeBuilding": true,
+      "codeSnippet": "l = 0\nr = n - 1",
+      "codeLabel": "Initialize indices"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Write the loop header and compute the current sum of values at l and r.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "while l < r:\n    s = pairs[l][0] + pairs[r][0]",
+          "isCode": true
+        },
+        {
+          "label": "while l <= r:\n    s = pairs[l][1] + pairs[r][1]  # adds indices",
+          "isCode": true
+        },
+        {
+          "label": "while l < r:\n    s = arr[l] + arr[r]  # not using sorted pairs",
+          "isCode": true
+        },
+        {
+          "label": "while True:\n    s = pairs[l][0] + pairs[r][0]  # may loop forever",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Use l<r to avoid using the same element twice and sum the values from the sorted pairs.",
+      "wrongExplanations": {
+        "1": "Adds indices, not values",
+        "2": "Must use the sorted pairs to follow the plan"
+      },
+      "hint": "Sum the values stored in pairs; stop before l meets r.",
+      "isCodeBuilding": true,
+      "codeSnippet": "while l < r:\n    s = pairs[l][0] + pairs[r][0]",
+      "codeLabel": "Loop and sum"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Handle the case when the sum equals x: print positions and stop.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    if s == x:\n        print(pairs[l][1] + 1, pairs[r][1] + 1)\n        sys.exit(0)",
+          "isCode": true
+        },
+        {
+          "label": "    if s == x:\n        print(pairs[l][0], pairs[r][0])\n        # continues loop",
+          "isCode": true
+        },
+        {
+          "label": "    if s == x:\n        print(l, r)\n        # 0-indexed",
+          "isCode": true
+        },
+        {
+          "label": "    if s == x:\n        break  # then print IMPOSSIBLE after loop",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Print 1-indexed original positions and exit to avoid printing IMPOSSIBLE later.",
+      "wrongExplanations": {
+        "1": "Prints values, not positions",
+        "3": "Breaking without printing causes wrong final output"
+      },
+      "hint": "Use original indices (+1) and stop immediately.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    if s == x:\n        print(pairs[l][1] + 1, pairs[r][1] + 1)\n        sys.exit(0)",
+      "codeLabel": "Match found"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Adjust indices when the sum is too small or too large.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    elif s < x:\n        l += 1\n    else:\n        r -= 1",
+          "isCode": true
+        },
+        {
+          "label": "    elif s < x:\n        r -= 1\n    else:\n        l += 1",
+          "isCode": true
+        },
+        {
+          "label": "    elif s <= x:\n        l += 1\n    else:\n        r -= 1",
+          "isCode": true
+        },
+        {
+          "label": "    elif s > x:\n        l += 1\n    else:\n        r -= 1",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Increase left when sum is too small; decrease right when sum is too large.",
+      "wrongExplanations": {
+        "1": "Moves the wrong index for each comparison",
+        "2": "Using <= skips the equality branch above"
+      },
+      "hint": "Compare s with x and move the side that adjusts the sum in the needed direction.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    elif s < x:\n        l += 1\n    else:\n        r -= 1",
+      "codeLabel": "Adjust indices"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "If no pair is found, what should be printed after the loop?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "print(\"IMPOSSIBLE\")",
+          "isCode": true
+        },
+        {
+          "label": "print(-1, -1)",
+          "isCode": true
+        },
+        {
+          "label": "print()",
+          "isCode": true
+        },
+        {
+          "label": "pass",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The required output is the exact word IMPOSSIBLE.",
+      "wrongExplanations": {
+        "1": "This format isn't specified by the problem",
+        "2": "Printing nothing is incorrect"
+      },
+      "hint": "Match the problem's output specification exactly.",
+      "isCodeBuilding": true,
+      "codeSnippet": "print(\"IMPOSSIBLE\")",
+      "codeLabel": "No solution output"
+    },
+    {
+      "id": "q22",
+      "phase": "Verifying the Solution",
+      "questionText": "Trace the method on array [2, 7, 5, 1], x=8. After pairing and sorting by value, what are the pairs?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "[(1,3), (2,0), (5,2), (7,1)]",
+          "isCode": false
+        },
+        {
+          "label": "[(2,0), (7,1), (5,2), (1,3)]",
+          "isCode": false
+        },
+        {
+          "label": "[(1,0), (2,1), (5,2), (7,3)]",
+          "isCode": false
+        },
+        {
+          "label": "[(2,1), (7,2), (5,3), (1,4)]",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Pair is (value, original_index). Sorted ascending by value gives [(1,3),(2,0),(5,2),(7,1)].",
+      "wrongExplanations": {
+        "1": "Not sorted ascending",
+        "2": "Indices are not the original positions"
+      },
+      "hint": "Sort values ascending; keep original indices attached.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q23",
+      "phase": "Verifying the Solution",
+      "questionText": "Continuing the trace: Start with left at 0 (value 1) and right at 3 (value 7). What happens?",
+      "diagram": "s = 1 + 7 = 8",
+      "options": [
+        {
+          "label": "s=8, print positions 4 and 2 (1-indexed) and stop",
+          "isCode": false
+        },
+        {
+          "label": "s=8, move left to 1",
+          "isCode": false
+        },
+        {
+          "label": "s=8, move right to 2",
+          "isCode": false
+        },
+        {
+          "label": "s=8, keep scanning for another pair",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Sum matches x; print original positions (3->4, 1->2) and terminate.",
+      "wrongExplanations": {
+        "3": "Any valid solution is acceptable; stop after printing"
+      },
+      "hint": "When you find a match, print and exit.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the overall time complexity of this approach?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n log n) due to sorting; the scan is linear",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2) because we consider many pairs",
+          "isCode": false
+        },
+        {
+          "label": "O(n) because sorting is linear",
+          "isCode": false
+        },
+        {
+          "label": "O(log n) because we use comparisons",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Sorting dominates at O(n log n). The subsequent pass from both ends is O(n).",
+      "wrongExplanations": {
+        "1": "We do not check all pairs",
+        "2": "General sorting is not linear in n"
+      },
+      "hint": "Consider the cost of sorting and then scanning once.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the extra space usage of this solution (excluding input storage)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n) for the list of pairs",
+          "isCode": false
+        },
+        {
+          "label": "O(1), no extra space",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(log n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We store n pairs (value, index), which is linear extra space.",
+      "wrongExplanations": {
+        "1": "We create a separate list of pairs",
+        "3": "Sorting in Python uses extra space beyond O(log n) for timsort, but pairs list dominates O(n)"
+      },
+      "hint": "We build a new list attached to each value.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Analyzing Complexity",
+      "questionText": "Which edge case must the code handle correctly?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "No pair exists; print IMPOSSIBLE",
+          "isCode": false
+        },
+        {
+          "label": "Sum is found only with the same index twice",
+          "isCode": false
+        },
+        {
+          "label": "n=0, array empty (not allowed by constraints)",
+          "isCode": false
+        },
+        {
+          "label": "x larger than any possible sum; skip sorting",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "If no pair is found, the program must print IMPOSSIBLE. Using the same index twice is disallowed.",
+      "wrongExplanations": {
+        "3": "We still need sorting before deciding; sums are checked after sorting"
+      },
+      "hint": "Consider termination without finding a match.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\nit = iter(map(int, sys.stdin.read().split()))\nn = next(it); x = next(it)\narr = [next(it) for _ in range(n)]",
+    "pairs = [(arr[i], i) for i in range(n)]\npairs.sort(key=lambda t: t[0])",
+    "l = 0\nr = n - 1",
+    "while l < r:\n    s = pairs[l][0] + pairs[r][0]",
+    "    if s == x:\n        print(pairs[l][1] + 1, pairs[r][1] + 1)\n        sys.exit(0)",
+    "    elif s < x:\n        l += 1\n    else:\n        r -= 1",
+    "print(\"IMPOSSIBLE\")"
+  ],
+  "reasoningChain": [
+    {
+      "question": "Why is checking all pairs too slow for n up to 2×10^5?",
+      "insight": "The number of pairs is quadratic (~2×10^10), exceeding time limits."
+    },
+    {
+      "question": "How can ordering the values help reduce the search space?",
+      "insight": "Sorting lets you compare extremes and steer the sum toward x efficiently."
+    },
+    {
+      "question": "How do you keep track of original positions after sorting?",
+      "insight": "Store (value, original_index) pairs and sort by value."
+    },
+    {
+      "question": "What adjustments should be made when the current sum is smaller or larger than x?",
+      "insight": "Increase the left side when too small; decrease the right side when too large."
+    },
+    {
+      "question": "What should be printed upon finding a match, and why stop immediately?",
+      "insight": "Print 1-indexed original positions and terminate to avoid extra output."
+    },
+    {
+      "question": "What to print if no match is found and how to avoid using the same element twice?",
+      "insight": "Use a loop with l<r and print IMPOSSIBLE after the loop ends."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1369,
+    "output_tokens": 11734,
+    "input_cost": 0.001711,
+    "output_cost": 0.11734,
+    "total_cost": 0.119051
+  }
+}

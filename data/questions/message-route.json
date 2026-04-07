@@ -1,0 +1,1048 @@
+{
+  "id": "message-route",
+  "title": "Message Route",
+  "difficulty": "intermediate",
+  "tags": [
+    "graph",
+    "shortest-path",
+    "path reconstruction"
+  ],
+  "estimatedMinutes": 55,
+  "language": "python",
+  "description": "Syrjälä's network has n computers and m connections. Your task is to find out if Uolevi can send a message to Maija, and if it is possible, what is the minimum number of computers on such a route.\n\nInput:\n- First line: two integers n and m (computers and connections). Computers are numbered 1..n. Uolevi's computer is 1 and Maija's computer is n.\n- Next m lines: two integers a and b, indicating a connection between computers a and b.\n\nEach connection is between two different computers, and there is at most one connection between any two computers.\n\nOutput:\n- If a route exists, print k (the minimum number of computers on a valid route), then on the next line print an example of such a route (any valid one).\n- If no route exists, print \"IMPOSSIBLE\".",
+  "examples": [
+    {
+      "input": "5 5\n1 2\n1 3\n1 4\n2 3\n5 4\n",
+      "output": "3\n1 4 5\n",
+      "explanation": "Shortest connection uses computers 1 -> 4 -> 5, which includes 3 computers."
+    }
+  ],
+  "constraints": [
+    "2 <= n <= 1e5",
+    "1 <= m <= 2e5",
+    "1 <= a, b <= n",
+    "At most one connection between any two computers",
+    "No connection is between a computer and itself"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "Computers are numbered 1..n. Suppose the connections are 1-2, 2-3, 3-4 (undirected). What is the minimum number of computers on a route from 1 to 4?",
+      "diagram": "1 -- 2 -- 3 -- 4",
+      "options": [
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "It depends on exploration order",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "The route 1-2-3-4 includes 4 computers. The number of computers equals number of edges plus 1.",
+      "wrongExplanations": {
+        "0": "3 is the number of edges, not computers.",
+        "3": "The minimum is determined by the graph, not exploration order."
+      },
+      "hint": "Count nodes along the route, not edges.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "Given connections: 1-2, 2-4, 1-3, 3-4. What is the minimum number of computers on a route from 1 to 4?",
+      "diagram": "1 -- 2 -- 4\n \\\n  3 --/",
+      "options": [
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "Impossible",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Routes 1-2-4 and 1-3-4 both have 2 edges, thus 3 computers.",
+      "wrongExplanations": {
+        "0": "2 would require a direct connection 1-4, which does not exist.",
+        "2": "4 corresponds to a longer route than necessary."
+      },
+      "hint": "Find the shortest route in number of edges; add 1 to get computers.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "If there is no route from computer 1 to computer n, what should the program print?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "IMPOSSIBLE",
+          "isCode": false
+        },
+        {
+          "label": "-1",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "The required output for no route is exactly \"IMPOSSIBLE\".",
+      "wrongExplanations": {
+        "0": "0 is not specified by the problem for this case.",
+        "2": "-1 is not part of the specified output format."
+      },
+      "hint": "Re-read the Output section for the no-route case.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "Connections are undirected. If the input contains a connection \"2 5\", can you go from 5 to 2 as well?",
+      "diagram": "2 ---- 5",
+      "options": [
+        {
+          "label": "Yes, connections are bidirectional",
+          "isCode": false
+        },
+        {
+          "label": "No, you can only move from 2 to 5",
+          "isCode": false
+        },
+        {
+          "label": "Only if 5 2 also appears in input",
+          "isCode": false
+        },
+        {
+          "label": "Only if 2 < 5",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each connection is between two computers without direction; both ways are allowed.",
+      "wrongExplanations": {
+        "2": "The input lists each connection once; it implies both directions."
+      },
+      "hint": "The statement says \"there is a connection between those computers\" without direction.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Understanding the Problem",
+      "questionText": "Which statements about the input are true?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "There can be multiple connections between the same pair",
+          "isCode": false
+        },
+        {
+          "label": "Connections may include a computer connected to itself",
+          "isCode": false
+        },
+        {
+          "label": "Each pair appears at most once and no self-connections exist",
+          "isCode": false
+        },
+        {
+          "label": "Numbers are 0-indexed",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Per constraints: at most one connection per pair, and no self-connections. Computers are 1..n.",
+      "wrongExplanations": {
+        "0": "The problem disallows multiple connections between the same pair.",
+        "1": "Self-connections are explicitly excluded."
+      },
+      "hint": "Check the constraints section carefully.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "To ensure you find a route with the fewest edges (hence fewest computers), which exploration strategy is appropriate?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Explore neighbors in order of increasing distance from the start",
+          "isCode": false
+        },
+        {
+          "label": "Always go to the neighbor with the smallest label",
+          "isCode": false
+        },
+        {
+          "label": "Keep going as deep as possible before backtracking",
+          "isCode": false
+        },
+        {
+          "label": "Pick random neighbors until you reach n",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Processing in increasing distance guarantees the first time you reach n is via a shortest route in edges.",
+      "wrongExplanations": {
+        "1": "Label order doesn't relate to path length.",
+        "2": "Going deep first may skip shorter routes at the same distance."
+      },
+      "hint": "Think in terms of \"waves\" of nodes at distance 0, 1, 2, ... from the start.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "Which data structure naturally supports processing nodes in the order they were discovered (first-in, first-out)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Queue (e.g., deque)",
+          "isCode": false
+        },
+        {
+          "label": "Stack",
+          "isCode": false
+        },
+        {
+          "label": "Priority queue keyed by node id",
+          "isCode": false
+        },
+        {
+          "label": "Unordered set",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "A queue yields first-in, first-out, matching increasing-distance processing from the start.",
+      "wrongExplanations": {
+        "1": "A stack is last-in, first-out and processes deeper nodes before shallow ones."
+      },
+      "hint": "You want to process the earliest discovered nodes first.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Exploring Approaches",
+      "questionText": "To avoid revisiting nodes and to know the edge count from the start, what should you maintain?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "A distance array initialized to -1 for unvisited nodes",
+          "isCode": false
+        },
+        {
+          "label": "Only a parent array",
+          "isCode": false
+        },
+        {
+          "label": "Only a boolean visited flag without distances",
+          "isCode": false
+        },
+        {
+          "label": "Recursion depth",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "A distance array both marks visited (distance != -1) and encodes how far each node is.",
+      "wrongExplanations": {
+        "2": "Visited alone doesn't tell you the number of edges from the start."
+      },
+      "hint": "You need both a visited mark and the number of edges from 1 to each node.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Exploring Approaches",
+      "questionText": "When is it safe to stop exploring and reconstruct the route to n?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "As soon as n is first discovered (its distance set for the first time)",
+          "isCode": false
+        },
+        {
+          "label": "Only after exploring all nodes",
+          "isCode": false
+        },
+        {
+          "label": "Only when n is removed from the processing structure",
+          "isCode": false
+        },
+        {
+          "label": "After exploring all nodes at the same distance as n",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "With increasing-distance processing, the first discovery of n is via a minimum-edge route.",
+      "wrongExplanations": {
+        "2": "Waiting to remove n later is unnecessary; its first discovery already pins the minimal distance."
+      },
+      "hint": "Discovery order mirrors edge distance from the start.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "If the number of edges from 1 to n is d, how many computers are on the route?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "d",
+          "isCode": false
+        },
+        {
+          "label": "d + 1",
+          "isCode": false
+        },
+        {
+          "label": "2d",
+          "isCode": false
+        },
+        {
+          "label": "Depends on the path content",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Each edge connects two computers; a path with d edges has d+1 computers.",
+      "wrongExplanations": {
+        "0": "Edges and computers differ by 1 along a path."
+      },
+      "hint": "A path 1-2-3 has 2 edges but 3 computers.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "To print an example route after exploration, what should you record for each node when it is first reached?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Its predecessor (the node from which it was reached)",
+          "isCode": false
+        },
+        {
+          "label": "Its children (neighbors discovered from it)",
+          "isCode": false
+        },
+        {
+          "label": "All complete paths to that node",
+          "isCode": false
+        },
+        {
+          "label": "Only its distance",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Storing the predecessor allows reconstructing a route by backtracking from n to 1.",
+      "wrongExplanations": {
+        "2": "Storing all paths is expensive and unnecessary for reconstruction."
+      },
+      "hint": "You want to follow a chain from n back to 1.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "How do you reconstruct the route after reaching n with predecessor information?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Start at n, follow predecessors back to 1, collect nodes, then reverse the list",
+          "isCode": false
+        },
+        {
+          "label": "Start at 1, follow predecessors forward to n",
+          "isCode": false
+        },
+        {
+          "label": "Start at n, follow children forward, reversing if needed",
+          "isCode": false
+        },
+        {
+          "label": "Collect nodes in discovery order",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Predecessors point backward; reverse the collected sequence to get 1..n.",
+      "wrongExplanations": {
+        "1": "Predecessors point to where you came from, not forward.",
+        "3": "Discovery order doesn't necessarily form a valid path."
+      },
+      "hint": "You have a chain n <- ... <- 1; invert it.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "What initial values should you set before exploration?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "distance[1] = 0; distance[others] = -1; predecessor[all] = -1",
+          "isCode": false
+        },
+        {
+          "label": "distance[1] = 1; distance[others] = 0; predecessor[all] = 0",
+          "isCode": false
+        },
+        {
+          "label": "distance[all] = 0; predecessor[1] = -1; others unset",
+          "isCode": false
+        },
+        {
+          "label": "No initialization is needed",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Set start distance to 0, others to -1 as unvisited, and predecessors to -1 initially.",
+      "wrongExplanations": {
+        "1": "Distances should count edges from 0 at the start; -1 marks unvisited."
+      },
+      "hint": "Use -1 as a clear marker for unvisited nodes.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Building the Idea",
+      "questionText": "Given n up to 1e5 and m up to 2e5, which graph representation is most suitable?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Adjacency list (list of lists), adding both directions",
+          "isCode": false
+        },
+        {
+          "label": "Adjacency matrix (n x n)",
+          "isCode": false
+        },
+        {
+          "label": "Store only the edge list, scan it on every step",
+          "isCode": false
+        },
+        {
+          "label": "A single global set of all nodes",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Adjacency lists are memory-efficient and allow O(1) average per edge traversal.",
+      "wrongExplanations": {
+        "1": "An n x n matrix would use too much memory (1e10 entries for n=1e5).",
+        "2": "Scanning all edges repeatedly would be too slow."
+      },
+      "hint": "Consider time and memory with large n, m.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q15",
+      "phase": "Building the Idea",
+      "questionText": "Small check: edges are 1-2, 2-5, 1-3, 3-5. What is the minimum number of computers from 1 to 5?",
+      "diagram": "1 -- 2 -- 5\n \\\n  3 --/",
+      "options": [
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "IMPOSSIBLE",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Both 1-2-5 and 1-3-5 have 2 edges, i.e., 3 computers.",
+      "wrongExplanations": {
+        "0": "No direct 1-5 connection exists.",
+        "2": "4 is longer than necessary."
+      },
+      "hint": "Count edges on the shortest route and then add 1.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Start with fast input and a main function skeleton. Which snippet correctly reads n and m as integers and handles empty input?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\nfrom collections import deque\n\ndef main():\n    data = sys.stdin.buffer.read().split()\n    it = iter(data)\n    try:\n        n = int(next(it))\n        m = int(next(it))\n    except StopIteration:\n        return",
+          "isCode": true
+        },
+        {
+          "label": "import sys\n\ndef main():\n    line = sys.stdin.readline()\n    if not line:\n        return\n    n, m = map(int, line)\n    from collections import deque",
+          "isCode": true
+        },
+        {
+          "label": "def main():\n    import sys\n    toks = sys.stdin.read().split()\n    n = int(toks[0]); m = toks[1]\n    from collections import deque",
+          "isCode": true
+        },
+        {
+          "label": "import sys\nfrom collections import deque\n\ndef main():\n    n = int(sys.stdin.buffer.read())\n    m = int(sys.stdin.buffer.read())",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "It reads all tokens, iterates safely, converts to int, and returns if input is empty.",
+      "wrongExplanations": {
+        "1": "map(int, line) iterates characters, not numbers; also missing deque import in scope.",
+        "2": "m is not converted to int; and may fail if input is short."
+      },
+      "hint": "Reading all tokens and iterating avoids per-line overhead and handles arbitrary whitespace.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\nfrom collections import deque\n\ndef main():\n    data = sys.stdin.buffer.read().split()\n    it = iter(data)\n    try:\n        n = int(next(it))\n        m = int(next(it))\n    except StopIteration:\n        return",
+      "codeLabel": "Imports and parse n, m"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Build the undirected adjacency list for n nodes and m edges from the token iterator.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    adj = [[] for _ in range(n+1)]\n    for _ in range(m):\n        a = int(next(it)); b = int(next(it))\n        adj[a].append(b)\n        adj[b].append(a)",
+          "isCode": true
+        },
+        {
+          "label": "    adj = [[] for _ in range(n)]\n    for _ in range(m):\n        a = int(next(it))-1; b = int(next(it))-1\n        adj[a].append(b)\n        adj[b].append(a)",
+          "isCode": true
+        },
+        {
+          "label": "    adj = [[0]*(n+1) for _ in range(n+1)]\n    for _ in range(m):\n        a = int(next(it)); b = int(next(it))\n        adj[a][b] = adj[b][a] = 1",
+          "isCode": true
+        },
+        {
+          "label": "    adj = [[] for _ in range(n+1)]\n    for _ in range(m):\n        a = int(next(it)); b = int(next(it))\n        adj[a].append(b)  # directed only",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Use 1-based indexing with size n+1 and add both directions for an undirected graph.",
+      "wrongExplanations": {
+        "1": "Mixing 0-based indices breaks with 1..n input unless all code adjusts.",
+        "3": "Only adding one direction turns the graph into directed, which is incorrect here."
+      },
+      "hint": "Remember: nodes are 1..n and edges are undirected.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    adj = [[] for _ in range(n+1)]\n    for _ in range(m):\n        a = int(next(it)); b = int(next(it))\n        adj[a].append(b)\n        adj[b].append(a)",
+      "codeLabel": "Build adjacency list"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Initialize arrays and variables for distances, predecessors, and the processing structure.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    dist = [-1]*(n+1)\n    parent = [-1]*(n+1)\n    from_node = 1\n    to_node = n\n    dq = deque()",
+          "isCode": true
+        },
+        {
+          "label": "    dist = [0]*(n+1)\n    parent = [0]*(n+1)\n    from_node = 1\n    to_node = n\n    dq = []",
+          "isCode": true
+        },
+        {
+          "label": "    visited = set()\n    prevs = {}\n    start = 1\n    end = n\n    dq = deque([start])",
+          "isCode": true
+        },
+        {
+          "label": "    dist = [-1]*n\n    parent = [-1]*n\n    from_node = 0\n    to_node = n-1\n    dq = deque()",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Use size n+1 arrays for 1..n indexing; -1 marks unvisited; deque is the right FIFO structure.",
+      "wrongExplanations": {
+        "1": "Initializing distances to 0 hides unvisited status and dq should be a deque, not a list.",
+        "4": "0-based indexing conflicts with the 1..n input; arrays are too small."
+      },
+      "hint": "Stick with 1-based indices and mark unvisited nodes distinctly.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    dist = [-1]*(n+1)\n    parent = [-1]*(n+1)\n    from_node = 1\n    to_node = n\n    dq = deque()",
+      "codeLabel": "Init state"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Set the starting node's distance and enqueue it.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    dist[from_node] = 0\n    dq.append(from_node)",
+          "isCode": true
+        },
+        {
+          "label": "    dist[to_node] = 0\n    dq.append(to_node)",
+          "isCode": true
+        },
+        {
+          "label": "    dist[from_node] = 1\n    dq.appendleft(from_node)",
+          "isCode": true
+        },
+        {
+          "label": "    parent[from_node] = 0\n    dq.append(from_node)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Start node has distance 0 and should be enqueued normally.",
+      "wrongExplanations": {
+        "1": "We explore from 1 to n, not from n.",
+        "2": "Distance should start at 0; appendleft is unnecessary here."
+      },
+      "hint": "Distances count edges from the start; the first is zero.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    dist[from_node] = 0\n    dq.append(from_node)",
+      "codeLabel": "Enqueue start"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Fill in the main exploration loop that processes nodes in increasing distance and records predecessors.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    while dq:\n        u = dq.popleft()\n        if u == to_node:\n            break\n        for v in adj[u]:\n            if dist[v] == -1:\n                dist[v] = dist[u] + 1\n                parent[v] = u\n                dq.append(v)",
+          "isCode": true
+        },
+        {
+          "label": "    while dq:\n        u = dq.pop()\n        for v in adj[u]:\n            if dist[v] == -1:\n                dist[v] = dist[u] + 1\n                parent[u] = v\n                dq.append(v)\n        if u == to_node:\n            break",
+          "isCode": true
+        },
+        {
+          "label": "    while dq:\n        u = dq.popleft()\n        for v in adj[u]:\n            if dist[v] != -1:\n                dist[v] = dist[u] + 1\n                parent[v] = u\n                dq.append(v)",
+          "isCode": true
+        },
+        {
+          "label": "    while dq:\n        u = dq.popleft()\n        for v in adj[u]:\n            if parent[v] == -1:\n                parent[v] = u\n                dq.appendleft(v)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Use popleft to process in FIFO order, set distance once per node, record parent, and optionally break when reaching the target.",
+      "wrongExplanations": {
+        "1": "Using pop() reverses order (LIFO), and parent assignment is reversed.",
+        "3": "Without distances, you can't compute the number of computers."
+      },
+      "hint": "Process earliest-discovered nodes first and avoid revisiting.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    while dq:\n        u = dq.popleft()\n        if u == to_node:\n            break\n        for v in adj[u]:\n            if dist[v] == -1:\n                dist[v] = dist[u] + 1\n                parent[v] = u\n                dq.append(v)",
+      "codeLabel": "Explore and record"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "After exploration, how do you handle the unreachable case before reconstructing the path?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    if dist[to_node] == -1:\n        print(\"IMPOSSIBLE\")\n        return",
+          "isCode": true
+        },
+        {
+          "label": "    if parent[to_node] == -1:\n        print(0)\n        return",
+          "isCode": true
+        },
+        {
+          "label": "    if dist[to_node] == -1:\n        print(\"IMPOSSIBLE\")",
+          "isCode": true
+        },
+        {
+          "label": "    if dist[to_node] == 0:\n        print(\"IMPOSSIBLE\")\n        return",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "A -1 distance means n was never reached; print \"IMPOSSIBLE\" and stop.",
+      "wrongExplanations": {
+        "1": "parent[n] could be -1 only if unreachable or n==1; the required output is \"IMPOSSIBLE\", not 0.",
+        "2": "Without returning, code would continue and likely fail or print wrong output."
+      },
+      "hint": "Use the distance array to detect reachability.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    if dist[to_node] == -1:\n        print(\"IMPOSSIBLE\")\n        return",
+      "codeLabel": "Unreachable check"
+    },
+    {
+      "id": "q22",
+      "phase": "Writing the Code",
+      "questionText": "Reconstruct the route from n back to 1 using the predecessor array.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    path = []\n    cur = to_node\n    while cur != -1:\n        path.append(cur)\n        cur = parent[cur]\n    path.reverse()",
+          "isCode": true
+        },
+        {
+          "label": "    path = []\n    cur = from_node\n    while cur != -1:\n        path.append(cur)\n        cur = parent[cur]\n    path.reverse()",
+          "isCode": true
+        },
+        {
+          "label": "    path = []\n    cur = to_node\n    while parent[cur] != -1:\n        path.append(cur)\n        cur = parent[cur)",
+          "isCode": true
+        },
+        {
+          "label": "    path = [from_node]\n    cur = from_node\n    while cur != to_node:\n        cur = parent[cur]\n        path.append(cur)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Follow predecessors from n to 1, including both ends, then reverse to get start-to-end order.",
+      "wrongExplanations": {
+        "1": "Starting at 1 won't reach forward using predecessors.",
+        "2": "This misses the start node and has a syntax error.)"
+      },
+      "hint": "Collect n, parent[n], parent[parent[n]], ..., until -1; then reverse.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    path = []\n    cur = to_node\n    while cur != -1:\n        path.append(cur)\n        cur = parent[cur]\n    path.reverse()",
+      "codeLabel": "Reconstruct path"
+    },
+    {
+      "id": "q23",
+      "phase": "Writing the Code",
+      "questionText": "Print the number of computers and the route, and add the standard Python entry point.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    print(len(path))\n    print(\" \".join(map(str, path)))\n\nif __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "    print(dist[to_node] + 1)\n    print(path)\n\nif __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "    print(len(path))\n    print(*path)\n\nif __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "    print(len(path))\n    print(\" \".join(map(str, path)))\n\nmain()",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Print the length and a space-separated route, and guard the entry point with the standard __name__ check.",
+      "wrongExplanations": {
+        "1": "Printing the list object shows brackets/commas, not the required format.",
+        "3": "Calling main() without the guard may cause unintended execution on import."
+      },
+      "hint": "Use a space-joined string for the path and include the usual Python guard.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    print(len(path))\n    print(\" \".join(map(str, path)))\n\nif __name__ == \"__main__\":\n    main()",
+      "codeLabel": "Output and entry point"
+    },
+    {
+      "id": "q24",
+      "phase": "Verifying the Solution",
+      "questionText": "Given the sample input:\n5 5\n1 2\n1 3\n1 4\n2 3\n5 4\nWhat output should the program produce?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "3\\n1 4 5",
+          "isCode": false
+        },
+        {
+          "label": "2\\n1 5",
+          "isCode": false
+        },
+        {
+          "label": "4\\n1 2 3 5",
+          "isCode": false
+        },
+        {
+          "label": "IMPOSSIBLE",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Shortest route: 1-4-5 with 3 computers. No direct 1-5 edge exists.",
+      "wrongExplanations": {
+        "1": "There is no direct connection between 1 and 5.",
+        "2": "A longer route exists but is not minimal."
+      },
+      "hint": "Check connections and count edges of the shortest route.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Verifying the Solution",
+      "questionText": "If multiple shortest routes exist, what should the program print?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Any one shortest route",
+          "isCode": false
+        },
+        {
+          "label": "All shortest routes",
+          "isCode": false
+        },
+        {
+          "label": "The lexicographically smallest shortest route",
+          "isCode": false
+        },
+        {
+          "label": "The route that visits the fewest unique labels",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The problem allows printing any valid route with minimal number of computers.",
+      "wrongExplanations": {
+        "2": "There is no requirement to select by label order."
+      },
+      "hint": "The Output section says \"You can print any valid solution.\"",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Verifying the Solution",
+      "questionText": "Consider edges: 1-2, 2-3, 3-1, 3-4. What is the minimum number of computers from 1 to 4?",
+      "diagram": "1 -- 2\n \\  /\n  3 -- 4",
+      "options": [
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "IMPOSSIBLE",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Shortest is 1-3-4: two edges -> three computers.",
+      "wrongExplanations": {
+        "0": "There is no direct 1-4 edge.",
+        "2": "You can do better than 1-2-3-4."
+      },
+      "hint": "Look for a route with two edges.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q27",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the worst-case time complexity in terms of n (nodes) and m (edges)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n + m)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(m log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n + m log m)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each node and edge is processed a constant number of times using adjacency lists.",
+      "wrongExplanations": {
+        "1": "Quadratic time would imply scanning all pairs, which we don't.",
+        "2": "There is no sorting or priority-based processing here."
+      },
+      "hint": "Count how many times each edge and node is examined.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q28",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the space complexity of the solution?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n + m)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(m^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Adjacency lists take O(n + m), plus O(n) for distance, parent, and queue.",
+      "wrongExplanations": {
+        "3": "You also need to store all edges; O(n) alone is insufficient."
+      },
+      "hint": "Account for adjacency lists and auxiliary arrays.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q29",
+      "phase": "Analyzing Complexity",
+      "questionText": "If you stop as soon as n is first discovered, how does that affect complexity?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Best-case improves, but worst-case remains O(n + m)",
+          "isCode": false
+        },
+        {
+          "label": "Both best and worst cases become O(n)",
+          "isCode": false
+        },
+        {
+          "label": "It becomes O(log n)",
+          "isCode": false
+        },
+        {
+          "label": "It becomes O(m^2)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Early stopping can save work in easy cases, but in the worst case you may still explore most nodes/edges.",
+      "wrongExplanations": {
+        "1": "You still may need to traverse many edges in the worst case."
+      },
+      "hint": "Consider graphs where n is far from 1 or unreachable.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\nfrom collections import deque\n\ndef main():\n    data = sys.stdin.buffer.read().split()\n    it = iter(data)\n    try:\n        n = int(next(it))\n        m = int(next(it))\n    except StopIteration:\n        return",
+    "    adj = [[] for _ in range(n+1)]\n    for _ in range(m):\n        a = int(next(it)); b = int(next(it))\n        adj[a].append(b)\n        adj[b].append(a)",
+    "    dist = [-1]*(n+1)\n    parent = [-1]*(n+1)\n    from_node = 1\n    to_node = n\n    dq = deque()",
+    "    dist[from_node] = 0\n    dq.append(from_node)",
+    "    while dq:\n        u = dq.popleft()\n        if u == to_node:\n            break\n        for v in adj[u]:\n            if dist[v] == -1:\n                dist[v] = dist[u] + 1\n                parent[v] = u\n                dq.append(v)",
+    "    if dist[to_node] == -1:\n        print(\"IMPOSSIBLE\")\n        return",
+    "    path = []\n    cur = to_node\n    while cur != -1:\n        path.append(cur)\n        cur = parent[cur]\n    path.reverse()",
+    "    print(len(path))\n    print(\" \".join(map(str, path)))\n\nif __name__ == \"__main__\":\n    main()"
+  ],
+  "reasoningChain": [
+    {
+      "question": "What does the output measure (edges vs. computers) and how do you count it?",
+      "insight": "The minimum number of computers equals the minimum number of edges from 1 to n plus 1."
+    },
+    {
+      "question": "How should connections be treated?",
+      "insight": "Edges are undirected; add both directions in the graph representation."
+    },
+    {
+      "question": "How to ensure the first time you reach a node is via the fewest edges?",
+      "insight": "Process nodes in order of increasing distance from the start using a FIFO structure."
+    },
+    {
+      "question": "What data should be tracked during exploration?",
+      "insight": "Maintain a distance array initialized to -1 and a predecessor array to reconstruct the route."
+    },
+    {
+      "question": "When can you safely stop and how do you compute k?",
+      "insight": "Stop when n is first discovered; k = dist[n] + 1."
+    },
+    {
+      "question": "How to reconstruct and print the route?",
+      "insight": "Backtrack from n via predecessors to 1, reverse the list, then print k and the route."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1473,
+    "output_tokens": 15372,
+    "input_cost": 0.001841,
+    "output_cost": 0.15372,
+    "total_cost": 0.155561
+  }
+}

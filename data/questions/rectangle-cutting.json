@@ -1,0 +1,1024 @@
+{
+  "id": "rectangle-cutting",
+  "title": "Rectangle Cutting",
+  "difficulty": "intermediate",
+  "tags": [
+    "dp"
+  ],
+  "estimatedMinutes": 40,
+  "language": "python",
+  "description": "Given an a × b rectangle, you can repeatedly pick one rectangle and cut it into two rectangles so that all side lengths remain integers. In how many moves (cuts) can you obtain only squares, using the minimum possible number of moves?\n\nInput: two integers a and b (1 ≤ a,b ≤ 500).\nOutput: one integer — the minimum number of moves.",
+  "examples": [
+    {
+      "input": "3 5",
+      "output": "3",
+      "explanation": "One way: 3×5 -> 3×3 + 3×2 (1 cut), 3×2 -> 2×2 + 1×2 (1 cut), 1×2 -> 1×1 + 1×1 (1 cut). Total 3."
+    }
+  ],
+  "constraints": [
+    "1 ≤ a,b ≤ 500",
+    "Each move cuts one rectangle into exactly two rectangles",
+    "All intermediate rectangles must have integer side lengths"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "If the rectangle is already a square, say 2 × 2, what is the minimum number of moves?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "A square needs no cuts. Any cut would only increase the number of moves.",
+      "wrongExplanations": {
+        "1": "Cutting a square once produces rectangles, which is unnecessary.",
+        "2": "No cuts are needed since it is already square."
+      },
+      "hint": "A square is the end state.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "For a 1 × 5 rectangle, what is the minimum number of moves?",
+      "diagram": "1×5 -> five 1×1 squares requires 4 cuts (each cut increases number of pieces by 1).",
+      "options": [
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "You need 5 squares; starting from 1 piece, each cut adds 1 piece. 5 pieces need 4 cuts.",
+      "wrongExplanations": {
+        "1": "5 is the number of squares, not moves. Moves are one fewer.",
+        "2": "You cannot reach 5 pieces with only 3 cuts."
+      },
+      "hint": "Pieces = cuts + 1.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "Which of the following is a valid single move from a 3 × 5 rectangle?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Cut into 3×3 and 3×2",
+          "isCode": false
+        },
+        {
+          "label": "Cut into 2×4 and 1×1",
+          "isCode": false
+        },
+        {
+          "label": "Cut into three rectangles at once",
+          "isCode": false
+        },
+        {
+          "label": "Cut along a diagonal to make triangles",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "A single move splits into exactly two rectangles with integer sides. 3×3 and 3×2 is valid.",
+      "wrongExplanations": {
+        "1": "Areas 2×4 and 1×1 do not cover 3×5 and cannot come from a single straight cut.",
+        "2": "Only two rectangles per move are allowed."
+      },
+      "hint": "Exactly two rectangles, integer sides, axis-aligned.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "For a 1 × 3 rectangle, how many moves are needed?",
+      "diagram": "1×3 -> 1×1 + 1×2 (1 cut), then 1×2 -> 1×1 + 1×1 (1 cut).",
+      "options": [
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "You need three 1×1 squares, so you need 2 cuts.",
+      "wrongExplanations": {
+        "1": "3 is the number of squares, not cuts.",
+        "2": "One cut yields only two pieces."
+      },
+      "hint": "Pieces = cuts + 1; need 3 pieces.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Exploring Approaches",
+      "questionText": "Consider 7 × 6. If you always cut off the largest possible square first, you get: 6×6 + 1×6 (1 cut), then split 1×6 into six 1×1 (5 more cuts) = 6 cuts. Can fewer cuts be done?",
+      "diagram": "Better: 7×6 -> 3×6 + 4×6 (1), 3×6 -> 3×3 + 3×3 (1), 4×6 -> 4×4 + 4×2 (1), 4×2 -> 2×2 + 2×2 (1). Total 4.",
+      "options": [
+        {
+          "label": "Yes, 4 cuts suffice, so largest-square-first is not always optimal.",
+          "isCode": false
+        },
+        {
+          "label": "No, 6 is minimal for 7×6.",
+          "isCode": false
+        },
+        {
+          "label": "Yes, 3 cuts suffice for 7×6.",
+          "isCode": false
+        },
+        {
+          "label": "It depends only on gcd(7,6), so 6 is fixed.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "A sequence achieving 4 cuts exists, beating 6. So always taking the largest square is not guaranteed minimal.",
+      "wrongExplanations": {
+        "1": "We showed a 4-cut sequence, so 6 is not minimal.",
+        "3": "The minimal cuts are not fixed by gcd alone."
+      },
+      "hint": "Try splitting 7×6 into two rectangles before removing any square.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "If a rectangle is split into two rectangles in one move, how does the minimal number of moves relate to its parts?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "It equals 1 + (minimal moves of left) + (minimal moves of right).",
+          "isCode": false
+        },
+        {
+          "label": "It equals (minimal moves of left) + (minimal moves of right), without +1.",
+          "isCode": false
+        },
+        {
+          "label": "It equals max(minimal moves of left, minimal moves of right).",
+          "isCode": false
+        },
+        {
+          "label": "It equals min(minimal moves of left, minimal moves of right).",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "You spend 1 move for the current cut, then finish both subrectangles independently.",
+      "wrongExplanations": {
+        "1": "You must count the current cut (+1).",
+        "2": "Both parts must be finished; you can't ignore one."
+      },
+      "hint": "One cut now, then solve both pieces.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "To minimize moves for a given a × b, what should we do over all valid straight splits?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Try all possible straight splits and take the minimum total (including the +1 for the current cut).",
+          "isCode": false
+        },
+        {
+          "label": "Try only equal splits and take the minimum.",
+          "isCode": false
+        },
+        {
+          "label": "Try all splits and take the maximum total.",
+          "isCode": false
+        },
+        {
+          "label": "Pick any one split; all give the same total.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We want the minimum over all possible straight cuts.",
+      "wrongExplanations": {
+        "1": "Equal splits aren't always best.",
+        "2": "We're minimizing, not maximizing."
+      },
+      "hint": "Consider vertical and horizontal splits at all positions.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Building the Idea",
+      "questionText": "Symmetry check: What is the relationship between the minimal moves for a × b and b × a?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "They are always equal.",
+          "isCode": false
+        },
+        {
+          "label": "They are equal only if a divides b.",
+          "isCode": false
+        },
+        {
+          "label": "They are equal only if both are even.",
+          "isCode": false
+        },
+        {
+          "label": "They are unrelated in general.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Cuts don’t depend on the order of sides; rotating the rectangle doesn’t change the task.",
+      "wrongExplanations": {
+        "1": "Divisibility doesn’t affect equality here.",
+        "3": "Parity doesn’t matter; rotation preserves the problem."
+      },
+      "hint": "Rotate the rectangle 90 degrees.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "Base cases: What is the minimal number of moves for an n × n rectangle?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "n − 1",
+          "isCode": false
+        },
+        {
+          "label": "n",
+          "isCode": false
+        },
+        {
+          "label": "Depends on whether n is prime",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "A square needs no cuts.",
+      "wrongExplanations": {
+        "1": "n−1 applies to 1×n, not n×n.",
+        "3": "Primality is irrelevant."
+      },
+      "hint": "Already a square.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "For a 1 × b rectangle, what is the minimal number of moves?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "b − 1",
+          "isCode": false
+        },
+        {
+          "label": "b",
+          "isCode": false
+        },
+        {
+          "label": "⌊b/2⌋",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "You need b pieces; starting from 1, you need b−1 cuts.",
+      "wrongExplanations": {
+        "1": "b is the number of pieces, not cuts.",
+        "3": "No reason to halve; pieces must be 1×1."
+      },
+      "hint": "Pieces after t cuts = t+1.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "Let f(i,j) be the minimal moves for i × j. Which recurrence is correct?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "f(i,j) = 0 if i=j; else min over x in [1..i−1] of (1 + f(x,j) + f(i−x,j)) and over y in [1..j−1] of (1 + f(i,y) + f(i,j−y)).",
+          "isCode": false
+        },
+        {
+          "label": "f(i,j) = min over x of (f(x,j) + f(i−x,j)) (no +1).",
+          "isCode": false
+        },
+        {
+          "label": "f(i,j) = max over all splits of (1 + ...).",
+          "isCode": false
+        },
+        {
+          "label": "f(i,j) = f(i−1,j) + 1 always.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Try all vertical and horizontal cuts; add 1 for this cut; pick the minimum. If square, 0.",
+      "wrongExplanations": {
+        "1": "Must include the current cut (+1).",
+        "2": "We are minimizing, not maximizing."
+      },
+      "hint": "Combine vertical and horizontal splits, and add the cost for the current cut.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "To compute all f(i,j) iteratively, which loop order safely ensures all needed smaller rectangles are ready?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "for i from 1..a: for j from 1..b",
+          "isCode": false
+        },
+        {
+          "label": "for j from b..1: for i from a..1",
+          "isCode": false
+        },
+        {
+          "label": "for i from a..1: for j from b..1",
+          "isCode": false
+        },
+        {
+          "label": "Any order works; dependencies don't matter.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "When computing (i,j), the splits involve indices < i or < j, which are already covered if increasing.",
+      "wrongExplanations": {
+        "2": "Descending may access (i',j') not yet computed for current j.",
+        "3": "Order matters due to dependencies."
+      },
+      "hint": "Think increasing sizes so smaller dimensions are computed first.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "Can we reduce duplicate work by only trying split positions up to half the side length for each orientation (e.g., x in 1..⌊i/2⌋)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, because splitting at x or at i−x yields the same pair reversed.",
+          "isCode": false
+        },
+        {
+          "label": "No, because we would miss asymmetric splits.",
+          "isCode": false
+        },
+        {
+          "label": "Only for even sizes; odd sizes require all splits.",
+          "isCode": false
+        },
+        {
+          "label": "Only for vertical cuts, not horizontal.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The two parts are unordered; considering both x and i−x is redundant.",
+      "wrongExplanations": {
+        "1": "We don't miss any unique pair; (x,i−x) and (i−x,x) are the same.",
+        "2": "Odd sizes still have mirrored pairs."
+      },
+      "hint": "Do (x, i−x) and (i−x, x) differ?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Building the Idea",
+      "questionText": "Using the recurrence, what is f(3,5)?",
+      "diagram": "Try vertical: 1+f(1,5)+f(2,5), etc., and horizontal: 1+f(3,1)+f(3,4), etc. The best path reaches 3.",
+      "options": [
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Cut 3×5 -> 3×3 + 3×2 (1), 3×2 -> 2×2 + 1×2 (1), 1×2 -> 1×1 + 1×1 (1): total 3.",
+      "wrongExplanations": {
+        "1": "You can't reach all squares in 2 cuts.",
+        "2": "A valid 3-cut sequence exists; 4 is not minimal."
+      },
+      "hint": "Use a 3×3 cut first, then finish the 3×2 piece.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Input parsing: read a and b from standard input.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "a,b=map(int,input().split())",
+          "isCode": true
+        },
+        {
+          "label": "a,b=list(map(int,input()))",
+          "isCode": true
+        },
+        {
+          "label": "a,b=map(int,input())",
+          "isCode": true
+        },
+        {
+          "label": "a,b=map(int, sys.stdin.readline())",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Split the line into two integers. The other options either don't split or use unavailable functions.",
+      "wrongExplanations": {
+        "1": "input() returns a string; you must split it.",
+        "3": "This also needs .split() and sys imported."
+      },
+      "hint": "You need to split the line into tokens.",
+      "isCodeBuilding": true,
+      "codeSnippet": "a,b=map(int,input().split())",
+      "codeLabel": "Read a and b"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Initialize a 2D table for all i in [0..a], j in [0..b], filled with zeros.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "dp=[[0]*(b+1) for _ in range(a+1)]",
+          "isCode": true
+        },
+        {
+          "label": "dp=[[0]*(b) for _ in range(a)]",
+          "isCode": true
+        },
+        {
+          "label": "dp=[[0]*(a+1) for _ in range(b+1)]",
+          "isCode": true
+        },
+        {
+          "label": "dp=[[0 for _ in range(b+1)]*(a+1)]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need (a+1) rows and (b+1) columns. Avoid shallow copies.",
+      "wrongExplanations": {
+        "1": "Missing the +1 indices for direct 1-based loops.",
+        "3": "This creates aliased rows; updates will mirror across rows."
+      },
+      "hint": "Use a list comprehension to avoid row aliasing.",
+      "isCodeBuilding": true,
+      "codeSnippet": "dp=[[0]*(b+1) for _ in range(a+1)]",
+      "codeLabel": "DP table"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Outer loops to fill rectangles from small sizes up to a × b:",
+      "diagram": null,
+      "options": [
+        {
+          "label": "for i in range(1,a+1):",
+          "isCode": true
+        },
+        {
+          "label": "for i in range(a,0,-1):",
+          "isCode": true
+        },
+        {
+          "label": "for i in range(a):",
+          "isCode": true
+        },
+        {
+          "label": "for i in range(0,a):",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Iterate i from 1..a to ensure smaller heights are computed first.",
+      "wrongExplanations": {
+        "1": "Descending complicates dependencies on smaller j for i fixed.",
+        "2": "This loops 0..a-1 and doesn't match 1-based indexing in table."
+      },
+      "hint": "Use 1..a inclusive.",
+      "isCodeBuilding": true,
+      "codeSnippet": "for i in range(1,a+1):",
+      "codeLabel": "Loop i"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Inner loop over j:",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    for j in range(1,b+1):",
+          "isCode": true
+        },
+        {
+          "label": "    for j in range(b,1,-1):",
+          "isCode": true
+        },
+        {
+          "label": "    for j in range(0,b):",
+          "isCode": true
+        },
+        {
+          "label": "    for j in range(1,a+1):",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Iterate j from 1..b to build up from smaller widths.",
+      "wrongExplanations": {
+        "1": "Descending j risks using dp[i][j-1] before it's computed for current i.",
+        "2": "This uses 0..b-1 and mismatches 1-based indexing."
+      },
+      "hint": "Mirror the i loop for j.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    for j in range(1,b+1):",
+      "codeLabel": "Loop j"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Skip computation when the rectangle is already a square:",
+      "diagram": null,
+      "options": [
+        {
+          "label": "        if i==j: continue",
+          "isCode": true
+        },
+        {
+          "label": "        if i==j: break",
+          "isCode": true
+        },
+        {
+          "label": "        if i!=j: continue",
+          "isCode": true
+        },
+        {
+          "label": "        if i==j: pass",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need no cuts for squares and should avoid overwriting the zero with a positive value.",
+      "wrongExplanations": {
+        "1": "break exits the loop early and misses other j values.",
+        "3": "pass does nothing; we'd still compute a nonzero value later for squares."
+      },
+      "hint": "Do not compute a value for squares at all.",
+      "isCodeBuilding": true,
+      "codeSnippet": "        if i==j: continue",
+      "codeLabel": "Skip squares"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Compute the best value by trying half of the split positions in each orientation efficiently (avoid building lists):",
+      "diagram": null,
+      "options": [
+        {
+          "label": "        best = min((dp[x][j]+dp[i-x][j]+1 for x in range(1, i//2+1)), default=float('inf')); best = min(best, min((dp[i][y]+dp[i][j-y]+1 for y in range(1, j//2+1)), default=float('inf')))",
+          "isCode": true
+        },
+        {
+          "label": "        best = min(dp[x][j]+dp[i-x][j] for x in range(1, i//2+1)); best = min(best, min(dp[i][y]+dp[i][j-y] for y in range(1, j//2+1)))",
+          "isCode": true
+        },
+        {
+          "label": "        best = min((dp[x][j]+dp[i-x][j] for x in range(1, i//2)), default=0); best = min(best, min((dp[i][y]+dp[i][j-y] for y in range(1, j//2)), default=0))",
+          "isCode": true
+        },
+        {
+          "label": "        best = min([dp[x][j]+dp[i-x][j]+1 for x in range(1, i//2+1)] + [dp[i][y]+dp[i][j-y]+1 for y in range(1, j//2+1)])",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Use generator expressions with defaults to handle empty ranges and include +1 for the current cut.",
+      "wrongExplanations": {
+        "1": "Missing +1 for the current cut; also min() on empty ranges raises an error.",
+        "3": "Builds lists (extra memory) and still fails when both ranges are empty."
+      },
+      "hint": "Remember +1 for the current cut and handle cases where a range might be empty.",
+      "isCodeBuilding": true,
+      "codeSnippet": "        best = min((dp[x][j]+dp[i-x][j]+1 for x in range(1, i//2+1)), default=float('inf')); best = min(best, min((dp[i][y]+dp[i][j-y]+1 for y in range(1, j//2+1)), default=float('inf')))",
+      "codeLabel": "Compute best"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "Store the computed best in the table:",
+      "diagram": null,
+      "options": [
+        {
+          "label": "        dp[i][j]=best",
+          "isCode": true
+        },
+        {
+          "label": "        dp[a][b]=best",
+          "isCode": true
+        },
+        {
+          "label": "        dp[j][i]=best",
+          "isCode": true
+        },
+        {
+          "label": "        dp[i][b]=best",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Assign the value to the current cell (i,j).",
+      "wrongExplanations": {
+        "1": "Only at the very end should we read dp[a][b], not overwrite it for all (i,j).",
+        "2": "We are filling (i,j), not its transpose."
+      },
+      "hint": "Use the current loop indices.",
+      "isCodeBuilding": true,
+      "codeSnippet": "        dp[i][j]=best",
+      "codeLabel": "Assign"
+    },
+    {
+      "id": "q22",
+      "phase": "Writing the Code",
+      "questionText": "Finally, output the answer:",
+      "diagram": null,
+      "options": [
+        {
+          "label": "print(dp[a][b])",
+          "isCode": true
+        },
+        {
+          "label": "print(best)",
+          "isCode": true
+        },
+        {
+          "label": "print(dp[b][a][0])",
+          "isCode": true
+        },
+        {
+          "label": "print(a*b - 1)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The answer is the computed value at dp[a][b].",
+      "wrongExplanations": {
+        "1": "best refers to the last inner iteration, not necessarily dp[a][b].",
+        "3": "This is only for 1×(ab), not general a×b."
+      },
+      "hint": "Read from the table at the target dimensions.",
+      "isCodeBuilding": true,
+      "codeSnippet": "print(dp[a][b])",
+      "codeLabel": "Print"
+    },
+    {
+      "id": "q23",
+      "phase": "Verifying the Solution",
+      "questionText": "Run the algorithm mentally for input 3 5. What is printed?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "As reasoned earlier, 3 cuts suffice for 3×5.",
+      "wrongExplanations": {
+        "1": "We have a concrete 3-cut sequence; 4 is not minimal.",
+        "3": "2 cuts cannot produce 5 squares from one rectangle."
+      },
+      "hint": "Try the 3×3 first then finish the 3×2 piece.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Verifying the Solution",
+      "questionText": "For input 7 6, what should the program output?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "6",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        },
+        {
+          "label": "7",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "A 4-cut sequence exists, so the minimal number is 4.",
+      "wrongExplanations": {
+        "1": "This corresponds to the naive largest-square-first plan.",
+        "2": "We can do better than 5 with the given sequence."
+      },
+      "hint": "Recall the 3×6 + 4×6 split path.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Verifying the Solution",
+      "questionText": "Edge sanity: For input 1 1, what is printed?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "Depends on implementation",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Already a square; zero cuts.",
+      "wrongExplanations": {
+        "1": "No cuts are needed at all.",
+        "3": "The recurrence handles this base case as 0."
+      },
+      "hint": "Base case.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the time complexity of this solution (using half-side split loops for each orientation)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(a·b·(a+b))",
+          "isCode": false
+        },
+        {
+          "label": "O(a·b)",
+          "isCode": false
+        },
+        {
+          "label": "O((a+b)^3)",
+          "isCode": false
+        },
+        {
+          "label": "O(a·b·log(a+b))",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "For each (i,j), we try O(i/2 + j/2) splits; across all i,j this totals O(a·b·(a+b)).",
+      "wrongExplanations": {
+        "1": "We do more than constant work per cell.",
+        "2": "No logarithms are involved."
+      },
+      "hint": "Sum the number of split positions over all i and j.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q27",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the space complexity?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(a·b)",
+          "isCode": false
+        },
+        {
+          "label": "O(a+b)",
+          "isCode": false
+        },
+        {
+          "label": "O(1)",
+          "isCode": false
+        },
+        {
+          "label": "O((a+b)^2)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We store a table of size (a+1)×(b+1).",
+      "wrongExplanations": {
+        "1": "We store all pairs (i,j), not just 1D state.",
+        "2": "More than constant state is needed."
+      },
+      "hint": "Count the table cells.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q28",
+      "phase": "Analyzing Complexity",
+      "questionText": "Which edge cases should be verified?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Squares (a=b), 1×b or a×1, and very unbalanced sizes.",
+          "isCode": false
+        },
+        {
+          "label": "Only prime dimensions.",
+          "isCode": false
+        },
+        {
+          "label": "Only even dimensions.",
+          "isCode": false
+        },
+        {
+          "label": "Only cases where a divides b.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Squares and skinny rectangles are critical. The others do not define correctness.",
+      "wrongExplanations": {
+        "1": "Primality is irrelevant to cutting rules.",
+        "2": "Parity does not constrain valid moves."
+      },
+      "hint": "Focus on shapes where the answer is obvious and helps confirm correctness.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "a,b=map(int,input().split())",
+    "dp=[[0]*(b+1) for _ in range(a+1)]",
+    "for i in range(1,a+1):",
+    "    for j in range(1,b+1):",
+    "        if i==j: continue",
+    "        best = min((dp[x][j]+dp[i-x][j]+1 for x in range(1, i//2+1)), default=float('inf')); best = min(best, min((dp[i][y]+dp[i][j-y]+1 for y in range(1, j//2+1)), default=float('inf')))",
+    "        dp[i][j]=best",
+    "print(dp[a][b])"
+  ],
+  "reasoningChain": [
+    {
+      "question": "If the rectangle is already a square, how many moves are needed?",
+      "insight": "Squares are final states with zero cuts: base case f(n,n)=0."
+    },
+    {
+      "question": "Is taking the largest square first always optimal?",
+      "insight": "No; counterexamples (e.g., 7×6) show we must consider all straight splits."
+    },
+    {
+      "question": "How does a single cut relate the whole to its parts?",
+      "insight": "A cut adds 1 move and splits the problem into two independent subproblems whose costs add."
+    },
+    {
+      "question": "What recurrence captures all options?",
+      "insight": "f(i,j)=min over all vertical and horizontal splits of 1+f(part1)+f(part2); f(i,i)=0."
+    },
+    {
+      "question": "How to compute values safely?",
+      "insight": "Fill a 2D table for i=1..a, j=1..b so smaller rectangles are computed before larger ones."
+    },
+    {
+      "question": "How to reduce work per cell?",
+      "insight": "Try split positions only up to half the side since complementary splits are symmetric."
+    },
+    {
+      "question": "What are complexity and edge cases?",
+      "insight": "Time O(a·b·(a+b)) with half splits, space O(a·b); check squares and 1×n cases."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1297,
+    "output_tokens": 19312,
+    "input_cost": 0.001621,
+    "output_cost": 0.19312,
+    "total_cost": 0.194741
+  }
+}

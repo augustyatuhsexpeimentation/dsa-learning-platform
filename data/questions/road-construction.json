@@ -1,0 +1,886 @@
+{
+  "id": "road-construction-mcqs",
+  "title": "Road Construction",
+  "difficulty": "intermediate",
+  "tags": [
+    "graph"
+  ],
+  "estimatedMinutes": 55,
+  "language": "python",
+  "description": "There are n cities and initially no roads between them. Each day, a new road is constructed, and there will be a total of m roads.\n\nA component is a group of cities where there is a route between any two cities using the roads. After each day, find the number of components and the size of the largest component.\n\nInput:\n- First line: two integers n and m\n- Next m lines: each contains two integers a and b (1 ≤ a,b ≤ n), a road between a and b\n\nPrint m lines: the required information after each day.\n\nNote: Each road is between different cities.",
+  "examples": [
+    {
+      "input": "5 3\n1 2\n1 3\n4 5\n",
+      "output": "4 2\n3 3\n2 3\n",
+      "explanation": "- Day 1: connect 1-2 → components=4, largest=2\n- Day 2: connect 1-3 → components=3, largest=3\n- Day 3: connect 4-5 → components=2, largest=3"
+    }
+  ],
+  "constraints": [
+    "1 ≤ n ≤ 10^5",
+    "1 ≤ m ≤ 2·10^5",
+    "1 ≤ a,b ≤ n",
+    "Road endpoints are different"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "n=5, initially no roads. After the first day we build a road between cities 1 and 2. What are the number of components and the largest component size?",
+      "diagram": "Cities: 1 2 3 4 5\nRoads after day 1: 1-2",
+      "options": [
+        {
+          "label": "5 components, largest size 1",
+          "isCode": false
+        },
+        {
+          "label": "4 components, largest size 2",
+          "isCode": false
+        },
+        {
+          "label": "4 components, largest size 1",
+          "isCode": false
+        },
+        {
+          "label": "3 components, largest size 2",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Connecting 1-2 merges two cities into one group: components drop from 5 to 4, largest size becomes 2.",
+      "wrongExplanations": {
+        "0": "A new road connects two cities, so components cannot stay at 5.",
+        "2": "Largest group now has both 1 and 2; size 1 is too small."
+      },
+      "hint": "A road merges exactly two separate cities into one group."
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "n=3. Day 1: build 1-2. Day 2: build 2-3. Day 3: build 1-3. What are the number of components and largest size after day 3?",
+      "diagram": "Day1: 1-2\nDay2: 1-2-3\nDay3: extra road 1-3 (already connected)",
+      "options": [
+        {
+          "label": "1 component, largest size 3",
+          "isCode": false
+        },
+        {
+          "label": "0 components, largest size 3",
+          "isCode": false
+        },
+        {
+          "label": "1 component, largest size 4",
+          "isCode": false
+        },
+        {
+          "label": "2 components, largest size 3",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "By day 2 all 3 are connected (1 component of size 3). Adding 1-3 on day 3 changes nothing.",
+      "wrongExplanations": {
+        "1": "Component count cannot be 0; at least one component exists.",
+        "2": "There are only 3 cities, largest size cannot exceed 3."
+      },
+      "hint": "If two cities are already connected by some route, adding another road between them doesn’t change groups."
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "After building roads (1,2) and (3,4) in n=5, are cities 2 and 3 in the same component?",
+      "diagram": "Roads: 1-2 and 3-4\nGroups: {1,2}, {3,4}, {5}",
+      "options": [
+        {
+          "label": "Yes, because they are consecutive numbers",
+          "isCode": false
+        },
+        {
+          "label": "No, there is no route using roads between 2 and 3",
+          "isCode": false
+        },
+        {
+          "label": "Yes, because every city is self-connected",
+          "isCode": false
+        },
+        {
+          "label": "It depends on the value of n",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Connectivity depends on roads, not numbering. Without a path of roads, 2 and 3 are in different components.",
+      "wrongExplanations": {
+        "0": "Numbering doesn't imply connectivity.",
+        "2": "Being self-connected doesn't connect different cities."
+      },
+      "hint": "A component requires a route via the built roads."
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "n=4. Roads by day: Day1: 1-2, Day2: 2-4, Day3: 3-4. What is the sequence of component counts after each day?",
+      "diagram": "Day1: 1-2\nDay2: 1-2-4\nDay3: 3-4 merges with 1-2-4",
+      "options": [
+        {
+          "label": "3, 2, 1",
+          "isCode": false
+        },
+        {
+          "label": "3, 3, 2",
+          "isCode": false
+        },
+        {
+          "label": "2, 1, 1",
+          "isCode": false
+        },
+        {
+          "label": "4, 3, 2",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "After 1-2: 3 groups. After 2-4: still 2 groups ({1,2,4} and {3}). After 3-4: all merge to 1 group.",
+      "wrongExplanations": {
+        "1": "Day2 merges 4 into {1,2}, reducing groups.",
+        "3": "Initially 4 groups, but day1 reduces to 3."
+      },
+      "hint": "Each road either merges two groups or changes nothing."
+    },
+    {
+      "id": "q5",
+      "phase": "Exploring Approaches",
+      "questionText": "Suppose after each day we recompute all components from scratch by scanning the roads and traversing the graph. What is the total time over m days?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "About O(m * (n + m))",
+          "isCode": false
+        },
+        {
+          "label": "About O(n + m)",
+          "isCode": false
+        },
+        {
+          "label": "About O(m log n)",
+          "isCode": false
+        },
+        {
+          "label": "About O(n * log m)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Recomputing each day costs ~O(n + current roads). Summed over m days gives ~O(m*(n+m)), too slow.",
+      "wrongExplanations": {
+        "1": "That would be for a single pass, not m recomputations."
+      },
+      "hint": "Think: Day 1 has ~1 road, Day 2 ~2 roads, ... up to m."
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "When adding a road between a and b, what minimal updates are needed to maintain the number of components and the largest component size?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "If a and b are in different groups: components -= 1 and new group's size = size(a's group) + size(b's group); else no change.",
+          "isCode": false
+        },
+        {
+          "label": "Always decrement components by 1 and add 2 to the largest size.",
+          "isCode": false
+        },
+        {
+          "label": "Increment components by 1 if a != b; update largest to max(largest, 2).",
+          "isCode": false
+        },
+        {
+          "label": "If a and b are in the same group, decrement components; else increment components.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "A new road only merges groups when it connects two previously separate groups. Group size sums on merge.",
+      "wrongExplanations": {
+        "1": "Adding 2 ignores existing group sizes and double-counts.",
+        "2": "Components should not increase when adding roads."
+      },
+      "hint": "A road within the same group does not change group count."
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "To quickly decide if two cities are in the same group and to maintain group sizes, what should we track?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "For each city, a link to a leader city; for each leader, the size of its group.",
+          "isCode": false
+        },
+        {
+          "label": "For each city, its degree (number of roads).",
+          "isCode": false
+        },
+        {
+          "label": "An adjacency list and run a full traversal each day.",
+          "isCode": false
+        },
+        {
+          "label": "For each pair of cities, whether they are directly connected.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Leader links allow jumping to a group's representative; storing sizes at leaders lets us merge sizes efficiently.",
+      "wrongExplanations": {
+        "2": "Running a full traversal daily is too slow.",
+        "3": "Direct connections don't capture indirect routes efficiently."
+      },
+      "hint": "We need per-city pointers and per-group sizes."
+    },
+    {
+      "id": "q8",
+      "phase": "Building the Idea",
+      "questionText": "We represent each group by a leader. Initially each city is its own leader. When connecting two cities from different groups and making one leader point to the other, how does the component count change?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Decrease by 1",
+          "isCode": false
+        },
+        {
+          "label": "Increase by 1",
+          "isCode": false
+        },
+        {
+          "label": "Stay the same",
+          "isCode": false
+        },
+        {
+          "label": "Decrease by the size of the smaller group",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Two groups become a single group, so the count drops by exactly 1.",
+      "wrongExplanations": {
+        "2": "If they were different groups, they merge; the count changes."
+      },
+      "hint": "Two separate groups become one."
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "To keep leader chains short after many merges, which choice helps when deciding which leader points to which?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Make the smaller group's leader point to the larger group's leader.",
+          "isCode": false
+        },
+        {
+          "label": "Always make the higher-numbered city the leader.",
+          "isCode": false
+        },
+        {
+          "label": "Always make the lower-numbered city the leader.",
+          "isCode": false
+        },
+        {
+          "label": "Pick randomly which leader points to which.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Attaching the smaller group under the larger keeps the chains short over time.",
+      "wrongExplanations": {
+        "1": "City numbering doesn't reflect group size or structure.",
+        "3": "Random choices can lead to long chains."
+      },
+      "hint": "Prefer attaching smaller under larger."
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "After merging two different groups, how do we update the size stored at the new leader?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Set it to the sum of the two group sizes.",
+          "isCode": false
+        },
+        {
+          "label": "Set it to the maximum of the two group sizes.",
+          "isCode": false
+        },
+        {
+          "label": "Set it to the minimum of the two group sizes.",
+          "isCode": false
+        },
+        {
+          "label": "Set it to the difference of the two group sizes plus 1.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "All members from both groups are now together, so size is the sum.",
+      "wrongExplanations": {
+        "1": "Taking max ignores the added members from the other group."
+      },
+      "hint": "No members are lost; groups combine entirely."
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "Given parent pointers to a leader, how do we check if cities a and b are already in the same group?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Follow parent pointers from a and b up to their leaders and compare the leaders.",
+          "isCode": false
+        },
+        {
+          "label": "Compare a and b directly; if equal, same group.",
+          "isCode": false
+        },
+        {
+          "label": "Check if a's parent equals b's parent after one step.",
+          "isCode": false
+        },
+        {
+          "label": "Check if there is a direct road between a and b.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Two cities are in the same group iff their leaders are the same.",
+      "wrongExplanations": {
+        "2": "Immediate parents can differ even within the same group."
+      },
+      "hint": "Leaders represent groups."
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "While following parent pointers to find a leader, we can set each visited node to point to its parent's parent. What effect does this have?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "It speeds up future leader lookups without changing groups or sizes.",
+          "isCode": false
+        },
+        {
+          "label": "It changes the number of components.",
+          "isCode": false
+        },
+        {
+          "label": "It increases group sizes.",
+          "isCode": false
+        },
+        {
+          "label": "It breaks the correctness of leader checks.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Shortening paths keeps the same leaders but reduces the path length for future queries.",
+      "wrongExplanations": {
+        "1": "Shortcuts don't change which cities are connected."
+      },
+      "hint": "Only pointers are shortened; connectivity doesn’t change."
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "Verify on the example n=5, roads: 1-2, 1-3, 4-5. What are the outputs after each day?",
+      "diagram": "Day1 merges {1},{2} → {1,2}\nDay2 merges {1,2} with {3} → {1,2,3}\nDay3 merges {4},{5} → {4,5}",
+      "options": [
+        {
+          "label": "4 2; 3 3; 2 3",
+          "isCode": false
+        },
+        {
+          "label": "5 2; 3 3; 1 5",
+          "isCode": false
+        },
+        {
+          "label": "4 2; 2 3; 1 5",
+          "isCode": false
+        },
+        {
+          "label": "3 2; 3 3; 2 3",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Day1: 4,2; Day2: 3,3; Day3: 2,3. Matches the sample.",
+      "wrongExplanations": {
+        "3": "After day1, components are 4, not 3."
+      },
+      "hint": "Track component count and largest group after each merge."
+    },
+    {
+      "id": "q14",
+      "phase": "Writing the Code",
+      "questionText": "Read all input efficiently and set up an iterator for tokens.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\ndata = sys.stdin.read().strip().split()\nit = iter(data)\nn = int(next(it)); m = int(next(it))",
+          "isCode": true
+        },
+        {
+          "label": "import sys\ndata = sys.stdin.readline().split()\nit = iter(data)\nn = int(next(it)); m = int(next(it))",
+          "isCode": true
+        },
+        {
+          "label": "n, m = map(int, input().split())\n# read rest later using input()",
+          "isCode": true
+        },
+        {
+          "label": "import sys\ndata = sys.stdin.read().split('\\n')\nit = iter(data)\nn = int(next(it)); m = int(next(it))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Reading all tokens and iterating is robust and fast for up to 2e5 roads.",
+      "wrongExplanations": {
+        "1": "A single readline() won’t read all tokens; subsequent reads need handling.",
+        "2": "Mixing input() per line can be slower; acceptable but not as efficient here."
+      },
+      "hint": "We need to parse 2 + 2m integers from standard input.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\ndata = sys.stdin.read().strip().split()\nit = iter(data)\nn = int(next(it)); m = int(next(it))",
+      "codeLabel": "Input parsing"
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Initialize leader links and group sizes, and track components and largest group.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "parent = list(range(n))\nsize = [1]*n\ncomponents = n\nmax_size = 1 if n>0 else 0",
+          "isCode": true
+        },
+        {
+          "label": "parent = list(range(n+1))\nsize = [0]*(n+1)\ncomponents = n\nmax_size = 0",
+          "isCode": true
+        },
+        {
+          "label": "parent = [0]*n\nsize = [0]*n\ncomponents = 0\nmax_size = 0",
+          "isCode": true
+        },
+        {
+          "label": "parent = list(range(n))\nsize = [1]*n\ncomponents = n\nmax_size = n",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each city starts as its own leader (size 1). Initially there are n components; largest is 1.",
+      "wrongExplanations": {
+        "1": "Allocating n+1 and zero sizes mis-tracks counts and sizes.",
+        "4": "Largest group is not n initially; there are no roads yet."
+      },
+      "hint": "At start, every city is isolated.",
+      "isCodeBuilding": true,
+      "codeSnippet": "parent = list(range(n))\nsize = [1]*n\ncomponents = n\nmax_size = 1 if n>0 else 0",
+      "codeLabel": "Initialization"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Implement a function to find the leader of x using iterative pointer jumping (shortcutting).",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def find(x):\n    while parent[x] != x:\n        parent[x] = parent[parent[x]]\n        x = parent[x]\n    return x",
+          "isCode": true
+        },
+        {
+          "label": "def find(x):\n    while parent[x] == x:\n        parent[x] = parent[parent[x]]\n    return x",
+          "isCode": true
+        },
+        {
+          "label": "def find(x):\n    if parent[x] == x:\n        return parent[parent[x]]\n    return x",
+          "isCode": true
+        },
+        {
+          "label": "def find(x):\n    while True:\n        x = parent[parent[x]]\n    return x",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "While not at leader, jump to grandparent and continue; return final leader.",
+      "wrongExplanations": {
+        "1": "The loop condition is inverted; also x never updates correctly.",
+        "3": "Infinite loop: no break when x reaches its leader."
+      },
+      "hint": "Stop when parent[x] == x.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def find(x):\n    while parent[x] != x:\n        parent[x] = parent[parent[x]]\n        x = parent[x]\n    return x",
+      "codeLabel": "Leader lookup"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Start a merge function that gets leaders and handles the case when both cities are already in the same group.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def unite(a, b):\n    ra = find(a); rb = find(b)\n    if ra == rb:\n        return False, size[ra]",
+          "isCode": true
+        },
+        {
+          "label": "def unite(a, b):\n    ra = a; rb = b\n    if ra != rb:\n        return False, 1",
+          "isCode": true
+        },
+        {
+          "label": "def unite(a, b):\n    if parent[a] == parent[b]:\n        return True, size[a]",
+          "isCode": true
+        },
+        {
+          "label": "def unite(a, b):\n    ra = find(a); rb = find(b)\n    if ra == rb:\n        return True, size[ra]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We must compare leaders; if equal, no structural change. Return a flag and current group size.",
+      "wrongExplanations": {
+        "2": "Immediate parents may differ within the same group; and the flag meaning is inverted.",
+        "3": "Returning True on no-op would mislead the caller into updating counts."
+      },
+      "hint": "Callers need to know whether a merge happened.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def unite(a, b):\n    ra = find(a); rb = find(b)\n    if ra == rb:\n        return False, size[ra]",
+      "codeLabel": "Merge start"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Complete the merge by attaching the smaller group under the larger and updating size.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    if size[ra] < size[rb]:\n        ra, rb = rb, ra\n    parent[rb] = ra\n    size[ra] += size[rb]\n    return True, size[ra]",
+          "isCode": true
+        },
+        {
+          "label": "    if size[ra] > size[rb]:\n        ra, rb = rb, ra\n    parent[rb] = ra\n    size[rb] += size[ra]\n    return True, size[rb]",
+          "isCode": true
+        },
+        {
+          "label": "    if size[ra] < size[rb]:\n        parent[ra] = rb\n    else:\n        parent[rb] = ra\n    return True, max(size[ra], size[rb])",
+          "isCode": true
+        },
+        {
+          "label": "    parent[ra] = rb\n    size[rb] = max(size[ra], size[rb])\n    return True, size[rb]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Ensure ra is the larger group, attach rb under ra, add sizes, and return the new size.",
+      "wrongExplanations": {
+        "1": "Swapping condition is reversed and sizes are updated on the wrong leader.",
+        "2": "Fails to add sizes; largest group size needs the sum, not max."
+      },
+      "hint": "Make the larger group's leader the new leader.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    if size[ra] < size[rb]:\n        ra, rb = rb, ra\n    parent[rb] = ra\n    size[ra] += size[rb]\n    return True, size[ra]",
+      "codeLabel": "Attach and update"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Prepare to process all m roads and collect outputs efficiently.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "out_lines = []\nfor _ in range(m):\n    a = int(next(it)) - 1; b = int(next(it)) - 1",
+          "isCode": true
+        },
+        {
+          "label": "out_lines = ''\nfor _ in range(n):\n    a = int(next(it)); b = int(next(it))",
+          "isCode": true
+        },
+        {
+          "label": "out_lines = []\nfor _ in range(m):\n    a = int(next(it)); b = int(next(it))",
+          "isCode": true
+        },
+        {
+          "label": "for _ in range(m):\n    a, b = map(int, input().split())\nout_lines = []",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need a list of lines and to read exactly m pairs, converting to 0-based indices.",
+      "wrongExplanations": {
+        "2": "Indices remain 1-based; leader arrays are 0-based.",
+        "3": "Mixing input methods and initializing out_lines after the loop is problematic."
+      },
+      "hint": "Adjust for 0-based indexing.",
+      "isCodeBuilding": true,
+      "codeSnippet": "out_lines = []\nfor _ in range(m):\n    a = int(next(it)) - 1; b = int(next(it)) - 1",
+      "codeLabel": "Loop and read edges"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "On each road, merge if needed, update counts and largest size, and record the result.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    merged, new_size = unite(a, b)\n    if merged:\n        components -= 1\n        if new_size > max_size:\n            max_size = new_size\n    out_lines.append(f\"{components} {max_size}\")",
+          "isCode": true
+        },
+        {
+          "label": "    merged, new_size = unite(a, b)\n    components -= 1\n    if new_size > max_size:\n        max_size = new_size\n    out_lines.append(f\"{components} {max_size}\")",
+          "isCode": true
+        },
+        {
+          "label": "    merged, new_size = unite(a, b)\n    if merged:\n        components -= 1\n    max_size = new_size\n    out_lines.append(f\"{components} {max_size}\")",
+          "isCode": true
+        },
+        {
+          "label": "    _, new_size = unite(a, b)\n    if new_size > max_size:\n        max_size = new_size\n    out_lines.append(f\"{components} {max_size}\")",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Only on a real merge do we decrement components and possibly raise max_size.",
+      "wrongExplanations": {
+        "1": "This decrements even when adding a redundant road.",
+        "2": "max_size should only increase if the new group is larger than previous max."
+      },
+      "hint": "No change when the two cities were already connected.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    merged, new_size = unite(a, b)\n    if merged:\n        components -= 1\n        if new_size > max_size:\n            max_size = new_size\n    out_lines.append(f\"{components} {max_size}\")",
+      "codeLabel": "Update and record"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "Finally, output all lines efficiently.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "sys.stdout.write(\"\\n\".join(out_lines))",
+          "isCode": true
+        },
+        {
+          "label": "print(out_lines)",
+          "isCode": true
+        },
+        {
+          "label": "for line in out_lines:\n    print(line, end='')",
+          "isCode": true
+        },
+        {
+          "label": "print(\"\\n\".join(out_lines), end='\\n\\n')",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Writing all at once is efficient and produces the exact required formatting.",
+      "wrongExplanations": {
+        "1": "Printing the list shows brackets and quotes, not the required lines.",
+        "3": "Adds an extra blank line at the end."
+      },
+      "hint": "No extra spaces or lines should be added.",
+      "isCodeBuilding": true,
+      "codeSnippet": "sys.stdout.write(\"\\n\".join(out_lines))",
+      "codeLabel": "Flush output"
+    },
+    {
+      "id": "q22",
+      "phase": "Verifying the Solution",
+      "questionText": "Run the code on the sample:\n5 3\n1 2\n1 3\n4 5\nWhat output should it print?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "4 2\n3 3\n2 3",
+          "isCode": false
+        },
+        {
+          "label": "5 1\n3 2\n1 5",
+          "isCode": false
+        },
+        {
+          "label": "4 2\n2 3\n1 5",
+          "isCode": false
+        },
+        {
+          "label": "4 2\n3 2\n2 3",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Day1: 4 2, Day2: 3 3, Day3: 2 3. Matches earlier reasoning.",
+      "wrongExplanations": {
+        "3": "Largest after day 2 should be 3, not 2."
+      },
+      "hint": "Track merges and largest size after each addition."
+    },
+    {
+      "id": "q23",
+      "phase": "Verifying the Solution",
+      "questionText": "Check another case:\n6 4\n1 2\n2 3\n4 5\n3 4\nWhat is the output?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "5 2\n4 3\n3 3\n2 5",
+          "isCode": false
+        },
+        {
+          "label": "5 2\n3 3\n2 4\n1 6",
+          "isCode": false
+        },
+        {
+          "label": "5 2\n4 3\n2 5\n1 6",
+          "isCode": false
+        },
+        {
+          "label": "6 1\n5 2\n4 2\n3 3",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Merges produce groups of sizes 2,3,2 and finally 5; component counts drop by 1 on each real merge.",
+      "wrongExplanations": {
+        "2": "After 3rd road, there are 3 components, not 2."
+      },
+      "hint": "Compute after each day: comp and max size."
+    },
+    {
+      "id": "q24",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the total time complexity of processing all m roads with the implemented approach?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "About O(n + m) overall in practice (near-constant work per road on average).",
+          "isCode": false
+        },
+        {
+          "label": "O(m * (n + m)) because we recompute from scratch each day.",
+          "isCode": false
+        },
+        {
+          "label": "O(n * m) because each merge scans all nodes.",
+          "isCode": false
+        },
+        {
+          "label": "O(m log m) due to sorting edges.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each operation does very small work on average thanks to leader shortcuts and size-based attachment.",
+      "wrongExplanations": {
+        "1": "We are not recomputing from scratch each day.",
+        "3": "No sorting is performed."
+      },
+      "hint": "Each road triggers a fast leader lookup and at most one merge."
+    },
+    {
+      "id": "q25",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the additional space used by the algorithm (excluding input storage)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n) for the leader and size arrays.",
+          "isCode": false
+        },
+        {
+          "label": "O(m) for storing all roads plus O(n).",
+          "isCode": false
+        },
+        {
+          "label": "O(1) because we only keep counters.",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2) to keep a matrix of connectivity.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We keep two arrays of length n and a few scalars; we don't store the road list.",
+      "wrongExplanations": {
+        "1": "We process roads on the fly; no need to store all edges.",
+        "3": "No adjacency matrix is used."
+      },
+      "hint": "We only keep per-city leader and size."
+    },
+    {
+      "id": "q26",
+      "phase": "Analyzing Complexity",
+      "questionText": "When a road connects two cities already in the same group, what changes in our maintained values?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "No change in component count or largest size.",
+          "isCode": false
+        },
+        {
+          "label": "Component count decreases by 1.",
+          "isCode": false
+        },
+        {
+          "label": "Largest size increases by 1.",
+          "isCode": false
+        },
+        {
+          "label": "Both component count and largest size may increase.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "A redundant road does not merge groups; counts remain the same.",
+      "wrongExplanations": {
+        "1": "Groups only decrease when two different groups merge.",
+        "2": "Largest size only changes on a merge that creates a bigger group."
+      },
+      "hint": "Only real merges affect counts and sizes."
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\ndata = sys.stdin.read().strip().split()\nit = iter(data)\nn = int(next(it)); m = int(next(it))",
+    "parent = list(range(n))\nsize = [1]*n\ncomponents = n\nmax_size = 1 if n>0 else 0",
+    "def find(x):\n    while parent[x] != x:\n        parent[x] = parent[parent[x]]\n        x = parent[x]\n    return x",
+    "def unite(a, b):\n    ra = find(a); rb = find(b)\n    if ra == rb:\n        return False, size[ra]",
+    "    if size[ra] < size[rb]:\n        ra, rb = rb, ra\n    parent[rb] = ra\n    size[ra] += size[rb]\n    return True, size[ra]",
+    "out_lines = []\nfor _ in range(m):\n    a = int(next(it)) - 1; b = int(next(it)) - 1",
+    "    merged, new_size = unite(a, b)\n    if merged:\n        components -= 1\n        if new_size > max_size:\n            max_size = new_size\n    out_lines.append(f\"{components} {max_size}\")\nsys.stdout.write(\"\\n\".join(out_lines))"
+  ],
+  "reasoningChain": [
+    {
+      "question": "What does a component mean and how do components change when adding a road?",
+      "insight": "A component is a set of cities connected by routes; adding a road between different groups reduces components by 1, within same group changes nothing."
+    },
+    {
+      "question": "Why recomputing components from scratch after each day is too slow?",
+      "insight": "Recomputing costs O(n+edges) per day leading to ~O(m*(n+m)); we need incremental updates."
+    },
+    {
+      "question": "What minimal information should we maintain to update quickly?",
+      "insight": "Maintain for each city a leader pointer and for each leader the size of its group to test connectivity and merge sizes."
+    },
+    {
+      "question": "How to merge two groups efficiently and keep future checks fast?",
+      "insight": "Attach smaller group under the larger and shortcut parent pointers during leader lookup to keep chains short."
+    },
+    {
+      "question": "How to implement and use these ideas in code to produce outputs after each day?",
+      "insight": "Implement leader lookup with shortcutting, a merge that returns whether it changed and the new size, update counters, and print after each road."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1432,
+    "output_tokens": 12589,
+    "input_cost": 0.00179,
+    "output_cost": 0.12589,
+    "total_cost": 0.12768
+  }
+}

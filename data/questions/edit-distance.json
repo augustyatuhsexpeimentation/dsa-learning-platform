@@ -1,0 +1,980 @@
+{
+  "id": "edit-distance-guided-builder",
+  "title": "Edit Distance",
+  "difficulty": "intermediate",
+  "tags": [
+    "dp",
+    "strings"
+  ],
+  "estimatedMinutes": 55,
+  "language": "python",
+  "description": "Compute the minimum number of operations required to transform one string into another, where the allowed operations are: add one character, remove one character, or replace one character. Both input strings consist of characters A–Z. Output the edit distance between the two strings.",
+  "examples": [
+    {
+      "input": "LOVE\nMOVIE",
+      "output": "2",
+      "explanation": "Replace L->M (1) and add I (1). Total 2."
+    }
+  ],
+  "constraints": [
+    "1 <= n,m <= 5000",
+    "Strings contain only A–Z"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "If s = \"A\" and t = \"A\", what is the edit distance?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "It is undefined for equal strings",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "No operation is needed to transform a string into itself. The distance is 0.",
+      "wrongExplanations": {
+        "1": "Replacing a character isn't needed when both strings are the same.",
+        "2": "Multiple operations are unnecessary if the strings already match."
+      },
+      "hint": "Zero operations if identical.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "What is the edit distance from s = \"AB\" to t = \"A\"?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "It depends on the positions",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Remove 'B' from \"AB\" to get \"A\"; that's 1 operation.",
+      "wrongExplanations": {
+        "0": "A change is required because the lengths differ.",
+        "2": "You do not need both a removal and replacement here."
+      },
+      "hint": "Removing the last character is allowed.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "What is the edit distance from s = \"A\" to t = \"BA\"?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "1 (add 'B' at the start)",
+          "isCode": false
+        },
+        {
+          "label": "2 (replace and then add)",
+          "isCode": false
+        },
+        {
+          "label": "0 (already same)",
+          "isCode": false
+        },
+        {
+          "label": "3 (two adds and one replace)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Add 'B' to the start of \"A\" to get \"BA\". Only 1 operation is needed.",
+      "wrongExplanations": {
+        "1": "A single insertion already achieves the target.",
+        "2": "They are not identical initially."
+      },
+      "hint": "Inserting one character can handle prefix changes.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "Is the edit distance symmetric? That is, is dist(s, t) = dist(t, s) for these operations?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, because each add/remove can be reversed, and replace is symmetric",
+          "isCode": false
+        },
+        {
+          "label": "No, it can differ by 1",
+          "isCode": false
+        },
+        {
+          "label": "Only when |s| = |t|",
+          "isCode": false
+        },
+        {
+          "label": "Only when s and t share the same first character",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each operation has a reverse counterpart; the minimal number is symmetric.",
+      "wrongExplanations": {
+        "1": "There is no reason it differs; reversibility preserves minimal cost."
+      },
+      "hint": "Think about reversing a sequence of operations.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Understanding the Problem",
+      "questionText": "To change 'L' to 'M' in a string (keeping all other characters same), what is the minimal cost?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "1 (replace 'L' with 'M')",
+          "isCode": false
+        },
+        {
+          "label": "2 (remove 'L', then add 'M')",
+          "isCode": false
+        },
+        {
+          "label": "0 (they are similar letters)",
+          "isCode": false
+        },
+        {
+          "label": "Depends on the position of 'L'",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Replace counts as 1 operation and directly achieves the change.",
+      "wrongExplanations": {
+        "1": "Replace is strictly cheaper than remove+add for a single character change."
+      },
+      "hint": "Replacement handles single-character changes directly.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "Consider s and t non-empty. If their last characters are equal, how does dist(s, t) relate to shorter strings?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "dist(s, t) = dist(s[:-1], t[:-1])",
+          "isCode": false
+        },
+        {
+          "label": "dist(s, t) = dist(s[:-1], t) + 1",
+          "isCode": false
+        },
+        {
+          "label": "dist(s, t) = dist(s, t[:-1]) + 1",
+          "isCode": false
+        },
+        {
+          "label": "dist(s, t) = |len(s) - len(t)|",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Matching last characters require no extra operation; reduce to prefixes.",
+      "wrongExplanations": {
+        "1": "Deleting from s isn't needed if last characters already match.",
+        "2": "Inserting into s isn't needed if last characters already match."
+      },
+      "hint": "If the ends already match, ignore them and focus on earlier characters.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "If the last characters differ, which relation is correct for dist(s, t)?",
+      "diagram": "Let s' = s without last char, t' = t without last char.",
+      "options": [
+        {
+          "label": "dist(s, t) = 1 + min(dist(s', t), dist(s, t'), dist(s', t'))",
+          "isCode": false
+        },
+        {
+          "label": "dist(s, t) = min(dist(s', t), dist(s, t'), dist(s', t'))",
+          "isCode": false
+        },
+        {
+          "label": "dist(s, t) = 1 + min(dist(s', t), dist(s, t'))",
+          "isCode": false
+        },
+        {
+          "label": "dist(s, t) = 2 + min(dist(s', t'), dist(s, t'))",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "One operation is required (delete, insert, or replace) plus the best among the three smaller cases.",
+      "wrongExplanations": {
+        "1": "At least one operation is needed when last characters differ.",
+        "2": "This omits the replacement possibility."
+      },
+      "hint": "Consider delete, insert, and replace as the three options.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Exploring Approaches",
+      "questionText": "What is dist(\"\", t) when t has length m?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "m",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "m - 1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "You need m insertions to build t from empty.",
+      "wrongExplanations": {
+        "1": "Empty to non-empty needs operations.",
+        "3": "All m characters must be added, not m-1."
+      },
+      "hint": "Count the number of inserted characters required.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Exploring Approaches",
+      "questionText": "We build a grid where cell (i, j) = distance between first i chars of s and first j chars of t. What size is this grid?",
+      "diagram": "Indices i = 0..n, j = 0..m; row 0 and column 0 represent empty prefixes.",
+      "options": [
+        {
+          "label": "(n + 1) by (m + 1)",
+          "isCode": false
+        },
+        {
+          "label": "n by m",
+          "isCode": false
+        },
+        {
+          "label": "n by (m + 1)",
+          "isCode": false
+        },
+        {
+          "label": "(n + 1) by m",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We include the empty prefix for both strings, so each dimension is length+1.",
+      "wrongExplanations": {
+        "1": "This ignores empty prefixes needed for base cases."
+      },
+      "hint": "Include empty prefix as index 0 on both axes.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "Let s = \"AB\" and t = \"ACB\". What values fill the first row (i = 0) of the grid?",
+      "diagram": "Row i=0 corresponds to transforming empty string to prefixes of t.",
+      "options": [
+        {
+          "label": "[0, 1, 2, 3]",
+          "isCode": false
+        },
+        {
+          "label": "[1, 1, 1, 1]",
+          "isCode": false
+        },
+        {
+          "label": "[0, 0, 0, 0]",
+          "isCode": false
+        },
+        {
+          "label": "[0, 1, 1, 1]",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "It takes j insertions to build the first j characters: 0,1,2,3.",
+      "wrongExplanations": {
+        "2": "Going from empty to non-empty needs insertions; not all zeros."
+      },
+      "hint": "Count insertions for '', 'A', 'AC', 'ACB'.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "For s = \"AB\", t = \"ACB\": what is the value at cell (1,1), i.e., dist(\"A\", \"A\")?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "Depends on earlier cells",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The characters match; use the diagonal value 0 (no extra operation).",
+      "wrongExplanations": {
+        "1": "No operation needed when they match."
+      },
+      "hint": "Matching characters copy diagonal value.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "For s = \"AB\", t = \"ACB\": what is dist(\"A\", \"AC\") (cell (1,2))?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Insert 'C' after 'A' to get 'AC'. One operation.",
+      "wrongExplanations": {
+        "1": "They are not equal; 'C' is missing from s."
+      },
+      "hint": "Think of adding one character to 'A'.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "For s = \"AB\", t = \"ACB\": what is dist(\"AB\", \"ACB\") (cell (2,3))?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Insert 'C' between 'A' and 'B': one insertion suffices.",
+      "wrongExplanations": {
+        "1": "They differ by one character; not identical."
+      },
+      "hint": "Try a single operation sequence that works.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Building the Idea",
+      "questionText": "When computing a cell (i, j) in left-to-right order across row i, which previously computed values are sufficient?",
+      "diagram": "Neighbors: up = (i-1,j), left = (i,j-1), diag = (i-1,j-1).",
+      "options": [
+        {
+          "label": "The entire previous row (i-1, *) and the current row's left neighbor (i, j-1)",
+          "isCode": false
+        },
+        {
+          "label": "Only the diagonal (i-1, j-1)",
+          "isCode": false
+        },
+        {
+          "label": "Only the previous column (*, j-1)",
+          "isCode": false
+        },
+        {
+          "label": "All earlier rows except the immediate previous one",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each cell depends on up, left, and diagonal; storing previous row and current left suffices.",
+      "wrongExplanations": {
+        "1": "Left and up neighbors are also needed.",
+        "2": "The up neighbor cannot be derived from the previous column alone."
+      },
+      "hint": "Look at the three neighbors in the recurrence.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q15",
+      "phase": "Building the Idea",
+      "questionText": "If we keep only one previous row, which loop order lets us compute correctly?",
+      "diagram": "We want to process s by rows and t by columns.",
+      "options": [
+        {
+          "label": "Outer loop over i from 1..n (characters of s), inner loop over j from 1..m (characters of t)",
+          "isCode": false
+        },
+        {
+          "label": "Outer loop over j, inner over i (with the same row-based storage)",
+          "isCode": false
+        },
+        {
+          "label": "Any order works equally well",
+          "isCode": false
+        },
+        {
+          "label": "Only reverse order (i from n..1, j from m..1) works",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Keeping the previous row means the outer loop should advance i row by row.",
+      "wrongExplanations": {
+        "1": "Row-based storage requires previous row; column-first would need previous column storage."
+      },
+      "hint": "Match your storage (rows) to the outer loop.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Read the two input strings safely (strip newlines). Choose the correct snippet.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\ns = sys.stdin.readline().strip()\nt = sys.stdin.readline().strip()",
+          "isCode": true
+        },
+        {
+          "label": "import sys\ns = sys.stdin.readline()\nt = sys.stdin.readline()",
+          "isCode": true
+        },
+        {
+          "label": "import sys\ns = sys.stdin.read().strip()\nt = sys.stdin.read().strip()",
+          "isCode": true
+        },
+        {
+          "label": "import sys\ns = sys.stdin.readline().strip()\nt = \"\"",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We must read exactly two lines and strip newlines. The other options either keep newlines, read everything at once, or miss the second line.",
+      "wrongExplanations": {
+        "1": "Leaving the newline changes string lengths and comparisons.",
+        "2": "Second read returns empty after consuming all input the first time."
+      },
+      "hint": "Use readline with strip for both lines.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\ns = sys.stdin.readline().strip()\nt = sys.stdin.readline().strip()",
+      "codeLabel": "Read input"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Initialize sizes and the base row for transforming '' to prefixes of t.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "n, m = len(s), len(t)\nprev = list(range(m + 1))",
+          "isCode": true
+        },
+        {
+          "label": "n, m = len(s), len(t)\nprev = list(range(m))",
+          "isCode": true
+        },
+        {
+          "label": "n, m = len(s), len(t)\nprev = [0] * (m + 1)",
+          "isCode": true
+        },
+        {
+          "label": "n, m = len(s), len(t)\nprev = list(range(n + 1))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "prev[j] should equal j for j=0..m, representing cost to build first j chars of t from empty.",
+      "wrongExplanations": {
+        "1": "Missing the j = m case; off by one.",
+        "2": "All zeros doesn't represent the j insertions needed.",
+        "3": "The row length must match t's prefix length (m), not n."
+      },
+      "hint": "prev should be [0,1,2,...,m].",
+      "isCodeBuilding": true,
+      "codeSnippet": "n, m = len(s), len(t)\nprev = list(range(m + 1))",
+      "codeLabel": "Sizes and base row"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Write the loop header to iterate over rows i = 1..n.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "for i in range(1, n + 1):",
+          "isCode": true
+        },
+        {
+          "label": "for i in range(n):",
+          "isCode": true
+        },
+        {
+          "label": "for i in range(0, n):",
+          "isCode": true
+        },
+        {
+          "label": "for i in range(1, n):",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need to process all characters 1..n in row order; starting at 0 breaks indexing and ending before n misses the last character.",
+      "wrongExplanations": {
+        "1": "This includes i=0 which causes s[i-1] to wrap to the last char.",
+        "3": "It would skip processing the nth character."
+      },
+      "hint": "Use inclusive range on both ends via +1.",
+      "isCodeBuilding": true,
+      "codeSnippet": "for i in range(1, n + 1):",
+      "codeLabel": "Row loop"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Initialize the current row so that curr[0] = i and the rest are placeholders.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    curr = [i] + [0] * m",
+          "isCode": true
+        },
+        {
+          "label": "    curr = [0] * (m + 1)",
+          "isCode": true
+        },
+        {
+          "label": "    curr = [i] * (m + 1)",
+          "isCode": true
+        },
+        {
+          "label": "    curr = [0] + [i] * m",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The first cell represents converting first i chars of s to empty t: i deletions. Others will be filled.",
+      "wrongExplanations": {
+        "1": "curr[0] must be i, not 0.",
+        "3": "Only curr[0] should be i; others start as placeholders."
+      },
+      "hint": "Set the leftmost cell to i.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    curr = [i] + [0] * m",
+      "codeLabel": "Init current row"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Fill the inner loop body using neighbors: up=prev[j], left=curr[j-1], diag=prev[j-1].",
+      "diagram": "Use: cost = 0 if s[i-1] == t[j-1] else 1, then take min of three moves.",
+      "options": [
+        {
+          "label": "    for j in range(1, m + 1):\n        cost = 0 if s[i - 1] == t[j - 1] else 1\n        curr[j] = min(prev[j] + 1, curr[j - 1] + 1, prev[j - 1] + cost)",
+          "isCode": true
+        },
+        {
+          "label": "    for j in range(1, m + 1):\n        cost = 0 if s[i] == t[j] else 1\n        curr[j] = min(prev[j] + 1, curr[j - 1], prev[j - 1] + cost)",
+          "isCode": true
+        },
+        {
+          "label": "    for j in range(m):\n        cost = 0 if s[i - 1] == t[j - 1] else 1\n        curr[j] = min(prev[j] + 1, curr[j - 1] + 1, prev[j] + cost)",
+          "isCode": true
+        },
+        {
+          "label": "    for j in range(1, m + 1):\n        cost = 1 if s[i - 1] == t[j - 1] else 0\n        curr[j] = min(prev[j - 1] + 1, curr[j - 1] + 1, prev[j] + cost)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We compare s[i-1] and t[j-1], then consider delete (up+1), insert (left+1), and match/replace (diag+cost).",
+      "wrongExplanations": {
+        "1": "s[i] or t[j] will go out of bounds; also missing +1 on insertion.",
+        "3": "Cost is inverted and neighbors are mismatched."
+      },
+      "hint": "Mind the indices: prefixes of length i and j use i-1 and j-1.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    for j in range(1, m + 1):\n        cost = 0 if s[i - 1] == t[j - 1] else 1\n        curr[j] = min(prev[j] + 1, curr[j - 1] + 1, prev[j - 1] + cost)",
+      "codeLabel": "Inner loop and transition"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "After finishing the inner loop for row i, update the previous row reference.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    prev = curr",
+          "isCode": true
+        },
+        {
+          "label": "    prev += curr",
+          "isCode": true
+        },
+        {
+          "label": "    curr = prev",
+          "isCode": true
+        },
+        {
+          "label": "    prev = prev[:]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We want the next iteration to see the just-computed row. Rebinding prev to curr does that.",
+      "wrongExplanations": {
+        "1": "This concatenates lists, corrupting lengths.",
+        "3": "This copies prev to itself; it doesn't change to the new row."
+      },
+      "hint": "Make prev point to the new row.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    prev = curr",
+      "codeLabel": "Advance row"
+    },
+    {
+      "id": "q22",
+      "phase": "Writing the Code",
+      "questionText": "Finally, print the distance between s and t using the last computed row.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "print(prev[m])",
+          "isCode": true
+        },
+        {
+          "label": "print(m)",
+          "isCode": true
+        },
+        {
+          "label": "print(len(prev))",
+          "isCode": true
+        },
+        {
+          "label": "print(prev[n])",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The answer sits at column m of the final row (prev).",
+      "wrongExplanations": {
+        "1": "m is the length of t, not the edit distance.",
+        "3": "Row index is i; n is unrelated to the column index."
+      },
+      "hint": "We want cell (n, m). After the loop, prev is row n.",
+      "isCodeBuilding": true,
+      "codeSnippet": "print(prev[m])",
+      "codeLabel": "Output"
+    },
+    {
+      "id": "q23",
+      "phase": "Verifying the Solution",
+      "questionText": "Trace for s = \"LOVE\", t = \"MOVIE\". After processing i = 1 (character 'L'), what is the row (prev)?",
+      "diagram": "Initial prev (i=0): [0,1,2,3,4,5]",
+      "options": [
+        {
+          "label": "[1, 1, 2, 3, 4, 5]",
+          "isCode": false
+        },
+        {
+          "label": "[1, 0, 1, 2, 3, 4]",
+          "isCode": false
+        },
+        {
+          "label": "[1, 2, 3, 4, 5, 6]",
+          "isCode": false
+        },
+        {
+          "label": "[0, 1, 2, 3, 4, 5]",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Matches our recurrence: [1,1,2,3,4,5] after considering delete/insert/replace across j.",
+      "wrongExplanations": {
+        "1": "This would imply a free match at j=1, which is not the case ('L' vs 'M').",
+        "3": "That's the initial row; we must update for i=1."
+      },
+      "hint": "Compute j from 1..5 using up/left/diag with cost 1 except when characters match.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Verifying the Solution",
+      "questionText": "What final value does the program print for s = \"LOVE\", t = \"MOVIE\"?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The final row yields prev[5] = 2, matching the example.",
+      "wrongExplanations": {
+        "2": "Three operations are not necessary; there's a two-step sequence."
+      },
+      "hint": "Our earlier manual trace found 2.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the time complexity of this solution with n = len(s), m = len(t)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n*m)",
+          "isCode": false
+        },
+        {
+          "label": "O(n + m)",
+          "isCode": false
+        },
+        {
+          "label": "O(max(n, m))",
+          "isCode": false
+        },
+        {
+          "label": "O(n*m*log(n+m))",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We compute m cells per row for n rows.",
+      "wrongExplanations": {
+        "1": "We visit each cell, not just each character once."
+      },
+      "hint": "Count the number of grid cells computed.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the additional space usage when keeping only the previous row and current row?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(m)",
+          "isCode": false
+        },
+        {
+          "label": "O(n*m)",
+          "isCode": false
+        },
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(1)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We store two rows of length m (plus input strings).",
+      "wrongExplanations": {
+        "3": "We need arrays proportional to m, not constant.",
+        "2": "Space depends on the number of columns used."
+      },
+      "hint": "Memory grows with the number of columns kept.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q27",
+      "phase": "Analyzing Complexity",
+      "questionText": "Which edge cases require special-case branching beyond initializing the first row and first column?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "None; the initialization for empty prefixes already handles empty strings and identical strings",
+          "isCode": false
+        },
+        {
+          "label": "Both strings empty require a separate print(0)",
+          "isCode": false
+        },
+        {
+          "label": "Identical strings require skipping the loops entirely",
+          "isCode": false
+        },
+        {
+          "label": "Strings longer than 1000 require building the full 2D grid",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Base initialization covers empty and identical cases; no extra branching is needed.",
+      "wrongExplanations": {
+        "1": "The base row/column make this unnecessary.",
+        "3": "We can still use row-by-row computation regardless of length."
+      },
+      "hint": "The first row/column are the only needed base conditions.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\ns = sys.stdin.readline().strip()\nt = sys.stdin.readline().strip()",
+    "n, m = len(s), len(t)\nprev = list(range(m + 1))",
+    "for i in range(1, n + 1):",
+    "    curr = [i] + [0] * m",
+    "    for j in range(1, m + 1):\n        cost = 0 if s[i - 1] == t[j - 1] else 1\n        curr[j] = min(prev[j] + 1, curr[j - 1] + 1, prev[j - 1] + cost)",
+    "    prev = curr",
+    "print(prev[m])"
+  ],
+  "reasoningChain": [
+    {
+      "question": "What operations define the edit distance and is it symmetric?",
+      "insight": "Understanding allowed operations and symmetry clarifies basic properties and helps reason about minimal changes."
+    },
+    {
+      "question": "What are the base cases for empty prefixes?",
+      "insight": "Distances involving empty strings equal the length of the other prefix, forming the first row/column."
+    },
+    {
+      "question": "How does the distance relate when the last characters match or differ?",
+      "insight": "If equal, reduce to smaller prefixes; if different, take 1 plus the minimum of delete, insert, or replace on smaller prefixes."
+    },
+    {
+      "question": "How to compute distances for all prefixes efficiently?",
+      "insight": "Use a grid of prefix distances filled from top-left to bottom-right so each cell uses already computed neighbors."
+    },
+    {
+      "question": "What information must be retained to reduce memory?",
+      "insight": "Each row depends only on the previous row and current left neighbor, enabling a rolling-row approach."
+    },
+    {
+      "question": "What loop order and indices avoid off-by-one errors?",
+      "insight": "Iterate rows over s (1..n) and columns over t (1..m), comparing s[i-1] with t[j-1] and using up/left/diag correctly."
+    },
+    {
+      "question": "How to assemble robust code for large inputs?",
+      "insight": "Read inputs carefully (strip), initialize the base row, iterate with proper transitions, update rows, and print the final cell."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1357,
+    "output_tokens": 16593,
+    "input_cost": 0.001696,
+    "output_cost": 0.16593,
+    "total_cost": 0.167626
+  }
+}

@@ -1,0 +1,1008 @@
+{
+  "id": "prefix-sum-queries",
+  "title": "Prefix Sum Queries",
+  "difficulty": "hard",
+  "tags": [
+    "array"
+  ],
+  "estimatedMinutes": 55,
+  "language": "python",
+  "description": "You are given an array of n integers and q queries. Each query is one of two types:\n\n1. Update the value at position k to u.\n2. Compute the maximum prefix sum within the subarray [a, b].\n\nA prefix of [a, b] means [a, a], [a, a+1], ..., [a, b]; empty prefix is allowed and has sum 0.\n\nInput format:\n- First line: two integers n and q.\n- Second line: n integers x_1, x_2, ..., x_n.\n- Next q lines: each contains three integers, either \"1 k u\" (update) or \"2 a b\" (query).\n\nOutput:\n- For each query of type 2, print the maximum prefix sum in range [a, b].\n\nExample:\nInput:\n8 4\n1 2 -1 3 1 -5 1 4\n2 2 6\n1 4 -2\n2 2 6\n2 3 4\n\nOutput:\n5\n2\n0",
+  "examples": [
+    {
+      "input": "8 4\n1 2 -1 3 1 -5 1 4\n2 2 6\n1 4 -2\n2 2 6\n2 3 4",
+      "output": "5\n2\n0",
+      "explanation": "For [2,6]: prefixes from index 2 give sums {2,1,4,5,0}, max is 5.\nAfter setting index 4 to -2: subarray [2,6] prefixes {2,1,0,1,-4}, max is 2.\nFor [3,4]: values {-1,-2}, best prefix allows empty => 0."
+    }
+  ],
+  "constraints": [
+    "1 <= n, q <= 2 * 10^5",
+    "-10^9 <= x_i, u <= 10^9",
+    "1 <= k <= n",
+    "1 <= a <= b <= n",
+    "Time Limit: 1.00 s",
+    "Memory Limit: 512 MB"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "For array [3, -2, 4] and range [1,3], what is the maximum prefix sum in [1,3] (empty prefix allowed)?",
+      "diagram": "Array index: 1  2   3\nValues:      3 -2   4\nPrefixes of [1,3]: sum([1,1])=3, sum([1,2])=1, sum([1,3])=5, empty=0",
+      "options": [
+        {
+          "label": "5",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "7",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Prefix sums are {3,1,5} plus empty=0. The maximum is 5.",
+      "wrongExplanations": {
+        "2": "7 is the total of all elements, not a prefix starting at 1 with length ≤ 3."
+      },
+      "hint": "Compute sums of [1,1], [1,2], [1,3], and consider empty 0.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "Array [-3, -2] and range [1,2]. What is the maximum prefix sum?",
+      "diagram": "Prefixes: sum([1,1])=-3, sum([1,2])=-5, empty=0",
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "-3",
+          "isCode": false
+        },
+        {
+          "label": "-5",
+          "isCode": false
+        },
+        {
+          "label": "-2",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Empty prefix is allowed, so the maximum is 0 when all prefixes are negative.",
+      "wrongExplanations": {
+        "1": "You must consider the empty prefix; -3 is not the maximum when 0 is allowed."
+      },
+      "hint": "If all values are negative, taking no elements is best.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "Array [1, -2, 3], range [1,3]. Then apply update: set position 2 to 5. What are the maximum prefix sums before and after the update?",
+      "diagram": "Before: prefixes {1, -1, 2}, empty=0 => max=2\nAfter: array [1,5,3], prefixes {1,6,9}, empty=0 => max=9",
+      "options": [
+        {
+          "label": "Before 2, After 9",
+          "isCode": false
+        },
+        {
+          "label": "Before 1, After 6",
+          "isCode": false
+        },
+        {
+          "label": "Before 2, After 6",
+          "isCode": false
+        },
+        {
+          "label": "Before 0, After 9",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Compute prefix sums and take the max with 0. Update at position 2 changes all prefixes that include index 2 and beyond.",
+      "wrongExplanations": {
+        "2": "After update, the third prefix is 9, not 6."
+      },
+      "hint": "Recompute the prefix sums after the update.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "Array [5, -1, -2, 10], query range [1,3]. Which value is the maximum prefix sum in [1,3]?",
+      "diagram": "Prefixes of [1,3]: {5, 4, 2}, empty=0; total of [1,3] is 2",
+      "options": [
+        {
+          "label": "2 (sum of [1,3])",
+          "isCode": false
+        },
+        {
+          "label": "5 (sum of [1,1])",
+          "isCode": false
+        },
+        {
+          "label": "4 (sum of [1,2])",
+          "isCode": false
+        },
+        {
+          "label": "0 (empty)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Maximum over {0,5,4,2} is 5. The total of the full range is not necessarily the maximum prefix.",
+      "wrongExplanations": {
+        "0": "The sum of the entire range is a candidate but not necessarily the maximum prefix."
+      },
+      "hint": "Compare all prefixes starting at index a, including empty.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Understanding the Problem",
+      "questionText": "If we compute each type-2 query by scanning [a,b] and accumulating prefix sums, what is the worst-case number of operations over all q queries?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n + q)",
+          "isCode": false
+        },
+        {
+          "label": "O(nq)",
+          "isCode": false
+        },
+        {
+          "label": "O(q log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log q)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Scanning [a,b] per query is O(|b-a+1|). Over q queries, worst case is O(nq), which is too slow for 2e5.",
+      "wrongExplanations": {
+        "0": "O(n + q) assumes constant time per query, which is not true for scanning."
+      },
+      "hint": "Each query may scan ~n elements in the worst case.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "Can a single precomputed prefix sum array of the whole array answer maximum prefix sums for any [a,b] efficiently after updates?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, because we can always use S[i] - S[a-1] to get any prefix of [a,b]",
+          "isCode": false
+        },
+        {
+          "label": "No, because updates invalidate precomputed sums and rebuilding per update is too slow",
+          "isCode": false
+        },
+        {
+          "label": "Yes, if we store both prefix and suffix sums globally",
+          "isCode": false
+        },
+        {
+          "label": "Yes, because the maximum prefix sum depends only on b",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "A fixed prefix sum array breaks when values change. Recomputing after each update costs O(n) per update, which is too slow.",
+      "wrongExplanations": {
+        "0": "S[i] - S[a-1] gives a prefix sum but finding the maximum quickly still needs scanning without structure."
+      },
+      "hint": "Think about point updates and dynamic ranges.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "To answer maximum prefix sums over intervals and support point updates, what should each interval store?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Only total sum of the interval",
+          "isCode": false
+        },
+        {
+          "label": "Total sum and maximum prefix sum of the interval",
+          "isCode": false
+        },
+        {
+          "label": "Only maximum single element of the interval",
+          "isCode": false
+        },
+        {
+          "label": "Total sum, maximum prefix sum, and minimum prefix sum",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "We need total sum to combine adjacent intervals, and maximum prefix sum for the query result.",
+      "wrongExplanations": {
+        "0": "Total sum alone can't reconstruct the best prefix.",
+        "3": "Minimum prefix sum isn't needed to combine for maximum prefix."
+      },
+      "hint": "What two values let you compute the best prefix of a concatenation?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Exploring Approaches",
+      "questionText": "If we have adjacent intervals L and R. L stores (sum_L, bestPrefix_L), R stores (sum_R, bestPrefix_R). What is bestPrefix of L+R?",
+      "diagram": "L: (sum_L, pref_L)\nR: (sum_R, pref_R)\nCombined: ?",
+      "options": [
+        {
+          "label": "max(pref_L, pref_R)",
+          "isCode": false
+        },
+        {
+          "label": "max(pref_L, sum_L + pref_R)",
+          "isCode": false
+        },
+        {
+          "label": "sum_L + sum_R",
+          "isCode": false
+        },
+        {
+          "label": "pref_L + pref_R",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "A prefix of L+R is either entirely in L or spans into R: max(pref_L, sum_L + pref_R).",
+      "wrongExplanations": {
+        "0": "A prefix can cross into R; pref_R alone ignores the starting point in L."
+      },
+      "hint": "Consider prefixes that stop in L vs those that continue into R.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "For a single-element interval with value v, what should bestPrefix be when empty prefixes are allowed?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "v",
+          "isCode": false
+        },
+        {
+          "label": "max(0, v)",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "min(0, v)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "You may choose empty (0) or take the element v. So bestPrefix = max(0, v).",
+      "wrongExplanations": {
+        "0": "If v < 0, taking nothing (0) is better."
+      },
+      "hint": "Compare taking the single value vs taking none.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "When combining intervals for a query, what should you return for a completely non-overlapping segment?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "(0, 0) for (sum, bestPrefix)",
+          "isCode": false
+        },
+        {
+          "label": "(0, -inf) to avoid affecting max",
+          "isCode": false
+        },
+        {
+          "label": "None",
+          "isCode": false
+        },
+        {
+          "label": "(inf, inf)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Returning sum=0 and bestPrefix=0 is neutral for combining: max(pref_L, sum_L + 0) is correct.",
+      "wrongExplanations": {
+        "1": "Negative infinity complicates arithmetic and isn't needed when empty prefixes are allowed."
+      },
+      "hint": "It should not change the combined sum or best prefix.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "Check combining on a small example. Left L=[3, -1] => sum_L=2, pref_L=3. Right R=[2, -4] => sum_R=-2, pref_R=2. What is bestPrefix of L+R?",
+      "diagram": "L: sum=2, pref=3\nR: sum=-2, pref=2\nCombined pref = max(3, 2 + 2) = 4",
+      "options": [
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Use max(pref_L, sum_L + pref_R) = max(3, 4) = 4.",
+      "wrongExplanations": {
+        "0": "3 is only the best entirely within L; it ignores prefixes that extend into R."
+      },
+      "hint": "Apply the formula explicitly.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "All negative case: L=[-5] => sum_L=-5, pref_L=0. R=[-1,-2] => sum_R=-3, pref_R=0. Combined bestPrefix?",
+      "diagram": "Combined pref = max(0, -5 + 0) = 0",
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "-3",
+          "isCode": false
+        },
+        {
+          "label": "-5",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Empty prefix remains optimal: max(0, -5 + 0) = 0.",
+      "wrongExplanations": {
+        "1": "Best prefix can't be negative when empty is allowed."
+      },
+      "hint": "Empty prefix is allowed.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "All positive case: L=[2,3] => sum_L=5, pref_L=5. R=[4] => sum_R=4, pref_R=4. Combined bestPrefix?",
+      "diagram": "Combined pref = max(5, 5 + 4) = 9",
+      "options": [
+        {
+          "label": "5",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "9",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Prefix of the concatenation is the full sum when all are positive: 9.",
+      "wrongExplanations": {
+        "0": "A prefix extending into R is larger here."
+      },
+      "hint": "All positive values make longer prefixes better.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Building the Idea",
+      "questionText": "After changing one element v at position k, how should ancestor intervals be updated?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Only recompute total sums on the path to the root",
+          "isCode": false
+        },
+        {
+          "label": "Recompute both total sum and best prefix using the same combine rule on the path to the root",
+          "isCode": false
+        },
+        {
+          "label": "Recompute only best prefix on the path to the root",
+          "isCode": false
+        },
+        {
+          "label": "Rebuild the whole structure from scratch",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Both values may change. Use the same combine rule when merging updated children.",
+      "wrongExplanations": {
+        "0": "Best prefix depends on sums and can change too."
+      },
+      "hint": "Merging logic doesn't change due to an update.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Choose a fast input helper suitable for up to 2e5 lines.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\ndef readints():\n    return list(map(int, sys.stdin.buffer.readline().split()))",
+          "isCode": true
+        },
+        {
+          "label": "def readints():\n    return input().split()",
+          "isCode": true
+        },
+        {
+          "label": "import sys\ndef readints():\n    return sys.stdin.buffer.read().split()",
+          "isCode": true
+        },
+        {
+          "label": "import sys\ndef readints():\n    return sys.stdin.readline().split()",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Using sys.stdin.buffer.readline with int conversion is fast and returns integers. Others either return strings or read all input at once.",
+      "wrongExplanations": {
+        "1": "Returns strings; also input() can be slow for many lines.",
+        "3": "Returns strings and may not handle large inputs efficiently."
+      },
+      "hint": "Use buffered reading and convert to ints.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\ndef readints():\n    return list(map(int, sys.stdin.buffer.readline().split()))",
+      "codeLabel": "Fast input"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Read n, q and the array values.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "n, q = readints()\narr = readints()",
+          "isCode": true
+        },
+        {
+          "label": "n, q = map(int, sys.stdin.buffer.readline())\narr = readints()",
+          "isCode": true
+        },
+        {
+          "label": "n = int(sys.stdin.buffer.readline())\nq = int(sys.stdin.buffer.readline())\narr = readints()",
+          "isCode": true
+        },
+        {
+          "label": "n, q = readints()\narr = [int(sys.stdin.buffer.readline()) for _ in range(n)]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "First line has both n and q; second line has all n values. Other variants mismatch the input format.",
+      "wrongExplanations": {
+        "2": "Each line doesn't contain a single integer here; the first line has two.",
+        "3": "Values are provided on one line, not n separate lines."
+      },
+      "hint": "Both n and q are on the same line.",
+      "isCodeBuilding": true,
+      "codeSnippet": "n, q = readints()\narr = readints()",
+      "codeLabel": "Read input"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Allocate arrays to store interval totals and best prefixes.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "size = 4 * max(1, n)\nsumt = [0] * size\npreft = [0] * size",
+          "isCode": true
+        },
+        {
+          "label": "sumt = [0] * n\npreft = [0] * n",
+          "isCode": true
+        },
+        {
+          "label": "size = 2 * n\nsumt = [0] * size\npreft = [0] * size",
+          "isCode": true
+        },
+        {
+          "label": "sumt = {}\npreft = {}",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Use a size large enough to store interval information. 4*n is a safe bound.",
+      "wrongExplanations": {
+        "1": "Too small; intervals need more capacity than n.",
+        "3": "Dictionaries are unnecessary and slower here."
+      },
+      "hint": "Ensure capacity for combining intervals.",
+      "isCodeBuilding": true,
+      "codeSnippet": "size = 4 * max(1, n)\nsumt = [0] * size\npreft = [0] * size",
+      "codeLabel": "Allocate storage"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Implement the combine function for two adjacent intervals.",
+      "diagram": "Given (ls, lp) and (rs, rp), compute (s, p)",
+      "options": [
+        {
+          "label": "def combine(ls, lp, rs, rp):\n    s = ls + rs\n    p = max(lp, rs)\n    return s, p",
+          "isCode": true
+        },
+        {
+          "label": "def combine(ls, lp, rs, rp):\n    s = ls + rs\n    p = lp if lp >= ls + rp else ls + rp\n    return s, p",
+          "isCode": true
+        },
+        {
+          "label": "def combine(ls, lp, rs, rp):\n    s = ls + rs\n    p = lp + rp\n    return s, p",
+          "isCode": true
+        },
+        {
+          "label": "def combine(ls, lp, rs, rp):\n    s = ls + rs\n    p = rs if rs >= lp else lp\n    return s, p",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Best prefix of concatenation is max(lp, ls + rp). Other formulas ignore crossing prefixes or add unrelated values.",
+      "wrongExplanations": {
+        "0": "rp must be weighted by ls for crossing prefixes.",
+        "2": "Adding lp and rp doesn't represent any valid prefix."
+      },
+      "hint": "Consider prefixes that end in L vs extend into R.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def combine(ls, lp, rs, rp):\n    s = ls + rs\n    p = lp if lp >= ls + rp else ls + rp\n    return s, p",
+      "codeLabel": "Combine intervals"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Build the interval structure over arr (1-indexed indices for intervals).",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def build(idx, l, r):\n    if l == r:\n        v = arr[l - 1]\n        sumt[idx] = v\n        preft[idx] = v if v > 0 else 0\n        return\n    m = (l + r) // 2\n    build(idx * 2, l, m)\n    build(idx * 2 + 1, m + 1, r)\n    s, p = combine(sumt[idx * 2], preft[idx * 2], sumt[idx * 2 + 1], preft[idx * 2 + 1])\n    sumt[idx] = s\n    preft[idx] = p",
+          "isCode": true
+        },
+        {
+          "label": "def build(idx, l, r):\n    if l == r:\n        v = arr[l]\n        sumt[idx] = v\n        preft[idx] = v\n        return\n    m = (l + r) // 2\n    build(idx * 2, l, m)\n    build(idx * 2 + 1, m + 1, r)\n    sumt[idx] = sumt[idx * 2] + sumt[idx * 2 + 1]\n    preft[idx] = max(preft[idx * 2], preft[idx * 2 + 1])",
+          "isCode": true
+        },
+        {
+          "label": "def build(idx, l, r):\n    if l == r:\n        sumt[idx] = arr[l - 1]\n        preft[idx] = 0\n        return\n    m = (l + r) // 2\n    build(idx * 2, l, m)\n    build(idx * 2 + 1, m + 1, r)\n    sumt[idx], preft[idx] = combine(sumt[idx * 2], preft[idx * 2], sumt[idx * 2 + 1], preft[idx * 2 + 1])",
+          "isCode": true
+        },
+        {
+          "label": "def build(idx, l, r):\n    if l > r:\n        return\n    v = arr[l - 1]\n    sumt[idx] = v\n    preft[idx] = max(0, v)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Use 1-indexed interval bounds; leaf uses arr[l-1] and bestPrefix=max(0,v). Internal nodes combine child segments.",
+      "wrongExplanations": {
+        "1": "Leaf indexing is off (arr[l]), and bestPrefix must allow empty (max(0,v)); parent prefix isn't max of child prefixes.",
+        "3": "This never recurses; it assigns leaf values wrongly for non-leaf intervals."
+      },
+      "hint": "Leaf: handle max(0,v). Internal: combine children.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def build(idx, l, r):\n    if l == r:\n        v = arr[l - 1]\n        sumt[idx] = v\n        preft[idx] = v if v > 0 else 0\n        return\n    m = (l + r) // 2\n    build(idx * 2, l, m)\n    build(idx * 2 + 1, m + 1, r)\n    s, p = combine(sumt[idx * 2], preft[idx * 2], sumt[idx * 2 + 1], preft[idx * 2 + 1])\n    sumt[idx] = s\n    preft[idx] = p",
+      "codeLabel": "Build structure"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Implement point update at position pos to val.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def update(idx, l, r, pos, val):\n    if l == r:\n        sumt[idx] = val\n        preft[idx] = val if val > 0 else 0\n        return\n    m = (l + r) // 2\n    if pos <= m:\n        update(idx * 2, l, m, pos, val)\n    else:\n        update(idx * 2 + 1, m + 1, r, pos, val)\n    s, p = combine(sumt[idx * 2], preft[idx * 2], sumt[idx * 2 + 1], preft[idx * 2 + 1])\n    sumt[idx] = s\n    preft[idx] = p",
+          "isCode": true
+        },
+        {
+          "label": "def update(idx, l, r, pos, val):\n    if l == r:\n        sumt[idx] = val\n        preft[idx] = val\n        return\n    m = (l + r) // 2\n    if pos < m:\n        update(idx * 2, l, m, pos, val)\n    else:\n        update(idx * 2 + 1, m + 1, r, pos, val)\n    sumt[idx] = sumt[idx * 2] + sumt[idx * 2 + 1]\n    preft[idx] = max(preft[idx * 2], preft[idx * 2 + 1])",
+          "isCode": true
+        },
+        {
+          "label": "def update(idx, l, r, pos, val):\n    if l == r:\n        sumt[idx] += val\n        preft[idx] = max(0, sumt[idx])\n        return\n    m = (l + r) // 2\n    update(idx * 2, l, m, pos, val)\n    update(idx * 2 + 1, m + 1, r, pos, val)\n    s, p = combine(sumt[idx * 2], preft[idx * 2], sumt[idx * 2 + 1], preft[idx * 2 + 1])\n    sumt[idx] = s\n    preft[idx] = p",
+          "isCode": true
+        },
+        {
+          "label": "def update(idx, l, r, pos, val):\n    while l != r:\n        m = (l + r) // 2\n        if pos <= m:\n            idx = idx * 2\n            r = m\n        else:\n            idx = idx * 2 + 1\n            l = m + 1\n    sumt[idx] = val\n    preft[idx] = max(0, val)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Set leaf sum and bestPrefix with empty allowed, then recombine upwards using the same rule.",
+      "wrongExplanations": {
+        "1": "Leaf bestPrefix must allow empty; parent best isn't just max of child bests.",
+        "3": "This never recomputes ancestors after updating the leaf."
+      },
+      "hint": "After updating the leaf, recompute ancestors via the combine function.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def update(idx, l, r, pos, val):\n    if l == r:\n        sumt[idx] = val\n        preft[idx] = val if val > 0 else 0\n        return\n    m = (l + r) // 2\n    if pos <= m:\n        update(idx * 2, l, m, pos, val)\n    else:\n        update(idx * 2 + 1, m + 1, r, pos, val)\n    s, p = combine(sumt[idx * 2], preft[idx * 2], sumt[idx * 2 + 1], preft[idx * 2 + 1])\n    sumt[idx] = s\n    preft[idx] = p",
+      "codeLabel": "Point update"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "Implement the range query function that returns (sum, bestPrefix) for [ql, qr].",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def query(idx, l, r, ql, qr):\n    if qr < l or r < ql:\n        return 0, 0\n    if ql <= l and r <= qr:\n        return sumt[idx], preft[idx]\n    m = (l + r) // 2\n    ls, lp = query(idx * 2, l, m, ql, qr)\n    rs, rp = query(idx * 2 + 1, m + 1, r, ql, qr)\n    s = ls + rs\n    p = lp if lp >= ls + rp else ls + rp\n    return s, p",
+          "isCode": true
+        },
+        {
+          "label": "def query(idx, l, r, ql, qr):\n    if qr < l or r < ql:\n        return None\n    if ql <= l and r <= qr:\n        return preft[idx]\n    m = (l + r) // 2\n    lp = query(idx * 2, l, m, ql, qr)\n    rp = query(idx * 2 + 1, m + 1, r, ql, qr)\n    return max(lp, rp)",
+          "isCode": true
+        },
+        {
+          "label": "def query(idx, l, r, ql, qr):\n    if ql <= l and r <= qr:\n        return sumt[idx], preft[idx]\n    m = (l + r) // 2\n    if qr <= m:\n        return query(idx * 2, l, m, ql, qr)\n    elif ql > m:\n        return query(idx * 2 + 1, m + 1, r, ql, qr)\n    else:\n        return sumt[idx], preft[idx]",
+          "isCode": true
+        },
+        {
+          "label": "def query(idx, l, r, ql, qr):\n    if ql <= l and r <= qr:\n        return sumt[idx]\n    m = (l + r) // 2\n    return query(idx * 2, l, m, ql, qr) + query(idx * 2 + 1, m + 1, r, ql, qr)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Handle non-overlap with neutral (0,0); fully covered segments return stored pair; partial overlap combines child results.",
+      "wrongExplanations": {
+        "1": "Returning None breaks combination; also you must return both sum and bestPrefix for partial overlaps.",
+        "2": "For partial overlap across m, you must combine children, not just return current node."
+      },
+      "hint": "Combine child results for partial overlap using the same rule.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def query(idx, l, r, ql, qr):\n    if qr < l or r < ql:\n        return 0, 0\n    if ql <= l and r <= qr:\n        return sumt[idx], preft[idx]\n    m = (l + r) // 2\n    ls, lp = query(idx * 2, l, m, ql, qr)\n    rs, rp = query(idx * 2 + 1, m + 1, r, ql, qr)\n    s = ls + rs\n    p = lp if lp >= ls + rp else ls + rp\n    return s, p",
+      "codeLabel": "Range query"
+    },
+    {
+      "id": "q22",
+      "phase": "Writing the Code",
+      "questionText": "Write the main logic to build and process q queries, printing answers for type 2.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "build(1, 1, n)\nout_lines = []\nfor _ in range(q):\n    t, a, b = readints()\n    if t == 1:\n        update(1, 1, n, a, b)\n    else:\n        _, p = query(1, 1, n, a, b)\n        out_lines.append(str(p))\nsys.stdout.write(\"\\n\".join(out_lines))",
+          "isCode": true
+        },
+        {
+          "label": "out_lines = []\nfor _ in range(q):\n    t, a, b = readints()\n    if t == 2:\n        update(1, 1, n, a, b)\n    else:\n        _, p = query(1, 1, n, a, b)\n        out_lines.append(str(p))\nprint(\"\\n\".join(out_lines))",
+          "isCode": true
+        },
+        {
+          "label": "build(1, 1, n)\nfor _ in range(q):\n    t, a, b = readints()\n    if t == 1:\n        update(1, 1, n, a, b)\n    else:\n        print(query(1, 1, n, a, b))",
+          "isCode": true
+        },
+        {
+          "label": "build(1, 1, n)\nout_lines = []\nfor _ in range(q):\n    a, b, t = readints()\n    if t == 1:\n        update(1, 1, n, a, b)\n    else:\n        _, p = query(1, 1, n, a, b)\n        out_lines.append(str(p))\nsys.stdout.write(\"\\n\".join(out_lines))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Build first. For type 1, update k=a to u=b; for type 2, query [a,b] and collect p. Then print all answers.",
+      "wrongExplanations": {
+        "2": "query returns a pair; printing it directly prints a tuple, not the required number.",
+        "3": "Parsing order is wrong; t must be first."
+      },
+      "hint": "Type 1: update; Type 2: query and append the best prefix.",
+      "isCodeBuilding": true,
+      "codeSnippet": "build(1, 1, n)\nout_lines = []\nfor _ in range(q):\n    t, a, b = readints()\n    if t == 1:\n        update(1, 1, n, a, b)\n    else:\n        _, p = query(1, 1, n, a, b)\n        out_lines.append(str(p))\nsys.stdout.write(\"\\n\".join(out_lines))",
+      "codeLabel": "Main loop"
+    },
+    {
+      "id": "q23",
+      "phase": "Verifying the Solution",
+      "questionText": "Using the initial array [1, 2, -1, 3, 1, -5, 1, 4], what does the code print for query 2 2 6?",
+      "diagram": "Subarray [2..6] = [2, -1, 3, 1, -5]\nPrefix sums from index 2: {2, 1, 4, 5, 0}",
+      "options": [
+        {
+          "label": "5",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "6",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The best prefix in [2,6] is 5.",
+      "wrongExplanations": {
+        "1": "4 is sum of [2,4], but [2,5] gives 5 before dropping on -5."
+      },
+      "hint": "Trace prefixes and pick the maximum with empty allowed.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Verifying the Solution",
+      "questionText": "After update 1 4 -2 (set index 4 to -2), what does the code print for query 2 2 6?",
+      "diagram": "Subarray [2..6] now [2, -1, -2, 1, -5]\nPrefixes: {2, 1, -1, 0, -5}",
+      "options": [
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The best prefix becomes 2 (just the first element of the range).",
+      "wrongExplanations": {
+        "2": "Empty yields 0, but a positive 2 exists."
+      },
+      "hint": "Re-evaluate prefixes after the update.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Verifying the Solution",
+      "questionText": "With the same updated array, what does the code print for query 2 3 4?",
+      "diagram": "Subarray [3..4] = [-1, -2]\nPrefixes: {-1, -3}, empty=0",
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "-1",
+          "isCode": false
+        },
+        {
+          "label": "-3",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Empty prefix is allowed and is best when all prefixes are negative.",
+      "wrongExplanations": {
+        "1": "Must consider empty; negatives aren't optimal."
+      },
+      "hint": "All prefixes are negative; empty wins.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the time per update and per range query with this interval structure?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(1) per update, O(1) per query",
+          "isCode": false
+        },
+        {
+          "label": "O(log n) per update, O(log n) per query",
+          "isCode": false
+        },
+        {
+          "label": "O(n) per update, O(1) per query",
+          "isCode": false
+        },
+        {
+          "label": "O(1) per update, O(n) per query",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Both update and query touch O(log n) intervals due to hierarchical intervals.",
+      "wrongExplanations": {
+        "0": "Constant time would require direct access to answers without combining intervals."
+      },
+      "hint": "How many interval nodes do you visit from root to leaf?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q27",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the space complexity of the interval arrays sumt and preft?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(1)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "We store a constant number of values per interval node; total nodes scale linearly with n.",
+      "wrongExplanations": {
+        "0": "Space is not just the height; we store all interval nodes."
+      },
+      "hint": "Total number of nodes in the interval hierarchy is proportional to n.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q28",
+      "phase": "Analyzing Complexity",
+      "questionText": "Which edge cases must be handled correctly?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "All negative subarray should return 0 due to empty prefix; single-element ranges; zero values",
+          "isCode": false
+        },
+        {
+          "label": "Only large positive values; everything else is handled automatically",
+          "isCode": false
+        },
+        {
+          "label": "Only empty arrays; others are trivial",
+          "isCode": false
+        },
+        {
+          "label": "Non-integer inputs",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Empty prefix affects negative ranges; single-element intervals rely on max(0,v); zeros must be handled in comparisons.",
+      "wrongExplanations": {
+        "1": "Large positives are easy; pitfalls are with negatives and zeros."
+      },
+      "hint": "Think about negatives and small ranges.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\ndef readints():\n    return list(map(int, sys.stdin.buffer.readline().split()))",
+    "n, q = readints()\narr = readints()",
+    "size = 4 * max(1, n)\nsumt = [0] * size\npreft = [0] * size",
+    "def combine(ls, lp, rs, rp):\n    s = ls + rs\n    p = lp if lp >= ls + rp else ls + rp\n    return s, p",
+    "def build(idx, l, r):\n    if l == r:\n        v = arr[l - 1]\n        sumt[idx] = v\n        preft[idx] = v if v > 0 else 0\n        return\n    m = (l + r) // 2\n    build(idx * 2, l, m)\n    build(idx * 2 + 1, m + 1, r)\n    s, p = combine(sumt[idx * 2], preft[idx * 2], sumt[idx * 2 + 1], preft[idx * 2 + 1])\n    sumt[idx] = s\n    preft[idx] = p",
+    "def update(idx, l, r, pos, val):\n    if l == r:\n        sumt[idx] = val\n        preft[idx] = val if val > 0 else 0\n        return\n    m = (l + r) // 2\n    if pos <= m:\n        update(idx * 2, l, m, pos, val)\n    else:\n        update(idx * 2 + 1, m + 1, r, pos, val)\n    s, p = combine(sumt[idx * 2], preft[idx * 2], sumt[idx * 2 + 1], preft[idx * 2 + 1])\n    sumt[idx] = s\n    preft[idx] = p",
+    "def query(idx, l, r, ql, qr):\n    if qr < l or r < ql:\n        return 0, 0\n    if ql <= l and r <= qr:\n        return sumt[idx], preft[idx]\n    m = (l + r) // 2\n    ls, lp = query(idx * 2, l, m, ql, qr)\n    rs, rp = query(idx * 2 + 1, m + 1, r, ql, qr)\n    s = ls + rs\n    p = lp if lp >= ls + rp else ls + rp\n    return s, p",
+    "build(1, 1, n)\nout_lines = []\nfor _ in range(q):\n    t, a, b = readints()\n    if t == 1:\n        update(1, 1, n, a, b)\n    else:\n        _, p = query(1, 1, n, a, b)\n        out_lines.append(str(p))\nsys.stdout.write(\"\\n\".join(out_lines))"
+  ],
+  "reasoningChain": [
+    {
+      "question": "What exactly is the 'maximum prefix sum' in a range when empty prefixes are allowed?",
+      "insight": "It is max over 0 and sums of prefixes starting at a: sum(a..a), sum(a..a+1), ..., sum(a..b)."
+    },
+    {
+      "question": "Why is scanning each query's range too slow at given limits?",
+      "insight": "Worst-case O(n) per query yields O(nq) overall, exceeding the time limit."
+    },
+    {
+      "question": "What values must each interval keep to allow combining results across adjacent ranges?",
+      "insight": "Each interval needs its total sum and the maximum prefix sum."
+    },
+    {
+      "question": "How do you combine two adjacent intervals' summaries to get the parent interval's best prefix?",
+      "insight": "Best prefix is max(pref_L, sum_L + pref_R); total sum is sum_L + sum_R."
+    },
+    {
+      "question": "What is the correct base case for a single element and the identity for non-overlap?",
+      "insight": "Leaf bestPrefix is max(0, v). Non-overlap returns (0,0) as neutral for combining."
+    },
+    {
+      "question": "How do updates affect stored interval values?",
+      "insight": "Update the leaf and recompute ancestors using the same combine rule, maintaining sum and bestPrefix."
+    },
+    {
+      "question": "How to implement query and update efficiently?",
+      "insight": "Use a hierarchical interval structure with functions build, update, and query visiting O(log n) nodes."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1443,
+    "output_tokens": 17217,
+    "input_cost": 0.001804,
+    "output_cost": 0.17217,
+    "total_cost": 0.173974
+  }
+}

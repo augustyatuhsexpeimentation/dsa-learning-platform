@@ -1,0 +1,953 @@
+{
+  "id": "mail-delivery-euler-route",
+  "title": "Mail Delivery",
+  "difficulty": "intermediate",
+  "tags": [
+    "graph"
+  ],
+  "estimatedMinutes": 45,
+  "language": "python",
+  "description": "Your task is to deliver mail to the inhabitants of a city. Find a route whose starting and ending point are the post office (crossing 1), and that goes through every street exactly once.\n\nInput:\n- First line: two integers n and m — number of crossings and streets.\n- Next m lines: two integers a b — there is a two-way street between crossings a and b.\n\nOutput:\n- Print all the crossings on the route in the order you visit them.\n- If there is no such route, print \"IMPOSSIBLE\".\n\nNotes:\n- Crossings are numbered 1..n.\n- There is at most one street between two crossings.\n- Every street connects two different crossings.\n- The route must start and end at crossing 1.",
+  "examples": [
+    {
+      "input": "6 8\n1 2\n1 3\n2 3\n2 4\n2 6\n3 5\n3 6\n4 5\n",
+      "output": "1 2 6 3 2 4 5 3 1",
+      "explanation": "One valid route that starts and ends at 1 and uses each street exactly once."
+    }
+  ],
+  "constraints": [
+    "2 <= n <= 1e5",
+    "1 <= m <= 2e5",
+    "1 <= a, b <= n",
+    "Undirected simple graph (no self-loops, at most one street per pair)"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "What exactly must be used \"exactly once\" in the route?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Every crossing must be visited at most once.",
+          "isCode": false
+        },
+        {
+          "label": "Every street must be used exactly once; crossings may repeat.",
+          "isCode": false
+        },
+        {
+          "label": "Every street and every crossing must be used exactly once.",
+          "isCode": false
+        },
+        {
+          "label": "The route must start at 1 but may end anywhere.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "We must traverse each street once. Crossings can appear multiple times. The route must start and end at crossing 1.",
+      "wrongExplanations": {
+        "0": "You can revisit crossings; the restriction is on streets.",
+        "2": "Crossings may repeat; only streets are constrained."
+      },
+      "hint": "Focus on the term \"street\" in the statement.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "Consider a triangle: streets (1-2), (2-3), (3-1). Which of the following is a valid output route?",
+      "diagram": "1---2\n \\ /\n  3",
+      "options": [
+        {
+          "label": "1 2 3 1",
+          "isCode": false
+        },
+        {
+          "label": "1 2 1 3 1",
+          "isCode": false
+        },
+        {
+          "label": "1 3 2",
+          "isCode": false
+        },
+        {
+          "label": "1 2 3 2",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "1-2-3-1 uses each street exactly once and starts/ends at 1. The others either reuse a street, miss a street, or don’t end at 1.",
+      "wrongExplanations": {
+        "1": "1-2-1 repeats street (1-2) twice.",
+        "2": "Route must end at 1 and include all streets."
+      },
+      "hint": "Does the route use each street once and end at 1?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "Single street case: n=2, m=1 with street (1-2). Is there a valid route starting and ending at 1 that uses the street exactly once?",
+      "diagram": "1---2",
+      "options": [
+        {
+          "label": "Yes: 1 2 1",
+          "isCode": false
+        },
+        {
+          "label": "Yes: 1",
+          "isCode": false
+        },
+        {
+          "label": "No, IMPOSSIBLE",
+          "isCode": false
+        },
+        {
+          "label": "Yes: 1 1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Using the only street exactly once moves to 2, but you cannot return to 1 without reusing it. So it's impossible.",
+      "wrongExplanations": {
+        "0": "1-2-1 uses the street twice, violating the rule.",
+        "1": "Printing just 1 would use no streets."
+      },
+      "hint": "You must traverse the single street exactly once and still return to 1.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "Which statement must be true for any route that starts and ends at the same crossing and uses every street exactly once?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Every crossing has even degree (number of incident streets).",
+          "isCode": false
+        },
+        {
+          "label": "Only crossing 1 must have even degree.",
+          "isCode": false
+        },
+        {
+          "label": "At most two crossings have odd degree.",
+          "isCode": false
+        },
+        {
+          "label": "The sum of all degrees is even.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Starting and ending at the same crossing means each visit contributes a pair of enter/exit per crossing, so all degrees must be even.",
+      "wrongExplanations": {
+        "2": "This would allow an open route; we need a closed one.",
+        "3": "This is always true in any undirected graph, not a specific condition."
+      },
+      "hint": "Think about entering and leaving a crossing along different streets.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Exploring Approaches",
+      "questionText": "Why is brute-forcing all possible orders of streets infeasible for m up to 2·10^5?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "It takes about O(2^m) time, which is too slow.",
+          "isCode": false
+        },
+        {
+          "label": "It takes about O(m^2) time, which is too slow.",
+          "isCode": false
+        },
+        {
+          "label": "It takes about O(m log m) time, which is too slow.",
+          "isCode": false
+        },
+        {
+          "label": "It takes about O(m!) time, which is far too slow.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 3,
+      "explanation": "Enumerating orders of using m streets is on the order of m!, which is astronomically large.",
+      "wrongExplanations": {
+        "0": "2^m is also huge, but ordering m distinct items is m! possibilities.",
+        "1": "m^2 or m log m would be feasible; ordering is much worse."
+      },
+      "hint": "How many permutations are there of m distinct items?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "Before constructing any route, which set of quick checks is necessary to rule out impossible cases?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Graph is connected when ignoring node 1 and all degrees are odd.",
+          "isCode": false
+        },
+        {
+          "label": "Only check that node 1's degree is even and m>0.",
+          "isCode": false
+        },
+        {
+          "label": "All crossings have even degree; every crossing with nonzero degree is reachable from 1; if m>0 then deg(1)>0.",
+          "isCode": false
+        },
+        {
+          "label": "No need for checks; just attempt to construct a route.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Even degrees and reachability from 1 are necessary; also if there are streets, node 1 must have nonzero degree.",
+      "wrongExplanations": {
+        "1": "Other nodes’ degrees matter; and reachability matters.",
+        "3": "Without checks, construction may fail or produce partial routes."
+      },
+      "hint": "Combine degree parity and the ability to reach all streets from 1.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "How should we verify reachability from crossing 1 before constructing the route?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Check if every crossing is reachable from 1, even if it has degree 0.",
+          "isCode": false
+        },
+        {
+          "label": "Traverse from 1 following streets; ensure every crossing with degree > 0 is visited.",
+          "isCode": false
+        },
+        {
+          "label": "Check if the number of connected components equals 1 for all crossings.",
+          "isCode": false
+        },
+        {
+          "label": "Only ensure streets adjacent to 1 are reachable.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Only crossings with degree > 0 must be in the same component as 1. Crossings with degree 0 are irrelevant.",
+      "wrongExplanations": {
+        "0": "Degree-0 crossings do not affect street traversal.",
+        "2": "Components of isolated nodes do not matter if they have no streets."
+      },
+      "hint": "Which crossings actually have streets to traverse?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Building the Idea",
+      "questionText": "When constructing the route by always taking an unused street from the current crossing, what should we do when stuck (no unused streets from the current crossing)?",
+      "diagram": "stack: [..., v]\nno unused edges from v",
+      "options": [
+        {
+          "label": "Pop the current crossing from a stack and append it to the output path.",
+          "isCode": false
+        },
+        {
+          "label": "Restart from crossing 1 and discard progress.",
+          "isCode": false
+        },
+        {
+          "label": "Mark the current crossing as used and continue elsewhere.",
+          "isCode": false
+        },
+        {
+          "label": "Remove the last two crossings from the output path.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Backtrack by popping and recording crossings; this stitches partial tours together into a full route.",
+      "wrongExplanations": {
+        "2": "We need to avoid reusing streets, not crossings.",
+        "1": "We should not discard progress; we incorporate it into the route."
+      },
+      "hint": "Think of postponing the current dead-end crossing until later in the final route.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "What must we mark as \"used\" to ensure each street is taken exactly once?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Crossings, because once visited they should not be revisited.",
+          "isCode": false
+        },
+        {
+          "label": "Directions of streets (u->v and v->u) separately.",
+          "isCode": false
+        },
+        {
+          "label": "Streets themselves (unique per undirected street).",
+          "isCode": false
+        },
+        {
+          "label": "Pairs of consecutive crossings in the route.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "We must mark undirected streets used exactly once; crossings can repeat, and directions are not distinct here.",
+      "wrongExplanations": {
+        "0": "Crossings may be visited multiple times; the constraint is on streets.",
+        "1": "The street is undirected; mark it once for both directions."
+      },
+      "hint": "Undirected streets should be counted once regardless of direction.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "How can we represent streets in adjacency lists so that marking a street as used affects both endpoints?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Store only neighbor crossings in each adjacency list.",
+          "isCode": false
+        },
+        {
+          "label": "Store (neighbor, unique_street_id) pairs in each adjacency list.",
+          "isCode": false
+        },
+        {
+          "label": "Store a boolean per crossing saying if any incident street is used.",
+          "isCode": false
+        },
+        {
+          "label": "Store both neighbors and mark by crossing degrees.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "A unique id per street lets us share the same \"used\" flag from either endpoint.",
+      "wrongExplanations": {
+        "0": "Then we cannot link back to a single used flag for both ends.",
+        "2": "We need per-street tracking, not per-crossing."
+      },
+      "hint": "You want a single boolean per street id.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "What's an efficient way to skip over used streets in adjacency lists during construction?",
+      "diagram": "adj[v] is a stack-like list of (to, id)\nkeep popping while top is used",
+      "options": [
+        {
+          "label": "Scan the entire list from the beginning each time to find an unused street.",
+          "isCode": false
+        },
+        {
+          "label": "Maintain a pointer per crossing but never remove used streets.",
+          "isCode": false
+        },
+        {
+          "label": "Sort adjacency lists by street id and binary search for unused streets.",
+          "isCode": false
+        },
+        {
+          "label": "Treat each adjacency list like a stack: pop used streets from the end until you find an unused one.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 3,
+      "explanation": "Popping used streets amortizes to O(1) per street; scanning or binary search is unnecessary overhead.",
+      "wrongExplanations": {
+        "0": "Scanning can be O(deg(v)) each time and too slow overall.",
+        "2": "Sorting and binary searching do not help identify used streets faster than popping."
+      },
+      "hint": "Aim for removing each street at most once from each endpoint.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "If there are m streets and a valid closed route exists, how many crossings should be printed in the final output sequence?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "m + 1",
+          "isCode": false
+        },
+        {
+          "label": "m",
+          "isCode": false
+        },
+        {
+          "label": "Depends on n only",
+          "isCode": false
+        },
+        {
+          "label": "At most m",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "A route using each street exactly once traverses m edges and thus visits m+1 crossings, starting and ending at 1.",
+      "wrongExplanations": {
+        "1": "m crossings implies only m-1 edges.",
+        "3": "A closed route needs m+1 crossings for m edges."
+      },
+      "hint": "Each street adds one more crossing to the sequence.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "When you append crossings upon backtracking, the collected sequence is reversed relative to the traversal. What should you output?",
+      "diagram": "collected during pops -> reverse to get the route order",
+      "options": [
+        {
+          "label": "Output the collected sequence as is.",
+          "isCode": false
+        },
+        {
+          "label": "Sort the collected sequence.",
+          "isCode": false
+        },
+        {
+          "label": "Rotate the sequence so it starts at 1.",
+          "isCode": false
+        },
+        {
+          "label": "Reverse the collected sequence before printing.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 3,
+      "explanation": "Backtracking appends crossings in reverse order of the final route, so reverse once at the end.",
+      "wrongExplanations": {
+        "0": "Without reversing, the order is backward.",
+        "1": "Sorting destroys route structure; it’s not about values."
+      },
+      "hint": "Think of a stack: last-in appended first; reverse at the end.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Writing the Code",
+      "questionText": "Read the input efficiently and start the program structure.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\n\ndef main():\n    data = list(map(int, sys.stdin.read().strip().split()))\n    if not data:\n        return\n    n, m = data[0], data[1]",
+          "isCode": true
+        },
+        {
+          "label": "def main():\n    n, m = map(int, input().split())\n    data = [int(x) for x in sys.stdin.read().split()]",
+          "isCode": true
+        },
+        {
+          "label": "import sys\n\ndef main():\n    line = sys.stdin.readline().split()\n    n, m = int(line[0]), int(line[1])\n    data = []",
+          "isCode": true
+        },
+        {
+          "label": "def main():\n    data = sys.stdin.read().split()\n    n = int(data[1]); m = int(data[0])",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We read all integers once for speed and parse n, m first. Handle empty input safely.",
+      "wrongExplanations": {
+        "1": "Mixing input() and sys.stdin.read() can misalign reads and is unnecessary.",
+        "3": "n and m parsed in the wrong order."
+      },
+      "hint": "Use sys.stdin.read() to get all integers at once.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\n\ndef main():\n    data = list(map(int, sys.stdin.read().strip().split()))\n    if not data:\n        return\n    n, m = data[0], data[1]",
+      "codeLabel": "Read input and header"
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Build adjacency lists with (neighbor, street_id) and degrees.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "adj = [[] for _ in range(n)]\ndeg = [0]*n\nidx = 2\nfor i in range(m):\n    a = data[idx]; b = data[idx+1]; idx += 2\n    adj[a-1].append((b-1, i))\n    adj[b-1].append((a-1, i))\n    deg[a-1] += 1; deg[b-1] += 1",
+          "isCode": true
+        },
+        {
+          "label": "adj = [[] for _ in range(n+1)]\ndeg = [0]*(n+1)\nidx = 2\nfor i in range(m):\n    a = data[idx]; b = data[idx+1]; idx += 2\n    adj[a].append((b, i))\n    adj[b].append((a, i))\n    deg[a] += 1; deg[b] += 1",
+          "isCode": true
+        },
+        {
+          "label": "adj = [[] for _ in range(n+1)]\ndeg = [0]*(n+1)\nfor i in range(2, 2*m, 2):\n    a = data[i]; b = data[i+1]\n    adj[a].append((b, i))\n    adj[b].append((a, i))\n    deg[a] += 1; deg[b] += 1",
+          "isCode": true
+        },
+        {
+          "label": "adj = [[] for _ in range(n+1)]\ndeg = [0]*(n+1)\nidx = 2\nfor i in range(m):\n    a = data[idx]; b = data[idx+1]; idx += 2\n    adj[a].append(b)\n    adj[b].append(a)\n    deg[a] += 1; deg[b] += 1",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "We use 1-based crossings and store (neighbor, street_id) to share a used flag per street.",
+      "wrongExplanations": {
+        "0": "Mixes 0-based nodes with 1-based input; later code assumes 1-based.",
+        "3": "Without street ids, we can’t mark an undirected street used from both ends."
+      },
+      "hint": "Keep node indices 1..n and attach a unique id to each street.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    adj = [[] for _ in range(n+1)]\n    deg = [0]*(n+1)\n    idx = 2\n    for i in range(m):\n        a = data[idx]; b = data[idx+1]; idx += 2\n        adj[a].append((b, i))\n        adj[b].append((a, i))\n        deg[a] += 1; deg[b] += 1",
+      "codeLabel": "Build adjacency and degrees"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Insert the degree parity check to quickly reject impossible cases.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "for u in range(1, n+1):\n    if deg[u] % 2 != 0:\n        print(\"IMPOSSIBLE\")\n        return",
+          "isCode": true
+        },
+        {
+          "label": "if deg[1] % 2 != 0:\n    print(\"IMPOSSIBLE\")\n    return",
+          "isCode": true
+        },
+        {
+          "label": "for u in range(1, n+1):\n    if deg[u] == 0:\n        print(\"IMPOSSIBLE\")\n        return",
+          "isCode": true
+        },
+        {
+          "label": "if sum(deg) % 2 != 0:\n    print(\"IMPOSSIBLE\")\n    return",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "All crossings must have even degree for a closed route. Checking only node 1 or sum of degrees is insufficient.",
+      "wrongExplanations": {
+        "1": "All nodes’ degrees matter, not just node 1.",
+        "3": "Sum of degrees is always even in undirected graphs."
+      },
+      "hint": "Parity must hold at every crossing.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    for u in range(1, n+1):\n        if deg[u] % 2 != 0:\n            print(\"IMPOSSIBLE\")\n            return",
+      "codeLabel": "Degree parity check"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Add the trivial and connectivity checks relative to crossing 1.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "if m == 0:\n    print(1)\n    return\nif deg[1] == 0:\n    print(\"IMPOSSIBLE\")\n    return\nvis = [False]*(n+1)\nstack = [1]\nvis[1] = True\nwhile stack:\n    v = stack.pop()\n    for (to, _) in adj[v]:\n        if not vis[to]:\n            vis[to] = True\n            stack.append(to)\nfor u in range(1, n+1):\n    if deg[u] > 0 and not vis[u]:\n        print(\"IMPOSSIBLE\")\n        return",
+          "isCode": true
+        },
+        {
+          "label": "if m == 0:\n    print(1)\n    return\nvis = [False]*(n+1)\nstack = [next(i for i in range(1, n+1) if deg[i]>0)]\nwhile stack:\n    v = stack.pop()\n    for (to, _) in adj[v]:\n        if not vis[to]:\n            vis[to] = True\n            stack.append(to)\n# no further checks",
+          "isCode": true
+        },
+        {
+          "label": "if deg[1] == 0 and m == 0:\n    print(1)\n    return\nvis = [False]*(n+1)\nfor u in range(1, n+1):\n    for (to, _) in adj[u]:\n        vis[to] = True\n# assume connected",
+          "isCode": true
+        },
+        {
+          "label": "vis = [False]*(n+1)\nstack = [1]\nvis[1] = True\nwhile stack:\n    v = stack.pop()\n    for (to, _) in adj[v]:\n        stack.append(to)\n# no IMPOSSIBLE checks",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "If there are no streets, print 1. If there are streets but deg(1)=0, impossible. Then ensure all crossings with deg>0 are reachable from 1.",
+      "wrongExplanations": {
+        "1": "Starting connectivity from any node ignores the requirement to start at 1.",
+        "3": "Missing checks and not guarding against revisits can loop indefinitely."
+      },
+      "hint": "Start reachability from crossing 1 and ignore crossings with degree 0.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    if m == 0:\n        print(1)\n        return\n    if deg[1] == 0:\n        print(\"IMPOSSIBLE\")\n        return\n    vis = [False]*(n+1)\n    stack = [1]\n    vis[1] = True\n    while stack:\n        v = stack.pop()\n        for (to, _) in adj[v]:\n            if not vis[to]:\n                vis[to] = True\n                stack.append(to)\n    for u in range(1, n+1):\n        if deg[u] > 0 and not vis[u]:\n            print(\"IMPOSSIBLE\")\n            return",
+      "codeLabel": "Connectivity from 1"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Initialize data structures for route construction.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "used = [False]*m\nst = [1]\nroute = []",
+          "isCode": true
+        },
+        {
+          "label": "used = set()\nst = []\nroute = [1]",
+          "isCode": true
+        },
+        {
+          "label": "used = [False]*n\nst = [1]\nroute = []",
+          "isCode": true
+        },
+        {
+          "label": "used = [False]*m\nst = []\nroute = []",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need a used-flag per street, a stack initialized with 1, and an empty route list.",
+      "wrongExplanations": {
+        "2": "We need one flag per street, not per crossing.",
+        "3": "Start the stack at crossing 1."
+      },
+      "hint": "Number of streets is m; the traversal starts from 1.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    used = [False]*m\n    st = [1]\n    route = []",
+      "codeLabel": "Initialize traversal"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Fill in the main loop to traverse unused streets and backtrack when stuck.",
+      "diagram": "While stack not empty:\n- v = top of stack\n- pop used edges from adj[v]\n- if an unused edge exists: mark used, push neighbor\n- else: append v to route and pop stack",
+      "options": [
+        {
+          "label": "while st:\n    v = st[-1]\n    if adj[v]:\n        to, eid = adj[v].pop(0)\n        if not used[eid]:\n            used[eid] = True\n            st.append(to)\n    else:\n        route.append(v)\n        st.pop()",
+          "isCode": true
+        },
+        {
+          "label": "while st:\n    v = st[-1]\n    while adj[v] and used[adj[v][-1][1]]:\n        adj[v].pop()\n    if adj[v]:\n        to, eid = adj[v].pop()\n        if not used[eid]:\n            used[eid] = True\n            st.append(to)\n    else:\n        route.append(v)\n        st.pop()",
+          "isCode": true
+        },
+        {
+          "label": "while st:\n    v = st[-1]\n    if adj[v] and not used[adj[v][-1][1]]:\n        to, eid = adj[v][-1]\n        used[eid] = True\n        st.append(to)\n    else:\n        route.append(v)\n        st.pop()",
+          "isCode": true
+        },
+        {
+          "label": "while st:\n    v = st[-1]\n    if adj[v]:\n        to, eid = adj[v].pop()\n        used[v] = True\n        st.append(to)\n    else:\n        route.append(v)\n        st.pop()",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Pop used streets from the end, then pop one unused street, mark it used, and continue; otherwise, backtrack by appending v and popping the stack.",
+      "wrongExplanations": {
+        "0": "Popping from the front is O(deg) and does not skip used streets.",
+        "3": "Marking used by crossing index is incorrect; we need per-street used flags."
+      },
+      "hint": "Use adj[v] as a stack and skip already used streets with a while loop.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    while st:\n        v = st[-1]\n        while adj[v] and used[adj[v][-1][1]]:\n            adj[v].pop()\n        if adj[v]:\n            to, eid = adj[v].pop()\n            if not used[eid]:\n                used[eid] = True\n                st.append(to)\n        else:\n            route.append(v)\n            st.pop()",
+      "codeLabel": "Traverse and backtrack"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "After constructing the route by backtracking, validate and output it.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "if len(route) != m+1:\n    print(\"IMPOSSIBLE\")\n    return\npath = route[::-1]\nif path[0] != 1 or path[-1] != 1:\n    print(\"IMPOSSIBLE\")\n    return\nprint(*path)",
+          "isCode": true
+        },
+        {
+          "label": "path = route\nif len(path) < m+1:\n    print(\"IMPOSSIBLE\")\nelse:\n    print(*path)",
+          "isCode": true
+        },
+        {
+          "label": "if len(route) == m:\n    print(\"IMPOSSIBLE\")\n    return\nprint(*route)",
+          "isCode": true
+        },
+        {
+          "label": "path = route[::-1]\nprint(*path)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "A valid closed route must have length m+1 and start/end at 1; reverse the collected list before printing.",
+      "wrongExplanations": {
+        "1": "We must ensure exactly m+1 crossings and correct endpoints.",
+        "3": "Missing validation may print a partial or incorrect route."
+      },
+      "hint": "Validate both length and endpoints; remember to reverse.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    if len(route) != m+1:\n        print(\"IMPOSSIBLE\")\n        return\n    path = route[::-1]\n    if path[0] != 1 or path[-1] != 1:\n        print(\"IMPOSSIBLE\")\n        return\n    print(*path)",
+      "codeLabel": "Validate and print"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "Finish the program with the standard entry point.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "if __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "main()",
+          "isCode": true
+        },
+        {
+          "label": "if __name__ == \"main\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "def __main__():\n    main()",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Using the standard Python guard ensures main() runs when executed as a script.",
+      "wrongExplanations": {
+        "1": "Calling main() unguarded can break some judges or imports.",
+        "3": "There is no special __main__ function definition in Python."
+      },
+      "hint": "Use the common Python idiom to invoke main.",
+      "isCodeBuilding": true,
+      "codeSnippet": "\nif __name__ == \"__main__\":\n    main()",
+      "codeLabel": "Entry point"
+    },
+    {
+      "id": "q22",
+      "phase": "Verifying the Solution",
+      "questionText": "Suppose after traversal you collected route with length m (not m+1) but all used flags are True. What should your program do?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Print the route anyway; flags being True is enough.",
+          "isCode": false
+        },
+        {
+          "label": "Print IMPOSSIBLE.",
+          "isCode": false
+        },
+        {
+          "label": "Append the start crossing to the route and print.",
+          "isCode": false
+        },
+        {
+          "label": "Try to reconstruct missing crossings by revisiting edges.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "A valid route must have m+1 crossings. If not, something failed; declare IMPOSSIBLE.",
+      "wrongExplanations": {
+        "0": "Length m indicates you missed a crossing (or edge accounting).",
+        "2": "Appended crossings without edges would break the rules."
+      },
+      "hint": "The output sequence must reflect exactly m edges.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q23",
+      "phase": "Verifying the Solution",
+      "questionText": "If some crossing (not necessarily 1) has an odd degree but all are reachable from 1, what will the program output?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "A valid route that starts and ends at 1.",
+          "isCode": false
+        },
+        {
+          "label": "IMPOSSIBLE.",
+          "isCode": false
+        },
+        {
+          "label": "A route that starts at 1 and ends at a different crossing.",
+          "isCode": false
+        },
+        {
+          "label": "It will loop indefinitely.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "The degree parity check rejects the input immediately as IMPOSSIBLE.",
+      "wrongExplanations": {
+        "0": "Odd degree crossings prevent a closed route using each street once.",
+        "2": "Problem requires start and end at 1; code rejects odd degrees."
+      },
+      "hint": "Recall the early degree parity check.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Verifying the Solution",
+      "questionText": "If m > 0 but deg(1) = 0 (there are streets elsewhere but none at crossing 1), what happens?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "The program constructs a route starting from another crossing.",
+          "isCode": false
+        },
+        {
+          "label": "The program prints IMPOSSIBLE.",
+          "isCode": false
+        },
+        {
+          "label": "The program prints just \"1\".",
+          "isCode": false
+        },
+        {
+          "label": "The program tries to connect components by reusing streets.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "With streets present elsewhere and none at 1, a required route from 1 cannot exist; code prints IMPOSSIBLE.",
+      "wrongExplanations": {
+        "0": "The route must start at 1.",
+        "3": "Reusing streets would violate the requirement."
+      },
+      "hint": "Start must be 1 and there must be incident streets to leave and return.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the time complexity of the implemented solution in terms of n crossings and m streets?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n + m)",
+          "isCode": false
+        },
+        {
+          "label": "O(m log m)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(m^2)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Building adjacency and traversing/removing each street at most a constant number of times yields O(n + m).",
+      "wrongExplanations": {
+        "1": "We don't sort or use logarithmic operations per edge.",
+        "3": "Each street is processed a constant number of times, not m times."
+      },
+      "hint": "Each street is considered and removed at most once per endpoint.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the space complexity of the solution?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n + m)",
+          "isCode": false
+        },
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(m log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(1)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Adjacency lists store 2 entries per street, plus arrays of size n and m; overall O(n + m).",
+      "wrongExplanations": {
+        "1": "We store all streets explicitly.",
+        "3": "We need to store the graph and route, not constant space."
+      },
+      "hint": "Consider adjacency lists, degree array, visited flags, and route.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\n\ndef main():\n    data = list(map(int, sys.stdin.read().strip().split()))\n    if not data:\n        return\n    n, m = data[0], data[1]",
+    "    adj = [[] for _ in range(n+1)]\n    deg = [0]*(n+1)\n    idx = 2\n    for i in range(m):\n        a = data[idx]; b = data[idx+1]; idx += 2\n        adj[a].append((b, i))\n        adj[b].append((a, i))\n        deg[a] += 1; deg[b] += 1",
+    "    for u in range(1, n+1):\n        if deg[u] % 2 != 0:\n            print(\"IMPOSSIBLE\")\n            return",
+    "    if m == 0:\n        print(1)\n        return\n    if deg[1] == 0:\n        print(\"IMPOSSIBLE\")\n        return\n    vis = [False]*(n+1)\n    stack = [1]\n    vis[1] = True\n    while stack:\n        v = stack.pop()\n        for (to, _) in adj[v]:\n            if not vis[to]:\n                vis[to] = True\n                stack.append(to)\n    for u in range(1, n+1):\n        if deg[u] > 0 and not vis[u]:\n            print(\"IMPOSSIBLE\")\n            return",
+    "    used = [False]*m\n    st = [1]\n    route = []",
+    "    while st:\n        v = st[-1]\n        while adj[v] and used[adj[v][-1][1]]:\n            adj[v].pop()\n        if adj[v]:\n            to, eid = adj[v].pop()\n            if not used[eid]:\n                used[eid] = True\n                st.append(to)\n        else:\n            route.append(v)\n            st.pop()",
+    "    if len(route) != m+1:\n        print(\"IMPOSSIBLE\")\n        return\n    path = route[::-1]\n    if path[0] != 1 or path[-1] != 1:\n        print(\"IMPOSSIBLE\")\n        return\n    print(*path)",
+    "\nif __name__ == \"__main__\":\n    main()"
+  ],
+  "reasoningChain": [
+    {
+      "question": "What exactly must be used exactly once, and can crossings repeat?",
+      "insight": "The constraint is on streets: each must be used once; crossings may repeat; start and end at 1."
+    },
+    {
+      "question": "What necessary conditions make such a closed route possible?",
+      "insight": "All crossings must have even degree; all crossings with deg>0 must be reachable from 1; if there are streets, deg(1)>0."
+    },
+    {
+      "question": "How to ensure using each street once while allowing revisits to crossings?",
+      "insight": "Track streets with unique ids in adjacency; mark each street as used once regardless of direction."
+    },
+    {
+      "question": "How to construct the route iteratively?",
+      "insight": "Walk along any unused street from current crossing, removing/marking it; when stuck, backtrack by popping and recording crossings to build the route."
+    },
+    {
+      "question": "How to implement efficient skipping of used streets?",
+      "insight": "Treat adjacency lists like stacks and pop used entries; each street is popped at most twice overall."
+    },
+    {
+      "question": "What to do with the collected sequence and how to validate?",
+      "insight": "Reverse the collected list to get the route order; ensure length is m+1 and both ends are 1; otherwise print IMPOSSIBLE."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1484,
+    "output_tokens": 16122,
+    "input_cost": 0.001855,
+    "output_cost": 0.16122,
+    "total_cost": 0.163075
+  }
+}

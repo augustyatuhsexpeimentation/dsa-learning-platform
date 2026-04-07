@@ -1,0 +1,949 @@
+{
+  "id": "investigation-shortest-paths-mcq",
+  "title": "Investigation",
+  "difficulty": "intermediate",
+  "tags": [
+    "graph"
+  ],
+  "estimatedMinutes": 60,
+  "language": "python",
+  "description": "You are going to travel from Syrjälä to Lehmälä by plane. You would like to find answers to the following questions:\n\n1. what is the minimum price of such a route?\n2. how many minimum-price routes are there? (modulo 10^9+7)\n3. what is the minimum number of flights in a minimum-price route?\n4. what is the maximum number of flights in a minimum-price route?\n\nThe first input line contains two integers n and m: the number of cities and the number of flights. The cities are numbered 1,2,\\ldots,n. City 1 is Syrjälä, and city n is Lehmälä.\n\nAfter this, there are m lines describing the flights. Each line has three integers a, b, and c: there is a flight from city a to city b with price c. All flights are one-way flights.\n\nYou may assume that there is a route from Syrjälä to Lehmälä.\n\nOutput four integers according to the problem statement.",
+  "examples": [
+    {
+      "input": "4 5\n1 4 5\n1 2 4\n2 4 5\n1 3 2\n3 4 3\n",
+      "output": "5 2 1 2\n",
+      "explanation": "Minimum price is 5 via 1->4 or 1->3->4. There are 2 such routes. Among them, min flights is 1 (direct), max flights is 2 (via 3)."
+    }
+  ],
+  "constraints": [
+    "1 <= n <= 1e5",
+    "1 <= m <= 2e5",
+    "1 <= a,b <= n",
+    "1 <= c <= 1e9",
+    "There is at least one route from 1 to n"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "Using the given example:\n\nn=4, m=5\n1 4 5\n1 2 4\n2 4 5\n1 3 2\n3 4 3\n\nWhat is the minimum total price from city 1 to city 4?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "5",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "7",
+          "isCode": false
+        },
+        {
+          "label": "9",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Costs: direct 1->4 is 5; 1->3->4 is 2+3=5; 1->2->4 is 4+5=9. Minimum is 5.",
+      "wrongExplanations": {
+        "1": "4 is the price to reach city 2, not city 4.",
+        "3": "9 is the path 1->2->4, but it is not minimal."
+      },
+      "hint": "List all paths 1->4 and compare sum of prices.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "In the same example, how many routes achieve the minimum total price from city 1 to city 4?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Minimum price 5 is achieved by 1->4 and 1->3->4, so there are 2 routes.",
+      "wrongExplanations": {
+        "1": "There are not three minimum-price routes; 1->2->4 has cost 9.",
+        "0": "There is at least one route; the problem guarantees reachability."
+      },
+      "hint": "Count only those routes whose total price equals the minimum.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "Among the minimum-price routes in the example, what is the minimum number of flights used?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Route 1->4 has 1 flight and is minimum-price, so the minimum number of flights is 1.",
+      "wrongExplanations": {
+        "0": "0 flights would mean staying at city 1; we need to reach city 4.",
+        "2": "2 is possible (1->3->4) but not the minimum among minimum-price routes."
+      },
+      "hint": "Check the direct flight option.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "Among the minimum-price routes in the example, what is the maximum number of flights used?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Two minimum-price routes: 1 flight (1->4) and 2 flights (1->3->4). Maximum among them is 2.",
+      "wrongExplanations": {
+        "1": "1 is the minimum, not the maximum among minimum-price routes."
+      },
+      "hint": "List the minimum-price routes and compare their lengths (in flights).",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Exploring Approaches",
+      "questionText": "n can be up to 1e5 and m up to 2e5. Would checking all possible routes from 1 to n be feasible?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, since m ≤ 2e5, enumerating all routes is linear.",
+          "isCode": false
+        },
+        {
+          "label": "No, the number of routes can be exponential in n and m.",
+          "isCode": false
+        },
+        {
+          "label": "Yes, as long as we stop early when costs exceed the current best.",
+          "isCode": false
+        },
+        {
+          "label": "Only if the graph has no cycles; otherwise still feasible.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "The number of distinct routes can explode (especially with cycles). We need a more efficient method.",
+      "wrongExplanations": {
+        "0": "Enumerating routes is not linear in m.",
+        "2": "Stopping early rarely prevents exponential growth in worst cases."
+      },
+      "hint": "Consider graphs with cycles: do routes remain bounded?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "All flight prices are positive. If a city currently has the smallest known total price among unprocessed cities, can any route discovered later reduce it?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, because there might be a detour with fewer flights.",
+          "isCode": false
+        },
+        {
+          "label": "No, any further route to it would add positive cost and be ≥ current best.",
+          "isCode": false
+        },
+        {
+          "label": "Yes, if there are multiple edges between two cities.",
+          "isCode": false
+        },
+        {
+          "label": "Only if we revisit cities; then it can decrease.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "With positive costs, any alternative path adds positive amounts; the smallest known total price is final.",
+      "wrongExplanations": {
+        "0": "Number of flights doesn't lower cost; costs are positive.",
+        "2": "Parallel edges don't change the positivity property."
+      },
+      "hint": "Think about adding any extra edge cost to a path.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "To expand cities in increasing order of current known total price efficiently, what data structure should we use to pick the next city?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "A queue that processes cities in arrival order.",
+          "isCode": false
+        },
+        {
+          "label": "A stack that processes the most recently discovered city.",
+          "isCode": false
+        },
+        {
+          "label": "A min-priority queue keyed by current known total price.",
+          "isCode": false
+        },
+        {
+          "label": "A set that stores all cities; pick any city arbitrarily.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "A min-priority queue efficiently retrieves the city with the smallest current known price.",
+      "wrongExplanations": {
+        "0": "A plain queue doesn't guarantee smallest price first.",
+        "1": "A stack also doesn't order by smallest known price."
+      },
+      "hint": "We need to always pick the city with minimal current best price.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Building the Idea",
+      "questionText": "What information should we maintain for each city to answer all four questions?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "- dist: minimum total price\n- ways: number of minimum-price routes\n- minFlights: minimum flights in minimum-price routes\n- maxFlights: maximum flights in minimum-price routes",
+          "isCode": false
+        },
+        {
+          "label": "- dist: minimum total price\n- parents: one parent city\n- visited: bool\n- depth: number of flights",
+          "isCode": false
+        },
+        {
+          "label": "- totalWays: number of all routes\n- minFlights: minimum flights over all routes\n- maxFlights: maximum flights over all routes\n- lastEdgeCost: last edge cost used",
+          "isCode": false
+        },
+        {
+          "label": "- dist: maximum total price\n- ways: number of all routes\n- minFlights: minimum flights in all routes\n- maxFlights: maximum flights in all routes",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need shortest price, count of shortest routes, and min/max flights among those shortest routes.",
+      "wrongExplanations": {
+        "1": "One parent city isn't enough for counting routes or min/max flights along minimal-price routes.",
+        "2": "We only care about routes with minimum total price, not all routes."
+      },
+      "hint": "Focus only on routes that achieve the minimum total price.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "How should we initialize these arrays before processing?\n- dist, ways, minFlights, maxFlights for all cities 1..n",
+      "diagram": null,
+      "options": [
+        {
+          "label": "dist[1]=0, ways[1]=1, minFlights[1]=0, maxFlights[1]=0; for others: dist=INF, ways=0, minFlights=INF, maxFlights=-INF",
+          "isCode": false
+        },
+        {
+          "label": "dist[1]=0; for others dist=INF; ways for all = 1; minFlights and maxFlights for all = 0",
+          "isCode": false
+        },
+        {
+          "label": "dist all = 0; ways all = 0 except ways[1]=1; minFlights all = 0; maxFlights all = 0",
+          "isCode": false
+        },
+        {
+          "label": "dist[1]=0, ways[1]=1; for others: dist=INF, ways=0; minFlights=0, maxFlights=0",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Only source has distance 0 and 1 way. For others: unknown distance (INF), zero ways; minFlights large, maxFlights very small to allow min/max updates.",
+      "wrongExplanations": {
+        "3": "min/max flights for unknown cities should not start at 0; they must be extreme sentinels."
+      },
+      "hint": "Use sentinel extremes for min/max when no path is known yet.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "Suppose we pop city u with current best dist[u], and examine edge u->v with cost w. If nd = dist[u] + w < dist[v], how should we update v?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "dist[v]=nd; ways[v]=ways[u]; minFlights[v]=minFlights[u]+1; maxFlights[v]=maxFlights[u]+1; push v",
+          "isCode": false
+        },
+        {
+          "label": "dist[v]=nd; ways[v]=(ways[v]+ways[u])%MOD; minFlights[v]=minFlights[u]+1; maxFlights[v]=maxFlights[u]+1; push v",
+          "isCode": false
+        },
+        {
+          "label": "dist[v]=nd; ways[v]=1; minFlights[v]=1; maxFlights[v]=1; push v",
+          "isCode": false
+        },
+        {
+          "label": "dist[v]=nd; ways[v]=ways[u]; minFlights[v]=minFlights[u]; maxFlights[v]=maxFlights[u]; do not push v",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "A strictly better price means all shortest routes to v come from u now: copy ways and set flights +1, then push v.",
+      "wrongExplanations": {
+        "1": "When improving, we replace v's shortest routes, not add to them.",
+        "3": "Flights must increase by 1 and we must push v to propagate improvement."
+      },
+      "hint": "A better price replaces previous info at v.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "If nd = dist[u] + w equals dist[v], how should we merge information for v?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "ways[v] = (ways[v] + ways[u]) % MOD; minFlights[v] = min(minFlights[v], minFlights[u]+1); maxFlights[v] = max(maxFlights[v], maxFlights[u]+1)",
+          "isCode": false
+        },
+        {
+          "label": "ways[v] = ways[u]; minFlights[v] = minFlights[u]+1; maxFlights[v] = maxFlights[u]+1",
+          "isCode": false
+        },
+        {
+          "label": "ways[v] = (ways[v] + ways[u]) % MOD; minFlights[v] = max(minFlights[v], minFlights[u]+1); maxFlights[v] = min(maxFlights[v], maxFlights[u]+1)",
+          "isCode": false
+        },
+        {
+          "label": "ways[v] = (ways[v] + ways[u]) % MOD; minFlights[v] = minFlights[u]; maxFlights[v] = maxFlights[u]",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Equal price means new shortest routes are added; update counts and take min/max flights accordingly (+1 for this edge).",
+      "wrongExplanations": {
+        "1": "We shouldn't overwrite counts on ties; we aggregate.",
+        "2": "min and max directions are swapped incorrectly."
+      },
+      "hint": "On equal prices, aggregate counts and adjust flights by +1.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "When nd equals dist[v] (a tie), do we need to push (nd, v) into the priority queue for correctness?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "No. Since dist[v] didn't improve, v is already scheduled (or processed) for nd; updating ways/min/max is enough.",
+          "isCode": false
+        },
+        {
+          "label": "Yes. Otherwise we might miss routes that go through v.",
+          "isCode": false
+        },
+        {
+          "label": "Only if ways[v] changed due to modulo.",
+          "isCode": false
+        },
+        {
+          "label": "Only when minFlights decreased; otherwise skip.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "A tie doesn't change dist[v], so an earlier improvement already queued v. Re-queuing is unnecessary for correctness.",
+      "wrongExplanations": {
+        "1": "Routes through v will be considered when v is processed at its current dist.",
+        "3": "The queue ordering is by dist only; minFlights doesn’t affect scheduling."
+      },
+      "hint": "The queue is keyed by dist; ties don't change that key.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "How should we apply modulo when updating ways[v] to avoid overflow and keep the count within bounds?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "ways[v] = (ways[v] + ways[u]) % MOD every time we add counts",
+          "isCode": false
+        },
+        {
+          "label": "Apply modulo only once at the very end when printing",
+          "isCode": false
+        },
+        {
+          "label": "ways[v] = ways[v] + ways[u] without modulo; Python integers don't overflow",
+          "isCode": false
+        },
+        {
+          "label": "ways[v] = (ways[v] * ways[u]) % MOD",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Take modulo on each addition to keep values bounded and correct by the required modulus.",
+      "wrongExplanations": {
+        "1": "Counts can grow huge; applying only at the end is inefficient and risky.",
+        "3": "Counts combine by addition, not multiplication."
+      },
+      "hint": "How do you combine counts of independent shortest routes?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Writing the Code",
+      "questionText": "Start with imports, function header, and reading n, m efficiently.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\nimport heapq\n\ndef main():\n    data = sys.stdin.buffer.read().split()\n    it = iter(data)\n    n = int(next(it)); m = int(next(it))",
+          "isCode": true
+        },
+        {
+          "label": "import sys\n\ndef main():\n    n, m = map(int, sys.stdin.read())\nimport heapq",
+          "isCode": true
+        },
+        {
+          "label": "import heapq\n\ndef main():\n    n, m = map(int, input().split())",
+          "isCode": true
+        },
+        {
+          "label": "def main():\n    import sys, heapq\n    it = sys.stdin.read().split()\n    n = next(it); m = next(it)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We import heapq, define main, and read all tokens as bytes split, converting to int via an iterator.",
+      "wrongExplanations": {
+        "1": "sys.stdin.read() returns a string; map over it without split iterates characters.",
+        "3": "next(it) returns strings here; without int() conversion later, types are wrong."
+      },
+      "hint": "Use sys.stdin.buffer.read().split() and an iterator to parse ints fast.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\nimport heapq\n\ndef main():\n    data = sys.stdin.buffer.read().split()\n    it = iter(data)\n    n = int(next(it)); m = int(next(it))",
+      "codeLabel": "Imports and input header"
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Build the adjacency list from the input flights.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    adj = [[] for _ in range(n+1)]\n    for _ in range(m):\n        a = int(next(it)); b = int(next(it)); c = int(next(it))\n        adj[a].append((b, c))",
+          "isCode": true
+        },
+        {
+          "label": "    adj = [[] for _ in range(n)]\n    for _ in range(m):\n        a = int(next(it)); b = int(next(it)); c = int(next(it))\n        adj[b].append((a, c))",
+          "isCode": true
+        },
+        {
+          "label": "    adj = {}\n    for _ in range(m):\n        a = int(next(it)); b = int(next(it)); c = int(next(it))\n        adj.setdefault(a, []).append(c)",
+          "isCode": true
+        },
+        {
+          "label": "    adj = [[] for _ in range(n+1)]\n    for _ in range(m):\n        a = next(it); b = next(it); c = next(it)\n        adj[a].append((b, c))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need 1-indexed adjacency with directed edges (a -> b) storing (neighbor, cost).",
+      "wrongExplanations": {
+        "1": "Indexing is off by one and edges are reversed.",
+        "3": "Tokens are bytes; without int() conversion, indices are not usable."
+      },
+      "hint": "Cities are 1..n and flights are one-way from a to b.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    adj = [[] for _ in range(n+1)]\n    for _ in range(m):\n        a = int(next(it)); b = int(next(it)); c = int(next(it))\n        adj[a].append((b, c))",
+      "codeLabel": "Adjacency list"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Initialize constants and per-city arrays.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    INF = 10**18\n    MOD = 10**9 + 7\n    dist = [INF]*(n+1)\n    ways = [0]*(n+1)\n    minf = [10**18]*(n+1)\n    maxf = [-10**18]*(n+1)",
+          "isCode": true
+        },
+        {
+          "label": "    INF = 10**9\n    MOD = 10**9 + 7\n    dist = [0]*(n+1)\n    ways = [1]*(n+1)\n    minf = [0]*(n+1)\n    maxf = [0]*(n+1)",
+          "isCode": true
+        },
+        {
+          "label": "    INF = float('inf')\n    MOD = 10**9 + 7\n    dist = [0.0]*(n+1)\n    ways = [0]*(n+1)\n    minf = [0]*(n+1)\n    maxf = [0]*(n+1)",
+          "isCode": true
+        },
+        {
+          "label": "    INF = 10**18\n    MOD = 10**9 + 7\n    dist = [INF]*n\n    ways = [0]*n\n    minf = [10**18]*n\n    maxf = [-10**18]*n",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Use large integer INF, correct MOD, and 1-indexed arrays with appropriate sentinels.",
+      "wrongExplanations": {
+        "3": "Arrays must be size n+1 because cities are 1..n."
+      },
+      "hint": "Prepare arrays for indices 1..n and integer arithmetic.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    INF = 10**18\n    MOD = 10**9 + 7\n    dist = [INF]*(n+1)\n    ways = [0]*(n+1)\n    minf = [10**18]*(n+1)\n    maxf = [-10**18]*(n+1)",
+      "codeLabel": "Constants and arrays"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Initialize source city values and the priority queue.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    dist[1] = 0\n    ways[1] = 1\n    minf[1] = 0\n    maxf[1] = 0\n    heap = [(0, 1)]",
+          "isCode": true
+        },
+        {
+          "label": "    dist[1] = 0\n    ways[1] = 0\n    minf[1] = 1\n    maxf[1] = 1\n    heap = []",
+          "isCode": true
+        },
+        {
+          "label": "    dist[0] = 0\n    ways[0] = 1\n    minf[0] = 0\n    maxf[0] = 0\n    heap = [(0, 0)]",
+          "isCode": true
+        },
+        {
+          "label": "    dist[1] = 0\n    ways[1] = 1\n    minf[1] = 0\n    maxf[1] = 0\n    heap = []",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Start from city 1 with distance 0, 1 way, and empty flights; push (0,1) to process.",
+      "wrongExplanations": {
+        "1": "ways[1] must be 1 initially; also the queue must contain (0,1).",
+        "2": "Cities are 1-indexed; city 0 doesn't exist."
+      },
+      "hint": "We must seed processing from city 1.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    dist[1] = 0\n    ways[1] = 1\n    minf[1] = 0\n    maxf[1] = 0\n    heap = [(0, 1)]",
+      "codeLabel": "Source and heap"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Write the main loop to pop the next city and skip stale entries.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    while heap:\n        d, u = heapq.heappop(heap)\n        if d != dist[u]:\n            continue",
+          "isCode": true
+        },
+        {
+          "label": "    while heap:\n        d, u = heapq.heappop(heap)\n        if d == dist[u]:\n            continue",
+          "isCode": true
+        },
+        {
+          "label": "    for d, u in heap:\n        if d != dist[u]:\n            continue",
+          "isCode": true
+        },
+        {
+          "label": "    while heap:\n        d, u = heap.pop(0)\n        if d != dist[u]:\n            continue",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We pop (d,u) and skip if a better dist[u] was found later (stale entry).",
+      "wrongExplanations": {
+        "1": "We should process when d equals dist[u], not skip.",
+        "3": "heap.pop(0) is not a priority queue operation and is inefficient."
+      },
+      "hint": "Use heapq.heappop and ignore entries that don't match current dist[u].",
+      "isCodeBuilding": true,
+      "codeSnippet": "    while heap:\n        d, u = heapq.heappop(heap)\n        if d != dist[u]:\n            continue",
+      "codeLabel": "Main loop start"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Fill in the relaxation for edges u->v with cost w, handling improvement and tie.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "        for v, w in adj[u]:\n            nd = d + w\n            if nd < dist[v]:\n                dist[v] = nd\n                ways[v] = ways[u]\n                minf[v] = minf[u] + 1\n                maxf[v] = maxf[u] + 1\n                heapq.heappush(heap, (nd, v))\n            elif nd == dist[v]:\n                ways[v] = (ways[v] + ways[u]) % MOD\n                if minf[u] + 1 < minf[v]:\n                    minf[v] = minf[u] + 1\n                if maxf[u] + 1 > maxf[v]:\n                    maxf[v] = maxf[u] + 1",
+          "isCode": true
+        },
+        {
+          "label": "        for v, w in adj[u]:\n            nd = d + w\n            if nd <= dist[v]:\n                dist[v] = nd\n                ways[v] = (ways[v] + ways[u]) % MOD\n                minf[v] = min(minf[v], minf[u])\n                maxf[v] = max(maxf[v], maxf[u])\n                heapq.heappush(heap, (nd, v))",
+          "isCode": true
+        },
+        {
+          "label": "        for v, w in adj[u]:\n            nd = d + w\n            if nd < dist[v]:\n                dist[v] = nd\n                ways[v] = (ways[v] + ways[u]) % MOD\n                minf[v] = minf[u]\n                maxf[v] = maxf[u]\n            elif nd == dist[v]:\n                ways[v] = ways[u]\n                minf[v] = minf[u] + 1\n                maxf[v] = maxf[u] + 1",
+          "isCode": true
+        },
+        {
+          "label": "        for v, w in adj[u]:\n            nd = d + w\n            if nd == dist[v]:\n                dist[v] = nd\n                ways[v] = ways[u]\n                minf[v] = minf[u] + 1\n                maxf[v] = maxf[u] + 1\n            elif nd < dist[v]:\n                ways[v] = (ways[v] + ways[u]) % MOD\n                heapq.heappush(heap, (nd, v))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "On improvement: replace dist and copy ways, flights +1, push. On tie: add ways modulo, update min/max flights by +1.",
+      "wrongExplanations": {
+        "1": "Merging <= conflates improvement and tie; min/max flights must add +1 and not always push on tie.",
+        "3": "On tie we should not reset dist[v]; and on improvement we must update dist and flights."
+      },
+      "hint": "Treat nd < dist[v] and nd == dist[v] as separate cases.",
+      "isCodeBuilding": true,
+      "codeSnippet": "        for v, w in adj[u]:\n            nd = d + w\n            if nd < dist[v]:\n                dist[v] = nd\n                ways[v] = ways[u]\n                minf[v] = minf[u] + 1\n                maxf[v] = maxf[u] + 1\n                heapq.heappush(heap, (nd, v))\n            elif nd == dist[v]:\n                ways[v] = (ways[v] + ways[u]) % MOD\n                if minf[u] + 1 < minf[v]:\n                    minf[v] = minf[u] + 1\n                if maxf[u] + 1 > maxf[v]:\n                    maxf[v] = maxf[u] + 1",
+      "codeLabel": "Relaxation"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Print results and add the usual Python entry point.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    print(dist[n], ways[n] % MOD, minf[n], maxf[n])\n\nif __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "    print(dist[n], ways[n], minf[n], maxf[n])\n\nif __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "    print(dist[n], ways[n] % MOD, minf[n], maxf[n])\n\nmain()",
+          "isCode": true
+        },
+        {
+          "label": "    print(dist[n] % MOD, ways[n], minf[n], maxf[n])\n\nif __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need to print ways modulo MOD; dist is not modulo. Use the standard __main__ guard.",
+      "wrongExplanations": {
+        "1": "ways must be modulo 1e9+7 by problem statement.",
+        "3": "dist is the minimum price and should not be taken modulo."
+      },
+      "hint": "Only the count is required modulo 1e9+7.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    print(dist[n], ways[n] % MOD, minf[n], maxf[n])\n\nif __name__ == \"__main__\":\n    main()",
+      "codeLabel": "Output and entry point"
+    },
+    {
+      "id": "q21",
+      "phase": "Verifying the Solution",
+      "questionText": "Consider this graph:\n\nn=5, m=5\n1 2 1\n2 5 4\n1 3 2\n3 4 1\n4 5 2\n\nWhat is the minimum total price from 1 to 5?",
+      "diagram": "1 ->2(1)->5(4)  cost 5\n1 ->3(2)->4(1)->5(2)  cost 5\n1 ->5 direct does not exist\n",
+      "options": [
+        {
+          "label": "5",
+          "isCode": false
+        },
+        {
+          "label": "6",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "7",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Two routes cost 5: 1-2-5 and 1-3-4-5. So minimum total price is 5.",
+      "wrongExplanations": {
+        "1": "6 would require different edge costs; here both paths cost 5."
+      },
+      "hint": "Compute sums along both routes.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q22",
+      "phase": "Verifying the Solution",
+      "questionText": "For the same graph, what are the number of minimum-price routes, minimum flights, and maximum flights among them?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "2 routes, min flights = 2, max flights = 3",
+          "isCode": false
+        },
+        {
+          "label": "2 routes, min flights = 2, max flights = 2",
+          "isCode": false
+        },
+        {
+          "label": "1 route, min flights = 2, max flights = 2",
+          "isCode": false
+        },
+        {
+          "label": "2 routes, min flights = 3, max flights = 3",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Two routes of cost 5: 1-2-5 (2 flights) and 1-3-4-5 (3 flights). So min=2, max=3.",
+      "wrongExplanations": {
+        "1": "Both routes exist; the longer one has 3 flights.",
+        "2": "There are 2 shortest routes, not 1."
+      },
+      "hint": "Count flights (edges) along each minimum-cost route.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q23",
+      "phase": "Verifying the Solution",
+      "questionText": "In our algorithm, if we process nodes in increasing current best price and apply the update rules, will the arrays for city 5 end with dist=5, ways=2, minf=2, maxf=3 for the previous graph?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, because both paths to 5 tie on price and we aggregate counts and min/max flights.",
+          "isCode": false
+        },
+        {
+          "label": "No, ways would be 1 because we overwrite on tie.",
+          "isCode": false
+        },
+        {
+          "label": "No, minf would be 3 because we always take the latest path.",
+          "isCode": false
+        },
+        {
+          "label": "No, maxf would be 2 because we ignore longer paths on ties.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Tie handling adds counts and updates min/max flights by +1 from predecessors, yielding (5,2,2,3).",
+      "wrongExplanations": {
+        "1": "On tie, we add counts; we don't overwrite.",
+        "3": "On tie, we update max flights with the larger value."
+      },
+      "hint": "Recall the tie update: add ways, take min and max of flights.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the time complexity of this approach using a min-priority queue and adjacency lists?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O((n + m) log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n + m)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(m log m)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each edge is relaxed at most once per relevant pop, and each pop/push costs log n.",
+      "wrongExplanations": {
+        "1": "We use a priority queue; log factors are present.",
+        "2": "This bound applies to dense simple loops without priority queues."
+      },
+      "hint": "Count heap operations and edge scans.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the space complexity of the solution?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n + m) for the adjacency list and arrays",
+          "isCode": false
+        },
+        {
+          "label": "O(m) for the adjacency list only",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2) due to distance matrix",
+          "isCode": false
+        },
+        {
+          "label": "O(n) because edges are processed on the fly",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We store adjacency lists (O(m)) and per-node arrays (O(n)).",
+      "wrongExplanations": {
+        "2": "We do not store an n×n matrix.",
+        "3": "We store all edges in memory, not process-only."
+      },
+      "hint": "Consider both adjacency and four per-node arrays.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Analyzing Complexity",
+      "questionText": "Which edge cases must be handled carefully to ensure correctness?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Multiple edges between the same cities, equal-cost ties, and large weights.",
+          "isCode": false
+        },
+        {
+          "label": "Negative edge weights and disconnected graphs.",
+          "isCode": false
+        },
+        {
+          "label": "Self-loops with zero cost.",
+          "isCode": false
+        },
+        {
+          "label": "Graphs with undirected edges only.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Costs are positive, but there may be parallel edges and ties; we must update counts and min/max flights correctly.",
+      "wrongExplanations": {
+        "1": "Negative weights are not allowed by constraints; reachability is guaranteed.",
+        "2": "Edge weights are ≥1, so zero-cost self-loops don't occur."
+      },
+      "hint": "Check the constraint ranges and guarantee statements.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\nimport heapq\n\ndef main():\n    data = sys.stdin.buffer.read().split()\n    it = iter(data)\n    n = int(next(it)); m = int(next(it))",
+    "    adj = [[] for _ in range(n+1)]\n    for _ in range(m):\n        a = int(next(it)); b = int(next(it)); c = int(next(it))\n        adj[a].append((b, c))",
+    "    INF = 10**18\n    MOD = 10**9 + 7\n    dist = [INF]*(n+1)\n    ways = [0]*(n+1)\n    minf = [10**18]*(n+1)\n    maxf = [-10**18]*(n+1)",
+    "    dist[1] = 0\n    ways[1] = 1\n    minf[1] = 0\n    maxf[1] = 0\n    heap = [(0, 1)]",
+    "    while heap:\n        d, u = heapq.heappop(heap)\n        if d != dist[u]:\n            continue",
+    "        for v, w in adj[u]:\n            nd = d + w\n            if nd < dist[v]:\n                dist[v] = nd\n                ways[v] = ways[u]\n                minf[v] = minf[u] + 1\n                maxf[v] = maxf[u] + 1\n                heapq.heappush(heap, (nd, v))\n            elif nd == dist[v]:\n                ways[v] = (ways[v] + ways[u]) % MOD\n                if minf[u] + 1 < minf[v]:\n                    minf[v] = minf[u] + 1\n                if maxf[u] + 1 > maxf[v]:\n                    maxf[v] = maxf[u] + 1",
+    "    print(dist[n], ways[n] % MOD, minf[n], maxf[n])\n\nif __name__ == \"__main__\":\n    main()"
+  ],
+  "reasoningChain": [
+    {
+      "question": "What do the four outputs represent on tiny examples?",
+      "insight": "They refer to the minimum total price, how many routes achieve that price (modulo 1e9+7), and the min/max number of flights among those routes."
+    },
+    {
+      "question": "How to avoid enumerating all routes given large n and m?",
+      "insight": "Process cities by increasing current best total price; with positive costs, the smallest current best price becomes final."
+    },
+    {
+      "question": "What data must be tracked per city?",
+      "insight": "Track minimum total price, number of shortest routes, and min/max flights among those shortest routes."
+    },
+    {
+      "question": "How to initialize values at the source and others?",
+      "insight": "dist[1]=0, ways[1]=1, min/max flights at source 0; others start with INF distance, 0 ways, minFlights=INF, maxFlights=-INF."
+    },
+    {
+      "question": "How to update along an edge when we find a better price vs. a tie?",
+      "insight": "On improvement: replace dist and copy counts and flights+1; on tie: add counts modulo, set minFlights to smaller and maxFlights to larger of (prev, from u + 1)."
+    },
+    {
+      "question": "How to implement this efficiently?",
+      "insight": "Use an adjacency list and a min-priority queue; skip stale entries and perform edge relaxations to achieve O((n+m) log n) time."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1504,
+    "output_tokens": 16061,
+    "input_cost": 0.00188,
+    "output_cost": 0.16061,
+    "total_cost": 0.16249
+  }
+}

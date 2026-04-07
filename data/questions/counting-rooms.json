@@ -1,0 +1,987 @@
+{
+  "id": "counting-rooms-interactive-mcq",
+  "title": "Counting Rooms",
+  "difficulty": "intermediate",
+  "tags": [
+    "graph"
+  ],
+  "estimatedMinutes": 45,
+  "language": "python",
+  "description": "You are given a map of a building, and your task is to count the number of its rooms. The map has n rows and m columns. Each cell is either floor (.) or wall (#). You can move between floor cells in the four cardinal directions (up, down, left, right). Count how many separate rooms (connected floor regions) the building has.\n\nInput:\n- First line: two integers n and m (height and width).\n- Next n lines: each of length m with characters '.' or '#'.\n\nOutput:\n- Print a single integer: the number of rooms.",
+  "examples": [
+    {
+      "input": "5 8\n########\n#..#...#\n####.#.#\n#..#...#\n########",
+      "output": "3",
+      "explanation": "There are three separate groups of connected floor cells (4-directional)."
+    }
+  ],
+  "constraints": [
+    "1 <= n, m <= 1000",
+    "Grid lines contain only '.' and '#'",
+    "Movement allowed only in four directions"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "Consider the smallest case.\nInput:\n1 1\n.\nHow many rooms are there?",
+      "diagram": ".",
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "Depends on starting tile",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "A single floor cell is one room. Starting position doesn’t change the count.",
+      "wrongExplanations": {
+        "0": "A floor cell counts as a room by itself.",
+        "2": "The count is independent of where you start.",
+        "3": "There can't be more rooms than floor components."
+      },
+      "hint": "A room is a connected group of floor cells.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "Consider:\n1 1\n#\nHow many rooms are there?",
+      "diagram": "#",
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "Undefined",
+          "isCode": false
+        },
+        {
+          "label": "Depends on neighbors",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "A single wall cell contains no floor, so there are 0 rooms.",
+      "wrongExplanations": {
+        "1": "A wall is not part of any room.",
+        "3": "Neighbors don’t matter when there’s no floor at all."
+      },
+      "hint": "Only floor cells form rooms.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "Diagonals don't count. For this grid:\n2 2\n.#\n#.\nHow many rooms are there when movement is only up/down/left/right?",
+      "diagram": ".#\n#.",
+      "options": [
+        {
+          "label": "1 (the two floors connect diagonally)",
+          "isCode": false
+        },
+        {
+          "label": "2 (each floor is isolated)",
+          "isCode": false
+        },
+        {
+          "label": "0 (no floors)",
+          "isCode": false
+        },
+        {
+          "label": "Depends on input reading order",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "The two floor cells are only diagonally adjacent, so they form two separate rooms.",
+      "wrongExplanations": {
+        "0": "Diagonal adjacency does not connect rooms here.",
+        "3": "Reading order does not affect connectivity."
+      },
+      "hint": "Only 4-directional moves connect floors.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "Grid:\n3 1\n#\n.\n#\nHow many rooms?",
+      "diagram": "#\n.\n#",
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Only the middle cell is floor, so it's one isolated room.",
+      "wrongExplanations": {
+        "2": "There is one floor cell.",
+        "1": "There is only one contiguous floor segment."
+      },
+      "hint": "Walls do not create rooms.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Understanding the Problem",
+      "questionText": "Which is the best definition of a room for this task?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Any area enclosed by walls, even if empty",
+          "isCode": false
+        },
+        {
+          "label": "A maximal set of floor cells connected by up/down/left/right moves",
+          "isCode": false
+        },
+        {
+          "label": "A group of cells including walls and floors",
+          "isCode": false
+        },
+        {
+          "label": "Any contiguous area including diagonals",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "We count connected components of floor cells using 4-directional connectivity.",
+      "wrongExplanations": {
+        "0": "Empty enclosed spaces without floors are not counted.",
+        "3": "Diagonals do not connect rooms in this problem."
+      },
+      "hint": "Focus on floor cells and 4-direction moves.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "Scanning the grid cell by cell, when should we increase the room count?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Every time we see a floor cell",
+          "isCode": false
+        },
+        {
+          "label": "Only when we find a floor cell that hasn’t been visited yet, before exploring its region",
+          "isCode": false
+        },
+        {
+          "label": "After exploring every neighbor of a floor cell",
+          "isCode": false
+        },
+        {
+          "label": "At the end, by counting visited cells / average size",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Increment when encountering a new unvisited floor to count each room exactly once.",
+      "wrongExplanations": {
+        "0": "That would overcount multiple cells within the same room.",
+        "2": "We need to trigger counting once per room, not per neighbor."
+      },
+      "hint": "Think 'first time you see a new room.'",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "What structure should we maintain to avoid recounting the same floor cells?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "A 2D boolean array marking whether each cell has been visited",
+          "isCode": false
+        },
+        {
+          "label": "A set of all wall positions",
+          "isCode": false
+        },
+        {
+          "label": "A counter of floors per row",
+          "isCode": false
+        },
+        {
+          "label": "A single global flag indicating 'in a room'",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Tracking visited per cell ensures each floor is processed at most once.",
+      "wrongExplanations": {
+        "1": "Walls don’t help track explored floors.",
+        "3": "A global flag can’t distinguish different cells."
+      },
+      "hint": "You need to remember work done per cell.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Exploring Approaches",
+      "questionText": "To explore all floors in one room starting from a single floor cell, which is most robust under large grids (up to 10^6 cells)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Use a list as a stack to iteratively expand to neighbors",
+          "isCode": false
+        },
+        {
+          "label": "Use deep recursion to expand neighbors",
+          "isCode": false
+        },
+        {
+          "label": "Use nested for-loops over the whole grid until nothing changes",
+          "isCode": false
+        },
+        {
+          "label": "Randomly jump to nearby floors until coverage seems complete",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "An explicit stack avoids recursion depth issues and expands to all connected neighbors efficiently.",
+      "wrongExplanations": {
+        "1": "Deep recursion can exceed call stack limits on large grids.",
+        "2": "Repeated full scans are wasteful and slow."
+      },
+      "hint": "Prefer an iterative neighbor expansion with your own container.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "Which neighbor directions should we consider for connectivity?",
+      "diagram": "r,c -> (r+1,c), (r-1,c), (r,c+1), (r,c-1)",
+      "options": [
+        {
+          "label": "[(1,0), (-1,0), (0,1), (0,-1)]",
+          "isCode": true
+        },
+        {
+          "label": "[(1,1), (1,-1), (-1,1), (-1,-1)]",
+          "isCode": true
+        },
+        {
+          "label": "[(1,0), (-1,0), (0,1), (0,-1), (1,1)]",
+          "isCode": true
+        },
+        {
+          "label": "[(2,0), (-2,0), (0,2), (0,-2)]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Only the four cardinal directions are allowed; no diagonals or jumps.",
+      "wrongExplanations": {
+        "1": "These are diagonals, not allowed.",
+        "2": "Adds a diagonal that shouldn’t be considered."
+      },
+      "hint": "Use only up, down, left, right moves.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "What is the correct in-bounds check for a neighbor (nr, nc) within n rows and m columns?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "0 <= nr <= n and 0 <= nc <= m",
+          "isCode": true
+        },
+        {
+          "label": "0 <= nr < n and 0 <= nc < m",
+          "isCode": true
+        },
+        {
+          "label": "-1 < nr <= n and -1 < nc <= m",
+          "isCode": true
+        },
+        {
+          "label": "nr in range(n) or nc in range(m)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Valid indices are 0..n-1 and 0..m-1, so use strict '<'.",
+      "wrongExplanations": {
+        "0": "Allows nr==n or nc==m, which are out of bounds.",
+        "3": "Using 'or' would allow one coordinate to be out of bounds."
+      },
+      "hint": "Think zero-based indexing bounds.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "When considering a neighbor to explore, which combined condition is appropriate?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Inside grid AND not visited AND cell == '.'",
+          "isCode": false
+        },
+        {
+          "label": "Inside grid OR not visited OR cell == '.'",
+          "isCode": false
+        },
+        {
+          "label": "Not visited AND cell == '#'",
+          "isCode": false
+        },
+        {
+          "label": "Inside grid AND cell == '.' (visited doesn’t matter)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We only explore floor neighbors inside the grid that haven’t been visited.",
+      "wrongExplanations": {
+        "1": "Using OR would accept neighbors that fail key conditions.",
+        "2": "Walls should be skipped."
+      },
+      "hint": "All three conditions must hold together.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "When should we mark a neighbor as visited to avoid pushing it multiple times?",
+      "diagram": "push (nr,nc) -> mark visited when?",
+      "options": [
+        {
+          "label": "Mark visited right when you add it to the stack",
+          "isCode": false
+        },
+        {
+          "label": "Mark visited only when you pop it from the stack",
+          "isCode": false
+        },
+        {
+          "label": "Mark visited after finishing the whole room",
+          "isCode": false
+        },
+        {
+          "label": "Never mark visited; rely on stack content",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Marking at the time of adding avoids duplicate pushes and redundant work.",
+      "wrongExplanations": {
+        "1": "Delaying can cause the same cell to be added multiple times.",
+        "3": "Without marking, you risk infinite loops or heavy repetition."
+      },
+      "hint": "Early marking prevents duplicates.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "Given this grid:\n3 3\n..#\n##.\n.##\nHow many times will we start a new exploration (i.e., how many rooms)?",
+      "diagram": "..#\n##.\n.##",
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Rooms at (0,0)-(0,1), (1,2), and (2,0): total 3.",
+      "wrongExplanations": {
+        "0": "Not all floors are connected.",
+        "1": "There are more isolated floors."
+      },
+      "hint": "List all floor positions and check 4-direction connections.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Building the Idea",
+      "questionText": "Where should we place the increment of the room count relative to exploring a new room?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Increment after calling the exploration from the first unvisited floor cell",
+          "isCode": false
+        },
+        {
+          "label": "Increment before scanning the grid",
+          "isCode": false
+        },
+        {
+          "label": "Increment for every neighbor visited",
+          "isCode": false
+        },
+        {
+          "label": "Increment only at the very end based on visited count",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Increment once per discovered room. Doing it right after invoking exploration is clear and correct.",
+      "wrongExplanations": {
+        "2": "That would overcount within a single room.",
+        "1": "You need to find rooms first."
+      },
+      "hint": "Tie the increment to discovering a new unvisited floor.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Read all input efficiently and build the basic grid structure.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\ndata = sys.stdin.read().strip().split()\nn, m = map(int, data[:2])\ngrid = [list(data[2 + i]) for i in range(n)]",
+          "isCode": true
+        },
+        {
+          "label": "n, m = map(int, input().split())\ngrid = [list(input().split()[0]) for _ in range(n)]",
+          "isCode": true
+        },
+        {
+          "label": "import sys\ndata = sys.stdin.read().splitlines()\nn, m = map(int, data)\ngrid = [list(row) for row in data[2:]]",
+          "isCode": true
+        },
+        {
+          "label": "n = int(input()); m = int(input())\ngrid = [list(input()) for _ in range(n)]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Reading all tokens and slicing works regardless of line breaks; the next n tokens are the rows.",
+      "wrongExplanations": {
+        "1": "Splitting input rows can fail if trailing spaces or missing rows occur; robust but less controlled.",
+        "3": "Reading n and m on separate lines doesn’t match the specified input format."
+      },
+      "hint": "Consider reading the entire input once and tokenizing.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\ndata = sys.stdin.read().strip().split()\nn, m = map(int, data[:2])\ngrid = [list(data[2 + i]) for i in range(n)]",
+      "codeLabel": "Read input and build grid"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Initialize tracking structures for visited cells and movement directions.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "visited = [[False] * m for _ in range(n)]\ndirs = [(1,0), (-1,0), (0,1), (0,-1)]",
+          "isCode": true
+        },
+        {
+          "label": "visited = [[0] * n for _ in range(m)]\ndirs = [(1,1), (1,-1), (-1,1), (-1,-1)]",
+          "isCode": true
+        },
+        {
+          "label": "visited = set()\ndirs = [(1,0), (0,1)]",
+          "isCode": true
+        },
+        {
+          "label": "visited = [[False] * n for _ in range(m)]\ndirs = [(1,0), (-1,0), (0,1)]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "A 2D boolean list matches grid indexing, and the four directions are exactly the allowed moves.",
+      "wrongExplanations": {
+        "1": "Visited dimensions are swapped and diagonals aren’t allowed.",
+        "3": "Visited dimensions are wrong and a direction is missing."
+      },
+      "hint": "Match visited shape to grid and include four moves.",
+      "isCodeBuilding": true,
+      "codeSnippet": "visited = [[False] * m for _ in range(n)]\ndirs = [(1,0), (-1,0), (0,1), (0,-1)]",
+      "codeLabel": "Visited array and directions"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Define the exploration function header and initialize its data.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def explore(sr, sc):\n    stack = [(sr, sc)]\n    visited[sr][sc] = True",
+          "isCode": true
+        },
+        {
+          "label": "def explore():\n    stack = []\n    visited = set()",
+          "isCode": true
+        },
+        {
+          "label": "def explore(sr, sc):\n    stack = []\n    visited[sr][sc] = False",
+          "isCode": true
+        },
+        {
+          "label": "def explore(sr, sc):\n    stack = [(sr, sc)]\n    # mark visited later",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need the starting cell, an explicit stack seeded with it, and mark it visited immediately.",
+      "wrongExplanations": {
+        "3": "Delaying marking risks pushing the same cell again.",
+        "2": "Visited should be set to True, not False."
+      },
+      "hint": "Begin with the start cell added and marked.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def explore(sr, sc):\n    stack = [(sr, sc)]\n    visited[sr][sc] = True",
+      "codeLabel": "Explore: header and init"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Fill in the exploration loop skeleton.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    while stack:\n        r, c = stack.pop()",
+          "isCode": true
+        },
+        {
+          "label": "    for r, c in stack:\n        stack.pop()",
+          "isCode": true
+        },
+        {
+          "label": "    while True:\n        r, c = stack[-1]",
+          "isCode": true
+        },
+        {
+          "label": "    while stack:\n        r, c = stack[0]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Pop from the end while the stack is non-empty is a standard iterative expansion approach.",
+      "wrongExplanations": {
+        "1": "Modifying a list while iterating over it is unsafe here.",
+        "3": "Always taking index 0 without removing will not progress."
+      },
+      "hint": "Use LIFO behavior for the container.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    while stack:\n        r, c = stack.pop()",
+      "codeLabel": "Explore: loop and pop"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Implement neighbor generation and the combined condition, including bounds.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "        for dr, dc in dirs:\n            nr, nc = r + dr, c + dc\n            if 0 <= nr < n and 0 <= nc < m and not visited[nr][nc] and grid[nr][nc] == '.':\n                visited[nr][nc] = True\n                stack.append((nr, nc))",
+          "isCode": true
+        },
+        {
+          "label": "        for dr, dc in dirs:\n            nr, nc = r + dr, c + dc\n            if 0 <= nr <= n and 0 <= nc <= m and grid[nr][nc] == '.':\n                stack.append((nr, nc))",
+          "isCode": true
+        },
+        {
+          "label": "        for dr, dc in dirs:\n            nr, nc = r + dr, c + dc\n            if not visited[nr][nc] or grid[nr][nc] == '.':\n                visited[nr][nc] = True\n                stack.append((nr, nc))",
+          "isCode": true
+        },
+        {
+          "label": "        for dr, dc in dirs:\n            nr, nc = r + dr, c + dc\n            if grid[nr][nc] == '.':\n                visited[nr][nc] = True",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Check bounds, floor, and not visited before marking and pushing.",
+      "wrongExplanations": {
+        "1": "Bounds check allows nr==n or nc==m (out of range) and misses visited check.",
+        "2": "Using OR can push out-of-bounds or walls; also lacks bounds checks."
+      },
+      "hint": "All three conditions must hold with strict bounds.",
+      "isCodeBuilding": true,
+      "codeSnippet": "        for dr, dc in dirs:\n            nr, nc = r + dr, c + dc\n            if 0 <= nr < n and 0 <= nc < m and not visited[nr][nc] and grid[nr][nc] == '.':\n                visited[nr][nc] = True\n                stack.append((nr, nc))",
+      "codeLabel": "Explore: neighbors and conditions"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Write the outer loops to traverse all cells.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "count = 0\nfor i in range(n):\n    for j in range(m):",
+          "isCode": true
+        },
+        {
+          "label": "count = 0\nfor i in range(m):\n    for j in range(n):",
+          "isCode": true
+        },
+        {
+          "label": "for i in range(n*m):",
+          "isCode": true
+        },
+        {
+          "label": "count = 0\nfor i, j in grid:",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Iterate rows 0..n-1 and columns 0..m-1 with a room counter.",
+      "wrongExplanations": {
+        "1": "This swaps dimensions and complicates indexing.",
+        "3": "Iterating grid directly yields rows, not (i,j) pairs."
+      },
+      "hint": "Two nested loops over n rows and m columns.",
+      "isCodeBuilding": true,
+      "codeSnippet": "count = 0\nfor i in range(n):\n    for j in range(m):",
+      "codeLabel": "Outer traversal and counter"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "Decide when to start exploring and update the count.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "        if grid[i][j] == '.' and not visited[i][j]:\n            explore(i, j)\n            count += 1",
+          "isCode": true
+        },
+        {
+          "label": "        if not visited[i][j]:\n            explore(i, j)\n            count += 1",
+          "isCode": true
+        },
+        {
+          "label": "        if grid[i][j] == '.':\n            count += 1\n            explore(i, j)",
+          "isCode": true
+        },
+        {
+          "label": "        if grid[i][j] == '.' and visited[i][j]:\n            explore(i, j)\n            count += 1",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Start exploration only from unvisited floor cells and then increment the room count.",
+      "wrongExplanations": {
+        "1": "This would also count walls.",
+        "2": "This counts every floor cell, overcounting rooms."
+      },
+      "hint": "Guard on both floor and unvisited.",
+      "isCodeBuilding": true,
+      "codeSnippet": "        if grid[i][j] == '.' and not visited[i][j]:\n            explore(i, j)\n            count += 1",
+      "codeLabel": "Start exploration and count"
+    },
+    {
+      "id": "q22",
+      "phase": "Writing the Code",
+      "questionText": "Finally, print the result.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "print(count)",
+          "isCode": true
+        },
+        {
+          "label": "sys.stdout = count",
+          "isCode": true
+        },
+        {
+          "label": "return count",
+          "isCode": true
+        },
+        {
+          "label": "print(len(visited))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need to output the number of rooms.",
+      "wrongExplanations": {
+        "2": "We are in the main script, not returning from a function.",
+        "3": "visited size is n, not the room count."
+      },
+      "hint": "Just output the counter.",
+      "isCodeBuilding": true,
+      "codeSnippet": "print(count)",
+      "codeLabel": "Output"
+    },
+    {
+      "id": "q23",
+      "phase": "Verifying the Solution",
+      "questionText": "Trace the algorithm on this grid:\n3 4\n##..\n#..#\n..##\nHow many rooms should be printed?",
+      "diagram": "##..\n#..#\n..##",
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Rooms: top-right two cells (0,2)-(0,3) connect to (1,2)? No, wall at (1,3). Middle (1,1)-(1,2) connects to bottom-left (2,0)-(2,1)? (1,1) connects down to (2,1). Top-right group is (0,2)-(0,3); middle/bottom-left group is (1,1),(1,2? no, (1,2) is '.'? In grid '#..#' positions: (1,1) and (1,2) are '.', and (2,0)-(2,1) are '.', connected via (1,1)-(2,1). Total 2 rooms.",
+      "wrongExplanations": {
+        "0": "Not all floor cells are connected across walls.",
+        "2": "Re-check connections; some groups merge."
+      },
+      "hint": "List all '.' and connect via 4-neighbors.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Verifying the Solution",
+      "questionText": "On the sample input from the problem:\n5 8\n########\n#..#...#\n####.#.#\n#..#...#\n########\nHow many times will the outer loops trigger a new exploration?",
+      "diagram": "########\n#..#...#\n####.#.#\n#..#...#\n########",
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "There are 3 separate connected floor regions; each starts one exploration.",
+      "wrongExplanations": {
+        "1": "Not all floors connect across the walls.",
+        "3": "Count the distinct groups carefully."
+      },
+      "hint": "Visualize each contiguous floor group.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the time complexity of scanning the grid and exploring neighbors as described?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n * m)",
+          "isCode": false
+        },
+        {
+          "label": "O((n * m)^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(n + m)",
+          "isCode": false
+        },
+        {
+          "label": "O(log(n * m))",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each cell is processed a constant number of times; overall linear in grid size.",
+      "wrongExplanations": {
+        "1": "We don’t reprocess cells quadratically.",
+        "2": "We must touch all cells in worst case."
+      },
+      "hint": "Consider how many times a cell can be visited/checked.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the auxiliary space usage (excluding input grid) in the worst case?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n * m) for visited plus up to O(n * m) for the stack in the worst connected case",
+          "isCode": false
+        },
+        {
+          "label": "O(1)",
+          "isCode": false
+        },
+        {
+          "label": "O(n + m)",
+          "isCode": false
+        },
+        {
+          "label": "O((n * m)^2)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Visited uses O(n*m). The stack can hold many cells in a large room, up to O(n*m).",
+      "wrongExplanations": {
+        "1": "We store per-cell visited state.",
+        "2": "We store more than per-row/column data."
+      },
+      "hint": "Consider both visited and the frontier container.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q27",
+      "phase": "Analyzing Complexity",
+      "questionText": "Which edge cases should the solution handle correctly?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "All walls (prints 0), all floors (prints 1), narrow grids like 1 x m or n x 1",
+          "isCode": false
+        },
+        {
+          "label": "Only square grids where n == m",
+          "isCode": false
+        },
+        {
+          "label": "Grids with diagonal-only connections counted as one",
+          "isCode": false
+        },
+        {
+          "label": "Inputs with variable line lengths for rows",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The algorithm must work for degenerate sizes and correctly treat diagonal-only adjacency as separate rooms.",
+      "wrongExplanations": {
+        "1": "Rectangular grids are allowed.",
+        "3": "Each row has exactly m characters per constraints."
+      },
+      "hint": "Check extreme shapes and trivial contents.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\ndata = sys.stdin.read().strip().split()\nn, m = map(int, data[:2])\ngrid = [list(data[2 + i]) for i in range(n)]",
+    "visited = [[False] * m for _ in range(n)]\ndirs = [(1,0), (-1,0), (0,1), (0,-1)]",
+    "def explore(sr, sc):\n    stack = [(sr, sc)]\n    visited[sr][sc] = True",
+    "    while stack:\n        r, c = stack.pop()",
+    "        for dr, dc in dirs:\n            nr, nc = r + dr, c + dc\n            if 0 <= nr < n and 0 <= nc < m and not visited[nr][nc] and grid[nr][nc] == '.':\n                visited[nr][nc] = True\n                stack.append((nr, nc))",
+    "count = 0\nfor i in range(n):\n    for j in range(m):",
+    "        if grid[i][j] == '.' and not visited[i][j]:\n            explore(i, j)\n            count += 1",
+    "print(count)"
+  ],
+  "reasoningChain": [
+    {
+      "question": "What counts as a room and does diagonal adjacency connect rooms?",
+      "insight": "Rooms are maximal floor components using only up, down, left, and right; diagonals do not connect."
+    },
+    {
+      "question": "How to avoid counting the same room multiple times?",
+      "insight": "Scan the grid and start exploration only from unvisited floor cells while marking visited cells."
+    },
+    {
+      "question": "How to systematically cover all cells in a room from one starting point?",
+      "insight": "Use an explicit container (stack) to iteratively explore neighbors until the connected region is fully covered."
+    },
+    {
+      "question": "What neighbor directions and bounds checks are needed?",
+      "insight": "Use the four cardinal deltas and ensure 0 <= r < n and 0 <= c < m when considering neighbors."
+    },
+    {
+      "question": "When to mark cells and when to increment the room counter?",
+      "insight": "Mark neighbors as visited when added to the container; increment the counter when you discover an unvisited floor to start exploration."
+    },
+    {
+      "question": "What are the performance characteristics and edge cases?",
+      "insight": "Each cell is processed O(1) times (O(n*m)); auxiliary space is O(n*m); handle all-walls, all-floors, and thin grids correctly."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1357,
+    "output_tokens": 13249,
+    "input_cost": 0.001696,
+    "output_cost": 0.13249,
+    "total_cost": 0.134186
+  }
+}
