@@ -32,7 +32,7 @@ export default function ProblemCard({ problem, progress }: ProblemCardProps) {
       </div>
       <h3 className="font-semibold text-[var(--text-primary)] mb-2">{problem.title}</h3>
       <div className="flex flex-wrap gap-1.5 mb-3">
-        {problem.tags.map((tag) => (
+        {(problem.tags ?? []).map((tag) => (
           <span key={tag} className="text-xs px-2 py-0.5 rounded bg-[var(--bg-secondary)] text-[var(--text-secondary)]">
             {tag}
           </span>
