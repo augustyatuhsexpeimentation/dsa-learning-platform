@@ -42,7 +42,7 @@ export default function ProblemCard({ problem, progress }: ProblemCardProps) {
         <Clock className="w-3.5 h-3.5" />
         <span>{problem.estimatedMinutes} min</span>
         <span className="mx-1">·</span>
-        <span>{problem.mcqChain.length} questions</span>
+        <span>{(problem.mcqChain ?? []).length} questions</span>
       </div>
       {status !== "not-started" && (
         <button
