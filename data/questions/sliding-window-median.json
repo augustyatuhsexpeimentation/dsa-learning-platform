@@ -1,0 +1,1041 @@
+{
+  "id": "sliding-window-median-heaps-lazy-deletion",
+  "title": "Sliding Window Median",
+  "difficulty": "intermediate",
+  "tags": [
+    "mixed"
+  ],
+  "estimatedMinutes": 60,
+  "language": "python",
+  "description": "You are given an array of n integers and an integer k. For each contiguous window of k elements (from left to right), output the median. The median is the middle element when the k elements are sorted; if k is even, there are two middle elements and we take the smaller one.",
+  "examples": [
+    {
+      "input": "8 3\n2 4 3 5 8 1 2 1\n",
+      "output": "3 4 5 5 2 1\n",
+      "explanation": "Windows: [2,4,3]->3, [4,3,5]->4, [3,5,8]->5, [5,8,1]->5, [8,1,2]->2, [1,2,1]->1."
+    }
+  ],
+  "constraints": [
+    "1 ≤ k ≤ n ≤ 2⋅10^5",
+    "1 ≤ x_i ≤ 10^9"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "Given array [2, 1, 5] and k = 3, what is the median of the window?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Sorted window [1,2,5] → middle is 2. For odd k, the median is the middle element.",
+      "wrongExplanations": {
+        "0": "1 is the smallest, not the middle.",
+        "2": "5 is the largest, not the middle."
+      },
+      "hint": "Sort [2,1,5] and pick the middle.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "For a window [1, 4, 2, 2] (k = 4), what median should be returned by the problem's definition?",
+      "diagram": "Sorted: [1,2,2,4]\nTwo middles: positions 1 and 2 (0-based).",
+      "options": [
+        {
+          "label": "2 (the smaller of the two middle values)",
+          "isCode": false
+        },
+        {
+          "label": "3 (average of the two middle values)",
+          "isCode": false
+        },
+        {
+          "label": "1 (the first element)",
+          "isCode": false
+        },
+        {
+          "label": "4 (the largest element)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "With even k, choose the smaller of the two middles. Here both middles are 2.",
+      "wrongExplanations": {
+        "1": "The problem asks for the smaller middle, not the average."
+      },
+      "hint": "When k is even, avoid averaging.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "If n = 7 and k = 3, how many medians should be printed?",
+      "diagram": "Windows start at indices 0..n-k",
+      "options": [
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        },
+        {
+          "label": "7",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "There are n - k + 1 windows: 7 - 3 + 1 = 5.",
+      "wrongExplanations": {
+        "0": "4 corresponds to n - k.",
+        "2": "7 would be one per element, not per window."
+      },
+      "hint": "Count windows starting positions.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "For array [1, 3, 2, 6] and k = 2, what sequence of medians is produced?",
+      "diagram": "Windows: [1,3], [3,2], [2,6]\nSorted: [1,3] -> 1; [2,3] -> 2; [2,6] -> 2",
+      "options": [
+        {
+          "label": "2 3 4",
+          "isCode": false
+        },
+        {
+          "label": "1 2 2",
+          "isCode": false
+        },
+        {
+          "label": "1 3 2",
+          "isCode": false
+        },
+        {
+          "label": "1 3 3",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Even k uses the smaller middle: [1,3]→1, [3,2]→2, [2,6]→2.",
+      "wrongExplanations": {
+        "2": "Second window median should be smaller of 2 and 3 → 2."
+      },
+      "hint": "Sort each pair and take the smaller one.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Understanding the Problem",
+      "questionText": "Which 0-based index gives the median for an even-sized sorted window of length k?",
+      "diagram": "Sorted window indices: 0..k-1",
+      "options": [
+        {
+          "label": "k/2 (upper middle)",
+          "isCode": false
+        },
+        {
+          "label": "k/2 - 1 (lower middle)",
+          "isCode": false
+        },
+        {
+          "label": "(k-1)/2 (floored)",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "We take the smaller of the two middles → index k/2 - 1.",
+      "wrongExplanations": {
+        "0": "k/2 is the upper middle; we need the lower one."
+      },
+      "hint": "Middles are at k/2 - 1 and k/2.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "If you sort each window independently, what is the time complexity over all windows?",
+      "diagram": "Each window sort: O(k log k), number of windows ≈ n",
+      "options": [
+        {
+          "label": "O(n k log k)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n k)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log k)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each window sort costs O(k log k); there are n - k + 1 ≈ n windows.",
+      "wrongExplanations": {
+        "1": "Sorting the full array once doesn't handle windows.",
+        "3": "You still sort k items per window."
+      },
+      "hint": "Multiply per-window cost by number of windows.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "With n up to 2⋅10^5 and k up to 2⋅10^5, is O(n k log k) feasible within 1 second?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, because constants are small",
+          "isCode": false
+        },
+        {
+          "label": "No, because it can exceed 10^10 operations",
+          "isCode": false
+        },
+        {
+          "label": "Yes, if we use fast input/output",
+          "isCode": false
+        },
+        {
+          "label": "Only if all numbers are small",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "n k log k can be enormous in worst case; we need near O(log k) per update.",
+      "wrongExplanations": {
+        "0": "Asymptotics dominate for these sizes.",
+        "2": "I/O speed doesn't cut algorithmic complexity."
+      },
+      "hint": "Estimate n k with worst-case values.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Exploring Approaches",
+      "questionText": "To update the median efficiently as the window moves by one position, which operations must be efficient?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Only insert the new element",
+          "isCode": false
+        },
+        {
+          "label": "Only remove the old element",
+          "isCode": false
+        },
+        {
+          "label": "Insert new, remove old, and get current median quickly",
+          "isCode": false
+        },
+        {
+          "label": "Re-sort the whole window occasionally",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "We must insert and remove per step and query the median fast.",
+      "wrongExplanations": {
+        "0": "The old element leaving the window must be removed.",
+        "3": "Re-sorting breaks the time budget."
+      },
+      "hint": "Think about the two elements that change between windows.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "How can we organize the k elements to read the median in O(1) while supporting insert/remove in O(log k)?",
+      "diagram": "lower half  |  upper half\n(max side)   |  (min side)\n<-- smaller  |  larger -->",
+      "options": [
+        {
+          "label": "Keep the entire window in a single sorted list",
+          "isCode": false
+        },
+        {
+          "label": "Use a queue for FIFO behavior",
+          "isCode": false
+        },
+        {
+          "label": "Maintain two priority queues: lower half and upper half",
+          "isCode": false
+        },
+        {
+          "label": "Use a stack for last-in-first-out",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Split into lower and upper halves gives median at boundary and O(log k) updates.",
+      "wrongExplanations": {
+        "0": "Removing arbitrary elements from a list is O(k)."
+      },
+      "hint": "Store smaller values separately from larger values.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "To always return the smaller median for even k, what size invariant should the two groups maintain?",
+      "diagram": "Let L = size(lower), U = size(upper)",
+      "options": [
+        {
+          "label": "L == U or L == U - 1",
+          "isCode": false
+        },
+        {
+          "label": "L == U or L == U + 1",
+          "isCode": false
+        },
+        {
+          "label": "Always L == U",
+          "isCode": false
+        },
+        {
+          "label": "Always L == U + 2",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Keep lower size ≥ upper by at most 1. Median is max of lower.",
+      "wrongExplanations": {
+        "0": "Lower should not be smaller than upper.",
+        "2": "When k is odd, lower should have one extra."
+      },
+      "hint": "Lower half should carry the middle when k is odd.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "When inserting a value x, how do we decide which group it belongs to in order to honor \"smaller median\"?",
+      "diagram": "max(lower) = current median candidate",
+      "options": [
+        {
+          "label": "If x < max(lower), go lower; else upper",
+          "isCode": false
+        },
+        {
+          "label": "If x <= max(lower), go lower; else upper",
+          "isCode": false
+        },
+        {
+          "label": "If x >= max(lower), go lower; else upper",
+          "isCode": false
+        },
+        {
+          "label": "Always put equals into upper",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Tie should go to lower to ensure the lower median sits on lower's top.",
+      "wrongExplanations": {
+        "0": "With '=', median might drift to upper for even k."
+      },
+      "hint": "Where should duplicates of the median reside?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "In Python's heapq (min-heap), how can we implement a max-oriented structure for the lower half?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Use a custom comparator with heapq",
+          "isCode": false
+        },
+        {
+          "label": "Maintain a sorted list in descending order",
+          "isCode": false
+        },
+        {
+          "label": "Push negative values so the smallest negative is the largest original",
+          "isCode": false
+        },
+        {
+          "label": "Call reversed() on the heap each time",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Negating values turns min-heap into a max-heap by order.",
+      "wrongExplanations": {
+        "0": "heapq does not support custom comparators."
+      },
+      "hint": "Transform values so that min equals max.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "How do we handle removing an element that's buried inside a heap without linear search?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Rebuild the heap from scratch each time",
+          "isCode": false
+        },
+        {
+          "label": "Search the heap and delete it in-place",
+          "isCode": false
+        },
+        {
+          "label": "Mark it in a counter (delayed removal) and ignore until it reaches the top",
+          "isCode": false
+        },
+        {
+          "label": "Don't remove it; leave it forever",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Mark and skip on top lets removals be amortized O(log k) without search.",
+      "wrongExplanations": {
+        "0": "Rebuilding each time is too slow.",
+        "1": "heapq lacks efficient arbitrary deletion."
+      },
+      "hint": "Can we defer the actual pop until it appears at the top?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Building the Idea",
+      "questionText": "When removing value x, which comparison assigns its logical group correctly?",
+      "diagram": "current median m = max(lower)",
+      "options": [
+        {
+          "label": "If x < m then lower else upper",
+          "isCode": false
+        },
+        {
+          "label": "If x <= m then lower else upper",
+          "isCode": false
+        },
+        {
+          "label": "Always remove from lower",
+          "isCode": false
+        },
+        {
+          "label": "Always remove from upper",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Tie must go to lower to keep equal-to-median elements counted in lower.",
+      "wrongExplanations": {
+        "0": "Using '<' misclassifies elements equal to the median."
+      },
+      "hint": "Consider duplicates equal to the current median.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q15",
+      "phase": "Building the Idea",
+      "questionText": "What should the pruning step do when the heap's top is marked for deletion?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Pop once and stop",
+          "isCode": false
+        },
+        {
+          "label": "Do nothing; wait for later",
+          "isCode": false
+        },
+        {
+          "label": "Repeatedly pop while the top is marked, decrementing its count",
+          "isCode": false
+        },
+        {
+          "label": "Clear the entire heap",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Continue popping while the top is invalid to expose the true top.",
+      "wrongExplanations": {
+        "0": "There may be multiple invalid elements at the top."
+      },
+      "hint": "There may be many duplicates at the top to clear.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q16",
+      "phase": "Building the Idea",
+      "questionText": "Which rebalance rule maintains the size invariant correctly?",
+      "diagram": "Let L=len(lower), U=len(upper)",
+      "options": [
+        {
+          "label": "If L > U + 1: move from lower to upper; if L < U: move from upper to lower",
+          "isCode": false
+        },
+        {
+          "label": "If L >= U + 2: move from lower to upper; else never move",
+          "isCode": false
+        },
+        {
+          "label": "If L < U - 1: move from lower to upper",
+          "isCode": false
+        },
+        {
+          "label": "Always move to make L == U",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Keep L == U or L == U + 1. Move one element when outside this range.",
+      "wrongExplanations": {
+        "3": "For odd k, L should be U + 1, not always equal."
+      },
+      "hint": "Lower should be at least as large as upper by at most one.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Read input efficiently and parse n, k, and the array.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys, heapq\ndata = list(map(int, sys.stdin.read().strip().split()))\nn, k = data[0], data[1]\narr = data[2:2+n]",
+          "isCode": true
+        },
+        {
+          "label": "import sys, heapq\nline1 = sys.stdin.readline().split()\nn, k = int(line1[0]), int(line1[1])\narr = list(map(int, sys.stdin.readline().split()))",
+          "isCode": true
+        },
+        {
+          "label": "import heapq\nn, k = map(int, input().split())\narr = list(map(int, input().split()))[:k]",
+          "isCode": true
+        },
+        {
+          "label": "import sys, heapq\ndata = sys.stdin.read().split()\nn, k = int(data[1]), int(data[0])\narr = list(map(int, data[2:]))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Read all ints, then slice exactly n numbers for arr. Avoids line assumptions and truncation.",
+      "wrongExplanations": {
+        "1": "Second line may not contain all n numbers if wrapped.",
+        "3": "Swapped n and k leads to wrong sizes."
+      },
+      "hint": "Use sys.stdin.read() to handle wrapped lines.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys, heapq\ndata = list(map(int, sys.stdin.read().strip().split()))\nn, k = data[0], data[1]\narr = data[2:2+n]",
+      "codeLabel": "Parse input"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Initialize the two heaps and helper structures.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "low = []  # max-heap via negatives\nhigh = [] # min-heap\ndelayed = {}\nlow_size = 0\nhigh_size = 0",
+          "isCode": true
+        },
+        {
+          "label": "low = None\nhigh = None\ndelayed = dict()\nlow_size = []\nhigh_size = []",
+          "isCode": true
+        },
+        {
+          "label": "low = []\nhigh = []\ndelayed = []\nlow_size = 0\nhigh_size = 0",
+          "isCode": true
+        },
+        {
+          "label": "low = {}\nhigh = {}\ndelayed = {}\nlow_size = 0\nhigh_size = 0",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Heaps as lists, delayed as dict, sizes as integers.",
+      "wrongExplanations": {
+        "2": "delayed must map values to counts, not be a list."
+      },
+      "hint": "heapq uses lists as heaps.",
+      "isCodeBuilding": true,
+      "codeSnippet": "low = []  # max-heap via negatives\nhigh = [] # min-heap\ndelayed = {}\nlow_size = 0\nhigh_size = 0",
+      "codeLabel": "Init structures"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Write a function to prune invalid top elements from a heap using the delayed map.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def prune_top(heap, is_low):\n    while heap:\n        x = -heap[0] if is_low else heap[0]\n        if delayed.get(x, 0):\n            heapq.heappop(heap)\n            delayed[x] -= 1\n            if delayed[x] == 0:\n                delayed.pop(x)\n        else:\n            break",
+          "isCode": true
+        },
+        {
+          "label": "def prune_top(heap, is_low):\n    if heap and delayed.get(heap[0], 0):\n        heapq.heappop(heap)",
+          "isCode": true
+        },
+        {
+          "label": "def prune_top(heap, is_low):\n    while heap:\n        x = heap[0]\n        if delayed.get(x, 0):\n            heapq.heappop(heap)\n        else:\n            break",
+          "isCode": true
+        },
+        {
+          "label": "def prune_top(heap, is_low):\n    while heap and delayed:\n        heapq.heappop(heap)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Must convert sign for lower heap, loop while top is marked, and decrement counts.",
+      "wrongExplanations": {
+        "1": "Only one pop and no sign handling; leaves many invalid tops.",
+        "3": "Pops indiscriminately and ignores specific delayed counts."
+      },
+      "hint": "Remember lower heap stores negatives.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def prune_top(heap, is_low):\n    while heap:\n        x = -heap[0] if is_low else heap[0]\n        if delayed.get(x, 0):\n            heapq.heappop(heap)\n            delayed[x] -= 1\n            if delayed[x] == 0:\n                delayed.pop(x)\n        else:\n            break",
+      "codeLabel": "Prune function"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Implement rebalancing so that lower has either the same size as upper or one more.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def rebalance():\n    global low_size, high_size\n    if low_size > high_size + 1:\n        val = -heapq.heappop(low)\n        heapq.heappush(high, val)\n        low_size -= 1\n        high_size += 1\n        prune_top(low, True)\n    elif low_size < high_size:\n        val = heapq.heappop(high)\n        heapq.heappush(low, -val)\n        low_size += 1\n        high_size -= 1\n        prune_top(high, False)",
+          "isCode": true
+        },
+        {
+          "label": "def rebalance():\n    global low_size, high_size\n    while low_size != high_size:\n        if low_size > high_size:\n            val = heapq.heappop(low)\n            heapq.heappush(high, val)\n            low_size -= 1\n            high_size += 1",
+          "isCode": true
+        },
+        {
+          "label": "def rebalance():\n    global low_size, high_size\n    if low_size < high_size - 1:\n        val = -heapq.heappop(low)\n        heapq.heappush(high, val)\n        low_size += 1\n        high_size -= 1",
+          "isCode": true
+        },
+        {
+          "label": "def rebalance():\n    global low_size, high_size\n    pass",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Move one element across when the invariant is violated, respecting signs and sizes.",
+      "wrongExplanations": {
+        "1": "Moves values without sign inversion and can overshoot the required invariant."
+      },
+      "hint": "Only move one when low is too big or too small.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def rebalance():\n    global low_size, high_size\n    if low_size > high_size + 1:\n        val = -heapq.heappop(low)\n        heapq.heappush(high, val)\n        low_size -= 1\n        high_size += 1\n        prune_top(low, True)\n    elif low_size < high_size:\n        val = heapq.heappop(high)\n        heapq.heappush(low, -val)\n        low_size += 1\n        high_size -= 1\n        prune_top(high, False)",
+      "codeLabel": "Rebalance"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "Implement insertion of a new number x into the correct heap and rebalance.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def add_num(x):\n    global low_size, high_size\n    if not low or x <= -low[0]:\n        heapq.heappush(low, -x)\n        low_size += 1\n    else:\n        heapq.heappush(high, x)\n        high_size += 1\n    rebalance()",
+          "isCode": true
+        },
+        {
+          "label": "def add_num(x):\n    global low_size, high_size\n    if not low or x < -low[0]:\n        heapq.heappush(low, x)\n        low_size += 1\n    else:\n        heapq.heappush(high, -x)\n        high_size += 1\n    rebalance()",
+          "isCode": true
+        },
+        {
+          "label": "def add_num(x):\n    global low_size, high_size\n    heapq.heappush(high, x)\n    high_size += 1\n    rebalance()",
+          "isCode": true
+        },
+        {
+          "label": "def add_num(x):\n    global low_size, high_size\n    if not low:\n        heapq.heappush(high, x)\n        high_size += 1\n    else:\n        heapq.heappush(low, -x)\n        low_size += 1",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Use <= to tie-break to lower; remember to negate for the lower heap.",
+      "wrongExplanations": {
+        "1": "Signs are flipped on the wrong heaps and '<' mishandles ties.",
+        "3": "Always pushing to one side breaks balance and ordering."
+      },
+      "hint": "Where should equals to current median go?",
+      "isCodeBuilding": true,
+      "codeSnippet": "def add_num(x):\n    global low_size, high_size\n    if not low or x <= -low[0]:\n        heapq.heappush(low, -x)\n        low_size += 1\n    else:\n        heapq.heappush(high, x)\n        high_size += 1\n    rebalance()",
+      "codeLabel": "Insert value"
+    },
+    {
+      "id": "q22",
+      "phase": "Writing the Code",
+      "questionText": "Implement removing a number x using delayed deletion and rebalance.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def remove_num(x):\n    global low_size, high_size\n    delayed[x] = delayed.get(x, 0) + 1\n    if x <= -low[0]:\n        low_size -= 1\n        if low and -low[0] == x:\n            prune_top(low, True)\n    else:\n        high_size -= 1\n        if high and high[0] == x:\n            prune_top(high, False)\n    rebalance()",
+          "isCode": true
+        },
+        {
+          "label": "def remove_num(x):\n    global low_size, high_size\n    if x in low:\n        low.remove(-x)\n        heapq.heapify(low)\n        low_size -= 1\n    else:\n        high.remove(x)\n        heapq.heapify(high)\n        high_size -= 1\n    rebalance()",
+          "isCode": true
+        },
+        {
+          "label": "def remove_num(x):\n    global low_size, high_size\n    delayed[x] = 1\n    low_size -= 1\n    prune_top(low, True)\n    rebalance()",
+          "isCode": true
+        },
+        {
+          "label": "def remove_num(x):\n    global low_size, high_size\n    delayed[x] = delayed.get(x, 0) + 1\n    if x < -low[0]:\n        low_size -= 1\n    else:\n        high_size -= 1\n    rebalance()",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Use delayed counts, assign by x <= current median, prune if it matches the top, then rebalance.",
+      "wrongExplanations": {
+        "1": "heapq doesn't support fast arbitrary deletion; this is too slow.",
+        "4": "Index 4 doesn't exist; ensure you pick one of the four options."
+      },
+      "hint": "Compare x with current median using <=.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def remove_num(x):\n    global low_size, high_size\n    delayed[x] = delayed.get(x, 0) + 1\n    if x <= -low[0]:\n        low_size -= 1\n        if low and -low[0] == x:\n            prune_top(low, True)\n    else:\n        high_size -= 1\n        if high and high[0] == x:\n            prune_top(high, False)\n    rebalance()",
+      "codeLabel": "Remove value"
+    },
+    {
+      "id": "q23",
+      "phase": "Writing the Code",
+      "questionText": "Implement a function to get the current median.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def get_median():\n    prune_top(low, True)\n    return -low[0]",
+          "isCode": true
+        },
+        {
+          "label": "def get_median():\n    prune_top(high, False)\n    return high[0]",
+          "isCode": true
+        },
+        {
+          "label": "def get_median():\n    return -low[0]",
+          "isCode": true
+        },
+        {
+          "label": "def get_median():\n    return (high[0] - low[0]) // 2",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Median is the max of lower. Prune first to ensure the top is valid.",
+      "wrongExplanations": {
+        "2": "Top may be stale without pruning.",
+        "1": "We need the smaller median; upper's top is the larger middle when even."
+      },
+      "hint": "Which heap holds the median by our invariant?",
+      "isCodeBuilding": true,
+      "codeSnippet": "def get_median():\n    prune_top(low, True)\n    return -low[0]",
+      "codeLabel": "Get median"
+    },
+    {
+      "id": "q24",
+      "phase": "Writing the Code",
+      "questionText": "Write the main loop to add new elements, remove outgoing ones, and collect medians.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "res = []\nfor i, x in enumerate(arr):\n    add_num(x)\n    if i >= k:\n        remove_num(arr[i - k])\n    if i >= k - 1:\n        res.append(str(get_median()))\nprint(\" \".join(res))",
+          "isCode": true
+        },
+        {
+          "label": "res = []\nfor i, x in enumerate(arr):\n    if i >= k:\n        remove_num(arr[i - k])\n    add_num(x)\n    if i >= k:\n        res.append(str(get_median()))\nprint(\" \".join(res))",
+          "isCode": true
+        },
+        {
+          "label": "res = []\nfor i, x in enumerate(arr):\n    add_num(x)\n    if i > k - 1:\n        remove_num(arr[i - k])\n    if i >= k - 1:\n        res.append(str(get_median()))\nprint(\" \".join(res))",
+          "isCode": true
+        },
+        {
+          "label": "res = []\nfor i, x in enumerate(arr):\n    add_num(x)\n    if i >= k - 1:\n        remove_num(arr[i - k + 1])\n        res.append(str(get_median()))\nprint(\" \".join(res))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Insert first, remove when i >= k, and record median when the first full window forms (i >= k-1).",
+      "wrongExplanations": {
+        "1": "You delay medians by one step; first median appears at i == k - 1.",
+        "3": "This removes an element too early; window size becomes k-1 at median time."
+      },
+      "hint": "First median appears when i == k - 1.",
+      "isCodeBuilding": true,
+      "codeSnippet": "res = []\nfor i, x in enumerate(arr):\n    add_num(x)\n    if i >= k:\n        remove_num(arr[i - k])\n    if i >= k - 1:\n        res.append(str(get_median()))\nprint(\" \".join(res))",
+      "codeLabel": "Main loop and output"
+    },
+    {
+      "id": "q25",
+      "phase": "Verifying the Solution",
+      "questionText": "For input n=8, k=3 and array [2,4,3,5,8,1,2,1], what is the median of the 4th window (elements 3..5)?",
+      "diagram": "Window 4: [5,8,1], sorted [1,5,8]",
+      "options": [
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        },
+        {
+          "label": "8",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Sorted [1,5,8], the middle is 5.",
+      "wrongExplanations": {
+        "0": "4 is not in this window."
+      },
+      "hint": "Sort [5,8,1].",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Verifying the Solution",
+      "questionText": "What full output should the program print for the example input?",
+      "diagram": "Input:\n8 3\n2 4 3 5 8 1 2 1",
+      "options": [
+        {
+          "label": "3 4 5 5 2 1",
+          "isCode": false
+        },
+        {
+          "label": "3 4 5 8 2 1",
+          "isCode": false
+        },
+        {
+          "label": "2 3 4 5 1 1",
+          "isCode": false
+        },
+        {
+          "label": "4 4 5 5 2 1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The medians per window are: 3,4,5,5,2,1.",
+      "wrongExplanations": {
+        "1": "The 4th window median is 5, not 8."
+      },
+      "hint": "Verify each window: [2,4,3], [4,3,5], ...",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q27",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the amortized time per step (insert+remove+median) with the two-heap and delayed deletion approach?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(1)",
+          "isCode": false
+        },
+        {
+          "label": "O(log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(log k)",
+          "isCode": false
+        },
+        {
+          "label": "O(k)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Each heap operation is O(log k); pruning is amortized O(1) per removal.",
+      "wrongExplanations": {
+        "1": "Operations depend on window size k, not n."
+      },
+      "hint": "Heap pushes/pops dominate.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q28",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the overall time complexity for processing all windows?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log k)",
+          "isCode": false
+        },
+        {
+          "label": "O(n k)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "There are O(n) steps with O(log k) work each: O(n log k).",
+      "wrongExplanations": {
+        "0": "We pay logarithmic cost for heap operations."
+      },
+      "hint": "Multiply per-step cost by the number of steps.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q29",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the extra space used by the data structures (excluding input and output)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(1)",
+          "isCode": false
+        },
+        {
+          "label": "O(k)",
+          "isCode": false
+        },
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(k log k)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Two heaps plus delayed map store at most O(k) elements.",
+      "wrongExplanations": {
+        "0": "We store up to k elements in the heaps."
+      },
+      "hint": "How many elements can be held across both heaps and the map?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys, heapq\ndata = list(map(int, sys.stdin.read().strip().split()))\nn, k = data[0], data[1]\narr = data[2:2+n]",
+    "low = []  # max-heap via negatives\nhigh = [] # min-heap\ndelayed = {}\nlow_size = 0\nhigh_size = 0",
+    "def prune_top(heap, is_low):\n    while heap:\n        x = -heap[0] if is_low else heap[0]\n        if delayed.get(x, 0):\n            heapq.heappop(heap)\n            delayed[x] -= 1\n            if delayed[x] == 0:\n                delayed.pop(x)\n        else:\n            break",
+    "def rebalance():\n    global low_size, high_size\n    if low_size > high_size + 1:\n        val = -heapq.heappop(low)\n        heapq.heappush(high, val)\n        low_size -= 1\n        high_size += 1\n        prune_top(low, True)\n    elif low_size < high_size:\n        val = heapq.heappop(high)\n        heapq.heappush(low, -val)\n        low_size += 1\n        high_size -= 1\n        prune_top(high, False)",
+    "def add_num(x):\n    global low_size, high_size\n    if not low or x <= -low[0]:\n        heapq.heappush(low, -x)\n        low_size += 1\n    else:\n        heapq.heappush(high, x)\n        high_size += 1\n    rebalance()",
+    "def remove_num(x):\n    global low_size, high_size\n    delayed[x] = delayed.get(x, 0) + 1\n    if x <= -low[0]:\n        low_size -= 1\n        if low and -low[0] == x:\n            prune_top(low, True)\n    else:\n        high_size -= 1\n        if high and high[0] == x:\n            prune_top(high, False)\n    rebalance()",
+    "def get_median():\n    prune_top(low, True)\n    return -low[0]",
+    "res = []\nfor i, x in enumerate(arr):\n    add_num(x)\n    if i >= k:\n        remove_num(arr[i - k])\n    if i >= k - 1:\n        res.append(str(get_median()))\nprint(\" \".join(res))"
+  ],
+  "reasoningChain": [
+    {
+      "question": "What exactly is the median when k is even in this problem?",
+      "insight": "For even k, we choose the smaller of the two middle elements. This defines which side should hold ties."
+    },
+    {
+      "question": "Why is sorting each window too slow and what operations do we need per step?",
+      "insight": "Sorting each window is O(n k log k); instead we need fast insert, delete, and read-median operations per element."
+    },
+    {
+      "question": "How to maintain elements so median is quickly accessible?",
+      "insight": "Split elements into two heaps: lower half (max-oriented) and upper half (min-oriented), keeping sizes balanced so the median is at lower's top."
+    },
+    {
+      "question": "How to handle deletions of arbitrary elements leaving the window?",
+      "insight": "Use a counter to mark elements for delayed removal and prune them when they reach the top of their heap."
+    },
+    {
+      "question": "Where do equal-to-median elements go and how to rebalance?",
+      "insight": "Insert with x <= max(lower) into lower to ensure the smaller median; rebalance so lower has either the same size as upper or one more."
+    },
+    {
+      "question": "How to implement a max-oriented structure in Python and compute median?",
+      "insight": "Use negatives in heapq for the lower heap; the median is always -low[0] after pruning."
+    },
+    {
+      "question": "What complexity does this achieve?",
+      "insight": "Each update is O(log k) and median query is O(1), giving total O(n log k) time and O(k) extra space."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1394,
+    "output_tokens": 15191,
+    "input_cost": 0.001742,
+    "output_cost": 0.15191,
+    "total_cost": 0.153652
+  }
+}

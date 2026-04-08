@@ -1,0 +1,970 @@
+{
+  "id": "distinct-routes-ii-min-coins",
+  "title": "Distinct Routes II",
+  "difficulty": "hard",
+  "tags": [
+    "advanced"
+  ],
+  "estimatedMinutes": 90,
+  "language": "python",
+  "description": "You are given a directed graph with n rooms (1..n) and m teleporters. Each teleporter can be used at most once overall (across all days). Each day you start at room 1 and must reach room n. Using any teleporter costs 1 coin. You must play exactly k days. Find the minimum total number of coins you must pay over k days if you plan optimally, and output one set of k routes that achieves this minimum. If it is impossible to play for k days, print only -1.\n\nInput:\n- First line: n m k\n- Next m lines: a b meaning a teleporter from a to b.\n\nOutput:\n- If impossible: print -1\n- Otherwise: print the minimum number of coins, then k route descriptions according to the example. Each route is printed as two lines: first the number of rooms on the route, then the list of rooms.\n\nNote: Using a teleporter incurs a cost of 1 coin each time it is used, and each teleporter can be used at most once across all k days.",
+  "examples": [
+    {
+      "input": "8 10 2\n1 2\n1 3\n2 5\n2 4\n3 5\n3 6\n4 8\n5 8\n6 7\n7 8\n",
+      "output": "6\n4\n1 2 4 8\n4\n1 3 5 8\n",
+      "explanation": "Two edge-disjoint routes are chosen: 1->2->4->8 and 1->3->5->8. Each has length 3 edges, so total coins = 6."
+    }
+  ],
+  "constraints": [
+    "2 <= n <= 500",
+    "1 <= m <= 1000",
+    "1 <= k <= n-1",
+    "1 <= a,b <= n",
+    "No two teleporters share the same (a,b) pair"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "A single day uses route 1->2->5->n (three teleporters). How many coins are paid that day?",
+      "diagram": "1 -> 2 -> 5 -> n",
+      "options": [
+        {
+          "label": "3 coins",
+          "isCode": false
+        },
+        {
+          "label": "4 coins (rooms visited)",
+          "isCode": false
+        },
+        {
+          "label": "2 coins (unique rooms excluding start)",
+          "isCode": false
+        },
+        {
+          "label": "1 coin (one route)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each teleporter costs 1 coin. Three teleporters are used, so 3 coins.",
+      "wrongExplanations": {
+        "1": "Coins depend on teleporters used, not rooms.",
+        "3": "It's per teleporter, not per path."
+      },
+      "hint": "Count the edges, not the vertices.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "Teleporters can be used at most once during the game. If you play for k days, can the same teleporter be reused on different days?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "No, each teleporter can be used at most once across all days",
+          "isCode": false
+        },
+        {
+          "label": "Yes, teleporters reset each day",
+          "isCode": false
+        },
+        {
+          "label": "Only if used by different routes on the same day",
+          "isCode": false
+        },
+        {
+          "label": "Only if the teleporter is part of a shortest route",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The rule applies to the whole game. Using it once forbids further use on any day.",
+      "wrongExplanations": {
+        "1": "The statement says 'during the game', not 'per day'."
+      },
+      "hint": "Focus on 'at most once during the game'.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "When is it impossible to play for k days?",
+      "diagram": "1 -> ... -> n\nEdges can be used at most once overall.",
+      "options": [
+        {
+          "label": "If there are fewer than k edge-disjoint paths from 1 to n",
+          "isCode": false
+        },
+        {
+          "label": "If every path from 1 to n has length > n",
+          "isCode": false
+        },
+        {
+          "label": "If any path uses a cycle",
+          "isCode": false
+        },
+        {
+          "label": "If m < n-1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "You need k routes that do not share teleporters. If fewer exist, it's impossible.",
+      "wrongExplanations": {
+        "3": "m < n-1 does not automatically imply impossibility; structure matters."
+      },
+      "hint": "Think about edge reuse constraints across days.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "You must minimize total coins over k days. What does this minimize over the chosen routes?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "The sum of the number of teleporters used across the k routes",
+          "isCode": false
+        },
+        {
+          "label": "The maximum number of teleporters used in a single route",
+          "isCode": false
+        },
+        {
+          "label": "The sum of distinct rooms visited across all routes",
+          "isCode": false
+        },
+        {
+          "label": "The number of days with the shortest route",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each teleporter costs 1. Total coins equals total edges used across all k routes.",
+      "wrongExplanations": {
+        "1": "We minimize the total sum, not the maximum.",
+        "2": "Rooms don't affect cost; teleporters do."
+      },
+      "hint": "The objective is additive over edges used.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Understanding the Problem",
+      "questionText": "When printing a route, what number should you print before listing rooms?",
+      "diagram": "Example shows '4' then '1 2 4 8'",
+      "options": [
+        {
+          "label": "The number of rooms on the route",
+          "isCode": false
+        },
+        {
+          "label": "The number of teleporters on the route",
+          "isCode": false
+        },
+        {
+          "label": "The total coins so far",
+          "isCode": false
+        },
+        {
+          "label": "The number of unused teleporters left",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Output format uses number of rooms, then room list.",
+      "wrongExplanations": {
+        "1": "Coins are counted by edges, but printing uses number of rooms."
+      },
+      "hint": "Follow the example output format exactly.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "If you greedily pick the shortest route from 1 to n each day and remove its teleporters, will this always minimize total coins?",
+      "diagram": "Consider a case where the first shortest path blocks two slightly longer disjoint paths.",
+      "options": [
+        {
+          "label": "No, the first choice can block a combination that is better overall",
+          "isCode": false
+        },
+        {
+          "label": "Yes, because shortest paths are always optimal individually",
+          "isCode": false
+        },
+        {
+          "label": "Yes, because teleporters have uniform cost",
+          "isCode": false
+        },
+        {
+          "label": "Only if k = 1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Local choices can block future routes; total sum may increase.",
+      "wrongExplanations": {
+        "1": "Uniform costs don't make independent choices optimal."
+      },
+      "hint": "Think about interactions between routes due to edge reuse constraints.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "To allow re-routing later, when a teleporter a->b is used once, what virtual connection should we add to permit 'undoing' that decision?",
+      "diagram": "a -> b (used once)\nAdd a connection b -> a with what cost?",
+      "options": [
+        {
+          "label": "Add b->a with cost -1 and capacity equal to how many times a->b was used",
+          "isCode": false
+        },
+        {
+          "label": "Add b->a with cost +1 and capacity infinity",
+          "isCode": false
+        },
+        {
+          "label": "Add b->a with cost 0 and capacity 1",
+          "isCode": false
+        },
+        {
+          "label": "Do nothing; re-routing isn't needed",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Using b->a with cost -1 cancels one prior +1 use, freeing the teleporter.",
+      "wrongExplanations": {
+        "1": "Cost +1 wouldn't refund the earlier use.",
+        "2": "Cost 0 wouldn't reflect freeing up a paid edge."
+      },
+      "hint": "Undoing should refund the previously paid coin for that teleporter.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Exploring Approaches",
+      "questionText": "After adding such reverse connections, the graph can have negative-cost edges. How should we find a cheapest 1->n route at each step?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Use a priority queue on adjusted edge costs so all considered costs are non-negative",
+          "isCode": false
+        },
+        {
+          "label": "Use simple BFS by edge count",
+          "isCode": false
+        },
+        {
+          "label": "Ignore reverse edges since they are negative",
+          "isCode": false
+        },
+        {
+          "label": "Pick any path; reverse edges will fix it later automatically",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Adjust costs to be non-negative and use a priority queue to find shortest current route safely.",
+      "wrongExplanations": {
+        "1": "Edge counts alone ignore costs and negative edges."
+      },
+      "hint": "We need non-negative adjusted costs for efficient shortest route computations.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "Let p[v] be an array of adjustments. What adjusted cost should we use for an edge u->v with original cost c?",
+      "diagram": "Adjusted cost = ?",
+      "options": [
+        {
+          "label": "c + p[u] - p[v]",
+          "isCode": false
+        },
+        {
+          "label": "c + p[v] - p[u]",
+          "isCode": false
+        },
+        {
+          "label": "c - p[u] - p[v]",
+          "isCode": false
+        },
+        {
+          "label": "c + p[u] + p[v]",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Using c + p[u] - p[v] keeps adjusted costs non-negative if p is updated consistently.",
+      "wrongExplanations": {
+        "1": "This would break non-negativity guarantees."
+      },
+      "hint": "We want adjusted costs so the path distances align with original costs.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "After computing shortest adjusted distances dist[], how should we update p[] to keep adjusted costs non-negative next time?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "For all reachable v, set p[v] = p[v] + dist[v]",
+          "isCode": false
+        },
+        {
+          "label": "Set p[v] = dist[v] for all v",
+          "isCode": false
+        },
+        {
+          "label": "Set p[v] = p[v] - dist[v]",
+          "isCode": false
+        },
+        {
+          "label": "Do not update p[]",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Adding dist[v] preserves non-negative adjusted costs and aligns adjusted distances with original costs.",
+      "wrongExplanations": {
+        "1": "Overwrites p without anchoring at s; incremental update is needed."
+      },
+      "hint": "Only update vertices reached in the search.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "How many times should we find and augment a 1->n route with current costs and adjustments?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Up to k times, stopping early if no route exists",
+          "isCode": false
+        },
+        {
+          "label": "Exactly m times",
+          "isCode": false
+        },
+        {
+          "label": "Until all edges are used",
+          "isCode": false
+        },
+        {
+          "label": "Once, then multiply by k",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need k unit routes; stop early if no more routes can be found.",
+      "wrongExplanations": {
+        "1": "m has no direct connection to number of days.",
+        "2": "We only need k routes, not exhaustion."
+      },
+      "hint": "Each iteration contributes exactly one day’s route.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "When we select a route, how should we add to the total number of coins?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Sum the original costs of the edges along the chosen route",
+          "isCode": false
+        },
+        {
+          "label": "Use the adjusted distance at n directly without correction",
+          "isCode": false
+        },
+        {
+          "label": "Add 1 regardless of route length",
+          "isCode": false
+        },
+        {
+          "label": "Sum adjusted costs of edges (which include p)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We pay per teleporter used. Sum the original costs along the route.",
+      "wrongExplanations": {
+        "1": "Adjusted distances need interpretation; directly summing original costs is simple and correct."
+      },
+      "hint": "Each teleporter has original cost 1 (forward), -1 only on undo edges.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "We need to toggle usage and undoing on edges efficiently. What should we store for each edge?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "to-node, index of reverse edge, remaining uses (0/1), and cost",
+          "isCode": false
+        },
+        {
+          "label": "Only to-node and cost",
+          "isCode": false
+        },
+        {
+          "label": "to-node, from-node, copy of adjacency list",
+          "isCode": false
+        },
+        {
+          "label": "to-node and whether it was visited in last search",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need to update both directions quickly: reverse index, remaining usage, and cost.",
+      "wrongExplanations": {
+        "1": "Without reverse edge index, undoing is hard."
+      },
+      "hint": "Think about how to increase reverse availability when you use an edge.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Building the Idea",
+      "questionText": "After planning k routes, how do we reconstruct the actual room sequences for output?",
+      "diagram": "Follow only edges that ended up used exactly once.",
+      "options": [
+        {
+          "label": "Walk from 1 to n following forward edges with remaining uses = 0 (i.e., used), marking them to avoid reuse, repeat k times",
+          "isCode": false
+        },
+        {
+          "label": "Rerun shortest path k times on the original graph",
+          "isCode": false
+        },
+        {
+          "label": "Print only 1 and n, ignoring intermediate rooms",
+          "isCode": false
+        },
+        {
+          "label": "Randomly walk until reaching n",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Used forward edges (capacity consumed) form k disjoint routes; consume them to extract paths.",
+      "wrongExplanations": {
+        "1": "This ignores the constraint that each teleporter was used at most once."
+      },
+      "hint": "Each used teleporter belongs to exactly one of the k routes.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Set up input reading and main structure.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\nfrom heapq import heappush, heappop\n\ndef main():\n    data = list(map(int, sys.stdin.read().strip().split()))\n    if not data:\n        return\n    it = iter(data)\n    n = next(it); m = next(it); k = next(it)\n",
+          "isCode": true
+        },
+        {
+          "label": "import sys\nfrom heapq import heappush, heappop\n\ndef main():\n    n, m, k = map(int, sys.stdin.readline().split())\n    data = []\n",
+          "isCode": true
+        },
+        {
+          "label": "from heapq import heappush, heappop\n\ndef main():\n    data = sys.stdin.read().split()\n    it = iter(data)\n    n = int(next(it)); m = int(next(it)); k = int(next(it))\n",
+          "isCode": true
+        },
+        {
+          "label": "import sys\n\ndef main():\n    tokens = sys.stdin.read().split()\n    n = int(tokens[0]); m = int(tokens[1])\n    # k is missing\n",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We read all integers, handle empty input, and parse n, m, k.",
+      "wrongExplanations": {
+        "1": "Only reads one line; input has m lines following.",
+        "3": "Does not parse k."
+      },
+      "hint": "Simplify by reading the entire input as integers.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\nfrom heapq import heappush, heappop\n\ndef main():\n    data = list(map(int, sys.stdin.read().strip().split()))\n    if not data:\n        return\n    it = iter(data)\n    n = next(it); m = next(it); k = next(it)",
+      "codeLabel": "Boilerplate: imports and input"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Define the graph structure and the function to add a teleporter with a reverse 'undo' connection.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    adj = [[] for _ in range(n)]\n    def add_edge(u, v, cost):\n        adj[u].append([v, len(adj[v]), 1, cost])\n        adj[v].append([u, len(adj[u]) - 1, 0, -cost])\n",
+          "isCode": true
+        },
+        {
+          "label": "    adj = [[] for _ in range(n)]\n    def add_edge(u, v, cost):\n        adj[u].append([v, len(adj[v]), 1, cost])\n        adj[v].append([u, len(adj[u]) - 1, 1, cost])\n",
+          "isCode": true
+        },
+        {
+          "label": "    adj = [[] for _ in range(n)]\n    def add_edge(u, v, cost):\n        adj[u].append([v, 0, 1, cost])\n        adj[v].append([u, 0, 0, cost])\n",
+          "isCode": true
+        },
+        {
+          "label": "    adj = [[] for _ in range(n)]\n    def add_edge(u, v, cost):\n        adj[u].append([v, len(adj[v]), 1, -cost])\n        adj[v].append([u, len(adj[u]) - 1, 0, cost])\n",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Forward cap=1 cost=+1, reverse cap=0 cost=-1 lets us undo usage later.",
+      "wrongExplanations": {
+        "1": "Reverse cap should start at 0 and cost should be negative.",
+        "3": "Swapping signs breaks the refund behavior."
+      },
+      "hint": "Reverse cost should negate the forward cost.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    adj = [[] for _ in range(n)]\n    def add_edge(u, v, cost):\n        adj[u].append([v, len(adj[v]), 1, cost])\n        adj[v].append([u, len(adj[u]) - 1, 0, -cost])",
+      "codeLabel": "Graph and add_edge"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Read teleporters and add them to the graph with unit cost.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    for _ in range(m):\n        a = next(it) - 1\n        b = next(it) - 1\n        add_edge(a, b, 1)\n",
+          "isCode": true
+        },
+        {
+          "label": "    for _ in range(m):\n        a = next(it)\n        b = next(it)\n        add_edge(a, b, 1)\n",
+          "isCode": true
+        },
+        {
+          "label": "    for _ in range(m):\n        a, b = map(int, sys.stdin.readline().split())\n        add_edge(a-1, b-1, 0)\n",
+          "isCode": true
+        },
+        {
+          "label": "    for _ in range(m):\n        a = next(it) - 1\n        b = next(it) - 1\n        add_edge(b, a, 1)\n",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We read from the iterator, convert to 0-based, and cost is 1 per teleporter.",
+      "wrongExplanations": {
+        "1": "We must convert to 0-based indices.",
+        "2": "Cost should be 1, not 0.",
+        "3": "Direction matters: teleporter is from a to b."
+      },
+      "hint": "Remember to use 0-based indices within the code.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    for _ in range(m):\n        a = next(it) - 1\n        b = next(it) - 1\n        add_edge(a, b, 1)",
+      "codeLabel": "Read edges"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Initialize core variables before iteratively selecting routes.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    s, t = 0, n - 1\n    INF = 10 ** 18\n    pot = [0] * n\n    totalCost = 0\n    flow = 0\n",
+          "isCode": true
+        },
+        {
+          "label": "    s, t = 1, n\n    INF = 10 ** 6\n    pot = [1] * n\n    totalCost = 0\n    flow = 0\n",
+          "isCode": true
+        },
+        {
+          "label": "    s, t = 0, n - 1\n    INF = 10 ** 9\n    pot = [0] * n\n    totalCost = 1\n    flow = k\n",
+          "isCode": true
+        },
+        {
+          "label": "    s, t = 0, n - 1\n    pot = []\n    totalCost = 0\n    flow = 0\n",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Use 0-based s,t, large INF, zeroed adjustments, and counters at zero.",
+      "wrongExplanations": {
+        "1": "We use 0-based, and INF should be very large. pot starts at 0."
+      },
+      "hint": "Start with no adjustments and no flow.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    s, t = 0, n - 1\n    INF = 10 ** 18\n    pot = [0] * n\n    totalCost = 0\n    flow = 0",
+      "codeLabel": "Initialize"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Implement the repeated adjusted-cost shortest path search and update adjustments.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    for _ in range(k):\n        dist = [INF] * n\n        dist[s] = 0\n        parent = [(-1, -1)] * n\n        pq = [(0, s)]\n        while pq:\n            d, u = heappop(pq)\n            if d != dist[u]:\n                continue\n            for i, e in enumerate(adj[u]):\n                v, rev, cap, cost = e\n                if cap > 0:\n                    nd = d + cost + pot[u] - pot[v]\n                    if nd < dist[v]:\n                        dist[v] = nd\n                        parent[v] = (u, i)\n                        heappush(pq, (nd, v))\n        if dist[t] == INF:\n            break\n        for v in range(n):\n            if dist[v] < INF:\n                pot[v] += dist[v]\n",
+          "isCode": true
+        },
+        {
+          "label": "    for _ in range(k):\n        dist = [0] * n\n        parent = [(-1, -1)] * n\n        pq = [(0, s)]\n        while pq:\n            d, u = heappop(pq)\n            for i, e in enumerate(adj[u]):\n                v, rev, cap, cost = e\n                if cap > 0 and d + 1 < dist[v]:\n                    dist[v] = d + 1\n                    parent[v] = (u, i)\n                    heappush(pq, (dist[v], v))\n        for v in range(n):\n            pot[v] += dist[v]\n",
+          "isCode": true
+        },
+        {
+          "label": "    for _ in range(k):\n        dist = [INF] * n\n        dist[s] = 0\n        parent = [(-1, -1)] * n\n        pq = [(0, s)]\n        while pq:\n            d, u = heappop(pq)\n            for i, e in enumerate(adj[u]):\n                v, rev, cap, cost = e\n                if cap > 0:\n                    nd = d + cost\n                    if nd <= dist[v]:\n                        dist[v] = nd\n                        parent[v] = (u, i)\n                        heappush(pq, (nd, v))\n        if dist[t] == INF:\n            break\n",
+          "isCode": true
+        },
+        {
+          "label": "    for _ in range(k):\n        parent = [(-1, -1)] * n\n        dist = [0] * n\n        # no queue; linear scan\n        for u in range(n):\n            for i, e in enumerate(adj[u]):\n                v, rev, cap, cost = e\n                if cap > 0 and dist[u] + cost + pot[v] - pot[u] < dist[v]:\n                    dist[v] = dist[u] + cost + pot[v] - pot[u]\n                    parent[v] = (u, i)\n        if parent[t][0] == -1:\n            break\n",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We use a priority queue with adjusted costs c + p[u] - p[v], and update p[v] by dist[v] for reached nodes.",
+      "wrongExplanations": {
+        "1": "Using edge count ignores costs and adjustments.",
+        "2": "Ignoring adjustments can traverse negative edges incorrectly."
+      },
+      "hint": "Keep adjusted costs non-negative, and remember to update parent pointers.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    for _ in range(k):\n        dist = [INF] * n\n        dist[s] = 0\n        parent = [(-1, -1)] * n\n        pq = [(0, s)]\n        while pq:\n            d, u = heappop(pq)\n            if d != dist[u]:\n                continue\n            for i, e in enumerate(adj[u]):\n                v, rev, cap, cost = e\n                if cap > 0:\n                    nd = d + cost + pot[u] - pot[v]\n                    if nd < dist[v]:\n                        dist[v] = nd\n                        parent[v] = (u, i)\n                        heappush(pq, (nd, v))\n        if dist[t] == INF:\n            break\n        for v in range(n):\n            if dist[v] < INF:\n                pot[v] += dist[v]",
+      "codeLabel": "Adjusted shortest path + update"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Augment one route using parent pointers, update capacities, and accumulate original cost.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "        v = t\n        path_cost = 0\n        if parent[v][0] == -1:\n            break\n        while v != s:\n            u, i = parent[v]\n            to, rev, cap, cost = adj[u][i]\n            adj[u][i][2] -= 1\n            adj[v][rev][2] += 1\n            path_cost += cost\n            v = u\n        totalCost += path_cost\n        flow += 1\n",
+          "isCode": true
+        },
+        {
+          "label": "        v = s\n        path_cost = 0\n        while v != t:\n            u, i = parent[v]\n            to, rev, cap, cost = adj[u][i]\n            adj[u][i][2] -= 1\n            adj[v][rev][2] += 1\n            path_cost += cost\n            v = to\n        totalCost += path_cost\n        flow += 1\n",
+          "isCode": true
+        },
+        {
+          "label": "        v = t\n        path_cost = 0\n        while v != s:\n            u, i = parent[v]\n            to, rev, cap, cost = adj[u][i]\n            adj[u][i][2] += 1\n            adj[v][rev][2] -= 1\n            path_cost += cost\n            v = u\n        totalCost -= path_cost\n        flow += 1\n",
+          "isCode": true
+        },
+        {
+          "label": "        v = t\n        path_cost = 0\n        while v != s:\n            u, i = parent[v]\n            to, rev, cap, cost = adj[u][i]\n            adj[u][i][3] -= 1\n            adj[v][rev][3] += 1\n            path_cost += 1\n            v = u\n        totalCost += path_cost\n        flow += 1\n",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Walk from t to s, decrease forward capacity, increase reverse capacity, and sum original costs.",
+      "wrongExplanations": {
+        "1": "Parent links point backwards from v to u; start from t.",
+        "2": "Capacity updates should be forward -1, reverse +1; and add to total cost."
+      },
+      "hint": "Capacities: forward cap goes down (used), reverse cap goes up (undo available).",
+      "isCodeBuilding": true,
+      "codeSnippet": "        v = t\n        path_cost = 0\n        if parent[v][0] == -1:\n            break\n        while v != s:\n            u, i = parent[v]\n            to, rev, cap, cost = adj[u][i]\n            adj[u][i][2] -= 1\n            adj[v][rev][2] += 1\n            path_cost += cost\n            v = u\n        totalCost += path_cost\n        flow += 1",
+      "codeLabel": "Augment and add cost"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "If fewer than k routes were found, handle impossibility; otherwise print total cost, reconstruct and print the k routes.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    if flow < k:\n        print(-1)\n        return\n    print(totalCost)\n    paths = []\n    used = [ [False] * len(adj[u]) for u in range(n) ]\n    for _ in range(k):\n        cur = s\n        path = [s]\n        while cur != t:\n            found = False\n            for i, e in enumerate(adj[cur]):\n                v, rev, cap, cost = e\n                if cost == 1 and cap == 0 and not used[cur][i]:\n                    used[cur][i] = True\n                    cur = v\n                    path.append(cur)\n                    found = True\n                    break\n            if not found:\n                for i, e in enumerate(adj[cur]):\n                    v, rev, cap, cost = e\n                    if cap == 0 and cost >= 0 and not used[cur][i]:\n                        used[cur][i] = True\n                        cur = v\n                        path.append(cur)\n                        found = True\n                        break\n            if not found:\n                break\n        paths.append(path)\n    for path in paths:\n        print(len(path))\n        print(\" \".join(str(x + 1) for x in path))\n",
+          "isCode": true
+        },
+        {
+          "label": "    if flow <= k:\n        print(-1)\n        return\n    print(totalCost)\n    for _ in range(k):\n        print(2)\n        print(\"1 \"+str(n))\n",
+          "isCode": true
+        },
+        {
+          "label": "    if flow < k:\n        print(-1)\n    print(totalCost)\n    # no path reconstruction\n",
+          "isCode": true
+        },
+        {
+          "label": "    print(totalCost)\n    paths = []\n    for _ in range(k):\n        print(0)\n        print(\"\")\n",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We check feasibility, print cost, then recover k paths by consuming used forward edges.",
+      "wrongExplanations": {
+        "1": "flow == k is feasible; and printing dummy paths is invalid.",
+        "2": "Missing required k routes in the output."
+      },
+      "hint": "Use cap==0 and cost==1 to detect used forward edges.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    if flow < k:\n        print(-1)\n        return\n    print(totalCost)\n    paths = []\n    used = [ [False] * len(adj[u]) for u in range(n) ]\n    for _ in range(k):\n        cur = s\n        path = [s]\n        while cur != t:\n            found = False\n            for i, e in enumerate(adj[cur]):\n                v, rev, cap, cost = e\n                if cost == 1 and cap == 0 and not used[cur][i]:\n                    used[cur][i] = True\n                    cur = v\n                    path.append(cur)\n                    found = True\n                    break\n            if not found:\n                for i, e in enumerate(adj[cur]):\n                    v, rev, cap, cost = e\n                    if cap == 0 and cost >= 0 and not used[cur][i]:\n                        used[cur][i] = True\n                        cur = v\n                        path.append(cur)\n                        found = True\n                        break\n            if not found:\n                break\n        paths.append(path)\n    for path in paths:\n        print(len(path))\n        print(\" \".join(str(x + 1) for x in path))",
+      "codeLabel": "Check feasibility and reconstruct paths"
+    },
+    {
+      "id": "q22",
+      "phase": "Writing the Code",
+      "questionText": "Finalize the script entry point.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "if __name__ == \"__main__\":\n    main()\n",
+          "isCode": true
+        },
+        {
+          "label": "if __name__ == \"__main__\":\n    pass\n",
+          "isCode": true
+        },
+        {
+          "label": "def __main__():\n    main()\n",
+          "isCode": true
+        },
+        {
+          "label": "main()\n",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Standard Python idiom to call main when run as a script.",
+      "wrongExplanations": {
+        "1": "Does nothing.",
+        "3": "This calls main even on import, which we avoid."
+      },
+      "hint": "Protect the call so importing doesn't execute it.",
+      "isCodeBuilding": true,
+      "codeSnippet": "if __name__ == \"__main__\":\n    main()",
+      "codeLabel": "Entry point"
+    },
+    {
+      "id": "q23",
+      "phase": "Verifying the Solution",
+      "questionText": "Consider:\n- n=4, m=5, k=2\n- Teleporters: 1->2, 2->4, 1->3, 3->4, 2->3\nWhat is the minimum total coins and one valid set of routes?",
+      "diagram": "1->2->4 and 1->3->4 are disjoint; 2->3 adds an alternative if rerouting needed.",
+      "options": [
+        {
+          "label": "Total coins 4; routes: 1 2 4 and 1 3 4",
+          "isCode": false
+        },
+        {
+          "label": "Total coins 3; routes: 1 2 4 and 1 4",
+          "isCode": false
+        },
+        {
+          "label": "Total coins 5; routes: 1 2 3 4 and 1 3 4",
+          "isCode": false
+        },
+        {
+          "label": "Impossible (-1)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Two disjoint 2-edge routes exist: sum is 4. Shorter 1->4 doesn't exist.",
+      "wrongExplanations": {
+        "1": "There is no direct 1->4.",
+        "2": "A longer pair isn't minimal."
+      },
+      "hint": "Find two edge-disjoint s->t paths with smallest total edges.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Verifying the Solution",
+      "questionText": "If the graph has only one route from 1 to n but k=2, what should the program output?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "-1 and nothing else",
+          "isCode": false
+        },
+        {
+          "label": "-1 and then the one route",
+          "isCode": false
+        },
+        {
+          "label": "0 and then no routes",
+          "isCode": false
+        },
+        {
+          "label": "Print one route twice",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "If fewer than k routes are found, we must print only -1.",
+      "wrongExplanations": {
+        "1": "We do not print any routes in the impossible case."
+      },
+      "hint": "Check the problem statement's output rule for impossible cases.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the time complexity in terms of n, m, k for this approach?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(k * m * log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n * m)",
+          "isCode": false
+        },
+        {
+          "label": "O(k * (n + m))",
+          "isCode": false
+        },
+        {
+          "label": "O(k^2 * m)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each of up to k iterations runs a priority-queue shortest path over m edges.",
+      "wrongExplanations": {
+        "1": "Linear-time per iteration does not hold with a priority queue."
+      },
+      "hint": "Consider the cost of each shortest path computation times k.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the auxiliary space usage (excluding input storage)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n + m)",
+          "isCode": false
+        },
+        {
+          "label": "O(k * n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(m^2)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We store adjacency lists and arrays of size n.",
+      "wrongExplanations": {
+        "1": "We don't store per-iteration structures scaled by k."
+      },
+      "hint": "Think adjacency storage and a few arrays of length n.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q27",
+      "phase": "Analyzing Complexity",
+      "questionText": "Which edge cases must be handled correctly?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "No route exists even once; k exceeds number of edge-disjoint routes; multiple valid outputs",
+          "isCode": false
+        },
+        {
+          "label": "Teleporters with a=b; negative k values",
+          "isCode": false
+        },
+        {
+          "label": "Unbounded k; infinite loops on cycles must be used to reduce cost",
+          "isCode": false
+        },
+        {
+          "label": "Require routes to be vertex-disjoint",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We must detect impossibility and can print any valid solution. Teleporters have a!=b per constraints.",
+      "wrongExplanations": {
+        "1": "Constraints forbid a=b and k is positive."
+      },
+      "hint": "Follow the constraint bounds and problem statement precisely.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\nfrom heapq import heappush, heappop\n\ndef main():\n    data = list(map(int, sys.stdin.read().strip().split()))\n    if not data:\n        return\n    it = iter(data)\n    n = next(it); m = next(it); k = next(it)",
+    "    adj = [[] for _ in range(n)]\n    def add_edge(u, v, cost):\n        adj[u].append([v, len(adj[v]), 1, cost])\n        adj[v].append([u, len(adj[u]) - 1, 0, -cost])",
+    "    for _ in range(m):\n        a = next(it) - 1\n        b = next(it) - 1\n        add_edge(a, b, 1)",
+    "    s, t = 0, n - 1\n    INF = 10 ** 18\n    pot = [0] * n\n    totalCost = 0\n    flow = 0",
+    "    for _ in range(k):\n        dist = [INF] * n\n        dist[s] = 0\n        parent = [(-1, -1)] * n\n        pq = [(0, s)]\n        while pq:\n            d, u = heappop(pq)\n            if d != dist[u]:\n                continue\n            for i, e in enumerate(adj[u]):\n                v, rev, cap, cost = e\n                if cap > 0:\n                    nd = d + cost + pot[u] - pot[v]\n                    if nd < dist[v]:\n                        dist[v] = nd\n                        parent[v] = (u, i)\n                        heappush(pq, (nd, v))\n        if dist[t] == INF:\n            break\n        for v in range(n):\n            if dist[v] < INF:\n                pot[v] += dist[v]",
+    "        v = t\n        path_cost = 0\n        if parent[v][0] == -1:\n            break\n        while v != s:\n            u, i = parent[v]\n            to, rev, cap, cost = adj[u][i]\n            adj[u][i][2] -= 1\n            adj[v][rev][2] += 1\n            path_cost += cost\n            v = u\n        totalCost += path_cost\n        flow += 1",
+    "    if flow < k:\n        print(-1)\n        return\n    print(totalCost)\n    paths = []\n    used = [ [False] * len(adj[u]) for u in range(n) ]\n    for _ in range(k):\n        cur = s\n        path = [s]\n        while cur != t:\n            found = False\n            for i, e in enumerate(adj[cur]):\n                v, rev, cap, cost = e\n                if cost == 1 and cap == 0 and not used[cur][i]:\n                    used[cur][i] = True\n                    cur = v\n                    path.append(cur)\n                    found = True\n                    break\n            if not found:\n                for i, e in enumerate(adj[cur]):\n                    v, rev, cap, cost = e\n                    if cap == 0 and cost >= 0 and not used[cur][i]:\n                        used[cur][i] = True\n                        cur = v\n                        path.append(cur)\n                        found = True\n                        break\n            if not found:\n                break\n        paths.append(path)\n    for path in paths:\n        print(len(path))\n        print(\" \".join(str(x + 1) for x in path))",
+    "if __name__ == \"__main__\":\n    main()"
+  ],
+  "reasoningChain": [
+    {
+      "question": "What exactly are we minimizing and under what constraints?",
+      "insight": "Total coins equal total number of teleporters used across k edge-disjoint 1->n routes; impossible if fewer than k such routes exist."
+    },
+    {
+      "question": "Why can't we just pick k greedy shortest routes one by one?",
+      "insight": "Early choices may block better combinations; we must allow revising earlier choices by 'undoing' used edges."
+    },
+    {
+      "question": "How can we enable undoing a previously used teleporter in our model?",
+      "insight": "Add a reverse connection with cost -1 and availability that reflects prior use, so taking it refunds the earlier coin and frees the edge."
+    },
+    {
+      "question": "How do we find cheapest routes when negative-cost reverse connections exist?",
+      "insight": "Maintain adjustments p[v] to make adjusted edge costs non-negative and use a priority queue to find the current cheapest route; then update p by the distances."
+    },
+    {
+      "question": "How do we assemble the final answer and output paths?",
+      "insight": "Repeat k route selections (stop early if none), sum original costs, then reconstruct k routes by walking forward edges used exactly once and print them."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1556,
+    "output_tokens": 17995,
+    "input_cost": 0.001945,
+    "output_cost": 0.17995,
+    "total_cost": 0.181895
+  }
+}

@@ -1,0 +1,921 @@
+{
+  "id": "sliding-window-xor",
+  "title": "Sliding Window Xor",
+  "difficulty": "intermediate",
+  "tags": [
+    "bitwise",
+    "arrays",
+    "streaming"
+  ],
+  "estimatedMinutes": 50,
+  "language": "python",
+  "description": "You are given an array of n integers. Your task is to calculate the bitwise xor of each window of k elements, from left to right.\n\nIn this problem the input data is large and it is created using a generator.\n\nThe first line contains two integers n and k : the number of elements and the size of the window.\n\nThe next line contains four integers x , a , b and c : the input generator parameters. The input is generated as follows:\n\nx_1 = x\nx_i = (a x_{i-1} + b) mod c for i = 2, 3, ..., n\n\nOutput\nPrint the xor of all window xors.",
+  "examples": [
+    {
+      "input": "8 5\n3 7 1 11\n",
+      "output": "0\n",
+      "explanation": "Generate the sequence using the given recurrence, compute each contiguous block of 5 values' xor from left to right, and xor all those window xors. The final result is 0."
+    }
+  ],
+  "constraints": [
+    "1 <= k <= n <= 10^7",
+    "0 <= x, a, b <= 10^9",
+    "1 <= c <= 10^9",
+    "Time Limit: 1.00 s",
+    "Memory Limit: 512 MB"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "Given array [1, 2, 3, 4] and k = 3, what is the final value to print?\nWindows (size 3): [1,2,3], [2,3,4]\n- Window xors: (1^2^3), (2^3^4)\n- Final answer is xor of all window xors.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "5",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "7",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "1^2^3 = 0 and 2^3^4 = 5, final is 0^5 = 5. Others ignore xor rules or mix up sums.",
+      "wrongExplanations": {
+        "1": "This is the first window xor only, not the final xor.",
+        "2": "This is the xor of all array elements, not required here."
+      },
+      "hint": "Compute each 3-length xor, then xor those two results.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "Which output is required by the problem?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Print each window's xor on its own line.",
+          "isCode": false
+        },
+        {
+          "label": "Print the xor of all window xors as a single integer.",
+          "isCode": false
+        },
+        {
+          "label": "Print the xor of the entire array.",
+          "isCode": false
+        },
+        {
+          "label": "Print the sum of all window xors.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "We must print a single integer equal to the xor of all window xors.",
+      "wrongExplanations": {
+        "0": "We are not asked to output intermediate window xors.",
+        "2": "Only if k = n would this match; generally it's different."
+      },
+      "hint": "The statement: 'Print the xor of all window xors.'",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "Given generator parameters x=1, a=2, b=1, c=10, what are x1..x4?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "1, 3, 7, 5",
+          "isCode": false
+        },
+        {
+          "label": "1, 3, 7, 3",
+          "isCode": false
+        },
+        {
+          "label": "1, 2, 5, 1",
+          "isCode": false
+        },
+        {
+          "label": "1, 3, 5, 1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "x1=1; x2=(2*1+1)%10=3; x3=(2*3+1)%10=7; x4=(2*7+1)%10=5.",
+      "wrongExplanations": {
+        "1": "x4 should be (2*7+1)%10 = 5, not 3.",
+        "2": "x2 is (2*1+1)%10 = 3, not 2."
+      },
+      "hint": "Apply x_i = (a*x_{i-1}+b) mod c step by step.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "n can be as large as 10^7 and values are defined by a recurrence. What is the best way to obtain array values?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Read n values from input; they are provided as a list.",
+          "isCode": false
+        },
+        {
+          "label": "Generate values on the fly using the recurrence; do not store the entire array.",
+          "isCode": false
+        },
+        {
+          "label": "Precompute and store all values in a Python list for quick access.",
+          "isCode": false
+        },
+        {
+          "label": "Alternate between reading and generating to reduce memory.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Values are not listed; they must be generated. Storing all can be too large.",
+      "wrongExplanations": {
+        "0": "Only generator parameters are given, not the full list.",
+        "2": "A list of size 10^7 in Python is heavy and unnecessary."
+      },
+      "hint": "Leverage the generator and process sequentially.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Exploring Approaches",
+      "questionText": "If you maintain a moving set of the last k elements to compute each window's xor directly, what extra memory is required in the worst case?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(k)",
+          "isCode": false
+        },
+        {
+          "label": "O(1)",
+          "isCode": false
+        },
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(log n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "You need to keep k current elements to drop the left and include the new right.",
+      "wrongExplanations": {
+        "1": "Without storing elements, you can't remove the outgoing value from xor.",
+        "2": "You never need to store all n values."
+      },
+      "hint": "How many values must be retained to update the current window xor?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "With n,k up to 10^7, is it safe to store the last k integers in a Python list?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, Python integers are small; memory is not a concern.",
+          "isCode": false
+        },
+        {
+          "label": "No, it can exceed the 512 MB limit when k is large.",
+          "isCode": false
+        },
+        {
+          "label": "Yes, as long as we delete elements promptly.",
+          "isCode": false
+        },
+        {
+          "label": "It depends on a,b,c; sometimes smaller.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "k can be 10^7; storing that many Python ints can exceed 512 MB.",
+      "wrongExplanations": {
+        "0": "Python ints are objects with significant overhead.",
+        "2": "Deleting still requires holding up to k elements during processing."
+      },
+      "hint": "Estimate memory per Python integer and multiply by k.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "Consider combining all window xors into one final xor. Using xor properties, how does a single array element arr[j] affect the final answer?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "It always appears exactly once in the final xor.",
+          "isCode": false
+        },
+        {
+          "label": "It contributes only if the number of windows covering it is odd.",
+          "isCode": false
+        },
+        {
+          "label": "It contributes only if k divides j.",
+          "isCode": false
+        },
+        {
+          "label": "It contributes only if its value is odd.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Xor cancels pairs; even occurrences cancel, odd remain.",
+      "wrongExplanations": {
+        "0": "Many elements appear in multiple windows.",
+        "2": "Coverage depends on index range, not divisibility."
+      },
+      "hint": "What happens when the same value is xored an even number of times?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Building the Idea",
+      "questionText": "For n=5, k=3, how many windows include each position j=1..5?",
+      "diagram": "j:    1  2  3  4  5\ncnt:  ?  ?  ?  ?  ?",
+      "options": [
+        {
+          "label": "[1, 2, 3, 2, 1]",
+          "isCode": false
+        },
+        {
+          "label": "[1, 3, 3, 3, 1]",
+          "isCode": false
+        },
+        {
+          "label": "[2, 3, 3, 3, 2]",
+          "isCode": false
+        },
+        {
+          "label": "[1, 2, 2, 2, 1]",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Windows: [1..3],[2..4],[3..5]. Coverage per position: 1,2,3,2,1.",
+      "wrongExplanations": {
+        "3": "This pattern applies to k=2, not k=3."
+      },
+      "hint": "List each window and count how many cover each index.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "Let i be the window start index (1..n-k+1). For a fixed position j (1-based), how many windows include j?",
+      "diagram": "Windows include j if i <= j <= i+k-1 ⇔ i ∈ [j-k+1, j] ∩ [1, n-k+1]",
+      "options": [
+        {
+          "label": "min(j, n-k+1) - max(1, j-k+1) + 1",
+          "isCode": false
+        },
+        {
+          "label": "min(j, k) - max(1, j-k) + 1",
+          "isCode": false
+        },
+        {
+          "label": "min(j, n) - max(1, j-k+1)",
+          "isCode": false
+        },
+        {
+          "label": "j - (k-1)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Start i must be in the intersection [j-k+1, j] and [1, n-k+1]. Its size gives the count.",
+      "wrongExplanations": {
+        "1": "The upper bound is j, not k; starts also limited by n-k+1.",
+        "3": "This ignores bounds and only works in a small prefix."
+      },
+      "hint": "Intersect the valid start range with [1, n-k+1].",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "Using the formula, for n=6, k=4, what is the number of windows covering j=2?",
+      "diagram": "n-k+1 = 3. i ∈ [j-k+1, j] ∩ [1, 3] = [2-3, 2] ∩ [1,3] = [-1,2] ∩ [1,3]",
+      "options": [
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Intersection is [1,2]; size 2.",
+      "wrongExplanations": {
+        "1": "Both i=1 and i=2 start windows covering j=2.",
+        "2": "There are only 3 possible starts; at j=2 only 2 cover it."
+      },
+      "hint": "Compute L=max(1, j-k+1) and R=min(j, n-k+1).",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "When does arr[j] contribute to the final xor?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "If the number of windows covering j is even",
+          "isCode": false
+        },
+        {
+          "label": "If the number of windows covering j is odd",
+          "isCode": false
+        },
+        {
+          "label": "If j <= k",
+          "isCode": false
+        },
+        {
+          "label": "If j is in the middle positions only",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Even occurrences in xor cancel; odd occurrences remain.",
+      "wrongExplanations": {
+        "0": "Even occurrences cancel in xor.",
+        "3": "Edges can also contribute depending on parity."
+      },
+      "hint": "Think parity.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "For a given j, which expressions compute L and R for the start index range?",
+      "diagram": "L = max(1, j-k+1), R = min(j, n-k+1)",
+      "options": [
+        {
+          "label": "L = max(1, j-k+1), R = min(j, n-k+1)",
+          "isCode": false
+        },
+        {
+          "label": "L = max(1, j-k), R = min(j, n)",
+          "isCode": false
+        },
+        {
+          "label": "L = max(1, j-k), R = min(k, n-k+1)",
+          "isCode": false
+        },
+        {
+          "label": "L = max(1, j-k+1), R = min(k, n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Starts must be within [1, n-k+1] and also in [j-k+1, j].",
+      "wrongExplanations": {
+        "1": "Upper bound is j for the second interval; and starts are limited by n-k+1.",
+        "3": "Upper bound should be min(j, n-k+1), not min(k, n)."
+      },
+      "hint": "Intersect [j-k+1, j] with [1, n-k+1].",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "What is a memory-safe plan to compute the final answer?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Generate each value, update a moving xor of k values, and store all k values.",
+          "isCode": false
+        },
+        {
+          "label": "Generate each value, determine if its coverage count is odd, and xor it into the answer if so.",
+          "isCode": false
+        },
+        {
+          "label": "Generate each value and always xor it into the answer.",
+          "isCode": false
+        },
+        {
+          "label": "First generate all values into a list, then process windows.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Using parity avoids storing k elements and directly builds the final xor.",
+      "wrongExplanations": {
+        "0": "Storing k elements can be too large.",
+        "2": "Not all positions contribute; only those with odd coverage."
+      },
+      "hint": "Use the odd/even coverage idea during a single pass.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Writing the Code",
+      "questionText": "Read all integers quickly from stdin as Python ints.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\ndata = list(map(int, sys.stdin.buffer.read().split()))",
+          "isCode": true
+        },
+        {
+          "label": "data = list(map(int, input().split()))",
+          "isCode": true
+        },
+        {
+          "label": "import sys\ndata = sys.stdin.read().split()",
+          "isCode": true
+        },
+        {
+          "label": "import sys\ndata = [int(x) for x in sys.stdin.readline().split()]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Reading the whole buffer and splitting is fast and gives all needed integers.",
+      "wrongExplanations": {
+        "1": "input() reads one line; parameters span two lines.",
+        "2": "Missing int conversion; also slower token-by-token use later."
+      },
+      "hint": "Use sys.stdin.buffer.read for speed.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\ndata = list(map(int, sys.stdin.buffer.read().split()))",
+      "codeLabel": "Fast input"
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Unpack the six integers in order: n, k, x, a, b, c.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "it = iter(data)\nn = next(it); k = next(it)\nx = next(it); a = next(it); b = next(it); c = next(it)",
+          "isCode": true
+        },
+        {
+          "label": "n, k, x, a, b, c = data",
+          "isCode": true
+        },
+        {
+          "label": "it = iter(data)\nk = next(it); n = next(it)\nx = next(it); a = next(it); b = next(it); c = next(it)",
+          "isCode": true
+        },
+        {
+          "label": "n, k = data[:2]\nx, a, b = data[2:5]\nc = data[5] if len(data) > 5 else 0",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The iterator approach is reliable for exactly six ints in the correct order.",
+      "wrongExplanations": {
+        "1": "data may be longer than 6 if extra whitespace; unpacking list of 6 is fine but unsafe if unexpected tokens.",
+        "3": "Over-complicates and risks wrong defaults; we have exactly six integers."
+      },
+      "hint": "Consume tokens in order using an iterator.",
+      "isCodeBuilding": true,
+      "codeSnippet": "it = iter(data)\nn = next(it); k = next(it)\nx = next(it); a = next(it); b = next(it); c = next(it)",
+      "codeLabel": "Unpack params"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Initialize the accumulator and precompute n - k + 1.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "ans = 0\nnk1 = n - k + 1",
+          "isCode": true
+        },
+        {
+          "label": "ans = 0\nnk1 = n + k - 1",
+          "isCode": true
+        },
+        {
+          "label": "ans = 1\nnk1 = n - k + 1",
+          "isCode": true
+        },
+        {
+          "label": "ans = 0\nnk1 = max(n - k + 1, 0)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We xor into ans starting at 0; valid start indices count is n - k + 1.",
+      "wrongExplanations": {
+        "1": "n + k - 1 is not the count of start positions.",
+        "2": "Xor identity is 0, not 1."
+      },
+      "hint": "How many starting positions exist for windows of size k?",
+      "isCodeBuilding": true,
+      "codeSnippet": "ans = 0\nnk1 = n - k + 1",
+      "codeLabel": "Init accumulators"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Initialize the current generated value before looping.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "xi = x",
+          "isCode": true
+        },
+        {
+          "label": "xi = 0",
+          "isCode": true
+        },
+        {
+          "label": "xi = a",
+          "isCode": true
+        },
+        {
+          "label": "xi = (a * x + b) % c",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The first value is x1 = x by definition.",
+      "wrongExplanations": {
+        "3": "That would skip x1 and start from x2.",
+        "1": "We must start from the given x."
+      },
+      "hint": "x1 equals the provided x.",
+      "isCodeBuilding": true,
+      "codeSnippet": "xi = x",
+      "codeLabel": "Init generator"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Loop over positions j using 1-based indexing to match the coverage formula.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "for j in range(1, n + 1):",
+          "isCode": true
+        },
+        {
+          "label": "for j in range(n):",
+          "isCode": true
+        },
+        {
+          "label": "for j in range(0, n_k1):",
+          "isCode": true
+        },
+        {
+          "label": "for j in range(1, nk1 + 1):",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need j=1..n to evaluate coverage for every position.",
+      "wrongExplanations": {
+        "1": "This uses 0..n-1; our formula uses 1..n.",
+        "3": "We must iterate all n positions, not just starts."
+      },
+      "hint": "Indexing the sequence elements themselves, not window starts.",
+      "isCodeBuilding": true,
+      "codeSnippet": "for j in range(1, n + 1):",
+      "codeLabel": "Main loop"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Compute L and R for the start index range at this j.",
+      "diagram": "L = max(1, j-k+1), R = min(j, nk1)",
+      "options": [
+        {
+          "label": "    L = 1 if j - k + 1 < 1 else j - k + 1\n    R = nk1 if j > nk1 else j",
+          "isCode": true
+        },
+        {
+          "label": "    L = 1 if j - k < 1 else j - k\n    R = nk1 if j >= nk1 else j",
+          "isCode": true
+        },
+        {
+          "label": "    L = max(1, j - k)\n    R = min(k, nk1)",
+          "isCode": true
+        },
+        {
+          "label": "    L = max(0, j - k + 1)\n    R = min(j, n)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "This matches L=max(1, j-k+1) and R=min(j, n-k+1).",
+      "wrongExplanations": {
+        "1": "Off-by-one on L and wrong comparison for R.",
+        "3": "L must be at least 1; R capped by nk1, not n."
+      },
+      "hint": "Stick to max(1, j-k+1) and min(j, nk1).",
+      "isCodeBuilding": true,
+      "codeSnippet": "    L = 1 if j - k + 1 < 1 else j - k + 1\n    R = nk1 if j > nk1 else j",
+      "codeLabel": "Compute L,R"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Count windows covering j and conditionally xor xi into the answer.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    cnt = R - L + 1\n    if cnt & 1:\n        ans ^= xi",
+          "isCode": true
+        },
+        {
+          "label": "    cnt = R - L\n    if cnt % 2 == 0:\n        ans ^= xi",
+          "isCode": true
+        },
+        {
+          "label": "    cnt = R - L + 1\n    if cnt % 2 == 0:\n        ans ^= xi",
+          "isCode": true
+        },
+        {
+          "label": "    cnt = R - L + 1\n    ans ^= cnt",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Size of inclusive range is R-L+1; xor xi when count is odd.",
+      "wrongExplanations": {
+        "2": "Even counts should not contribute to xor.",
+        "1": "Off-by-one in count and inverted parity."
+      },
+      "hint": "Parity check: odd => include; even => skip.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    cnt = R - L + 1\n    if cnt & 1:\n        ans ^= xi",
+      "codeLabel": "Parity and xor"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "Advance the generator each step and output the result at the end.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    xi = (a * xi + b) % c\nprint(ans)",
+          "isCode": true
+        },
+        {
+          "label": "    xi = (xi * b + a) % c\nprint(ans)",
+          "isCode": true
+        },
+        {
+          "label": "print(ans)\n    xi = (a * xi + b) % c",
+          "isCode": true
+        },
+        {
+          "label": "    xi = (a * xi + b) % c\nprint(xi)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Update xi using the given recurrence and print the final accumulated ans.",
+      "wrongExplanations": {
+        "1": "Order of a and b is wrong; formula is (a*xi + b) % c.",
+        "3": "We must print the final answer, not the last xi."
+      },
+      "hint": "Use xi ← (a*xi + b) mod c, then print ans after the loop.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    xi = (a * xi + b) % c\nprint(ans)",
+      "codeLabel": "Advance and output"
+    },
+    {
+      "id": "q22",
+      "phase": "Verifying the Solution",
+      "questionText": "Quick check: n=5, k=2, x=1, a=1, b=1, c=10. Sequence: 1,2,3,4,5. Windows: [1^2=3, 2^3=1, 3^4=7, 4^5=1]. Final xor?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "6",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "3 ^ 1 ^ 7 ^ 1 = (3^1)=2; 2^7=5; 5^1=4.",
+      "wrongExplanations": {
+        "1": "That's the xor of all 4 window xors cancelling incorrectly.",
+        "3": "This is 3^1 only; missing others."
+      },
+      "hint": "Combine step by step.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q23",
+      "phase": "Verifying the Solution",
+      "questionText": "Use the sample: n=8, k=5, x=3, a=7, b=1, c=11. What should the program print?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "11",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Matches the given example output.",
+      "wrongExplanations": {
+        "1": "No support from the example; recompute carefully.",
+        "2": "Check example again; the correct output is 0."
+      },
+      "hint": "Refer to the example in the statement.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Analyzing Complexity",
+      "questionText": "What are the time and extra space complexities of the implemented approach?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Time O(n), Space O(1)",
+          "isCode": false
+        },
+        {
+          "label": "Time O(nk), Space O(k)",
+          "isCode": false
+        },
+        {
+          "label": "Time O(n), Space O(k)",
+          "isCode": false
+        },
+        {
+          "label": "Time O(log n), Space O(1)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We iterate once over n elements, keep O(1) integers.",
+      "wrongExplanations": {
+        "2": "We don't store k elements; coverage parity is computed on the fly."
+      },
+      "hint": "Count loop iterations and persistent variables.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Analyzing Complexity",
+      "questionText": "Consider edge cases. What does the final answer become when k=1 and when k=n?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "k=1: xor of all elements; k=n: xor of all elements",
+          "isCode": false
+        },
+        {
+          "label": "k=1: 0; k=n: xor of first k elements only",
+          "isCode": false
+        },
+        {
+          "label": "k=1: sum of elements; k=n: xor of elements",
+          "isCode": false
+        },
+        {
+          "label": "k=1: xor of first element; k=n: xor of last k elements",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "k=1 windows are singletons; k=n has exactly one window—the entire array.",
+      "wrongExplanations": {
+        "1": "k=1 windows produce each element; xor of all is not 0 unless they cancel.",
+        "3": "All elements contribute in both cases."
+      },
+      "hint": "How many windows exist in each case?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys",
+    "data = list(map(int, sys.stdin.buffer.read().split()))",
+    "it = iter(data)\nn = next(it); k = next(it)\nx = next(it); a = next(it); b = next(it); c = next(it)",
+    "ans = 0\nnk1 = n - k + 1",
+    "xi = x",
+    "for j in range(1, n + 1):",
+    "    L = 1 if j - k + 1 < 1 else j - k + 1\n    R = nk1 if j > nk1 else j",
+    "    cnt = R - L + 1\n    if cnt & 1:\n        ans ^= xi",
+    "    xi = (a * xi + b) % c\nprint(ans)"
+  ],
+  "reasoningChain": [
+    {
+      "question": "What exactly is being printed—individual window xors or the xor of all window xors?",
+      "insight": "We only need the single xor of all per-window xors, not the windows themselves."
+    },
+    {
+      "question": "How do we obtain the array values with only generator parameters given?",
+      "insight": "Generate values on the fly using the recurrence; avoid storing large arrays."
+    },
+    {
+      "question": "Why is storing k elements to compute each window's xor impractical here?",
+      "insight": "k can be up to 10^7; storing k values risks exceeding memory limits."
+    },
+    {
+      "question": "How does xor behavior help when combining all window xors?",
+      "insight": "An element contributes iff it appears in an odd number of windows; even occurrences cancel."
+    },
+    {
+      "question": "How many windows cover a position j, and how to compute its parity efficiently?",
+      "insight": "Count is size of [max(1, j-k+1), min(j, n-k+1)]; we only need odd/even."
+    },
+    {
+      "question": "How to implement a single-pass solution with O(1) space?",
+      "insight": "Iterate j=1..n, generate xi, compute coverage parity with min/max, xor xi into answer if odd, update xi."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1396,
+    "output_tokens": 14386,
+    "input_cost": 0.001745,
+    "output_cost": 0.14386,
+    "total_cost": 0.145605
+  }
+}

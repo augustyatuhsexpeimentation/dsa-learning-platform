@@ -1,0 +1,1059 @@
+{
+  "id": "strongly-connected-edges",
+  "title": "Strongly Connected Edges",
+  "difficulty": "intermediate",
+  "tags": [
+    "mixed"
+  ],
+  "estimatedMinutes": 55,
+  "language": "python",
+  "description": "Given an undirected graph with n nodes and m edges, choose a direction for each edge so that the resulting directed graph is strongly connected. If it is not possible, print IMPOSSIBLE.\n\nInput:\n- First line: two integers n and m\n- Next m lines: two integers a b per line (1 ≤ a,b ≤ n), an undirected edge between a and b\n\nOutput:\n- If possible, print m lines, each with two integers a b indicating a directed edge a→b.\n- If impossible, print IMPOSSIBLE.\n\nThe graph is simple (no parallel edges, no self-loops). Any valid orientation is acceptable.",
+  "examples": [
+    {
+      "input": "3 3\n1 2\n1 3\n2 3",
+      "output": "1 2\n2 3\n3 1",
+      "explanation": "One possible orientation is a directed cycle 1→2→3→1, which is strongly connected."
+    }
+  ],
+  "constraints": [
+    "1 ≤ n ≤ 10^5",
+    "1 ≤ m ≤ 2·10^5",
+    "1 ≤ a,b ≤ n",
+    "Simple graph: no multiple edges, no self-loops"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "What must be true about the directed graph after orienting the edges for the solution to be valid?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "From every node, there is a directed path to every other node.",
+          "isCode": false
+        },
+        {
+          "label": "For each pair of nodes, at least one direction between them must have a path.",
+          "isCode": false
+        },
+        {
+          "label": "It is enough that the undirected graph is connected; orientation does not matter.",
+          "isCode": false
+        },
+        {
+          "label": "Every undirected edge must be traversable in both directions afterward.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Strong connectivity means every node can reach every other via directed paths. The other statements weaken or misstate this requirement.",
+      "wrongExplanations": {
+        "1": "Having a path in only one direction for some pairs is not enough.",
+        "2": "Undirected connectivity alone does not guarantee strong directed connectivity."
+      },
+      "hint": "Recall the definition of strong connectivity.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "Consider n=2, m=1 with edge (1,2). Can you orient the single edge to make the directed graph strongly connected?",
+      "diagram": "1 -- 2",
+      "options": [
+        {
+          "label": "Yes: 1 2 and 2 1 at the same time.",
+          "isCode": false
+        },
+        {
+          "label": "Yes: 1 2.",
+          "isCode": false
+        },
+        {
+          "label": "Yes: 2 1.",
+          "isCode": false
+        },
+        {
+          "label": "No, it is impossible.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 3,
+      "explanation": "With one edge, you can choose only one direction, so one node cannot reach the other in the opposite direction.",
+      "wrongExplanations": {
+        "0": "Each undirected edge must be oriented one way, not both.",
+        "1": "Choosing a single direction leaves no path back to the start."
+      },
+      "hint": "Strong connectivity requires reachability in both directions between the two nodes.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "For the triangle graph 1-2, 1-3, 2-3, which of the following orientations yields a strongly connected directed graph?",
+      "diagram": "1\n / \\\n2---3",
+      "options": [
+        {
+          "label": "1 2; 1 3; 2 3",
+          "isCode": false
+        },
+        {
+          "label": "1 2; 3 1; 3 2",
+          "isCode": false
+        },
+        {
+          "label": "2 1; 2 3; 3 1",
+          "isCode": false
+        },
+        {
+          "label": "1 2; 2 3; 3 1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 3,
+      "explanation": "A directed 3-cycle is strongly connected. The other options leave some node with no return path.",
+      "wrongExplanations": {
+        "0": "Node 3 cannot reach node 1; it has no outgoing edge.",
+        "1": "Node 2 cannot reach node 3; 2 has only incoming edges."
+      },
+      "hint": "Try to see if you can follow directed edges to go around the triangle in both directions.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "In a 4-node cycle 1-2-3-4-1, if you direct all edges clockwise (1→2→3→4→1), is the directed graph strongly connected?",
+      "diagram": "1 -> 2 -> 3 -> 4\n^               |\n|---------------|",
+      "options": [
+        {
+          "label": "No, because some nodes won't have incoming edges.",
+          "isCode": false
+        },
+        {
+          "label": "Yes, every node can reach every other along the cycle.",
+          "isCode": false
+        },
+        {
+          "label": "No, because each edge can be used only once.",
+          "isCode": false
+        },
+        {
+          "label": "It depends on node labels; sometimes yes, sometimes no.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "A single directed cycle is strongly connected since you can traverse around the cycle to reach any node.",
+      "wrongExplanations": {
+        "0": "Each node has in-degree 1 and out-degree 1 in the cycle.",
+        "2": "Paths may reuse nodes/edges; only reachability matters."
+      },
+      "hint": "Can you reach node 1 from node 3 along directed edges?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Exploring Approaches",
+      "questionText": "If the undirected graph has more than one connected component, can any orientation produce a strongly connected directed graph?",
+      "diagram": "Component A    Component B",
+      "options": [
+        {
+          "label": "Yes, with a careful choice of directions.",
+          "isCode": false
+        },
+        {
+          "label": "Yes, if each component contains a cycle.",
+          "isCode": false
+        },
+        {
+          "label": "No, it is impossible.",
+          "isCode": false
+        },
+        {
+          "label": "Only if there are exactly two components.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Strong connectivity implies the underlying undirected graph must be connected.",
+      "wrongExplanations": {
+        "0": "Direction choices cannot connect separate components without edges.",
+        "1": "Cycles within components don't connect different components."
+      },
+      "hint": "Edges cannot appear between components that are disconnected.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "Consider the path graph 1-2-3 (edges: (1,2), (2,3)). Can any orientation yield strong connectivity? Why?",
+      "diagram": "1 -- 2 -- 3",
+      "options": [
+        {
+          "label": "No. Removing (2,3) isolates node 3, so no orientation can make it strongly connected.",
+          "isCode": false
+        },
+        {
+          "label": "Yes. Orient 1 2 and 2 3.",
+          "isCode": false
+        },
+        {
+          "label": "Yes. Orient 2 1 and 3 2.",
+          "isCode": false
+        },
+        {
+          "label": "Only if we add an extra edge between 1 and 3.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "If an edge's removal disconnects the graph, no orientation can give paths in both directions across it.",
+      "wrongExplanations": {
+        "1": "This gives no return path from 3 back to 1.",
+        "2": "This gives no path from 1 to 3."
+      },
+      "hint": "Think about whether both directions across the middle link can be maintained with a single oriented edge.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "While recursively traversing the graph, suppose u is the current node and v is an unvisited neighbor that becomes a child. After exploring v's subtree, which condition tells you the edge (u,v) prevents any valid solution?",
+      "diagram": "u -- v (v is explored from u)",
+      "options": [
+        {
+          "label": "low[v] > tin[u]",
+          "isCode": false
+        },
+        {
+          "label": "tin[v] > tin[u]",
+          "isCode": false
+        },
+        {
+          "label": "low[v] >= tin[u]",
+          "isCode": false
+        },
+        {
+          "label": "degree[u] == 1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "If v's subtree cannot reach any ancestor of u (low[v] > tin[u]), the edge acts as a cut and no orientation can fix it.",
+      "wrongExplanations": {
+        "2": "Using >= incorrectly flags edges that are part of cycles.",
+        "1": "tin order alone does not reflect reachability to ancestors."
+      },
+      "hint": "Track the smallest entry time reachable from v's subtree using non-parent edges.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Building the Idea",
+      "questionText": "When computing helper arrays during recursion, how should low[u] be defined/updated conceptually?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "low[u] is always equal to tin[u].",
+          "isCode": false
+        },
+        {
+          "label": "low[u] = min( tin[u], tin[w] for already visited non-parent neighbors w, low[child] for each child ).",
+          "isCode": false
+        },
+        {
+          "label": "low[u] equals tin[parent[u]].",
+          "isCode": false
+        },
+        {
+          "label": "low[u] is the smallest neighbor node number.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "low[u] tracks the smallest entry time reachable from u via any edges in its subtree plus back edges to ancestors.",
+      "wrongExplanations": {
+        "0": "This ignores back edges and children's contributions.",
+        "2": "It depends on reachable ancestors, not just the parent."
+      },
+      "hint": "Combine u’s own entry time, back edges to earlier nodes, and children’s results.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "While at node u, you see a visited neighbor v that is not your parent. What is the correct update to low[u]?",
+      "diagram": "u -- v (v visited already, v != parent[u])",
+      "options": [
+        {
+          "label": "low[u] = min(low[u], low[v])",
+          "isCode": false
+        },
+        {
+          "label": "low[u] = min(low[u], tin[u])",
+          "isCode": false
+        },
+        {
+          "label": "low[u] = min(low[u], tin[v])",
+          "isCode": false
+        },
+        {
+          "label": "Do not change low[u].",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "A visited non-parent neighbor indicates a back edge to an earlier entry time tin[v].",
+      "wrongExplanations": {
+        "0": "low[v] includes descendants; here we need the neighbor’s entry time.",
+        "3": "Ignoring this loses information about reachability to ancestors."
+      },
+      "hint": "This edge gives a direct link to an ancestor at time tin[v].",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "After exploring a child v of u, how should low[u] be updated using v’s information?",
+      "diagram": "u -> v (v explored)",
+      "options": [
+        {
+          "label": "low[u] = max(low[u], low[v])",
+          "isCode": false
+        },
+        {
+          "label": "low[u] = min(low[u], tin[v])",
+          "isCode": false
+        },
+        {
+          "label": "low[u] = tin[u]",
+          "isCode": false
+        },
+        {
+          "label": "low[u] = min(low[u], low[v])",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 3,
+      "explanation": "Children can reach earlier ancestors than u; take the minimum over children’s low-values.",
+      "wrongExplanations": {
+        "0": "We want the earliest reachable time, not the latest.",
+        "1": "tin[v] misses reachability through v’s subtree."
+      },
+      "hint": "Combine children’s results by taking the minimum.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "After returning from child v of u, which condition means the edge (u,v) makes any solution impossible?",
+      "diagram": "u -- v (v is a child of u)",
+      "options": [
+        {
+          "label": "tin[v] < tin[u]",
+          "isCode": false
+        },
+        {
+          "label": "low[v] > tin[u]",
+          "isCode": false
+        },
+        {
+          "label": "low[v] >= tin[v]",
+          "isCode": false
+        },
+        {
+          "label": "tin[v] > tin[u] and low[v] < tin[u]",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "If v’s subtree cannot reach any node discovered before u, the edge is a bottleneck that blocks two-way reachability.",
+      "wrongExplanations": {
+        "0": "This is always true for a child and says nothing about impossibility.",
+        "2": "This is generally true and not a meaningful test."
+      },
+      "hint": "Compare the earliest reachable time from v’s subtree to u’s own entry time.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "How should you orient edges during traversal to work toward strong connectivity when no blocking edges exist?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "For a new neighbor v: orient u→v. For a visited non-parent neighbor v discovered earlier than u: orient u→v.",
+          "isCode": false
+        },
+        {
+          "label": "For a new neighbor v: orient v→u. For visited non-parent v: orient u→v.",
+          "isCode": false
+        },
+        {
+          "label": "Always orient from smaller entry time to larger entry time.",
+          "isCode": false
+        },
+        {
+          "label": "Always orient from smaller node label to larger node label.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Direct tree edges downward and edges to ancestors upward; this supplies cycles when no blocking edges exist.",
+      "wrongExplanations": {
+        "1": "Reversing tree edges breaks the cycle-building property.",
+        "2": "This would orient edges to ancestors the wrong way."
+      },
+      "hint": "Think: tree edges one way, edges to earlier-visited nodes the other way.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "To avoid outputting the same undirected edge twice, when should you append an orientation for an edge (u,v) where v is already visited and v ≠ parent[u]?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Only when tin[v] < tin[u] (v is an ancestor).",
+          "isCode": false
+        },
+        {
+          "label": "Only when tin[v] > tin[u] (v is a descendant).",
+          "isCode": false
+        },
+        {
+          "label": "For all visited v ≠ parent[u].",
+          "isCode": false
+        },
+        {
+          "label": "Never for visited neighbors; handle all edges later.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Orient edges to earlier-visited neighbors once; the reverse encounter will be skipped.",
+      "wrongExplanations": {
+        "1": "This risks duplicating tree edges.",
+        "2": "This will duplicate non-parent edges."
+      },
+      "hint": "Direct only toward earlier entry times to avoid duplication.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Writing the Code",
+      "questionText": "Set up fast input, recursion depth, and read n, m. Choose the correct snippet.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\nsys.setrecursionlimit(1_000_000)\n\ndef main():\n    data = sys.stdin.read().strip().split()\n    if not data:\n        return\n    it = iter(data)\n    n = int(next(it)); m = int(next(it))",
+          "isCode": true
+        },
+        {
+          "label": "def main():\n    n, m = map(int, input().split())\n    # no recursion limit set\n    data = []",
+          "isCode": true
+        },
+        {
+          "label": "import sys\n\ndef main():\n    buf = sys.stdin.read()\n    n = int(buf[0]); m = int(buf[1])",
+          "isCode": true
+        },
+        {
+          "label": "import sys\nsys.setrecursionlimit(10**3)\n\ndef main():\n    n = int(sys.stdin.readline()); m = int(sys.stdin.readline())",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need robust fast reading and a high recursion limit for deep traversals. Iterating tokens is reliable.",
+      "wrongExplanations": {
+        "1": "Using input() repeatedly may be too slow and lacks recursion limit safety.",
+        "3": "Default recursion depth is too low for large graphs; reading lines separately also mismatches input format."
+      },
+      "hint": "Use sys.stdin.read and increase recursion limit significantly.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\nsys.setrecursionlimit(1_000_000)\n\ndef main():\n    data = sys.stdin.read().strip().split()\n    if not data:\n        return\n    it = iter(data)\n    n = int(next(it)); m = int(next(it))",
+      "codeLabel": "Setup and read n,m"
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Build the adjacency list with edge ids and store input edges. Choose the correct snippet.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    adj = [[] for _ in range(n+1)]\n    edges = []\n    for i in range(m):\n        a = int(next(it)); b = int(next(it))\n        adj[a].append((b, i))\n        adj[b].append((a, i))\n        edges.append((a, b))",
+          "isCode": true
+        },
+        {
+          "label": "    adj = [[] for _ in range(n)]\n    for i in range(m):\n        a = int(next(it)); b = int(next(it))\n        adj[a-1].append(b-1)\n        adj[b-1].append(a-1)",
+          "isCode": true
+        },
+        {
+          "label": "    adj = [[] for _ in range(n+1)]\n    for i in range(m):\n        a = int(next(it)); b = int(next(it))\n        adj[a].append(b)\n        # missing reverse add and ids",
+          "isCode": true
+        },
+        {
+          "label": "    adj = {}\n    for i in range(m):\n        a = int(next(it)); b = int(next(it))\n        adj.setdefault(a, set()).add(b)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need 1-based adjacency with both directions and edge ids for skip logic and unique orientation.",
+      "wrongExplanations": {
+        "2": "Missing the reverse add and ids will break traversal and duplicate handling.",
+        "1": "Switching to 0-based without adjusting later code will cause index errors."
+      },
+      "hint": "Store both directions and remember a unique id per edge.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    adj = [[] for _ in range(n+1)]\n    edges = []\n    for i in range(m):\n        a = int(next(it)); b = int(next(it))\n        adj[a].append((b, i))\n        adj[b].append((a, i))\n        edges.append((a, b))",
+      "codeLabel": "Adjacency with ids"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Initialize helper arrays and state. Choose the correct snippet.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    tin = [-1] * (n + 1)\n    low = [0] * (n + 1)\n    visited = [False] * (n + 1)\n    ans = []\n    time = 0\n    ok = True",
+          "isCode": true
+        },
+        {
+          "label": "    tin = [0] * n\n    low = [0] * n\n    visited = [False] * n\n    ans = {}\n    time = 1\n    ok = False",
+          "isCode": true
+        },
+        {
+          "label": "    tin = [None] * (n + 1)\n    low = [None] * (n + 1)\n    seen = set()\n    ans = []\n    ok = True",
+          "isCode": true
+        },
+        {
+          "label": "    visited = [0] * (n + 1)\n    ans = []\n    time = 0\n    # no tin/low arrays",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need 1-based arrays, tin initialized to -1, and a flag to report impossibility.",
+      "wrongExplanations": {
+        "1": "Wrong sizes and data types; ans should be a list to preserve order.",
+        "3": "tin/low are required for detecting problematic edges."
+      },
+      "hint": "We'll track entry times, earliest reachable times, and visited status per node.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    tin = [-1] * (n + 1)\n    low = [0] * (n + 1)\n    visited = [False] * (n + 1)\n    ans = []\n    time = 0\n    ok = True",
+      "codeLabel": "Initialize arrays and state"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Define the recursive traversal header and initialize per-node timing. Choose the correct snippet.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    def dfs(u, peid):\n        nonlocal time, ok\n        visited[u] = True\n        tin[u] = time\n        low[u] = time\n        time += 1",
+          "isCode": true
+        },
+        {
+          "label": "    def dfs(u, parent):\n        visited[u] = True\n        tin[u] = 0\n        low[u] = 0",
+          "isCode": true
+        },
+        {
+          "label": "    def dfs(u):\n        nonlocal time\n        tin[u] = time; time += 1\n        # visited not tracked",
+          "isCode": true
+        },
+        {
+          "label": "    def dfs(u, peid):\n        visited[u] = True\n        low[u] = min(low)\n        tin[u] = time",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need to pass the parent edge id, mark visited, and set both tin and low to the current time.",
+      "wrongExplanations": {
+        "1": "Not tracking time properly and ignoring parent edge id will break detection.",
+        "2": "Visited tracking is necessary to distinguish first visits from back edges."
+      },
+      "hint": "Remember both tin and low start at the same current timestamp.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    def dfs(u, peid):\n        nonlocal time, ok\n        visited[u] = True\n        tin[u] = time\n        low[u] = time\n        time += 1",
+      "codeLabel": "DFS header and entry time"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Iterate neighbors and skip the edge you came from. Choose the correct loop header and skip.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "        for v, eid in adj[u]:\n            if eid == peid:\n                continue",
+          "isCode": true
+        },
+        {
+          "label": "        for v in adj[u]:\n            if v == peid:\n                continue",
+          "isCode": true
+        },
+        {
+          "label": "        for v, eid in adj[u]:\n            if v == peid:\n                continue",
+          "isCode": true
+        },
+        {
+          "label": "        for v, eid in adj[u]:\n            # do not skip the parent edge",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We stored (neighbor, edge_id); we must skip by matching the edge id, not the neighbor node.",
+      "wrongExplanations": {
+        "1": "adj[u] stores pairs; iterating v alone is incorrect.",
+        "2": "Comparing neighbor to parent edge id makes no sense."
+      },
+      "hint": "Use the unique id to identify the edge used to enter u.",
+      "isCodeBuilding": true,
+      "codeSnippet": "        for v, eid in adj[u]:\n            if eid == peid:\n                continue",
+      "codeLabel": "Neighbor loop and skip parent edge"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Handle an unvisited neighbor v: orient the edge, recurse, update low, and detect impossibility. Choose the correct snippet.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "            if not visited[v]:\n                ans.append((u, v))\n                dfs(v, eid)\n                low[u] = min(low[u], low[v])\n                if low[v] > tin[u]:\n                    ok = False\n                    return",
+          "isCode": true
+        },
+        {
+          "label": "            if not visited[v]:\n                ans.append((v, u))\n                dfs(v, eid)\n                low[u] = min(low[u], tin[v])\n                if low[v] >= tin[u]:\n                    ok = False\n                    return",
+          "isCode": true
+        },
+        {
+          "label": "            if not visited[v]:\n                dfs(v, eid)\n                low[u] = max(low[u], low[v])",
+          "isCode": true
+        },
+        {
+          "label": "            if not visited[v]:\n                ans.append((u, v))\n                dfs(v, eid)\n                if tin[v] > tin[u]:\n                    ok = False\n                    return",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Tree edges are oriented u→v. After recursion, update low with low[v] and check if v’s subtree can’t reach above u.",
+      "wrongExplanations": {
+        "1": "Reversing orientation and using wrong comparison (>=) or update breaks correctness.",
+        "3": "Comparing tin ignores reachability via back edges."
+      },
+      "hint": "The impossibility test compares low[v] and tin[u].",
+      "isCodeBuilding": true,
+      "codeSnippet": "            if not visited[v]:\n                ans.append((u, v))\n                dfs(v, eid)\n                low[u] = min(low[u], low[v])\n                if low[v] > tin[u]:\n                    ok = False\n                    return",
+      "codeLabel": "Handle tree edge and detect blocking edge"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Handle a visited non-parent neighbor v: decide orientation and update low. Choose the correct snippet.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "            else:\n                if tin[v] < tin[u]:\n                    ans.append((u, v))\n                low[u] = min(low[u], tin[v])",
+          "isCode": true
+        },
+        {
+          "label": "            else:\n                ans.append((u, v))\n                low[u] = min(low[u], low[v])",
+          "isCode": true
+        },
+        {
+          "label": "            else:\n                if tin[v] > tin[u]:\n                    ans.append((u, v))\n                low[u] = min(low[u], tin[u])",
+          "isCode": true
+        },
+        {
+          "label": "            else:\n                if tin[v] < tin[u]:\n                    ans.append((v, u))\n                low[u] = max(low[u], tin[v])",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Only orient toward earlier-visited neighbors to avoid duplicates, and update low[u] with tin[v].",
+      "wrongExplanations": {
+        "1": "Always appending duplicates edges; updating with low[v] is not appropriate for back edges.",
+        "2": "This will duplicate or misorient edges and ignores proper low update."
+      },
+      "hint": "For non-parent visited neighbors, only point to ancestors.",
+      "isCodeBuilding": true,
+      "codeSnippet": "            else:\n                if tin[v] < tin[u]:\n                    ans.append((u, v))\n                low[u] = min(low[u], tin[v])",
+      "codeLabel": "Handle back/ancestor edge"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "Start the traversal from node 1. Choose the correct snippet.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    dfs(1, -1)",
+          "isCode": true
+        },
+        {
+          "label": "    for i in range(1, n+1):\n        dfs(i, -1)",
+          "isCode": true
+        },
+        {
+          "label": "    dfs(0, -1)",
+          "isCode": true
+        },
+        {
+          "label": "    # traversal will be implicit; no call",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We attempt from node 1 and later verify all nodes were visited; starting all nodes would wrongly orient across components.",
+      "wrongExplanations": {
+        "1": "Multiple starts would emit edges from different components before detecting impossibility.",
+        "3": "Without a traversal, nothing is computed."
+      },
+      "hint": "We’ll validate connectivity after one traversal.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    dfs(1, -1)",
+      "codeLabel": "Start traversal"
+    },
+    {
+      "id": "q22",
+      "phase": "Writing the Code",
+      "questionText": "Check for impossibility and print the orientations. Choose the correct snippet.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    if not all(visited[1:]) or not ok or len(ans) != m:\n        print(\"IMPOSSIBLE\")\n        return\n    out = []\n    for a, b in ans:\n        out.append(f\"{a} {b}\")\n    sys.stdout.write(\"\\n\".join(out))",
+          "isCode": true
+        },
+        {
+          "label": "    if not ok:\n        print(\"IMPOSSIBLE\")\n    for a, b in ans:\n        print(a, b)",
+          "isCode": true
+        },
+        {
+          "label": "    if len(ans) == m:\n        print(\"IMPOSSIBLE\")\n    else:\n        for a, b in ans:\n            print(a, b)",
+          "isCode": true
+        },
+        {
+          "label": "    if all(visited):\n        for a, b in ans:\n            print(a, b)\n    else:\n        print(\"IMPOSSIBLE\")",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We must ensure connectivity, no blocking edges, and exactly m oriented edges.",
+      "wrongExplanations": {
+        "1": "Missing the connectivity and edge count checks can output invalid results.",
+        "3": "visited includes index 0 which is unused; also ignores impossibility from blocking edges."
+      },
+      "hint": "Check three things: all nodes visited, ok flag, and m orientations.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    if not all(visited[1:]) or not ok or len(ans) != m:\n        print(\"IMPOSSIBLE\")\n        return\n    out = []\n    for a, b in ans:\n        out.append(f\"{a} {b}\")\n    sys.stdout.write(\"\\n\".join(out))",
+      "codeLabel": "Validate and print"
+    },
+    {
+      "id": "q23",
+      "phase": "Writing the Code",
+      "questionText": "Finish the program with the standard entry point. Choose the correct snippet.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "if __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "if __name__ == \"main\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "if __main__:\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "main()",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Use the correct entry-point guard to allow importing without running and to execute main when run as a script.",
+      "wrongExplanations": {
+        "1": "The magic variable is __name__ and value is \"__main__\".",
+        "3": "Calling main unconditionally is less safe in some environments."
+      },
+      "hint": "This is the standard Python idiom.",
+      "isCodeBuilding": true,
+      "codeSnippet": "if __name__ == \"__main__\":\n    main()",
+      "codeLabel": "Main guard"
+    },
+    {
+      "id": "q24",
+      "phase": "Verifying the Solution",
+      "questionText": "Given input:\n3 2\n1 2\n2 3\nWhat will the program print?",
+      "diagram": "1 -- 2 -- 3",
+      "options": [
+        {
+          "label": "1 2\\n2 3",
+          "isCode": false
+        },
+        {
+          "label": "2 1\\n3 2",
+          "isCode": false
+        },
+        {
+          "label": "1 2\\n3 2",
+          "isCode": false
+        },
+        {
+          "label": "IMPOSSIBLE",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 3,
+      "explanation": "The edge between 2 and 3 blocks two-way reachability; the code detects this and prints IMPOSSIBLE.",
+      "wrongExplanations": {
+        "0": "These orientations do not make it strongly connected and the code would not output them.",
+        "2": "Still lacks reachability from 3 to 1."
+      },
+      "hint": "Check the low/entry time comparison for the edge (2,3).",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Verifying the Solution",
+      "questionText": "Given input:\n4 4\n1 2\n2 3\n3 4\n4 1\nWhat directed edge does the program output for the undirected edge (3,4)?",
+      "diagram": "1 -- 2 -- 3 -- 4 -- 1",
+      "options": [
+        {
+          "label": "4 3",
+          "isCode": false
+        },
+        {
+          "label": "3 4",
+          "isCode": false
+        },
+        {
+          "label": "It depends on node labels; could be either.",
+          "isCode": false
+        },
+        {
+          "label": "The program prints IMPOSSIBLE.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Traversal from 1 visits 2 then 3 then 4, making (3,4) a tree edge oriented 3→4.",
+      "wrongExplanations": {
+        "0": "This would reverse the tree edge orientation used in the code.",
+        "3": "A 4-cycle is orientable; the code will not print IMPOSSIBLE."
+      },
+      "hint": "Follow the traversal order from node 1 and see which node discovers 4.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Verifying the Solution",
+      "questionText": "Why does the program produce exactly m oriented edges when it succeeds?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Each undirected edge is oriented once: either as a tree edge when first discovering a node, or as a single directed edge toward an ancestor when revisited.",
+          "isCode": false
+        },
+        {
+          "label": "It outputs each edge twice but removes duplicates at the end.",
+          "isCode": false
+        },
+        {
+          "label": "It orients edges only in cycles and ignores others.",
+          "isCode": false
+        },
+        {
+          "label": "It guesses directions randomly until the count matches m.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Tree edges are recorded once upon discovery; non-parent revisits to ancestors are recorded once by entry-time check.",
+      "wrongExplanations": {
+        "1": "There is no deduplication pass.",
+        "2": "Edges outside cycles would be ignored incorrectly."
+      },
+      "hint": "Consider how the code handles new neighbors vs already visited ones.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q27",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the time complexity of the solution in terms of n and m?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n + m)",
+          "isCode": false
+        },
+        {
+          "label": "O(m log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(m^2)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each node and edge is processed a constant number of times during traversal.",
+      "wrongExplanations": {
+        "1": "No sorting or priority structure is used.",
+        "2": "We do not inspect all pairs of nodes."
+      },
+      "hint": "How many times can an edge be seen in the loops?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q28",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the auxiliary space complexity (excluding the input edge list) of the solution?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n + m)",
+          "isCode": false
+        },
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(m log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Adjacency lists store O(n + m), and arrays tin/low/visited add O(n).",
+      "wrongExplanations": {
+        "1": "The adjacency list alone is O(n + m).",
+        "3": "No dense matrix is used."
+      },
+      "hint": "Consider adjacency storage and per-node arrays.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q29",
+      "phase": "Analyzing Complexity",
+      "questionText": "Which input conditions cause the program to print IMPOSSIBLE?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Only when the graph has no cycles.",
+          "isCode": false
+        },
+        {
+          "label": "Either the graph is disconnected or there exists an edge whose removal increases the number of connected components.",
+          "isCode": false
+        },
+        {
+          "label": "Only when there are multiple edges between some nodes.",
+          "isCode": false
+        },
+        {
+          "label": "Whenever n > m.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Disconnected graphs cannot be made strongly connected, and any edge that alone connects two parts prevents two-way reachability.",
+      "wrongExplanations": {
+        "0": "Having cycles is sufficient but not necessary alone for the check; the key is the specific blocking edges and connectivity.",
+        "3": "The relation between n and m alone does not decide possibility."
+      },
+      "hint": "Think connectivity and single-edge bottlenecks.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\nsys.setrecursionlimit(1_000_000)\n\ndef main():\n    data = sys.stdin.read().strip().split()\n    if not data:\n        return\n    it = iter(data)\n    n = int(next(it)); m = int(next(it))",
+    "    adj = [[] for _ in range(n+1)]\n    edges = []\n    for i in range(m):\n        a = int(next(it)); b = int(next(it))\n        adj[a].append((b, i))\n        adj[b].append((a, i))\n        edges.append((a, b))",
+    "    tin = [-1] * (n + 1)\n    low = [0] * (n + 1)\n    visited = [False] * (n + 1)\n    ans = []\n    time = 0\n    ok = True",
+    "    def dfs(u, peid):\n        nonlocal time, ok\n        visited[u] = True\n        tin[u] = time\n        low[u] = time\n        time += 1",
+    "        for v, eid in adj[u]:\n            if eid == peid:\n                continue\n            if not visited[v]:\n                ans.append((u, v))\n                dfs(v, eid)\n                low[u] = min(low[u], low[v])\n                if low[v] > tin[u]:\n                    ok = False\n                    return\n            else:\n                if tin[v] < tin[u]:\n                    ans.append((u, v))\n                low[u] = min(low[u], tin[v])",
+    "    dfs(1, -1)",
+    "    if not all(visited[1:]) or not ok or len(ans) != m:\n        print(\"IMPOSSIBLE\")\n        return\n    out = []\n    for a, b in ans:\n        out.append(f\"{a} {b}\")\n    sys.stdout.write(\"\\n\".join(out))",
+    "if __name__ == \"__main__\":\n    main()"
+  ],
+  "reasoningChain": [
+    {
+      "question": "What must be true about the directed graph after orienting the edges?",
+      "insight": "Strong connectivity requires reachability from every node to every other node; the undirected graph must be connected at minimum."
+    },
+    {
+      "question": "Which undirected edges make a solution impossible?",
+      "insight": "Any single edge whose removal disconnects the graph prevents two-way reachability across it under any orientation."
+    },
+    {
+      "question": "How to detect such problematic edges during traversal?",
+      "insight": "Track entry times and the smallest entry time reachable from each subtree; compare low[v] to tin[u] to spot blocking edges."
+    },
+    {
+      "question": "How to orient edges to ensure cycles when no blocking edges exist?",
+      "insight": "Direct new edges from current to child; direct edges to already visited ancestors from current to ancestor to form cycles."
+    },
+    {
+      "question": "How to avoid duplicating orientations?",
+      "insight": "Use edge ids and only orient toward neighbors with earlier entry times when revisiting, skipping the parent edge."
+    },
+    {
+      "question": "How to conclude impossibility and connectivity?",
+      "insight": "After traversal, if any node is unvisited or any blocking edge was found, print IMPOSSIBLE; else output all m directed edges."
+    },
+    {
+      "question": "What are the performance bounds?",
+      "insight": "Each node and edge is processed a constant number of times, giving O(n+m) time and O(n+m) space."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1444,
+    "output_tokens": 20017,
+    "input_cost": 0.001805,
+    "output_cost": 0.20017,
+    "total_cost": 0.201975
+  }
+}

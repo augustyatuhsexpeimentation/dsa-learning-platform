@@ -1,0 +1,921 @@
+{
+  "id": "grid-path-construction",
+  "title": "Grid Path Construction",
+  "difficulty": "intermediate",
+  "tags": [
+    "mixed"
+  ],
+  "estimatedMinutes": 60,
+  "language": "python",
+  "description": "You are given an n×m grid and two squares a=(y1,x1) and b=(y2,x2). Your task is to determine if there exists a path from a to b that visits every square exactly once (a Hamiltonian path), moving only with steps U (up), D (down), L (left), R (right). If it exists, print YES and the path string; otherwise, print NO.\n\nInput:\n- t: number of tests\n- For each test: n m y1 x1 y2 x2\n\nOutput:\n- YES and the path string if possible; NO otherwise.\n\nConstraints:\n- 1 ≤ t ≤ 100\n- 1 ≤ n, m ≤ 50\n- 1 ≤ y1, y2 ≤ n\n- 1 ≤ x1, x2 ≤ m\n- (y1, x1) ≠ (y2, x2)",
+  "examples": [
+    {
+      "input": "5\n1 3 1 1 1 3\n1 3 1 2 1 3\n2 2 1 1 2 2\n2 2 1 1 2 1\n4 7 1 3 3 6",
+      "output": "YES\nRR\nNO\nNO\nYES\nRDL\nYES\nRRRRDDDLLLLLLUUURDDRURDRURD",
+      "explanation": "Single row requires endpoints at the extremes; parity constraints decide feasibility in small grids; larger grid example shows one valid path string."
+    }
+  ],
+  "constraints": [
+    "1 ≤ t ≤ 100",
+    "1 ≤ n, m ≤ 50",
+    "Moves are U/D/L/R to adjacent squares only",
+    "Path must visit each cell exactly once"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "What does the path need to do in the grid?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Start at a, end at b, visit each cell at most once.",
+          "isCode": false
+        },
+        {
+          "label": "Start at a, end at b, visit each cell exactly once.",
+          "isCode": false
+        },
+        {
+          "label": "Start anywhere, end anywhere, visit each cell at least once.",
+          "isCode": false
+        },
+        {
+          "label": "Start at a, end at b, visit some cells multiple times.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "We need a Hamiltonian path: start at a, end at b, visit each cell exactly once. Visiting cells at most once is not enough; it must be exactly once.",
+      "wrongExplanations": {
+        "0": "At most once allows skipping cells, which is not allowed.",
+        "3": "Revisiting cells violates the requirement."
+      },
+      "hint": null,
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "In a 1×m grid (single row), when does a full path from a to b visiting all cells exactly once exist?",
+      "diagram": "Row: [1,1] [1,2] ... [1,m]",
+      "options": [
+        {
+          "label": "For any a and b in the row.",
+          "isCode": false
+        },
+        {
+          "label": "Only when a and b are adjacent.",
+          "isCode": false
+        },
+        {
+          "label": "Only when a and b are the two ends of the row.",
+          "isCode": false
+        },
+        {
+          "label": "Never; single row is impossible.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "A path visiting all cells in a line must start at one end and end at the other. Otherwise you can't cover all cells without revisits.",
+      "wrongExplanations": {
+        "0": "Starting in the middle can't reach both ends without revisiting.",
+        "1": "Adjacency isn't enough; the path must cover the entire row."
+      },
+      "hint": "Think of the row as a path graph: endpoints must be the two extremes.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "In a 1×m grid with a=(1,2), b=(1,m) and m>2, can we visit all cells exactly once?",
+      "diagram": "Row: [1,1] [1,2] [1,3] ... [1,m]",
+      "options": [
+        {
+          "label": "Yes, go right only.",
+          "isCode": false
+        },
+        {
+          "label": "No, because endpoints are not both extremes.",
+          "isCode": false
+        },
+        {
+          "label": "Yes, go left then right alternately.",
+          "isCode": false
+        },
+        {
+          "label": "Depends on m parity.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Single row requires endpoints to be extremes. Here a is not an extreme, so it’s impossible to cover all cells exactly once.",
+      "wrongExplanations": {
+        "0": "You leave the left part unvisited.",
+        "2": "Alternating directions revisits cells."
+      },
+      "hint": null,
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "Consider a 2×2 grid. For which endpoints (y1,x1) and (y2,x2) is a full path possible?",
+      "diagram": "Grid:\n(1,1) (1,2)\n(2,1) (2,2)",
+      "options": [
+        {
+          "label": "Only when endpoints are of opposite parity (y+x).",
+          "isCode": false
+        },
+        {
+          "label": "Only when endpoints are the corners (1,1) and (2,2).",
+          "isCode": false
+        },
+        {
+          "label": "For any endpoints.",
+          "isCode": false
+        },
+        {
+          "label": "Only when endpoints are adjacent.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "In a bipartite grid, a Hamiltonian path with even number of cells requires endpoints of opposite parity. (1,1) and (2,2) have same parity; impossible.",
+      "wrongExplanations": {
+        "1": "Same parity corners fail (sample shows NO).",
+        "3": "Adjacency doesn’t guarantee covering all cells."
+      },
+      "hint": "Check parity: (y+x)%2 for each endpoint.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Exploring Approaches",
+      "questionText": "Why does parity of endpoints matter for existence?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Because moves change (y+x) parity each step and path alternates colors.",
+          "isCode": false
+        },
+        {
+          "label": "Because grids with even cells forbid vertical moves.",
+          "isCode": false
+        },
+        {
+          "label": "Because path length must be divisible by 4.",
+          "isCode": false
+        },
+        {
+          "label": "Parity never matters; size does.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Adjacent cells have opposite parity. A full path alternates; endpoints parity depends on total cell count parity.",
+      "wrongExplanations": {
+        "3": "Parity is crucial in bipartite graphs.",
+        "1": "Vertical moves are allowed; parity is the constraint."
+      },
+      "hint": "Compare parity of N=n*m and endpoints parity.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "Match N=n*m parity with endpoint parity requirement:",
+      "diagram": null,
+      "options": [
+        {
+          "label": "N odd: endpoints opposite parity. N even: endpoints same parity.",
+          "isCode": false
+        },
+        {
+          "label": "N odd: endpoints same parity. N even: endpoints opposite parity.",
+          "isCode": false
+        },
+        {
+          "label": "Parity irrelevant when n,m>1.",
+          "isCode": false
+        },
+        {
+          "label": "Depends only on n parity.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "For N odd (path length even), endpoints have same parity. For N even (path length odd), endpoints have opposite parity.",
+      "wrongExplanations": {
+        "0": "Reversed.",
+        "3": "Both n and m determine N."
+      },
+      "hint": "Path uses N vertices and N-1 edges; parity alternation decides endpoint parity.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "Special case: For 1×m or n×1 grids, what additional requirement exists beyond parity?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Endpoints must be extremes of the line.",
+          "isCode": false
+        },
+        {
+          "label": "No additional requirement.",
+          "isCode": false
+        },
+        {
+          "label": "Endpoints must be adjacent.",
+          "isCode": false
+        },
+        {
+          "label": "Endpoints must be corners of the rectangle.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "A line graph has a unique full path that starts and ends at the two extremes.",
+      "wrongExplanations": {
+        "1": "Line shape imposes stronger constraints.",
+        "2": "Adjacency is insufficient to cover all cells."
+      },
+      "hint": "Think of a single line: full coverage starts at one end and ends at the other.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Building the Idea",
+      "questionText": "If N is even and endpoints have opposite parity, can we always construct a path when n,m≥2?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, a full path exists.",
+          "isCode": false
+        },
+        {
+          "label": "No, only when both n and m are even.",
+          "isCode": false
+        },
+        {
+          "label": "Only when one of n or m equals 2.",
+          "isCode": false
+        },
+        {
+          "label": "Depends on x1==x2 or y1==y2.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "For rectangular grids with both dimensions ≥2, the parity condition suffices for existence when N is even.",
+      "wrongExplanations": {
+        "1": "Not required; one even dimension suffices for cycles, and paths exist broadly.",
+        "3": "Alignment isn't necessary."
+      },
+      "hint": "Use parity and grid structure properties for existence.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "When N is odd, which endpoints can be connected by a full path (n,m≥2)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Only endpoints of opposite parity.",
+          "isCode": false
+        },
+        {
+          "label": "Only endpoints of same parity.",
+          "isCode": false
+        },
+        {
+          "label": "Any endpoints.",
+          "isCode": false
+        },
+        {
+          "label": "Only adjacent endpoints.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "For odd N, a full path uses N-1 edges (even), so endpoints must be same parity.",
+      "wrongExplanations": {
+        "0": "Opposite parity applies to even N.",
+        "3": "Adjacency does not ensure full coverage."
+      },
+      "hint": "Use the alternation property of moves.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "Which of the following strategies guarantees visiting all cells exactly once for n,m≥2, regardless of start/end initially?",
+      "diagram": "Example snake by rows:\nRow1: -> -> ->\nRow2: <- <- <-\nRow3: -> -> ->",
+      "options": [
+        {
+          "label": "Row-wise zigzag (snake) that alternates direction per row.",
+          "isCode": false
+        },
+        {
+          "label": "Always moving towards b greedily.",
+          "isCode": false
+        },
+        {
+          "label": "Random moves until all cells visited.",
+          "isCode": false
+        },
+        {
+          "label": "Jumping between corners only.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "A zigzag traversal covers all cells exactly once. We'll shape it to match endpoints when feasible.",
+      "wrongExplanations": {
+        "1": "Greedy may get stuck.",
+        "2": "Random cannot ensure no revisits."
+      },
+      "hint": "Think of covering rows or columns systematically.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "We need a constructive path that starts at a and ends at b. Which adjustable elements help align endpoints for valid cases?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Choose zigzag direction (rows vs columns) and reflection relative to a and b.",
+          "isCode": false
+        },
+        {
+          "label": "Try all permutations of cells.",
+          "isCode": false
+        },
+        {
+          "label": "Use shortest path repeatedly.",
+          "isCode": false
+        },
+        {
+          "label": "Only start at corners.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "By switching row/column snake and reflecting relative to a/b, we can construct a path anchored at a and finishing at b when parity permits.",
+      "wrongExplanations": {
+        "1": "Infeasible; exponential.",
+        "4": "Corners are not required."
+      },
+      "hint": "Flexible traversal patterns can be anchored at a.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Writing the Code",
+      "questionText": "Read input and prepare result container.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "t=int(input().strip()); out=[]",
+          "isCode": true
+        },
+        {
+          "label": "t=input(); out=''",
+          "isCode": true
+        },
+        {
+          "label": "t=int(input()); out=set()",
+          "isCode": true
+        },
+        {
+          "label": "t=int(input().strip()); out=None",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We read integer t and collect outputs in a list for later printing.",
+      "wrongExplanations": {
+        "1": "input() returns string; we need int.",
+        "3": "Using None is not suitable for collection."
+      },
+      "hint": null,
+      "isCodeBuilding": true,
+      "codeSnippet": "t=int(input().strip()); out=[]",
+      "codeLabel": "read t and init out"
+    },
+    {
+      "id": "q13",
+      "phase": "Writing the Code",
+      "questionText": "Define a helper to convert a list of positions into a move string.",
+      "diagram": "Moves: consecutive positions differ by 1 in one coordinate.",
+      "options": [
+        {
+          "label": "def to_moves(path):\n    s=[]\n    for (y1,x1),(y2,x2) in zip(path,path[1:]):\n        if y2==y1 and x2==x1+1: s.append('R')\n        elif y2==y1 and x2==x1-1: s.append('L')\n        elif x2==x1 and y2==y1+1: s.append('D')\n        elif x2==x1 and y2==y1-1: s.append('U')\n        else: return None\n    return ''.join(s)",
+          "isCode": true
+        },
+        {
+          "label": "def to_moves(path):\n    return 'R'*len(path)",
+          "isCode": true
+        },
+        {
+          "label": "def to_moves(path):\n    return ''.join('RDLU')",
+          "isCode": true
+        },
+        {
+          "label": "def to_moves(path):\n    return None",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We convert adjacent coordinate differences into U/D/L/R, validating adjacency.",
+      "wrongExplanations": {
+        "1": "Always 'R' is incorrect.",
+        "3": "We need actual conversion."
+      },
+      "hint": "Check differences in y and x for each step.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def to_moves(path):\n    s=[]\n    for (y1,x1),(y2,x2) in zip(path,path[1:]):\n        if y2==y1 and x2==x1+1:\n            s.append('R')\n        elif y2==y1 and x2==x1-1:\n            s.append('L')\n        elif x2==x1 and y2==y1+1:\n            s.append('D')\n        elif x2==x1 and y2==y1-1:\n            s.append('U')\n        else:\n            return None\n    return ''.join(s)",
+      "codeLabel": "to_moves"
+    },
+    {
+      "id": "q14",
+      "phase": "Writing the Code",
+      "questionText": "Implement quick checks for line-shaped grids (n==1 or m==1).",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def line_path(n,m,y1,x1,y2,x2):\n    if n==1:\n        if {x1,x2}=={1,m} and y1==y2==1:\n            return [(1,i) for i in range(x1, x2, 1 if x2>x1 else -1)] + [(1,x2)]\n        else:\n            return None\n    if m==1:\n        if {y1,y2}=={1,n} and x1==x2==1:\n            return [(i,1) for i in range(y1, y2, 1 if y2>y1 else -1)] + [(y2,1)]\n        else:\n            return None\n    return None",
+          "isCode": true
+        },
+        {
+          "label": "def line_path(...):\n    return None",
+          "isCode": true
+        },
+        {
+          "label": "def line_path(n,m,y1,x1,y2,x2):\n    return [(y1,x1),(y2,x2)]",
+          "isCode": true
+        },
+        {
+          "label": "def line_path(n,m,y1,x1,y2,x2):\n    if n==1 or m==1: return []\n    return None",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "For single row/column, endpoints must be extremes; construct straight path accordingly.",
+      "wrongExplanations": {
+        "2": "Only two points do not cover all cells.",
+        "3": "Empty path is not valid."
+      },
+      "hint": "Use range with step sign based on direction.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def line_path(n,m,y1,x1,y2,x2):\n    if n==1:\n        if {x1,x2}=={1,m} and y1==y2==1:\n            step = 1 if x2>x1 else -1\n            path = []\n            for i in range(x1, x2, step):\n                path.append((1,i))\n            path.append((1,x2))\n            return path\n        else:\n            return None\n    if m==1:\n        if {y1,y2}=={1,n} and x1==x2==1:\n            step = 1 if y2>y1 else -1\n            path = []\n            for i in range(y1, y2, step):\n                path.append((i,1))\n            path.append((y2,1))\n            return path\n        else:\n            return None\n    return None",
+      "codeLabel": "line_path"
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Compute parity helper for endpoint feasibility.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def ok_parity(n,m,y1,x1,y2,x2):\n    N=n*m\n    p1=(y1+x1)&1\n    p2=(y2+x2)&1\n    if N%2==0:\n        return p1!=p2\n    else:\n        return p1==p2",
+          "isCode": true
+        },
+        {
+          "label": "def ok_parity(n,m,y1,x1,y2,x2):\n    return True",
+          "isCode": true
+        },
+        {
+          "label": "def ok_parity(n,m,y1,x1,y2,x2):\n    return (y1+x1)%2==(y2+x2)%2",
+          "isCode": true
+        },
+        {
+          "label": "def ok_parity(n,m,y1,x1,y2,x2):\n    return n%2==1",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Endpoints parity must match N parity: opposite when N even, same when N odd.",
+      "wrongExplanations": {
+        "2": "This ignores N parity.",
+        "3": "Only n's parity is insufficient."
+      },
+      "hint": "Use (y+x)%2 for endpoints.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def ok_parity(n,m,y1,x1,y2,x2):\n    N=n*m\n    p1=(y1+x1)&1\n    p2=(y2+x2)&1\n    if N%2==0:\n        return p1!=p2\n    else:\n        return p1==p2",
+      "codeLabel": "ok_parity"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Construct a full covering path using row-wise snake starting from (1,1) to an endpoint corner.",
+      "diagram": "Snake rows: 1->m, down, m->1, ...",
+      "options": [
+        {
+          "label": "def snake_rows(n,m):\n    order=[]\n    for y in range(1,n+1):\n        if y%2==1:\n            for x in range(1,m+1): order.append((y,x))\n        else:\n            for x in range(m,0,-1): order.append((y,x))\n    return order",
+          "isCode": true
+        },
+        {
+          "label": "def snake_rows(n,m):\n    return [(1,1),(n,m)]",
+          "isCode": true
+        },
+        {
+          "label": "def snake_rows(n,m):\n    return []",
+          "isCode": true
+        },
+        {
+          "label": "def snake_rows(n,m):\n    for y in range(n): pass",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "This ordering visits all cells exactly once in a zigzag manner.",
+      "wrongExplanations": {
+        "1": "Only endpoints are returned; missing all cells.",
+        "3": "No path constructed."
+      },
+      "hint": "Alternate direction per row.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def snake_rows(n,m):\n    order=[]\n    for y in range(1,n+1):\n        if y%2==1:\n            for x in range(1,m+1):\n                order.append((y,x))\n        else:\n            for x in range(m,0,-1):\n                order.append((y,x))\n    return order",
+      "codeLabel": "snake_rows"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Construct a full covering path using column-wise snake starting from (1,1).",
+      "diagram": "Snake columns: 1->n, right, n->1, ...",
+      "options": [
+        {
+          "label": "def snake_cols(n,m):\n    order=[]\n    for x in range(1,m+1):\n        if x%2==1:\n            for y in range(1,n+1): order.append((y,x))\n        else:\n            for y in range(n,1-1,-1): pass\n    return order",
+          "isCode": true
+        },
+        {
+          "label": "def snake_cols(n,m):\n    order=[]\n    for x in range(1,m+1):\n        if x%2==1:\n            for y in range(1,n+1): order.append((y,x))\n        else:\n            for y in range(n,0,-1): order.append((y,x))\n    return order",
+          "isCode": true
+        },
+        {
+          "label": "def snake_cols(n,m):\n    return snake_rows(n,m)",
+          "isCode": true
+        },
+        {
+          "label": "def snake_cols(n,m):\n    return None",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Alternate direction per column to cover all cells exactly once.",
+      "wrongExplanations": {
+        "0": "Has a bug (range and pass).",
+        "3": "We need an actual path."
+      },
+      "hint": "Use y ranges 1..n and n..1 alternately.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def snake_cols(n,m):\n    order=[]\n    for x in range(1,m+1):\n        if x%2==1:\n            for y in range(1,n+1):\n                order.append((y,x))\n        else:\n            for y in range(n,0,-1):\n                order.append((y,x))\n    return order",
+      "codeLabel": "snake_cols"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Given a full covering order, how to rotate it to start at a and end at b if both are endpoints of the order?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Find indices ia, ib; if ia==0 and ib==len-1 use as is; else reverse if that matches; otherwise None.",
+          "isCode": true
+        },
+        {
+          "label": "Remove all cells before a.",
+          "isCode": true
+        },
+        {
+          "label": "Shuffle until a at start.",
+          "isCode": true
+        },
+        {
+          "label": "Pick any start/end.",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We can use the order if a and b match its endpoints, or reverse the order to match; otherwise this particular order can’t be anchored.",
+      "wrongExplanations": {
+        "1": "Removing breaks coverage.",
+        "3": "Endpoints must match a,b."
+      },
+      "hint": "Check both directions.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def anchor_order(order,a,b):\n    n=len(order)\n    try:\n        ia=order.index(a)\n        ib=order.index(b)\n    except ValueError:\n        return None\n    if ia==0 and ib==n-1:\n        return order\n    if ib==0 and ia==n-1:\n        return list(reversed(order))\n    return None",
+      "codeLabel": "anchor_order"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Implement a constructive fallback that reshapes the snake by reflecting rows or columns to try matching endpoints.",
+      "diagram": "Try four reflections: identity, flip rows, flip cols, flip both.",
+      "options": [
+        {
+          "label": "def try_constructions(n,m,a,b):\n    orders=[]\n    base1=snake_rows(n,m)\n    base2=snake_cols(n,m)\n    orders.append(base1)\n    orders.append(list(reversed(base1)))\n    orders.append(base2)\n    orders.append(list(reversed(base2)))\n    for order in orders:\n        anchored=anchor_order(order,a,b)\n        if anchored:\n            return anchored\n    return None",
+          "isCode": true
+        },
+        {
+          "label": "def try_constructions(n,m,a,b):\n    return snake_rows(n,m)",
+          "isCode": true
+        },
+        {
+          "label": "def try_constructions(n,m,a,b):\n    return anchor_order([],a,b)",
+          "isCode": true
+        },
+        {
+          "label": "def try_constructions(n,m,a,b):\n    return None",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Try row and column snakes and their reversals to match endpoints. If none fits, return None.",
+      "wrongExplanations": {
+        "1": "Only one attempt may fail to match endpoints.",
+        "3": "We need to try possible shapes."
+      },
+      "hint": "Try multiple canonical orders.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def try_constructions(n,m,a,b):\n    orders=[]\n    base1=snake_rows(n,m)\n    base2=snake_cols(n,m)\n    orders.append(base1)\n    orders.append(list(reversed(base1)))\n    orders.append(base2)\n    orders.append(list(reversed(base2)))\n    for order in orders:\n        anchored=anchor_order(order,a,b)\n        if anchored:\n            return anchored\n    return None",
+      "codeLabel": "try_constructions"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Assemble per-test logic: handle lines, check parity, then construct and print.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "for _ in range(t):\n    n,m,y1,x1,y2,x2=map(int,input().split())\n    a=(y1,x1); b=(y2,x2)\n    lp=line_path(n,m,y1,x1,y2,x2)\n    if lp:\n        moves=to_moves(lp)\n        out.append('YES\\n'+moves)\n        continue\n    if not ok_parity(n,m,y1,x1,y2,x2):\n        out.append('NO')\n        continue\n    order=try_constructions(n,m,a,b)\n    if order is None:\n        out.append('NO')\n    else:\n        moves=to_moves(order)\n        out.append('YES\\n'+moves)",
+          "isCode": true
+        },
+        {
+          "label": "for _ in range(t):\n    print('YES')",
+          "isCode": true
+        },
+        {
+          "label": "for _ in range(t):\n    pass",
+          "isCode": true
+        },
+        {
+          "label": "for _ in range(t):\n    out.append('NO')",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We handle line cases, parity feasibility, then attempt constructions and print results.",
+      "wrongExplanations": {
+        "1": "Always YES is incorrect.",
+        "4": "Always NO ignores feasible cases."
+      },
+      "hint": "Combine the helpers coherently.",
+      "isCodeBuilding": true,
+      "codeSnippet": "for _ in range(t):\n    n,m,y1,x1,y2,x2=map(int,input().split())\n    a=(y1,x1); b=(y2,x2)\n    lp=line_path(n,m,y1,x1,y2,x2)\n    if lp:\n        moves=to_moves(lp)\n        out.append('YES\\n'+moves)\n        continue\n    if not ok_parity(n,m,y1,x1,y2,x2):\n        out.append('NO')\n        continue\n    order=try_constructions(n,m,a,b)\n    if order is None:\n        out.append('NO')\n    else:\n        moves=to_moves(order)\n        out.append('YES\\n'+moves)",
+      "codeLabel": "per-test logic"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "Finally print all outputs.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "print('\\n'.join(out))",
+          "isCode": true
+        },
+        {
+          "label": "for s in out: print(s, end='')",
+          "isCode": true
+        },
+        {
+          "label": "print(out)",
+          "isCode": true
+        },
+        {
+          "label": "print(out[0])",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Join with newlines to match required output formatting.",
+      "wrongExplanations": {
+        "2": "Printing list directly is wrong format.",
+        "3": "Only prints first case."
+      },
+      "hint": null,
+      "isCodeBuilding": true,
+      "codeSnippet": "print('\\n'.join(out))",
+      "codeLabel": "print outputs"
+    },
+    {
+      "id": "q22",
+      "phase": "Verifying the Solution",
+      "questionText": "For input: 1\\n1 3 1 1 1 3, what does the program output?",
+      "diagram": "Row 1..3, a=(1,1), b=(1,3)",
+      "options": [
+        {
+          "label": "YES\\nRR",
+          "isCode": false
+        },
+        {
+          "label": "NO",
+          "isCode": false
+        },
+        {
+          "label": "YES\\nRL",
+          "isCode": false
+        },
+        {
+          "label": "YES\\nR",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Single row; endpoints are extremes; path is two rights.",
+      "wrongExplanations": {
+        "2": "RL revisits middle.",
+        "3": "Not covering all cells."
+      },
+      "hint": null,
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q23",
+      "phase": "Verifying the Solution",
+      "questionText": "For input: 1\\n2 2 1 1 2 2, what should be printed?",
+      "diagram": "2x2 grid, a=(1,1), b=(2,2)",
+      "options": [
+        {
+          "label": "YES with some path",
+          "isCode": false
+        },
+        {
+          "label": "NO",
+          "isCode": false
+        },
+        {
+          "label": "YES\\nRDLU",
+          "isCode": false
+        },
+        {
+          "label": "YES\\nDR",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "N even requires opposite parity; (1,1) and (2,2) have same parity, so NO.",
+      "wrongExplanations": {
+        "0": "Exists only for opposite parity endpoints.",
+        "2": "This revisits/not full coverage."
+      },
+      "hint": "Compute (y+x)%2 for both endpoints.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the time complexity per test of constructing the path?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n*m)",
+          "isCode": false
+        },
+        {
+          "label": "O(1)",
+          "isCode": false
+        },
+        {
+          "label": "O((n*m)^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(n+m)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We build an ordering visiting each cell once; linear in the number of cells.",
+      "wrongExplanations": {
+        "1": "We output a path of length ~n*m; not constant.",
+        "3": "We visit all cells, not just per row/col."
+      },
+      "hint": "Consider the size of the output path.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Analyzing Complexity",
+      "questionText": "What extra memory is used beyond input/output?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n*m) to store an order of cells.",
+          "isCode": false
+        },
+        {
+          "label": "O(1) only.",
+          "isCode": false
+        },
+        {
+          "label": "O(n+m) for parity checks.",
+          "isCode": false
+        },
+        {
+          "label": "O((n*m)^2) for visited matrix.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We store path orders as lists of coordinates: linear in cells.",
+      "wrongExplanations": {
+        "2": "Parity check is O(1); the order list dominates.",
+        "4": "No quadratic storage needed."
+      },
+      "hint": "We build a list of all cells in order.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "t=int(input().strip()); out=[]",
+    "def to_moves(path):\n    s=[]\n    for (y1,x1),(y2,x2) in zip(path,path[1:]):\n        if y2==y1 and x2==x1+1:\n            s.append('R')\n        elif y2==y1 and x2==x1-1:\n            s.append('L')\n        elif x2==x1 and y2==y1+1:\n            s.append('D')\n        elif x2==x1 and y2==y1-1:\n            s.append('U')\n        else:\n            return None\n    return ''.join(s)",
+    "def line_path(n,m,y1,x1,y2,x2):\n    if n==1:\n        if {x1,x2}=={1,m} and y1==y2==1:\n            step = 1 if x2>x1 else -1\n            path = []\n            for i in range(x1, x2, step):\n                path.append((1,i))\n            path.append((1,x2))\n            return path\n        else:\n            return None\n    if m==1:\n        if {y1,y2}=={1,n} and x1==x2==1:\n            step = 1 if y2>y1 else -1\n            path = []\n            for i in range(y1, y2, step):\n                path.append((i,1))\n            path.append((y2,1))\n            return path\n        else:\n            return None\n    return None",
+    "def ok_parity(n,m,y1,x1,y2,x2):\n    N=n*m\n    p1=(y1+x1)&1\n    p2=(y2+x2)&1\n    if N%2==0:\n        return p1!=p2\n    else:\n        return p1==p2",
+    "def snake_rows(n,m):\n    order=[]\n    for y in range(1,n+1):\n        if y%2==1:\n            for x in range(1,m+1):\n                order.append((y,x))\n        else:\n            for x in range(m,0,-1):\n                order.append((y,x))\n    return order",
+    "def snake_cols(n,m):\n    order=[]\n    for x in range(1,m+1):\n        if x%2==1:\n            for y in range(1,n+1):\n                order.append((y,x))\n        else:\n            for y in range(n,0,-1):\n                order.append((y,x))\n    return order",
+    "def anchor_order(order,a,b):\n    n=len(order)\n    try:\n        ia=order.index(a)\n        ib=order.index(b)\n    except ValueError:\n        return None\n    if ia==0 and ib==n-1:\n        return order\n    if ib==0 and ia==n-1:\n        return list(reversed(order))\n    return None",
+    "def try_constructions(n,m,a,b):\n    orders=[]\n    base1=snake_rows(n,m)\n    base2=snake_cols(n,m)\n    orders.append(base1)\n    orders.append(list(reversed(base1)))\n    orders.append(base2)\n    orders.append(list(reversed(base2)))\n    for order in orders:\n        anchored=anchor_order(order,a,b)\n        if anchored:\n            return anchored\n    return None",
+    "for _ in range(t):\n    n,m,y1,x1,y2,x2=map(int,input().split())\n    a=(y1,x1); b=(y2,x2)\n    lp=line_path(n,m,y1,x1,y2,x2)\n    if lp:\n        moves=to_moves(lp)\n        out.append('YES\\n'+moves)\n        continue\n    if not ok_parity(n,m,y1,x1,y2,x2):\n        out.append('NO')\n        continue\n    order=try_constructions(n,m,a,b)\n    if order is None:\n        out.append('NO')\n    else:\n        moves=to_moves(order)\n        out.append('YES\\n'+moves)",
+    "print('\\n'.join(out))"
+  ],
+  "reasoningChain": [
+    {
+      "question": "What does the path need to do in the grid?",
+      "insight": "Clarify Hamiltonian path requirement: visit all cells exactly once from a to b."
+    },
+    {
+      "question": "Single row/column feasibility?",
+      "insight": "Line-shaped grids require endpoints at extremes to cover all cells."
+    },
+    {
+      "question": "Parity role?",
+      "insight": "Adjacency alternates parity; endpoint parity depends on total cell count parity."
+    },
+    {
+      "question": "Map N parity to endpoints parity.",
+      "insight": "N odd => endpoints same parity; N even => endpoints opposite parity."
+    },
+    {
+      "question": "Constructive coverage pattern.",
+      "insight": "Use snake traversal to cover all cells; try variants to fit endpoints."
+    },
+    {
+      "question": "Implementation plan.",
+      "insight": "Build helpers: line case handler, parity check, snakes, anchoring, and final printing."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1572,
+    "output_tokens": 27447,
+    "input_cost": 0.001965,
+    "output_cost": 0.27447,
+    "total_cost": 0.276435
+  }
+}

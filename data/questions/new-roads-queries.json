@@ -1,0 +1,1013 @@
+{
+  "id": "new-roads-queries-guide",
+  "title": "New Roads Queries",
+  "difficulty": "hard",
+  "tags": [
+    "advanced",
+    "graphs"
+  ],
+  "estimatedMinutes": 90,
+  "language": "python",
+  "description": "There are n cities and m roads that will be built one per day (in the given order). For q queries, each asks: after how many days can we first travel from city a to city b? If it never becomes possible, print -1.\n\nInput:\n- First line: n m q\n- Next m lines: a b (road built between a and b on that day)\n- Next q lines: a b (travel query)\n\nOutput:\n- For each query, the earliest day index when a and b become connected, or -1 if never.",
+  "examples": [
+    {
+      "input": "5 4 3\n1 2\n2 3\n1 3\n2 5\n1 3\n3 4\n3 5\n",
+      "output": "2\n-1\n4",
+      "explanation": "- Cities 1 and 3 are connected by day 2 (road 1-3 on day 3 would be later than using 1-2 and 2-3).\n- Cities 3 and 4 never become connected.\n- Cities 3 and 5 become connected by day 4 (via 2-5 after 1-2 and 2-3)."
+    }
+  ],
+  "constraints": [
+    "1 ≤ n, m, q ≤ 2⋅10^5",
+    "1 ≤ a, b ≤ n",
+    "Roads are added one per day in the given order"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "Day-by-day roads:\nDay 1: 1-2\nDay 2: 2-3\nQuery: When can we first travel from 1 to 3?",
+      "diagram": "1 --(1)-- 2 --(2)-- 3",
+      "options": [
+        {
+          "label": "Day 2",
+          "isCode": false
+        },
+        {
+          "label": "Day 1",
+          "isCode": false
+        },
+        {
+          "label": "Day 3",
+          "isCode": false
+        },
+        {
+          "label": "-1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need both roads 1-2 and 2-3; the latest of them is day 2, so earliest is day 2.",
+      "wrongExplanations": {
+        "1": "On day 1, 3 is not reachable from 1.",
+        "2": "There is no road added on day 3 in this example.",
+        "3": "They become connected by day 2, so not -1."
+      },
+      "hint": "Earliest day is the maximum day among the roads on a path.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "Consider a fixed path 1-2-3 where road 1-2 is built on day 5 and 2-3 on day 2. What determines the earliest day this path is usable?",
+      "diagram": "1 --(5)-- 2 --(2)-- 3",
+      "options": [
+        {
+          "label": "The maximum of {5, 2} which is 5",
+          "isCode": false
+        },
+        {
+          "label": "The sum 5 + 2 = 7",
+          "isCode": false
+        },
+        {
+          "label": "The minimum of {5, 2} which is 2",
+          "isCode": false
+        },
+        {
+          "label": "Always the later road minus the earlier: 5 - 2 = 3",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "You can use the path only after both roads exist; the limiting day is the later one (max).",
+      "wrongExplanations": {
+        "1": "Days do not add; you just wait until both are available.",
+        "2": "You must wait until both are present; the later one governs.",
+        "3": "Differences are irrelevant; availability depends on the latest required road."
+      },
+      "hint": "You need all edges on the path; which day is the first when that's true?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "Multiple paths may exist. Roads:\nDay 1: 1-2\nDay 2: 1-3\nDay 3: 2-3\nQuery: earliest day to travel from 1 to 3?",
+      "diagram": "Paths:\n1-3 uses day 2\n1-2-3 uses days {1,3} -> max=3",
+      "options": [
+        {
+          "label": "Day 2 (use direct road 1-3)",
+          "isCode": false
+        },
+        {
+          "label": "Day 3 (path 1-2-3)",
+          "isCode": false
+        },
+        {
+          "label": "Day 1 (since 1-2 exists)",
+          "isCode": false
+        },
+        {
+          "label": "-1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Choose the path that minimizes the latest required day; direct 1-3 needs only day 2.",
+      "wrongExplanations": {
+        "1": "This path is valid but not earliest; day 3 is later than 2.",
+        "2": "1 and 3 are not connected on day 1.",
+        "3": "They do become connected."
+      },
+      "hint": "Compare the maximum day per path and pick the smaller one.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "If cities a and b are the same (a == b), what should be printed?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "-1",
+          "isCode": false
+        },
+        {
+          "label": "The day the first road touching a is built",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "You can stay at the same city immediately; zero days are needed.",
+      "wrongExplanations": {
+        "1": "No waiting is needed if start equals end.",
+        "2": "They are trivially reachable.",
+        "3": "Irrelevant; no road is needed."
+      },
+      "hint": "Travel from a to a requires no roads.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Understanding the Problem",
+      "questionText": "Given n up to 2e5, would checking each query by simulating days 1..m and running a search each day be feasible?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "No, it would be far too slow in the worst case.",
+          "isCode": false
+        },
+        {
+          "label": "Yes, because each search is O(1).",
+          "isCode": false
+        },
+        {
+          "label": "Yes, because m is at most n.",
+          "isCode": false
+        },
+        {
+          "label": "Maybe; it depends on the graph shape but should pass.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Simulating up to m days per query with searches is roughly O(q·(n+m)), which is too large.",
+      "wrongExplanations": {
+        "1": "A search is not O(1).",
+        "2": "m can be as large as 2e5; not bounded by n.",
+        "3": "Worst-case complexity is the constraint to consider."
+      },
+      "hint": "Estimate q·m with q,m≈2e5.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "For a fixed pair (a,b), which expression best describes the earliest day they become connected?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Minimum over all a→b paths of (maximum day among edges on that path).",
+          "isCode": false
+        },
+        {
+          "label": "Maximum over all a→b paths of (minimum day among edges on that path).",
+          "isCode": false
+        },
+        {
+          "label": "Sum of days of the shortest path (by edges).",
+          "isCode": false
+        },
+        {
+          "label": "Day when degree(a)+degree(b) first exceeds 0.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "You can travel when every edge on the path exists; minimize the latest edge day among paths.",
+      "wrongExplanations": {
+        "1": "We care about the latest edge on a path, not the earliest.",
+        "2": "Sum of days is not meaningful for availability.",
+        "3": "Degrees don't ensure connectivity."
+      },
+      "hint": "You need all edges on the chosen path to be built.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "Suppose we process roads in day order and keep only those that connect two previously separate groups (skip those that would create a cycle). If we look at the maximum day along the unique path between a and b in this kept structure, what does it equal?",
+      "diagram": "We build an acyclic structure by skipping cycle-creating roads.",
+      "options": [
+        {
+          "label": "Exactly the earliest day a and b can be connected.",
+          "isCode": false
+        },
+        {
+          "label": "An upper bound but may be larger than the true earliest day.",
+          "isCode": false
+        },
+        {
+          "label": "A lower bound but may be smaller than the true earliest day.",
+          "isCode": false
+        },
+        {
+          "label": "Unrelated; skipping roads changes the earliest day arbitrarily.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Keeping only cycle-free, day-ordered connectors preserves the path with minimized bottleneck day for any pair.",
+      "wrongExplanations": {
+        "1": "It's not just a bound; it's exact due to the minimax property.",
+        "2": "Skipping cycle edges doesn't reduce the earliest day.",
+        "3": "It's closely related; cycles are redundant."
+      },
+      "hint": "Any cycle contains a redundant road for connectivity between already-connected cities.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Exploring Approaches",
+      "questionText": "Why is skipping roads that connect cities already in the same group safe for earliest-day answers?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Because among all paths, there exists one where the latest road is minimized and no skipped road improves that maximum.",
+          "isCode": false
+        },
+        {
+          "label": "Because skipped roads are always built later than all others.",
+          "isCode": false
+        },
+        {
+          "label": "Because we only care about road counts, not which roads.",
+          "isCode": false
+        },
+        {
+          "label": "Because early roads are never part of any cycle.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Any skipped road lies on a cycle; an alternative path with no worse latest day already exists.",
+      "wrongExplanations": {
+        "1": "Skipped roads can be early too; timing doesn't guarantee skipping.",
+        "2": "We care about which roads and their days.",
+        "3": "Cycles may include early roads."
+      },
+      "hint": "A cycle gives two different ways between the same nodes.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "To build the cycle-free structure by processing roads in day order, what operation do we need to support efficiently for endpoints (u,v)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Check if u and v are in the same group, and merge their groups if not.",
+          "isCode": false
+        },
+        {
+          "label": "Recompute connected components from scratch after each road.",
+          "isCode": false
+        },
+        {
+          "label": "Store all neighbors of each city in a set and scan them when needed.",
+          "isCode": false
+        },
+        {
+          "label": "Run a full search from u to v after each road to detect cycles.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need fast same-group checks and merges as roads arrive; recomputing or scanning is too slow.",
+      "wrongExplanations": {
+        "1": "Rebuilding after each road is O(n+m) per step.",
+        "3": "Full searches per road are too expensive."
+      },
+      "hint": "Maintain a representative for each group and merge on demand.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "After we build the cycle-free structure (a forest with day labels on edges), how to answer many queries (a,b) asking for maximum day along their path efficiently?",
+      "diagram": "Tree edges labeled by day indexes.",
+      "options": [
+        {
+          "label": "Precompute ancestors at powers of two for each node and the maximum day when jumping upward.",
+          "isCode": false
+        },
+        {
+          "label": "For each query, do a simple upward walk from both nodes to the root, tracking max.",
+          "isCode": false
+        },
+        {
+          "label": "For each query, run a search along the tree.",
+          "isCode": false
+        },
+        {
+          "label": "Flatten the tree into an array by any traversal and scan between indices.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Precomputing jumps by powers of two gives log-time queries with tracked maxima.",
+      "wrongExplanations": {
+        "1": "A linear upward walk can be O(n) per query.",
+        "2": "A search per query is too slow for 2e5 queries."
+      },
+      "hint": "Think of moving nodes upward in large steps while tracking the largest edge day.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "To compute the maximum day along the path between u and v in the forest using jumps, which sequence is correct?",
+      "diagram": "u and v in a rooted tree:\n- Lift deeper node up to same depth (track max)\n- Lift both up until they meet (track max both sides)",
+      "options": [
+        {
+          "label": "Lift deeper node to match depth (tracking max), then lift both up together while their parents differ (tracking max), then include the last one-step edges.",
+          "isCode": false
+        },
+        {
+          "label": "Always lift u all the way to the root; then lift v to the root; take the maximum of both paths.",
+          "isCode": false
+        },
+        {
+          "label": "Lift both nodes to depth 0 immediately and take max of all upward edges used.",
+          "isCode": false
+        },
+        {
+          "label": "Randomly lift either node until they meet.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Equalize depths first, then lift both while staying just below their meeting point, finally include the edges to the meeting node.",
+      "wrongExplanations": {
+        "1": "Lifting to root can traverse unnecessary edges and complicate combining.",
+        "2": "This is inefficient and not structured.",
+        "3": "Random lifting offers no guarantee of efficiency or correctness."
+      },
+      "hint": "Move both upward in lockstep only after depths match.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "What do we need to precompute to support such jumps on a forest with up to n=2e5?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "For each node v and k, store the 2^k-th ancestor of v and the maximum day on the path from v to that ancestor.",
+          "isCode": false
+        },
+        {
+          "label": "For each node, store only the parent; compute larger jumps on the fly.",
+          "isCode": false
+        },
+        {
+          "label": "For each pair of nodes, store their maximum-day path.",
+          "isCode": false
+        },
+        {
+          "label": "For each edge, precompute its position in an Euler tour and use range maxima directly.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Storing 2^k-th ancestors and corresponding maxima allows O(log n) jumps for any height difference.",
+      "wrongExplanations": {
+        "1": "Only parent is too slow for many queries.",
+        "2": "Pairwise storage is O(n^2), impossible.",
+        "3": "A traversal index alone isn't enough without more structure."
+      },
+      "hint": "How many levels of k do we need? About log2(n).",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "How do we handle multiple disconnected trees when preparing depths and first ancestors?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Start a traversal from every unvisited node as a new root, setting its parent to itself and depth 0.",
+          "isCode": false
+        },
+        {
+          "label": "Pick a single node as root; others will be handled during queries.",
+          "isCode": false
+        },
+        {
+          "label": "Ignore isolated nodes since they won't appear in queries.",
+          "isCode": false
+        },
+        {
+          "label": "Connect all roots with a virtual edge of day 0 to make one tree.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We must initialize each component; setting root's parent to itself keeps jumps well-defined without mixing components.",
+      "wrongExplanations": {
+        "1": "Uninitialized components break queries.",
+        "3": "Queries can target any nodes.",
+        "4": "Adding edges changes the problem."
+      },
+      "hint": "Treat each component separately but consistently.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Building the Idea",
+      "questionText": "Before answering a query (a,b), how can we quickly detect if they will never be connected?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Check if a and b end up in different groups after processing all roads.",
+          "isCode": false
+        },
+        {
+          "label": "Check if their depths differ.",
+          "isCode": false
+        },
+        {
+          "label": "Check if either is a root.",
+          "isCode": false
+        },
+        {
+          "label": "Count their degrees in the forest and compare.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "If they are in different final groups, no path exists in the full graph; otherwise, we can answer from the forest.",
+      "wrongExplanations": {
+        "1": "Depth or degree doesn't indicate connectivity.",
+        "2": "Being a root is unrelated."
+      },
+      "hint": "Use the same group merging structure you used while adding roads.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Parse input efficiently and store edges (0-based) and queries.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\n\ndef main():\n    data = list(map(int, sys.stdin.buffer.read().split()))\n    it = iter(data)\n    n = next(it); m = next(it); q = next(it)\n    edges = []\n    for _ in range(m):\n        a = next(it) - 1; b = next(it) - 1\n        edges.append((a, b))\n    queries = []\n    for _ in range(q):\n        a = next(it) - 1; b = next(it) - 1\n        queries.append((a, b))",
+          "isCode": true
+        },
+        {
+          "label": "import sys\n\ndef main():\n    data = sys.stdin.read().split()\n    n, m, q = map(int, data[:3])\n    edges = [(int(data[i]), int(data[i+1])) for i in range(3, 3+2*m, 2)]\n    queries = [(int(data[i]), int(data[i+1])) for i in range(3+2*m, 3+2*m+2*q, 2)]",
+          "isCode": true
+        },
+        {
+          "label": "import sys\n\ndef main():\n    n, m, q = map(int, sys.stdin.readline().split())\n    edges = [tuple(map(int, sys.stdin.readline().split())) for _ in range(m)]\n    queries = [tuple(map(int, sys.stdin.readline().split())) for _ in range(q)]",
+          "isCode": true
+        },
+        {
+          "label": "import sys\n\ndef main():\n    data = list(map(int, sys.stdin.buffer.read().split()))\n    it = iter(data)\n    n = next(it); m = next(it); q = next(it)\n    edges = []\n    for _ in range(m):\n        a = next(it); b = next(it)\n        edges.append((a, b))\n    queries = []\n    for _ in range(q):\n        a = next(it); b = next(it)\n        queries.append((a, b))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Use fast buffered read and convert to 0-based early. The other options either keep 1-based indices or rely on slower line reads.",
+      "wrongExplanations": {
+        "1": "This keeps 1-based indices; later logic expects 0-based.",
+        "2": "Line-by-line can be slower; also keeps 1-based without conversion.",
+        "3": "Missing 0-based conversion."
+      },
+      "hint": "Convert city indices to 0-based when storing.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\n\ndef main():\n    data = list(map(int, sys.stdin.buffer.read().split()))\n    it = iter(data)\n    n = next(it); m = next(it); q = next(it)\n    edges = []\n    for _ in range(m):\n        a = next(it) - 1; b = next(it) - 1\n        edges.append((a, b))\n    queries = []\n    for _ in range(q):\n        a = next(it) - 1; b = next(it) - 1\n        queries.append((a, b))",
+      "codeLabel": "Parse input"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Initialize group structure and implement a fast representative finder.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    parent = list(range(n))\n    size = [1] * n\n    def find(x):\n        while parent[x] != x:\n            parent[x] = parent[parent[x]]\n            x = parent[x]\n        return x",
+          "isCode": true
+        },
+        {
+          "label": "    parent = [-1] * n\n    def find(x):\n        if parent[x] == -1: return x\n        return find(parent[x])",
+          "isCode": true
+        },
+        {
+          "label": "    parent = list(range(n))\n    def find(x):\n        while parent[x] != -1:\n            x = parent[x]\n        return x",
+          "isCode": true
+        },
+        {
+          "label": "    parent = list(range(n))\n    size = [1] * n\n    def find(x):\n        if parent[x] == x: return x\n        return find(parent[x])",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Iterative path halving keeps amortized near-constant find time. Others miss compression or use wrong sentinels.",
+      "wrongExplanations": {
+        "1": "Uses -1 as sentinel but parent never set to -1; also no compression.",
+        "2": "Parent never set to -1; loop condition is wrong.",
+        "3": "No path compression; deep trees hurt performance."
+      },
+      "hint": "Flatten paths while climbing to the representative.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    parent = list(range(n))\n    size = [1] * n\n    def find(x):\n        while parent[x] != x:\n            parent[x] = parent[parent[x]]\n            x = parent[x]\n        return x",
+      "codeLabel": "Group init and find"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Implement merging of two groups with small-to-large attachment and report whether a merge happened.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    def unite(a, b):\n        ra = find(a); rb = find(b)\n        if ra == rb:\n            return False\n        if size[ra] < size[rb]:\n            ra, rb = rb, ra\n        parent[rb] = ra\n        size[ra] += size[rb]\n        return True",
+          "isCode": true
+        },
+        {
+          "label": "    def unite(a, b):\n        ra = find(a); rb = find(b)\n        if ra == rb:\n            return True\n        parent[ra] = rb\n        return False",
+          "isCode": true
+        },
+        {
+          "label": "    def unite(a, b):\n        ra = find(a); rb = find(b)\n        parent[rb] = ra\n        return ra != rb",
+          "isCode": true
+        },
+        {
+          "label": "    def unite(a, b):\n        ra = find(a); rb = find(b)\n        if size[ra] > size[rb]:\n            parent[ra] = rb\n        else:\n            parent[rb] = ra\n        return True",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Attach smaller to larger and update size; return True only on actual merges.",
+      "wrongExplanations": {
+        "1": "Return values reversed; also no size updates.",
+        "2": "Ignores size and returns based on pre-merge state without updating sizes.",
+        "3": "Attaches larger under smaller in one branch and always returns True even if same group."
+      },
+      "hint": "Return True only when parents change.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    def unite(a, b):\n        ra = find(a); rb = find(b)\n        if ra == rb:\n            return False\n        if size[ra] < size[rb]:\n            ra, rb = rb, ra\n        parent[rb] = ra\n        size[ra] += size[rb]\n        return True",
+      "codeLabel": "Group merge"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Build the cycle-free structure (forest) by processing roads in day order and keeping only merging roads. Label each kept edge with its day.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    g = [[] for _ in range(n)]\n    day = 1\n    for (u, v) in edges:\n        if unite(u, v):\n            g[u].append((v, day))\n            g[v].append((u, day))\n        day += 1",
+          "isCode": true
+        },
+        {
+          "label": "    g = [[] for _ in range(n)]\n    for i, (u, v) in enumerate(edges):\n        if unite(u, v):\n            g[u].append((v, i))\n            g[v].append((u, i))",
+          "isCode": true
+        },
+        {
+          "label": "    g = [[] for _ in range(n)]\n    for i, (u, v) in enumerate(edges, start=1):\n        g[u].append((v, i))\n        g[v].append((u, i))",
+          "isCode": true
+        },
+        {
+          "label": "    g = [[] for _ in range(n)]\n    day = 1\n    for (u, v) in edges:\n        unite(u, v)\n        g[u].append((v, day))\n        g[v].append((u, day))\n        day += 1",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Only add the edge if it merges two groups; days are 1..m so start day at 1 and increment.",
+      "wrongExplanations": {
+        "1": "Using enumerate without start=1 labels day i from 0..m-1; also off-by-one.",
+        "2": "This adds every edge, including cycle edges, which breaks acyclicity.",
+        "3": "Adds all edges regardless of merging; not a forest."
+      },
+      "hint": "Skip roads that connect already-connected cities.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    g = [[] for _ in range(n)]\n    day = 1\n    for (u, v) in edges:\n        if unite(u, v):\n            g[u].append((v, day))\n            g[v].append((u, day))\n        day += 1",
+      "codeLabel": "Build forest"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Initialize jump tables and prepare depth and first ancestor for every node by traversing each component.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    LOG = max(1, (n).bit_length())\n    up = [[0] * n for _ in range(LOG)]\n    mx = [[0] * n for _ in range(LOG)]\n    depth = [0] * n\n    seen = [False] * n\n    for root in range(n):\n        if not seen[root]:\n            seen[root] = True\n            up[0][root] = root\n            mx[0][root] = 0\n            depth[root] = 0\n            stack = [root]\n            while stack:\n                u = stack.pop()\n                for v, w in g[u]:\n                    if not seen[v]:\n                        seen[v] = True\n                        up[0][v] = u\n                        mx[0][v] = w\n                        depth[v] = depth[u] + 1\n                        stack.append(v)",
+          "isCode": true
+        },
+        {
+          "label": "    LOG = n\n    up = [[-1] * n for _ in range(LOG)]\n    mx = [[0] * n for _ in range(LOG)]\n    depth = [0] * n\n    for root in range(n):\n        up[0][root] = -1",
+          "isCode": true
+        },
+        {
+          "label": "    LOG = max(1, (n).bit_length())\n    up = [[0] * n for _ in range(LOG)]\n    mx = [[0] * n for _ in range(LOG)]\n    depth = [0] * n\n    # No traversal; assume up[0] already valid.",
+          "isCode": true
+        },
+        {
+          "label": "    LOG = max(1, (n).bit_length())\n    up = [[0] * n for _ in range(LOG)]\n    mx = [[0] * n for _ in range(LOG)]\n    depth = [0] * n\n    seen = [False] * n\n    # Use only roots with degree 0 as components\n    for root in range(n):\n        if not g[root]:\n            seen[root] = True\n            up[0][root] = root",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Traverse each component to set depth and first ancestors; root points to itself with 0 day.",
+      "wrongExplanations": {
+        "1": "LOG must be ~log2(n), not n; also no traversal.",
+        "2": "Skipping traversal leaves up[0] and mx[0] unset.",
+        "3": "Components with edges need traversals too."
+      },
+      "hint": "Set parent and edge day for each tree edge discovered.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    LOG = max(1, (n).bit_length())\n    up = [[0] * n for _ in range(LOG)]\n    mx = [[0] * n for _ in range(LOG)]\n    depth = [0] * n\n    seen = [False] * n\n    for root in range(n):\n        if not seen[root]:\n            seen[root] = True\n            up[0][root] = root\n            mx[0][root] = 0\n            depth[root] = 0\n            stack = [root]\n            while stack:\n                u = stack.pop()\n                for v, w in g[u]:\n                    if not seen[v]:\n                        seen[v] = True\n                        up[0][v] = u\n                        mx[0][v] = w\n                        depth[v] = depth[u] + 1\n                        stack.append(v)",
+      "codeLabel": "Initialize base jumps"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Fill higher jump levels: for each k>0 and node v, set the 2^k-th ancestor and the maximum day to get there.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    for k in range(1, LOG):\n        for v in range(n):\n            up[k][v] = up[k-1][ up[k-1][v] ]\n            mx[k][v] = max(mx[k-1][v], mx[k-1][ up[k-1][v] ])",
+          "isCode": true
+        },
+        {
+          "label": "    for k in range(1, LOG):\n        for v in range(n):\n            up[k][v] = up[k-1][v]\n            mx[k][v] = mx[k-1][v] + mx[k-1][ up[k-1][v] ]",
+          "isCode": true
+        },
+        {
+          "label": "    for k in range(1, LOG):\n        for v in range(n):\n            up[k][v] = up[k-1][ up[k-1][v] ]\n            mx[k][v] = mx[k-1][ up[k-1][v] ]",
+          "isCode": true
+        },
+        {
+          "label": "    for k in range(1, LOG):\n        for v in range(n):\n            up[k][v] = up[k-1][ up[k-1][v] ]\n            mx[k][v] = min(mx[k-1][v], mx[k-1][ up[k-1][v] ])",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The 2^k jump composes two 2^(k-1) jumps; the maximum day is the max of their maxima.",
+      "wrongExplanations": {
+        "1": "Simply copying ancestor is wrong; and days do not add.",
+        "2": "Dropping one side's max loses information.",
+        "3": "We need the maximum, not minimum."
+      },
+      "hint": "Compose two half-length jumps.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    for k in range(1, LOG):\n        for v in range(n):\n            up[k][v] = up[k-1][ up[k-1][v] ]\n            mx[k][v] = max(mx[k-1][v], mx[k-1][ up[k-1][v] ])",
+      "codeLabel": "Build jump tables"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "Implement a function that returns the maximum day along the path between u and v in the forest.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    def max_on_path(u, v):\n        if u == v:\n            return 0\n        res = 0\n        if depth[u] < depth[v]:\n            u, v = v, u\n        diff = depth[u] - depth[v]\n        k = 0\n        while diff:\n            if diff & 1:\n                res = max(res, mx[k][u])\n                u = up[k][u]\n            diff >>= 1\n            k += 1\n        if u == v:\n            return res\n        for k in range(LOG - 1, -1, -1):\n            if up[k][u] != up[k][v]:\n                res = max(res, mx[k][u], mx[k][v])\n                u = up[k][u]\n                v = up[k][v]\n        res = max(res, mx[0][u], mx[0][v])\n        return res",
+          "isCode": true
+        },
+        {
+          "label": "    def max_on_path(u, v):\n        res = 0\n        while u != v:\n            if depth[u] > depth[v]:\n                res = max(res, mx[0][u])\n                u = up[0][u]\n            else:\n                res = max(res, mx[0][v])\n                v = up[0][v]\n        return res",
+          "isCode": true
+        },
+        {
+          "label": "    def max_on_path(u, v):\n        res = 0\n        for k in range(LOG):\n            res = max(res, mx[k][u], mx[k][v])\n        return res",
+          "isCode": true
+        },
+        {
+          "label": "    def max_on_path(u, v):\n        if depth[u] < depth[v]: u, v = v, u\n        res = 0\n        for k in range(LOG - 1, -1, -1):\n            if (depth[u] - depth[v]) >= (1 << k):\n                u = up[k][u]\n        for k in range(LOG - 1, -1, -1):\n            if up[k][u] != up[k][v]:\n                u = up[k][u]\n                v = up[k][v]\n        return res",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Lift deeper node by bits while tracking max, then lift both while parents differ, tracking max from both, finally include last step.",
+      "wrongExplanations": {
+        "1": "Lifting one step at a time is O(n) in worst case.",
+        "2": "Taking max over all levels without moving nodes is meaningless.",
+        "3": "Does not track max values and misses last edges."
+      },
+      "hint": "Use both bitwise lifting and simultaneous lifting with max updates.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    def max_on_path(u, v):\n        if u == v:\n            return 0\n        res = 0\n        if depth[u] < depth[v]:\n            u, v = v, u\n        diff = depth[u] - depth[v]\n        k = 0\n        while diff:\n            if diff & 1:\n                res = max(res, mx[k][u])\n                u = up[k][u]\n            diff >>= 1\n            k += 1\n        if u == v:\n            return res\n        for k in range(LOG - 1, -1, -1):\n            if up[k][u] != up[k][v]:\n                res = max(res, mx[k][u], mx[k][v])\n                u = up[k][u]\n                v = up[k][v]\n        res = max(res, mx[0][u], mx[0][v])\n        return res",
+      "codeLabel": "Path query"
+    },
+    {
+      "id": "q22",
+      "phase": "Writing the Code",
+      "questionText": "Process all queries: if cities are in different final groups, print -1; otherwise print the maximum day along their path. Use buffered output.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    out = []\n    for a, b in queries:\n        if find(a) != find(b):\n            out.append(\"-1\")\n        else:\n            out.append(str(max_on_path(a, b)))\n    sys.stdout.write(\"\\n\".join(out))\n\nif __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "    for a, b in queries:\n        if find(a) == find(b):\n            print(max_on_path(a, b))\n        else:\n            print(0)\n\nif __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "    out = []\n    for a, b in queries:\n        unite(a, b)\n        out.append(str(max_on_path(a, b)))\n    sys.stdout.write(\"\\n\".join(out))\n\nif __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "    out = []\n    for a, b in queries:\n        out.append(str(max_on_path(a, b)))\n    print(\"\\n\".join(out))\n\nif __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Use the final groups to detect disconnection; if connected, answer via the forest path. Buffered output is efficient.",
+      "wrongExplanations": {
+        "1": "Disconnected pairs should be -1, not 0.",
+        "2": "Never merge during queries; that changes the structure.",
+        "3": "Missing disconnection check; would give wrong answers."
+      },
+      "hint": "Do not modify the structure while answering queries.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    out = []\n    for a, b in queries:\n        if find(a) != find(b):\n            out.append(\"-1\")\n        else:\n            out.append(str(max_on_path(a, b)))\n    sys.stdout.write(\"\\n\".join(out))\n\nif __name__ == \"__main__\":\n    main()",
+      "codeLabel": "Answer queries and run"
+    },
+    {
+      "id": "q23",
+      "phase": "Verifying the Solution",
+      "questionText": "Run the built program on the sample. What is the output?",
+      "diagram": "Input:\n5 4 3\n1 2\n2 3\n1 3\n2 5\n1 3\n3 4\n3 5",
+      "options": [
+        {
+          "label": "2\n-1\n4",
+          "isCode": false
+        },
+        {
+          "label": "3\n-1\n3",
+          "isCode": false
+        },
+        {
+          "label": "2\n0\n4",
+          "isCode": false
+        },
+        {
+          "label": "2\n-1\n3",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Matches the example: day 2 for (1,3), never for (3,4), day 4 for (3,5).",
+      "wrongExplanations": {
+        "1": "Day 3 for (1,3) is not minimal.",
+        "2": "(3,4) is not 0; they are disconnected."
+      },
+      "hint": "Trace paths using kept edges and take the larger day on the path.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Verifying the Solution",
+      "questionText": "Consider:\n4 3 3\n1 2\n2 4\n3 4\n1 4\n1 3\n2 3\nWhat are the outputs?",
+      "diagram": "Road days: (1-2)=1, (2-4)=2, (3-4)=3",
+      "options": [
+        {
+          "label": "2\n3\n3",
+          "isCode": false
+        },
+        {
+          "label": "2\n-1\n2",
+          "isCode": false
+        },
+        {
+          "label": "1\n3\n2",
+          "isCode": false
+        },
+        {
+          "label": "3\n3\n3",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "(1,4): path 1-2-4 -> max{1,2}=2; (1,3): 1-2-4-3 -> max{1,2,3}=3; (2,3): 2-4-3 -> max{2,3}=3.",
+      "wrongExplanations": {
+        "1": "Check each path's maximum day; sums are irrelevant.",
+        "2": "Ensure you pick the minimal maximum among all available paths."
+      },
+      "hint": "Use the forest built by keeping merging roads only.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the time complexity of building the cycle-free structure and preparing jump tables?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O((n + m) α(n) + n log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2 + m^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(m log m + n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(n + m + q)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Merging/connecting is near-linear with a tiny inverse-Ackermann factor; jump table build is O(n log n).",
+      "wrongExplanations": {
+        "1": "Quadratic bounds are unnecessary.",
+        "2": "We never sort edges; and no quadratic steps.",
+        "3": "Preprocessing is heavier than linear."
+      },
+      "hint": "Consider merges per road and per-level table fills.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the time per query to compute the earliest day between a and b, assuming they are connected?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(1)",
+          "isCode": false
+        },
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(log m)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We perform a logarithmic number of upward jumps.",
+      "wrongExplanations": {
+        "1": "We don't have constant-time jumps without precomputation of all possibilities.",
+        "2": "Linear walks are unnecessary.",
+        "3": "The number of levels is tied to n."
+      },
+      "hint": "How many levels of 2^k ancestors exist?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q27",
+      "phase": "Analyzing Complexity",
+      "questionText": "What extra space (beyond input storage) dominates this solution?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "The jump tables up[k][v] and mx[k][v], which are O(n log n).",
+          "isCode": false
+        },
+        {
+          "label": "A full n×n matrix of distances.",
+          "isCode": false
+        },
+        {
+          "label": "An array of size O(m log m) for sorting edges.",
+          "isCode": false
+        },
+        {
+          "label": "Only O(n) extra space is used.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We store O(log n) ancestors and maxima per node.",
+      "wrongExplanations": {
+        "1": "No n×n matrix is used.",
+        "2": "We do not sort edges.",
+        "3": "Jump tables are superlinear in n."
+      },
+      "hint": "Count levels across nodes.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\n\ndef main():\n    data = list(map(int, sys.stdin.buffer.read().split()))\n    it = iter(data)\n    n = next(it); m = next(it); q = next(it)\n    edges = []\n    for _ in range(m):\n        a = next(it) - 1; b = next(it) - 1\n        edges.append((a, b))\n    queries = []\n    for _ in range(q):\n        a = next(it) - 1; b = next(it) - 1\n        queries.append((a, b))",
+    "    parent = list(range(n))\n    size = [1] * n\n    def find(x):\n        while parent[x] != x:\n            parent[x] = parent[parent[x]]\n            x = parent[x]\n        return x",
+    "    def unite(a, b):\n        ra = find(a); rb = find(b)\n        if ra == rb:\n            return False\n        if size[ra] < size[rb]:\n            ra, rb = rb, ra\n        parent[rb] = ra\n        size[ra] += size[rb]\n        return True",
+    "    g = [[] for _ in range(n)]\n    day = 1\n    for (u, v) in edges:\n        if unite(u, v):\n            g[u].append((v, day))\n            g[v].append((u, day))\n        day += 1",
+    "    LOG = max(1, (n).bit_length())\n    up = [[0] * n for _ in range(LOG)]\n    mx = [[0] * n for _ in range(LOG)]\n    depth = [0] * n\n    seen = [False] * n\n    for root in range(n):\n        if not seen[root]:\n            seen[root] = True\n            up[0][root] = root\n            mx[0][root] = 0\n            depth[root] = 0\n            stack = [root]\n            while stack:\n                u = stack.pop()\n                for v, w in g[u]:\n                    if not seen[v]:\n                        seen[v] = True\n                        up[0][v] = u\n                        mx[0][v] = w\n                        depth[v] = depth[u] + 1\n                        stack.append(v)",
+    "    for k in range(1, LOG):\n        for v in range(n):\n            up[k][v] = up[k-1][ up[k-1][v] ]\n            mx[k][v] = max(mx[k-1][v], mx[k-1][ up[k-1][v] ])",
+    "    def max_on_path(u, v):\n        if u == v:\n            return 0\n        res = 0\n        if depth[u] < depth[v]:\n            u, v = v, u\n        diff = depth[u] - depth[v]\n        k = 0\n        while diff:\n            if diff & 1:\n                res = max(res, mx[k][u])\n                u = up[k][u]\n            diff >>= 1\n            k += 1\n        if u == v:\n            return res\n        for k in range(LOG - 1, -1, -1):\n            if up[k][u] != up[k][v]:\n                res = max(res, mx[k][u], mx[k][v])\n                u = up[k][u]\n                v = up[k][v]\n        res = max(res, mx[0][u], mx[0][v])\n        return res",
+    "    out = []\n    for a, b in queries:\n        if find(a) != find(b):\n            out.append(\"-1\")\n        else:\n            out.append(str(max_on_path(a, b)))\n    sys.stdout.write(\"\\n\".join(out))\n\nif __name__ == \"__main__\":\n    main()"
+  ],
+  "reasoningChain": [
+    {
+      "question": "What determines the earliest day two cities become connected when considering a path?",
+      "insight": "For any fixed path, the first usable day is the maximum day among its edges; overall, minimize this maximum across all paths."
+    },
+    {
+      "question": "Can we ignore roads that form cycles when processed in day order?",
+      "insight": "Yes; keeping only roads that merge groups yields a cycle-free structure preserving the minimal-bottleneck day for any pair."
+    },
+    {
+      "question": "How to build that structure efficiently over m roads?",
+      "insight": "Maintain groups with fast representative checks and merges while scanning roads in day order, adding only merging roads."
+    },
+    {
+      "question": "How to answer many queries on the cycle-free structure?",
+      "insight": "Reduce to computing the maximum day along the unique path between two nodes in a tree/forest."
+    },
+    {
+      "question": "How to compute the maximum-day path efficiently?",
+      "insight": "Precompute 2^k ancestors and maximum days per jump; equalize depths, then lift both nodes up while tracking maxima."
+    },
+    {
+      "question": "How to handle disconnected pairs quickly?",
+      "insight": "Check final groups of endpoints; if different, answer is -1; otherwise query the forest."
+    },
+    {
+      "question": "Is the approach efficient under constraints?",
+      "insight": "Preprocessing near-linear plus O(n log n) and answering each query in O(log n) fits n,m,q up to 2e5."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1467,
+    "output_tokens": 20317,
+    "input_cost": 0.001834,
+    "output_cost": 0.20317,
+    "total_cost": 0.205004
+  }
+}

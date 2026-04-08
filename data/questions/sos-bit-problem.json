@@ -1,0 +1,956 @@
+{
+  "id": "sos-bit-problem",
+  "title": "SOS Bit Problem",
+  "difficulty": "intermediate",
+  "tags": [
+    "mixed",
+    "bitwise"
+  ],
+  "estimatedMinutes": 70,
+  "language": "python",
+  "description": "Given a list of n integers, for each element x output three counts:\n1) number of elements y such that x | y = x\n2) number of elements y such that x & y = x\n3) number of elements y such that x & y != 0\n\nInput:\n- First line: n\n- Second line: n integers x1..xn\n\nOutput:\n- n lines, each with the three required values for the corresponding element in input order.",
+  "examples": [
+    {
+      "input": "5\n3 7 2 9 2",
+      "output": "3 2 5\n4 1 5\n2 4 4\n1 1 3\n2 4 4",
+      "explanation": "For x=3: submasks present are {3,2}, so first=3; supermasks present are {3,7}, so second=2; disjoint count is 0, so third=5. Other rows follow similarly."
+    }
+  ],
+  "constraints": [
+    "1 ≤ n ≤ 2 * 10^5",
+    "1 ≤ x_i ≤ 10^6"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "List = [1, 3, 5]. For x = 1, how many y in the list satisfy x | y = x?",
+      "diagram": "Binary:\n1 = 001\n3 = 011\n5 = 101",
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "x|y=x means all 1-bits of y are within x. Only y=1 qualifies in the list. So count=1.",
+      "wrongExplanations": {
+        "1": "3 would count 1,3,5, but 3 and 5 have bits outside x (001).",
+        "3": "2 would require another number that is a submask of 1, but only 1 is present."
+      },
+      "hint": "Check which y have no 1-bits outside those in x.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "List = [1, 3, 5]. For x = 1, how many y in the list satisfy x & y = x?",
+      "diagram": "Binary:\n1 = 001\n3 = 011\n5 = 101",
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "x&y=x means y has at least all 1-bits of x. Here 1,3,5 all include bit0, so count=3.",
+      "wrongExplanations": {
+        "0": "1 counts only x itself; but 3 and 5 also satisfy.",
+        "1": "2 would miss one of {1,3,5} that include bit0."
+      },
+      "hint": "Which y have bit0 set?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "List = [1, 3, 5]. For x = 4, how many y in the list satisfy x & y != 0?",
+      "diagram": "Binary:\n1 = 001\n3 = 011\n5 = 101\nx=4 = 100",
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "x&y!=0 means share at least one 1-bit. Only 5 (101) shares bit2 with 4 (100). Count=1.",
+      "wrongExplanations": {
+        "1": "2 would count another number, but 1 and 3 share only bit0/bit1 with 4=100, which is false.",
+        "2": "3 assumes all share a bit; not true."
+      },
+      "hint": "Which y have the 100 bit set?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "Which statement is equivalent to \"x | y = x\"?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "All 1-bits of y are also 1-bits of x.",
+          "isCode": false
+        },
+        {
+          "label": "All 1-bits of x are also 1-bits of y.",
+          "isCode": false
+        },
+        {
+          "label": "x and y share no common 1-bits.",
+          "isCode": false
+        },
+        {
+          "label": "y must equal x exactly.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "x|y=x means y has no 1-bit outside x; y can be any submask of x. Other options describe different relations.",
+      "wrongExplanations": {
+        "1": "That corresponds to x & y = x (y is a supermask of x).",
+        "3": "Equality is sufficient but not necessary; any submask works."
+      },
+      "hint": "Think set inclusion of 1-bits.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Exploring Approaches",
+      "questionText": "With n up to 2e5, is checking all pairs (x,y) to test the three conditions feasible?",
+      "diagram": "Pairwise check ~ n^2 ≈ 4e10 operations.",
+      "options": [
+        {
+          "label": "No, it will be far too slow.",
+          "isCode": false
+        },
+        {
+          "label": "Yes, it might pass with fast I/O.",
+          "isCode": false
+        },
+        {
+          "label": "Only if we sort the array.",
+          "isCode": false
+        },
+        {
+          "label": "Yes, because bit operations are fast.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "n^2 is ~4e10 operations, far beyond the time limit. We need aggregated counts.",
+      "wrongExplanations": {
+        "1": "I/O doesn’t change quadratic growth.",
+        "3": "Bit operations are fast but not 4e10 fast."
+      },
+      "hint": "Estimate 2e5 squared.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "To answer counts for x | y = x efficiently, which precomputed data is most directly useful?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "For each mask m, sum of frequencies of all submasks of m.",
+          "isCode": false
+        },
+        {
+          "label": "For each mask m, sum of frequencies of all supermasks of m.",
+          "isCode": false
+        },
+        {
+          "label": "For each bit, how many numbers set this bit; then sum chosen bits.",
+          "isCode": false
+        },
+        {
+          "label": "Prefix sums over numeric order of values.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "x|y=x requires y be a submask of x, so sum of frequencies over all submasks of x gives the answer.",
+      "wrongExplanations": {
+        "1": "Supermasks are for x & y = x, not x | y = x.",
+        "2": "Summing per-bit counts double-counts numbers with multiple bits."
+      },
+      "hint": "y must be a submask of x.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "How should we choose the bit-width B for masks?",
+      "diagram": "1 ≤ x_i ≤ 10^6",
+      "options": [
+        {
+          "label": "B = number of bits needed to represent max(x_i).",
+          "isCode": false
+        },
+        {
+          "label": "B = floor(log2(n)) + 1.",
+          "isCode": false
+        },
+        {
+          "label": "B = 32 for simplicity.",
+          "isCode": false
+        },
+        {
+          "label": "B = 1,000,000 (to cover values).",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need enough bits to cover the maximum value; more bits inflate 2^B unnecessarily.",
+      "wrongExplanations": {
+        "2": "Using 32 works but is wasteful; 2^32 is infeasible.",
+        "3": "1e6 bits is impossible; we use binary width, not value range as bits."
+      },
+      "hint": "Use bit_length of the maximum number.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Building the Idea",
+      "questionText": "If subSum[m] equals the sum of frequencies of all submasks of m, what gives the count of y with x | y = x?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "subSum[x]",
+          "isCode": false
+        },
+        {
+          "label": "freq[x]",
+          "isCode": false
+        },
+        {
+          "label": "n - subSum[maskAll ^ x]",
+          "isCode": false
+        },
+        {
+          "label": "superSum[x]",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "x|y=x sums over all submasks y of x, which is exactly subSum[x].",
+      "wrongExplanations": {
+        "1": "freq[x] counts only y==x, missing other submasks.",
+        "3": "superSum[x] sums supermasks, for x & y = x instead."
+      },
+      "hint": "Submasks of x are directly relevant for x|y=x.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "If superSum[m] equals the sum of frequencies of all supermasks of m, what gives the count of y with x & y = x?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "superSum[x]",
+          "isCode": false
+        },
+        {
+          "label": "subSum[x]",
+          "isCode": false
+        },
+        {
+          "label": "n - subSum[maskAll ^ x]",
+          "isCode": false
+        },
+        {
+          "label": "freq[x]",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "x&y=x means y is a supermask of x, summed by superSum[x].",
+      "wrongExplanations": {
+        "1": "SubSum is for submasks, not supermasks.",
+        "3": "freq[x] misses other supermasks."
+      },
+      "hint": "y must contain all bits of x (supermask).",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "How to compute the count of y with x & y != 0 using subSum and maskAll?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "n - subSum[maskAll ^ x]",
+          "isCode": false
+        },
+        {
+          "label": "subSum[x]",
+          "isCode": false
+        },
+        {
+          "label": "n - superSum[maskAll ^ x]",
+          "isCode": false
+        },
+        {
+          "label": "superSum[x]",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Numbers disjoint with x are submasks of complement (maskAll^x). Subtract from n.",
+      "wrongExplanations": {
+        "1": "subSum[x] counts submasks of x, not disjoint ones.",
+        "2": "supermasks of the complement do not characterize disjoint numbers here."
+      },
+      "hint": "Disjoint means all 1-bits within complement of x.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "Example list [2, 3, 2]. For x = 2, how many y satisfy x | y = x?",
+      "diagram": "Binary: 2=10, 3=11\nSubmasks of 10 are {00,10}",
+      "options": [
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Valid y are 2 only (twice). So count=2.",
+      "wrongExplanations": {
+        "1": "1 would ignore the duplicate 2.",
+        "2": "3 would count 3, but 3 has bit outside x."
+      },
+      "hint": "Count how many 2’s in the list.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "Example list [2, 3, 2]. For x = 2, how many y satisfy x & y = x?",
+      "diagram": "Binary: 2=10, 3=11\nSupermasks of 10 are {10,11,110,...}",
+      "options": [
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "y can be 2 or 3; we have two 2’s and one 3, total 3.",
+      "wrongExplanations": {
+        "1": "2 would miss one of the two 2’s or 3.",
+        "3": "4 exceeds the list size."
+      },
+      "hint": "Count 2’s and 3’s in the list.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "Example list [2, 3, 2]. For x = 1, how many y satisfy x & y != 0?",
+      "diagram": "Binary: 1=01; list: 2=10, 3=11, 2=10",
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Only 3 (11) shares bit0 with 1 (01). Count=1.",
+      "wrongExplanations": {
+        "2": "2 would count a 2, but 2 has no bit0 set.",
+        "3": "3 counts all; not all share a bit."
+      },
+      "hint": "Which numbers have the least significant bit set?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Writing the Code",
+      "questionText": "Start with the program structure. Which snippet correctly sets up the module and an entry function?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\n\ndef main():",
+          "isCode": true
+        },
+        {
+          "label": "import sys\n\ndef main()",
+          "isCode": true
+        },
+        {
+          "label": "def main():\n    import sys",
+          "isCode": true
+        },
+        {
+          "label": "import sys\n\ndef main(args):",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need a no-arg main function and to import sys at top.",
+      "wrongExplanations": {
+        "1": "Missing ':' after function signature is a syntax error.",
+        "3": "We don't pass command-line args; we'll read from stdin."
+      },
+      "hint": "Python function definitions need ':' and we won’t pass parameters.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\n\ndef main():",
+      "codeLabel": "Imports and main header"
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Read all input quickly and handle empty input. Choose the correct snippet.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    data = list(map(int, sys.stdin.buffer.read().split()))\n    if not data:\n        return",
+          "isCode": true
+        },
+        {
+          "label": "    data = sys.stdin.read().split()\n    if not data:\n        return",
+          "isCode": true
+        },
+        {
+          "label": "    tokens = sys.stdin.buffer.read().split()\n    data = list(tokens)\n    if data is None:\n        return",
+          "isCode": true
+        },
+        {
+          "label": "    data = list(map(int, sys.stdin.readline().split()))\n    if not data:\n        return",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need ints; buffer.read().split() + map(int) is correct and fast. Then early return if empty.",
+      "wrongExplanations": {
+        "1": "Missing int conversion; data would be strings.",
+        "3": "Only reads one line; input spans multiple tokens."
+      },
+      "hint": "Ensure tokens are converted to integers.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    data = list(map(int, sys.stdin.buffer.read().split()))\n    if not data:\n        return",
+      "codeLabel": "Read input tokens"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Extract n and the list of values from the token list.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    n = data[0]\n    vals = data[1:1+n]",
+          "isCode": true
+        },
+        {
+          "label": "    n = len(data) - 1\n    vals = data[1:]",
+          "isCode": true
+        },
+        {
+          "label": "    n = data[1]\n    vals = data[2:2+n]",
+          "isCode": true
+        },
+        {
+          "label": "    n = data[0]\n    vals = data[:n]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "n is the first token; next n tokens are the values, so data[1:1+n].",
+      "wrongExplanations": {
+        "1": "n may not equal len(data)-1 in malformed inputs; rely on the given n.",
+        "3": "data[:n] includes the n itself and misses the last value."
+      },
+      "hint": "Slice the next n integers after the first token.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    n = data[0]\n    vals = data[1:1+n]",
+      "codeLabel": "Parse n and values"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Compute bit width and mask bounds for transforms.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    maxv = max(vals) if vals else 0\n    B = max(1, maxv.bit_length())\n    MAXM = 1 << B\n    maskAll = MAXM - 1",
+          "isCode": true
+        },
+        {
+          "label": "    B = 20\n    MAXM = 1 << B\n    maskAll = MAXM",
+          "isCode": true
+        },
+        {
+          "label": "    maxv = max(vals)\n    B = maxv\n    MAXM = B\n    maskAll = ~0",
+          "isCode": true
+        },
+        {
+          "label": "    B = len(bin(max(vals)))\n    MAXM = B\n    maskAll = (1 << B)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Use bit_length of max value; maskAll is (1<<B)-1. Ensures complement is within range.",
+      "wrongExplanations": {
+        "1": "Fixed 20 may work but maskAll=MAXM is off by one and wastes space.",
+        "2": "B should be number of bits, not the value; ~0 is infinite-width ones."
+      },
+      "hint": "maskAll should be like 0b111..(B ones).",
+      "isCodeBuilding": true,
+      "codeSnippet": "    maxv = max(vals) if vals else 0\n    B = max(1, maxv.bit_length())\n    MAXM = 1 << B\n    maskAll = MAXM - 1",
+      "codeLabel": "Bit width and masks"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Build the frequency array of size 2^B.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    freq = [0] * MAXM\n    for x in vals:\n        freq[x] += 1",
+          "isCode": true
+        },
+        {
+          "label": "    freq = {}\n    for x in vals:\n        freq[x] = freq.get(x, 0) + 1",
+          "isCode": true
+        },
+        {
+          "label": "    freq = [0] * (MAXM - 1)\n    for x in vals:\n        freq[x] += 1",
+          "isCode": true
+        },
+        {
+          "label": "    freq = set(vals)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need a dense array indexed by mask for fast transforms; size is MAXM.",
+      "wrongExplanations": {
+        "1": "A dict works for counts but complicates and slows the bit-wise transforms.",
+        "2": "Array too small by 1; index MAXM-1 would fail."
+      },
+      "hint": "Index directly by value as a mask.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    freq = [0] * MAXM\n    for x in vals:\n        freq[x] += 1",
+      "codeLabel": "Frequency array"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Compute submask sums subSum[m] = sum of freq[s] for all s ⊆ m.",
+      "diagram": "for i in 0..B-1:\n  for mask in 0..(2^B-1):\n    if mask has bit i: subSum[mask] += subSum[mask without bit i]",
+      "options": [
+        {
+          "label": "    subSum = freq[:]\n    for i in range(B):\n        step = 1 << i\n        for mask in range(MAXM):\n            if mask & step:\n                subSum[mask] += subSum[mask ^ step]",
+          "isCode": true
+        },
+        {
+          "label": "    subSum = freq[:]\n    for i in range(B):\n        step = 1 << i\n        for mask in range(MAXM):\n            if (mask & step) == 0:\n                subSum[mask] += subSum[mask | step]",
+          "isCode": true
+        },
+        {
+          "label": "    subSum = [0] * MAXM\n    for mask in range(MAXM):\n        for i in range(B):\n            if mask & (1<<i):\n                subSum[mask] += freq[mask ^ (1<<i)]",
+          "isCode": true
+        },
+        {
+          "label": "    subSum = freq[:]\n    for i in range(1, B+1):\n        step = i\n        for mask in range(MAXM):\n            if mask & step:\n                subSum[mask] += subSum[mask - step]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Propagate sums from mask without bit i to mask with bit i to accumulate submask sums.",
+      "wrongExplanations": {
+        "1": "This accumulates over supermasks instead of submasks.",
+        "2": "Misses combining chains of submasks; also resets per mask inefficiently."
+      },
+      "hint": "Use the bit to remove: mask ^ (1<<i).",
+      "isCodeBuilding": true,
+      "codeSnippet": "    subSum = freq[:]\n    for i in range(B):\n        step = 1 << i\n        for mask in range(MAXM):\n            if mask & step:\n                subSum[mask] += subSum[mask ^ step]",
+      "codeLabel": "Submask sums"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Compute supermask sums superSum[m] = sum of freq[s] for all s ⊇ m.",
+      "diagram": "for i in 0..B-1:\n  if mask lacks bit i: add from mask with bit i",
+      "options": [
+        {
+          "label": "    superSum = freq[:]\n    for i in range(B):\n        step = 1 << i\n        for mask in range(MAXM):\n            if (mask & step) == 0:\n                superSum[mask] += superSum[mask | step]",
+          "isCode": true
+        },
+        {
+          "label": "    superSum = freq[:]\n    for i in range(B):\n        step = 1 << i\n        for mask in range(MAXM):\n            if mask & step:\n                superSum[mask] += superSum[mask ^ step]",
+          "isCode": true
+        },
+        {
+          "label": "    superSum = [0] * MAXM\n    for mask in range(MAXM):\n        for i in range(B):\n            if (mask & (1<<i)) == 0:\n                superSum[mask] += freq[mask | (1<<i)]",
+          "isCode": true
+        },
+        {
+          "label": "    superSum = freq[:]\n    for i in range(B-1, -1, -1):\n        step = 1 << i\n        for mask in range(MAXM):\n            if mask & step:\n                superSum[mask] += superSum[mask ^ step]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Accumulate from mask with bit i to mask without bit i to sum over all supermasks.",
+      "wrongExplanations": {
+        "1": "This recomputes submask accumulation, not supermask.",
+        "2": "Does not propagate transitive supermask sums correctly."
+      },
+      "hint": "Flow from adding a bit to removing it.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    superSum = freq[:]\n    for i in range(B):\n        step = 1 << i\n        for mask in range(MAXM):\n            if (mask & step) == 0:\n                superSum[mask] += superSum[mask | step]",
+      "codeLabel": "Supermask sums"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "Produce outputs per x: first=subSum[x], second=superSum[x], third=n - subSum[maskAll ^ x]. Choose the correct code.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    out_lines = []\n    for x in vals:\n        a1 = subSum[x]\n        a2 = superSum[x]\n        comp = maskAll ^ x\n        disjoint = subSum[comp]\n        a3 = n - disjoint\n        out_lines.append(f\"{a1} {a2} {a3}\")\n    sys.stdout.write(\"\\n\".join(out_lines))\n\nif __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "    for x in vals:\n        a1 = subSum[x]\n        a2 = superSum[x]\n        comp = ~x\n        a3 = n - subSum[comp]\n        print(a1, a2, a3)",
+          "isCode": true
+        },
+        {
+          "label": "    out_lines = []\n    for x in vals:\n        a1 = freq[x]\n        a2 = superSum[x]\n        comp = maskAll - x\n        a3 = n - subSum[comp]\n        out_lines.append(f\"{a1} {a2} {a3}\")\n    sys.stdout.write(\"\\n\".join(out_lines))\n\nif __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "    out_lines = []\n    for x in vals:\n        a1 = subSum[x]\n        a2 = superSum[x]\n        comp = maskAll ^ x\n        a3 = n - superSum[comp]\n        out_lines.append(f\"{a1} {a2} {a3}\")\n    sys.stdout.write(\"\\n\".join(out_lines))\n\nif __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Use XOR with maskAll for complement within B bits; third uses subSum of complement for disjoint count.",
+      "wrongExplanations": {
+        "1": "~x is an unbounded-width complement in Python; indexing will be invalid.",
+        "2": "freq[x] misses other submasks; maskAll - x is not bitwise complement."
+      },
+      "hint": "Complement within B bits is maskAll ^ x.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    out_lines = []\n    for x in vals:\n        a1 = subSum[x]\n        a2 = superSum[x]\n        comp = maskAll ^ x\n        disjoint = subSum[comp]\n        a3 = n - disjoint\n        out_lines.append(f\"{a1} {a2} {a3}\")\n    sys.stdout.write(\"\\n\".join(out_lines))\n\nif __name__ == \"__main__\":\n    main()",
+      "codeLabel": "Compute and print answers"
+    },
+    {
+      "id": "q22",
+      "phase": "Verifying the Solution",
+      "questionText": "Using the sample input n=5, vals=[3,7,2,9,2], what is the output line for x=3?",
+      "diagram": "x=3 (0011)\nSubmasks present: {3,2} -> counts: 3(1),2(2) => 3\nSupermasks present: {3,7} -> 2\nDisjoint with x: none in list -> 0\nThird: 5-0 = 5",
+      "options": [
+        {
+          "label": "3 2 5",
+          "isCode": false
+        },
+        {
+          "label": "2 3 5",
+          "isCode": false
+        },
+        {
+          "label": "3 2 4",
+          "isCode": false
+        },
+        {
+          "label": "1 2 5",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Submasks sum to 3, supermasks sum to 2, and all 5 share at least one bit -> 3 2 5.",
+      "wrongExplanations": {
+        "1": "Order of first two counts is swapped.",
+        "2": "Third should be 5 since no disjoint y exist."
+      },
+      "hint": "List occurrences of 2 and 3 only; none are disjoint.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q23",
+      "phase": "Verifying the Solution",
+      "questionText": "For the same sample, what is the output line for x=9?",
+      "diagram": "x=9 (1001)\nSubmasks allowed: {0,1,8,9}; only 9 occurs -> 1\nSupermasks required: must include bits {8,1}; only 9 occurs -> 1\nShare any bit: 3 (0011) yes, 7 (0111) yes, 2 (0010) no, 9 yes, 2 no -> 3",
+      "options": [
+        {
+          "label": "1 1 3",
+          "isCode": false
+        },
+        {
+          "label": "1 1 4",
+          "isCode": false
+        },
+        {
+          "label": "2 1 3",
+          "isCode": false
+        },
+        {
+          "label": "1 2 3",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Only 9 contributes to sub/supermask tallies; three numbers share at least one bit.",
+      "wrongExplanations": {
+        "1": "There are exactly three with a common bit: 3,7,9.",
+        "2": "Submask count is 1, not 2."
+      },
+      "hint": "Check which elements have bit 3 or bit 0 set.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Verifying the Solution",
+      "questionText": "Why do we compute complement within maskAll (comp = maskAll ^ x) when finding disjoint counts?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "To limit the complement to B bits and avoid negative/infinite bits in Python.",
+          "isCode": false
+        },
+        {
+          "label": "It is faster than ~x by constant factors.",
+          "isCode": false
+        },
+        {
+          "label": "Because subSum is only defined for even numbers.",
+          "isCode": false
+        },
+        {
+          "label": "To change numbers into Gray code.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "~x produces negatives with infinite leading ones; masking keeps it in [0,2^B).",
+      "wrongExplanations": {
+        "1": "Speed is not the reason; correctness is.",
+        "2": "subSum is defined for all masks, even or odd."
+      },
+      "hint": "Python ints are unbounded; beware of ~x.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the overall time complexity in terms of B (bit-width) and M=2^B?",
+      "diagram": "Transforms loop over bits and masks",
+      "options": [
+        {
+          "label": "O(B * 2^B + n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(2^B)",
+          "isCode": false
+        },
+        {
+          "label": "O(B * n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each transform iterates B*M, plus O(n) to build freq and O(n) to output.",
+      "wrongExplanations": {
+        "2": "We loop over B bits too, not just masks.",
+        "3": "We iterate over all masks, not just input elements."
+      },
+      "hint": "Two transforms over all masks and bits.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the space complexity of the main arrays used?",
+      "diagram": "Arrays: freq, subSum, superSum, each size 2^B",
+      "options": [
+        {
+          "label": "O(2^B)",
+          "isCode": false
+        },
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(B * 2^B)",
+          "isCode": false
+        },
+        {
+          "label": "O(B + n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We store a constant number of arrays of length 2^B; constants are ignored in big-O.",
+      "wrongExplanations": {
+        "1": "n can be smaller or larger than 2^B; arrays scale with 2^B.",
+        "2": "B is not multiplied in storage; only the number of arrays is constant."
+      },
+      "hint": "Consider lengths of freq, subSum, superSum.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\n\ndef main():",
+    "    data = list(map(int, sys.stdin.buffer.read().split()))\n    if not data:\n        return",
+    "    n = data[0]\n    vals = data[1:1+n]",
+    "    maxv = max(vals) if vals else 0\n    B = max(1, maxv.bit_length())\n    MAXM = 1 << B\n    maskAll = MAXM - 1",
+    "    freq = [0] * MAXM\n    for x in vals:\n        freq[x] += 1",
+    "    subSum = freq[:]\n    for i in range(B):\n        step = 1 << i\n        for mask in range(MAXM):\n            if mask & step:\n                subSum[mask] += subSum[mask ^ step]",
+    "    superSum = freq[:]\n    for i in range(B):\n        step = 1 << i\n        for mask in range(MAXM):\n            if (mask & step) == 0:\n                superSum[mask] += superSum[mask | step]",
+    "    out_lines = []\n    for x in vals:\n        a1 = subSum[x]\n        a2 = superSum[x]\n        comp = maskAll ^ x\n        disjoint = subSum[comp]\n        a3 = n - disjoint\n        out_lines.append(f\"{a1} {a2} {a3}\")\n    sys.stdout.write(\"\\n\".join(out_lines))\n\nif __name__ == \"__main__\":\n    main()"
+  ],
+  "reasoningChain": [
+    {
+      "question": "What does each condition mean in terms of bit inclusion between x and y?",
+      "insight": "x|y=x implies y is a submask of x; x&y=x implies y is a supermask of x; x&y!=0 means y shares any bit with x."
+    },
+    {
+      "question": "Why is pairwise checking infeasible and what aggregated counts should we precompute?",
+      "insight": "n^2 is too large; precompute frequency for each mask and sums over all submasks/supermasks."
+    },
+    {
+      "question": "How to choose the mask size and compute complements safely?",
+      "insight": "Set B as bit_length(max value); use maskAll=(1<<B)-1 and comp=maskAll^x to stay within B bits."
+    },
+    {
+      "question": "How to compute sums over all submasks for every mask efficiently?",
+      "insight": "Iterate over bits; for each bit, add from mask without the bit to mask with the bit (submask accumulation)."
+    },
+    {
+      "question": "How to compute sums over all supermasks for every mask efficiently?",
+      "insight": "Iterate over bits; for each bit, add from mask with the bit to mask without the bit (supermask accumulation)."
+    },
+    {
+      "question": "How to derive the third count from the submask sums?",
+      "insight": "Numbers disjoint with x are submasks of comp=maskAll^x, so count3 = n - subSum[comp]."
+    },
+    {
+      "question": "How to produce outputs in input order efficiently?",
+      "insight": "Use the precomputed arrays to answer each x in O(1) and print lines in sequence."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1395,
+    "output_tokens": 16263,
+    "input_cost": 0.001744,
+    "output_cost": 0.16263,
+    "total_cost": 0.164374
+  }
+}

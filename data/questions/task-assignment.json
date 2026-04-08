@@ -1,0 +1,1033 @@
+{
+  "id": "task-assignment",
+  "title": "Task Assignment",
+  "difficulty": "hard",
+  "tags": [
+    "advanced"
+  ],
+  "estimatedMinutes": 120,
+  "language": "python",
+  "description": "A company has n employees and there are n tasks that need to be done. We know for each employee the cost of carrying out each task. Every employee should be assigned to exactly one task. What is the minimum total cost if we assign the tasks optimally and how could they be assigned?\n\nInput\nThe first input line has one integer n: the number of employees and the number of tasks.\nAfter this, there are n lines each consisting of n integers. The i-th line consists of integers c_{i1}, c_{i2}, ..., c_{in}: the cost of each task when it is assigned to the i-th employee.\n\nOutput\nFirst print the minimum total cost.\nThen print n lines each consisting of two integers a and b: you assign the b-th task to the a-th employee.\nIf there are multiple solutions you can print any of them.",
+  "examples": [
+    {
+      "input": "4\n17 8 16 9\n7 15 12 19\n6 9 10 11\n14 7 13 10\n",
+      "output": "33\n1 4\n2 1\n3 3\n4 2\n",
+      "explanation": "One optimal assignment is: employee 1 -> task 4 (9), employee 2 -> task 1 (7), employee 3 -> task 3 (10), employee 4 -> task 2 (7). Sum = 9+7+10+7 = 33."
+    }
+  ],
+  "constraints": [
+    "1 ≤ n ≤ 200",
+    "1 ≤ c_{ij} ≤ 1000"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "Given a 2x2 cost matrix:\n\n    Tasks:   1   2\nEmp1 costs: 4   1\nEmp2 costs: 2   3\n\nWhich assignment gives the minimum total cost?",
+      "diagram": "Matrix (rows=employees, cols=tasks)\n[ [4, 1],\n  [2, 3] ]",
+      "options": [
+        {
+          "label": "Assign (1->1), (2->2): total = 4 + 3 = 7",
+          "isCode": false
+        },
+        {
+          "label": "Assign (1->2), (2->1): total = 1 + 2 = 3",
+          "isCode": false
+        },
+        {
+          "label": "Assign (1->2), (2->2): total = 1 + 3 = 4",
+          "isCode": false
+        },
+        {
+          "label": "Assign (1->1), (2->1): total = 4 + 2 = 6",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "We must assign different tasks. (1->2,2->1) sums to 3, which is smaller than 7. Options with duplicate tasks are invalid.",
+      "wrongExplanations": {
+        "0": "This is valid but not minimal. 7 > 3.",
+        "2": "Both employees cannot take task 2. Each task must be assigned once."
+      },
+      "hint": "Check all permutations of tasks for employees 1 and 2."
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "If each employee picks the lowest cost in their row, do we always get a valid assignment?",
+      "diagram": "Example:\nEmp1: [2, 5] -> min at task 1\nEmp2: [1, 3] -> min at task 1 (conflict)",
+      "options": [
+        {
+          "label": "Yes, because picking row minimums always yields different tasks.",
+          "isCode": false
+        },
+        {
+          "label": "No, two employees can pick the same task, causing a conflict.",
+          "isCode": false
+        },
+        {
+          "label": "Yes, because we can break ties arbitrarily to keep tasks unique.",
+          "isCode": false
+        },
+        {
+          "label": "Sometimes, but only if all row minimums are in different columns.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Row-wise minimums can collide on the same task. We must ensure one distinct task per employee.",
+      "wrongExplanations": {
+        "0": "Row minimums can be in the same column for different rows.",
+        "2": "Breaking ties does not prevent collisions if they occur in different rows without ties."
+      },
+      "hint": "Think about two rows sharing the same smallest column."
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "For the 3x3 matrix below, what is the minimum total cost over all valid assignments?\n\n    Tasks:   1   2   3\nEmp1:       2   1   3\nEmp2:       3   2   1\nEmp3:       1   3   2",
+      "diagram": "Consider all 3! = 6 permutations.",
+      "options": [
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "6",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        },
+        {
+          "label": "7",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Assignment (1->2, 2->3, 3->1) gives 1+1+1=3. Other permutations sum to 6 or more.",
+      "wrongExplanations": {
+        "1": "6 is common for several permutations here, but not the minimum.",
+        "2": "No permutation sums to 5 for this matrix."
+      },
+      "hint": "Check (1->2, 2->3, 3->1)."
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "How many different valid assignments are there for n=4 employees and 4 tasks?",
+      "diagram": "Number of bijections from 4 employees to 4 tasks.",
+      "options": [
+        {
+          "label": "8",
+          "isCode": false
+        },
+        {
+          "label": "16",
+          "isCode": false
+        },
+        {
+          "label": "24",
+          "isCode": false
+        },
+        {
+          "label": "32",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "The count is 4! = 24.",
+      "wrongExplanations": {
+        "1": "16 is 2^4, not the number of permutations.",
+        "3": "32 is not a factorial value for 4."
+      },
+      "hint": "Count permutations of 4 elements."
+    },
+    {
+      "id": "q5",
+      "phase": "Exploring Approaches",
+      "questionText": "Is it feasible to try all assignments for n=12 within the given limits?",
+      "diagram": "12! ≈ 4.79×10^8 possibilities.",
+      "options": [
+        {
+          "label": "Yes, 12! is small enough to enumerate within 1 second.",
+          "isCode": false
+        },
+        {
+          "label": "No, 12! is far too large for the time limit.",
+          "isCode": false
+        },
+        {
+          "label": "Possibly, if we use nested loops carefully.",
+          "isCode": false
+        },
+        {
+          "label": "It depends on the matrix values more than n! size.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "12! is hundreds of millions of assignments—too large for 1s.",
+      "wrongExplanations": {
+        "0": "12! is far beyond what can be tried in 1s in Python.",
+        "2": "Loop structure doesn't reduce combinatorial explosion."
+      },
+      "hint": "Estimate 12! roughly."
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "If we add the same number k to all costs in a single row i, what happens to the optimal assignment?",
+      "diagram": "Row i: c_{i1}..c_{in} → c_{i1}+k..c_{in}+k",
+      "options": [
+        {
+          "label": "The optimal assignment remains the same; the total cost increases by k.",
+          "isCode": false
+        },
+        {
+          "label": "The optimal assignment may change because row rankings change.",
+          "isCode": false
+        },
+        {
+          "label": "All reduced costs become negative.",
+          "isCode": false
+        },
+        {
+          "label": "The optimal assignment remains the same; the total cost increases by n·k.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each valid assignment uses row i exactly once, so all totals shift by k. The argmin is unchanged.",
+      "wrongExplanations": {
+        "1": "All assignments get +k uniformly; ordering doesn't change.",
+        "3": "Only one row is used once; total increases by k, not n·k."
+      },
+      "hint": "Every assignment includes exactly one cost from that row."
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "After subtracting the minimum value of each row from that row, which statements are true?",
+      "diagram": "For each row i: let r_i=min_j c_{ij}; set c_{ij}←c_{ij}−r_i",
+      "options": [
+        {
+          "label": "At least one zero appears in each row.",
+          "isCode": false
+        },
+        {
+          "label": "The identity of the optimal assignment does not change.",
+          "isCode": false
+        },
+        {
+          "label": "Some entries may become negative.",
+          "isCode": false
+        },
+        {
+          "label": "Both A and B.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 3,
+      "explanation": "Subtracting the row minimum keeps all entries ≥ 0 and guarantees a zero per row without changing which assignment is optimal.",
+      "wrongExplanations": {
+        "2": "Subtracting the minimum cannot create negatives; all entries stay ≥ 0."
+      },
+      "hint": "This is a normalization that preserves optimal choices."
+    },
+    {
+      "id": "q8",
+      "phase": "Exploring Approaches",
+      "questionText": "After also subtracting the minimum of each column from that column (after row normalization), what can be said about the matrix?",
+      "diagram": "For each column j: c_{ij}←c_{ij}−min_i c_{ij}",
+      "options": [
+        {
+          "label": "All entries are ≥ 0, and each column has at least one zero.",
+          "isCode": false
+        },
+        {
+          "label": "Some entries may become negative.",
+          "isCode": false
+        },
+        {
+          "label": "Every row now has exactly one zero.",
+          "isCode": false
+        },
+        {
+          "label": "The optimal assignment changes.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Column normalization preserves non-negativity and ensures at least one zero per column without changing optimal assignments.",
+      "wrongExplanations": {
+        "1": "Subtracting the column minimum cannot create negative values.",
+        "2": "Rows may have multiple zeros; not necessarily exactly one."
+      },
+      "hint": "Think about minima after both normalizations."
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "Consider a matrix where all entries are ≥ 0. If you choose one entry per row and column, what is the minimum possible sum of the chosen entries in the normalized (reduced) matrix?",
+      "diagram": "Assume the matrix was normalized by subtracting row and column minima.",
+      "options": [
+        {
+          "label": "It is always 0 if a full selection of zeros exists.",
+          "isCode": false
+        },
+        {
+          "label": "It must be ≥ the smallest entry in the matrix.",
+          "isCode": false
+        },
+        {
+          "label": "It must be equal to the sum of all column minima.",
+          "isCode": false
+        },
+        {
+          "label": "It must be equal to the sum of all row minima.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "A selection of zeros yields reduced sum 0, which is minimal since all entries are ≥ 0.",
+      "wrongExplanations": {
+        "1": "The smallest entry could be >0 even if a zero selection exists.",
+        "2": "This refers to a constant shift, not the reduced selection sum."
+      },
+      "hint": "Non-negative sums are minimized by picking zeros if possible."
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "When it's impossible to pick distinct zeros for all rows, we adjust row and column offsets to create new zeros without changing optimal assignments. Which adjustment keeps all reduced costs ≥ 0 while making progress?",
+      "diagram": "We maintain offsets u[i] for rows and v[j] for columns, using some visited sets.",
+      "options": [
+        {
+          "label": "Increase u for visited rows and decrease v for visited columns by δ.",
+          "isCode": false
+        },
+        {
+          "label": "Increase u for visited rows and decrease v for unvisited columns by δ.",
+          "isCode": false
+        },
+        {
+          "label": "Increase u for all rows and decrease v for all columns by δ.",
+          "isCode": false
+        },
+        {
+          "label": "Decrease u for visited rows and increase v for visited columns by δ.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Increasing u on rows we've reached and decreasing v on columns we've marked keeps reduced costs non-negative while reducing some slacks by δ.",
+      "wrongExplanations": {
+        "0": "Decreasing v on visited columns breaks invariants for already used columns.",
+        "3": "This moves in the wrong direction; it would increase some slacks."
+      },
+      "hint": "Think: which columns should have v decreased to create new zeros?"
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "Suppose minv[j] tracks the smallest reduced slack to reach each unvisited column j. What value δ should we choose for the next adjustment?",
+      "diagram": "minv[j] ≥ 0 for unvisited j; visited columns are excluded.",
+      "options": [
+        {
+          "label": "δ = min over all minv[j] for unvisited columns j.",
+          "isCode": false
+        },
+        {
+          "label": "δ = max over all minv[j] for unvisited columns j.",
+          "isCode": false
+        },
+        {
+          "label": "δ = min over all original costs in the matrix.",
+          "isCode": false
+        },
+        {
+          "label": "δ = min over all minv[j] for visited columns j.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Choosing the smallest slack δ exposes at least one new zero while keeping all reduced costs ≥ 0.",
+      "wrongExplanations": {
+        "1": "Using the maximum does not guarantee creating any new zero.",
+        "3": "Visited columns are not candidates for expansion."
+      },
+      "hint": "We want at least one new zero to appear."
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "After choosing δ, how should minv[j] be updated for unvisited columns j to reflect the adjustment?",
+      "diagram": "We increased u on visited rows and decreased v on visited columns; minv tracks best slacks to unvisited columns.",
+      "options": [
+        {
+          "label": "Subtract δ from minv[j] for all unvisited columns j.",
+          "isCode": false
+        },
+        {
+          "label": "Add δ to minv[j] for all unvisited columns j.",
+          "isCode": false
+        },
+        {
+          "label": "Set minv[j] to 0 for all unvisited columns j.",
+          "isCode": false
+        },
+        {
+          "label": "Leave minv[j] unchanged.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The adjustment reduces all slacks to unvisited columns by δ; at least one becomes zero.",
+      "wrongExplanations": {
+        "1": "We need to reduce slack to create zeros, not increase it.",
+        "3": "Then no new zeros would be exposed."
+      },
+      "hint": "We want to bring at least one slack down to zero."
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "We keep an array p[j]. What does p[j] store during the construction?",
+      "diagram": "Columns j may have an assigned row or be free (0).",
+      "options": [
+        {
+          "label": "The current row assigned to column j, or 0 if free.",
+          "isCode": false
+        },
+        {
+          "label": "The current column assigned to row j, or 0 if free.",
+          "isCode": false
+        },
+        {
+          "label": "The smallest cost seen so far for column j.",
+          "isCode": false
+        },
+        {
+          "label": "The previous column visited before j.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "p[j] tracks which row is currently tied to column j. 0 means the column is unassigned.",
+      "wrongExplanations": {
+        "1": "Indices are not swapped; p is indexed by column.",
+        "3": "The predecessor relation is tracked separately."
+      },
+      "hint": "Think: p is indexed by columns."
+    },
+    {
+      "id": "q14",
+      "phase": "Building the Idea",
+      "questionText": "When we find a free column j0 (p[j0]==0), how do we update assignments using the predecessor array way[j]?",
+      "diagram": "Follow j0 ← way[j0] ← way[way[j0]] ... until 0.",
+      "options": [
+        {
+          "label": "Repeatedly set p[j0]=p[way[j0]]; j0=way[j0]; stop at j0==0.",
+          "isCode": false
+        },
+        {
+          "label": "Repeatedly set p[way[j0]]=p[j0]; j0=way[j0]; stop at j0==0.",
+          "isCode": false
+        },
+        {
+          "label": "Set all p[j]=0 until j0 becomes 0, then restart.",
+          "isCode": false
+        },
+        {
+          "label": "Swap p[j] and way[j] for all j in the path.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We reassign along the chain: p[j0]=p[j1], then move to j1=way[j0], until reaching 0.",
+      "wrongExplanations": {
+        "1": "This reverses the direction and does not correctly reassign along the chain."
+      },
+      "hint": "You propagate assignments backward along the way[] pointers."
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Start by importing I/O utilities.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys",
+          "isCode": true
+        },
+        {
+          "label": "from os import sys",
+          "isCode": true
+        },
+        {
+          "label": "import io as sys",
+          "isCode": true
+        },
+        {
+          "label": "from sys import stdin as sys",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need sys for fast input/output.",
+      "wrongExplanations": {
+        "1": "os and sys are different modules.",
+        "3": "Aliasing sys to stdin breaks later calls."
+      },
+      "hint": null,
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys",
+      "codeLabel": "Import"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Set up main() and read n and the tokens safely.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def main():\n    data = sys.stdin.read().strip().split()\n    if not data:\n        return\n    it = iter(data)\n    n = int(next(it))",
+          "isCode": true
+        },
+        {
+          "label": "def main():\n    data = sys.stdin.readline().split()\n    it = iter(data)\n    n = int(data[0])",
+          "isCode": true
+        },
+        {
+          "label": "def main():\n    n = int(sys.stdin.readline())\n    it = sys.stdin.read().split()\n    n = int(next(it))",
+          "isCode": true
+        },
+        {
+          "label": "def main():\n    tokens = sys.stdin.read().split()\n    it = iter(tokens)\n    # assume not empty\n    n = int(tokens[1])",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Read all tokens, handle empty input, create an iterator, and parse n first.",
+      "wrongExplanations": {
+        "1": "Only reads one line; the matrix spans multiple lines.",
+        "3": "n is the first token, not tokens[1]."
+      },
+      "hint": "We will iterate over the remaining integers after n.",
+      "isCodeBuilding": true,
+      "codeSnippet": "\n\ndef main():\n    data = sys.stdin.read().strip().split()\n    if not data:\n        return\n    it = iter(data)\n    n = int(next(it))",
+      "codeLabel": "Main and read n"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Read the n x n matrix into a 1-indexed list of lists (add a leading 0 per row).",
+      "diagram": null,
+      "options": [
+        {
+          "label": "a = [[0]*(n+1)]\nfor i in range(n):\n    row = [0] + [int(next(it)) for _ in range(n)]\n    a.append(row)",
+          "isCode": true
+        },
+        {
+          "label": "a = []\nfor i in range(n):\n    row = [int(next(it)) for _ in range(n)]\n    a.append([0]+row)\n    a[0] = [0]*(n+1)",
+          "isCode": true
+        },
+        {
+          "label": "a = [[0]*n]\nfor i in range(n):\n    row = [int(next(it)) for _ in range(n)]\n    a.append(row)",
+          "isCode": true
+        },
+        {
+          "label": "a = [[0]*(n+1)]\nfor i in range(1, n+1):\n    row = [int(next(it)) for _ in range(n)]\n    a[i][1:] = row",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Prepend a leading zero column for 1-based indexing and append each row.",
+      "wrongExplanations": {
+        "2": "Creates a 0-padded row of length n (not n+1). Indexing will misalign."
+      },
+      "hint": "We want a[1][1] to be the first cost.",
+      "isCodeBuilding": true,
+      "codeSnippet": "\n    a = [[0]*(n+1)]\n    for i in range(n):\n        row = [0] + [int(next(it)) for _ in range(n)]\n        a.append(row)",
+      "codeLabel": "Read matrix"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Initialize the row/column offsets and helper arrays (size n+1).",
+      "diagram": null,
+      "options": [
+        {
+          "label": "u = [0]*(n+1)\nv = [0]*(n+1)\np = [0]*(n+1)\nway = [0]*(n+1)",
+          "isCode": true
+        },
+        {
+          "label": "u = [0]*n\nv = [0]*n\np = [0]*n\nway = [0]*n",
+          "isCode": true
+        },
+        {
+          "label": "u = [0]*(n+2)\nv = [0]*(n+2)\np = [0]*(n+2)\nway = [0]*(n+2)",
+          "isCode": true
+        },
+        {
+          "label": "u = v = p = way = [0]*(n+1)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need arrays indexed 0..n, so length n+1. Do not alias the arrays.",
+      "wrongExplanations": {
+        "3": "This makes all four names refer to the same list—modifying one modifies all."
+      },
+      "hint": "We'll use index 0 for a special column.",
+      "isCodeBuilding": true,
+      "codeSnippet": "\n    u = [0]*(n+1)\n    v = [0]*(n+1)\n    p = [0]*(n+1)\n    way = [0]*(n+1)",
+      "codeLabel": "Init arrays"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Start the main loop over rows and initialize the inner search state.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "for i in range(1, n+1):\n    p[0] = i\n    j0 = 0\n    minv = [float('inf')]*(n+1)\n    used = [False]*(n+1)\n    while True:\n        used[j0] = True\n        i0 = p[j0]\n        delta = float('inf')\n        j1 = 0",
+          "isCode": true
+        },
+        {
+          "label": "for i in range(n):\n    p[i] = 0\n    j0 = 0\n    minv = [0]*(n+1)\n    used = [True]*(n+1)\n    while j0 < n:\n        i0 = p[j0]\n        delta = 0\n        j1 = 1",
+          "isCode": true
+        },
+        {
+          "label": "for i in range(1, n+1):\n    j0 = i\n    p[0] = 0\n    minv = [0]*(n+1)\n    used = [False]*(n+1)\n    while True:\n        used[j0] = False\n        i0 = p[j0]\n        delta = 0\n        j1 = 0",
+          "isCode": true
+        },
+        {
+          "label": "for i in range(1, n+1):\n    p[0] = 0\n    j0 = i\n    minv = [float('inf')]*n\n    used = [False]*n\n    while True:\n        used[j0] = True\n        i0 = p[j0]\n        delta = 0\n        j1 = 0",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We try to attach row i starting from j0=0, set minv to ∞, used to False. Then begin the search.",
+      "wrongExplanations": {
+        "1": "Indices and initial states are wrong; minv should start as ∞ and used as False.",
+        "3": "Arrays sized n not n+1; also p[0] must be set to i."
+      },
+      "hint": "We attach the current row to the special column 0 and start from j0=0.",
+      "isCodeBuilding": true,
+      "codeSnippet": "\n    for i in range(1, n+1):\n        p[0] = i\n        j0 = 0\n        minv = [float('inf')]*(n+1)\n        used = [False]*(n+1)\n        while True:\n            used[j0] = True\n            i0 = p[j0]\n            delta = float('inf')\n            j1 = 0",
+      "codeLabel": "Outer loop and init"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Scan over columns to update slacks and find the smallest δ and next column j1.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "for j in range(1, n+1):\n    if not used[j]:\n        cur = a[i0][j] - u[i0] - v[j]\n        if cur < minv[j]:\n            minv[j] = cur\n            way[j] = j0\n        if minv[j] < delta:\n            delta = minv[j]\n            j1 = j",
+          "isCode": true
+        },
+        {
+          "label": "for j in range(0, n):\n    if used[j]:\n        cur = a[i0][j] - u[i0] - v[j]\n        if cur <= minv[j]:\n            minv[j] = cur\n            way[j] = j0\n        if minv[j] <= delta:\n            delta = minv[j]\n            j1 = j",
+          "isCode": true
+        },
+        {
+          "label": "for j in range(1, n+1):\n    if used[j]:\n        cur = a[i0][j] - u[i0] - v[j]\n        if cur < minv[j]:\n            minv[j] = cur\n            way[j] = j0\n        if cur < delta:\n            delta = cur\n            j1 = j",
+          "isCode": true
+        },
+        {
+          "label": "for j in range(1, n+1):\n    if not used[j]:\n        cur = a[i0][j] - u[i0] - v[j]\n        if cur > minv[j]:\n            minv[j] = cur\n            way[j] = j0\n        if minv[j] > delta:\n            delta = minv[j]\n            j1 = j",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We only consider unvisited columns, update minv and way with smaller cur, and track the smallest minv as δ.",
+      "wrongExplanations": {
+        "2": "You must compare minv[j], not just cur, to maintain best slack over paths."
+      },
+      "hint": "Track best slack per column and the minimum among them.",
+      "isCodeBuilding": true,
+      "codeSnippet": "\n            for j in range(1, n+1):\n                if not used[j]:\n                    cur = a[i0][j] - u[i0] - v[j]\n                    if cur < minv[j]:\n                        minv[j] = cur\n                        way[j] = j0\n                    if minv[j] < delta:\n                        delta = minv[j]\n                        j1 = j",
+      "codeLabel": "Scan columns"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "Update offsets and slacks by δ, move to j1, and stop when a free column is found.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "for j in range(0, n+1):\n    if used[j]:\n        u[p[j]] += delta\n        v[j] -= delta\n    else:\n        minv[j] -= delta\nj0 = j1\nif p[j0] == 0:\n    break",
+          "isCode": true
+        },
+        {
+          "label": "for j in range(1, n+1):\n    if used[j]:\n        u[p[j]] -= delta\n        v[j] += delta\n    else:\n        minv[j] += delta\nj0 = j1\nif p[j0] != 0:\n    break",
+          "isCode": true
+        },
+        {
+          "label": "for j in range(0, n):\n    if used[j]:\n        u[p[j]] += delta\n        v[j] -= delta\n    else:\n        minv[j] -= delta\nj0 = j1\nif p[j0] == 0:\n    continue",
+          "isCode": true
+        },
+        {
+          "label": "for j in range(0, n+1):\n    minv[j] -= delta\nj0 = j1\nif p[j0] == 0:\n    break",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Increase u on used columns' rows and decrease v on those columns; reduce minv for others. Move to j1 and break when free.",
+      "wrongExplanations": {
+        "1": "Signs are flipped; this breaks non-negativity and search invariant.",
+        "2": "Ranges and stopping condition are wrong."
+      },
+      "hint": "Used columns get u and v updated; others reduce their minv.",
+      "isCodeBuilding": true,
+      "codeSnippet": "\n            for j in range(0, n+1):\n                if used[j]:\n                    u[p[j]] += delta\n                    v[j] -= delta\n                else:\n                    minv[j] -= delta\n            j0 = j1\n            if p[j0] == 0:\n                break",
+      "codeLabel": "Update by delta"
+    },
+    {
+      "id": "q22",
+      "phase": "Writing the Code",
+      "questionText": "Reconstruct the assignment along the predecessor chain when a free column is found.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "while True:\n    j1 = way[j0]\n    p[j0] = p[j1]\n    j0 = j1\n    if j0 == 0:\n        break",
+          "isCode": true
+        },
+        {
+          "label": "while j0 != 0:\n    j1 = way[j0]\n    p[j1] = p[j0]\n    j0 = j1",
+          "isCode": true
+        },
+        {
+          "label": "while True:\n    j1 = way[j0]\n    p[j1] = j0\n    j0 = j1\n    if p[j0] == 0:\n        break",
+          "isCode": true
+        },
+        {
+          "label": "while True:\n    j1 = way[j0]\n    p[j0] = i\n    j0 = j1\n    if j0 == 0:\n        break",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We walk back using way[] and shift assignments: p[j0] gets previous row p[j1], then move to j1 until reaching 0.",
+      "wrongExplanations": {
+        "1": "This assigns in the wrong direction and loses information."
+      },
+      "hint": "Use p[j0] = p[j1], then step to j1.",
+      "isCodeBuilding": true,
+      "codeSnippet": "\n        while True:\n            j1 = way[j0]\n            p[j0] = p[j1]\n            j0 = j1\n            if j0 == 0:\n                break",
+      "codeLabel": "Reconstruct chain"
+    },
+    {
+      "id": "q23",
+      "phase": "Writing the Code",
+      "questionText": "Build the final assignment array: assignment[i] = column assigned to row i.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "assignment = [0]*(n+1)\nfor j in range(1, n+1):\n    assignment[p[j]] = j",
+          "isCode": true
+        },
+        {
+          "label": "assignment = [0]*(n+1)\nfor i in range(1, n+1):\n    assignment[i] = p[i]",
+          "isCode": true
+        },
+        {
+          "label": "assignment = [0]*n\nfor j in range(n):\n    assignment[p[j]] = j",
+          "isCode": true
+        },
+        {
+          "label": "assignment = [0]*(n+1)\nfor j in range(1, n+1):\n    assignment[j] = p[j]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "p[j] is the row assigned to column j. So inverse mapping gives assignment[row]=column.",
+      "wrongExplanations": {
+        "1": "p is indexed by columns, not rows.",
+        "3": "This makes assignment hold rows, not columns."
+      },
+      "hint": "Invert p[j] to get assignment per row.",
+      "isCodeBuilding": true,
+      "codeSnippet": "\n    assignment = [0]*(n+1)\n    for j in range(1, n+1):\n        assignment[p[j]] = j",
+      "codeLabel": "Build assignment"
+    },
+    {
+      "id": "q24",
+      "phase": "Writing the Code",
+      "questionText": "Compute the total cost from the original matrix and assignment.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "total = 0\nfor i in range(1, n+1):\n    total += a[i][assignment[i]]",
+          "isCode": true
+        },
+        {
+          "label": "total = sum(a[i][assignment[i]] for i in range(n))",
+          "isCode": true
+        },
+        {
+          "label": "total = 0\nfor j in range(1, n+1):\n    total += a[p[j]][j]",
+          "isCode": true
+        },
+        {
+          "label": "total = -v[0]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Summing a[i][assignment[i]] is clear and correct with 1-based indexing.",
+      "wrongExplanations": {
+        "1": "range(n) misses i=n and indexing is off by one.",
+        "3": "This also works in theory, but we haven't carried v forward explicitly for output."
+      },
+      "hint": "Use the original costs and the mapping per row.",
+      "isCodeBuilding": true,
+      "codeSnippet": "\n    total = 0\n    for i in range(1, n+1):\n        total += a[i][assignment[i]]",
+      "codeLabel": "Compute total"
+    },
+    {
+      "id": "q25",
+      "phase": "Writing the Code",
+      "questionText": "Prepare and print the output as specified.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "out = []\nout.append(str(total))\nfor i in range(1, n+1):\n    out.append(f\"{i} {assignment[i]}\")\nsys.stdout.write(\"\\n\".join(out))",
+          "isCode": true
+        },
+        {
+          "label": "print(total)\nfor i in range(n):\n    print(i, assignment[i])",
+          "isCode": true
+        },
+        {
+          "label": "print(total)\nfor i in range(1, n+1):\n    print(assignment[i], i)",
+          "isCode": true
+        },
+        {
+          "label": "sys.stdout.write(str(total) + \"\\n\")\nsys.stdout.write(\" \".join(map(str, assignment[1:])))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "First line is total, then n lines of 'employee task' pairs 1..n.",
+      "wrongExplanations": {
+        "2": "Order of a and b is specified as 'employee task', not 'task employee'."
+      },
+      "hint": "Follow the exact required format.",
+      "isCodeBuilding": true,
+      "codeSnippet": "\n    out = []\n    out.append(str(total))\n    for i in range(1, n+1):\n        out.append(f\"{i} {assignment[i]}\")\n    sys.stdout.write(\"\\n\".join(out))",
+      "codeLabel": "Output"
+    },
+    {
+      "id": "q26",
+      "phase": "Writing the Code",
+      "questionText": "Add the usual main guard and call main().",
+      "diagram": null,
+      "options": [
+        {
+          "label": "if __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "if __name__ == main:\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "if __name__ == \"__main__\":\n    pass",
+          "isCode": true
+        },
+        {
+          "label": "main()",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Standard guard ensures main() runs when the script is executed directly.",
+      "wrongExplanations": {
+        "3": "Calling main() unguarded can cause issues if imported."
+      },
+      "hint": null,
+      "isCodeBuilding": true,
+      "codeSnippet": "\nif __name__ == \"__main__\":\n    main()",
+      "codeLabel": "Main guard"
+    },
+    {
+      "id": "q27",
+      "phase": "Verifying the Solution",
+      "questionText": "Run your program on the 3x3 example:\n\n3\n2 1 3\n3 2 1\n1 3 2\n\nWhat is the first line of output (the minimum total cost)?",
+      "diagram": "We found earlier the minimum total cost is 3.",
+      "options": [
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        },
+        {
+          "label": "6",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "An optimal assignment achieves total cost 3.",
+      "wrongExplanations": {
+        "3": "6 is achievable but not minimal here."
+      },
+      "hint": "Check (1->2, 2->3, 3->1).",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q28",
+      "phase": "Verifying the Solution",
+      "questionText": "For the provided sample input in the statement, what minimum total cost should your program print?",
+      "diagram": "4\n17 8 16 9\n7 15 12 19\n6 9 10 11\n14 7 13 10",
+      "options": [
+        {
+          "label": "33",
+          "isCode": false
+        },
+        {
+          "label": "32",
+          "isCode": false
+        },
+        {
+          "label": "34",
+          "isCode": false
+        },
+        {
+          "label": "35",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "One optimal assignment achieves total cost 33 as shown.",
+      "wrongExplanations": {
+        "1": "32 is not achievable with the given constraints.",
+        "2": "34 is higher than the known optimal."
+      },
+      "hint": "Cross-check with the example explanation.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q29",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the time complexity of your implementation in terms of n?",
+      "diagram": "Outer loop over rows; inner operations scan columns and adjust; all within nested loops.",
+      "options": [
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^3)",
+          "isCode": false
+        },
+        {
+          "label": "O(n!)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^4)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "The algorithm runs in cubic time for an n x n matrix.",
+      "wrongExplanations": {
+        "0": "There is a nested search and updates; it's not quadratic.",
+        "2": "We avoided factorial by a smarter method."
+      },
+      "hint": "Count the dominant nested loops across all iterations."
+    },
+    {
+      "id": "q30",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the space complexity of your solution?",
+      "diagram": "We store the n x n matrix and a few O(n) arrays.",
+      "options": [
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(1)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "The matrix requires O(n^2) space; helper arrays are O(n).",
+      "wrongExplanations": {
+        "0": "The matrix dominates, not just the helper arrays."
+      },
+      "hint": "Consider the storage of all costs."
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys",
+    "\n\ndef main():\n    data = sys.stdin.read().strip().split()\n    if not data:\n        return\n    it = iter(data)\n    n = int(next(it))",
+    "\n    a = [[0]*(n+1)]\n    for i in range(n):\n        row = [0] + [int(next(it)) for _ in range(n)]\n        a.append(row)",
+    "\n    u = [0]*(n+1)\n    v = [0]*(n+1)\n    p = [0]*(n+1)\n    way = [0]*(n+1)",
+    "\n    for i in range(1, n+1):\n        p[0] = i\n        j0 = 0\n        minv = [float('inf')]*(n+1)\n        used = [False]*(n+1)\n        while True:\n            used[j0] = True\n            i0 = p[j0]\n            delta = float('inf')\n            j1 = 0",
+    "\n            for j in range(1, n+1):\n                if not used[j]:\n                    cur = a[i0][j] - u[i0] - v[j]\n                    if cur < minv[j]:\n                        minv[j] = cur\n                        way[j] = j0\n                    if minv[j] < delta:\n                        delta = minv[j]\n                        j1 = j",
+    "\n            for j in range(0, n+1):\n                if used[j]:\n                    u[p[j]] += delta\n                    v[j] -= delta\n                else:\n                    minv[j] -= delta\n            j0 = j1\n            if p[j0] == 0:\n                break",
+    "\n        while True:\n            j1 = way[j0]\n            p[j0] = p[j1]\n            j0 = j1\n            if j0 == 0:\n                break",
+    "\n    assignment = [0]*(n+1)\n    for j in range(1, n+1):\n        assignment[p[j]] = j",
+    "\n    total = 0\n    for i in range(1, n+1):\n        total += a[i][assignment[i]]",
+    "\n    out = []\n    out.append(str(total))\n    for i in range(1, n+1):\n        out.append(f\"{i} {assignment[i]}\")\n    sys.stdout.write(\"\\n\".join(out))",
+    "\nif __name__ == \"__main__\":\n    main()"
+  ],
+  "reasoningChain": [
+    {
+      "question": "Why is brute force over all assignments infeasible for n up to 200?",
+      "insight": "The number of assignments grows as n!, which is astronomically large for even moderate n."
+    },
+    {
+      "question": "What transformations preserve the optimal assignment?",
+      "insight": "Adding or subtracting constants per row or per column shifts all assignment totals uniformly, so the argmin is unchanged."
+    },
+    {
+      "question": "How can we use normalized costs to guide selection?",
+      "insight": "After subtracting row and column minima, all entries are non-negative and many zeros appear; an optimal selection can be guided by zeros."
+    },
+    {
+      "question": "How to iteratively build an assignment using reduced costs?",
+      "insight": "Maintain row and column offsets to keep reduced costs non-negative, track best slacks (minv), and adjust offsets by the smallest slack to create new zeros."
+    },
+    {
+      "question": "Which state and predecessor arrays are needed to implement this efficiently?",
+      "insight": "Use arrays for row/column offsets, a mapping from columns to rows (p), predecessor columns (way), visited flags, and minimal slacks."
+    },
+    {
+      "question": "How to reconstruct the assignment and compute the answer?",
+      "insight": "Invert the column-to-row map to get each row’s assigned column and sum original costs; print total and the pairs."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1463,
+    "output_tokens": 18661,
+    "input_cost": 0.001829,
+    "output_cost": 0.18661,
+    "total_cost": 0.188439
+  }
+}

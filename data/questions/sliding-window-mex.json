@@ -1,0 +1,1023 @@
+{
+  "id": "sliding-window-mex",
+  "title": "Sliding Window Mex",
+  "difficulty": "intermediate",
+  "tags": [
+    "mixed",
+    "arrays",
+    "heap",
+    "window"
+  ],
+  "estimatedMinutes": 45,
+  "language": "python",
+  "description": "You are given an array of n integers and a window size k. For each contiguous window of k elements (from left to right), compute the mex of that window. The mex of a multiset is the smallest nonnegative integer that does not appear in it.\n\nInput:\n- First line: two integers n and k\n- Second line: n integers x_1, x_2, ..., x_n\n\nOutput:\n- Print n - k + 1 integers: the mex values of each window.\n\nExample:\n- For the array [3,1,4,3,0,5], mex is 2.\n",
+  "examples": [
+    {
+      "input": "8 3\n1 2 1 0 5 1 1 0\n",
+      "output": "0 3 2 2 0 2\n",
+      "explanation": "Windows of size 3:\n- [1,2,1] -> missing 0 => mex=0\n- [2,1,0] -> has 0,1,2 => mex=3\n- [1,0,5] -> missing 2 => mex=2\n- [0,5,1] -> missing 2 => mex=2\n- [5,1,1] -> missing 0 => mex=0\n- [1,1,0] -> missing 2 => mex=2"
+    }
+  ],
+  "constraints": [
+    "1 <= k <= n <= 2 * 10^5",
+    "0 <= x_i <= 10^9"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "What is the mex of the window [2, 0]?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Values present are {0,2}. The smallest nonnegative missing is 1.",
+      "wrongExplanations": {
+        "0": "0 is present in the window.",
+        "2": "2 is present in the window."
+      },
+      "hint": "List numbers starting from 0 and find the first absent.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "In the sample input with k=3, the first window is [1,2,1]. What is its mex?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "0 is not in [1,2,1], so mex = 0.",
+      "wrongExplanations": {
+        "1": "1 appears in the window.",
+        "2": "2 appears in the window."
+      },
+      "hint": "Check 0, then 1, then 2, ...",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "For any window of size k, what is the maximum possible mex?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "k + 1",
+          "isCode": false
+        },
+        {
+          "label": "n",
+          "isCode": false
+        },
+        {
+          "label": "k",
+          "isCode": false
+        },
+        {
+          "label": "max(array) + 1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "A window has k elements; it can't contain all 0..k. If 0..k-1 are present, mex is k.",
+      "wrongExplanations": {
+        "0": "You would need k+1 distinct values 0..k for mex to be k+1.",
+        "3": "Mex depends on the window, not global max."
+      },
+      "hint": "How many distinct nonnegative numbers can a k-length window contain?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "If k = 3, can a value like 10^9 inside a window affect its mex?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "No, values greater than k do not affect the mex for a k-sized window.",
+          "isCode": false
+        },
+        {
+          "label": "Yes, if it is unique in the window.",
+          "isCode": false
+        },
+        {
+          "label": "Yes, always.",
+          "isCode": false
+        },
+        {
+          "label": "Only if the window has all equal large values.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Mex is within [0..k]. Numbers > k do not change which of 0..k appear.",
+      "wrongExplanations": {
+        "1": "Uniqueness of a large value doesn't create or remove small numbers.",
+        "2": "Large values don't introduce small missing values."
+      },
+      "hint": "Focus on whether 0..k appear.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Understanding the Problem",
+      "questionText": "Second window in the example is [2,1,0]. What is its mex?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 3,
+      "explanation": "0,1,2 are present, so mex is 3.",
+      "wrongExplanations": {
+        "0": "0 is present in the window.",
+        "2": "2 is present in the window."
+      },
+      "hint": "List 0,1,2: all present. Next is 3.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "Suppose for each window you build a set of elements and then scan from 0 upward to find the mex. What is the overall time?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(nk)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(k)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Scanning up to k per window yields O(k) per window and O(nk) total.",
+      "wrongExplanations": {
+        "1": "Log factors don't appear in that simple scan.",
+        "2": "You still scan up to k per window."
+      },
+      "hint": "How many windows are there? How much work per window?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "When moving the window one step to the right, which elements affect counts?",
+      "diagram": "arr: [a0, a1, a2, a3, ...]\nwindow t:    [a1, a2, a3]\nwindow t+1:      [a2, a3, a4]",
+      "options": [
+        {
+          "label": "Only the new entering element (right end).",
+          "isCode": false
+        },
+        {
+          "label": "Only the leaving element (left end).",
+          "isCode": false
+        },
+        {
+          "label": "Both the leaving and entering elements.",
+          "isCode": false
+        },
+        {
+          "label": "All elements inside the window.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Only one element leaves and one enters; others remain.",
+      "wrongExplanations": {
+        "0": "You must also handle the one that leaves.",
+        "1": "You must also handle the one that enters."
+      },
+      "hint": "Compare the two windows; which positions changed?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Exploring Approaches",
+      "questionText": "Can the mex ever decrease after shifting the window by one position?",
+      "diagram": "Example: [0,2,3] -> mex=1\nShift right by 1 (remove 0, add 1): [2,3,1] -> mex=?",
+      "options": [
+        {
+          "label": "It must be non-decreasing.",
+          "isCode": false
+        },
+        {
+          "label": "It may decrease.",
+          "isCode": false
+        },
+        {
+          "label": "It always increases by at most 1.",
+          "isCode": false
+        },
+        {
+          "label": "It always stays the same.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "In the example, mex goes from 1 to 0; it decreased.",
+      "wrongExplanations": {
+        "0": "Removing an element can create a smaller missing number.",
+        "2": "The change isn't bounded like that."
+      },
+      "hint": "Consider removing a small number that was making mex larger.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "Which values do we need to maintain counts for to compute mex in a k-sized window?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "All distinct numbers in the array.",
+          "isCode": false
+        },
+        {
+          "label": "All integers in [0..k].",
+          "isCode": false
+        },
+        {
+          "label": "All integers up to max(array).",
+          "isCode": false
+        },
+        {
+          "label": "No counts; just recompute each time.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Mex cannot exceed k for a k-sized window; only 0..k matter.",
+      "wrongExplanations": {
+        "0": "Values > k don't affect mex.",
+        "2": "Tracking up to max(array) wastes time and space."
+      },
+      "hint": "Use the bound from earlier that mex <= k.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "We need the smallest i in [0..k] with zero count quickly. Which choice supports fast updates and quick minimum queries?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Keep a list of zero-count values and sort it each time.",
+          "isCode": false
+        },
+        {
+          "label": "Maintain a min-heap of missing values and pop while the top is present.",
+          "isCode": false
+        },
+        {
+          "label": "Use an unsorted set and call min() each time.",
+          "isCode": false
+        },
+        {
+          "label": "Scan 0..k linearly each time.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "A min-heap gives O(log k) updates and quick access to the smallest missing value.",
+      "wrongExplanations": {
+        "0": "Sorting each time is too slow.",
+        "2": "min() over an unsorted set is O(k) per window."
+      },
+      "hint": "We want to avoid O(k) per window.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "How should we initialize the structure of missing values for the first window?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Start with all values 0..k in the structure; after counting the first window, ignore present ones by popping when querying.",
+          "isCode": false
+        },
+        {
+          "label": "Start empty; insert only values not in the first window by scanning 0..k once.",
+          "isCode": false
+        },
+        {
+          "label": "Compute set(0..k) minus present and store it; rebuild from scratch each window.",
+          "isCode": false
+        },
+        {
+          "label": "Don't initialize; compute mex by scanning 0..k each time.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Starting with 0..k and using lazy pops keeps updates simple and efficient.",
+      "wrongExplanations": {
+        "2": "Rebuilding each window brings back O(k) work.",
+        "3": "Scanning each time is too slow."
+      },
+      "hint": "Favor a one-time setup and incremental updates.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "When an element v in [0..k] leaves the window and its count becomes 0, what should we do?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Push v into the min-heap of missing values.",
+          "isCode": false
+        },
+        {
+          "label": "Remove v from the min-heap.",
+          "isCode": false
+        },
+        {
+          "label": "Do nothing; it will be handled later.",
+          "isCode": false
+        },
+        {
+          "label": "Push -v to prioritize smaller values.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "When count becomes 0, v is newly missing; push it so it can become the mex if smallest.",
+      "wrongExplanations": {
+        "1": "You want to add missing values, not remove them.",
+        "2": "It won't be added by itself; we must push when it becomes missing."
+      },
+      "hint": "Missing values should be candidates for the next mex.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "When an element v in [0..k] enters the window and its count increases from 0 to 1, how do we handle the missing-values structure?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Remove v from the heap immediately.",
+          "isCode": false
+        },
+        {
+          "label": "Do nothing; skip present values lazily by popping when querying mex.",
+          "isCode": false
+        },
+        {
+          "label": "Push v again into the heap.",
+          "isCode": false
+        },
+        {
+          "label": "Clear and rebuild the heap.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "We use lazy popping: only pop while the top is present when reading mex.",
+      "wrongExplanations": {
+        "0": "Removing arbitrary items from a heap is costly.",
+        "2": "Duplicates add no value and can confuse logic."
+      },
+      "hint": "Heap supports pop from the top, not removing arbitrary items efficiently.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Building the Idea",
+      "questionText": "How do we obtain the current mex from the heap and counts?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Return heap[0] directly without checks.",
+          "isCode": false
+        },
+        {
+          "label": "Pop while heap[0] corresponds to freq[...] == 0, then use the next.",
+          "isCode": false
+        },
+        {
+          "label": "Pop while heap[0] corresponds to freq[...] > 0, then return heap[0].",
+          "isCode": false
+        },
+        {
+          "label": "Take the largest value in the heap.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Skip present values (freq>0) by popping until the top is truly missing; then top is mex.",
+      "wrongExplanations": {
+        "0": "heap[0] may be present (freq>0) due to lazy updates.",
+        "1": "If freq==0, it's truly missing; don't pop it away."
+      },
+      "hint": "We only want to remove values that are no longer missing.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q15",
+      "phase": "Building the Idea",
+      "questionText": "For window [2,1,0] with k=3, what is the mex we should output?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 3,
+      "explanation": "0,1,2 are present; mex is 3.",
+      "wrongExplanations": {
+        "0": "0 is present.",
+        "2": "2 is present."
+      },
+      "hint": "Check presence of 0,1,2 first.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Read input and parse n, k, and the array.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\nimport heapq\n\ndef main():\n    data = sys.stdin.read().strip().split()\n    if not data:\n        return\n    it = iter(data)\n    n = int(next(it)); k = int(next(it))\n    arr = [int(next(it)) for _ in range(n)]",
+          "isCode": true
+        },
+        {
+          "label": "import sys\n\ndef main():\n    n, k = map(int, sys.stdin.readline().split())\n    arr = list(map(int, sys.stdin.readline().split()))\nimport heapq",
+          "isCode": true
+        },
+        {
+          "label": "import sys\nimport heapq\n\ndef main():\n    data = sys.stdin.read().split()\n    n = int(data[0]); k = int(data[1])\n    arr = [int(x) for x in data[1:]]",
+          "isCode": true
+        },
+        {
+          "label": "import heapq\n\ndef main():\n    data = input().strip().split()\n    n = int(data[0]); k = int(data[1])\n    arr = list(map(int, input().split()))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "This robustly reads all tokens and parses n, k, and n numbers. Others risk misreading counts or mixing input sources.",
+      "wrongExplanations": {
+        "2": "Slices are wrong: arr should start from index 2, not 1.",
+        "3": "Mixing input() lines can break for large inputs or extra whitespace."
+      },
+      "hint": "Use a single read to avoid I/O overhead and alignment issues.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\nimport heapq\n\ndef main():\n    data = sys.stdin.read().strip().split()\n    if not data:\n        return\n    it = iter(data)\n    n = int(next(it)); k = int(next(it))\n    arr = [int(next(it)) for _ in range(n)]",
+      "codeLabel": "Input parsing"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Initialize counts and the heap of missing values for range [0..k].",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    maxv = k\n    freq = [0] * (maxv + 1)\n    missing = list(range(maxv + 1))\n    heapq.heapify(missing)",
+          "isCode": true
+        },
+        {
+          "label": "    maxv = k\n    freq = [0] * maxv\n    missing = list(range(maxv))\n    heapq.heapify(missing)",
+          "isCode": true
+        },
+        {
+          "label": "    maxv = k\n    freq = [0] * (maxv + 2)\n    missing = list(range(maxv + 2))\n    heapq.heapify(missing)",
+          "isCode": true
+        },
+        {
+          "label": "    maxv = k\n    freq = {}\n    missing = []\n    heapq.heapify(missing)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need indices 0..k inclusive, so size (k+1). The heap starts with all 0..k.",
+      "wrongExplanations": {
+        "1": "This omits k; mex can be k.",
+        "2": "Extra size complicates logic; we only need up to k.",
+        "3": "A list of zeros is faster than a dict here and we need initial 0..k in the heap."
+      },
+      "hint": "Remember mex can be k.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    maxv = k\n    freq = [0] * (maxv + 1)\n    missing = list(range(maxv + 1))\n    heapq.heapify(missing)",
+      "codeLabel": "Init structures"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Count the elements of the first window, considering only values in [0..k].",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    # initialize first window counts\n    for i in range(k):\n        x = arr[i]\n        if 0 <= x <= maxv:\n            freq[x] += 1",
+          "isCode": true
+        },
+        {
+          "label": "    # initialize first window counts\n    for i in range(k - 1):\n        x = arr[i]\n        if 0 <= x < maxv:\n            freq[x] += 1",
+          "isCode": true
+        },
+        {
+          "label": "    # initialize first window counts\n    for i in range(k):\n        x = arr[i]\n        freq[x] += 1",
+          "isCode": true
+        },
+        {
+          "label": "    # initialize first window counts\n    for i in range(1, k + 1):\n        x = arr[i]\n        if x <= maxv:\n            freq[x] += 1",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We must include indices 0..k-1 and filter to [0..k]. Others have off-by-one or lack filtering.",
+      "wrongExplanations": {
+        "1": "range(k-1) excludes the last index and '< maxv' excludes k.",
+        "3": "Off-by-one in indexing and missing lower bound check."
+      },
+      "hint": "Range should cover exactly k elements starting at index 0.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    # initialize first window counts\n    for i in range(k):\n        x = arr[i]\n        if 0 <= x <= maxv:\n            freq[x] += 1",
+      "codeLabel": "Init first window"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Implement a helper to get the current mex using lazy popping from the heap.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    def current_mex():\n        while missing and freq[missing[0]] > 0:\n            heapq.heappop(missing)\n        return missing[0] if missing else maxv + 1",
+          "isCode": true
+        },
+        {
+          "label": "    def current_mex():\n        while missing and freq[missing[0]] == 0:\n            heapq.heappop(missing)\n        return missing[0]",
+          "isCode": true
+        },
+        {
+          "label": "    def current_mex():\n        return missing[0]",
+          "isCode": true
+        },
+        {
+          "label": "    def current_mex():\n        while freq[missing[0]] > 0:\n            heapq.heappop(missing)\n        return missing[-1]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Pop present values (freq>0) until the top is truly missing; then return top.",
+      "wrongExplanations": {
+        "1": "Popping when freq==0 removes the actual mex.",
+        "3": "No check for empty and returning the last element is wrong."
+      },
+      "hint": "Only remove values that are no longer missing.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    def current_mex():\n        while missing and freq[missing[0]] > 0:\n            heapq.heappop(missing)\n        return missing[0] if missing else maxv + 1",
+      "codeLabel": "mex helper"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Start the result list and append the mex for the first window.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    res = []\n    res.append(current_mex())",
+          "isCode": true
+        },
+        {
+          "label": "    res = []\n    res.append(str(current_mex()))",
+          "isCode": true
+        },
+        {
+          "label": "    res = [current_mex]\n    res.append()",
+          "isCode": true
+        },
+        {
+          "label": "    res = []\n    # first mex will be added later",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Store integers now; we'll convert to strings when printing. Others stringify too early or skip the first mex.",
+      "wrongExplanations": {
+        "1": "Stringifying early is inconsistent with later numeric operations.",
+        "3": "You must include the first window's mex."
+      },
+      "hint": "Compute and store the first mex immediately after initialization.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    res = []\n    res.append(current_mex())",
+      "codeLabel": "First mex"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "Write the loop to slide the window: update counts for leaving and entering elements and append the new mex.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    for i in range(k, n):\n        out = arr[i - k]\n        if 0 <= out <= maxv:\n            freq[out] -= 1\n            if freq[out] == 0:\n                heapq.heappush(missing, out)\n        inn = arr[i]\n        if 0 <= inn <= maxv:\n            if freq[inn] == 0:\n                pass\n            freq[inn] += 1\n        res.append(current_mex())",
+          "isCode": true
+        },
+        {
+          "label": "    for i in range(k + 1, n):\n        out = arr[i - k - 1]\n        if out <= maxv:\n            freq[out] -= 1\n        inn = arr[i]\n        if inn <= maxv:\n            freq[inn] += 1\n        res.append(current_mex())",
+          "isCode": true
+        },
+        {
+          "label": "    for i in range(k, n):\n        out = arr[i - k]\n        freq[out] -= 1\n        inn = arr[i]\n        freq[inn] += 1\n        res.append(current_mex())",
+          "isCode": true
+        },
+        {
+          "label": "    for i in range(k, n):\n        inn = arr[i]\n        if 0 <= inn <= maxv:\n            freq[inn] += 1\n        out = arr[i - k]\n        if 0 <= out <= maxv:\n            freq[out] -= 1\n            if freq[out] == 0:\n                heapq.heappush(missing, out)\n        res.append(current_mex())",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "This correctly updates leaving first, pushes to heap when count hits 0, filters to [0..k], and lazily handles entering.",
+      "wrongExplanations": {
+        "2": "No filtering to [0..k] and no heap push when count becomes 0.",
+        "3": "Updating entering before leaving can transiently mis-handle counts; order matters for clarity."
+      },
+      "hint": "Remember to push a value into the heap only when its count reaches 0.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    for i in range(k, n):\n        out = arr[i - k]\n        if 0 <= out <= maxv:\n            freq[out] -= 1\n            if freq[out] == 0:\n                heapq.heappush(missing, out)\n        inn = arr[i]\n        if 0 <= inn <= maxv:\n            if freq[inn] == 0:\n                pass\n            freq[inn] += 1\n        res.append(current_mex())",
+      "codeLabel": "Slide loop"
+    },
+    {
+      "id": "q22",
+      "phase": "Writing the Code",
+      "questionText": "Print the results as space-separated values.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    print(\" \".join(map(str, res)))",
+          "isCode": true
+        },
+        {
+          "label": "    print(res)",
+          "isCode": true
+        },
+        {
+          "label": "    print(*map(str, res), sep='')",
+          "isCode": true
+        },
+        {
+          "label": "    print(*res, sep=' ')",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Joining ensures exactly one space between values. Others either print list syntax or no spaces.",
+      "wrongExplanations": {
+        "1": "This prints Python list representation, not required format.",
+        "2": "sep='' prints without spaces."
+      },
+      "hint": "The output should be like: 0 3 2 ...",
+      "isCodeBuilding": true,
+      "codeSnippet": "    print(\" \".join(map(str, res)))",
+      "codeLabel": "Output"
+    },
+    {
+      "id": "q23",
+      "phase": "Writing the Code",
+      "questionText": "Add the standard entry point to run main().",
+      "diagram": null,
+      "options": [
+        {
+          "label": "if __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "if __name__ == main:\n    __main__()",
+          "isCode": true
+        },
+        {
+          "label": "main()\nif __name__ == \"__main__\":\n    pass",
+          "isCode": true
+        },
+        {
+          "label": "def __main__():\n    main()\n__main__()",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "This is the standard Python guard to call main when executed as a script.",
+      "wrongExplanations": {
+        "2": "Calling main() unguarded runs on import too.",
+        "3": "Custom __main__ function is unnecessary here."
+      },
+      "hint": "Use the conventional guard string.",
+      "isCodeBuilding": true,
+      "codeSnippet": "if __name__ == \"__main__\":\n    main()",
+      "codeLabel": "Main guard"
+    },
+    {
+      "id": "q24",
+      "phase": "Verifying the Solution",
+      "questionText": "Using the algorithm, after processing the first window [1,2,1] (mex=0), the next window is [2,1,0]. What mex is appended next?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 3,
+      "explanation": "0,1,2 are present in [2,1,0], so mex=3.",
+      "wrongExplanations": {
+        "0": "0 is present now.",
+        "2": "2 is present now."
+      },
+      "hint": "Check presence of 0,1,2 in the new window.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Verifying the Solution",
+      "questionText": "Continuing the example, the third window is [1,0,5]. What mex should the code output there?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Values present are {0,1,5}. The smallest missing is 2.",
+      "wrongExplanations": {
+        "0": "0 is present.",
+        "1": "1 is present."
+      },
+      "hint": "Ignore 5; focus on 0..k.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the time complexity of this method over all windows?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(nk)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log k)",
+          "isCode": false
+        },
+        {
+          "label": "O(n + k)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Each shift does O(1) count updates and O(log k) heap work for pushes/pops.",
+      "wrongExplanations": {
+        "0": "We avoid scanning 0..k per window.",
+        "3": "The log factor is in k, not n."
+      },
+      "hint": "Consider heap operations per window.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q27",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the extra space usage of the algorithm?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(1)",
+          "isCode": false
+        },
+        {
+          "label": "O(log k)",
+          "isCode": false
+        },
+        {
+          "label": "O(k)",
+          "isCode": false
+        },
+        {
+          "label": "O(n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "We maintain freq[0..k] and a heap over 0..k, both O(k).",
+      "wrongExplanations": {
+        "0": "We store structures proportional to k.",
+        "3": "We don't store whole array copies."
+      },
+      "hint": "Count array and heap sizes depend on k.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q28",
+      "phase": "Analyzing Complexity",
+      "questionText": "Edge case check: For k=1, what is mex of window [0]?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "k",
+          "isCode": false
+        },
+        {
+          "label": "Undefined",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "0 is present; smallest missing is 1.",
+      "wrongExplanations": {
+        "0": "0 is in the window.",
+        "2": "k equals 1 here; mex is 1 because 0 is present."
+      },
+      "hint": "Mex is the smallest nonnegative not in the window.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\nimport heapq\n\ndef main():\n    data = sys.stdin.read().strip().split()\n    if not data:\n        return\n    it = iter(data)\n    n = int(next(it)); k = int(next(it))\n    arr = [int(next(it)) for _ in range(n)]",
+    "    maxv = k\n    freq = [0] * (maxv + 1)\n    missing = list(range(maxv + 1))\n    heapq.heapify(missing)",
+    "    # initialize first window counts\n    for i in range(k):\n        x = arr[i]\n        if 0 <= x <= maxv:\n            freq[x] += 1",
+    "    def current_mex():\n        while missing and freq[missing[0]] > 0:\n            heapq.heappop(missing)\n        return missing[0] if missing else maxv + 1",
+    "    res = []\n    res.append(current_mex())",
+    "    for i in range(k, n):\n        out = arr[i - k]\n        if 0 <= out <= maxv:\n            freq[out] -= 1\n            if freq[out] == 0:\n                heapq.heappush(missing, out)\n        inn = arr[i]\n        if 0 <= inn <= maxv:\n            if freq[inn] == 0:\n                pass\n            freq[inn] += 1\n        res.append(current_mex())",
+    "    print(\" \".join(map(str, res)))",
+    "if __name__ == \"__main__\":\n    main()"
+  ],
+  "reasoningChain": [
+    {
+      "question": "For any window of size k, what is the maximum possible mex?",
+      "insight": "Mex cannot exceed k because at most k distinct nonnegative integers can appear in the window; if 0..k-1 appear, mex is k."
+    },
+    {
+      "question": "Do values greater than k affect the mex for a k-sized window?",
+      "insight": "Values > k do not change which of 0..k appear; thus we can ignore them in counting."
+    },
+    {
+      "question": "When shifting the window, which counts change?",
+      "insight": "Only the leaving element and the entering element affect counts; we can update in O(1) per shift."
+    },
+    {
+      "question": "How to find the smallest missing number in [0..k] quickly?",
+      "insight": "Maintain a structure of missing values with quick access to the smallest (a min-heap) and use lazy removal based on current counts."
+    },
+    {
+      "question": "How to initialize and update the missing-values structure?",
+      "insight": "Start with all 0..k in the heap; after counting, pop present ones when querying; on decrement to zero push back; on increment to one rely on lazy popping."
+    },
+    {
+      "question": "How to implement and verify the approach efficiently?",
+      "insight": "Assemble code to read input, maintain freq and heap across windows, compute mex via a helper, and print space-separated results with O(n log k) time and O(k) space."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1395,
+    "output_tokens": 17268,
+    "input_cost": 0.001744,
+    "output_cost": 0.17268,
+    "total_cost": 0.174424
+  }
+}

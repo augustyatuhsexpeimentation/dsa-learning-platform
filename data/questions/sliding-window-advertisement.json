@@ -1,0 +1,1262 @@
+{
+  "id": "sliding-window-advertisement",
+  "title": "Sliding Window Advertisement",
+  "difficulty": "intermediate",
+  "tags": [
+    "mixed"
+  ],
+  "estimatedMinutes": 60,
+  "language": "python",
+  "description": "You have a fence with n vertical boards (width 1 each) and varying heights. For each window of k consecutive boards from left to right, compute the maximum area of a rectangular advertisement that can be placed using a consecutive subset of boards within that window. The height of the rectangle is limited by the shortest board in the chosen subset.\n\nInput:\n- First line: two integers n and k\n- Second line: n integers x_1, x_2, ..., x_n (heights)\n\nOutput:\n- Print n - k + 1 integers: the maximum rectangle areas for each window of k boards.",
+  "examples": [
+    {
+      "input": "8 3\n4 1 5 3 3 2 4 1",
+      "output": "5 6 9 6 6 4",
+      "explanation": "For each 3-board window, take the largest area over all consecutive subsets inside that window. For example, window [4,1,5] has max area 5 (using the single board of height 5)."
+    }
+  ],
+  "constraints": [
+    "1 ≤ k ≤ n ≤ 2⋅10^5",
+    "1 ≤ x_i ≤ 10^9"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "In a window of k consecutive boards, what does the area of a valid rectangular advertisement represent?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Width = number of selected consecutive boards in the window; height = minimum height among those selected boards.",
+          "isCode": false
+        },
+        {
+          "label": "Width = k always; height = maximum height among boards in the window.",
+          "isCode": false
+        },
+        {
+          "label": "Width = number of selected boards (not necessarily consecutive); height = average height.",
+          "isCode": false
+        },
+        {
+          "label": "Width = number of selected consecutive boards; height = maximum height among those boards.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Area uses consecutive boards only; height is limited by the shortest among them. Using all k or non-consecutive boards is not required.",
+      "wrongExplanations": {
+        "1": "Height is constrained by the minimum, not maximum, and width need not be exactly k.",
+        "3": "Maximum height over the subset overestimates; the limiting height is the minimum."
+      },
+      "hint": null,
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "Consider window [4, 1, 5] (k=3). What is the maximum area within this window?",
+      "diagram": "Indices: 1 2 3\nHeights: 4 1 5",
+      "options": [
+        {
+          "label": "5 (choose the single board of height 5)",
+          "isCode": false
+        },
+        {
+          "label": "3 (use all 3 boards; min height is 1; area 1*3)",
+          "isCode": false
+        },
+        {
+          "label": "4 (choose the single board of height 4)",
+          "isCode": false
+        },
+        {
+          "label": "2 (choose two boards [4,1] or [1,5]; min=1; area=2)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Single board of height 5 yields area 5. Using all 3 boards gives area 3, which is smaller.",
+      "wrongExplanations": {
+        "1": "Using all k boards is not required; area 3 is not maximal.",
+        "3": "Two-board choices have min=1 so area only 2."
+      },
+      "hint": "Try all consecutive subsets and compare their areas.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "For window [1, 5, 3], which area is the maximum?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "6 (two boards [5,3], min=3, width=2)",
+          "isCode": false
+        },
+        {
+          "label": "5 (single board height 5)",
+          "isCode": false
+        },
+        {
+          "label": "3 (use all 3 boards; min=1)",
+          "isCode": false
+        },
+        {
+          "label": "2 (two boards [1,5], min=1)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The pair [5,3] yields min=3 and width=2 for area 6, which beats any single board or full window.",
+      "wrongExplanations": {
+        "1": "Area 5 is good but 6 is larger.",
+        "2": "Using all boards is not always optimal."
+      },
+      "hint": "Check all consecutive subsets: widths 1, 2, and 3.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "A naive method computes the largest rectangle in each window independently by checking all O(k^2) subsets. What is the total complexity over all windows?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(nk^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(nk)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n + k)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each of the (n - k + 1) windows costs O(k^2), so total is O(nk^2). This is too slow for large n, k.",
+      "wrongExplanations": {
+        "1": "O(nk) assumes only linear work per window, which is false for checking all subsets.",
+        "2": "O(n log n) would require strong reuse not found in the naive method."
+      },
+      "hint": "There are (n - k + 1) windows; each uses O(k^2) checks.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Exploring Approaches",
+      "questionText": "For a board at index i with height h[i], define the largest span it can cover while remaining the minimum: which boundaries describe this span?",
+      "diagram": ".... L[i] < i < R[i] ....\nWithin (L[i], R[i]) all heights >= h[i]",
+      "options": [
+        {
+          "label": "L[i]: nearest index to the left with height < h[i]; R[i]: nearest index to the right with height < h[i]",
+          "isCode": false
+        },
+        {
+          "label": "L[i]: nearest index to the left with height <= h[i]; R[i]: nearest index to the right with height <= h[i]",
+          "isCode": false
+        },
+        {
+          "label": "L[i]: nearest index to the left with height > h[i]; R[i]: nearest index to the right with height > h[i]",
+          "isCode": false
+        },
+        {
+          "label": "L[i]: farthest index to the left; R[i]: farthest index to the right",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We want strict smaller boundaries so the span (L[i]+1..R[i]-1) has all heights >= h[i]. Using <= would shrink the span incorrectly.",
+      "wrongExplanations": {
+        "1": "Using <= blocks equal heights and shortens the valid span.",
+        "2": "Greater-than boundaries do not ensure h[i] is the minimum inside."
+      },
+      "hint": "Inside the span, h[i] must be the minimum; outside, strictly smaller heights should stop it.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "Given heights [4, 1, 5, 3] (indices 0..3), what are L and R for i=3 (height 3)?",
+      "diagram": "Heights: idx0=4, idx1=1, idx2=5, idx3=3",
+      "options": [
+        {
+          "label": "L[3]=1, R[3]=4",
+          "isCode": false
+        },
+        {
+          "label": "L[3]=2, R[3]=4",
+          "isCode": false
+        },
+        {
+          "label": "L[3]=0, R[3]=4",
+          "isCode": false
+        },
+        {
+          "label": "L[3]=1, R[3]=3",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Nearest left with height <3 is at index 1 (height 1). To the right, none is <3, so R=4 (n).",
+      "wrongExplanations": {
+        "1": "Index 2 has height 5, not <3, so it cannot be the left boundary.",
+        "3": "R should be the first strictly smaller to the right; none exists so R=n=4."
+      },
+      "hint": "Look left from i=3 for the first height <3; to the right, check if any is <3.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "How can we compute L and R for all indices in linear time?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Scan once from left for L and once from right for R, maintaining a list of candidate indices and popping while violating the height conditions.",
+          "isCode": false
+        },
+        {
+          "label": "Sort the indices by height and then use binary search for boundaries.",
+          "isCode": false
+        },
+        {
+          "label": "Use nested loops to compare every pair of indices.",
+          "isCode": false
+        },
+        {
+          "label": "Randomized sampling to estimate boundaries.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Two linear scans suffice, using a list of indices while removing those that cannot serve as boundaries.",
+      "wrongExplanations": {
+        "1": "Sorting does not directly yield nearest boundary positions.",
+        "2": "Quadratic time is too slow for given constraints."
+      },
+      "hint": "During each scan, keep indices with non-decreasing heights and drop those violating the boundary rule.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Building the Idea",
+      "questionText": "Let a = L[i]+1 and b = R[i]-1. For a window starting at l (ending at l+k-1), what is the width contributed by board i?",
+      "diagram": "Window [l..l+k-1] ∩ Span [a..b]",
+      "options": [
+        {
+          "label": "max(0, min(b, l+k-1) - max(a, l) + 1)",
+          "isCode": false
+        },
+        {
+          "label": "min(b-a+1, k)",
+          "isCode": false
+        },
+        {
+          "label": "min(b, l) - max(a, l+k-1) + 1",
+          "isCode": false
+        },
+        {
+          "label": "max(0, b - a + 1 - k)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Width is the size of the intersection of [l..l+k-1] with [a..b]. Other formulas ignore position l.",
+      "wrongExplanations": {
+        "1": "This only gives maximum possible width, not the width at a specific window start.",
+        "2": "The order of min/max is inverted; it can be negative."
+      },
+      "hint": "Intersection length is right-end minus left-end plus one, clipped at zero.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "If s = b - a + 1 ≥ k, for which l does board i contribute width exactly k?",
+      "diagram": "Span covers at least k boards",
+      "options": [
+        {
+          "label": "For l in [a, b - k + 1]",
+          "isCode": false
+        },
+        {
+          "label": "For l in [a - k + 1, a - 1]",
+          "isCode": false
+        },
+        {
+          "label": "For l in [b - k + 2, b]",
+          "isCode": false
+        },
+        {
+          "label": "For all l",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "When the window [l..l+k-1] lies entirely within [a..b], width is k. That occurs for l from a to b - k + 1.",
+      "wrongExplanations": {
+        "1": "Those l give the rising part, not the full width.",
+        "2": "These are in the falling part near b."
+      },
+      "hint": "Window inside span ⇒ start between a and b - k + 1.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "On the left side, for l in [a - k + 1, a], what is the width contributed by i (before reaching the plateau if any)?",
+      "diagram": "Left ramp",
+      "options": [
+        {
+          "label": "l + k - a",
+          "isCode": false
+        },
+        {
+          "label": "a - l + 1",
+          "isCode": false
+        },
+        {
+          "label": "k - (a - l)",
+          "isCode": false
+        },
+        {
+          "label": "b - l + 1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Intersection grows by 1 per step: min(l+k-1, b) - a + 1 = l + k - a (until capped by b).",
+      "wrongExplanations": {
+        "1": "a - l + 1 decreases as l increases; does not match the left growth.",
+        "3": "This is the right-side formula."
+      },
+      "hint": "Compute min(l+k-1, b) - a + 1 while l+k-1 ≤ b.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "If s = b - a + 1 < k, there is no full-width plateau k. What is the constant width in the middle region and its l-range?",
+      "diagram": "s < k case",
+      "options": [
+        {
+          "label": "Width s over l in [b - k + 1, a]",
+          "isCode": false
+        },
+        {
+          "label": "Width k over l in [a, b - k + 1]",
+          "isCode": false
+        },
+        {
+          "label": "Width s over l in [a - k + 1, b]",
+          "isCode": false
+        },
+        {
+          "label": "Width k over l in [b - k + 1, a]",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "When s<k, window covers the span entirely in l ∈ [b - k + 1, a], giving constant width s.",
+      "wrongExplanations": {
+        "1": "Width is s here, not k.",
+        "2": "That range includes ramp regions, not a constant width across all."
+      },
+      "hint": "Find l where min(l+k-1, b)=b and max(l, a)=a simultaneously.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "What is the area contributed by i on the left ramp as a function of l?",
+      "diagram": "Area(l) = h * width(l)",
+      "options": [
+        {
+          "label": "h*l + h*(k - a)",
+          "isCode": false
+        },
+        {
+          "label": "h*(a - l + 1)",
+          "isCode": false
+        },
+        {
+          "label": "h*k",
+          "isCode": false
+        },
+        {
+          "label": "-h*l + h*(b + 1)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Width on left is l + k - a, so area is h*(l + k - a) = h*l + h*(k - a).",
+      "wrongExplanations": {
+        "3": "This is the right ramp formula, not the left."
+      },
+      "hint": "Multiply h by the left width from q10.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "What is the area contributed by i on the right ramp (l in the falling region)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "-h*l + h*(b + 1)",
+          "isCode": false
+        },
+        {
+          "label": "h*l + h*(k - a)",
+          "isCode": false
+        },
+        {
+          "label": "h*(a - l + 1)",
+          "isCode": false
+        },
+        {
+          "label": "h*k",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Right width is b - l + 1, so area is h*(b - l + 1) = -h*l + h*(b + 1).",
+      "wrongExplanations": {
+        "1": "That's the left ramp expression.",
+        "3": "a - l + 1 is not the width on the right; it's decreasing incorrectly."
+      },
+      "hint": "Use width = b - l + 1.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Building the Idea",
+      "questionText": "Valid window starts l range from 1 to M. What is M?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "n - k + 1",
+          "isCode": false
+        },
+        {
+          "label": "n - k",
+          "isCode": false
+        },
+        {
+          "label": "k",
+          "isCode": false
+        },
+        {
+          "label": "n",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Window of length k starting at l must fit within n boards: last start is n - k + 1.",
+      "wrongExplanations": {
+        "1": "Off by one: the last start index is included.",
+        "3": "M counts windows, not boards."
+      },
+      "hint": "The last window starts at index n - k + 1.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q15",
+      "phase": "Building the Idea",
+      "questionText": "We need, for each l ∈ [1..M], the maximum across many expressions:\n- left ramp: h*l + c\n- plateau: constant\n- right ramp: -h*l + c\nWhich approach lets us insert these expressions over their valid l-ranges and then read the maximum value at each l efficiently?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Maintain a structure that stores an expression at nodes and compares values at points; insert expressions restricted to their l-ranges; later, query each l.",
+          "isCode": false
+        },
+        {
+          "label": "Recompute all values for every l using all boards i each time.",
+          "isCode": false
+        },
+        {
+          "label": "Sort l by height and greedily pick expressions.",
+          "isCode": false
+        },
+        {
+          "label": "Use prefix sums of heights to get maxima directly.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We can keep the best linear/constant expression per point by inserting over ranges and querying per l. This avoids recomputation.",
+      "wrongExplanations": {
+        "1": "This returns to O(nk) or worse.",
+        "3": "Max of linear pieces is not obtainable from simple prefix sums."
+      },
+      "hint": "Think of storing a 'best expression' per interval and evaluating at integer l.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Read input and initialize n, k, arr, and M.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\n\ndef main():\n    data = list(map(int, sys.stdin.read().split()))\n    if not data:\n        return\n    n, k = data[0], data[1]\n    arr = data[2:2+n]\n    M = n - k + 1",
+          "isCode": true
+        },
+        {
+          "label": "import sys\n\ndef main():\n    n, k = map(int, sys.stdin.readline().split())\n    arr = list(map(int, sys.stdin.readline().split()))\n    M = n + k - 1",
+          "isCode": true
+        },
+        {
+          "label": "def main():\n    data = list(map(int, input().split()))\n    n, k = data[0], data[1]\n    arr = data[2:]\n    M = k - n + 1",
+          "isCode": true
+        },
+        {
+          "label": "import sys\n\ndef main():\n    tokens = sys.stdin.read().split()\n    n, k = int(tokens[1]), int(tokens[0])\n    arr = list(map(int, tokens[2:2+n]))\n    M = n - k",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Reading all tokens is robust; M = n - k + 1 is the number of windows.",
+      "wrongExplanations": {
+        "1": "M formula is incorrect; also assumes two-line input strictly.",
+        "3": "Swapped n,k and off-by-one in M."
+      },
+      "hint": "M counts starting positions for a k-length window.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\n\ndef main():\n    data = list(map(int, sys.stdin.read().split()))\n    if not data:\n        return\n    n, k = data[0], data[1]\n    arr = data[2:2+n]\n    M = n - k + 1",
+      "codeLabel": "Read input and init"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Compute left boundaries L[i] (previous index with height < arr[i]) in one pass.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "L = [-1] * n\nst = []\nfor i in range(n):\n    while st and arr[st[-1]] >= arr[i]:\n        st.pop()\n    L[i] = st[-1] if st else -1\n    st.append(i)",
+          "isCode": true
+        },
+        {
+          "label": "L = [-1] * n\nst = []\nfor i in range(n):\n    while st and arr[st[-1]] > arr[i]:\n        st.pop()\n    L[i] = st[-1] if st else -1\n    st.append(i)",
+          "isCode": true
+        },
+        {
+          "label": "L = [-1] * n\nfor i in range(n):\n    j = i - 1\n    while j >= 0 and arr[j] >= arr[i]:\n        j -= 1\n    L[i] = j",
+          "isCode": true
+        },
+        {
+          "label": "L = [0] * n\nst = []\nfor i in range(n):\n    while st and arr[st[-1]] <= arr[i]:\n        st.pop()\n    L[i] = st[-1] if st else 0\n    st.append(i)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Pop while previous height ≥ current to enforce strictly smaller boundary. Initialize to -1 when none.",
+      "wrongExplanations": {
+        "1": "Using '>' yields previous height ≤ current, not strictly smaller boundary on the left; equal heights mishandled.",
+        "3": "Linear scan is O(n^2) in worst case."
+      },
+      "hint": "Ensure equal heights are popped so boundary is strictly smaller.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    L = [-1] * n\n    st = []\n    for i in range(n):\n        while st and arr[st[-1]] >= arr[i]:\n            st.pop()\n        L[i] = st[-1] if st else -1\n        st.append(i)",
+      "codeLabel": "Compute L"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Compute right boundaries R[i] (next index with height < arr[i]) in one pass from right.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "R = [n] * n\nst = []\nfor i in range(n - 1, -1, -1):\n    while st and arr[st[-1]] > arr[i]:\n        st.pop()\n    R[i] = st[-1] if st else n\n    st.append(i)",
+          "isCode": true
+        },
+        {
+          "label": "R = [n] * n\nst = []\nfor i in range(n - 1, -1, -1):\n    while st and arr[st[-1]] >= arr[i]:\n        st.pop()\n    R[i] = st[-1] if st else n\n    st.append(i)",
+          "isCode": true
+        },
+        {
+          "label": "R = [n] * n\nfor i in range(n):\n    j = i + 1\n    while j < n and arr[j] >= arr[i]:\n        j += 1\n    R[i] = j",
+          "isCode": true
+        },
+        {
+          "label": "R = [0] * n\nst = []\nfor i in range(n - 1, -1, -1):\n    while st and arr[st[-1]] <= arr[i]:\n        st.pop()\n    R[i] = st[-1] if st else 0\n    st.append(i)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Use '>' so the right boundary is strictly smaller; combined with left's '≥' avoids double-counting equal heights.",
+      "wrongExplanations": {
+        "1": "Using '≥' on both sides misassigns spans for equal heights.",
+        "2": "Quadratic approach is too slow."
+      },
+      "hint": "Pair the left condition '≥' with right condition '>' for consistent spans.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    R = [n] * n\n    st = []\n    for i in range(n - 1, -1, -1):\n        while st and arr[st[-1]] > arr[i]:\n            st.pop()\n        R[i] = st[-1] if st else n\n        st.append(i)",
+      "codeLabel": "Compute R"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Define a small object to represent an expression of the form m*x + b and an eval method.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "class Line:\n    __slots__ = ('m','b')\n    def __init__(self, m, b):\n        self.m = m\n        self.b = b\n    def eval(self, x):\n        return self.m * x + self.b",
+          "isCode": true
+        },
+        {
+          "label": "class Line:\n    def __init__(self, m, b):\n        self.m = m\n        self.b = b\n    def eval(self, x):\n        return self.m + self.b * x",
+          "isCode": true
+        },
+        {
+          "label": "class Line:\n    def __init__(self):\n        pass\n    def eval(self, x):\n        return x",
+          "isCode": true
+        },
+        {
+          "label": "class Line:\n    def __init__(self, m, b):\n        self.m = m\n        self.b = b\n    def eval(self, x):\n        return self.b - self.m * x",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need m*x + b. Other options compute different expressions.",
+      "wrongExplanations": {
+        "1": "This computes m + b*x, not m*x + b.",
+        "3": "This computes b - m*x; wrong sign."
+      },
+      "hint": "Ensure eval(x) returns m*x + b.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    class Line:\n        __slots__ = ('m','b')\n        def __init__(self, m, b):\n            self.m = m\n            self.b = b\n        def eval(self, x):\n            return self.m * x + self.b",
+      "codeLabel": "Line class"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Define a node object storing an interval [l, r], a current best expression, and pointers to children.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "class Node:\n    __slots__ = ('l','r','line','left','right')\n    def __init__(self, l, r):\n        self.l = l\n        self.r = r\n        self.line = None\n        self.left = None\n        self.right = None",
+          "isCode": true
+        },
+        {
+          "label": "class Node:\n    def __init__(self, l, r):\n        self.l = l\n        self.r = r\n        self.line = []\n        self.left = []\n        self.right = []",
+          "isCode": true
+        },
+        {
+          "label": "class Node:\n    def __init__(self, l, r):\n        self.range = (l, r)\n        self.line = 0\n        self.left = 0\n        self.right = 0",
+          "isCode": true
+        },
+        {
+          "label": "class Node:\n    __slots__ = ('l','r')\n    def __init__(self, l, r):\n        self.l = l\n        self.r = r",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We store interval, current best line, and child pointers. Other options misinitialize fields.",
+      "wrongExplanations": {
+        "1": "Children should be nodes, not lists.",
+        "3": "Missing essential fields."
+      },
+      "hint": "We need nullable children and a nullable current best expression.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    class Node:\n        __slots__ = ('l','r','line','left','right')\n        def __init__(self, l, r):\n            self.l = l\n            self.r = r\n            self.line = None\n            self.left = None\n            self.right = None",
+      "codeLabel": "Node class"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "Implement insertion of a new expression into a node's interval, keeping the better one at each sub-interval by comparing at l, mid, r.",
+      "diagram": "Compare new vs stored at l, mid, r; swap at mid if better; recurse to sides where new beats current.",
+      "options": [
+        {
+          "label": "def insert_line(node, new):\n    l, r = node.l, node.r\n    mid = (l + r) // 2\n    if node.line is None:\n        node.line = new\n        return\n    left_better = new.eval(l) > node.line.eval(l)\n    mid_better = new.eval(mid) > node.line.eval(mid)\n    right_better = new.eval(r) > node.line.eval(r)\n    if mid_better:\n        node.line, new = new, node.line\n    if l == r:\n        return\n    if left_better != mid_better:\n        if node.left is None:\n            node.left = Node(l, mid)\n        insert_line(node.left, new)\n    if right_better != mid_better:\n        if node.right is None:\n            node.right = Node(mid + 1, r)\n        insert_line(node.right, new)",
+          "isCode": true
+        },
+        {
+          "label": "def insert_line(node, new):\n    l, r = node.l, node.r\n    mid = (l + r + 1) // 2\n    if node.line is None:\n        node.line = new\n        return\n    if new.eval(l) >= node.line.eval(l):\n        node.line = new\n    if l == r:\n        return\n    if new.eval(r) > node.line.eval(r):\n        if node.right is None:\n            node.right = Node(mid + 1, r)\n        insert_line(node.right, new)",
+          "isCode": true
+        },
+        {
+          "label": "def insert_line(node, new):\n    if node.line is None:\n        node.line = new\n        return\n    if new.eval(node.l) > node.line.eval(node.r):\n        node.line = new",
+          "isCode": true
+        },
+        {
+          "label": "def insert_line(node, new):\n    l, r = node.l, node.r\n    mid = (l + r) // 2\n    node.line = new\n    if node.left is None:\n        node.left = Node(l, mid)\n    if node.right is None:\n        node.right = Node(mid + 1, r)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Compare at l, mid, r; swap at mid if new is better; recurse to sides where the better changes. Others do not maintain correctness across the interval.",
+      "wrongExplanations": {
+        "1": "Doesn't swap at mid or recurse on both sides properly.",
+        "4": "Blindly overwrites line and expands children without comparing."
+      },
+      "hint": "Use mid as the pivot; only recurse where the 'winner' changes.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    def insert_line(node, new):\n        l, r = node.l, node.r\n        mid = (l + r) // 2\n        if node.line is None:\n            node.line = new\n            return\n        left_better = new.eval(l) > node.line.eval(l)\n        mid_better = new.eval(mid) > node.line.eval(mid)\n        right_better = new.eval(r) > node.line.eval(r)\n        if mid_better:\n            node.line, new = new, node.line\n        if l == r:\n            return\n        if left_better != mid_better:\n            if node.left is None:\n                node.left = Node(l, mid)\n            insert_line(node.left, new)\n        if right_better != mid_better:\n            if node.right is None:\n                node.right = Node(mid + 1, r)\n            insert_line(node.right, new)",
+      "codeLabel": "Insert line"
+    },
+    {
+      "id": "q22",
+      "phase": "Writing the Code",
+      "questionText": "Implement inserting an expression limited to a range [Lq, Rq] within the node interval.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def insert_segment(node, Lq, Rq, line):\n    if Lq > Rq or node is None:\n        return\n    if Lq <= node.l and node.r <= Rq:\n        insert_line(node, line)\n        return\n    mid = (node.l + node.r) // 2\n    if Lq <= mid:\n        if node.left is None:\n            node.left = Node(node.l, mid)\n        insert_segment(node.left, Lq, min(Rq, mid), line)\n    if Rq > mid:\n        if node.right is None:\n            node.right = Node(mid + 1, node.r)\n        insert_segment(node.right, max(Lq, mid + 1), Rq, line)",
+          "isCode": true
+        },
+        {
+          "label": "def insert_segment(node, Lq, Rq, line):\n    if Lq > Rq:\n        return\n    insert_line(node, line)",
+          "isCode": true
+        },
+        {
+          "label": "def insert_segment(node, Lq, Rq, line):\n    if node is None:\n        return\n    mid = (node.l + node.r) // 2\n    insert_segment(node.left, Lq, mid, line)\n    insert_segment(node.right, mid+1, Rq, line)",
+          "isCode": true
+        },
+        {
+          "label": "def insert_segment(node, Lq, Rq, line):\n    if node is None:\n        return\n    if Lq <= node.l or node.r <= Rq:\n        insert_line(node, line)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Only insert into subranges overlapping [Lq, Rq]; if the node interval is contained, insert the expression there.",
+      "wrongExplanations": {
+        "1": "Blind insertion ignores range restriction.",
+        "3": "Recurses without checking overlap or creating children correctly."
+      },
+      "hint": "Intersect [Lq, Rq] with left and right child intervals.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    def insert_segment(node, Lq, Rq, line):\n        if Lq > Rq or node is None:\n            return\n        if Lq <= node.l and node.r <= Rq:\n            insert_line(node, line)\n            return\n        mid = (node.l + node.r) // 2\n        if Lq <= mid:\n            if node.left is None:\n                node.left = Node(node.l, mid)\n            insert_segment(node.left, Lq, min(Rq, mid), line)\n        if Rq > mid:\n            if node.right is None:\n                node.right = Node(mid + 1, node.r)\n            insert_segment(node.right, max(Lq, mid + 1), Rq, line)",
+      "codeLabel": "Insert segment"
+    },
+    {
+      "id": "q23",
+      "phase": "Writing the Code",
+      "questionText": "Implement querying the maximum value at a point x using the stored expressions along the path.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def query(node, x):\n    res = -(1 << 63)\n    cur = node\n    while cur is not None:\n        if cur.line is not None:\n            val = cur.line.eval(x)\n            if val > res:\n                res = val\n        mid = (cur.l + cur.r) // 2\n        if x <= mid:\n            cur = cur.left\n        else:\n            cur = cur.right\n    return res",
+          "isCode": true
+        },
+        {
+          "label": "def query(node, x):\n    if node is None:\n        return 0\n    mid = (node.l + node.r) // 2\n    return max(node.line.eval(x), query(node.left, x), query(node.right, x))",
+          "isCode": true
+        },
+        {
+          "label": "def query(node, x):\n    res = 0\n    while node:\n        res = node.line.eval(node.l)\n        node = node.left\n    return res",
+          "isCode": true
+        },
+        {
+          "label": "def query(node, x):\n    return node.line.eval(x)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Traverse to the leaf for x, tracking best expression along the path. Other options either recurse over entire tree or ignore the path.",
+      "wrongExplanations": {
+        "1": "Unnecessary full recursion; also fails on None line.",
+        "3": "There can be multiple expressions along the path; using only one is incorrect."
+      },
+      "hint": "Only nodes covering x can affect its value.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    def query(node, x):\n        res = -(1 << 63)\n        cur = node\n        while cur is not None:\n            if cur.line is not None:\n                val = cur.line.eval(x)\n                if val > res:\n                    res = val\n            mid = (cur.l + cur.r) // 2\n            if x <= mid:\n                cur = cur.left\n            else:\n                cur = cur.right\n        return res",
+      "codeLabel": "Query point"
+    },
+    {
+      "id": "q24",
+      "phase": "Writing the Code",
+      "questionText": "Compute ranges for left ramp, plateau, and right ramp for each index i and clamp to [1..M]. Which is correct?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "root = Node(1, M)\nfor i in range(n):\n    a = L[i] + 1\n    b = R[i] - 1\n    h = arr[i]\n    leftL = max(1, a - k + 1)\n    leftR = min(M, min(a, b - k + 1))\n    midL = max(1, min(a, b - k + 1))\n    midR = min(M, max(a, b - k + 1))\n    rightL = max(1, max(a, b - k + 1))\n    rightR = min(M, b)",
+          "isCode": true
+        },
+        {
+          "label": "root = Node(1, M)\nfor i in range(n):\n    a = L[i]\n    b = R[i]\n    h = arr[i]\n    leftL = max(1, a - k)\n    leftR = min(M, a)\n    midL = a\n    midR = b - k + 1\n    rightL = b - k + 1\n    rightR = b",
+          "isCode": true
+        },
+        {
+          "label": "root = Node(1, M)\nfor i in range(n):\n    a = L[i] + 1\n    b = R[i] - 1\n    h = arr[i]\n    leftL = a - k\n    leftR = a\n    midL = a\n    midR = b - k\n    rightL = b - k\n    rightR = b",
+          "isCode": true
+        },
+        {
+          "label": "root = Node(1, M)\nfor i in range(n):\n    a = L[i] + 1\n    b = R[i] - 1\n    h = arr[i]\n    leftL = max(1, b - k + 1)\n    leftR = min(M, a)\n    midL = max(1, a)\n    midR = min(M, b)\n    rightL = max(1, a - k + 1)\n    rightR = min(M, b - k + 1)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Ranges: left [a-k+1..min(a, b-k+1)], middle [min(a, b-k+1)..max(a, b-k+1)], right [max(a, b-k+1)..b], then clamp to [1..M].",
+      "wrongExplanations": {
+        "1": "Off-by-one errors and missing clamps on middle.",
+        "3": "Left/right are swapped and mid covers entire span."
+      },
+      "hint": "Use min/max of a and b - k + 1 to split the three regions.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    root = Node(1, M)\n    for i in range(n):\n        a = L[i] + 1\n        b = R[i] - 1\n        h = arr[i]\n        leftL = max(1, a - k + 1)\n        leftR = min(M, min(a, b - k + 1))\n        if leftL <= leftR:\n            insert_segment(root, leftL, leftR, Line(h, h * (k - a)))\n        midL = max(1, min(a, b - k + 1))\n        midR = min(M, max(a, b - k + 1))\n        plateau_len = min(k, b - a + 1)\n        if midL <= midR:\n            insert_segment(root, midL, midR, Line(0, h * plateau_len))\n        rightL = max(1, max(a, b - k + 1))\n        rightR = min(M, b)\n        if rightL <= rightR:\n            insert_segment(root, rightL, rightR, Line(-h, h * (b + 1)))",
+      "codeLabel": "Process ranges and insert"
+    },
+    {
+      "id": "q25",
+      "phase": "Writing the Code",
+      "questionText": "Confirm the expressions inserted for each segment are correct.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Left: Line(h, h*(k - a)) over [leftL, leftR]; Middle: Line(0, h*plateau_len) over [midL, midR]; Right: Line(-h, h*(b + 1)) over [rightL, rightR]",
+          "isCode": true
+        },
+        {
+          "label": "Left: Line(-h, h*(k - a)); Middle: Line(0, h*k); Right: Line(h, h*(b + 1))",
+          "isCode": true
+        },
+        {
+          "label": "Left: Line(h, h*(a - k)); Middle: Line(0, h*plateau_len); Right: Line(-h, h*(b - 1))",
+          "isCode": true
+        },
+        {
+          "label": "Left: Line(h, 0); Middle: Line(0, h*plateau_len); Right: Line(-h, 0)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Left area h*(l + k - a)=h*l + h*(k - a); middle constant; right area h*(b - l + 1) = -h*l + h*(b+1).",
+      "wrongExplanations": {
+        "1": "Signs reversed for left and right slopes; middle fixed to h*k only valid when s≥k.",
+        "3": "Intercepts must include constants; zero is incorrect."
+      },
+      "hint": "Use derivations from q12 and q13 and the plateau len from q11.",
+      "isCodeBuilding": true,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Writing the Code",
+      "questionText": "Build the output by querying each l from 1 to M and print space-separated.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "out = []\nfor l in range(1, M + 1):\n    out.append(str(query(root, l)))\nprint(' '.join(out))",
+          "isCode": true
+        },
+        {
+          "label": "print(' '.join(str(query(root, l)) for l in range(M)))",
+          "isCode": true
+        },
+        {
+          "label": "for l in range(1, M + 1):\n    print(query(root, l))",
+          "isCode": true
+        },
+        {
+          "label": "out = [query(root, l) for l in range(1, M)]\nprint(out)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Query l from 1..M inclusive and join as strings. Other options miss boundaries or formatting.",
+      "wrongExplanations": {
+        "1": "Range(M) uses 0..M-1; off by one.",
+        "3": "Prints Python list format, not required space-separated integers."
+      },
+      "hint": "Ensure correct l range and single-line format.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    out = []\n    for l in range(1, M + 1):\n        out.append(str(query(root, l)))\n    print(' '.join(out))",
+      "codeLabel": "Output results"
+    },
+    {
+      "id": "q27",
+      "phase": "Writing the Code",
+      "questionText": "Close the program with the usual main guard.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "if __name__ == '__main__':\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "main()",
+          "isCode": true
+        },
+        {
+          "label": "if __name__ == '__main__':\n    pass",
+          "isCode": true
+        },
+        {
+          "label": "if __name__ == '__main__':\n    print(main())",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Use the main guard to call main().",
+      "wrongExplanations": {
+        "1": "This calls main immediately upon import too.",
+        "3": "main() prints output; printing its return adds None."
+      },
+      "hint": null,
+      "isCodeBuilding": true,
+      "codeSnippet": "if __name__ == '__main__':\n    main()",
+      "codeLabel": "Main guard"
+    },
+    {
+      "id": "q28",
+      "phase": "Verifying the Solution",
+      "questionText": "On the example input 8 3 and heights [4,1,5,3,3,2,4,1], what is the third window's maximum area?",
+      "diagram": "Window 3: [5,3,3]",
+      "options": [
+        {
+          "label": "9",
+          "isCode": false
+        },
+        {
+          "label": "6",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The full window [5,3,3] has minimum 3 and width 3 ⇒ area 9, which is maximal.",
+      "wrongExplanations": {
+        "1": "Area 6 from pairs exists but 9 is larger.",
+        "2": "Single board 5 is smaller than 9."
+      },
+      "hint": "Check width 3 choice first: min=3 ⇒ area 9.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q29",
+      "phase": "Verifying the Solution",
+      "questionText": "If k = 1, what should the output be, and does the code produce it?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Output equals the original heights; yes, the code produces that.",
+          "isCode": false
+        },
+        {
+          "label": "All zeros; yes, the code produces zeros.",
+          "isCode": false
+        },
+        {
+          "label": "All ones; the code produces ones.",
+          "isCode": false
+        },
+        {
+          "label": "Output equals the prefix maxima; the code produces prefix maxima.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "With width 1, area of each window is the height itself. The ramp/plateau logic yields that.",
+      "wrongExplanations": {
+        "1": "Areas are not zero for positive heights.",
+        "3": "Prefix maxima are unrelated to per-window areas here."
+      },
+      "hint": "Each window of 1 board has area = height.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q30",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the overall time complexity of the implementation?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O((n + M) log M) where M = n - k + 1",
+          "isCode": false
+        },
+        {
+          "label": "O(nk)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n + k)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Computing L/R is O(n). Inserting up to 3 range-limited expressions per i is O(log M) each. Querying M points is O(M log M).",
+      "wrongExplanations": {
+        "1": "This is the naive approach we avoided.",
+        "3": "Quadratic time would be too slow."
+      },
+      "hint": "Count the insertions and queries; each is logarithmic in M.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q31",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the space complexity and why?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n + M): arrays for L and R plus nodes created along insertions over [1..M]",
+          "isCode": false
+        },
+        {
+          "label": "O(nk): storing all window results per board",
+          "isCode": false
+        },
+        {
+          "label": "O(n): only the input array",
+          "isCode": false
+        },
+        {
+          "label": "O(M^2): a grid of values for each l",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We keep arrays L,R of size n and a tree over [1..M]. No per-window per-board storage.",
+      "wrongExplanations": {
+        "1": "We do not store per-board per-window values.",
+        "3": "Tree nodes scale with M as we insert range-limited expressions."
+      },
+      "hint": "Consider arrays plus the structure over the l-domain.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q32",
+      "phase": "Analyzing Complexity",
+      "questionText": "For equal heights, which boundary conditions ensure correct spans without double counting?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Pop with '>=' on the left scan and '>' on the right scan.",
+          "isCode": false
+        },
+        {
+          "label": "Pop with '>' on both scans.",
+          "isCode": false
+        },
+        {
+          "label": "Pop with '>=' on both scans.",
+          "isCode": false
+        },
+        {
+          "label": "Pop with '<' on both scans.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Pairing '≥' on the left and '>' on the right ensures each equal-height span is assigned consistently.",
+      "wrongExplanations": {
+        "2": "This can shrink spans incorrectly for equal heights.",
+        "3": "Comparing with '<' is the wrong direction."
+      },
+      "hint": "Use asymmetric conditions for handling equal heights.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys",
+    "",
+    "def main():",
+    "    data = list(map(int, sys.stdin.read().split()))",
+    "    if not data:",
+    "        return",
+    "    n, k = data[0], data[1]",
+    "    arr = data[2:2+n]",
+    "    M = n - k + 1",
+    "    L = [-1] * n",
+    "    st = []",
+    "    for i in range(n):",
+    "        while st and arr[st[-1]] >= arr[i]:",
+    "            st.pop()",
+    "        L[i] = st[-1] if st else -1",
+    "        st.append(i)",
+    "    R = [n] * n",
+    "    st = []",
+    "    for i in range(n - 1, -1, -1):",
+    "        while st and arr[st[-1]] > arr[i]:",
+    "            st.pop()",
+    "        R[i] = st[-1] if st else n",
+    "        st.append(i)",
+    "    class Line:",
+    "        __slots__ = ('m','b')",
+    "        def __init__(self, m, b):",
+    "            self.m = m",
+    "            self.b = b",
+    "        def eval(self, x):",
+    "            return self.m * x + self.b",
+    "    class Node:",
+    "        __slots__ = ('l','r','line','left','right')",
+    "        def __init__(self, l, r):",
+    "            self.l = l",
+    "            self.r = r",
+    "            self.line = None",
+    "            self.left = None",
+    "            self.right = None",
+    "    def insert_line(node, new):",
+    "        l, r = node.l, node.r",
+    "        mid = (l + r) // 2",
+    "        if node.line is None:",
+    "            node.line = new",
+    "            return",
+    "        left_better = new.eval(l) > node.line.eval(l)",
+    "        mid_better = new.eval(mid) > node.line.eval(mid)",
+    "        right_better = new.eval(r) > node.line.eval(r)",
+    "        if mid_better:",
+    "            node.line, new = new, node.line",
+    "        if l == r:",
+    "            return",
+    "        if left_better != mid_better:",
+    "            if node.left is None:",
+    "                node.left = Node(l, mid)",
+    "            insert_line(node.left, new)",
+    "        if right_better != mid_better:",
+    "            if node.right is None:",
+    "                node.right = Node(mid + 1, r)",
+    "            insert_line(node.right, new)",
+    "    def insert_segment(node, Lq, Rq, line):",
+    "        if Lq > Rq or node is None:",
+    "            return",
+    "        if Lq <= node.l and node.r <= Rq:",
+    "            insert_line(node, line)",
+    "            return",
+    "        mid = (node.l + node.r) // 2",
+    "        if Lq <= mid:",
+    "            if node.left is None:",
+    "                node.left = Node(node.l, mid)",
+    "            insert_segment(node.left, Lq, min(Rq, mid), line)",
+    "        if Rq > mid:",
+    "            if node.right is None:",
+    "                node.right = Node(mid + 1, node.r)",
+    "            insert_segment(node.right, max(Lq, mid + 1), Rq, line)",
+    "    def query(node, x):",
+    "        res = -(1 << 63)",
+    "        cur = node",
+    "        while cur is not None:",
+    "            if cur.line is not None:",
+    "                val = cur.line.eval(x)",
+    "                if val > res:",
+    "                    res = val",
+    "            mid = (cur.l + cur.r) // 2",
+    "            if x <= mid:",
+    "                cur = cur.left",
+    "            else:",
+    "                cur = cur.right",
+    "        return res",
+    "    root = Node(1, M)",
+    "    for i in range(n):",
+    "        a = L[i] + 1",
+    "        b = R[i] - 1",
+    "        h = arr[i]",
+    "        leftL = max(1, a - k + 1)",
+    "        leftR = min(M, min(a, b - k + 1))",
+    "        if leftL <= leftR:",
+    "            insert_segment(root, leftL, leftR, Line(h, h * (k - a)))",
+    "        midL = max(1, min(a, b - k + 1))",
+    "        midR = min(M, max(a, b - k + 1))",
+    "        plateau_len = min(k, b - a + 1)",
+    "        if midL <= midR:",
+    "            insert_segment(root, midL, midR, Line(0, h * plateau_len))",
+    "        rightL = max(1, max(a, b - k + 1))",
+    "        rightR = min(M, b)",
+    "        if rightL <= rightR:",
+    "            insert_segment(root, rightL, rightR, Line(-h, h * (b + 1)))",
+    "    out = []",
+    "    for l in range(1, M + 1):",
+    "        out.append(str(query(root, l)))",
+    "    print(' '.join(out))",
+    "if __name__ == '__main__':",
+    "    main()"
+  ],
+  "reasoningChain": [
+    {
+      "question": "What defines the area of a rectangle within a window of boards?",
+      "insight": "Area equals the number of selected consecutive boards times the minimum height among them."
+    },
+    {
+      "question": "Why is the naive per-window check too slow?",
+      "insight": "Checking all subsets per window is O(k^2); over all windows that is O(nk^2), exceeding limits."
+    },
+    {
+      "question": "How do we characterize, for each board, where it can be the minimum?",
+      "insight": "Compute nearest strictly smaller heights to the left and right; its valid span is (L[i]+1..R[i]-1) where heights are ≥ h[i]."
+    },
+    {
+      "question": "Within a window starting at l, how much width can board i contribute?",
+      "insight": "It is the intersection length of [l..l+k-1] with [a..b], which forms left-rising, middle-constant, and right-falling pieces as l varies."
+    },
+    {
+      "question": "How do we express the area on these pieces?",
+      "insight": "Area is linear in l on ramps: h*l + c (left) and -h*l + c (right), and constant on the plateau."
+    },
+    {
+      "question": "How can we combine all boards' contributions efficiently for all window starts l?",
+      "insight": "Insert these linear/constant expressions over their valid l-ranges into a structure that keeps the best value at each point; then query each l."
+    },
+    {
+      "question": "What is the final workflow?",
+      "insight": "Read input; compute L and R in linear time; for each i, derive ranges and insert expressions; query all l from 1..M to print the results."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1396,
+    "output_tokens": 25706,
+    "input_cost": 0.001745,
+    "output_cost": 0.25706,
+    "total_cost": 0.258805
+  }
+}

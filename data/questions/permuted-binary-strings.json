@@ -1,0 +1,991 @@
+{
+  "id": "permuted-binary-strings",
+  "title": "Permuted Binary Strings",
+  "difficulty": "intermediate",
+  "tags": [
+    "mixed"
+  ],
+  "estimatedMinutes": 55,
+  "language": "python",
+  "description": "You are given an interactive setup: there is a hidden permutation a_1..a_n of 1..n. You may ask queries by sending a binary string b_1..b_n, and you receive the permuted string b_{a_1}..b_{a_n}. You can ask at most 10 such queries. The goal is to determine the hidden permutation and output it.\n\nFor this learning exercise, we'll simulate the interaction offline: the input will contain n and then a permutation a_1..a_n. Your task is to output the permutation by issuing up to ceil(log2 n) simulated queries internally (not printed), reconstructing a_1..a_n, and printing it as space-separated integers on one line.",
+  "examples": [
+    {
+      "input": "4\n3 1 4 2\n",
+      "output": "3 1 4 2\n",
+      "explanation": "We simulate queries internally. Using k = ceil(log2 4) = 2 queries that encode index bits, the responses reveal the binary representation of each a_j - 1 at position j. Decoding yields the original permutation."
+    },
+    {
+      "input": "1\n1\n",
+      "output": "1\n",
+      "explanation": "With n=1, no queries are needed. The only permutation is [1]."
+    }
+  ],
+  "constraints": [
+    "1 <= n <= 1000",
+    "You may ask at most 10 queries of type '?'",
+    "In this exercise, you will read the permutation and simulate the interaction internally"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "Let n = 4 and hidden permutation a = [3, 1, 4, 2]. If you ask with b = \"0101\" (so b_1=0,b_2=1,b_3=0,b_4=1), what binary string is returned?",
+      "diagram": "a = [3,1,4,2]\nreturned[j] = b_{a_j}\npositions j=1..4",
+      "options": [
+        {
+          "label": "0011",
+          "isCode": false
+        },
+        {
+          "label": "0101",
+          "isCode": false
+        },
+        {
+          "label": "1010",
+          "isCode": false
+        },
+        {
+          "label": "1100",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "returned[j] = b_{a_j}. For j=1..4: b_3=0, b_1=0, b_4=1, b_2=1 → \"0011\".",
+      "wrongExplanations": {
+        "1": "This is just echoing the query. The grader permutes indices by a, it does not return b unchanged.",
+        "2": "This corresponds to a different permutation mapping than the given a."
+      },
+      "hint": "Compute b_{a_1}, b_{a_2}, b_{a_3}, b_{a_4} one by one.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "For a general position j, which element of the query b contributes to the returned bit at position j?",
+      "diagram": "returned[j] = ?",
+      "options": [
+        {
+          "label": "b_j",
+          "isCode": false
+        },
+        {
+          "label": "b_{a_j}",
+          "isCode": false
+        },
+        {
+          "label": "b_{a^{-1}_j}",
+          "isCode": false
+        },
+        {
+          "label": "b_{n+1-j}",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "By definition, the reply is b_{a_1} b_{a_2} ... b_{a_n}, so position j is b_{a_j}.",
+      "wrongExplanations": {
+        "0": "This would be true only if a_j = j for all j (identity permutation).",
+        "2": "The inverse permutation would map positions in the other direction; it's not used in the reply format."
+      },
+      "hint": "Look at the problem statement's returned string format.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "If you ask with b = \"0000\" for any permutation a, what is the returned string?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "\"0000\"",
+          "isCode": false
+        },
+        {
+          "label": "\"1111\"",
+          "isCode": false
+        },
+        {
+          "label": "Some permutation of \"0000\"",
+          "isCode": false
+        },
+        {
+          "label": "Depends on a",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Every b_i is 0, so b_{a_j} is always 0. The permutation does not change all-zero.",
+      "wrongExplanations": {
+        "2": "Permuting all zeros yields all zeros; it does not change anything.",
+        "3": "It does not depend on a when all bits are the same."
+      },
+      "hint": "Permutation of identical symbols yields the same string.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "Suppose you ask with b having a single '1' at position 1: b = \"1000...0\". What can you say about the returned string?",
+      "diagram": "b_1=1, all other b_i=0",
+      "options": [
+        {
+          "label": "There is exactly one '1', located at the position j where a_j = 1.",
+          "isCode": false
+        },
+        {
+          "label": "There is exactly one '1', at j = 1.",
+          "isCode": false
+        },
+        {
+          "label": "There can be multiple '1's depending on a.",
+          "isCode": false
+        },
+        {
+          "label": "There are no '1's.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "returned[j]=b_{a_j} is 1 iff a_j=1. Exactly one j satisfies a_j=1, so one '1' appears at that j.",
+      "wrongExplanations": {
+        "1": "The '1' is moved to the position where the value 1 appears in a, not fixed at j=1.",
+        "2": "a is a permutation; exactly one position maps to value 1."
+      },
+      "hint": "Consider how many j have a_j=1 in a permutation.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Understanding the Problem",
+      "questionText": "If you repeat the single-1 query for each index i (placing '1' at i and '0' elsewhere), how many queries are needed to fully recover the permutation?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "n",
+          "isCode": false
+        },
+        {
+          "label": "ceil(log2 n)",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "10",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each query finds the position of one specific value. Doing this for all values 1..n requires n queries.",
+      "wrongExplanations": {
+        "1": "ceil(log2 n) is for encoding indices using bits across queries, not single-1 queries.",
+        "3": "The limit is 10, but this plan does not guarantee finishing within that limit unless n <= 10."
+      },
+      "hint": "How many values (1..n) must be located with one query each?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "Given n up to 1000 and at most 10 queries, which high-level plan is feasible to identify all positions?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Design ~log2(n) queries so each index i contributes a unique bit pattern across queries.",
+          "isCode": false
+        },
+        {
+          "label": "Use single-1 queries for each i from 1..n.",
+          "isCode": false
+        },
+        {
+          "label": "Send random b and hope to infer a from correlations.",
+          "isCode": false
+        },
+        {
+          "label": "Alternate \"0101...\" and \"1010...\" patterns until the permutation is clear.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Encoding indices with bit patterns lets each position j receive the bits of a_j, allowing reconstruction within ceil(log2 n) queries.",
+      "wrongExplanations": {
+        "1": "This uses n queries, too many when n can be 1000.",
+        "3": "These patterns don't distinguish all indices within 10 queries."
+      },
+      "hint": "How many distinct patterns can k queries distinguish?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "What is the minimum number of queries k needed so that you can assign a unique bit label to each of the n indices?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "ceil(log2 n)",
+          "isCode": false
+        },
+        {
+          "label": "floor(log2 n)",
+          "isCode": false
+        },
+        {
+          "label": "n",
+          "isCode": false
+        },
+        {
+          "label": "2 * ceil(log2 n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "k bits encode up to 2^k distinct labels. You need the smallest k with 2^k >= n, i.e., ceil(log2 n).",
+      "wrongExplanations": {
+        "1": "If 2^k < n, some indices would share the same label.",
+        "2": "That's the single-1 approach, not a compressed labeling."
+      },
+      "hint": "Relate k and the number of distinct labels 2^k.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Exploring Approaches",
+      "questionText": "For query number q (0-based from least significant bit), how should you set b_i for index i to encode index labels consistently?",
+      "diagram": "We want b_i to represent the q-th bit of the label of i.",
+      "options": [
+        {
+          "label": "Set b_i to the q-th bit of (i-1) in binary.",
+          "isCode": false
+        },
+        {
+          "label": "Set b_i to the q-th bit of a_i in binary.",
+          "isCode": false
+        },
+        {
+          "label": "Set b_i to the q-th bit of i in binary.",
+          "isCode": false
+        },
+        {
+          "label": "Set b_i = 1 if i <= 2^q, else 0.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Indices are 1-based but bits are naturally 0-based. Using (i-1) ensures LSB corresponds to i=1..n properly.",
+      "wrongExplanations": {
+        "1": "You don't know a_i when constructing the query.",
+        "2": "Using i directly shifts all labels by 1, mislabeling positions."
+      },
+      "hint": "Align index 1 with binary 0 to match bit positions cleanly.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "After k such queries, you collect for each output position j the sequence of returned bits (from q=0..k-1). What does this bit sequence represent?",
+      "diagram": "returned[q][j] = b_{a_j} using b from query q",
+      "options": [
+        {
+          "label": "The binary representation of (a_j - 1).",
+          "isCode": false
+        },
+        {
+          "label": "The binary representation of (j - 1).",
+          "isCode": false
+        },
+        {
+          "label": "The binary representation of the position of j in a.",
+          "isCode": false
+        },
+        {
+          "label": "The binary representation of a_j.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each query q sets b_i to bit q of (i-1), so returned[q][j] equals bit q of (a_j-1). Collecting over q yields (a_j-1).",
+      "wrongExplanations": {
+        "1": "The output position j receives info about the value a_j, not about j itself.",
+        "3": "We encoded (i-1), not i. Using a_j would shift by one."
+      },
+      "hint": "returned[q][j] came from b_{a_j} whose bit q was set from (a_j - 1).",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "Why is it important to encode index i using (i-1) rather than i when building the queries?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "To align 1-based indices with 0-based bit positions so LSB corresponds to i=1.",
+          "isCode": false
+        },
+        {
+          "label": "To avoid queries with too many '1's.",
+          "isCode": false
+        },
+        {
+          "label": "Because a_i is 0-based.",
+          "isCode": false
+        },
+        {
+          "label": "It doesn't matter; either works the same.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Bit positions are 0-based. Using (i-1) makes index 1 map to 0, ensuring correct reconstruction with v+1.",
+      "wrongExplanations": {
+        "1": "The density of '1's is not the core reason; correctness of labeling is.",
+        "3": "Using i would produce labels shifted by one, causing off-by-one errors."
+      },
+      "hint": "Consider what binary number you reconstruct at each j and how to map back to a_j.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "After constructing an integer v from the collected bits at position j (interpreting bit q as 2^q), how do you recover a_j?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "a_j = v + 1",
+          "isCode": false
+        },
+        {
+          "label": "a_j = v",
+          "isCode": false
+        },
+        {
+          "label": "a_j = 1 << v",
+          "isCode": false
+        },
+        {
+          "label": "a_j = n - v",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The bits represent (a_j - 1). Therefore a_j = (a_j - 1) + 1 = v + 1.",
+      "wrongExplanations": {
+        "1": "v is zero-based while a_j is one-based.",
+        "2": "This transforms v; it's unrelated to mapping back to a_j."
+      },
+      "hint": "Recall the -1 used when encoding indices for queries.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "Let n=5 and suppose a_2 = 1. If you perform k=3 queries for q=0,1,2 as described, what bit sequence do you collect at output position j=2 across q=0..2?",
+      "diagram": "Sequence is [returned[0][2], returned[1][2], returned[2][2]]",
+      "options": [
+        {
+          "label": "0, 0, 0",
+          "isCode": false
+        },
+        {
+          "label": "1, 0, 0",
+          "isCode": false
+        },
+        {
+          "label": "0, 1, 0",
+          "isCode": false
+        },
+        {
+          "label": "1, 1, 0",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Bits represent (a_2 - 1) = 0. In binary with LSB-first, all three bits are 0.",
+      "wrongExplanations": {
+        "1": "This would correspond to (a_2 - 1) = 1, i.e., a_2 = 2, not 1.",
+        "2": "This corresponds to (a_2 - 1) = 2, i.e., a_2 = 3."
+      },
+      "hint": "Compute binary of a_2 - 1 with 3 bits in LSB-first order.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "You have responses resp[q] for q=0..k-1, each a string of length n. How should you accumulate the integer v for a fixed position j?",
+      "diagram": "for q in 0..k-1: if resp[q][j]=='1': v |= (1<<q)",
+      "options": [
+        {
+          "label": "If resp[q][j] == '1': v |= (1 << q)",
+          "isCode": false
+        },
+        {
+          "label": "If resp[q][j] == '1': v |= (1 << j)",
+          "isCode": false
+        },
+        {
+          "label": "If resp[j][q] == '1': v |= (1 << q)",
+          "isCode": false
+        },
+        {
+          "label": "v = v * 2 + int(resp[q][j]) with q from 0 upward",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Bit q contributes 2^q. Use resp[q][j]. Using j as the shift or swapping indices mixes dimensions.",
+      "wrongExplanations": {
+        "1": "The weight depends on q (bit position), not on output index j.",
+        "3": "This would require processing in MSB-to-LSB order; with q from LSB upward this reverses bits."
+      },
+      "hint": "Which dimension indexes bit positions in resp?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Building the Idea",
+      "questionText": "What value of k (number of queries) should you choose for a given n?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "k = ceil(log2 n)",
+          "isCode": false
+        },
+        {
+          "label": "k = floor(log2 n)",
+          "isCode": false
+        },
+        {
+          "label": "k = 10 always",
+          "isCode": false
+        },
+        {
+          "label": "k = ceil(log2 (n-1))",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "You need the smallest k such that 2^k >= n to label all indices; that's ceil(log2 n).",
+      "wrongExplanations": {
+        "1": "If 2^k < n, some labels would collide.",
+        "3": "This can fail when n is a power of two."
+      },
+      "hint": "Consider n that is a power of two as a check.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Read n and the permutation from stdin (simulation). Choose the correct robust input parsing setup.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\n\ndef main():\n    data = sys.stdin.read().strip().split()\n    if not data:\n        return\n    it = iter(data)\n    n = int(next(it))\n    perm = [int(next(it)) for _ in range(n)]",
+          "isCode": true
+        },
+        {
+          "label": "import sys\n\ndef main():\n    n = int(sys.stdin.readline())\n    perm = list(map(int, sys.stdin.readline().split()))\n    # assumes exactly one line with all numbers",
+          "isCode": true
+        },
+        {
+          "label": "def main():\n    import sys\n    tokens = sys.stdin.read().split()\n    n = int(tokens[0])\n    perm = [int(x) for x in tokens[1:n]]",
+          "isCode": true
+        },
+        {
+          "label": "import sys\n\ndef main():\n    n = int(sys.stdin.read().strip())\n    perm = [int(x) for x in sys.stdin.read().split()]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Reading all tokens and iterating ensures we handle line breaks flexibly and exactly n integers for the permutation.",
+      "wrongExplanations": {
+        "1": "Works only if the permutation is on a single line and fully present; less robust for arbitrary whitespace.",
+        "2": "Slicing tokens[1:n] misses the last element; should be tokens[1:1+n]."
+      },
+      "hint": "Prefer reading all tokens to avoid line break assumptions.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\n\ndef main():\n    data = sys.stdin.read().strip().split()\n    if not data:\n        return\n    it = iter(data)\n    n = int(next(it))\n    perm = [int(next(it)) for _ in range(n)]",
+      "codeLabel": "Parse input"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Implement the helper function ask(b) that simulates the grader: it returns b_{a_1}..b_{a_n}. Place it inside main so it can use n and perm.",
+      "diagram": "returned[j] = b[perm[j]-1]",
+      "options": [
+        {
+          "label": "    def ask(b):\n        # b is a string of length n\n        return ''.join(b[perm[j]-1] for j in range(n))",
+          "isCode": true
+        },
+        {
+          "label": "    def ask(b):\n        return ''.join(b[j] for j in range(n))  # echo",
+          "isCode": true
+        },
+        {
+          "label": "    def ask(b):\n        return ''.join(b[perm[j]] for j in range(n))  # off by one",
+          "isCode": true
+        },
+        {
+          "label": "    def ask(b):\n        res = ['0']*n\n        for j in range(n):\n            res[perm[j]-1] = b[j]\n        return ''.join(res)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need the j-th output as b at index perm[j]-1. The other options either echo, are off by one, or build the inverse mapping.",
+      "wrongExplanations": {
+        "2": "Python strings are 0-based; using perm[j] accesses the next position.",
+        "3": "This computes b composed with inverse permutation, not b_{a_1}..b_{a_n}."
+      },
+      "hint": "Match returned[j] to b at the position indicated by a_j.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    def ask(b):\n        # b is a string of length n\n        return ''.join(b[perm[j]-1] for j in range(n))",
+      "codeLabel": "Simulated ask"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Compute the minimal number of queries k so that 2^k >= n.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    k = 0\n    while (1 << k) < n:\n        k += 1",
+          "isCode": true
+        },
+        {
+          "label": "    k = 0\n    while (1 << k) <= n:\n        k += 1",
+          "isCode": true
+        },
+        {
+          "label": "    k = 1\n    while (1 << k) < n:\n        k += 1",
+          "isCode": true
+        },
+        {
+          "label": "    import math\n    k = int(math.log2(n))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Increment k until 2^k >= n. Using <= overshoots powers of two; starting at 1 breaks n=1; floor(log2 n) underestimates when n is not a power of two.",
+      "wrongExplanations": {
+        "1": "If n is a power of two, this makes k one too large.",
+        "3": "Needs ceil, not floor; integer cast truncates."
+      },
+      "hint": "Test n=1 and n=4 to check boundary conditions.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    k = 0\n    while (1 << k) < n:\n        k += 1",
+      "codeLabel": "Compute k"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Build the list of k query strings where query q sets b_i to the q-th bit of (i-1).",
+      "diagram": "For each q in 0..k-1, for i in 0..n-1: if ((i >> q) & 1) then b[i]='1'",
+      "options": [
+        {
+          "label": "    queries = []\n    for q in range(k):\n        bits = ['0'] * n\n        for i in range(n):\n            if ((i >> q) & 1):\n                bits[i] = '1'\n        queries.append(''.join(bits))",
+          "isCode": true
+        },
+        {
+          "label": "    queries = []\n    for q in range(1, k+1):\n        bits = ['0'] * n\n        for i in range(n):\n            if ((i >> q) & 1):\n                bits[i] = '1'\n        queries.append(''.join(bits))",
+          "isCode": true
+        },
+        {
+          "label": "    queries = []\n    for q in range(k):\n        bits = ['0'] * n\n        for i in range(1, n+1):\n            if (((i) >> q) & 1):\n                bits[i-1] = '1'\n        queries.append(''.join(bits))",
+          "isCode": true
+        },
+        {
+          "label": "    queries = []\n    for q in range(k):\n        bits = ['0'] * n\n        for i in range(n):\n            if (((i+1) >> q) & 1):\n                bits[i] = '1'\n        queries.append(''.join(bits))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Use 0-based i and q so (i >> q) matches the q-th bit of (i-1) with i from 0..n-1. Shifting ranges or using (i+1) misaligns labels.",
+      "wrongExplanations": {
+        "2": "Mixing 1-based i then correcting with i-1 is fine, but shifting i directly here encodes i not (i-1).",
+        "3": "This encodes i instead of (i-1), causing off-by-one errors."
+      },
+      "hint": "Keep i and q both 0-based to match the earlier plan.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    queries = []\n    for q in range(k):\n        bits = ['0'] * n\n        for i in range(n):\n            if ((i >> q) & 1):\n                bits[i] = '1'\n        queries.append(''.join(bits))",
+      "codeLabel": "Build queries"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Collect the responses for each query by calling ask on each query string.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    resp = [ask(b) for b in queries]",
+          "isCode": true
+        },
+        {
+          "label": "    resp = ask(queries[-1])  # last only",
+          "isCode": true
+        },
+        {
+          "label": "    resp = [''.join(ask(b)) for b in queries]",
+          "isCode": true
+        },
+        {
+          "label": "    resp = [list(ask(b)) for b in queries]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need a list of k strings, one per query. The other options either take only one or change types unnecessarily.",
+      "wrongExplanations": {
+        "1": "Only captures one response, losing information from other queries.",
+        "3": "A list of lists of characters complicates later indexing; strings suffice."
+      },
+      "hint": "You want k items so you can index by q and j as resp[q][j].",
+      "isCodeBuilding": true,
+      "codeSnippet": "    resp = [ask(b) for b in queries]",
+      "codeLabel": "Collect responses"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Decode the permutation values from the responses into an array res of length n.",
+      "diagram": "For each j: v=0; for q in 0..k-1: if resp[q][j]=='1': v|=1<<q; res[j]=v+1",
+      "options": [
+        {
+          "label": "    res = [0] * n\n    for j in range(n):\n        v = 0\n        for q in range(k):\n            if resp[q][j] == '1':\n                v |= (1 << q)\n        res[j] = v + 1",
+          "isCode": true
+        },
+        {
+          "label": "    res = [0] * n\n    for j in range(n):\n        v = 0\n        for q in range(k):\n            if resp[j][q] == '1':\n                v |= (1 << q)\n        res[j] = v + 1",
+          "isCode": true
+        },
+        {
+          "label": "    res = [0] * n\n    for j in range(n):\n        v = 0\n        for q in range(k):\n            if resp[q][j] == '1':\n                v |= (1 << j)\n        res[j] = v + 1",
+          "isCode": true
+        },
+        {
+          "label": "    res = [0] * n\n    for j in range(n):\n        for q in range(k):\n            if resp[q][j] == '1':\n                res[j] += (1 << q)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Index by q then j; each '1' at bit q contributes 2^q to v. After the loop, set res[j] = v + 1.",
+      "wrongExplanations": {
+        "1": "resp is indexed by [q][j], not [j][q].",
+        "3": "Missing the +1 offset and relies on res[j] starting at 0; it's better to compute v then offset."
+      },
+      "hint": "Be careful with dimensions: first bit index q, then position j.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    res = [0] * n\n    for j in range(n):\n        v = 0\n        for q in range(k):\n            if resp[q][j] == '1':\n                v |= (1 << q)\n        res[j] = v + 1",
+      "codeLabel": "Decode permutation"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "Output the decoded permutation and finish the program.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    print(' '.join(map(str, res)))",
+          "isCode": true
+        },
+        {
+          "label": "    print(*res)",
+          "isCode": true
+        },
+        {
+          "label": "    sys.stdout.write(' '.join(res))",
+          "isCode": true
+        },
+        {
+          "label": "    print(res)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Join with spaces and convert to strings to match expected format. Other options risk formatting differences or type issues.",
+      "wrongExplanations": {
+        "1": "While often fine, it may insert spaces but also add a trailing space/newline; we prefer explicit join.",
+        "2": "res contains ints; join expects strings."
+      },
+      "hint": "Ensure integers are converted to strings and separated by single spaces.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    print(' '.join(map(str, res)))",
+      "codeLabel": "Print result"
+    },
+    {
+      "id": "q22",
+      "phase": "Writing the Code",
+      "questionText": "Add the typical Python entry point to call main().",
+      "diagram": null,
+      "options": [
+        {
+          "label": "if __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "if __name__ == \"main\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "if __name__ == \"__main__\":\n    main",
+          "isCode": true
+        },
+        {
+          "label": "main()",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "This is the standard guard to run main when the script is executed directly.",
+      "wrongExplanations": {
+        "1": "The magic name is \"__main__\", not \"main\".",
+        "3": "Calling main() unguarded is acceptable but less standard and may cause issues on import."
+      },
+      "hint": "Use the common double-underscore name check.",
+      "isCodeBuilding": true,
+      "codeSnippet": "if __name__ == \"__main__\":\n    main()",
+      "codeLabel": "Entry point"
+    },
+    {
+      "id": "q23",
+      "phase": "Verifying the Solution",
+      "questionText": "Run the algorithm on n=4, a=[3,1,4,2]. Using k=2 queries with q=0 and q=1, what final permutation does the code output?",
+      "diagram": "Expect to reconstruct a exactly.",
+      "options": [
+        {
+          "label": "[3, 1, 4, 2]",
+          "isCode": false
+        },
+        {
+          "label": "[1, 3, 2, 4]",
+          "isCode": false
+        },
+        {
+          "label": "[2, 4, 1, 3]",
+          "isCode": false
+        },
+        {
+          "label": "[4, 2, 3, 1]",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each position j accumulates bits of (a_j-1), so decoding yields the original permutation [3,1,4,2].",
+      "wrongExplanations": {
+        "1": "This would correspond to incorrectly mixing positions and values.",
+        "2": "No consistent bit-label plan yields this for the given a."
+      },
+      "hint": "Check one position: j=2 has a_2=1; bits should decode to 0→1.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Verifying the Solution",
+      "questionText": "Consider n=1, a=[1]. What are k and the resulting output?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "k=0, output: 1",
+          "isCode": false
+        },
+        {
+          "label": "k=1, output: 1",
+          "isCode": false
+        },
+        {
+          "label": "k=0, output: 0",
+          "isCode": false
+        },
+        {
+          "label": "k=1, output: 0",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "2^0=1 so k=0; no queries needed; we decode v=0 and output v+1=1.",
+      "wrongExplanations": {
+        "1": "k need not be 1; 2^0 already covers n=1.",
+        "3": "Output values are 1-based permutation entries."
+      },
+      "hint": "Smallest k such that 2^k >= 1 is 0.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Analyzing Complexity",
+      "questionText": "How many queries does the algorithm perform in terms of n?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "ceil(log2 n)",
+          "isCode": false
+        },
+        {
+          "label": "n",
+          "isCode": false
+        },
+        {
+          "label": "sqrt(n)",
+          "isCode": false
+        },
+        {
+          "label": "A constant independent of n",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We choose the smallest k with 2^k >= n, which is ceil(log2 n).",
+      "wrongExplanations": {
+        "1": "That's the single-1 plan; our algorithm compresses across queries.",
+        "3": "k grows with n; it's not constant."
+      },
+      "hint": "Think in terms of how many distinct labels are needed.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the time complexity to construct queries, collect responses, and decode the permutation?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(log n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We build k queries of length n and decode with k passes over n: both O(nk), with k=O(log n).",
+      "wrongExplanations": {
+        "2": "You need to process k bits per position, not just one pass.",
+        "3": "You still touch all n positions across k queries."
+      },
+      "hint": "Count loops over n and over k.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q27",
+      "phase": "Analyzing Complexity",
+      "questionText": "Which edge cases should you ensure are handled correctly?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "n=1 and when n is a power of two (k computed exactly).",
+          "isCode": false
+        },
+        {
+          "label": "Only n being prime needs special handling.",
+          "isCode": false
+        },
+        {
+          "label": "When a is the identity permutation only.",
+          "isCode": false
+        },
+        {
+          "label": "Only when n is odd.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "k computation must handle n=1 (k=0) and exact powers of two; the encoding/decoding logic is uniform otherwise.",
+      "wrongExplanations": {
+        "1": "Primality of n is irrelevant to bit-labeling.",
+        "2": "Identity is not special; the method works uniformly."
+      },
+      "hint": "Focus on k and off-by-one issues.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\n\ndef main():\n    data = sys.stdin.read().strip().split()\n    if not data:\n        return\n    it = iter(data)\n    n = int(next(it))\n    perm = [int(next(it)) for _ in range(n)]",
+    "    def ask(b):\n        # b is a string of length n\n        return ''.join(b[perm[j]-1] for j in range(n))",
+    "    k = 0\n    while (1 << k) < n:\n        k += 1",
+    "    queries = []\n    for q in range(k):\n        bits = ['0'] * n\n        for i in range(n):\n            if ((i >> q) & 1):\n                bits[i] = '1'\n        queries.append(''.join(bits))",
+    "    resp = [ask(b) for b in queries]",
+    "    res = [0] * n\n    for j in range(n):\n        v = 0\n        for q in range(k):\n            if resp[q][j] == '1':\n                v |= (1 << q)\n        res[j] = v + 1",
+    "    print(' '.join(map(str, res)))",
+    "if __name__ == \"__main__\":\n    main()"
+  ],
+  "reasoningChain": [
+    {
+      "question": "What does the grader return at position j when you send a binary string?",
+      "insight": "The returned bit at position j is b_{a_j}, i.e., the query bit at index a_j."
+    },
+    {
+      "question": "Is sending a single '1' per query for each index efficient?",
+      "insight": "Single-1 queries require n queries; with a limit of 10, we must compress information per query."
+    },
+    {
+      "question": "How can we compress index identities into a small number of queries?",
+      "insight": "Assign each index a unique binary label and send k queries corresponding to bit positions; k = ceil(log2 n)."
+    },
+    {
+      "question": "What do the collected bits at output position j represent?",
+      "insight": "They form the binary representation of (a_j - 1), since each query used the q-th bit of (i-1)."
+    },
+    {
+      "question": "How do we map the collected bits back to the permutation values?",
+      "insight": "Interpret bits with weights 2^q to get v, then output a_j = v + 1 for each j."
+    },
+    {
+      "question": "How do we implement this robustly in code?",
+      "insight": "Compute k, build queries with 0-based indices, simulate ask, collect responses, decode using bitwise operations, and print results."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1469,
+    "output_tokens": 15331,
+    "input_cost": 0.001836,
+    "output_cost": 0.15331,
+    "total_cost": 0.155146
+  }
+}

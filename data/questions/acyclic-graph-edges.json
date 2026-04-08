@@ -1,0 +1,967 @@
+{
+  "id": "acyclic-graph-edges-orient-by-label",
+  "title": "Acyclic Graph Edges",
+  "difficulty": "intermediate",
+  "tags": [
+    "graphs",
+    "orientation",
+    "acyclic",
+    "mixed"
+  ],
+  "estimatedMinutes": 35,
+  "language": "python",
+  "description": "Given an undirected graph, your task is to choose a direction for each edge so that the resulting directed graph is acyclic.\n\nInput:\n- First line: two integers n and m — number of nodes and edges (nodes are 1..n).\n- Next m lines: two distinct integers a and b describing an edge between a and b.\n\nOutput:\nPrint m lines describing edge directions. Each line has two integers a and b meaning an edge from a to b. Any valid acyclic orientation is accepted.",
+  "examples": [
+    {
+      "input": "3 3\n1 2\n2 3\n3 1\n",
+      "output": "1 2\n2 3\n1 3\n",
+      "explanation": "Orient each edge from the smaller label to the larger label. This forbids directed cycles."
+    }
+  ],
+  "constraints": [
+    "1 ≤ n ≤ 10^5",
+    "1 ≤ m ≤ 2·10^5",
+    "1 ≤ a,b ≤ n",
+    "Edges have distinct endpoints (a ≠ b)"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "Undirected triangle: edges (1,2), (2,3), (3,1). Suppose we direct them as 1→2, 2→3, 3→1. Is the directed graph acyclic?",
+      "diagram": "1 -> 2 -> 3 -> 1",
+      "options": [
+        {
+          "label": "Yes, acyclic",
+          "isCode": false
+        },
+        {
+          "label": "No, it has a directed cycle",
+          "isCode": false
+        },
+        {
+          "label": "It depends on the starting node",
+          "isCode": false
+        },
+        {
+          "label": "Only if 1 is the smallest label, it is acyclic",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "1→2→3→1 is a directed cycle, so it is not acyclic.",
+      "wrongExplanations": {
+        "0": "A cycle of length 3 is present, so it's not acyclic."
+      },
+      "hint": "A directed cycle returns to its start following arrow directions.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "Same triangle: direct edges as 1→2, 1→3, 2→3. Is there any directed cycle?",
+      "diagram": "1 -> 2\n|    ^\nv    |\n3 ----",
+      "options": [
+        {
+          "label": "No, there is no directed cycle",
+          "isCode": false
+        },
+        {
+          "label": "Yes, there is a cycle 1→2→3→1",
+          "isCode": false
+        },
+        {
+          "label": "Yes, there is a cycle 1→3→2→1",
+          "isCode": false
+        },
+        {
+          "label": "It depends on the input order",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Every edge points from a smaller to a larger label. You cannot return to 1 following arrows.",
+      "wrongExplanations": {
+        "1": "There is no arrow from 3 back to 1.",
+        "2": "There is no arrow from 3 to 2."
+      },
+      "hint": "Try to follow arrows and see if you can return to the starting node.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "Square (1,2), (2,3), (3,4), (4,1). Direct as 1→2, 2→3, 3→4, 4→1. Is this acyclic?",
+      "diagram": "1 -> 2 -> 3 -> 4\n^                 |\n|-----------------",
+      "options": [
+        {
+          "label": "Yes, acyclic because it's a square",
+          "isCode": false
+        },
+        {
+          "label": "No, there is a directed cycle of length 4",
+          "isCode": false
+        },
+        {
+          "label": "Acyclic only if n ≥ 4",
+          "isCode": false
+        },
+        {
+          "label": "It depends on parallel edges",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "1→2→3→4→1 is a directed cycle.",
+      "wrongExplanations": {
+        "0": "Cycle length doesn't prevent cycles; direction does."
+      },
+      "hint": "Check if you can follow arrows around the square back to 1.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "If you choose a direction independently for each edge at random, will the result always be acyclic?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, always acyclic",
+          "isCode": false
+        },
+        {
+          "label": "Sometimes acyclic, sometimes not",
+          "isCode": false
+        },
+        {
+          "label": "Only acyclic for trees",
+          "isCode": false
+        },
+        {
+          "label": "Never acyclic",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Random orientations can form directed cycles on graphs with undirected cycles.",
+      "wrongExplanations": {
+        "0": "Random choices can create 3-cycles like 1→2→3→1."
+      },
+      "hint": "Consider a triangle with random directions.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Exploring Approaches",
+      "questionText": "Each undirected edge has two possible directions. How many total orientations are there for m edges?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "m!",
+          "isCode": false
+        },
+        {
+          "label": "2^m",
+          "isCode": false
+        },
+        {
+          "label": "n^m",
+          "isCode": false
+        },
+        {
+          "label": "2m",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Each edge contributes 2 choices independently: 2×2×… = 2^m.",
+      "wrongExplanations": {
+        "0": "m! counts permutations, not binary choices per edge."
+      },
+      "hint": "Multiply choices per edge.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "We need a simple rule using only endpoints a and b of each edge (a,b) to ensure no directed cycle. Which rule is sufficient?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Direct from min(a,b) to max(a,b)",
+          "isCode": false
+        },
+        {
+          "label": "Alternate directions by edge index parity",
+          "isCode": false
+        },
+        {
+          "label": "If a+b is even, a→b; else b→a",
+          "isCode": false
+        },
+        {
+          "label": "Randomly pick a direction and hope for the best",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Directing from smaller to larger label keeps labels strictly increasing along any directed edge.",
+      "wrongExplanations": {
+        "1": "Alternating doesn't prevent directed cycles on undirected cycles.",
+        "2": "Parity-based rules can still create directed cycles."
+      },
+      "hint": "Think about making labels always move one way along edges.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "Why does directing every edge from the smaller label to the larger label forbid directed cycles?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Labels strictly increase along any directed path, so you cannot return to a start label",
+          "isCode": false
+        },
+        {
+          "label": "It removes all undirected cycles from the graph",
+          "isCode": false
+        },
+        {
+          "label": "Because m ≤ 2·10^5",
+          "isCode": false
+        },
+        {
+          "label": "Because tree edges are always oriented outwards",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "A cycle would require labels to eventually decrease to return, which contradicts strict increase.",
+      "wrongExplanations": {
+        "1": "Undirected cycles still exist; only directions change."
+      },
+      "hint": "Track labels along a hypothetical directed cycle.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Exploring Approaches",
+      "questionText": "Do we need to search the graph structure to apply this rule?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "No, each edge can be oriented independently by comparing its endpoints",
+          "isCode": false
+        },
+        {
+          "label": "Yes, we must find a traversal order first",
+          "isCode": false
+        },
+        {
+          "label": "Yes, only after building adjacency lists",
+          "isCode": false
+        },
+        {
+          "label": "Only for graphs with cycles",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The rule depends only on min/max of a,b for each edge.",
+      "wrongExplanations": {
+        "1": "Any total order works; labels already provide one."
+      },
+      "hint": "Can you decide orientation from just a and b?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "Will the min→max rule work for any graph (connected or not)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, it works independently on each component",
+          "isCode": false
+        },
+        {
+          "label": "Only if the graph is connected",
+          "isCode": false
+        },
+        {
+          "label": "Only if the graph is bipartite",
+          "isCode": false
+        },
+        {
+          "label": "Only if there are no undirected cycles",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The rule is local per edge and doesn't depend on connectivity.",
+      "wrongExplanations": {
+        "3": "Undirected cycles don't matter when edges are oriented min→max."
+      },
+      "hint": "Does orientation of one edge depend on other edges?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "If the input contains two identical edges between the same endpoints (parallel edges), does min→max still avoid directed cycles?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, both edges get the same direction and still no cycle is forced",
+          "isCode": false
+        },
+        {
+          "label": "No, two parallel edges create a 2-cycle",
+          "isCode": false
+        },
+        {
+          "label": "Only if we delete one of them",
+          "isCode": false
+        },
+        {
+          "label": "Only if we alternate their directions",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Parallel edges in the same direction don't create a cycle by themselves.",
+      "wrongExplanations": {
+        "1": "A 2-cycle requires opposite directions, which min→max avoids."
+      },
+      "hint": "A 2-cycle needs opposite directions between the same pair.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "Input guarantees a ≠ b. Do we need special handling for self-loops?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "No, self-loops cannot appear by constraint",
+          "isCode": false
+        },
+        {
+          "label": "Yes, we must skip them",
+          "isCode": false
+        },
+        {
+          "label": "Yes, we must direct a→a",
+          "isCode": false
+        },
+        {
+          "label": "Yes, we must print nothing for them",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each edge has distinct endpoints by problem statement.",
+      "wrongExplanations": {
+        "1": "Constraints already exclude a=b, no need to check."
+      },
+      "hint": "Read the constraint on a and b carefully.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "Do we need to store the whole graph to solve the task?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "No, process and orient each edge as read",
+          "isCode": false
+        },
+        {
+          "label": "Yes, to detect cycles first",
+          "isCode": false
+        },
+        {
+          "label": "Yes, to sort nodes by degree",
+          "isCode": false
+        },
+        {
+          "label": "Yes, to compute a traversal",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Orientation depends only on comparing a and b for each edge.",
+      "wrongExplanations": {
+        "1": "We don't need to detect cycles; orientation guarantees none."
+      },
+      "hint": "What is the minimal info needed per edge?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "In what order should we output the oriented edges to be safe for judging?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "In the same order as the input edges",
+          "isCode": false
+        },
+        {
+          "label": "Any order, reorder freely",
+          "isCode": false
+        },
+        {
+          "label": "Sorted by source then destination",
+          "isCode": false
+        },
+        {
+          "label": "Group by connected components",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Outputting in input order is simplest and safe for typical judging.",
+      "wrongExplanations": {
+        "1": "Some judges may expect correspondence with inputs."
+      },
+      "hint": "Match each line you read with one line you write.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Building the Idea",
+      "questionText": "Given the input size, which input method is safer in Python within 1s?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Read all tokens with sys.stdin.read() and split",
+          "isCode": false
+        },
+        {
+          "label": "Use input() inside a loop m times",
+          "isCode": false
+        },
+        {
+          "label": "Call sys.stdin.readline() once",
+          "isCode": false
+        },
+        {
+          "label": "Use eval on the entire input",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Bulk read and split is faster in Python for large inputs.",
+      "wrongExplanations": {
+        "1": "Calling input() repeatedly can be slow in tight loops."
+      },
+      "hint": "Minimize per-line overhead in Python.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Choose the import that supports sys.stdin.read and sys.stdout.write.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys",
+          "isCode": true
+        },
+        {
+          "label": "from sys import stdin",
+          "isCode": true
+        },
+        {
+          "label": "from sys import stdout",
+          "isCode": true
+        },
+        {
+          "label": "import io",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need both stdin and stdout via the sys module.",
+      "wrongExplanations": {
+        "1": "Only stdin is imported; stdout via sys is missing."
+      },
+      "hint": "We will reference sys.stdin and sys.stdout.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys",
+      "codeLabel": "Import sys"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Define the main function header.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def main():",
+          "isCode": true
+        },
+        {
+          "label": "def main()",
+          "isCode": true
+        },
+        {
+          "label": "def main:",
+          "isCode": true
+        },
+        {
+          "label": "def main(self):",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Function definition needs parentheses and a colon.",
+      "wrongExplanations": {
+        "1": "Missing colon makes it invalid syntax."
+      },
+      "hint": "Standard Python function definition.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def main():",
+      "codeLabel": "Function header"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Read all input tokens and early-return if empty (single line inside main).",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    data = sys.stdin.read().strip().split(); if not data: return",
+          "isCode": true
+        },
+        {
+          "label": "    data = sys.stdin.readline().split(); if not data: return",
+          "isCode": true
+        },
+        {
+          "label": "    data = [sys.stdin.read()]; if not data: return",
+          "isCode": true
+        },
+        {
+          "label": "    data = input().split(); if not data: return",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Bulk read + split gets all tokens; early return handles empty input.",
+      "wrongExplanations": {
+        "1": "Reads only the first line; remaining lines are ignored."
+      },
+      "hint": "We want all numbers, not just the first line.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    data = sys.stdin.read().strip().split(); if not data: return",
+      "codeLabel": "Read tokens and guard"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Create a token iterator and parse n and m.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    it = iter(data); n = int(next(it)); m = int(next(it))",
+          "isCode": true
+        },
+        {
+          "label": "    it = 0; n = int(data[it]); m = int(data[it+1]); it += 2",
+          "isCode": true
+        },
+        {
+          "label": "    it = iter(data); n = next(it); m = next(it)",
+          "isCode": true
+        },
+        {
+          "label": "    n, m = map(int, sys.stdin.readline().split())",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Using an iterator and int conversion prepares for reading edges with next(it).",
+      "wrongExplanations": {
+        "2": "Missing int conversion leaves strings; comparisons would be lexicographic."
+      },
+      "hint": "We'll call next(it) repeatedly for edges.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    it = iter(data); n = int(next(it)); m = int(next(it))",
+      "codeLabel": "Parse n, m"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Initialize a container for the output lines.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    out_lines = []",
+          "isCode": true
+        },
+        {
+          "label": "    out_lines = {}",
+          "isCode": true
+        },
+        {
+          "label": "    out_lines = set()",
+          "isCode": true
+        },
+        {
+          "label": "    out_lines = \"\"",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We will collect strings in a list and join with newlines later.",
+      "wrongExplanations": {
+        "1": "A dict doesn't preserve insertion as simple sequence of strings for join.",
+        "2": "Sets are unordered and cannot contain duplicates reliably."
+      },
+      "hint": "We need to append and preserve order.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    out_lines = []",
+      "codeLabel": "Init output list"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Fill the loop to read m edges and orient each from smaller to larger label.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    for _ in range(m):\n        a = int(next(it)); b = int(next(it))\n        if a < b:\n            out_lines.append(f\"{a} {b}\")\n        else:\n            out_lines.append(f\"{b} {a}\")",
+          "isCode": true
+        },
+        {
+          "label": "    for _ in range(m):\n        a = next(it); b = next(it)\n        if a < b:\n            out_lines.append(f\"{a} {b}\")\n        else:\n            out_lines.append(f\"{b} {a}\")",
+          "isCode": true
+        },
+        {
+          "label": "    for _ in range(m):\n        a = int(next(it)); b = int(next(it))\n        if a < b:\n            out_lines.append(f\"{b} {a}\")\n        else:\n            out_lines.append(f\"{a} {b}\")",
+          "isCode": true
+        },
+        {
+          "label": "    for _ in range(m):\n        a = int(next(it))\n        out_lines.append(f\"{a}\")",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Convert tokens to ints and append \"min max\" for each edge.",
+      "wrongExplanations": {
+        "1": "Comparing strings yields wrong order (e.g., '10' < '2').",
+        "2": "This reverses the intended direction."
+      },
+      "hint": "Beware of string vs integer comparisons.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    for _ in range(m):\n        a = int(next(it)); b = int(next(it))\n        if a < b:\n            out_lines.append(f\"{a} {b}\")\n        else:\n            out_lines.append(f\"{b} {a}\")",
+      "codeLabel": "Loop and orient edges"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "Write all oriented edges to stdout efficiently.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    sys.stdout.write(\"\\n\".join(out_lines))",
+          "isCode": true
+        },
+        {
+          "label": "    sys.stdout.write(out_lines)",
+          "isCode": true
+        },
+        {
+          "label": "    for s in out_lines: sys.stdout.write(s)",
+          "isCode": true
+        },
+        {
+          "label": "    print(out_lines)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Join with newlines and write once to match required format.",
+      "wrongExplanations": {
+        "2": "Missing newlines would concatenate lines without separators."
+      },
+      "hint": "The expected format is one edge per line.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    sys.stdout.write(\"\\n\".join(out_lines))",
+      "codeLabel": "Flush output"
+    },
+    {
+      "id": "q22",
+      "phase": "Writing the Code",
+      "questionText": "Add the standard entry point to call main.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "if __name__ == \"__main__\": main()",
+          "isCode": true
+        },
+        {
+          "label": "if __name__ == \"__main__\": main",
+          "isCode": true
+        },
+        {
+          "label": "if __name__ == \"__main__\": print(main())",
+          "isCode": true
+        },
+        {
+          "label": "main()",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "This calls main when the script is executed.",
+      "wrongExplanations": {
+        "1": "This references the function but does not call it."
+      },
+      "hint": "Use the common Python guard pattern.",
+      "isCodeBuilding": true,
+      "codeSnippet": "if __name__ == \"__main__\": main()",
+      "codeLabel": "Main guard"
+    },
+    {
+      "id": "q23",
+      "phase": "Verifying the Solution",
+      "questionText": "Run the code on:\n3 3\n1 2\n2 3\n3 1\nWhat lines does it print?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "1 2\n2 3\n1 3",
+          "isCode": false
+        },
+        {
+          "label": "1 2\n3 2\n3 1",
+          "isCode": false
+        },
+        {
+          "label": "2 1\n3 2\n1 3",
+          "isCode": false
+        },
+        {
+          "label": "1 2\n2 3\n3 1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each edge is oriented from smaller to larger: (1,2)->1 2, (2,3)->2 3, (3,1)->1 3.",
+      "wrongExplanations": {
+        "3": "3 1 would violate the min→max rule for edge (3,1)."
+      },
+      "hint": "Apply min→max to each input edge in order.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Verifying the Solution",
+      "questionText": "For a single edge input:\n2 1\n5 4\nWhat is the correct output line?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "5 4",
+          "isCode": false
+        },
+        {
+          "label": "4 5",
+          "isCode": false
+        },
+        {
+          "label": "5 5",
+          "isCode": false
+        },
+        {
+          "label": "4 4",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Orient from smaller to larger: (5,4) becomes 4 5.",
+      "wrongExplanations": {
+        "0": "This keeps the original order but violates min→max."
+      },
+      "hint": "Pick min and max of (5,4).",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the time complexity of this solution in terms of n and m?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(m)",
+          "isCode": false
+        },
+        {
+          "label": "O(m log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(2^m)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We read and process each edge once with O(1) work.",
+      "wrongExplanations": {
+        "1": "No sorting or logarithmic factor is used."
+      },
+      "hint": "Count how many times you touch each edge.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the additional space usage of the implementation shown?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(m) for collecting output lines",
+          "isCode": false
+        },
+        {
+          "label": "O(1)",
+          "isCode": false
+        },
+        {
+          "label": "O(n + m) for adjacency lists",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We store m strings before writing them out.",
+      "wrongExplanations": {
+        "1": "We do accumulate output in a list; it's not constant space."
+      },
+      "hint": "Consider how outputs are buffered.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q27",
+      "phase": "Analyzing Complexity",
+      "questionText": "Which set of edge cases is most relevant to test?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "m=0; disconnected graphs; parallel edges; largest labels",
+          "isCode": false
+        },
+        {
+          "label": "Only graphs without cycles",
+          "isCode": false
+        },
+        {
+          "label": "Only complete graphs",
+          "isCode": false
+        },
+        {
+          "label": "Self-loops and a=b cases",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "These align with constraints and typical tricky scenarios.",
+      "wrongExplanations": {
+        "3": "Self-loops are not present per constraints."
+      },
+      "hint": "Focus on constraints and formatting-sensitive cases.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys",
+    "def main():",
+    "    data = sys.stdin.read().strip().split(); if not data: return",
+    "    it = iter(data); n = int(next(it)); m = int(next(it))",
+    "    out_lines = []",
+    "    for _ in range(m):\n        a = int(next(it)); b = int(next(it))\n        if a < b:\n            out_lines.append(f\"{a} {b}\")\n        else:\n            out_lines.append(f\"{b} {a}\")",
+    "    sys.stdout.write(\"\\n\".join(out_lines))",
+    "if __name__ == \"__main__\": main()"
+  ],
+  "reasoningChain": [
+    {
+      "question": "What orientation property ensures impossibility of directed cycles?",
+      "insight": "If labels strictly move in one direction along every edge (e.g., increasing), you cannot return to the start."
+    },
+    {
+      "question": "Can node labels be used directly to enforce that property?",
+      "insight": "Yes, directing each edge from the smaller endpoint to the larger gives strict monotonicity."
+    },
+    {
+      "question": "Does this depend on graph shape or connectivity?",
+      "insight": "No, the rule applies per edge and works for any undirected graph, including cyclic and disconnected ones."
+    },
+    {
+      "question": "Do we need to build graph structures or run traversals?",
+      "insight": "No; orient each edge independently by comparing endpoints."
+    },
+    {
+      "question": "Will this scale to given constraints?",
+      "insight": "Yes; processing each edge once yields linear time and modest memory for output buffering."
+    },
+    {
+      "question": "What implementation choices ensure speed and correct formatting in Python?",
+      "insight": "Bulk-read input, iterate tokens, accumulate lines, and print joined by newlines in input order."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1401,
+    "output_tokens": 16471,
+    "input_cost": 0.001751,
+    "output_cost": 0.16471,
+    "total_cost": 0.166461
+  }
+}

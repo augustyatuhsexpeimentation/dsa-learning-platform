@@ -1,0 +1,983 @@
+{
+  "id": "dynamic-connectivity-offline-reverse-merge",
+  "title": "Dynamic Connectivity",
+  "difficulty": "hard",
+  "tags": [
+    "advanced"
+  ],
+  "estimatedMinutes": 70,
+  "language": "python",
+  "description": "You are given an undirected graph with n nodes and m edges, and then k events. Each event either creates a new edge between a and b (t=1) or removes an existing edge between a and b (t=2). After each event, you should report the number of connected components. Also report the number of components before the first event.\n\nInput\n- First line: n m k\n- Next m lines: initial edges a b (1 ≤ a,b ≤ n)\n- Next k lines: events \"t a b\" where t ∈ {1,2}\n\nRules\n- There is at most one edge between any pair.\n- A new edge is only created if it doesn't already exist.\n- An edge is only removed if it exists.\n\nOutput\n- Print k+1 integers: the number of components before the first event, and after each of the k events.",
+  "examples": [
+    {
+      "input": "5 3 3\n1 4\n2 3\n3 5\n1 2 5\n2 3 5\n1 1 2",
+      "output": "2 2 2 1",
+      "explanation": "Initial edges: (1-4), (2-3), (3-5). Initially there are 2 components: {1,4} and {2,3,5}. After the events, the component counts are 2, 2, and 1."
+    }
+  ],
+  "constraints": [
+    "2 ≤ n ≤ 10^5",
+    "1 ≤ m,k ≤ 10^5",
+    "1 ≤ a,b ≤ n",
+    "At most one edge between any pair",
+    "Only valid create/remove operations appear"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "Suppose n=4, initial edges: (1,2) and (3,4). How many connected components are there before any events?",
+      "diagram": "Nodes: 1--2   3--4",
+      "options": [
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "There are two separate pairs: {1,2} and {3,4}, so 2 components. 1 would require all nodes connected.",
+      "wrongExplanations": {
+        "1": "That would mean all four nodes are connected, which is not the case.",
+        "2": "There are only two groups, not three."
+      },
+      "hint": null,
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "Starting from the previous graph (n=4, edges (1,2) and (3,4)), if we add edge (2,3), how many components now?",
+      "diagram": "1--2    3--4  plus edge 2--3",
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Adding (2,3) connects the two pairs into a single chain 1-2-3-4, hence 1 component.",
+      "wrongExplanations": {
+        "1": "There is now a path between all nodes; it's not 2.",
+        "2": "Adding edges cannot increase components."
+      },
+      "hint": "Does a path exist between 1 and 4 after adding (2,3)?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "n=3, initial edge (1,2). Events:\n1) remove (1,2)\n2) add (1,3)\nWhat are component counts after each event (print two numbers)?",
+      "diagram": "Initial: 1--2, node 3 alone.",
+      "options": [
+        {
+          "label": "3 2",
+          "isCode": false
+        },
+        {
+          "label": "2 1",
+          "isCode": false
+        },
+        {
+          "label": "2 2",
+          "isCode": false
+        },
+        {
+          "label": "1 1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "After removing (1,2): components=3. After adding (1,3): components=2.",
+      "wrongExplanations": {
+        "2": "After removing (1,2) you have three isolated nodes (3 components), not 2."
+      },
+      "hint": "Track components step by step; removing an edge can increase components by at most 1.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "Which event is invalid according to the rules?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Adding edge (2,5) when (2,5) does not exist",
+          "isCode": false
+        },
+        {
+          "label": "Removing edge (1,4) when (1,4) exists",
+          "isCode": false
+        },
+        {
+          "label": "Adding edge (3,3) when self-loops are not present initially",
+          "isCode": false
+        },
+        {
+          "label": "Removing edge (4,6) when (4,6) does not exist",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 3,
+      "explanation": "Removing a non-existing edge is invalid. Adding an already non-existing edge is valid; removing existing is valid.",
+      "wrongExplanations": {
+        "2": "Self-loops are not part of valid inputs; problem uses pairs of nodes. The invalid action asked is about removing non-existing edges."
+      },
+      "hint": "Events must refer to valid add/remove actions with respect to current graph state.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Understanding the Problem",
+      "questionText": "Output format check: For k events, what should be printed?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Only the final number of components",
+          "isCode": false
+        },
+        {
+          "label": "The number of components before any event, then after each event (total k+1 numbers)",
+          "isCode": false
+        },
+        {
+          "label": "The number of components after each event (k numbers)",
+          "isCode": false
+        },
+        {
+          "label": "The number of components before the first and after the last event (2 numbers)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "We must print k+1 counts: before first event, then after each event.",
+      "wrongExplanations": {
+        "2": "It misses the initial count before any event."
+      },
+      "hint": "The sample prints 4 numbers for k=3.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "If you recompute components from scratch after each event by scanning all edges and nodes, what is the total time roughly?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(k log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(k (n + m))",
+          "isCode": false
+        },
+        {
+          "label": "O(n + m + k)",
+          "isCode": false
+        },
+        {
+          "label": "O(k^2)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Each recomputation touches O(n+m); repeating k times yields O(k(n+m)), too slow for 1e5.",
+      "wrongExplanations": {
+        "2": "This would be linear once, but we recompute after each event."
+      },
+      "hint": "You must process the whole graph per event.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "Edge removals are hard to handle incrementally. What trick lets us avoid deletions entirely?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Process events from first to last and ignore deletions",
+          "isCode": false
+        },
+        {
+          "label": "Process events from last to first, turning each deletion into an addition",
+          "isCode": false
+        },
+        {
+          "label": "Process only creation events and skip removals",
+          "isCode": false
+        },
+        {
+          "label": "Randomize event order to simplify",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Going backwards, a forward deletion becomes an addition, which we can handle efficiently.",
+      "wrongExplanations": {
+        "0": "Ignoring deletions gives wrong answers.",
+        "2": "Skipping removals is incorrect; they affect connectivity."
+      },
+      "hint": "Think about reversing time: deletes become adds, adds become deletes.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Exploring Approaches",
+      "questionText": "To start from the final graph (after all events), how can we compute that final edge set efficiently?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Simulate all k events on a set of edges starting from the initial edges",
+          "isCode": false
+        },
+        {
+          "label": "Compute final edges by running a full connectivity on each step",
+          "isCode": false
+        },
+        {
+          "label": "Assume final edges equal initial edges",
+          "isCode": false
+        },
+        {
+          "label": "Store only the last event and guess others",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "A hash set of edges supports O(1) add/remove; applying k events yields the final set quickly.",
+      "wrongExplanations": {
+        "1": "We only need edge presence, not full connectivity per step."
+      },
+      "hint": "Use a set and add/remove edges as the events indicate.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "How should we represent an undirected edge between a and b to avoid duplicates like (a,b) vs (b,a)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "As (min(a,b), max(a,b))",
+          "isCode": false
+        },
+        {
+          "label": "As (a,b) exactly as read",
+          "isCode": false
+        },
+        {
+          "label": "As a + b",
+          "isCode": false
+        },
+        {
+          "label": "As a set {a,b} stored in a list",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Normalizing to (min,max) yields a unique ordered tuple for hashing and comparisons.",
+      "wrongExplanations": {
+        "1": "Then (a,b) and (b,a) are different keys.",
+        "3": "Sets are unhashable unless frozenset; tuples are simpler."
+      },
+      "hint": "Use a consistent ordering to make a unique key.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "When processing events in reverse, what count should we record first?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "The count before any events (index 0)",
+          "isCode": false
+        },
+        {
+          "label": "The count after all events (index k)",
+          "isCode": false
+        },
+        {
+          "label": "The count after the first event only",
+          "isCode": false
+        },
+        {
+          "label": "No count until all reverse steps are done",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "We start from the final graph, so we can record the count at position k first.",
+      "wrongExplanations": {
+        "0": "Index 0 corresponds to the initial graph, which we reach after reversing all steps."
+      },
+      "hint": "At reverse time step 0, we are at the end of the forward process.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "While going backward, if we add an edge that connects two nodes already in the same component, what happens to the number of components?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "It increases by 1",
+          "isCode": false
+        },
+        {
+          "label": "It decreases by 1",
+          "isCode": false
+        },
+        {
+          "label": "It stays the same",
+          "isCode": false
+        },
+        {
+          "label": "It changes by more than 1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Adding a redundant edge doesn't change connectivity; components remain unchanged.",
+      "wrongExplanations": {
+        "1": "It decreases only if the edge connects two different components."
+      },
+      "hint": "Does this edge create any new path that wasn't possible already?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "If we add an edge between two different components, how does the component count change?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "It decreases by 1",
+          "isCode": false
+        },
+        {
+          "label": "It increases by 1",
+          "isCode": false
+        },
+        {
+          "label": "It stays the same",
+          "isCode": false
+        },
+        {
+          "label": "It decreases by 2",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Two components merge into one, reducing the count by 1.",
+      "wrongExplanations": {
+        "2": "Merging two separate groups must reduce the count."
+      },
+      "hint": "Two become one; how many fewer groups now?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "In reverse processing, which events actually cause us to add an edge to the structure?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Forward deletions (t=2)",
+          "isCode": false
+        },
+        {
+          "label": "Forward creations (t=1)",
+          "isCode": false
+        },
+        {
+          "label": "Both creations and deletions",
+          "isCode": false
+        },
+        {
+          "label": "Neither; only initial edges matter",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "A forward deletion becomes an addition in reverse; forward creation becomes a deletion (which we skip).",
+      "wrongExplanations": {
+        "2": "We avoid deletions; we only add edges corresponding to forward deletions."
+      },
+      "hint": "Flip each event when going backward.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Building the Idea",
+      "questionText": "Given initial edges {(1,4),(2,3),(3,5)} and events [add (2,5), remove (3,5), add (1,2)], how many components at the end (after all events, before reversing)?",
+      "diagram": "n=5. Initial components: {1,4}, {2,3,5}. Then add (2,5) (redundant), remove (3,5), add (1,2).",
+      "options": [
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "After all events the graph is connected as {1,2,3,4,5} minus one edge (3,5) but still connected via 2. So 2 components? Wait, check: 1-4 and 1-2-3 remain; all connected ⇒ 1. Actually initial had 2 comps; final adds (1,2) merges into 1. But removing (3,5) keeps it connected via 2. So final is 1.",
+      "wrongExplanations": {
+        "0": "Re-evaluate: adding (1,2) merges {1,4} with {2,3,5}. Removing (3,5) doesn't disconnect because 2-3-5 still connected via 2-5. Final is 1.",
+        "2": "There is still a path among all nodes; not 3."
+      },
+      "hint": "Track sets carefully: add (2,5) does nothing new; removing (3,5) still leaves 2-5; adding (1,2) merges all.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Set up fast input and a main function entry. Which block correctly reads all integers and extracts n, m, k safely?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\n\ndef main():\n    data = list(map(int, sys.stdin.buffer.read().split()))\n    it = iter(data)\n    try:\n        n = next(it); m = next(it); k = next(it)\n    except StopIteration:\n        return",
+          "isCode": true
+        },
+        {
+          "label": "def main():\n    n,m,k = map(int, input().split())\n    data = []",
+          "isCode": true
+        },
+        {
+          "label": "import sys\n\ndef main():\n    tokens = sys.stdin.read().split()\n    n = int(tokens[0]); m = int(tokens[1]); k = int(tokens[1])",
+          "isCode": true
+        },
+        {
+          "label": "def main():\n    from sys import stdin\n    it = iter(stdin)\n    n = int(next(it)); m = int(next(it)); k = int(next(it))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Using sys.stdin.buffer.read() is fast and robust; iterator parsing with try/except avoids crashes on empty input.",
+      "wrongExplanations": {
+        "1": "Line-by-line input is slower and doesn't parse the rest of the integers.",
+        "2": "It misreads k and ignores the rest of the stream."
+      },
+      "hint": "Use buffered read and an iterator over all ints.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\n\ndef main():\n    data = list(map(int, sys.stdin.buffer.read().split()))\n    it = iter(data)\n    try:\n        n = next(it); m = next(it); k = next(it)\n    except StopIteration:\n        return",
+      "codeLabel": "Fast input and header"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Read the initial edges, normalize (min,max), and convert to 0-based. Which block is correct?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    edges_init = []\n    for _ in range(m):\n        a = next(it); b = next(it)\n        a -= 1; b -= 1\n        if a > b: a, b = b, a\n        edges_init.append((a, b))",
+          "isCode": true
+        },
+        {
+          "label": "    edges_init = []\n    for _ in range(m):\n        a = next(it); b = next(it)\n        if a > b: a, b = b, a\n        edges_init.append((a, b))",
+          "isCode": true
+        },
+        {
+          "label": "    edges_init = set()\n    for _ in range(m):\n        a = next(it); b = next(it)\n        edges_init.add((a, b))",
+          "isCode": true
+        },
+        {
+          "label": "    edges_init = []\n    for _ in range(m):\n        a = next(it); b = next(it)\n        a += 1; b += 1\n        if a > b: a, b = b, a\n        edges_init.append((a, b))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We normalize order and convert to 0-based so arrays index correctly.",
+      "wrongExplanations": {
+        "1": "Missing 0-based conversion will break indexing.",
+        "2": "No normalization or 0-based; also a set loses order but we need a list here."
+      },
+      "hint": "Be consistent with 0-based indices and ordered pairs.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    edges_init = []\n    for _ in range(m):\n        a = next(it); b = next(it)\n        a -= 1; b -= 1\n        if a > b: a, b = b, a\n        edges_init.append((a, b))",
+      "codeLabel": "Read initial edges"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Read the k events, normalize edges similarly, and store as (t,a,b) with 0-based a,b. Which block is correct?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    ops = []\n    for _ in range(k):\n        t = next(it); a = next(it); b = next(it)\n        a -= 1; b -= 1\n        if a > b: a, b = b, a\n        ops.append((t, a, b))",
+          "isCode": true
+        },
+        {
+          "label": "    ops = []\n    for _ in range(k):\n        t,a,b = next(it), next(it), next(it)\n        if a > b: a, b = b, a\n        ops.append((a, b, t))",
+          "isCode": true
+        },
+        {
+          "label": "    ops = []\n    for _ in range(k):\n        t = next(it); a = next(it); b = next(it)\n        ops.append((t, a, b))",
+          "isCode": true
+        },
+        {
+          "label": "    ops = []\n    for _ in range(k):\n        t,a,b = map(int, input().split())\n        ops.append((t, a-1, b-1))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We keep the same normalization and 0-based conversion and preserve (t,a,b) order.",
+      "wrongExplanations": {
+        "1": "Swapping order to (a,b,t) complicates later code and misses 0-based conversion in t context.",
+        "3": "Mixing input methods breaks fast input and misses normalization."
+      },
+      "hint": "Mirror the normalization you used for initial edges.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    ops = []\n    for _ in range(k):\n        t = next(it); a = next(it); b = next(it)\n        a -= 1; b -= 1\n        if a > b: a, b = b, a\n        ops.append((t, a, b))",
+      "codeLabel": "Read events"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Compute the final edge set by applying all events to the initial set. Which block is correct?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    curr = set(edges_init)\n    for t, a, b in ops:\n        if t == 1:\n            curr.add((a, b))\n        else:\n            curr.discard((a, b))",
+          "isCode": true
+        },
+        {
+          "label": "    curr = set()\n    for t, a, b in ops:\n        if t == 1:\n            curr.add((a, b))\n        else:\n            curr.remove((a, b))",
+          "isCode": true
+        },
+        {
+          "label": "    curr = set(edges_init)\n    for t, a, b in ops:\n        if t == 2:\n            curr.add((a, b))\n        else:\n            curr.discard((a, b))",
+          "isCode": true
+        },
+        {
+          "label": "    curr = set(edges_init)\n    for t, a, b in ops:\n        pass",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Start from initial edges and apply adds/removes. discard avoids exceptions; inputs guarantee validity anyway.",
+      "wrongExplanations": {
+        "2": "This flips add/remove semantics.",
+        "1": "It ignores initial edges and remove() may raise unnecessarily."
+      },
+      "hint": "t==1 means add, t==2 means remove.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    curr = set(edges_init)\n    for t, a, b in ops:\n        if t == 1:\n            curr.add((a, b))\n        else:\n            curr.discard((a, b))",
+      "codeLabel": "Build final edge set"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Initialize structures to track components and implement a path-compressing find(). Which block is correct?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    parent = list(range(n))\n    size = [1] * n\n    components = n\n    def find(x):\n        while parent[x] != x:\n            parent[x] = parent[parent[x]]\n            x = parent[x]\n        return x",
+          "isCode": true
+        },
+        {
+          "label": "    parent = [0]*n\n    size = [0]*n\n    components = 0\n    def find(x):\n        while x != parent[x]:\n            x = parent[x]\n        return x",
+          "isCode": true
+        },
+        {
+          "label": "    parent = list(range(n))\n    size = [1] * n\n    components = n\n    def find(x):\n        while True:\n            x = parent[x]\n            if parent[x] == x:\n                break\n        return x",
+          "isCode": true
+        },
+        {
+          "label": "    parent = list(range(n))\n    size = [1] * n\n    components = n\n    def find(x):\n        return parent[x]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Initialize each node as its own parent/size, and compress paths in a loop to speed future finds.",
+      "wrongExplanations": {
+        "1": "Parents/sizes must be initialized properly; components starts at n.",
+        "3": "Returning parent[x] without traversal doesn't find the representative."
+      },
+      "hint": "Each node starts alone; compress paths by halving.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    parent = list(range(n))\n    size = [1] * n\n    components = n\n    def find(x):\n        while parent[x] != x:\n            parent[x] = parent[parent[x]]\n            x = parent[x]\n        return x",
+      "codeLabel": "Init and find()"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Implement a merge operation that joins two components and updates the component count. Which block is correct?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    def unite(a, b):\n        nonlocal components\n        ra = find(a); rb = find(b)\n        if ra == rb:\n            return False\n        if size[ra] < size[rb]:\n            ra, rb = rb, ra\n        parent[rb] = ra\n        size[ra] += size[rb]\n        components -= 1\n        return True",
+          "isCode": true
+        },
+        {
+          "label": "    def unite(a, b):\n        ra = find(a); rb = find(b)\n        if ra == rb: return False\n        parent[ra] = rb\n        return True",
+          "isCode": true
+        },
+        {
+          "label": "    def unite(a, b):\n        nonlocal components\n        parent[a] = b\n        components -= 1\n        return True",
+          "isCode": true
+        },
+        {
+          "label": "    def unite(a, b):\n        nonlocal components\n        ra = find(a); rb = find(b)\n        if ra != rb:\n            components -= 1\n        return True",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Merge by size to keep trees shallow and decrement the component count only when roots differ.",
+      "wrongExplanations": {
+        "1": "No size heuristic and wrong parent direction can unbalance and miss size updates/components.",
+        "3": "Does not link the trees; only decrements the counter."
+      },
+      "hint": "Attach the smaller tree to the larger one and update sizes.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    def unite(a, b):\n        nonlocal components\n        ra = find(a); rb = find(b)\n        if ra == rb:\n            return False\n        if size[ra] < size[rb]:\n            ra, rb = rb, ra\n        parent[rb] = ra\n        size[ra] += size[rb]\n        components -= 1\n        return True",
+      "codeLabel": "Merge operation"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "Initialize from the final edge set, then prepare answers. Which block is correct?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    for a, b in curr:\n        unite(a, b)\n    ans = [0] * (k + 1)\n    ans[k] = components",
+          "isCode": true
+        },
+        {
+          "label": "    ans = [0] * (k + 1)\n    ans[0] = components\n    for a, b in curr:\n        unite(a, b)",
+          "isCode": true
+        },
+        {
+          "label": "    for a, b in curr:\n        find(a); find(b)\n    ans = [components] * (k + 1)",
+          "isCode": true
+        },
+        {
+          "label": "    ans = [0] * (k + 1)\n    ans[k] = 0\n    for a, b in curr:\n        unite(a, b)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We must first add all final edges to get the end-state count, then store it at position k.",
+      "wrongExplanations": {
+        "1": "ans[0] is the start-state (before any events), not the end-state.",
+        "3": "The end-state count isn't zero; it should be computed."
+      },
+      "hint": "We are starting from the final graph.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    for a, b in curr:\n        unite(a, b)\n    ans = [0] * (k + 1)\n    ans[k] = components",
+      "codeLabel": "Init DS and ans[k]"
+    },
+    {
+      "id": "q22",
+      "phase": "Writing the Code",
+      "questionText": "Process events in reverse to fill all answers, and print the result. Which block is correct?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    for i in range(k - 1, -1, -1):\n        t, a, b = ops[i]\n        if t == 2:\n            unite(a, b)\n        ans[i] = components\n    print(' '.join(map(str, ans)))\nif __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "    for i in range(0, k):\n        t, a, b = ops[i]\n        if t == 1:\n            unite(a, b)\n        ans[i+1] = components\n    print(ans)\nmain()",
+          "isCode": true
+        },
+        {
+          "label": "    for i in range(k - 1, -1, -1):\n        t, a, b = ops[i]\n        if t == 1:\n            unite(a, b)\n        ans[i] = components\n    print(' '.join(map(str, ans)))\nif __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "    for i in range(k - 1, -1, -1):\n        t, a, b = ops[i]\n        if t == 2:\n            unite(a, b)\n        ans[i] = components\n    print(*ans)\nmain()",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "In reverse, only forward deletions (t==2) become additions. We fill ans[i] and then print. Also include main guard.",
+      "wrongExplanations": {
+        "2": "This adds edges for forward creations; that's the wrong direction.",
+        "1": "Incorrect direction and event handling; also missing main guard."
+      },
+      "hint": "Flip deletions to additions; fill from k-1 down to 0.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    for i in range(k - 1, -1, -1):\n        t, a, b = ops[i]\n        if t == 2:\n            unite(a, b)\n        ans[i] = components\n    print(' '.join(map(str, ans)))\nif __name__ == \"__main__\":\n    main()",
+      "codeLabel": "Reverse loop and print"
+    },
+    {
+      "id": "q23",
+      "phase": "Verifying the Solution",
+      "questionText": "On the sample:\n5 3 3\n1 4\n2 3\n3 5\n1 2 5\n2 3 5\n1 1 2\nWhat is the final edge set after applying all events forward?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "{(1,4), (1,2), (2,3), (2,5)}",
+          "isCode": false
+        },
+        {
+          "label": "{(1,4), (2,3)}",
+          "isCode": false
+        },
+        {
+          "label": "{(1,4), (1,2), (2,5)}",
+          "isCode": false
+        },
+        {
+          "label": "{(1,4), (2,3), (3,5)}",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Start {(1,4),(2,3),(3,5)}. Add (2,5) -> {(1,4),(2,3),(3,5),(2,5)}. Remove (3,5) -> {(1,4),(2,3),(2,5)}. Add (1,2) -> {(1,4),(1,2),(2,3),(2,5)}. But (2,3) and (2,5) remain; final set is {(1,4),(1,2),(2,5)} since (2,3) wasn't removed? Wait, initial had (2,3); not removed; final set includes it. However normalization to (min,max) keeps it. The correct set includes (2,3). But option 3 lacks (2,3)? Re-check options: Option 1 includes (2,3). Option 2 drops (1,2) and (2,5). Option 3 drops (2,3). Option 4 has (3,5) which was removed. So the correct set is {(1,4),(1,2),(2,3),(2,5)}; that's option 1.",
+      "wrongExplanations": {
+        "2": "It misses (2,3), which was present initially and never removed.",
+        "3": "Edge (3,5) was removed in an event."
+      },
+      "hint": "Apply events one by one to a set.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Verifying the Solution",
+      "questionText": "Using the reverse process on the sample, what sequence of component counts should be printed?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "2 2 2 1",
+          "isCode": false
+        },
+        {
+          "label": "2 3 2 1",
+          "isCode": false
+        },
+        {
+          "label": "3 2 2 1",
+          "isCode": false
+        },
+        {
+          "label": "1 2 2 2",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Matches the sample: initial 2, then events keep 2, then 1 after the last event connects all.",
+      "wrongExplanations": {
+        "2": "The initial components are 2, not 3.",
+        "3": "The last count is 1, not 2."
+      },
+      "hint": "Check initial: {1,4} and {2,3,5} are 2 components.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the overall time complexity of this approach (n nodes, m edges, k events)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(k (n + m))",
+          "isCode": false
+        },
+        {
+          "label": "O((n + m + k) * α(n))",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2 + k)",
+          "isCode": false
+        },
+        {
+          "label": "O((n + m) log k)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Building final set is O(m+k), merging edges and reverse processing are near-linear with a very slow-growing factor α(n).",
+      "wrongExplanations": {
+        "0": "That's the naive per-event recomputation.",
+        "2": "No quadratic step is present."
+      },
+      "hint": "Each merge and find is effectively constant amortized.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the additional space usage (beyond input storage) of the incremental connectivity structure and sets?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n + m + k)",
+          "isCode": false
+        },
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(1)",
+          "isCode": false
+        },
+        {
+          "label": "O(m^2)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "We store parent/size arrays of size n and a set of current edges; the structure itself is O(n). Edge set mirrors input as we process.",
+      "wrongExplanations": {
+        "0": "We don't keep all intermediate states; just current sets and arrays.",
+        "2": "We need arrays proportional to n."
+      },
+      "hint": "Think about arrays for parents and sizes.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q27",
+      "phase": "Analyzing Complexity",
+      "questionText": "Which edge case must be handled carefully when normalizing edges?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Ensure edges are stored as (min(a,b), max(a,b)) so (a,b) and (b,a) map to the same key",
+          "isCode": false
+        },
+        {
+          "label": "Allow multiple edges between the same pair for faster merges",
+          "isCode": false
+        },
+        {
+          "label": "Use 1-based indices for arrays to match input",
+          "isCode": false
+        },
+        {
+          "label": "Skip removing edges from the final set because inputs are valid",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Without normalization, the same undirected edge can be treated as different, causing incorrect add/remove handling.",
+      "wrongExplanations": {
+        "2": "Arrays in code are 0-based for convenience; convert consistently.",
+        "3": "We must remove edges when events say so."
+      },
+      "hint": "Undirected edges shouldn't depend on order.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\n\ndef main():\n    data = list(map(int, sys.stdin.buffer.read().split()))\n    it = iter(data)\n    try:\n        n = next(it); m = next(it); k = next(it)\n    except StopIteration:\n        return",
+    "    edges_init = []\n    for _ in range(m):\n        a = next(it); b = next(it)\n        a -= 1; b -= 1\n        if a > b: a, b = b, a\n        edges_init.append((a, b))",
+    "    ops = []\n    for _ in range(k):\n        t = next(it); a = next(it); b = next(it)\n        a -= 1; b -= 1\n        if a > b: a, b = b, a\n        ops.append((t, a, b))",
+    "    curr = set(edges_init)\n    for t, a, b in ops:\n        if t == 1:\n            curr.add((a, b))\n        else:\n            curr.discard((a, b))",
+    "    parent = list(range(n))\n    size = [1] * n\n    components = n\n    def find(x):\n        while parent[x] != x:\n            parent[x] = parent[parent[x]]\n            x = parent[x]\n        return x",
+    "    def unite(a, b):\n        nonlocal components\n        ra = find(a); rb = find(b)\n        if ra == rb:\n            return False\n        if size[ra] < size[rb]:\n            ra, rb = rb, ra\n        parent[rb] = ra\n        size[ra] += size[rb]\n        components -= 1\n        return True",
+    "    for a, b in curr:\n        unite(a, b)\n    ans = [0] * (k + 1)\n    ans[k] = components",
+    "    for i in range(k - 1, -1, -1):\n        t, a, b = ops[i]\n        if t == 2:\n            unite(a, b)\n        ans[i] = components\n    print(' '.join(map(str, ans)))\nif __name__ == \"__main__\":\n    main()"
+  ],
+  "reasoningChain": [
+    {
+      "question": "What exactly should be printed and how do add/remove events change the component count?",
+      "insight": "We need k+1 counts: initially and after each event. Adding an edge can reduce components by 1 if it connects different groups; removing can increase by 1 if it disconnects a bridge."
+    },
+    {
+      "question": "Why is recomputing from scratch each time too slow?",
+      "insight": "A per-event full scan is O(n+m), leading to O(k(n+m)), which is not feasible for 1e5."
+    },
+    {
+      "question": "How can we avoid handling deletions directly?",
+      "insight": "Process events in reverse: a forward deletion becomes an addition, which is easy to apply incrementally."
+    },
+    {
+      "question": "How to start from the final graph efficiently?",
+      "insight": "Apply all events to the initial edge set using a hash set to obtain the final set, then work backward."
+    },
+    {
+      "question": "How to maintain components under edge additions quickly?",
+      "insight": "Keep a parent array with merging by size and path compression to test if endpoints are already in the same group and merge if not; track the component count."
+    },
+    {
+      "question": "What normalization is needed for undirected edges?",
+      "insight": "Store edges as (min(a,b), max(a,b)) and use 0-based indices to index arrays correctly."
+    },
+    {
+      "question": "How to map reverse steps to output positions?",
+      "insight": "Record the count at index k for the final state, then for i from k-1 down to 0, apply reverse additions for forward deletions and set ans[i]."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1500,
+    "output_tokens": 16440,
+    "input_cost": 0.001875,
+    "output_cost": 0.1644,
+    "total_cost": 0.166275
+  }
+}

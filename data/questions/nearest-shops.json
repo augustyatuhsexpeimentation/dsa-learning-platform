@@ -1,0 +1,985 @@
+{
+  "id": "nearest-shops-guided-mcqs",
+  "title": "Nearest Shops",
+  "difficulty": "intermediate",
+  "tags": [
+    "mixed"
+  ],
+  "estimatedMinutes": 70,
+  "language": "python",
+  "description": "There are n cities and m bidirectional roads. k cities have an anime shop. For each city, output the minimum number of roads to reach a city that has an anime shop and is not the same city. If no such city exists, output -1.\n\nInput format:\n- First line: n m k\n- Second line: k integers (cities with shops)\n- Next m lines: a b (a road between cities a and b)\n\nOutput: n integers — for each city 1..n, the minimum distance to another city with a shop, or -1 if none.",
+  "examples": [
+    {
+      "input": "9 6 4\n2 4 5 7\n1 2\n1 3\n1 8\n2 4\n3 4\n5 6",
+      "output": "1 1 1 1 -1 1 -1 2 -1",
+      "explanation": "Cities 2 and 4 are adjacent (distance 1), so each has answer 1. City 5 has no path to any other shop, so -1. City 8 reaches city 2 in 2 steps via 1."
+    }
+  ],
+  "constraints": [
+    "1 <= k <= n <= 1e5",
+    "0 <= m <= 2e5",
+    "Cities are 1-indexed",
+    "Roads are bidirectional"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "Two cities (1--2). City 1 has a shop. What should the output be (city1 city2)?",
+      "diagram": "1 -- 2\nshop at 1",
+      "options": [
+        {
+          "label": "-1 1",
+          "isCode": false
+        },
+        {
+          "label": "0 1",
+          "isCode": false
+        },
+        {
+          "label": "0 0",
+          "isCode": false
+        },
+        {
+          "label": "1 0",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "City 1 needs a shop not in itself, none exists → -1. City 2 reaches city 1 in 1 road → 1.",
+      "wrongExplanations": {
+        "1": "A shop city cannot have distance 0 because the target must be another city.",
+        "3": "City 2 does not have a shop in itself; its nearest shop is city 1 at distance 1."
+      },
+      "hint": "Distance counts roads; the target must be a different city.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "Two cities (1--2). Both 1 and 2 have shops. What is the output (city1 city2)?",
+      "diagram": "1 -- 2\nshops at 1 and 2",
+      "options": [
+        {
+          "label": "1 1",
+          "isCode": false
+        },
+        {
+          "label": "0 0",
+          "isCode": false
+        },
+        {
+          "label": "-1 -1",
+          "isCode": false
+        },
+        {
+          "label": "1 0",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each shop's nearest other shop is the other city at distance 1.",
+      "wrongExplanations": {
+        "1": "0 would mean the shop is in the same city, but the problem requires a different city.",
+        "2": "They are connected and there are shops on both ends."
+      },
+      "hint": "A direct road gives distance 1.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "Three cities with one road: 1--2 and isolated 3. Only city 3 has a shop. What is the output (city1 city2 city3)?",
+      "diagram": "1 -- 2    3 (shop)",
+      "options": [
+        {
+          "label": "-1 -1 -1",
+          "isCode": false
+        },
+        {
+          "label": "2 1 -1",
+          "isCode": false
+        },
+        {
+          "label": "-1 -1 0",
+          "isCode": false
+        },
+        {
+          "label": "-1 -1 1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Cities 1 and 2 cannot reach any shop → -1. City 3 has no other shop → -1.",
+      "wrongExplanations": {
+        "2": "0 for city 3 would be distance to itself, which is not allowed.",
+        "3": "City 3 cannot reach another shop; there isn’t one."
+      },
+      "hint": "Unreachable means -1; a shop needs a different-city shop.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "What does “distance” mean in this problem?",
+      "diagram": "Example path: 1--2--3--4 (4 has a shop)",
+      "options": [
+        {
+          "label": "Number of roads on a shortest path",
+          "isCode": false
+        },
+        {
+          "label": "Euclidean distance between city indices",
+          "isCode": false
+        },
+        {
+          "label": "Number of cities visited",
+          "isCode": false
+        },
+        {
+          "label": "Always 1 if connected",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Distance is counted as edges on a shortest path in the unweighted graph.",
+      "wrongExplanations": {
+        "1": "City indices are labels, not coordinates.",
+        "3": "Connectedness doesn’t imply distance 1; it could be more."
+      },
+      "hint": "Edges are unweighted roads.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Understanding the Problem",
+      "questionText": "Can a city that has a shop ever have output 0?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "No, because the shop must be in a different city",
+          "isCode": false
+        },
+        {
+          "label": "Yes, if it is the only shop in its component",
+          "isCode": false
+        },
+        {
+          "label": "Yes, if it has multiple roads",
+          "isCode": false
+        },
+        {
+          "label": "Yes, if there are at least two shops overall",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Target must be a different city, so minimum is at least 1; 0 is never valid.",
+      "wrongExplanations": {
+        "1": "Being the only shop makes the answer -1, not 0."
+      },
+      "hint": "Think about the phrase “not in your city.”",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "A naive plan: for each city, compute distances to all shops separately. What is the rough time if you re-run a full unweighted shortest search per city?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n * (n + m))",
+          "isCode": false
+        },
+        {
+          "label": "O(n + m)",
+          "isCode": false
+        },
+        {
+          "label": "O(m log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(k * log n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Running a full exploration per city costs about (n+m) each, for n cities → O(n*(n+m)).",
+      "wrongExplanations": {
+        "1": "O(n+m) would be for a single traversal, not repeated for each city.",
+        "2": "log factors don’t appear in simple unweighted graph exploration."
+      },
+      "hint": "Multiply the per-run cost by the number of runs.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "Consider exploring outward from all shop cities at once, by increasing distance. After this process, what does dist[u] represent?",
+      "diagram": "Start with all shops at distance 0, expand layer by layer.",
+      "options": [
+        {
+          "label": "The shortest distance from u to any shop (could be 0 if u is a shop)",
+          "isCode": false
+        },
+        {
+          "label": "The distance from u to the nearest other shop (excluding self)",
+          "isCode": false
+        },
+        {
+          "label": "The degree (number of roads) of u",
+          "isCode": false
+        },
+        {
+          "label": "Always -1 for non-shops",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "This process gives the minimum distance to the closest shop, counting 0 for shop cities.",
+      "wrongExplanations": {
+        "1": "It doesn’t automatically exclude the city’s own shop.",
+        "3": "Distances are computed for all reachable cities, not left as -1 by default."
+      },
+      "hint": "All shops start at distance 0 together.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Exploring Approaches",
+      "questionText": "To later exclude a shop city’s own shop, what extra data should we record for each city during the outward exploration?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Which shop reached it first (store that shop’s city ID)",
+          "isCode": false
+        },
+        {
+          "label": "Only the parent pointer to reconstruct paths",
+          "isCode": false
+        },
+        {
+          "label": "How many times it was visited",
+          "isCode": false
+        },
+        {
+          "label": "Whether its distance is odd or even",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Recording the originating shop lets us detect boundaries between different shops’ regions.",
+      "wrongExplanations": {
+        "1": "Parent pointers don’t tell which shop originated the distance.",
+        "2": "Visit count doesn’t help identify which shop is closest."
+      },
+      "hint": "We need to know from which shop its shortest distance comes.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "How should the exploration be initialized regarding shops?",
+      "diagram": "Queue initially contains: all shops at distance 0.",
+      "options": [
+        {
+          "label": "Put all shop cities into the queue with distance 0 and source = itself",
+          "isCode": false
+        },
+        {
+          "label": "Pick one arbitrary shop to start",
+          "isCode": false
+        },
+        {
+          "label": "Put all cities into the queue with distance 0",
+          "isCode": false
+        },
+        {
+          "label": "Leave the queue empty and add neighbors on demand",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "All shops start at distance 0 so distances to any shop are discovered in increasing order.",
+      "wrongExplanations": {
+        "1": "Starting from one shop loses information about others’ distances.",
+        "2": "Non-shops shouldn’t start at 0; they need to be reached."
+      },
+      "hint": "We want the nearest shop for every city without bias.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "When visiting a neighbor v from u for the first time, what should we set?",
+      "diagram": "u -> v (first time reaching v)",
+      "options": [
+        {
+          "label": "dist[v] = dist[u] + 1 and source[v] = source[u]",
+          "isCode": false
+        },
+        {
+          "label": "dist[v] = dist[u] and source[v] = v",
+          "isCode": false
+        },
+        {
+          "label": "dist[v] = 1 and do not set source[v]",
+          "isCode": false
+        },
+        {
+          "label": "Only set source[v] = u",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Distance increases by 1 per road and the nearest shop remains the same as u’s source.",
+      "wrongExplanations": {
+        "1": "Distance must increase along an edge.",
+        "2": "A fixed 1 ignores actual path length and nearest shop identity."
+      },
+      "hint": "Carry the origin shop forward and add one to distance.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "After filling distances, what is the answer for a non-shop city u?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "dist[u] if reachable, else -1",
+          "isCode": false
+        },
+        {
+          "label": "0 if u has neighbors",
+          "isCode": false
+        },
+        {
+          "label": "The number of shop cities",
+          "isCode": false
+        },
+        {
+          "label": "Always -1 for non-shops",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Non-shops need the nearest shop distance; if unreachable, it's -1.",
+      "wrongExplanations": {
+        "1": "Neighbors do not imply distance 0.",
+        "3": "Reachable non-shops can have positive distances."
+      },
+      "hint": "Use the computed nearest-shop distance.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "Consider any road (x, y) where source[x] != source[y]. What does dist[x] + dist[y] + 1 represent?",
+      "diagram": "shop A ... x -- y ... shop B",
+      "options": [
+        {
+          "label": "The shortest number of roads between the two shops that reached x and y",
+          "isCode": false
+        },
+        {
+          "label": "The distance between x and y",
+          "isCode": false
+        },
+        {
+          "label": "The sum of degrees of x and y",
+          "isCode": false
+        },
+        {
+          "label": "An upper bound with no use for answers",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "It stitches the two shortest paths from x and y back to their shops, plus the connecting road.",
+      "wrongExplanations": {
+        "1": "The distance between x and y is just 1 due to the road.",
+        "3": "This exactly gives the length of a valid shortest path between different shops."
+      },
+      "hint": "Think paths from x and y back to their respective shops.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "How do we use such edges (x, y) with different sources to compute each shop city s’s answer?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Track best[s] = min(best[s], dist[x] + dist[y] + 1) for edges touching s’s region",
+          "isCode": false
+        },
+        {
+          "label": "Use max over all such sums for s",
+          "isCode": false
+        },
+        {
+          "label": "Only consider edges where neither endpoint belongs to a shop’s region",
+          "isCode": false
+        },
+        {
+          "label": "Ignore these edges and recompute from each shop separately",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Taking the minimum over boundary sums yields the nearest other shop for each shop city.",
+      "wrongExplanations": {
+        "1": "We need the minimum distance, not the maximum.",
+        "3": "Recomputing per shop is too slow and unnecessary."
+      },
+      "hint": "Minimize per shop over all cross-source edges.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Building the Idea",
+      "questionText": "If a connected component has exactly one shop, what will best[shop] be after scanning all roads?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "It stays as infinity (so output -1 for that shop)",
+          "isCode": false
+        },
+        {
+          "label": "It becomes 0",
+          "isCode": false
+        },
+        {
+          "label": "It becomes 1",
+          "isCode": false
+        },
+        {
+          "label": "It becomes the component size",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "No cross-source edge exists, so best doesn’t get updated and the answer is -1.",
+      "wrongExplanations": {
+        "1": "0 would imply another shop in the same city, which is disallowed.",
+        "2": "1 requires an adjacent different-shop city, which doesn’t exist."
+      },
+      "hint": "best updates only when two different sources meet.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Read all input tokens and extract n, m, k and the list of shop cities.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\nfrom collections import deque\n\ndata = list(map(int, sys.stdin.read().strip().split()))\nif not data:\n    print()\n    raise SystemExit\nn, m, k = data[0], data[1], data[2]\nshops = data[3:3+k]\nidx = 3 + k",
+          "isCode": true
+        },
+        {
+          "label": "import sys\nfrom collections import deque\n\ndata = sys.stdin.read().split()\nn, m, k = map(int, data[:3])\nshops = list(map(int, data[3:3+m]))\nidx = 3 + m",
+          "isCode": true
+        },
+        {
+          "label": "import sys\nfrom collections import deque\n\ndata = list(map(int, sys.stdin.read().split()))\nm, n, k = data[0], data[1], data[2]\nshops = data[3:3+k]\nidx = 3 + k",
+          "isCode": true
+        },
+        {
+          "label": "import sys\n\ndata = list(map(int, sys.stdin.readline().split()))\nn, m, k = data[0], data[1], data[2]\nshops = []\nidx = 3",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We parse all integers, then take k shop IDs after the first three and track the current index.",
+      "wrongExplanations": {
+        "1": "It reads m shops instead of k and sets idx incorrectly.",
+        "2": "Swapped n and m; ordering must be n, m, k."
+      },
+      "hint": "After n, m, k, read exactly k shop IDs.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\nfrom collections import deque\n\ndata = list(map(int, sys.stdin.read().strip().split()))\nif not data:\n    raise SystemExit\nn, m, k = data[0], data[1], data[2]\nshops = data[3:3+k]\nidx = 3 + k",
+      "codeLabel": "Parse input and shops"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Build the adjacency list and also keep a separate list of edges.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "adj = [[] for _ in range(n+1)]\nedges = []\nfor _ in range(m):\n    a = data[idx]; b = data[idx+1]; idx += 2\n    adj[a].append(b)\n    adj[b].append(a)\n    edges.append((a, b))",
+          "isCode": true
+        },
+        {
+          "label": "adj = [[] for _ in range(n)]\nedges = []\nfor _ in range(m):\n    a = data[idx]; b = data[idx+1]; idx += 2\n    adj[a-1].append(b-1)\n    edges.append((a, b))",
+          "isCode": true
+        },
+        {
+          "label": "adj = [[] for _ in range(n+1)]\nedges = []\nfor _ in range(m):\n    a = data[idx]; b = data[idx+1]; idx += 2\n    adj[a].append(b)\n    edges.append((a, b))",
+          "isCode": true
+        },
+        {
+          "label": "adj = [[] for _ in range(n+1)]\nedges = []\nfor _ in range(m):\n    a = data[idx]; b = data[idx+1]; idx += 2\n    adj[b].append(a)\n    edges.append((a, b))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need 1-based adjacency and undirected edges, so append both ways and record the edge pair.",
+      "wrongExplanations": {
+        "1": "Creates 0-based adjacency while data uses 1-based city IDs.",
+        "2": "Misses the reverse edge; roads are bidirectional."
+      },
+      "hint": "Each road must appear in both adjacency lists.",
+      "isCodeBuilding": true,
+      "codeSnippet": "adj = [[] for _ in range(n+1)]\nedges = []\nfor _ in range(m):\n    a = data[idx]; b = data[idx+1]; idx += 2\n    adj[a].append(b)\n    adj[b].append(a)\n    edges.append((a, b))",
+      "codeLabel": "Build graph"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Initialize distance, source arrays, and a queue with all shop cities.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "INF = 10**18\ndist = [-1] * (n+1)\nsrc = [0] * (n+1)\nq = deque()\nfor s in shops:\n    dist[s] = 0\n    src[s] = s\n    q.append(s)",
+          "isCode": true
+        },
+        {
+          "label": "INF = 10**18\ndist = [0] * (n+1)\nsrc = [0] * (n+1)\nq = deque(shops)",
+          "isCode": true
+        },
+        {
+          "label": "INF = 10**18\ndist = [-1] * n\nsrc = [0] * n\nq = deque()\nq.append(shops[0])",
+          "isCode": true
+        },
+        {
+          "label": "INF = 10**18\nq = deque()\nfor s in shops:\n    src[s] = s\n    q.appendleft(s)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Distances start at -1, shops at 0 with their own source ID, and all shops are enqueued.",
+      "wrongExplanations": {
+        "1": "Setting all distances to 0 breaks discovery of shortest layers.",
+        "2": "Arrays should be sized n+1 and all shops must be enqueued, not just one."
+      },
+      "hint": "Unvisited is -1; mark each shop’s own source.",
+      "isCodeBuilding": true,
+      "codeSnippet": "INF = 10**18\ndist = [-1] * (n+1)\nsrc = [0] * (n+1)\nq = deque()\nfor s in shops:\n    dist[s] = 0\n    src[s] = s\n    q.append(s)",
+      "codeLabel": "Initialize distances and queue"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Write the main loop to expand distances by increasing number of roads and carry source IDs.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "while q:\n    u = q.popleft()\n    for v in adj[u]:\n        if dist[v] == -1:\n            dist[v] = dist[u] + 1\n            src[v] = src[u]\n            q.append(v)",
+          "isCode": true
+        },
+        {
+          "label": "while q:\n    u = q.popleft()\n    for v in adj[u]:\n        dist[v] = dist[u] + 1\n        q.append(v)",
+          "isCode": true
+        },
+        {
+          "label": "while q:\n    u = q.pop()\n    for v in adj[u]:\n        if src[v] == 0:\n            dist[v] = dist[u]\n            src[v] = u\n            q.append(v)",
+          "isCode": true
+        },
+        {
+          "label": "while q:\n    u = q.popleft()\n    for v in adj[u]:\n        if dist[v] != -1:\n            dist[v] = min(dist[v], dist[u] + 1)\n            q.append(v)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Only first-time visits set distance and propagate the originating shop.",
+      "wrongExplanations": {
+        "1": "Overwrites distances repeatedly and revisits endlessly.",
+        "3": "Revisiting visited nodes and pushing them again is unnecessary and incorrect here."
+      },
+      "hint": "Set neighbors only when they’re unvisited.",
+      "isCodeBuilding": true,
+      "codeSnippet": "while q:\n    u = q.popleft()\n    for v in adj[u]:\n        if dist[v] == -1:\n            dist[v] = dist[u] + 1\n            src[v] = src[u]\n            q.append(v)",
+      "codeLabel": "Expand layers"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Compute the best distance for each shop to reach a different shop by scanning edges where sources differ.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "best = [INF] * (n+1)\nfor a, b in edges:\n    if src[a] != 0 and src[b] != 0 and src[a] != src[b]:\n        d = dist[a] + dist[b] + 1\n        if d < best[src[a]]:\n            best[src[a]] = d\n        if d < best[src[b]]:\n            best[src[b]] = d",
+          "isCode": true
+        },
+        {
+          "label": "best = [INF] * (n+1)\nfor a, b in edges:\n    d = abs(dist[a] - dist[b])\n    best[a] = min(best[a], d)\n    best[b] = min(best[b], d)",
+          "isCode": true
+        },
+        {
+          "label": "best = [INF] * (n+1)\nfor a, b in edges:\n    if src[a] == src[b]:\n        d = dist[a] + dist[b] + 1\n        best[src[a]] = min(best[src[a]], d)",
+          "isCode": true
+        },
+        {
+          "label": "best = [INF] * (n+1)\nfor a, b in edges:\n    if src[a] != src[b]:\n        best[a] = min(best[a], dist[a] + 1)\n        best[b] = min(best[b], dist[b] + 1)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Only edges whose endpoints come from different shops define cross-shop paths of length dist[a]+dist[b]+1.",
+      "wrongExplanations": {
+        "1": "Absolute difference of distances doesn’t reflect a path between different shops.",
+        "2": "Same-source edges don’t connect two different shops."
+      },
+      "hint": "Update the entries for the two shops that meet across an edge.",
+      "isCodeBuilding": true,
+      "codeSnippet": "best = [INF] * (n+1)\nfor a, b in edges:\n    if src[a] != 0 and src[b] != 0 and src[a] != src[b]:\n        d = dist[a] + dist[b] + 1\n        if d < best[src[a]]:\n            best[src[a]] = d\n        if d < best[src[b]]:\n            best[src[b]] = d",
+      "codeLabel": "Compute per-shop best via boundaries"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Build the final answers for all cities using dist for non-shops and best for shops.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "ans = [-1] * (n+1)\nshopset = set(shops)\nfor u in range(1, n+1):\n    if u in shopset:\n        ans[u] = -1 if best[u] == INF else best[u]\n    else:\n        ans[u] = dist[u]",
+          "isCode": true
+        },
+        {
+          "label": "ans = [0] * (n+1)\nshopset = set(shops)\nfor u in range(1, n+1):\n    if u in shopset:\n        ans[u] = dist[u]\n    else:\n        ans[u] = best[u]",
+          "isCode": true
+        },
+        {
+          "label": "ans = [-1] * (n+1)\nfor u in range(n):\n    ans[u] = min(dist[u], best[u])",
+          "isCode": true
+        },
+        {
+          "label": "ans = [-1] * (n+1)\nfor u in range(1, n+1):\n    ans[u] = dist[u] if dist[u] != -1 else 0",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Non-shops take the nearest shop distance; shops take the best distance to a different shop or -1 if none.",
+      "wrongExplanations": {
+        "1": "Shops would incorrectly take 0; non-shops would use a shop-to-shop distance.",
+        "2": "Indices off by one, and mixing shop/non-shop logic."
+      },
+      "hint": "Check membership in the shop set per city.",
+      "isCodeBuilding": true,
+      "codeSnippet": "ans = [-1] * (n+1)\nshopset = set(shops)\nfor u in range(1, n+1):\n    if u in shopset:\n        ans[u] = -1 if best[u] == INF else best[u]\n    else:\n        ans[u] = dist[u]",
+      "codeLabel": "Assemble answers"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "Print the answers for cities 1..n space-separated.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "print(' '.join(str(ans[u]) for u in range(1, n+1)))",
+          "isCode": true
+        },
+        {
+          "label": "print(*ans)",
+          "isCode": true
+        },
+        {
+          "label": "for u in range(1, n+1):\n    print(ans[u])",
+          "isCode": true
+        },
+        {
+          "label": "print(' '.join(map(str, ans)))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need exactly cities 1..n, space-separated, in one line.",
+      "wrongExplanations": {
+        "1": "ans[0] is unused; printing it adds an extra leading value.",
+        "2": "This prints one value per line, not space-separated."
+      },
+      "hint": "Exclude index 0 and separate by spaces.",
+      "isCodeBuilding": true,
+      "codeSnippet": "print(' '.join(str(ans[u]) for u in range(1, n+1)))",
+      "codeLabel": "Output"
+    },
+    {
+      "id": "q22",
+      "phase": "Verifying the Solution",
+      "questionText": "Using the sample input, what is the distance for city 8 to the nearest shop?",
+      "diagram": "Edges: 1-2, 1-3, 1-8, 2-4, 3-4, 5-6; Shops: 2,4,5,7",
+      "options": [
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "-1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "8→1→2 is length 2; 8→1→3→4 is length 3, so 2 is minimal.",
+      "wrongExplanations": {
+        "1": "8 is not directly adjacent to a shop.",
+        "3": "A path of length 2 exists via 1→2."
+      },
+      "hint": "Check paths via city 1.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q23",
+      "phase": "Verifying the Solution",
+      "questionText": "In the sample, what is the output for city 5 (which has a shop)?",
+      "diagram": "Edges: 5-6 only; Other shops: 2,4,7 in separate parts",
+      "options": [
+        {
+          "label": "-1",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "City 5’s component has no other shop, so there is no reachable different shop → -1.",
+      "wrongExplanations": {
+        "1": "0 would imply counting the shop in the same city.",
+        "2": "Distance 1 would require an adjacent shop."
+      },
+      "hint": "Are there any shops reachable from 5 besides itself?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Verifying the Solution",
+      "questionText": "Which road directly yields a shop-to-shop distance of 1 in the sample?",
+      "diagram": "Roads include: 2-4",
+      "options": [
+        {
+          "label": "2-4",
+          "isCode": false
+        },
+        {
+          "label": "1-3",
+          "isCode": false
+        },
+        {
+          "label": "5-6",
+          "isCode": false
+        },
+        {
+          "label": "1-8",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Cities 2 and 4 are both shops and directly connected → distance 1.",
+      "wrongExplanations": {
+        "1": "1-3 connects non-shop to non-shop.",
+        "2": "5-6 connects shop to non-shop only."
+      },
+      "hint": "Look for an edge connecting two shop cities.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the overall time complexity of the approach (building graph, expanding distances, scanning edges)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n + m)",
+          "isCode": false
+        },
+        {
+          "label": "O(n * (n + m))",
+          "isCode": false
+        },
+        {
+          "label": "O(m log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(k * n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each edge and node is processed a constant number of times, so linear in n + m.",
+      "wrongExplanations": {
+        "1": "That would be per-node repetition; we do a single pass.",
+        "2": "No logarithmic factors are introduced."
+      },
+      "hint": "Count how many times each node/edge is touched.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the space complexity of the solution?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n + m)",
+          "isCode": false
+        },
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(m)",
+          "isCode": false
+        },
+        {
+          "label": "O(1)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The adjacency list stores O(n + m). Arrays dist, src, best, ans add O(n).",
+      "wrongExplanations": {
+        "1": "Adjacency alone is O(n+m); plus arrays make it still O(n+m).",
+        "3": "It’s not constant; we store per-node and per-edge data."
+      },
+      "hint": "Consider adjacency and arrays of size n.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q27",
+      "phase": "Analyzing Complexity",
+      "questionText": "If m = 0 (no roads) and k >= 1, what will the outputs be?",
+      "diagram": "No edges; some cities have shops.",
+      "options": [
+        {
+          "label": "All cities output -1",
+          "isCode": false
+        },
+        {
+          "label": "Shop cities output 0; others -1",
+          "isCode": false
+        },
+        {
+          "label": "Non-shops output 1 if adjacent to a shop",
+          "isCode": false
+        },
+        {
+          "label": "Shops output 1; others -1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "No roads means no city can reach any other; shops have no other shop reachable.",
+      "wrongExplanations": {
+        "1": "0 is invalid because the target must be a different city.",
+        "2": "There are no adjacent cities without roads."
+      },
+      "hint": "Every city is isolated when m = 0.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\nfrom collections import deque\n\ndata = list(map(int, sys.stdin.read().strip().split()))\nif not data:\n    raise SystemExit\nn, m, k = data[0], data[1], data[2]\nshops = data[3:3+k]\nidx = 3 + k",
+    "adj = [[] for _ in range(n+1)]\nedges = []\nfor _ in range(m):\n    a = data[idx]; b = data[idx+1]; idx += 2\n    adj[a].append(b)\n    adj[b].append(a)\n    edges.append((a, b))",
+    "INF = 10**18\ndist = [-1] * (n+1)\nsrc = [0] * (n+1)\nq = deque()\nfor s in shops:\n    dist[s] = 0\n    src[s] = s\n    q.append(s)",
+    "while q:\n    u = q.popleft()\n    for v in adj[u]:\n        if dist[v] == -1:\n            dist[v] = dist[u] + 1\n            src[v] = src[u]\n            q.append(v)",
+    "best = [INF] * (n+1)\nfor a, b in edges:\n    if src[a] != 0 and src[b] != 0 and src[a] != src[b]:\n        d = dist[a] + dist[b] + 1\n        if d < best[src[a]]:\n            best[src[a]] = d\n        if d < best[src[b]]:\n            best[src[b]] = d",
+    "ans = [-1] * (n+1)\nshopset = set(shops)\nfor u in range(1, n+1):\n    if u in shopset:\n        ans[u] = -1 if best[u] == INF else best[u]\n    else:\n        ans[u] = dist[u]",
+    "print(' '.join(str(ans[u]) for u in range(1, n+1)))"
+  ],
+  "reasoningChain": [
+    {
+      "question": "What does the problem ask when the city itself has a shop?",
+      "insight": "The target shop must be in a different city; shop cities need distance to another shop or -1 if none."
+    },
+    {
+      "question": "How to compute distances to the nearest shop efficiently?",
+      "insight": "Start from all shop cities at once and expand by increasing number of roads, recording distances and the originating shop for each city."
+    },
+    {
+      "question": "What do we output for non-shop cities?",
+      "insight": "Their computed distance to the nearest shop, or -1 if unreachable."
+    },
+    {
+      "question": "How to handle shop cities needing the nearest different shop?",
+      "insight": "Identify roads whose endpoints were reached from different shops; each such road gives a candidate distance dist[x]+dist[y]+1 between those two shops."
+    },
+    {
+      "question": "How to assemble final answers?",
+      "insight": "Take the minimum candidate per shop from boundary roads; use those for shop cities and use nearest-shop distances for non-shop cities."
+    },
+    {
+      "question": "What is the complexity?",
+      "insight": "Each node and edge is processed a constant number of times, so O(n+m) time and O(n+m) space."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1490,
+    "output_tokens": 16800,
+    "input_cost": 0.001863,
+    "output_cost": 0.168,
+    "total_cost": 0.169862
+  }
+}

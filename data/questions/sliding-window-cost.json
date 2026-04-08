@@ -1,0 +1,959 @@
+{
+  "id": "sliding-window-cost",
+  "title": "Sliding Window Cost",
+  "difficulty": "intermediate",
+  "tags": [
+    "arrays",
+    "median",
+    "priority-queue",
+    "heaps"
+  ],
+  "estimatedMinutes": 70,
+  "language": "python",
+  "description": "You are given an array of n integers. For each contiguous block of k elements from left to right, compute the minimum total cost to make all elements in the block equal. Changing a value by x costs x (absolute difference). Output n−k+1 costs.\n\nInput:\n- First line: two integers n and k\n- Second line: n integers x1..xn\n\nOutput:\n- n−k+1 integers: the minimum costs for each block of length k\n",
+  "examples": [
+    {
+      "input": "8 3\n2 4 3 5 8 1 2 1\n",
+      "output": "2 2 5 7 7 1\n",
+      "explanation": "For each block of 3, the minimal sum of absolute differences is achieved at the block's middle value after sorting."
+    }
+  ],
+  "constraints": [
+    "1 ≤ k ≤ n ≤ 2 · 10^5",
+    "1 ≤ x_i ≤ 10^9",
+    "Time limit: 1.00 s",
+    "Memory limit: 512 MB"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "For the block [2, 4, 3] (k=3), what is the minimum total cost to make all elements equal?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Choosing 3 gives |2−3|+|4−3|+|3−3|=2. Any other target yields ≥2.",
+      "wrongExplanations": {
+        "1": "Target 2 or 4 gives cost 3.",
+        "3": "Cost 0 only if all equal already."
+      },
+      "hint": "Try targets 2, 3, and 4.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "For the block [2, 4] (k=2), what is the minimum total cost to make all elements equal (target must be an integer)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Any target t in [2,4] gives |2−t|+|4−t|=2. Minimum is 2.",
+      "wrongExplanations": {
+        "0": "At t=3, cost is 2, not 1.",
+        "3": "Only zero if both values are already the same."
+      },
+      "hint": "Try t=2,3,4 and compute absolute differences.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "Does the order of elements in a block affect the minimum total cost?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, the order changes the minimum cost significantly.",
+          "isCode": false
+        },
+        {
+          "label": "No, only the multiset of values matters.",
+          "isCode": false
+        },
+        {
+          "label": "Yes, only when k is even.",
+          "isCode": false
+        },
+        {
+          "label": "Yes, because the cost depends on adjacent differences.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Cost is the sum of absolute differences to a chosen target; order does not matter.",
+      "wrongExplanations": {
+        "0": "Try [2,4,3] vs [3,2,4]; same multiset yields same minimum.",
+        "2": "Parity of k doesn't make order matter."
+      },
+      "hint": "Reorder a simple block and recompute the best cost.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "For the block [1, 10, 10], which target value (from the options) achieves the minimum total cost?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "10",
+          "isCode": false
+        },
+        {
+          "label": "7",
+          "isCode": false
+        },
+        {
+          "label": "Any integer between 1 and 10 (inclusive)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Target 10 gives |1−10|+|10−10|+|10−10|=9, which is minimal among choices.",
+      "wrongExplanations": {
+        "3": "Only t=10 (and also t in [10,10]) is optimal here among the listed choices."
+      },
+      "hint": "Compute the sum of absolute differences for each option.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Exploring Approaches",
+      "questionText": "If you sort each block of size k and pick the middle value, what is the time per block for this step?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(k)",
+          "isCode": false
+        },
+        {
+          "label": "O(k log k)",
+          "isCode": false
+        },
+        {
+          "label": "O(log k)",
+          "isCode": false
+        },
+        {
+          "label": "O(1)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Sorting k elements costs O(k log k); selecting the middle is O(1) after sorting.",
+      "wrongExplanations": {
+        "0": "Linear time is not enough for sorting arbitrary values.",
+        "2": "Logarithmic time applies to searching, not sorting k items."
+      },
+      "hint": "What's the cost of sorting k numbers?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "Given up to n≈2·10^5 and k up to n, what is the worst-case overall time if you sort each of the n−k+1 blocks?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n log k)",
+          "isCode": false
+        },
+        {
+          "label": "O(n k)",
+          "isCode": false
+        },
+        {
+          "label": "O(n k log k)",
+          "isCode": false
+        },
+        {
+          "label": "O(n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Each block costs O(k log k). There are ~n blocks, so O(n k log k).",
+      "wrongExplanations": {
+        "0": "That would be true if each block was processed in O(log k).",
+        "1": "Sorting adds a log k factor."
+      },
+      "hint": "Multiply work per block by number of blocks.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "What single statistic from each block is sufficient to minimize the sum of absolute differences?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "The average of the block",
+          "isCode": false
+        },
+        {
+          "label": "The sum of the block",
+          "isCode": false
+        },
+        {
+          "label": "The middle value after sorting the block",
+          "isCode": false
+        },
+        {
+          "label": "The maximum of the block",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "The middle value after sorting minimizes the sum of absolute differences.",
+      "wrongExplanations": {
+        "0": "The average minimizes squared differences, not absolute differences.",
+        "1": "Sum alone doesn't identify the minimizing target."
+      },
+      "hint": "Check small examples to see which target gives the minimum.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Building the Idea",
+      "questionText": "Let m be the middle value. Let sumLeft be the sum of values ≤ m, sumRight be the sum of values > m, and lenLeft/lenRight their counts. What formula computes the minimal cost for the block?",
+      "diagram": "m | left side (≤ m) ... | right side (> m)\nCost should add distances to m from both sides.",
+      "options": [
+        {
+          "label": "sumRight - sumLeft",
+          "isCode": false
+        },
+        {
+          "label": "m*lenLeft - sumLeft + sumRight - m*lenRight",
+          "isCode": false
+        },
+        {
+          "label": "abs(sumRight - sumLeft)",
+          "isCode": false
+        },
+        {
+          "label": "(sumLeft + sumRight)/k",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Left contributes m−xi; right contributes xj−m. Summing gives m*lenLeft−sumLeft + sumRight−m*lenRight.",
+      "wrongExplanations": {
+        "0": "Subtracting sums ignores counts.",
+        "2": "Absolute difference of sums is not the sum of absolute differences."
+      },
+      "hint": "Sum distances to m separately for left and right.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "When k is even, there are two middle values after sorting. Which choice keeps the formula consistent across all blocks?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Always use the lower of the two middles",
+          "isCode": false
+        },
+        {
+          "label": "Always use the upper of the two middles",
+          "isCode": false
+        },
+        {
+          "label": "Always use their average",
+          "isCode": false
+        },
+        {
+          "label": "Pick whichever is closer to the outgoing element",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Using the lower middle keeps the invariant stable and the cost formula valid.",
+      "wrongExplanations": {
+        "2": "The minimizing set is any value between them, but we need a consistent integer choice.",
+        "3": "The optimal choice should not depend on elements outside the current block."
+      },
+      "hint": "Choose a consistent rule that works with integer targets and the cost formula.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "We maintain two parts: values ≤ m and values > m. When inserting a new value x, where should it go?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "If x ≤ m, into the lower part; otherwise into the upper part",
+          "isCode": false
+        },
+        {
+          "label": "Always into the lower part",
+          "isCode": false
+        },
+        {
+          "label": "Always into the upper part",
+          "isCode": false
+        },
+        {
+          "label": "Place based on parity of x",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Place by comparing to current m so each part respects the split around m.",
+      "wrongExplanations": {
+        "1": "This would break the split and the ability to read m.",
+        "2": "Same issue; m would no longer be the boundary."
+      },
+      "hint": "Compare x to the current middle before placing it.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "We use priority queues for the two parts and can only pop the top. How to handle removing a value y that is not at the top?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Scan the structure and remove y in O(k)",
+          "isCode": false
+        },
+        {
+          "label": "Rebuild the structure without y each time",
+          "isCode": false
+        },
+        {
+          "label": "Mark y as 'to be deleted' and discard it when it reaches the top",
+          "isCode": false
+        },
+        {
+          "label": "It's impossible to remove y if it's not the top",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Mark-and-prune lets us defer removal and keep O(log k) amortized operations.",
+      "wrongExplanations": {
+        "0": "Scanning would be too slow for large k.",
+        "1": "Rebuilding each time is too slow."
+      },
+      "hint": "Think about deferring the removal until the item surfaces naturally.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "When marking a value y for deletion, when should we update the stored sums and sizes for the parts?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Only when it is physically popped from the priority queue",
+          "isCode": false
+        },
+        {
+          "label": "At marking time, so the window statistics reflect the removal",
+          "isCode": false
+        },
+        {
+          "label": "Both at marking and at popping",
+          "isCode": false
+        },
+        {
+          "label": "Never; sums and sizes don't need updating",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Update at marking so cost and balance reflect the current block; prune later must not double-count.",
+      "wrongExplanations": {
+        "0": "Delaying updates would compute costs for the wrong block.",
+        "2": "That would subtract twice."
+      },
+      "hint": "We must compute cost for the current block immediately.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "What balance condition should the two parts maintain after each insertion/removal?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Sizes equal exactly",
+          "isCode": false
+        },
+        {
+          "label": "Lower part has at most one more element than upper; otherwise rebalance",
+          "isCode": false
+        },
+        {
+          "label": "Upper part has at most one more element than lower",
+          "isCode": false
+        },
+        {
+          "label": "No balance needed; just keep all values ≤ m in lower",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Keep |lenLower − lenUpper| ≤ 1 with lower ≥ upper, ensuring the middle is the top of the lower part.",
+      "wrongExplanations": {
+        "0": "Not always possible when k is odd.",
+        "2": "We defined m as from the lower; lower should not be smaller."
+      },
+      "hint": "Ensure the top of the lower part is the middle value.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Building the Idea",
+      "questionText": "Before reading the current middle value from the lower part, what should we do regarding marked-for-deletion elements?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Nothing; the top is always valid",
+          "isCode": false
+        },
+        {
+          "label": "Prune marked elements from the lower part until the top is valid",
+          "isCode": false
+        },
+        {
+          "label": "Prune only the upper part",
+          "isCode": false
+        },
+        {
+          "label": "Rebuild both parts",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "We must discard any marked items at the top so the middle is a valid element.",
+      "wrongExplanations": {
+        "0": "Marked items can sit at the top.",
+        "2": "We need to ensure the lower top is valid for reading m."
+      },
+      "hint": "Ensure the top truly belongs to the current block before using it.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "c1",
+      "phase": "Writing the Code",
+      "questionText": "Initialize I/O, structures, and state for maintaining two parts and their sums.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\nimport heapq\nfrom collections import defaultdict\n\ndata = list(map(int, sys.stdin.buffer.read().split()))\nn, k = data[0], data[1]\narr = data[2:]\n\n# lower half as max-heap (store negatives), upper half as min-heap\nlo = []\nhi = []\nsize_lo = 0\nsize_hi = 0\nsum_lo = 0\nsum_hi = 0\ndelayed = defaultdict(int)",
+          "isCode": true
+        },
+        {
+          "label": "import sys, heapq\n\ndata = sys.stdin.read().split()\nn, k = map(int, data)\narr = []\nlo = hi = []\nsize_lo = size_hi = sum_lo = sum_hi = 0\ndelayed = {}",
+          "isCode": true
+        },
+        {
+          "label": "import sys\nimport heapq\n\ndata = list(map(int, sys.stdin.buffer.read().split()))\nn, k = data[0], data[1]\narr = data[3:]\nlo = []\nhi = []\nsize_lo = size_hi = 0\nsum_lo = sum_hi = 0\ndelayed = {}",
+          "isCode": true
+        },
+        {
+          "label": "from collections import defaultdict\n\ndata = list(map(int, input().split()))\nn, k = data[0], data[1]\narr = data[2:]\nlo = []\nhi = []\nsize_lo = size_hi = sum_lo = sum_hi = 0\ndelayed = defaultdict(int)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need fast input, correct parsing, two heaps, sizes/sums, and a defaultdict for delayed deletions.",
+      "wrongExplanations": {
+        "2": "arr indexing wrong (starts from data[2], not data[3]).",
+        "3": "Missing heapq import; input() splitting once won't read the entire array reliably."
+      },
+      "hint": "Use buffer.read and map to ints; keep separate sum and size trackers.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\nimport heapq\nfrom collections import defaultdict\n\ndata = list(map(int, sys.stdin.buffer.read().split()))\nn, k = data[0], data[1]\narr = data[2:]\n\n# lower half as max-heap (store negatives), upper half as min-heap\nlo = []\nhi = []\nsize_lo = 0\nsize_hi = 0\nsum_lo = 0\nsum_hi = 0\ndelayed = defaultdict(int)",
+      "codeLabel": "Setup I/O and state"
+    },
+    {
+      "id": "c2",
+      "phase": "Writing the Code",
+      "questionText": "Write functions to prune marked elements from the tops of the two priority queues.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def prune_lo():\n    while lo and delayed[-lo[0]] > 0:\n        x = -heapq.heappop(lo)\n        delayed[x] -= 1\n\ndef prune_hi():\n    while hi and delayed[hi[0]] > 0:\n        x = heapq.heappop(hi)\n        delayed[x] -= 1",
+          "isCode": true
+        },
+        {
+          "label": "def prune_lo():\n    while lo and delayed[-lo[0]] > 0:\n        x = -heapq.heappop(lo)\n        delayed[x] -= 1\n        global sum_lo; sum_lo -= x\n\ndef prune_hi():\n    while hi and delayed[hi[0]] > 0:\n        x = heapq.heappop(hi)\n        delayed[x] -= 1\n        global sum_hi; sum_hi -= x",
+          "isCode": true
+        },
+        {
+          "label": "def prune_lo():\n    while lo and delayed[lo[0]] > 0:\n        x = heapq.heappop(lo)\n        delayed[x] -= 1\n\ndef prune_hi():\n    while hi and delayed[-hi[0]] > 0:\n        x = -heapq.heappop(hi)\n        delayed[x] -= 1",
+          "isCode": true
+        },
+        {
+          "label": "def prune_lo():\n    pass\n\ndef prune_hi():\n    pass",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Prune compares the top value with delayed counts and removes marked tops without changing sums (already adjusted at mark time).",
+      "wrongExplanations": {
+        "1": "Sums were already updated when marking; subtracting again double counts.",
+        "2": "Sign handling is wrong: lo stores negatives, hi stores positives."
+      },
+      "hint": "Remember lo stores negatives; do not adjust sums in prune.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def prune_lo():\n    while lo and delayed[-lo[0]] > 0:\n        x = -heapq.heappop(lo)\n        delayed[x] -= 1\n\ndef prune_hi():\n    while hi and delayed[hi[0]] > 0:\n        x = heapq.heappop(hi)\n        delayed[x] -= 1",
+      "codeLabel": "Prune helpers"
+    },
+    {
+      "id": "c3",
+      "phase": "Writing the Code",
+      "questionText": "Implement rebalancing so the lower part has at most one more than the upper, moving tops between structures as needed.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def rebalance():\n    global size_lo, size_hi, sum_lo, sum_hi\n    prune_lo()\n    prune_hi()\n    while size_lo > size_hi + 1:\n        x = -heapq.heappop(lo)\n        sum_lo -= x\n        size_lo -= 1\n        heapq.heappush(hi, x)\n        sum_hi += x\n        size_hi += 1\n        prune_lo()\n    while size_lo < size_hi:\n        x = heapq.heappop(hi)\n        sum_hi -= x\n        size_hi -= 1\n        heapq.heappush(lo, -x)\n        sum_lo += x\n        size_lo += 1\n        prune_hi()",
+          "isCode": true
+        },
+        {
+          "label": "def rebalance():\n    global size_lo, size_hi, sum_lo, sum_hi\n    while size_lo < size_hi - 1:\n        x = heapq.heappop(hi)\n        sum_hi -= x\n        size_hi -= 1\n        heapq.heappush(lo, -x)\n        sum_lo += x\n        size_lo += 1",
+          "isCode": true
+        },
+        {
+          "label": "def rebalance():\n    global size_lo, size_hi\n    prune_lo()\n    prune_hi()\n    if size_lo > size_hi + 1:\n        x = -heapq.heappop(lo)\n        heapq.heappush(hi, x)\n        size_lo -= 1\n        size_hi += 1",
+          "isCode": true
+        },
+        {
+          "label": "def rebalance():\n    prune_lo()\n    prune_hi()\n    while size_lo > size_hi + 1:\n        heapq.heappush(hi, heapq.heappop(lo))\n    while size_lo < size_hi:\n        heapq.heappush(lo, heapq.heappop(hi))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We must move valid tops between structures, updating sums and sizes and pruning as we go.",
+      "wrongExplanations": {
+        "2": "Single-pass may leave imbalance if big differences; also misses sum updates.",
+        "4": "Direct pushes without sign handling or sum/size updates will break invariants."
+      },
+      "hint": "Move from lo to hi or vice versa until the size condition holds; update sums.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def rebalance():\n    global size_lo, size_hi, sum_lo, sum_hi\n    prune_lo()\n    prune_hi()\n    while size_lo > size_hi + 1:\n        x = -heapq.heappop(lo)\n        sum_lo -= x\n        size_lo -= 1\n        heapq.heappush(hi, x)\n        sum_hi += x\n        size_hi += 1\n        prune_lo()\n    while size_lo < size_hi:\n        x = heapq.heappop(hi)\n        sum_hi -= x\n        size_hi -= 1\n        heapq.heappush(lo, -x)\n        sum_lo += x\n        size_lo += 1\n        prune_hi()",
+      "codeLabel": "Rebalance"
+    },
+    {
+      "id": "c4",
+      "phase": "Writing the Code",
+      "questionText": "Implement insertion of a value x into the correct part, updating sums and sizes, then rebalancing.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def add(x):\n    global size_lo, size_hi, sum_lo, sum_hi\n    if not lo:\n        heapq.heappush(lo, -x)\n        size_lo += 1\n        sum_lo += x\n    else:\n        if x <= -lo[0]:\n            heapq.heappush(lo, -x)\n            size_lo += 1\n            sum_lo += x\n        else:\n            heapq.heappush(hi, x)\n            size_hi += 1\n            sum_hi += x\n    rebalance()",
+          "isCode": true
+        },
+        {
+          "label": "def add(x):\n    global size_lo, size_hi, sum_lo, sum_hi\n    heapq.heappush(lo, -x)\n    size_lo += 1\n    sum_lo += x\n    rebalance()",
+          "isCode": true
+        },
+        {
+          "label": "def add(x):\n    global size_lo, size_hi, sum_lo, sum_hi\n    if x < -lo[0]:\n        heapq.heappush(lo, -x)\n        size_lo += 1\n        sum_lo += x\n    else:\n        heapq.heappush(hi, x)\n        size_hi += 1\n        sum_hi += x",
+          "isCode": true
+        },
+        {
+          "label": "def add(x):\n    global size_lo, size_hi\n    if not lo:\n        heapq.heappush(lo, -x)\n        size_lo += 1\n    else:\n        heapq.heappush(hi, x)\n        size_hi += 1",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Insert by comparing to current middle (top of lower), update sums and sizes, then rebalance.",
+      "wrongExplanations": {
+        "1": "Always pushing to lower breaks the split and median.",
+        "2": "Using '<' misplaces equals; also missing rebalance.",
+        "3": "Sums not updated, and misplaced values break invariants."
+      },
+      "hint": "Use x ≤ current middle for lower; otherwise upper.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def add(x):\n    global size_lo, size_hi, sum_lo, sum_hi\n    if not lo:\n        heapq.heappush(lo, -x)\n        size_lo += 1\n        sum_lo += x\n    else:\n        if x <= -lo[0]:\n            heapq.heappush(lo, -x)\n            size_lo += 1\n            sum_lo += x\n        else:\n            heapq.heappush(hi, x)\n            size_hi += 1\n            sum_hi += x\n    rebalance()",
+      "codeLabel": "Insertion"
+    },
+    {
+      "id": "c5",
+      "phase": "Writing the Code",
+      "questionText": "Implement removing a value x: mark it for deletion, update sums/sizes immediately based on current middle, prune, then rebalance.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def remove(x):\n    global size_lo, size_hi, sum_lo, sum_hi\n    delayed[x] += 1\n    if lo and x <= -lo[0]:\n        size_lo -= 1\n        sum_lo -= x\n    else:\n        size_hi -= 1\n        sum_hi -= x\n    prune_lo()\n    prune_hi()\n    rebalance()",
+          "isCode": true
+        },
+        {
+          "label": "def remove(x):\n    global size_lo, size_hi, sum_lo, sum_hi\n    delayed[x] += 1\n    prune_lo()\n    prune_hi()\n    # update sums when popped\n    rebalance()",
+          "isCode": true
+        },
+        {
+          "label": "def remove(x):\n    global size_lo, size_hi, sum_lo, sum_hi\n    if x <= -lo[0]:\n        delayed[x] += 1\n        size_lo -= 1\n    else:\n        size_hi -= 1\n        delayed[x] += 1\n    rebalance()",
+          "isCode": true
+        },
+        {
+          "label": "def remove(x):\n    delayed[x] += 1\n    if x <= -lo[0]:\n        sum_lo -= x\n    else:\n        sum_hi -= x\n    # no size updates\n    rebalance()",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Update sizes and sums at marking, then prune any invalid tops and rebalance.",
+      "wrongExplanations": {
+        "1": "Delaying sum updates until popping makes costs incorrect for the current block.",
+        "3": "Sizes must be updated; otherwise balance and cost are wrong."
+      },
+      "hint": "Reflect the removal immediately in counts and sums.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def remove(x):\n    global size_lo, size_hi, sum_lo, sum_hi\n    delayed[x] += 1\n    if lo and x <= -lo[0]:\n        size_lo -= 1\n        sum_lo -= x\n    else:\n        size_hi -= 1\n        sum_hi -= x\n    prune_lo()\n    prune_hi()\n    rebalance()",
+      "codeLabel": "Removal"
+    },
+    {
+      "id": "c6",
+      "phase": "Writing the Code",
+      "questionText": "Implement getting the current middle and computing the current block's cost using the stored sums and sizes.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def median():\n    prune_lo()\n    return -lo[0]\n\ndef current_cost():\n    m = median()\n    return m * size_lo - sum_lo + sum_hi - m * size_hi",
+          "isCode": true
+        },
+        {
+          "label": "def median():\n    return -lo[0]\n\ndef current_cost():\n    m = median()\n    return abs(sum_hi - sum_lo)",
+          "isCode": true
+        },
+        {
+          "label": "def median():\n    prune_hi()\n    return hi[0]\n\ndef current_cost():\n    m = median()\n    return sum_hi - sum_lo",
+          "isCode": true
+        },
+        {
+          "label": "def median():\n    prune_lo()\n    return -lo[0]\n\ndef current_cost():\n    m = median()\n    return (sum_lo + sum_hi) // (size_lo + size_hi)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Prune lower, read its top as middle, and apply the derived cost formula.",
+      "wrongExplanations": {
+        "1": "abs(sum_hi - sum_lo) is not the sum of absolute differences.",
+        "3": "Averages don't give the minimal absolute-difference cost."
+      },
+      "hint": "Use the formula with m, sums, and sizes from earlier.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def median():\n    prune_lo()\n    return -lo[0]\n\ndef current_cost():\n    m = median()\n    return m * size_lo - sum_lo + sum_hi - m * size_hi",
+      "codeLabel": "Median and cost"
+    },
+    {
+      "id": "c7",
+      "phase": "Writing the Code",
+      "questionText": "Write the driver: build the first block, then for each next position remove outgoing, add incoming, and collect costs.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "# build first block of k elements\nfor i in range(k):\n    add(arr[i])\n\nans = [str(current_cost())]\n\nfor i in range(k, n):\n    remove(arr[i - k])\n    add(arr[i])\n    ans.append(str(current_cost()))\n\nprint(\" \".join(ans))",
+          "isCode": true
+        },
+        {
+          "label": "# build first block of k elements\nfor i in range(k):\n    add(arr[i])\n\nans = [str(current_cost())]\n\nfor i in range(k, n):\n    add(arr[i])\n    remove(arr[i - k])\n    ans.append(str(current_cost()))\n\nprint(\" \".join(ans))",
+          "isCode": true
+        },
+        {
+          "label": "# build first block of k elements\nfor i in range(k):\n    add(arr[i])\n\nans = []\n\nfor i in range(k, n):\n    remove(arr[i - k])\n    add(arr[i])\n    ans.append(str(current_cost()))\n\nprint(\" \".join(ans))",
+          "isCode": true
+        },
+        {
+          "label": "# build first block of k elements\nfor i in range(k):\n    add(arr[i])\n\nans = [str(current_cost())]\n\nfor i in range(k, n):\n    remove(arr[i - k])\n    add(arr[i])\n\nprint(\" \".join(ans))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Build initial block, record its cost, then for each step remove outgoing first, add incoming, and append the new cost.",
+      "wrongExplanations": {
+        "1": "Adding before removing may misclassify the removal side.",
+        "3": "Forgets to append costs for subsequent blocks."
+      },
+      "hint": "Remove the old value before inserting the new one for each move.",
+      "isCodeBuilding": true,
+      "codeSnippet": "# build first block of k elements\nfor i in range(k):\n    add(arr[i])\n\nans = [str(current_cost())]\n\nfor i in range(k, n):\n    remove(arr[i - k])\n    add(arr[i])\n    ans.append(str(current_cost()))\n\nprint(\" \".join(ans))",
+      "codeLabel": "Driver"
+    },
+    {
+      "id": "v1",
+      "phase": "Verifying the Solution",
+      "questionText": "Trace on a small case: n=5, k=3, arr=[1,3,2,6,7]. What should the program print?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "2 4 5",
+          "isCode": false
+        },
+        {
+          "label": "2 3 4",
+          "isCode": false
+        },
+        {
+          "label": "0 3 5",
+          "isCode": false
+        },
+        {
+          "label": "1 4 5",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Blocks: [1,3,2]→2, [3,2,6]→4, [2,6,7]→5.",
+      "wrongExplanations": {
+        "1": "Check [3,2,6]: to 3 cost is 4.",
+        "2": "First block cost is 2, not 0."
+      },
+      "hint": "Compute costs using the middle value of each block.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "v2",
+      "phase": "Verifying the Solution",
+      "questionText": "Even-sized blocks: n=4, k=2, arr=[1,5,2,2]. What should the program print?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "4 3 0",
+          "isCode": false
+        },
+        {
+          "label": "2 1 0",
+          "isCode": false
+        },
+        {
+          "label": "4 4 0",
+          "isCode": false
+        },
+        {
+          "label": "3 3 0",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Blocks: [1,5]→4, [5,2]→3, [2,2]→0.",
+      "wrongExplanations": {
+        "1": "Recompute [5,2]: any t in [2,5] gives 3.",
+        "3": "First block cost is 4, not 3."
+      },
+      "hint": "Use the lower middle for k=2.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "a1",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the amortized time per step when moving the block by one position (remove one, add one, report cost)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(1)",
+          "isCode": false
+        },
+        {
+          "label": "O(log k)",
+          "isCode": false
+        },
+        {
+          "label": "O(k)",
+          "isCode": false
+        },
+        {
+          "label": "O(k log k)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Each add/remove, prune, and rebalance uses heap operations costing O(log k) amortized.",
+      "wrongExplanations": {
+        "0": "We use priority queue operations which are logarithmic.",
+        "3": "We avoid sorting per block."
+      },
+      "hint": "Consider the cost of push/pop on a priority queue.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "a2",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the extra space used by the data structures (excluding input array)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(1)",
+          "isCode": false
+        },
+        {
+          "label": "O(log k)",
+          "isCode": false
+        },
+        {
+          "label": "O(k)",
+          "isCode": false
+        },
+        {
+          "label": "O(n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "We store roughly k elements across two priority queues and some counters.",
+      "wrongExplanations": {
+        "0": "We store all elements of the current block.",
+        "3": "We do not keep all n elements in structures."
+      },
+      "hint": "We maintain only the current block's elements.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "a3",
+      "phase": "Analyzing Complexity",
+      "questionText": "Edge case check: when k=1 for any n, what will all reported costs be?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "All zeros",
+          "isCode": false
+        },
+        {
+          "label": "The array values themselves",
+          "isCode": false
+        },
+        {
+          "label": "The differences between consecutive elements",
+          "isCode": false
+        },
+        {
+          "label": "Depends on the values",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each block has one element, already equal; cost is 0.",
+      "wrongExplanations": {
+        "1": "We output costs, not the values.",
+        "3": "It does not depend on values when k=1."
+      },
+      "hint": "A block of one element needs no change to make all elements equal.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\nimport heapq\nfrom collections import defaultdict\n\ndata = list(map(int, sys.stdin.buffer.read().split()))\nn, k = data[0], data[1]\narr = data[2:]\n\n# lower half as max-heap (store negatives), upper half as min-heap\nlo = []\nhi = []\nsize_lo = 0\nsize_hi = 0\nsum_lo = 0\nsum_hi = 0\ndelayed = defaultdict(int)",
+    "def prune_lo():\n    while lo and delayed[-lo[0]] > 0:\n        x = -heapq.heappop(lo)\n        delayed[x] -= 1\n\ndef prune_hi():\n    while hi and delayed[hi[0]] > 0:\n        x = heapq.heappop(hi)\n        delayed[x] -= 1",
+    "def rebalance():\n    global size_lo, size_hi, sum_lo, sum_hi\n    prune_lo()\n    prune_hi()\n    while size_lo > size_hi + 1:\n        x = -heapq.heappop(lo)\n        sum_lo -= x\n        size_lo -= 1\n        heapq.heappush(hi, x)\n        sum_hi += x\n        size_hi += 1\n        prune_lo()\n    while size_lo < size_hi:\n        x = heapq.heappop(hi)\n        sum_hi -= x\n        size_hi -= 1\n        heapq.heappush(lo, -x)\n        sum_lo += x\n        size_lo += 1\n        prune_hi()",
+    "def add(x):\n    global size_lo, size_hi, sum_lo, sum_hi\n    if not lo:\n        heapq.heappush(lo, -x)\n        size_lo += 1\n        sum_lo += x\n    else:\n        if x <= -lo[0]:\n            heapq.heappush(lo, -x)\n            size_lo += 1\n            sum_lo += x\n        else:\n            heapq.heappush(hi, x)\n            size_hi += 1\n            sum_hi += x\n    rebalance()",
+    "def remove(x):\n    global size_lo, size_hi, sum_lo, sum_hi\n    delayed[x] += 1\n    if lo and x <= -lo[0]:\n        size_lo -= 1\n        sum_lo -= x\n    else:\n        size_hi -= 1\n        sum_hi -= x\n    prune_lo()\n    prune_hi()\n    rebalance()",
+    "def median():\n    prune_lo()\n    return -lo[0]\n\ndef current_cost():\n    m = median()\n    return m * size_lo - sum_lo + sum_hi - m * size_hi",
+    "# build first block of k elements\nfor i in range(k):\n    add(arr[i])\n\nans = [str(current_cost())]\n\nfor i in range(k, n):\n    remove(arr[i - k])\n    add(arr[i])\n    ans.append(str(current_cost()))\n\nprint(\" \".join(ans))"
+  ],
+  "reasoningChain": [
+    {
+      "question": "What target value minimizes the sum of absolute differences for a block?",
+      "insight": "The middle value after sorting the block minimizes the total absolute difference."
+    },
+    {
+      "question": "How to compute the minimum cost quickly if we know the middle and the sums on each side?",
+      "insight": "Use cost = m*lenLeft − sumLeft + sumRight − m*lenRight to get O(1) per block from maintained sums."
+    },
+    {
+      "question": "How to maintain the middle value as we move between adjacent blocks?",
+      "insight": "Maintain two priority queues for values ≤ m and > m, with the top of the lower giving the middle."
+    },
+    {
+      "question": "How to remove elements that leave the block without direct arbitrary deletion?",
+      "insight": "Mark elements for deletion and prune them when they reach the top to keep operations efficient."
+    },
+    {
+      "question": "What invariants keep the middle definition stable?",
+      "insight": "Keep the lower part size ≥ upper part size and differ by at most one; insert based on comparison to the current middle."
+    },
+    {
+      "question": "When to adjust sums and sizes for removals?",
+      "insight": "Update sums and sizes immediately upon marking a removal so computations reflect the current block."
+    },
+    {
+      "question": "What are the overall guarantees?",
+      "insight": "Each step costs O(log k) with O(k) extra space, meeting the time and memory limits."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1396,
+    "output_tokens": 18363,
+    "input_cost": 0.001745,
+    "output_cost": 0.18363,
+    "total_cost": 0.185375
+  }
+}

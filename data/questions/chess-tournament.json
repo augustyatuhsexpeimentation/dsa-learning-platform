@@ -1,0 +1,989 @@
+{
+  "id": "chess-tournament-havel-construct",
+  "title": "Chess Tournament",
+  "difficulty": "intermediate",
+  "tags": [
+    "mixed"
+  ],
+  "estimatedMinutes": 55,
+  "language": "python",
+  "description": "There will be a chess tournament of n players. Each player has announced the number of games they want to play.\n\nEach pair of players can play at most one game. Your task is to determine which games will be played so that everybody will be happy.\n\nInput:\n- First line: integer n (number of players, numbered 1..n)\n- Second line: n integers x_1..x_n where x_i is the number of games player i wants to play.\n\nOutput:\n- If possible, first print k (number of games), then k lines of pairs `u v` describing the games.\n- If there is no solution, print `IMPOSSIBLE`.\n\nYou may print any valid solution.",
+  "examples": [
+    {
+      "input": "5\n1 3 2 0 2\n",
+      "output": "4\n1 2\n2 3\n2 5\n3 5\n",
+      "explanation": "One valid set of 4 games that satisfies all requested counts."
+    }
+  ],
+  "constraints": [
+    "1 ≤ n ≤ 10^5",
+    "Sum of x_i ≤ 2 · 10^5",
+    "Each pair can play at most one game"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "What does x_i represent in this problem?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "The exact number of games player i must play",
+          "isCode": false
+        },
+        {
+          "label": "The maximum number of games player i can play (they can play fewer)",
+          "isCode": false
+        },
+        {
+          "label": "The minimum number of games player i must play (they can play more)",
+          "isCode": false
+        },
+        {
+          "label": "The number of opponents player i must play twice",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "x_i is the exact number of games player i wants to play. It is not a maximum or minimum bound.",
+      "wrongExplanations": {
+        "1": "They must be satisfied exactly, not just up to that many.",
+        "2": "They cannot exceed x_i because others' counts would be violated."
+      },
+      "hint": "Each game's two endpoints both consume 1 from their x values.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "For n=3 and x = [1, 1, 0], which set of games satisfies all players?",
+      "diagram": "Players: 1,2,3\nx:      1,1,0",
+      "options": [
+        {
+          "label": "{(1,2)}",
+          "isCode": false
+        },
+        {
+          "label": "{(1,3)}",
+          "isCode": false
+        },
+        {
+          "label": "{(2,3)}",
+          "isCode": false
+        },
+        {
+          "label": "IMPOSSIBLE",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Only (1,2) gives degrees [1,1,0]. (1,3) or (2,3) would make x_3=1, violating x_3=0.",
+      "wrongExplanations": {
+        "1": "This makes player 3 have 1 game, not 0.",
+        "2": "This makes player 3 have 1 game, not 0."
+      },
+      "hint": "Each edge adds 1 to both endpoints' counts.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "Which degree list is definitely impossible solely due to parity (sum of x_i)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "[2,2,1,1]",
+          "isCode": false
+        },
+        {
+          "label": "[3,1,1,1]",
+          "isCode": false
+        },
+        {
+          "label": "[2,2,2,1]",
+          "isCode": false
+        },
+        {
+          "label": "[0,0,0,0]",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "The sum must be even. [2,2,2,1] sums to 7, odd, so impossible.",
+      "wrongExplanations": {
+        "0": "Sum is 6 (even), not ruled out by parity.",
+        "1": "Sum is 6 (even), not ruled out by parity."
+      },
+      "hint": "Each edge contributes 2 to the total sum.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "For n=4, which list violates the \"at most one game per pair\" bound immediately?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "[4,0,0,0]",
+          "isCode": false
+        },
+        {
+          "label": "[3,0,0,0]",
+          "isCode": false
+        },
+        {
+          "label": "[3,3,3,3]",
+          "isCode": false
+        },
+        {
+          "label": "[2,2,1,1]",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "A player cannot have more than n-1 opponents. For n=4, max is 3. So 4 is invalid.",
+      "wrongExplanations": {
+        "1": "3 is within the bound n-1 for n=4.",
+        "2": "All players want 3 which matches a complete 4-player tournament."
+      },
+      "hint": "The maximum possible for any player is n-1.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Understanding the Problem",
+      "questionText": "Consider n=4, x=[2,1,1,0]. If you pair players (2,3) first, what happens?",
+      "diagram": "Start: [2,1,1,0]\nAfter (2,3): [2,0,0,0]",
+      "options": [
+        {
+          "label": "You may get stuck even though a solution exists",
+          "isCode": false
+        },
+        {
+          "label": "It always leads to a valid solution if you continue",
+          "isCode": false
+        },
+        {
+          "label": "It never changes the possibility of a solution",
+          "isCode": false
+        },
+        {
+          "label": "It proves the instance is impossible",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "After (2,3), player 1 needs 2 but others want 0, making it stuck. Yet (1,2),(1,3) works.",
+      "wrongExplanations": {
+        "1": "Continuing cannot satisfy player 1 without exceeding others' demands.",
+        "3": "The instance is solvable; the first choice can ruin it."
+      },
+      "hint": "Early bad choices can block satisfying the largest remaining demand later.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "To avoid dead ends, which player should you process next at each step?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "The player with the largest remaining number of games",
+          "isCode": false
+        },
+        {
+          "label": "The player with the smallest remaining number of games",
+          "isCode": false
+        },
+        {
+          "label": "Any player with a positive remaining number of games (arbitrary)",
+          "isCode": false
+        },
+        {
+          "label": "The player with the smallest index",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Satisfy the largest remaining demand first to ensure enough opponents are still available.",
+      "wrongExplanations": {
+        "1": "Smallest-first can leave a large demand with no available opponents.",
+        "2": "Arbitrary choices can create dead ends as seen earlier."
+      },
+      "hint": "Think which choice most constrains the future.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "Suppose you select a player with remaining demand d>0. How many distinct opponents should you pair them with now?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Exactly d distinct opponents",
+          "isCode": false
+        },
+        {
+          "label": "Any number less than d and finish later",
+          "isCode": false
+        },
+        {
+          "label": "All remaining players",
+          "isCode": false
+        },
+        {
+          "label": "Exactly 1 opponent",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "You must create d edges for this player and reduce those opponents' remainders by 1 each.",
+      "wrongExplanations": {
+        "1": "Deferring can block this player's future needs.",
+        "2": "They may not need to play everyone; only d opponents are required."
+      },
+      "hint": "Each edge reduces the chosen player's remainder by exactly 1.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Exploring Approaches",
+      "questionText": "What if d is larger than the number of other players who still have positive remaining demands?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Declare IMPOSSIBLE immediately",
+          "isCode": false
+        },
+        {
+          "label": "Pair with some players twice to make up the difference",
+          "isCode": false
+        },
+        {
+          "label": "Increase d for some opponents to fit",
+          "isCode": false
+        },
+        {
+          "label": "Skip this player and try another",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "If not enough distinct opponents exist, it's impossible due to the one-game-per-pair rule.",
+      "wrongExplanations": {
+        "1": "Pairs cannot be repeated.",
+        "3": "Skipping does not create more opponents; the constraint remains."
+      },
+      "hint": "Distinct opponents are required, and counts cannot be increased arbitrarily.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Exploring Approaches",
+      "questionText": "After connecting the selected player to d opponents, how should the remaining counts be updated?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Set the selected player's remainder to 0 and subtract 1 from each chosen opponent",
+          "isCode": false
+        },
+        {
+          "label": "Subtract d from each chosen opponent and leave the selected player's remainder unchanged",
+          "isCode": false
+        },
+        {
+          "label": "Add 1 to all non-chosen players to balance",
+          "isCode": false
+        },
+        {
+          "label": "Set all players' remainders to 0",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "You consume the selected player's entire demand via d edges and reduce each opponent by 1.",
+      "wrongExplanations": {
+        "1": "The selected player's remainder must drop by d.",
+        "2": "Unchosen players are unaffected by these edges."
+      },
+      "hint": "Each edge reduces both endpoints by 1.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "You need to repeatedly take the largest remaining value and update others. Which approach supports fast \"take largest\" and updates?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Use a structure that keeps elements ordered and allows logarithmic-time removal of the current largest",
+          "isCode": false
+        },
+        {
+          "label": "Scan the whole list each time to find the largest (linear time per pick)",
+          "isCode": false
+        },
+        {
+          "label": "Maintain a FIFO queue of players",
+          "isCode": false
+        },
+        {
+          "label": "Re-sort the entire list after every single update",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "An ordered-removal structure gives efficient repeated access to the current largest and reinsertions.",
+      "wrongExplanations": {
+        "1": "Linear scans per pick can be too slow for many picks.",
+        "3": "Full re-sorts after each update are costly compared to ordered structure updates."
+      },
+      "hint": "Think about per-pick cost when many picks are needed.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "Given sum of x_i ≤ 2e5, what target time complexity should we aim for?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "About O((sum of x_i) log n)",
+          "isCode": false
+        },
+        {
+          "label": "About O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "About O(sum of x_i)^2",
+          "isCode": false
+        },
+        {
+          "label": "About O(n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each game triggers a few ordered-structure ops, yielding roughly O((sum x_i) log n).",
+      "wrongExplanations": {
+        "1": "Quadratic may time out with n up to 1e5.",
+        "3": "Linear is unrealistic because we repeatedly select and update many times."
+      },
+      "hint": "Each edge leads to a small number of ordered removals/insertions.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "Trace step 1 for x=[2,2,1,1] (players 1..4). Assume ties pick the smallest index. Which two edges do you add first?",
+      "diagram": "Start remainders: (1:2),(2:2),(3:1),(4:1)\nPick player with largest remainder (smallest index on tie).",
+      "options": [
+        {
+          "label": "(1,2) and (1,3)",
+          "isCode": false
+        },
+        {
+          "label": "(1,3) and (1,4)",
+          "isCode": false
+        },
+        {
+          "label": "(2,3) and (2,4)",
+          "isCode": false
+        },
+        {
+          "label": "(1,2) and (1,4)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Pick player 1 (2). Connect to two largest others: player 2 (2), then player 3 (1) by tie-breaking.",
+      "wrongExplanations": {
+        "1": "Player 2 has 2 and should be chosen before 4 or 3 with 1.",
+        "2": "We pick player 1 first by tie-breaking; not player 2."
+      },
+      "hint": "Connect to the largest remaining others, tie-breaking by index.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "After adding (1,2) and (1,3) in the previous step, what are the new remainders?",
+      "diagram": "Before: (1:2),(2:2),(3:1),(4:1)\nAdded: (1,2),(1,3)",
+      "options": [
+        {
+          "label": "(1:0),(2:1),(3:0),(4:1)",
+          "isCode": false
+        },
+        {
+          "label": "(1:0),(2:0),(3:0),(4:1)",
+          "isCode": false
+        },
+        {
+          "label": "(1:1),(2:1),(3:1),(4:1)",
+          "isCode": false
+        },
+        {
+          "label": "(1:0),(2:2),(3:0),(4:1)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Player 1 drops to 0; players 2 and 3 drop by 1; player 4 unchanged.",
+      "wrongExplanations": {
+        "1": "Player 2 had 2 and should drop to 1, not 0.",
+        "3": "Player 2 must decrease by 1 after (1,2)."
+      },
+      "hint": "Each edge reduces both endpoints by 1 exactly.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Building the Idea",
+      "questionText": "Should players with 0 remaining be kept in the selection structure for future picks?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "No, remove/ignore them to avoid unnecessary operations",
+          "isCode": false
+        },
+        {
+          "label": "Yes, keep them to help parity checks",
+          "isCode": false
+        },
+        {
+          "label": "Yes, they might still be selected to help others",
+          "isCode": false
+        },
+        {
+          "label": "Keep them only if their index is small",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "They cannot be used as opponents without violating their desired count, so exclude them.",
+      "wrongExplanations": {
+        "1": "Parity can be checked separately via sum.",
+        "2": "They cannot be paired without exceeding their counts."
+      },
+      "hint": "Only positive remainders can be paired without violating counts.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q15",
+      "phase": "Building the Idea",
+      "questionText": "Should you check whether sum(x_i) is odd early and immediately print IMPOSSIBLE in that case?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, fail fast if the sum is odd",
+          "isCode": false
+        },
+        {
+          "label": "No, only check at the end",
+          "isCode": false
+        },
+        {
+          "label": "No, odd sum can still work sometimes",
+          "isCode": false
+        },
+        {
+          "label": "Check only if n is even",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each edge contributes 2 to the total, so an odd sum is impossible. Early check avoids work.",
+      "wrongExplanations": {
+        "2": "Odd total sum cannot be formed by summing 2 per edge."
+      },
+      "hint": "Sum of degrees must equal twice the number of edges.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Start the program: import modules and read all integers from stdin inside main(). Which snippet is correct?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\nimport heapq\n\ndef main():\n    data = list(map(int, sys.stdin.read().split()))\n    if not data:\n        return",
+          "isCode": true
+        },
+        {
+          "label": "import io\n\ndef main():\n    data = input().split()\n    if data is None:\n        return",
+          "isCode": true
+        },
+        {
+          "label": "import sys\n\ndef main():\n    data = list(map(int, sys.stdin.readline().split()))\n    if len(data) == 0:\n        pass",
+          "isCode": true
+        },
+        {
+          "label": "import heapq\n\ndef main():\n    data = [int(x) for x in sys.stdin]\n    if data == []:\n        return",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need both sys and heapq, and to read all tokens since inputs may be on multiple lines.",
+      "wrongExplanations": {
+        "1": "Doesn't import heapq and reads only one line.",
+        "2": "Reads only one line; remaining tokens would be missed."
+      },
+      "hint": "The degree list can span multiple lines; read the whole stream.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\nimport heapq\n\ndef main():\n    data = list(map(int, sys.stdin.read().split()))\n    if not data:\n        return",
+      "codeLabel": "Imports and read input"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Parse n and the list xs, and validate the length. Choose the correct snippet.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    n = data[0]\n    xs = data[1:1+n]\n    if len(xs) != n:\n        print(\"IMPOSSIBLE\")\n        return",
+          "isCode": true
+        },
+        {
+          "label": "    n = data[0]\n    xs = data[1:]\n    if len(xs) < n:\n        pass",
+          "isCode": true
+        },
+        {
+          "label": "    n = int(data[0])\n    xs = [data[i] for i in range(n)]\n    if len(xs) != n:\n        print(\"IMPOSSIBLE\")",
+          "isCode": true
+        },
+        {
+          "label": "    n = data.pop(0)\n    xs = data\n    # assume input is valid",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Slice exactly n numbers for xs and validate; otherwise declare impossibility.",
+      "wrongExplanations": {
+        "1": "Taking all remaining tokens may include extras; also missing validation.",
+        "2": "Builds xs from the wrong indices; data[0] is n, not a degree."
+      },
+      "hint": "Degrees start right after n and there should be exactly n of them.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    n = data[0]\n    xs = data[1:1+n]\n    if len(xs) != n:\n        print(\"IMPOSSIBLE\")\n        return",
+      "codeLabel": "Parse n and xs"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Add an early parity check on the total sum of xs. Which snippet is correct?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    total = sum(xs)\n    if total % 2 == 1:\n        print(\"IMPOSSIBLE\")\n        return",
+          "isCode": true
+        },
+        {
+          "label": "    total = sum(xs)\n    if total % 2 == 0:\n        print(\"IMPOSSIBLE\")\n        return",
+          "isCode": true
+        },
+        {
+          "label": "    total = sum(xs)\n    if total % 2:\n        pass",
+          "isCode": true
+        },
+        {
+          "label": "    if sum(xs) % 3 == 0:\n        print(\"IMPOSSIBLE\")\n        return",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Odd sum is impossible; even sum passes this check.",
+      "wrongExplanations": {
+        "1": "Even sums are not impossible by parity.",
+        "2": "We should exit when odd, not ignore it."
+      },
+      "hint": "Each edge adds 2 to the total degree sum.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    total = sum(xs)\n    if total % 2 == 1:\n        print(\"IMPOSSIBLE\")\n        return",
+      "codeLabel": "Parity check"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Build the structure of remaining demands with validation (no negatives, <= n-1), and prepare for fast maximum extraction. Pick the correct snippet.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    heap = []\n    for i, d in enumerate(xs, start=1):\n        if d < 0 or d > n - 1:\n            print(\"IMPOSSIBLE\")\n            return\n        if d > 0:\n            heap.append((-d, i))\n    heapq.heapify(heap)",
+          "isCode": true
+        },
+        {
+          "label": "    heap = []\n    for i, d in enumerate(xs, start=1):\n        if d > n:\n            print(\"IMPOSSIBLE\")\n            return\n        heap.append((d, i))\n    heapq.heapify(heap)",
+          "isCode": true
+        },
+        {
+          "label": "    heap = []\n    for i, d in enumerate(xs, start=1):\n        if d < 0 or d > n - 1:\n            continue\n        heapq.heappush(heap, (d, i))",
+          "isCode": true
+        },
+        {
+          "label": "    heap = []\n    for i, d in enumerate(xs, start=1):\n        if d >= 0:\n            heap.append((d, i))\n    # no heapify",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We validate bounds and store negatives for max-removal behavior, then heapify once.",
+      "wrongExplanations": {
+        "1": "Stores positives, making it a min-structure; also allows d==n.",
+        "2": "Silently ignores invalids and uses positives, selecting smallest first."
+      },
+      "hint": "Use negated values to simulate taking the largest quickly.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    heap = []\n    for i, d in enumerate(xs, start=1):\n        if d < 0 or d > n - 1:\n            print(\"IMPOSSIBLE\")\n            return\n        if d > 0:\n            heap.append((-d, i))\n    heapq.heapify(heap)",
+      "codeLabel": "Build max-removal structure"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Initialize the edge list and start the main loop: pop the current largest, check feasibility, and prepare a list of taken opponents. Choose the correct snippet.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    edges = []\n    while heap:\n        negd, u = heapq.heappop(heap)\n        d = -negd\n        if d > len(heap):\n            print(\"IMPOSSIBLE\")\n            return\n        taken = []",
+          "isCode": true
+        },
+        {
+          "label": "    edges = set()\n    while heap:\n        d, u = heapq.heappop(heap)\n        if d > len(heap):\n            break\n        taken = []",
+          "isCode": true
+        },
+        {
+          "label": "    edges = []\n    while heap:\n        negd, u = heap[0]\n        d = -negd\n        taken = []",
+          "isCode": true
+        },
+        {
+          "label": "    edges = []\n    while heap:\n        negd, u = heapq.heappush(heap, (0, 0))\n        taken = []",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Pop the largest, invert its sign, check if enough opponents exist, and start a 'taken' list.",
+      "wrongExplanations": {
+        "1": "Using a set loses order/duplicates and popping wrong tuple order; also breaks on impossibility instead of returning.",
+        "2": "Not removing the element; just peeking can cause an infinite loop."
+      },
+      "hint": "You need to actually remove the current largest before pairing.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    edges = []\n    while heap:\n        negd, u = heapq.heappop(heap)\n        d = -negd\n        if d > len(heap):\n            print(\"IMPOSSIBLE\")\n            return\n        taken = []",
+      "codeLabel": "Start loop and pop largest"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "Inside the loop, remove d opponents with largest remaining values, record edges, and decrement their counts. Which snippet fits?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "        for _ in range(d):\n            negv, v = heapq.heappop(heap)\n            taken.append((negv + 1, v))\n            edges.append((u, v))",
+          "isCode": true
+        },
+        {
+          "label": "        for _ in range(d):\n            negv, v = heapq.heappop(heap)\n            taken.append((negv - 1, v))\n            edges.append((v, u))",
+          "isCode": true
+        },
+        {
+          "label": "        for _ in range(d):\n            v, negv = heapq.heappop(heap)\n            taken.append((negv + 1, v))\n            edges.append((u, v))",
+          "isCode": true
+        },
+        {
+          "label": "        for _ in range(d):\n            negv, v = heapq.heappop(heap)\n            taken.append((negv, v))\n            edges.append((u, v))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Pop opponent, add edge (u,v), and increment negv by 1 (equivalently decrement actual count by 1).",
+      "wrongExplanations": {
+        "1": "negv is negative; subtracting 1 increases the absolute degree instead of decreasing.",
+        "3": "Forgetting to decrement would never reduce demands."
+      },
+      "hint": "Remember we stored negative remainders; reducing remainder by 1 means negv becomes negv+1.",
+      "isCodeBuilding": true,
+      "codeSnippet": "        for _ in range(d):\n            negv, v = heapq.heappop(heap)\n            taken.append((negv + 1, v))\n            edges.append((u, v))",
+      "codeLabel": "Take d opponents and add edges"
+    },
+    {
+      "id": "q22",
+      "phase": "Writing the Code",
+      "questionText": "After collecting the d opponents, reinsert those with remaining >0 back into the structure. Choose the correct snippet.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "        for negv, v in taken:\n            if negv < 0:\n                heapq.heappush(heap, (negv, v))",
+          "isCode": true
+        },
+        {
+          "label": "        for negv, v in taken:\n            if negv <= 0:\n                heapq.heappush(heap, (negv, v))",
+          "isCode": true
+        },
+        {
+          "label": "        for negv, v in taken:\n            if negv > 0:\n                heapq.heappush(heap, (negv, v))",
+          "isCode": true
+        },
+        {
+          "label": "        for v, negv in taken:\n            if negv < 0:\n                heapq.heappush(heap, (negv, v))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "If the updated negv is still negative, the opponent still has games to play; reinsert them.",
+      "wrongExplanations": {
+        "1": "negv==0 means the player is satisfied; do not reinsert.",
+        "2": "negv is never positive because we store negatives."
+      },
+      "hint": "We stored negatives: a remaining count of 0 translates to negv==0.",
+      "isCodeBuilding": true,
+      "codeSnippet": "        for negv, v in taken:\n            if negv < 0:\n                heapq.heappush(heap, (negv, v))",
+      "codeLabel": "Reinsert updated opponents"
+    },
+    {
+      "id": "q23",
+      "phase": "Writing the Code",
+      "questionText": "Finally, print the number of edges and each edge on its own line. Which snippet is correct?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    print(len(edges))\n    for u, v in edges:\n        print(u, v)\n\nif __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "    print(len(edges))\n    for e in edges:\n        print(e)\n\nmain()",
+          "isCode": true
+        },
+        {
+          "label": "    print(len(edges))\n    print(edges)\n\nif __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "    for u, v in edges:\n        print(u, v)\n    print(len(edges))\n\nif __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Print k first, then each 'u v' edge. Include the main guard to run main().",
+      "wrongExplanations": {
+        "1": "Printing tuples adds punctuation not required by the judge.",
+        "3": "Order is wrong: k must be printed before the edges."
+      },
+      "hint": "Match the exact required output format.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    print(len(edges))\n    for u, v in edges:\n        print(u, v)\n\nif __name__ == \"__main__\":\n    main()",
+      "codeLabel": "Print and main guard"
+    },
+    {
+      "id": "q24",
+      "phase": "Verifying the Solution",
+      "questionText": "On input n=5, x=[1,3,2,0,2], which set of edges is a valid output of the algorithm (one possible tie-breaking)?",
+      "diagram": "Counts: (1:1),(2:3),(3:2),(4:0),(5:2)",
+      "options": [
+        {
+          "label": "{(2,3),(2,5),(2,1),(3,5)}",
+          "isCode": false
+        },
+        {
+          "label": "{(1,2),(1,3),(2,3),(2,5)}",
+          "isCode": false
+        },
+        {
+          "label": "{(2,3),(2,4),(2,5),(3,5)}",
+          "isCode": false
+        },
+        {
+          "label": "{(1,2),(2,3),(3,4),(4,5)}",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Degrees become (1:0),(2:0),(3:0),(4:0),(5:0). Others either use player 4 (who wants 0) or over/under satisfy counts.",
+      "wrongExplanations": {
+        "1": "Player 1 would then need 0 but gets 2 edges here.",
+        "2": "Player 4 has x_4=0; cannot be in any edge."
+      },
+      "hint": "Check each player's total incident edges equals their x_i.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Verifying the Solution",
+      "questionText": "For the same input (5; 1 3 2 0 2), what number k does the program print first?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        },
+        {
+          "label": "IMPOSSIBLE",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Sum of x is 8, so the number of edges is 8/2 = 4.",
+      "wrongExplanations": {
+        "1": "Would imply sum of x is 6, which it isn't.",
+        "3": "A valid construction exists as shown."
+      },
+      "hint": "k = (sum of x_i)/2 when a solution exists.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the time complexity of this approach in terms of n and total requested games S = sum x_i?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(S log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(S^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(n + S)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each of the about S/2 edges causes a small number of ordered removals/insertions, each logarithmic in n.",
+      "wrongExplanations": {
+        "1": "Too slow for n up to 1e5 in worst cases.",
+        "3": "We need ordered removals/insertions; it's not purely linear."
+      },
+      "hint": "Each pairing involves a few operations on an ordered structure.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q27",
+      "phase": "Analyzing Complexity",
+      "questionText": "What additional checks or edge cases are necessary to correctly handle impossibility early?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Check sum(x_i) is even; check each x_i in [0, n-1]; check if current d > number of available opponents",
+          "isCode": false
+        },
+        {
+          "label": "Check only if any x_i is 0",
+          "isCode": false
+        },
+        {
+          "label": "Skip all checks and rely on the loop to detect issues",
+          "isCode": false
+        },
+        {
+          "label": "Check if sum(x_i) is divisible by 3",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "These necessary conditions rule out impossible cases immediately and during processing.",
+      "wrongExplanations": {
+        "1": "x_i=0 is fine; it's not an impossibility.",
+        "3": "Divisibility by 3 is irrelevant for simple graphs."
+      },
+      "hint": "Think bounds (per-node), parity, and availability in each iteration.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\nimport heapq\n\ndef main():\n    data = list(map(int, sys.stdin.read().split()))\n    if not data:\n        return",
+    "    n = data[0]\n    xs = data[1:1+n]\n    if len(xs) != n:\n        print(\"IMPOSSIBLE\")\n        return",
+    "    total = sum(xs)\n    if total % 2 == 1:\n        print(\"IMPOSSIBLE\")\n        return",
+    "    heap = []\n    for i, d in enumerate(xs, start=1):\n        if d < 0 or d > n - 1:\n            print(\"IMPOSSIBLE\")\n            return\n        if d > 0:\n            heap.append((-d, i))\n    heapq.heapify(heap)",
+    "    edges = []\n    while heap:\n        negd, u = heapq.heappop(heap)\n        d = -negd\n        if d > len(heap):\n            print(\"IMPOSSIBLE\")\n            return\n        taken = []",
+    "        for _ in range(d):\n            negv, v = heapq.heappop(heap)\n            taken.append((negv + 1, v))\n            edges.append((u, v))",
+    "        for negv, v in taken:\n            if negv < 0:\n                heapq.heappush(heap, (negv, v))",
+    "    print(len(edges))\n    for u, v in edges:\n        print(u, v)\n\nif __name__ == \"__main__\":\n    main()"
+  ],
+  "reasoningChain": [
+    {
+      "question": "q3",
+      "insight": "The sum of requested games must be even because each game contributes 2 to the total."
+    },
+    {
+      "question": "q4",
+      "insight": "Each player's request cannot exceed n-1 due to at most one game per pair."
+    },
+    {
+      "question": "q6",
+      "insight": "Always satisfy the largest remaining request next to prevent future infeasibility."
+    },
+    {
+      "question": "q8",
+      "insight": "If the largest request exceeds the number of available opponents, the instance is impossible."
+    },
+    {
+      "question": "q10",
+      "insight": "Use an ordered-removal data structure to efficiently get the current largest and update."
+    },
+    {
+      "question": "q12",
+      "insight": "Connect the selected player to the top d other players and decrement their remainders."
+    },
+    {
+      "question": "q26",
+      "insight": "The approach runs in about O((sum of x_i) log n) time and uses manageable space."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1418,
+    "output_tokens": 16849,
+    "input_cost": 0.001772,
+    "output_cost": 0.16849,
+    "total_cost": 0.170263
+  }
+}

@@ -1,0 +1,944 @@
+{
+  "id": "monotone-subsequences-construction",
+  "title": "Monotone Subsequences",
+  "difficulty": "intermediate",
+  "tags": [
+    "mixed",
+    "constructive"
+  ],
+  "estimatedMinutes": 60,
+  "language": "python",
+  "description": "Your task is to create a permutation of numbers 1,2,\\dots,n whose longest monotone subsequence has exactly k elements.\n\nA monotone subsequence is either increasing or decreasing. For example, some monotone subsequences in [2,1,4,5,3] are [2,4,5] and [4,3].\n\nInput:\n- The first input line has an integer t: the number of tests.\n- After this, there are t lines. Each line has two integers n and k.\n\nOutput:\n- For each test, print a line that contains the permutation. You can print any valid solution. If there are no solutions, print IMPOSSIBLE.\n",
+  "examples": [
+    {
+      "input": "3\n5 3\n5 2\n7 7\n",
+      "output": "2 1 4 5 3\nIMPOSSIBLE\n1 2 3 4 5 6 7\n",
+      "explanation": "Any valid permutation with longest monotone subsequence length exactly k is accepted. For 5 3, one valid answer is 2 1 4 5 3. For 5 2, it's impossible. For 7 7, the identity permutation works."
+    }
+  ],
+  "constraints": [
+    "1 ≤ t ≤ 1000",
+    "1 ≤ k ≤ n ≤ 100"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "What is the length of the longest monotone subsequence in the permutation [2, 1, 4, 5, 3]?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "An increasing subsequence [2,4,5] has length 3. No increasing or decreasing subsequence of length 4 exists. So the longest monotone length is 3.",
+      "wrongExplanations": {
+        "0": "There are subsequences of length 3 like [2,4,5].",
+        "2": "No monotone subsequence of length 4 can be formed here."
+      },
+      "hint": "Try to find the longest increasing and the longest decreasing subsequences."
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "For a permutation of length 2, what is the minimum possible length of the longest monotone subsequence?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "It depends on the numbers.",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Either [1,2] or [2,1] occurs, giving an increasing or decreasing subsequence of length 2.",
+      "wrongExplanations": {
+        "0": "You always have an increasing or decreasing pair in a length-2 permutation."
+      },
+      "hint": "Consider the permutations [1,2] and [2,1]."
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "Is it possible to have k=2 for n=3? Choose the correct statement.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, for example 2 1 3 has longest monotone subsequence length 2.",
+          "isCode": false
+        },
+        {
+          "label": "Yes, but only 1 2 3 works.",
+          "isCode": false
+        },
+        {
+          "label": "No, the minimum possible longest monotone length for n=3 is 3.",
+          "isCode": false
+        },
+        {
+          "label": "No, the minimum possible longest monotone length is 1.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Permutation 2 1 3 has increasing [1,3] and decreasing [2,1], so the longest monotone length is 2.",
+      "wrongExplanations": {
+        "1": "1 2 3 has an increasing subsequence of length 3, not 2.",
+        "2": "There exists a permutation (e.g., 2 1 3) with longest monotone 2."
+      },
+      "hint": "Try constructing a permutation that avoids 3 in a row increasing or decreasing."
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "For n=5 and k=2, is it possible to find a permutation whose longest monotone subsequence has exactly length 2?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, it is possible for some permutation.",
+          "isCode": false
+        },
+        {
+          "label": "No, any permutation of length 5 must have an increasing or decreasing subsequence of length at least 3.",
+          "isCode": false
+        },
+        {
+          "label": "Yes, for example 3 1 4 2 5.",
+          "isCode": false
+        },
+        {
+          "label": "No, because parity of n and k must match.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "For length 5, you cannot keep both increasing and decreasing subsequences below length 3.",
+      "wrongExplanations": {
+        "0": "Try multiple permutations; you will find one of the monotone subsequences reaches length 3.",
+        "2": "Check that 3 1 4 2 5 has increasing subsequences of length 3 (e.g., 1,2,5)."
+      },
+      "hint": "If you try to avoid 3 in a row increasing, you may be forced into 3 in a row decreasing."
+    },
+    {
+      "id": "q5",
+      "phase": "Understanding the Problem",
+      "questionText": "If the permutation is strictly increasing (1 2 3 ... n), what is the longest monotone subsequence length?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "n",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "It depends on whether n is prime.",
+          "isCode": false
+        },
+        {
+          "label": "n-1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The entire permutation is an increasing subsequence of length n.",
+      "wrongExplanations": {
+        "1": "There is an increasing subsequence using all n elements.",
+        "3": "The full sequence is monotone increasing, so length n is achievable."
+      },
+      "hint": "Consider the entire sequence as a subsequence."
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "Suppose we split 1..n into groups, print groups in increasing order of values, and within each group print numbers in decreasing order. What is the maximum possible length of an increasing subsequence in the result?",
+      "diagram": "Group 1 (decreasing): a_k ... a_2 a_1\nGroup 2 (decreasing): b_k ... b_1  (and all b_i > all a_i)\n...",
+      "options": [
+        {
+          "label": "At most the size of a group.",
+          "isCode": false
+        },
+        {
+          "label": "At most the number of groups.",
+          "isCode": false
+        },
+        {
+          "label": "At most n.",
+          "isCode": false
+        },
+        {
+          "label": "At most the minimum of (group size, number of groups).",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Within a group, numbers decrease, so you can take at most one from each group to keep increasing. Thus it's bounded by the number of groups.",
+      "wrongExplanations": {
+        "0": "Increasing subsequences can span across groups (one per group).",
+        "3": "You can take at most one per group, not the minimum of the two."
+      },
+      "hint": "Can you pick more than one element from a decreasing group while staying increasing?"
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "Under the same arrangement (groups printed in order, each group decreasing inside), what is the maximum possible length of a decreasing subsequence?",
+      "diagram": "Group boundaries: all elements of later groups are larger than all of earlier groups.",
+      "options": [
+        {
+          "label": "At most the size of a group.",
+          "isCode": false
+        },
+        {
+          "label": "At most the number of groups.",
+          "isCode": false
+        },
+        {
+          "label": "At most n.",
+          "isCode": false
+        },
+        {
+          "label": "Unbounded by groups; it can cross groups arbitrarily.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Across group boundaries values increase, so a decreasing subsequence cannot cross groups; it must lie within one group.",
+      "wrongExplanations": {
+        "1": "A decreasing subsequence cannot take elements from multiple groups because later groups have larger values.",
+        "3": "Group boundaries strictly increase overall values."
+      },
+      "hint": "Compare any element in a later group to any in an earlier group."
+    },
+    {
+      "id": "q8",
+      "phase": "Exploring Approaches",
+      "questionText": "To guarantee both increasing and decreasing subsequences have length at most k using this grouped arrangement, which condition must hold?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Group size ≤ k and number of groups ≤ k.",
+          "isCode": false
+        },
+        {
+          "label": "Either group size ≤ k or number of groups ≤ k (one suffices).",
+          "isCode": false
+        },
+        {
+          "label": "Group size × number of groups ≤ k.",
+          "isCode": false
+        },
+        {
+          "label": "Group size + number of groups ≤ k.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Increasing subsequence length ≤ number of groups; decreasing subsequence length ≤ group size. Both must be ≤ k.",
+      "wrongExplanations": {
+        "1": "Limiting only one allows the other monotone subsequence to exceed k.",
+        "2": "The product bound does not limit each monotone subsequence separately."
+      },
+      "hint": "One bound controls increasing length; the other controls decreasing length."
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "If we fix each group's size to exactly k (except possibly the last), how many groups are needed to cover n elements?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "⌊n/k⌋ (floor division)",
+          "isCode": false
+        },
+        {
+          "label": "⌈n/k⌉ (ceiling division)",
+          "isCode": false
+        },
+        {
+          "label": "Exactly k",
+          "isCode": false
+        },
+        {
+          "label": "n − k + 1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "You need ⌈n/k⌉ groups so that the total capacity k per group covers n elements.",
+      "wrongExplanations": {
+        "0": "⌊n/k⌋ groups may be insufficient when n is not a multiple of k."
+      },
+      "hint": "How many size-k buckets to fit n items?"
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "When does ⌈n/k⌉ ≤ k hold?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Always, for any 1 ≤ k ≤ n.",
+          "isCode": false
+        },
+        {
+          "label": "If and only if n ≤ k².",
+          "isCode": false
+        },
+        {
+          "label": "If and only if n ≥ k².",
+          "isCode": false
+        },
+        {
+          "label": "Only when n = k.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "⌈n/k⌉ ≤ k ⇔ n/k ≤ k ⇔ n ≤ k².",
+      "wrongExplanations": {
+        "0": "Counterexample: n=10, k=2 gives ⌈10/2⌉=5 which is not ≤2.",
+        "2": "This flips the inequality; it's the opposite condition."
+      },
+      "hint": "Rewrite ⌈n/k⌉ ≤ k in terms of n and k."
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "For our grouped arrangement (groups in order, each decreasing), when is it impossible to keep the longest monotone subsequence ≤ k?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "When n > k².",
+          "isCode": false
+        },
+        {
+          "label": "When n < k.",
+          "isCode": false
+        },
+        {
+          "label": "When k > n.",
+          "isCode": false
+        },
+        {
+          "label": "When n is prime.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "If n > k², then either the number of groups or the group size would exceed k, forcing a monotone subsequence longer than k.",
+      "wrongExplanations": {
+        "1": "Given constraints 1 ≤ k ≤ n, n < k does not occur.",
+        "2": "Also forbidden by constraints; not relevant."
+      },
+      "hint": "Consider the maximum size you can cover with k groups of size k."
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "Assuming n ≤ k² and k ≤ n, what will be the exact length of the longest monotone subsequence under this scheme?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Exactly k.",
+          "isCode": false
+        },
+        {
+          "label": "At most ⌈n/k⌉.",
+          "isCode": false
+        },
+        {
+          "label": "Exactly ⌈n/k⌉.",
+          "isCode": false
+        },
+        {
+          "label": "Between k and 2k.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "There is a full group of size k, giving a decreasing subsequence of length k, and both monotone lengths are ≤ k.",
+      "wrongExplanations": {
+        "1": "The longest monotone is not the smaller bound; the decreasing subsequence reaches k."
+      },
+      "hint": "Is there at least one full group of size k when k ≤ n?"
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "Using the scheme (groups of size k, each reversed), what permutation do we produce for n=5, k=3?",
+      "diagram": "Groups: [1,2,3] -> 3 2 1; [4,5] -> 5 4.",
+      "options": [
+        {
+          "label": "3 2 1 5 4",
+          "isCode": false
+        },
+        {
+          "label": "1 2 3 4 5",
+          "isCode": false
+        },
+        {
+          "label": "2 1 4 5 3",
+          "isCode": false
+        },
+        {
+          "label": "4 5 3 2 1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Reverse each block: [1,2,3]→3 2 1 and [4,5]→5 4; concatenating yields 3 2 1 5 4.",
+      "wrongExplanations": {
+        "2": "This is a valid answer but not produced by this specific grouping scheme."
+      },
+      "hint": "Process 1..3 and 4..5 separately, each in decreasing order."
+    },
+    {
+      "id": "q14",
+      "phase": "Building the Idea",
+      "questionText": "For n=7, k=7, which is the permutation produced by the grouping scheme?",
+      "diagram": "Single group [1..7] reversed.",
+      "options": [
+        {
+          "label": "7 6 5 4 3 2 1",
+          "isCode": false
+        },
+        {
+          "label": "1 2 3 4 5 6 7",
+          "isCode": false
+        },
+        {
+          "label": "IMPOSSIBLE",
+          "isCode": false
+        },
+        {
+          "label": "2 1 4 3 6 5 7",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "One group of size 7 reversed gives 7 6 5 4 3 2 1. Any valid permutation with longest monotone 7 is acceptable, but this is the scheme’s output.",
+      "wrongExplanations": {
+        "1": "Also valid in principle, but not produced by the \"reverse each group\" method."
+      },
+      "hint": "How many groups are there when k=n?"
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Read all input tokens efficiently and prepare an iterator over them.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\ndata = sys.stdin.read().strip().split()\nit = iter(data)",
+          "isCode": true
+        },
+        {
+          "label": "data = input().splitlines()\nit = iter(data)",
+          "isCode": true
+        },
+        {
+          "label": "import sys\ndata = sys.stdin.read()\nit = iter(data)  # iterates characters",
+          "isCode": true
+        },
+        {
+          "label": "it = iter(sys.stdin)\n# iterate lines directly",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Reading and splitting all tokens, then iterating over them, suits multiple test cases and tokens per line.",
+      "wrongExplanations": {
+        "2": "Iterating over the raw string yields characters, not tokens."
+      },
+      "hint": "We need to consume integers one by one regardless of line breaks.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\ndata = sys.stdin.read().strip().split()\nit = iter(data)",
+      "codeLabel": "Read tokens"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Parse the first token as the number of test cases t.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "t = int(next(it))",
+          "isCode": true
+        },
+        {
+          "label": "t = int(it.next())",
+          "isCode": true
+        },
+        {
+          "label": "t = int(data.pop(0))",
+          "isCode": true
+        },
+        {
+          "label": "t = int(sys.stdin.readline())",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Using next(it) matches the iterator we created from tokens.",
+      "wrongExplanations": {
+        "1": "In Python 3, iterators don’t have .next(); use next(it).",
+        "3": "We already consumed the input into tokens; mixing methods is error-prone."
+      },
+      "hint": "Use the iterator you built to consume tokens.",
+      "isCodeBuilding": true,
+      "codeSnippet": "t = int(next(it))",
+      "codeLabel": "Read t"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Start collecting outputs and iterate over test cases while reading n and k.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "out_lines = []\nfor _ in range(t):\n    n = int(next(it)); k = int(next(it))",
+          "isCode": true
+        },
+        {
+          "label": "out_lines = {}\nfor _ in range(t):\n    n = int(next(it))\n    # forgot to read k",
+          "isCode": true
+        },
+        {
+          "label": "out_lines = []\nfor _ in range(1, t):\n    n = int(next(it)); k = int(next(it))",
+          "isCode": true
+        },
+        {
+          "label": "out_lines = []\nfor _ in range(t):\n    k = int(next(it)); n = int(next(it))  # swapped",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need a list to collect lines. Loop exactly t times and read n then k in order.",
+      "wrongExplanations": {
+        "2": "This loops t-1 times, skipping the last case.",
+        "3": "Swapping n and k breaks logic and comparisons."
+      },
+      "hint": "Ensure you read two integers per test case, in the given order.",
+      "isCodeBuilding": true,
+      "codeSnippet": "out_lines = []\nfor _ in range(t):\n    n = int(next(it)); k = int(next(it))",
+      "codeLabel": "Loop and read n,k"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Insert the impossibility check based on n and k.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "if k*k < n:\n    out_lines.append(\"IMPOSSIBLE\")\n    continue",
+          "isCode": true
+        },
+        {
+          "label": "if k*k <= n:\n    out_lines.append(\"IMPOSSIBLE\")\n    continue",
+          "isCode": true
+        },
+        {
+          "label": "if n < k*k:\n    out_lines.append(\"IMPOSSIBLE\")\n    continue",
+          "isCode": true
+        },
+        {
+          "label": "if k < n*k:\n    out_lines.append(\"IMPOSSIBLE\")\n    continue",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "A solution exists iff n ≤ k²; thus when k*k < n, print IMPOSSIBLE.",
+      "wrongExplanations": {
+        "1": "This rejects valid boundary cases where n = k².",
+        "2": "This flips the condition and rejects many solvable cases."
+      },
+      "hint": "Boundary n = k² should still be solvable.",
+      "isCodeBuilding": true,
+      "codeSnippet": "if k*k < n:\n    out_lines.append(\"IMPOSSIBLE\")\n    continue",
+      "codeLabel": "Feasibility check"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Initialize the current permutation container and compute the number of groups g when group size is k.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "res = []\ng = (n + k - 1) // k",
+          "isCode": true
+        },
+        {
+          "label": "res = {}\ng = n // k",
+          "isCode": true
+        },
+        {
+          "label": "res = []\ng = n // k",
+          "isCode": true
+        },
+        {
+          "label": "res = []\ng = int(n / k)  # may truncate incorrectly",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Use a list for the permutation, and compute ceiling(n/k) via (n + k - 1)//k.",
+      "wrongExplanations": {
+        "2": "Floor division misses the last partial group when n is not a multiple of k."
+      },
+      "hint": "We need ceiling division to include any partial last group.",
+      "isCodeBuilding": true,
+      "codeSnippet": "res = []\ng = (n + k - 1) // k",
+      "codeLabel": "Init res and groups"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Loop over groups and compute the start and end of each group (1-indexed values).",
+      "diagram": "Group i (0-based): values from i*k+1 up to min(n, (i+1)*k)",
+      "options": [
+        {
+          "label": "for i in range(g):\n    start = i*k + 1\n    end = min(n, (i+1)*k)",
+          "isCode": true
+        },
+        {
+          "label": "for i in range(g):\n    start = i*k\n    end = min(n, i*k + k - 1)",
+          "isCode": true
+        },
+        {
+          "label": "for i in range(1, g+1):\n    start = i*k\n    end = min(n, i*k + k)",
+          "isCode": true
+        },
+        {
+          "label": "for i in range(g):\n    start = max(1, i*k)\n    end = (i+1)*k",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Group i should cover [i*k+1, min(n,(i+1)*k)] in 1..n.",
+      "wrongExplanations": {
+        "1": "This uses 0-based values and misses the last element of each group.",
+        "2": "Ranges shift incorrectly and may exceed n."
+      },
+      "hint": "First group starts at 1 and ends at min(n, k).",
+      "isCodeBuilding": true,
+      "codeSnippet": "for i in range(g):\n    start = i*k + 1\n    end = min(n, (i+1)*k)",
+      "codeLabel": "Group bounds"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "Append each group's numbers in decreasing order to bound the decreasing subsequence within a group and the increasing subsequence across groups.",
+      "diagram": "Within a group [start..end], we want end, end-1, ..., start.",
+      "options": [
+        {
+          "label": "for x in range(end, start-1, -1):\n    res.append(str(x))",
+          "isCode": true
+        },
+        {
+          "label": "for x in range(start, end+1):\n    res.append(str(x))",
+          "isCode": true
+        },
+        {
+          "label": "for x in range(end-1, start-1, -1):\n    res.append(str(x))",
+          "isCode": true
+        },
+        {
+          "label": "for x in range(end, start-1, -1):\n    res.append(x)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "range(end, start-1, -1) includes both endpoints in decreasing order; append as strings for joining later.",
+      "wrongExplanations": {
+        "1": "This is increasing order; we need decreasing within each group.",
+        "3": "We'll join with spaces later, so elements should be strings."
+      },
+      "hint": "Python ranges exclude the stop; use start-1 to include start.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    for x in range(end, start-1, -1):\n        res.append(str(x))",
+      "codeLabel": "Fill group decreasing"
+    },
+    {
+      "id": "q22",
+      "phase": "Writing the Code",
+      "questionText": "Finish by storing the line for this test and printing all lines at the end.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    out_lines.append(\" \".join(res))\nsys.stdout.write(\"\\n\".join(out_lines))",
+          "isCode": true
+        },
+        {
+          "label": "out_lines.append(\" \".join(res))\nprint(\"\\n\".join(out_lines))",
+          "isCode": true
+        },
+        {
+          "label": "    out_lines.append(\"\".join(res))\nsys.stdout.write(\"\\n\".join(out_lines))",
+          "isCode": true
+        },
+        {
+          "label": "    print(\" \".join(res))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Append the space-joined permutation inside the loop and write all lines once at the end.",
+      "wrongExplanations": {
+        "2": "Joining without spaces merges numbers together.",
+        "4": "Printing inside the loop conflicts with collecting all outputs first."
+      },
+      "hint": "Keep printing outside the test loop to match the buffered approach.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    out_lines.append(\" \".join(res))\nsys.stdout.write(\"\\n\".join(out_lines))",
+      "codeLabel": "Append and print"
+    },
+    {
+      "id": "q23",
+      "phase": "Verifying the Solution",
+      "questionText": "Given input:\n1\n5 3\nWhat does the program print (using the described scheme)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "3 2 1 5 4",
+          "isCode": false
+        },
+        {
+          "label": "2 1 4 5 3",
+          "isCode": false
+        },
+        {
+          "label": "IMPOSSIBLE",
+          "isCode": false
+        },
+        {
+          "label": "1 2 3 4 5",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Groups: [1,2,3]→3 2 1 and [4,5]→5 4, so print 3 2 1 5 4.",
+      "wrongExplanations": {
+        "1": "This is valid but not produced by the block-reversing scheme."
+      },
+      "hint": "Form groups of size 3: [1..3] and [4..5]."
+    },
+    {
+      "id": "q24",
+      "phase": "Verifying the Solution",
+      "questionText": "Given input:\n1\n5 2\nWhat does the program print?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "IMPOSSIBLE",
+          "isCode": false
+        },
+        {
+          "label": "2 1 4 3 5",
+          "isCode": false
+        },
+        {
+          "label": "1 2 3 4 5",
+          "isCode": false
+        },
+        {
+          "label": "3 2 1 5 4",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Since 5 > 2², the check triggers and prints IMPOSSIBLE.",
+      "wrongExplanations": {
+        "3": "This corresponds to k=3, not k=2."
+      },
+      "hint": "Compare n with k²."
+    },
+    {
+      "id": "q25",
+      "phase": "Verifying the Solution",
+      "questionText": "Given input:\n1\n7 7\nWhat will the program print using the scheme?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "7 6 5 4 3 2 1",
+          "isCode": false
+        },
+        {
+          "label": "1 2 3 4 5 6 7",
+          "isCode": false
+        },
+        {
+          "label": "IMPOSSIBLE",
+          "isCode": false
+        },
+        {
+          "label": "7 5 3 1 2 4 6",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "One group of size 7 is reversed to 7 6 5 4 3 2 1.",
+      "wrongExplanations": {
+        "1": "Also valid overall, but not the specific output of reversing each group."
+      },
+      "hint": "How many groups when k=n?"
+    },
+    {
+      "id": "q26",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the time complexity per test case to construct and print the permutation when a solution exists?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(k^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(1)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We visit and output each number exactly once: O(n).",
+      "wrongExplanations": {
+        "1": "No sorting or logarithmic factors are used."
+      },
+      "hint": "How many elements are appended and printed?"
+    },
+    {
+      "id": "q27",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the additional space used per test case while constructing one permutation line (excluding input and final output storage)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(k)",
+          "isCode": false
+        },
+        {
+          "label": "O(1)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We build a list of n elements for the permutation line: O(n).",
+      "wrongExplanations": {
+        "2": "We store all n elements before joining."
+      },
+      "hint": "Consider the 'res' list length."
+    },
+    {
+      "id": "q28",
+      "phase": "Analyzing Complexity",
+      "questionText": "Which condition correctly identifies when to print IMPOSSIBLE?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "When n > k².",
+          "isCode": false
+        },
+        {
+          "label": "When n ≥ k².",
+          "isCode": false
+        },
+        {
+          "label": "When n < k.",
+          "isCode": false
+        },
+        {
+          "label": "When k is odd and n is even.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "A solution exists iff n ≤ k²; strictly greater makes it impossible.",
+      "wrongExplanations": {
+        "1": "n = k² is still solvable.",
+        "3": "Parity does not affect feasibility here."
+      },
+      "hint": "Relate feasibility to how many elements k groups of size k can cover."
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\ndata = sys.stdin.read().strip().split()\nit = iter(data)",
+    "t = int(next(it))",
+    "out_lines = []\nfor _ in range(t):\n    n = int(next(it)); k = int(next(it))",
+    "if k*k < n:\n    out_lines.append(\"IMPOSSIBLE\")\n    continue",
+    "res = []\ng = (n + k - 1) // k",
+    "for i in range(g):\n    start = i*k + 1\n    end = min(n, (i+1)*k)",
+    "    for x in range(end, start-1, -1):\n        res.append(str(x))",
+    "    out_lines.append(\" \".join(res))\nsys.stdout.write(\"\\n\".join(out_lines))"
+  ],
+  "reasoningChain": [
+    {
+      "question": "What is the longest monotone subsequence length in a given array?",
+      "insight": "Understanding that we must control both increasing and decreasing subsequences; the target is max(LIS, LDS)."
+    },
+    {
+      "question": "How can grouping elements bound increasing and decreasing subsequences separately?",
+      "insight": "Arranging groups in increasing order and reversing each group bounds LIS by group count and LDS by group size."
+    },
+    {
+      "question": "When is it feasible to keep both monotone subsequences ≤ k?",
+      "insight": "Feasibility requires both group size ≤ k and group count ≤ k, implying n ≤ k²."
+    },
+    {
+      "question": "How to achieve exactly k as the longest monotone length?",
+      "insight": "Use group size k so an entire group provides a decreasing subsequence of length k, while LIS ≤ ⌈n/k⌉ ≤ k."
+    },
+    {
+      "question": "How to implement the construction efficiently for multiple test cases?",
+      "insight": "For each test, check n ≤ k², then iterate groups of size k and append each group in decreasing order, outputting space-separated lines."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1414,
+    "output_tokens": 18018,
+    "input_cost": 0.001767,
+    "output_cost": 0.18018,
+    "total_cost": 0.181948
+  }
+}

@@ -1,0 +1,994 @@
+{
+  "id": "parcel-delivery-min-cost-k-units",
+  "title": "Parcel Delivery",
+  "difficulty": "hard",
+  "tags": [
+    "advanced",
+    "graphs",
+    "flow",
+    "shortest-path"
+  ],
+  "estimatedMinutes": 60,
+  "language": "python",
+  "description": "You are given n cities and m directed routes. Each route from city a to city b can carry at most r parcels and has a per-parcel cost c. You need to send k parcels from city 1 (Syrjälä) to city n (Lehmälä) with minimum total cost.\n\nInput:\n- First line: n m k\n- Next m lines: a b r c (1-indexed cities)\n\nOutput:\n- One integer: the minimum total cost to send k parcels, or -1 if it is impossible.\n\nThe sum cost of a path is the sum of per-parcel costs over its edges, multiplied by the number of parcels sent along that path, respecting capacities.",
+  "examples": [
+    {
+      "input": "4 5 3\n1 2 5 100\n1 3 10 50\n1 4 7 500\n2 4 8 350\n3 4 2 100",
+      "output": "750",
+      "explanation": "Send 2 parcels along 1→3→4 (50+100 each = 150 per parcel) and 1 parcel along 1→2→4 (100+350 = 450). Total = 2*150 + 450 = 750."
+    }
+  ],
+  "constraints": [
+    "2 ≤ n ≤ 500",
+    "1 ≤ m ≤ 1000",
+    "1 ≤ k ≤ 100",
+    "1 ≤ a,b ≤ n",
+    "1 ≤ r,c ≤ 1000"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "If you send 3 parcels directly from city 1 to city 4 using a single route whose per-parcel cost is 500, what is the total cost?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "500",
+          "isCode": false
+        },
+        {
+          "label": "1000",
+          "isCode": false
+        },
+        {
+          "label": "1500",
+          "isCode": false
+        },
+        {
+          "label": "2000",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Per-parcel cost is 500, so 3 parcels cost 3*500=1500. Other options misinterpret per-parcel vs total.",
+      "wrongExplanations": {
+        "1": "1000 would be correct if the per-parcel cost was ~333; here it's 500.",
+        "0": "500 is the cost of one parcel, not all three."
+      },
+      "hint": "Multiply the per-parcel cost by the number of parcels.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "Consider paths from city 1 to city 4:\n- 1→2→4 with costs 100 and 350\n- 1→3→4 with costs 50 and 100\nWhat is the per-parcel cost of the cheaper path?",
+      "diagram": "1\n|100      50|\n2----350----4\n \\          /\n  \\        /\n    3--100",
+      "options": [
+        {
+          "label": "450",
+          "isCode": false
+        },
+        {
+          "label": "150",
+          "isCode": false
+        },
+        {
+          "label": "200",
+          "isCode": false
+        },
+        {
+          "label": "50",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Path 1→3→4 costs 50+100=150 per parcel; 1→2→4 costs 100+350=450.",
+      "wrongExplanations": {
+        "0": "450 is the more expensive path 1→2→4.",
+        "3": "50 ignores the second edge on 1→3→4."
+      },
+      "hint": "Sum edge costs along each path.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "Using the same graph, suppose the route 3→4 has capacity r=2 and you need to send k=3 parcels. What is the minimum total cost?",
+      "diagram": "1\n|100      50|\n2----350----4\n \\          /\n  \\        /\n    3--100 (capacity 2)",
+      "options": [
+        {
+          "label": "450",
+          "isCode": false
+        },
+        {
+          "label": "600",
+          "isCode": false
+        },
+        {
+          "label": "750",
+          "isCode": false
+        },
+        {
+          "label": "900",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Send 2 parcels via 1→3→4 (2*150=300) and 1 parcel via 1→2→4 (450). Total=750.",
+      "wrongExplanations": {
+        "1": "600 would be 2*150+1*300, but 1→2→4 costs 450, not 300.",
+        "0": "450 is only the cost for one parcel via 1→2→4."
+      },
+      "hint": "Split parcels across paths respecting capacities.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "If there is no route or combination of routes from city 1 to city n that can carry k parcels, what should the output be?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "-1",
+          "isCode": false
+        },
+        {
+          "label": "The cost of the best partial shipment",
+          "isCode": false
+        },
+        {
+          "label": "n",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "The problem asks to print -1 if there is no solution. Partial shipments are not allowed.",
+      "wrongExplanations": {
+        "2": "Partial shipments aren't accepted; the problem requires sending all k parcels.",
+        "0": "0 would imply costless shipment, which isn't correct when impossible."
+      },
+      "hint": "Check the Output section of the problem statement.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Understanding the Problem",
+      "questionText": "Total cost over multiple paths is computed by:",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Sum over paths of (number of parcels on the path × sum of per-parcel edge costs along the path)",
+          "isCode": false
+        },
+        {
+          "label": "Sum of capacities used",
+          "isCode": false
+        },
+        {
+          "label": "Sum of unique edge costs used regardless of parcel count",
+          "isCode": false
+        },
+        {
+          "label": "Sum of per-parcel costs on the cheapest edge only",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each parcel pays the sum of edge costs along its path. Multiply by parcels on that path, then sum.",
+      "wrongExplanations": {
+        "2": "Edge costs must be counted per parcel; not just whether an edge is used.",
+        "1": "Capacity used isn't a cost; it's a limit."
+      },
+      "hint": "Costs are per parcel on each edge.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "Which plan is more promising for minimizing total cost with capacities?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Try all ways to assign parcels to all possible paths and pick the cheapest",
+          "isCode": false
+        },
+        {
+          "label": "Repeatedly find the cheapest path from 1 to n under current capacities and send as much as possible along it",
+          "isCode": false
+        },
+        {
+          "label": "Pick any path and send all k parcels on it if possible",
+          "isCode": false
+        },
+        {
+          "label": "Send parcels greedily on the first route listed until full, then move to the next",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Repeated cheapest paths adapt to capacities and avoid exponential search. Other choices ignore costs or explode in complexity.",
+      "wrongExplanations": {
+        "0": "Number of assignments grows combinatorially and is infeasible.",
+        "2": "Single-path choice may violate capacity or be costlier than splitting."
+      },
+      "hint": "Use a path-by-path approach that adapts after each shipment.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "Suppose earlier parcels used a path that turns out suboptimal after later routes fill. How can we allow reassignments to reduce total cost?",
+      "diagram": "Forward edge (a->b) cost c; backward edge (b->a) cost -c to undo",
+      "options": [
+        {
+          "label": "Disallow any changes to earlier choices",
+          "isCode": false
+        },
+        {
+          "label": "Add a backward edge (b→a) with capacity equal to used flow and per-parcel cost −c to undo at the same magnitude",
+          "isCode": false
+        },
+        {
+          "label": "Only consider unused routes; never revisit used ones",
+          "isCode": false
+        },
+        {
+          "label": "Restart the whole computation from scratch each time",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "A backward edge lets you reduce previously used amount and recover its cost, enabling better combinations.",
+      "wrongExplanations": {
+        "0": "This forbids corrections and can miss cheaper solutions.",
+        "2": "Ignoring used routes prevents beneficial reroutes."
+      },
+      "hint": "Model the possibility of undoing previous flow with an opposite-direction edge.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Exploring Approaches",
+      "questionText": "Backward edges have negative costs. When searching for the cheapest path, how can we safely use a min-heap of tentative distances?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Use the original costs directly; negative edges won't matter",
+          "isCode": false
+        },
+        {
+          "label": "Adjust each edge's effective cost by an offset: new_cost = cost + offset[u] − offset[v] so that explored effective costs are nonnegative each round",
+          "isCode": false
+        },
+        {
+          "label": "Ignore backward edges during search",
+          "isCode": false
+        },
+        {
+          "label": "Randomly reorder nodes to avoid negative edges",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "With suitable offsets, effective edge costs become nonnegative, making min-heap-based relaxation valid.",
+      "wrongExplanations": {
+        "0": "Negative edges can break min-heap-related assumptions on relaxation order.",
+        "2": "Ignoring backward edges blocks necessary corrections."
+      },
+      "hint": "Use a node-based offset so effective costs are ≥ 0.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "How should each original route (a→b, capacity r, cost c) be represented initially in the working graph?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Only a forward edge a→b with capacity r and cost c",
+          "isCode": false
+        },
+        {
+          "label": "A forward edge a→b (cap r, cost c) and a backward edge b→a (cap 0, cost −c)",
+          "isCode": false
+        },
+        {
+          "label": "Two forward edges a→b: one with cap r, one with cap 0",
+          "isCode": false
+        },
+        {
+          "label": "Only a backward edge b→a with cap r and cost −c",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Start with available forward capacity and no ability to undo yet; backward cost reflects undoing the forward cost.",
+      "wrongExplanations": {
+        "0": "This disallows undoing used capacity later.",
+        "3": "We must allow sending parcels forward initially."
+      },
+      "hint": "Include both directions with appropriate initial capacities.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "After sending x parcels through edge u→v (forward), how do capacities change?",
+      "diagram": "u --(cap f, cost c)--> v; v --(cap b, cost -c)--> u",
+      "options": [
+        {
+          "label": "Increase forward cap by x; backward cap unchanged",
+          "isCode": false
+        },
+        {
+          "label": "Decrease forward cap by x; increase backward cap by x",
+          "isCode": false
+        },
+        {
+          "label": "Decrease both caps by x",
+          "isCode": false
+        },
+        {
+          "label": "Backward cap decreases by x; forward cap unchanged",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Forward residual capacity decreases by used amount; you gain ability to undo by increasing backward capacity.",
+      "wrongExplanations": {
+        "0": "Forward capacity should reduce after use.",
+        "2": "Backward capacity should increase to allow undo."
+      },
+      "hint": "Think in terms of remaining ability and undo ability.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "What initial values for the offset array (one per city) make effective costs nonnegative for the first search?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "All zeros",
+          "isCode": false
+        },
+        {
+          "label": "Large positive numbers",
+          "isCode": false
+        },
+        {
+          "label": "Random values",
+          "isCode": false
+        },
+        {
+          "label": "All negatives",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Original costs are nonnegative, and backward edges start with zero capacity. Zero offsets are fine.",
+      "wrongExplanations": {
+        "3": "Negative offsets aren't needed initially and can complicate effective costs.",
+        "1": "Large offsets do not help and may overflow if mishandled."
+      },
+      "hint": "Start simple; adjust after a search.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "After computing shortest distances dist[v] from the source using effective costs, how should offsets be updated?",
+      "diagram": "offset'[v] = offset[v] + dist[v] (if reachable)",
+      "options": [
+        {
+          "label": "offset[v] = dist[v]",
+          "isCode": false
+        },
+        {
+          "label": "offset[v] += dist[v] for reachable v; leave others unchanged",
+          "isCode": false
+        },
+        {
+          "label": "offset[v] -= dist[v]",
+          "isCode": false
+        },
+        {
+          "label": "Do not change offsets",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Adding dist[v] keeps effective edge costs nonnegative next round and preserves original path costs.",
+      "wrongExplanations": {
+        "0": "Replacing offsets can break relations accumulated over rounds.",
+        "3": "Offsets must adapt to maintain nonnegative effective costs."
+      },
+      "hint": "Accumulate the current distances onto the offsets.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "How does the sum of original edge costs along a path relate to the sum of effective costs (using offsets) along the same path?",
+      "diagram": "Sum(original) = Sum(effective) + offset[s] − offset[t]",
+      "options": [
+        {
+          "label": "Sum(original) = Sum(effective) − offset[s] − offset[t]",
+          "isCode": false
+        },
+        {
+          "label": "Sum(original) = Sum(effective) + offset[s] − offset[t]",
+          "isCode": false
+        },
+        {
+          "label": "Sum(original) = Sum(effective) + offset[t] − offset[s]",
+          "isCode": false
+        },
+        {
+          "label": "They are always equal regardless of offsets",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Effective cost adds offset[u] and subtracts offset[v] per edge; along a path this telescopes to offset[s]−offset[t].",
+      "wrongExplanations": {
+        "3": "Offsets alter effective sums by a telescoping term; not always equal.",
+        "0": "Signs are incorrect; offsets telescope as s minus t."
+      },
+      "hint": "Consider telescoping of offset terms along consecutive edges.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Building the Idea",
+      "questionText": "After finding a cheapest path, how many parcels should be sent along it in one augmentation?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Exactly 1 parcel",
+          "isCode": false
+        },
+        {
+          "label": "As many as possible, i.e., min(remaining needed, minimum residual capacity on the path)",
+          "isCode": false
+        },
+        {
+          "label": "All remaining parcels regardless of capacity",
+          "isCode": false
+        },
+        {
+          "label": "None; only update offsets",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Send the maximum allowable by both remaining demand and bottleneck capacity on the path.",
+      "wrongExplanations": {
+        "0": "Sending only 1 can be too slow and isn't necessary with linear costs.",
+        "2": "Cannot exceed path capacities."
+      },
+      "hint": "Constrained by both remaining demand and path bottlenecks.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Start with imports, input helper, and main entry. Pick the correct snippet.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\nimport heapq\n\ndef read_ints():\n    return list(map(int, sys.stdin.read().split()))\n\ndef main():\n    data = read_ints()\n    if not data:\n        return",
+          "isCode": true
+        },
+        {
+          "label": "import sys\n\n\ndef read_ints():\n    return sys.stdin.readline().split()\n\ndef main():\n    pass",
+          "isCode": true
+        },
+        {
+          "label": "import heapq\n\ndef read_ints():\n    return list(map(int, input().split()))\n\ndef main():\n    data = read_ints()",
+          "isCode": true
+        },
+        {
+          "label": "def read_ints():\n    return []\n\ndef main():\n    data = read_ints()",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We read all integers at once from stdin for performance and exit early if empty.",
+      "wrongExplanations": {
+        "1": "Only reading one line won't get all m lines.",
+        "2": "Using input() repeatedly may be slower and complicates parsing all lines."
+      },
+      "hint": "We need all numbers from stdin efficiently.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\nimport heapq\n\ndef read_ints():\n    return list(map(int, sys.stdin.read().split()))\n\ndef main():\n    data = read_ints()\n    if not data:\n        return",
+      "codeLabel": "Imports and input helper"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Parse the first line and create the graph structure. Choose the correct snippet.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    it = iter(data)\n    n = next(it); m = next(it); k = next(it)\n    g = [[] for _ in range(n)]",
+          "isCode": true
+        },
+        {
+          "label": "    n, m, k = data[:3]\n    g = [0]*n",
+          "isCode": true
+        },
+        {
+          "label": "    n = int(data[0]); m = int(data[1]); k = int(data[2])\n    g = [None for _ in range(m)]",
+          "isCode": true
+        },
+        {
+          "label": "    n, m, k = map(int, sys.stdin.readline().split())\n    g = []",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Use an iterator over the flat int list; adjacency list per node is best.",
+      "wrongExplanations": {
+        "1": "g must be adjacency lists, not zeros.",
+        "3": "We are already reading from data; mixing methods complicates parsing."
+      },
+      "hint": "Use a list of lists for adjacency.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    it = iter(data)\n    n = next(it); m = next(it); k = next(it)\n    g = [[] for _ in range(n)]",
+      "codeLabel": "Parse n,m,k and init graph"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Define add_edge to add forward and backward edges correctly.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    def add_edge(u, v, cap, cost):\n        g[u].append([v, len(g[v]), cap, cost])\n        g[v].append([u, len(g[u]) - 1, 0, -cost])",
+          "isCode": true
+        },
+        {
+          "label": "    def add_edge(u, v, cap, cost):\n        g[u].append([v, len(g[v]), cap, cost])\n        g[v].append([u, len(g[u]), 0, cost])",
+          "isCode": true
+        },
+        {
+          "label": "    def add_edge(u, v, cap, cost):\n        g[u].append([v, 0, cap, cost])\n        g[v].append([u, 0, 0, -cost])",
+          "isCode": true
+        },
+        {
+          "label": "    def add_edge(u, v, cap, cost):\n        g[u].append([v, len(g[u]), cap, cost])\n        g[v].append([u, len(g[v]) - 1, 0, -cost])",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Reverse edge index must point to the counterpart; reverse cost is -cost; reverse capacity starts at 0.",
+      "wrongExplanations": {
+        "1": "Reverse edge cost must be -cost to undo, not +cost.",
+        "3": "Reverse index stored in forward edge should be the index in g[v], not g[u]."
+      },
+      "hint": "The reverse index should point to the exact pair edge.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    def add_edge(u, v, cap, cost):\n        g[u].append([v, len(g[v]), cap, cost])\n        g[v].append([u, len(g[u]) - 1, 0, -cost])",
+      "codeLabel": "Edge insertion"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Read m routes and add edges (remember 1-indexed input).",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    for _ in range(m):\n        a = next(it); b = next(it); r = next(it); c = next(it)\n        add_edge(a-1, b-1, r, c)",
+          "isCode": true
+        },
+        {
+          "label": "    for _ in range(m):\n        a = next(it); b = next(it); r = next(it); c = next(it)\n        add_edge(a, b, r, c)",
+          "isCode": true
+        },
+        {
+          "label": "    for _ in range(n):\n        a = next(it); b = next(it); r = next(it); c = next(it)\n        add_edge(a-1, b-1, r, c)",
+          "isCode": true
+        },
+        {
+          "label": "    for _ in range(m):\n        a, b, r, c = map(int, sys.stdin.readline().split())\n        add_edge(a-1, b-1, r, c)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Loop m times and convert to 0-index. We already read from data.",
+      "wrongExplanations": {
+        "1": "Input is 1-indexed; must convert to 0-index for arrays.",
+        "3": "Mixing direct stdin with pre-read data breaks parsing."
+      },
+      "hint": "Use the iterator and subtract 1 from city indices.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    for _ in range(m):\n        a = next(it); b = next(it); r = next(it); c = next(it)\n        add_edge(a-1, b-1, r, c)",
+      "codeLabel": "Read routes"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Initialize source/target, infinity, offsets, total cost, and current flow.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    s = 0; t = n - 1\n    INF = 10**18\n    h = [0] * n\n    res = 0\n    flow = 0",
+          "isCode": true
+        },
+        {
+          "label": "    s = 1; t = n\n    INF = 10**9\n    h = [1] * n\n    res = 0\n    flow = 0",
+          "isCode": true
+        },
+        {
+          "label": "    s = 0; t = n - 1\n    INF = 10**9\n    h = [0] * n\n    res = 1\n    flow = 0",
+          "isCode": true
+        },
+        {
+          "label": "    s = 0; t = n - 2\n    INF = 10**18\n    h = [0] * n\n    res = 0\n    flow = 0",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Cities are 0-indexed: source 0, target n−1; large INF; offsets start at zero; res and flow start at zero.",
+      "wrongExplanations": {
+        "1": "Indices must be 0-based; offsets start at 0.",
+        "3": "Target must be n−1 (city n)."
+      },
+      "hint": "Match the 1-indexed cities to 0-indexed positions.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    s = 0; t = n - 1\n    INF = 10**18\n    h = [0] * n\n    res = 0\n    flow = 0",
+      "codeLabel": "Initialization"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Build the main loop and path search with effective costs. Choose the correct snippet.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    while flow < k:\n        dist = [INF] * n\n        dist[s] = 0\n        prevv = [-1] * n\n        preve = [-1] * n\n        pq = [(0, s)]\n        while pq:\n            d, v = heapq.heappop(pq)\n            if d != dist[v]:\n                continue\n            for i, e in enumerate(g[v]):\n                if e[2] > 0:\n                    nd = d + e[3] + h[v] - h[e[0]]\n                    if nd < dist[e[0]]:\n                        dist[e[0]] = nd\n                        prevv[e[0]] = v\n                        preve[e[0]] = i\n                        heapq.heappush(pq, (nd, e[0]))",
+          "isCode": true
+        },
+        {
+          "label": "    while flow < k:\n        dist = [INF] * n\n        prevv = [0] * n\n        preve = [0] * n\n        pq = [(0, s)]\n        while pq:\n            d, v = heapq.heappop(pq)\n            for i, e in enumerate(g[v]):\n                nd = d + e[3]\n                if nd <= dist[e[0]]:\n                    dist[e[0]] = nd\n                    prevv[e[0]] = v\n                    preve[e[0]] = i\n                    heapq.heappush(pq, (nd, e[0]))",
+          "isCode": true
+        },
+        {
+          "label": "    while flow <= k:\n        dist = [INF] * n\n        dist[s] = 1\n        prevv = [-1] * n\n        preve = [-1] * n\n        pq = []\n        for i in range(n):\n            for e in g[i]:\n                pass",
+          "isCode": true
+        },
+        {
+          "label": "    while True:\n        dist = [0] * n\n        prevv = [-1] * n\n        preve = [-1] * n\n        pq = [(0, s)]\n        break",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Use effective costs nd = d + cost + h[u] − h[v], skip saturated edges, and standard min-heap relaxation with a check.",
+      "wrongExplanations": {
+        "1": "Missing capacity check and offsets; also uses <= risking incorrect predecessors.",
+        "2": "Loop and initializations are incorrect (flow condition, dist[s], empty pq)."
+      },
+      "hint": "Only traverse edges with positive residual capacity and include offsets.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    while flow < k:\n        dist = [INF] * n\n        dist[s] = 0\n        prevv = [-1] * n\n        preve = [-1] * n\n        pq = [(0, s)]\n        while pq:\n            d, v = heapq.heappop(pq)\n            if d != dist[v]:\n                continue\n            for i, e in enumerate(g[v]):\n                if e[2] > 0:\n                    nd = d + e[3] + h[v] - h[e[0]]\n                    if nd < dist[e[0]]:\n                        dist[e[0]] = nd\n                        prevv[e[0]] = v\n                        preve[e[0]] = i\n                        heapq.heappush(pq, (nd, e[0]))",
+      "codeLabel": "Path search loop"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "Handle the case when no path exists and update offsets, then determine augmentation amount.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "        if dist[t] == INF:\n            print(-1)\n            return\n        for v in range(n):\n            if dist[v] < INF:\n                h[v] += dist[v]\n        addf = k - flow\n        v = t\n        while v != s:\n            e = g[prevv[v]][preve[v]]\n            addf = min(addf, e[2])\n            v = prevv[v]",
+          "isCode": true
+        },
+        {
+          "label": "        if dist[t] == 0:\n            print(-1)\n            return\n        for v in range(n):\n            h[v] = dist[v]\n        addf = 1",
+          "isCode": true
+        },
+        {
+          "label": "        if dist[t] == INF:\n            print(0)\n            return\n        for v in range(n):\n            if dist[v] < INF:\n                h[v] -= dist[v]\n        addf = k",
+          "isCode": true
+        },
+        {
+          "label": "        if dist[t] == INF:\n            pass\n        for v in range(n):\n            h[v] += 1\n        addf = min(k, 1)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Check reachability; add distances to offsets; compute bottleneck addf along the path from t to s.",
+      "wrongExplanations": {
+        "1": "dist[t]==0 is wrong; offsets must accumulate, not overwrite.",
+        "3": "Offsets shouldn't just increment by 1; addf should reflect bottlenecks."
+      },
+      "hint": "Use dist[t]==INF to detect no path; walk back via prev arrays to find min capacity.",
+      "isCodeBuilding": true,
+      "codeSnippet": "        if dist[t] == INF:\n            print(-1)\n            return\n        for v in range(n):\n            if dist[v] < INF:\n                h[v] += dist[v]\n        addf = k - flow\n        v = t\n        while v != s:\n            e = g[prevv[v]][preve[v]]\n            addf = min(addf, e[2])\n            v = prevv[v]",
+      "codeLabel": "Offsets and bottleneck"
+    },
+    {
+      "id": "q22",
+      "phase": "Writing the Code",
+      "questionText": "Augment flow, add to total cost, and update residual capacities.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "        flow += addf\n        res += addf * h[t]\n        v = t\n        while v != s:\n            e = g[prevv[v]][preve[v]]\n            e[2] -= addf\n            rev = e[1]\n            g[v][rev][2] += addf\n            v = prevv[v]",
+          "isCode": true
+        },
+        {
+          "label": "        flow = addf\n        res += addf * dist[t]\n        v = t\n        while v != s:\n            e = g[prevv[v]][preve[v]]\n            e[2] += addf\n            rev = e[1]\n            g[v][rev][2] -= addf\n            v = prevv[v]",
+          "isCode": true
+        },
+        {
+          "label": "        flow += addf\n        res += h[s] * addf\n        v = t\n        while v != s:\n            e = g[prevv[v]][preve[v]]\n            v = prevv[v]",
+          "isCode": true
+        },
+        {
+          "label": "        flow += 1\n        res += h[t]\n        v = s\n        while v != t:\n            e = g[v][0]\n            e[2] -= 1\n            v += 1",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Increase flow by addf; total cost increases by addf × h[t]; reduce forward cap and increase reverse cap along the path.",
+      "wrongExplanations": {
+        "1": "Forward capacity must decrease and reverse increase; also res uses h[t] after offset update.",
+        "2": "Skipping capacity updates breaks residual graph."
+      },
+      "hint": "Update both cost and capacities along the traced path from t to s.",
+      "isCodeBuilding": true,
+      "codeSnippet": "        flow += addf\n        res += addf * h[t]\n        v = t\n        while v != s:\n            e = g[prevv[v]][preve[v]]\n            e[2] -= addf\n            rev = e[1]\n            g[v][rev][2] += addf\n            v = prevv[v]",
+      "codeLabel": "Augment and update residuals"
+    },
+    {
+      "id": "q23",
+      "phase": "Writing the Code",
+      "questionText": "Finish by printing the result and adding the standard entry point.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    print(res)\n\nif __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "    print(flow)\n\nif __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "    print(h[t])\n\nif __name__ == \"__main__\":\n    pass",
+          "isCode": true
+        },
+        {
+          "label": "    print(res)\n\nmain()",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We should output the minimum total cost and call main under the usual guard.",
+      "wrongExplanations": {
+        "1": "Printing flow prints k, not the total cost.",
+        "3": "Missing the guard can cause issues if imported."
+      },
+      "hint": "Print the final total cost and use the common Python main guard.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    print(res)\n\nif __name__ == \"__main__\":\n    main()",
+      "codeLabel": "Output and entry point"
+    },
+    {
+      "id": "q24",
+      "phase": "Verifying the Solution",
+      "questionText": "Run the code conceptually on the sample. On the first augmentation, what path is chosen and how many parcels are sent?",
+      "diagram": "Sample graph from the example",
+      "options": [
+        {
+          "label": "Path 1→3→4; send 2 parcels (bottleneck at 3→4)",
+          "isCode": false
+        },
+        {
+          "label": "Path 1→2→4; send 3 parcels",
+          "isCode": false
+        },
+        {
+          "label": "Path 1→3→4; send 3 parcels",
+          "isCode": false
+        },
+        {
+          "label": "Path 1→4; send 1 parcel",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Cheapest path is 1→3→4 with capacity 2 on 3→4; send min(3,2)=2.",
+      "wrongExplanations": {
+        "2": "3→4 has capacity 2, limiting this path.",
+        "1": "1→2→4 is costlier and wasn't chosen first."
+      },
+      "hint": "Find the cheapest path and apply the bottleneck rule.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Verifying the Solution",
+      "questionText": "After the first augmentation, what is the remaining number of parcels and the next path chosen?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Remaining 1 parcel; path 1→2→4",
+          "isCode": false
+        },
+        {
+          "label": "Remaining 1 parcel; path 1→3→4",
+          "isCode": false
+        },
+        {
+          "label": "Remaining 2 parcels; path 1→2→4",
+          "isCode": false
+        },
+        {
+          "label": "Remaining 1 parcel; path 1→4",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "1 parcel remains; 3→4 capacity is exhausted, so choose 1→2→4 next.",
+      "wrongExplanations": {
+        "1": "3→4 capacity is now 0 and cannot carry another parcel."
+      },
+      "hint": "Check updated residual capacities.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the expected time complexity in terms of k, m, and n for this approach?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(k * m log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(m^2 + n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(k * n * m^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(k + m + n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each augmentation finds a cheapest path using a min-heap over effective costs, about O(m log n), repeated up to k times.",
+      "wrongExplanations": {
+        "3": "This ignores the path search cost per augmentation.",
+        "1": "Too pessimistic; does not use a heap-based relaxation."
+      },
+      "hint": "Consider one path search per augmentation.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q27",
+      "phase": "Analyzing Complexity",
+      "questionText": "Space usage and edge cases: which statements are correct?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Space is O(n + m); print -1 if the cheapest path is unreachable in any augmentation",
+          "isCode": false
+        },
+        {
+          "label": "Space is O(k * m); always print 0 when unreachable",
+          "isCode": false
+        },
+        {
+          "label": "Space is O(n^2); unreachable cases should be skipped without output",
+          "isCode": false
+        },
+        {
+          "label": "Space is O(m^2); unreachable cases should output k",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Adjacency lists with reverse edges use O(n + m); if no path exists when demand remains, print -1.",
+      "wrongExplanations": {
+        "1": "Space does not scale with k like that.",
+        "2": "We must output -1 for unreachable cases."
+      },
+      "hint": "Graph structure dominates space; check the Output rules.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\nimport heapq\n\ndef read_ints():\n    return list(map(int, sys.stdin.read().split()))\n\ndef main():\n    data = read_ints()\n    if not data:\n        return",
+    "    it = iter(data)\n    n = next(it); m = next(it); k = next(it)\n    g = [[] for _ in range(n)]",
+    "    def add_edge(u, v, cap, cost):\n        g[u].append([v, len(g[v]), cap, cost])\n        g[v].append([u, len(g[u]) - 1, 0, -cost])",
+    "    for _ in range(m):\n        a = next(it); b = next(it); r = next(it); c = next(it)\n        add_edge(a-1, b-1, r, c)",
+    "    s = 0; t = n - 1\n    INF = 10**18\n    h = [0] * n\n    res = 0\n    flow = 0",
+    "    while flow < k:\n        dist = [INF] * n\n        dist[s] = 0\n        prevv = [-1] * n\n        preve = [-1] * n\n        pq = [(0, s)]\n        while pq:\n            d, v = heapq.heappop(pq)\n            if d != dist[v]:\n                continue\n            for i, e in enumerate(g[v]):\n                if e[2] > 0:\n                    nd = d + e[3] + h[v] - h[e[0]]\n                    if nd < dist[e[0]]:\n                        dist[e[0]] = nd\n                        prevv[e[0]] = v\n                        preve[e[0]] = i\n                        heapq.heappush(pq, (nd, e[0]))",
+    "        if dist[t] == INF:\n            print(-1)\n            return\n        for v in range(n):\n            if dist[v] < INF:\n                h[v] += dist[v]\n        addf = k - flow\n        v = t\n        while v != s:\n            e = g[prevv[v]][preve[v]]\n            addf = min(addf, e[2])\n            v = prevv[v]",
+    "        flow += addf\n        res += addf * h[t]\n        v = t\n        while v != s:\n            e = g[prevv[v]][preve[v]]\n            e[2] -= addf\n            rev = e[1]\n            g[v][rev][2] += addf\n            v = prevv[v]\n    print(res)\n\nif __name__ == \"__main__\":\n    main()"
+  ],
+  "reasoningChain": [
+    {
+      "question": "What does the total cost mean for multiple parcels across edges?",
+      "insight": "Total cost is the sum of per-parcel edge costs times the number of parcels sent along each edge across all paths."
+    },
+    {
+      "question": "How can we iteratively build a solution under capacities?",
+      "insight": "Send parcels along a cheapest path under current capacities, repeating until all parcels are sent or no path exists."
+    },
+    {
+      "question": "How to correct earlier choices if later a better combination appears?",
+      "insight": "Use backward edges with negative per-parcel cost to allow undoing previously used capacity and reduce total cost."
+    },
+    {
+      "question": "How to safely compute cheapest paths when backward edges have negative costs?",
+      "insight": "Introduce node offsets to form effective edge costs so they are nonnegative in each round; update offsets using current shortest distances."
+    },
+    {
+      "question": "How to compute augmentation and update the residual graph?",
+      "insight": "Augment by the minimum of remaining demand and bottleneck residual capacity on the path; decrease forward capacity and increase backward capacity."
+    },
+    {
+      "question": "How to accumulate the total cost correctly?",
+      "insight": "Add augmentation amount multiplied by the offset at the sink after updating offsets (which reflects the original path cost)."
+    },
+    {
+      "question": "How to terminate and handle impossibility?",
+      "insight": "If the sink is unreachable while demand remains, output -1; otherwise stop after sending k parcels and print the total cost."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1494,
+    "output_tokens": 17587,
+    "input_cost": 0.001868,
+    "output_cost": 0.17587,
+    "total_cost": 0.177737
+  }
+}

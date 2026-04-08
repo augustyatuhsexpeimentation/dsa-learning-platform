@@ -1,0 +1,993 @@
+{
+  "id": "course-schedule-ii-lexicographic-order",
+  "title": "Course Schedule II",
+  "difficulty": "intermediate",
+  "tags": [
+    "graphs",
+    "ordering",
+    "implementation"
+  ],
+  "estimatedMinutes": 60,
+  "language": "python",
+  "description": "You want to complete n courses that have requirements of the form \"course a has to be completed before course b\".\n\nYou want to complete course 1 as soon as possible. If there are several ways to do this, you want then to complete course 2 as soon as possible, and so on.\n\nYour task is to determine the order in which you complete the courses.\n\nInput:\n- First line: two integers n and m — the number of courses and requirements. The courses are numbered 1..n.\n- Next m lines: two integers a and b — course a has to be completed before course b.\n\nYou can assume that there is at least one valid schedule.\n\nOutput:\nPrint one line having n integers: the order in which you complete the courses.",
+  "examples": [
+    {
+      "input": "4 2\n2 1\n2 3\n",
+      "output": "2 1 3 4",
+      "explanation": "Course 2 must precede 1 and 3. Among available courses at each step, take the smallest index to make earlier courses as early as possible."
+    }
+  ],
+  "constraints": [
+    "1 ≤ n ≤ 10^5",
+    "1 ≤ m ≤ 2·10^5",
+    "1 ≤ a,b ≤ n",
+    "At least one valid schedule exists"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "If there are no requirements (n=3, m=0), which order minimizes \"course 1 as soon as possible, then course 2, then course 3\"?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "1 2 3",
+          "isCode": false
+        },
+        {
+          "label": "2 1 3",
+          "isCode": false
+        },
+        {
+          "label": "3 2 1",
+          "isCode": false
+        },
+        {
+          "label": "1 3 2",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "With no requirements, the earliest for course 1 is to take it first, then 2, then 3.",
+      "wrongExplanations": {
+        "1": "Placing 2 before 1 delays course 1 unnecessarily.",
+        "3": "Putting 3 before 2 delays course 2 without any requirement."
+      },
+      "hint": "No constraints means taking smallest index first aligns with the goal.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "Given n=3, m=1 with requirement: 2 1 (2 before 1). What valid order meets the \"as soon as possible\" rule?",
+      "diagram": "2 -> 1\n(no other edges)",
+      "options": [
+        {
+          "label": "2 1 3",
+          "isCode": false
+        },
+        {
+          "label": "1 2 3",
+          "isCode": false
+        },
+        {
+          "label": "2 3 1",
+          "isCode": false
+        },
+        {
+          "label": "3 2 1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "2 must be before 1. Among valid starts, 2 is required first. Then 1, then 3.",
+      "wrongExplanations": {
+        "1": "Violates the requirement: 1 cannot be before 2.",
+        "2": "Delays 1 unnecessarily; 1 can be done immediately after 2."
+      },
+      "hint": "Respect 2 before 1; then place the remaining course.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "Interpret a requirement line \"a b\". Which statement is correct?",
+      "diagram": "a ? b",
+      "options": [
+        {
+          "label": "Course a must be completed before course b",
+          "isCode": false
+        },
+        {
+          "label": "Course b must be completed before course a",
+          "isCode": false
+        },
+        {
+          "label": "Courses a and b must be taken together",
+          "isCode": false
+        },
+        {
+          "label": "Either a or b can precede; it doesn't constrain order",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each line \"a b\" means a must be before b.",
+      "wrongExplanations": {
+        "1": "This reverses the given requirement.",
+        "3": "The line imposes a strict before/after requirement."
+      },
+      "hint": "Read the problem statement wording carefully.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "At some step, multiple courses have no unmet requirements. To satisfy the rule (1 earliest, then 2, ...), which should you choose next?",
+      "diagram": "Available now: {1, 4, 5}",
+      "options": [
+        {
+          "label": "Pick the smallest index among available courses",
+          "isCode": false
+        },
+        {
+          "label": "Pick the largest index to free more courses later",
+          "isCode": false
+        },
+        {
+          "label": "Pick randomly among available courses",
+          "isCode": false
+        },
+        {
+          "label": "Pick the course that appears last in input",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Choosing the smallest index among available keeps earlier courses as early as possible.",
+      "wrongExplanations": {
+        "1": "Picking largest delays earlier-numbered courses.",
+        "2": "Random choice may delay earlier courses unnecessarily."
+      },
+      "hint": "Tie-breaking must favor earlier course numbers.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Understanding the Problem",
+      "questionText": "Consider n=4 with requirements: 1 3 and 2 3 and 3 4. What order follows the rule?",
+      "diagram": "1 -> 3 -> 4\n2 -> 3",
+      "options": [
+        {
+          "label": "1 2 3 4",
+          "isCode": false
+        },
+        {
+          "label": "2 1 3 4",
+          "isCode": false
+        },
+        {
+          "label": "1 3 2 4",
+          "isCode": false
+        },
+        {
+          "label": "2 3 1 4",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Start with {1,2} available; choose 1 first, then 2. Then 3 becomes available, then 4.",
+      "wrongExplanations": {
+        "1": "Choosing 2 first delays course 1 without benefit; both are available.",
+        "2": "3 cannot be before both 1 and 2 are done."
+      },
+      "hint": "At start both 1 and 2 are free; pick the smaller first, then proceed.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "Why is trying all valid orders infeasible here?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "The number of valid orders can grow factorially with n",
+          "isCode": false
+        },
+        {
+          "label": "Because input parsing already takes too long",
+          "isCode": false
+        },
+        {
+          "label": "Because constraints forbid any branching",
+          "isCode": false
+        },
+        {
+          "label": "Because we cannot detect validity of an order efficiently",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "There can be exponentially many valid orders; n up to 1e5 makes enumeration impossible.",
+      "wrongExplanations": {
+        "1": "Parsing isn't the bottleneck; enumerating orders is.",
+        "3": "We can check validity, but enumerating all is too slow."
+      },
+      "hint": "Think about how many ways to arrange items without constraints.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "What information lets us know which courses are currently takeable?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "For each course, the number of prerequisites not yet completed",
+          "isCode": false
+        },
+        {
+          "label": "A record of courses that depend on it",
+          "isCode": false
+        },
+        {
+          "label": "The depth of the course in the graph",
+          "isCode": false
+        },
+        {
+          "label": "The time when it appears in input",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Courses with zero unmet prerequisites are takeable.",
+      "wrongExplanations": {
+        "1": "Dependents help updates but don't signal takeability by themselves.",
+        "2": "Depth is not robust and hard to maintain under updates."
+      },
+      "hint": "Track how many incoming requirements remain for each course.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Exploring Approaches",
+      "questionText": "We need to repeatedly pick the smallest-index takeable course. Which structure supports this efficiently as courses become takeable?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "A min-heap of currently takeable courses",
+          "isCode": false
+        },
+        {
+          "label": "A simple queue of courses in input order",
+          "isCode": false
+        },
+        {
+          "label": "Sorting the list of takeable courses at every step",
+          "isCode": false
+        },
+        {
+          "label": "Scanning all courses to find the smallest takeable each time",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "A min-heap gives quick access to the smallest available and handles dynamic insertions.",
+      "wrongExplanations": {
+        "2": "Sorting each step is too slow overall.",
+        "3": "Scanning all n courses each time is too slow."
+      },
+      "hint": "We need fast min retrieval and fast insert for new takeable courses.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "How should we represent the requirements to update courses that become takeable after completing one?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "An adjacency list: for each course a, store all b such that a -> b",
+          "isCode": false
+        },
+        {
+          "label": "An adjacency matrix of size n x n",
+          "isCode": false
+        },
+        {
+          "label": "Only store for each course its number of prerequisites",
+          "isCode": false
+        },
+        {
+          "label": "Store the full list of all edges and scan it after each course",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Adjacency lists let us quickly find which courses to update when a course is completed.",
+      "wrongExplanations": {
+        "1": "Matrix uses too much memory for n up to 1e5.",
+        "3": "Scanning all edges after each step is too slow."
+      },
+      "hint": "We need to find dependents of a course quickly when it is taken.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "How do we compute the initial count of unmet prerequisites for each course?",
+      "diagram": "For each edge a -> b, b has one more prerequisite.",
+      "options": [
+        {
+          "label": "Initialize counts to 0; for each edge a -> b, increment count[b] by 1",
+          "isCode": false
+        },
+        {
+          "label": "Initialize counts to 1; for each edge a -> b, decrement count[b] by 1",
+          "isCode": false
+        },
+        {
+          "label": "Set count[a] += 1 for each edge a -> b",
+          "isCode": false
+        },
+        {
+          "label": "Set count[b] = total outgoing edges from b",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each incoming edge to b adds one unmet prerequisite for b.",
+      "wrongExplanations": {
+        "2": "We need incoming edges for b, not outgoing of a.",
+        "3": "Outgoing edges from b are unrelated to prerequisites of b."
+      },
+      "hint": "Think input edges as requirements into a course.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "When we take course x, what updates are needed?",
+      "diagram": "x -> v1, v2, ...",
+      "options": [
+        {
+          "label": "For each v in dependents of x, decrement its unmet prerequisite count; if it becomes 0, add v to available",
+          "isCode": false
+        },
+        {
+          "label": "Set unmet count of x to 0 again and do nothing else",
+          "isCode": false
+        },
+        {
+          "label": "Increment unmet count of dependents to prevent early selection",
+          "isCode": false
+        },
+        {
+          "label": "Recompute counts for all courses from scratch",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Completing x satisfies one prerequisite for each dependent; when a count hits 0, it becomes available.",
+      "wrongExplanations": {
+        "3": "Dependents become easier to take, not harder.",
+        "4": "Global recomputation is unnecessary and slow."
+      },
+      "hint": "Only neighbors of x are directly affected.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "Trace this: n=4, edges 2->1 and 2->3. Initial unmet counts: [1:1,2:0,3:1,4:0], available {2,4}. You pick 2 first. What is the next course chosen?",
+      "diagram": "2 -> 1\n2 -> 3\nAvailable after taking 2: {1,3,4}",
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "2 again",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "After taking 2, {1,3,4} are available; choose the smallest index: 1.",
+      "wrongExplanations": {
+        "1": "3 is available but not the smallest index.",
+        "2": "4 is available but 1 is smaller."
+      },
+      "hint": "Apply the smallest-index rule among available courses.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "Courses are numbered 1..n. How should arrays (adjacency and counts) be sized and indexed?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Size n+1 and use indices 1..n (ignore index 0)",
+          "isCode": false
+        },
+        {
+          "label": "Size n and use indices 0..n-1",
+          "isCode": false
+        },
+        {
+          "label": "Size n and use indices 1..n-1",
+          "isCode": false
+        },
+        {
+          "label": "Dynamically grow arrays as needed",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Using size n+1 and 1-based indexing aligns with course numbers and is simple.",
+      "wrongExplanations": {
+        "1": "This would require converting course numbers by -1 everywhere.",
+        "3": "Would miss course n."
+      },
+      "hint": "Match array indices with course numbers to avoid off-by-one mistakes.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Building the Idea",
+      "questionText": "The problem guarantees at least one valid schedule. Do we need to handle the case where not all courses are processed?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "No explicit handling is required under this guarantee",
+          "isCode": false
+        },
+        {
+          "label": "Yes, we must print -1 if not all courses are processed",
+          "isCode": false
+        },
+        {
+          "label": "We should restart the process if stuck",
+          "isCode": false
+        },
+        {
+          "label": "We should drop some edges to continue",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "With a guaranteed valid schedule, all courses will be processed if we follow the rules.",
+      "wrongExplanations": {
+        "1": "Printing -1 is used when schedules may be invalid, not here.",
+        "2": "Restarting doesn't fix impossible cases and isn't needed under the guarantee."
+      },
+      "hint": "Rely on the problem's promise for this implementation.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Start by importing and preparing to read all integers fast.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\nfrom heapq import heappush, heappop\ndata = list(map(int, sys.stdin.buffer.read().split()))",
+          "isCode": true
+        },
+        {
+          "label": "from sys import *\nfrom heapq import *\ndata = input().split()",
+          "isCode": true
+        },
+        {
+          "label": "import sys\nfrom heapq import heappush, heappop\ndata = sys.stdin.read().strip()",
+          "isCode": true
+        },
+        {
+          "label": "import sys\nimport heapq\ndata = [int(x) for x in sys.stdin.readline().split()]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Reading all ints via sys.stdin.buffer.read().split() is fast and convenient for large input.",
+      "wrongExplanations": {
+        "1": "input().split() reads only one line; we need all numbers.",
+        "2": "Reading a raw string requires splitting and mapping to ints; it's incomplete."
+      },
+      "hint": "Use buffered read and split into integers; also import heap operations explicitly.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\nfrom heapq import heappush, heappop\ndata = list(map(int, sys.stdin.buffer.read().split()))",
+      "codeLabel": "Imports and bulk read"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Extract n and m from the flat integer list.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "it = iter(data)\nn = next(it); m = next(it)",
+          "isCode": true
+        },
+        {
+          "label": "n, m = data[0]; it = iter(data[2:])",
+          "isCode": true
+        },
+        {
+          "label": "n = data.pop(0); m = data.pop(0); it = iter(data)",
+          "isCode": true
+        },
+        {
+          "label": "n = int(data[0]); m = int(data[1]); it = iter(data)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Using an iterator and next() cleanly consumes n and m and leaves the rest for edges.",
+      "wrongExplanations": {
+        "1": "data[0] is a single int, cannot unpack to n and m.",
+        "3": "This leaves n and m at data[0], data[1] again when iterating."
+      },
+      "hint": "An iterator supports sequential consumption with next().",
+      "isCodeBuilding": true,
+      "codeSnippet": "it = iter(data)\nn = next(it); m = next(it)",
+      "codeLabel": "Parse n and m"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Initialize adjacency and unmet prerequisite count arrays (1-based indexing).",
+      "diagram": null,
+      "options": [
+        {
+          "label": "adj = [[] for _ in range(n+1)]\nindeg = [0] * (n+1)",
+          "isCode": true
+        },
+        {
+          "label": "adj = [[]] * (n+1)\nindeg = [0] * n",
+          "isCode": true
+        },
+        {
+          "label": "adj = [[] for _ in range(n)]\nindeg = [0] * (n+1)",
+          "isCode": true
+        },
+        {
+          "label": "adj = [set() for _ in range(n+1)]\nindeg = [0] * (n+1)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need n+1 slots for 1..n; separate lists per node with list-of-lists.",
+      "wrongExplanations": {
+        "1": "Multiplying a list creates shared inner lists; appends will alias.",
+        "2": "adj length n misses index n; we use 1..n."
+      },
+      "hint": "Avoid shared inner lists; allocate one per course.",
+      "isCodeBuilding": true,
+      "codeSnippet": "adj = [[] for _ in range(n+1)]\nindeg = [0] * (n+1)",
+      "codeLabel": "Allocate graph structures"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Read m edges and fill the structures. Each line a b means a before b.",
+      "diagram": "Add edge a->b; increment unmet count of b",
+      "options": [
+        {
+          "label": "for _ in range(m):\n    a = next(it); b = next(it)\n    adj[a].append(b)\n    indeg[b] += 1",
+          "isCode": true
+        },
+        {
+          "label": "for _ in range(m):\n    a = next(it); b = next(it)\n    adj[b].append(a)\n    indeg[a] += 1",
+          "isCode": true
+        },
+        {
+          "label": "for _ in range(m):\n    b = next(it); a = next(it)\n    adj[a].append(b)\n    indeg[a] += 1",
+          "isCode": true
+        },
+        {
+          "label": "for _ in range(m):\n    a = next(it); b = next(it)\n    adj[a].append(b)\n    indeg[a] += 1",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Edge is from a to b; b gains one unmet prerequisite.",
+      "wrongExplanations": {
+        "1": "This reverses the direction; would enforce b before a.",
+        "3": "Incrementing indeg[a] counts outgoing edges, not unmet prerequisites of b."
+      },
+      "hint": "Unmet count increases on the course that must come after.",
+      "isCodeBuilding": true,
+      "codeSnippet": "for _ in range(m):\n    a = next(it); b = next(it)\n    adj[a].append(b)\n    indeg[b] += 1",
+      "codeLabel": "Read edges and build graph"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Initialize the structure of currently takeable courses following the smallest-index rule.",
+      "diagram": "Collect all i with indeg[i]==0 into a min-structure",
+      "options": [
+        {
+          "label": "heap = []\nfor i in range(1, n+1):\n    if indeg[i] == 0:\n        heappush(heap, i)",
+          "isCode": true
+        },
+        {
+          "label": "heap = []\nfor i in range(1, n+1):\n    if indeg[i] == 0:\n        heap.append(i)",
+          "isCode": true
+        },
+        {
+          "label": "heap = []\nfor i in range(0, n):\n    if indeg[i] == 0:\n        heappush(heap, i)",
+          "isCode": true
+        },
+        {
+          "label": "heap = []\nfor i in range(1, n+1):\n    if indeg[i] != 0:\n        heappush(heap, i)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Use a min-heap seeded with all courses having zero unmet prerequisites.",
+      "wrongExplanations": {
+        "1": "A plain list won't maintain the smallest-first removal efficiently.",
+        "2": "Indexing 0..n-1 misses course n and includes index 0."
+      },
+      "hint": "We need to quickly get the smallest available course.",
+      "isCodeBuilding": true,
+      "codeSnippet": "heap = []\nfor i in range(1, n+1):\n    if indeg[i] == 0:\n        heappush(heap, i)",
+      "codeLabel": "Seed the min-heap"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Prepare the result container for the final order.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "order = []",
+          "isCode": true
+        },
+        {
+          "label": "order = {}",
+          "isCode": true
+        },
+        {
+          "label": "order = set()",
+          "isCode": true
+        },
+        {
+          "label": "order = [0] * n",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We'll append courses in completion order into a list.",
+      "wrongExplanations": {
+        "1": "A dict is not needed for ordered accumulation.",
+        "2": "Sets do not preserve order of insertion."
+      },
+      "hint": "We need an ordered sequence that grows step by step.",
+      "isCodeBuilding": true,
+      "codeSnippet": "order = []",
+      "codeLabel": "Initialize output list"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "Write the main loop: repeatedly take the smallest available course and update dependents.",
+      "diagram": "while heap not empty:\n  u = pop smallest\n  for each v in adj[u]:\n    decrement indeg[v]\n    if 0: push v",
+      "options": [
+        {
+          "label": "while heap:\n    u = heappop(heap)\n    order.append(u)\n    for v in adj[u]:\n        indeg[v] -= 1\n        if indeg[v] == 0:\n            heappush(heap, v)",
+          "isCode": true
+        },
+        {
+          "label": "while heap:\n    u = heappop(heap)\n    order.append(u)\n    for v in adj[u]:\n        indeg[u] -= 1\n        if indeg[u] == 0:\n            heappush(heap, v)",
+          "isCode": true
+        },
+        {
+          "label": "while heap:\n    u = heappop(heap)\n    for v in adj[u]:\n        heappush(heap, v)\n    order.append(u)",
+          "isCode": true
+        },
+        {
+          "label": "while heap:\n    u = heappop(heap)\n    order.append(u)\n    for v in adj[u]:\n        if indeg[v] == 0:\n            heappush(heap, v)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Decrease unmet counts for dependents; push when a dependent's count hits zero.",
+      "wrongExplanations": {
+        "1": "This decrements indeg[u] instead of indeg[v], so counts are wrong.",
+        "3": "Pushing neighbors without checking counts ignores prerequisites."
+      },
+      "hint": "Only when a dependent's count reaches zero should it become available.",
+      "isCodeBuilding": true,
+      "codeSnippet": "while heap:\n    u = heappop(heap)\n    order.append(u)\n    for v in adj[u]:\n        indeg[v] -= 1\n        if indeg[v] == 0:\n            heappush(heap, v)",
+      "codeLabel": "Process courses by smallest available"
+    },
+    {
+      "id": "q22",
+      "phase": "Writing the Code",
+      "questionText": "Finally, print the order as space-separated integers.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "print(' '.join(map(str, order)))",
+          "isCode": true
+        },
+        {
+          "label": "print(*order)",
+          "isCode": true
+        },
+        {
+          "label": "print(order)",
+          "isCode": true
+        },
+        {
+          "label": "for x in order: print(x)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Joining with spaces matches the required single-line, space-separated format.",
+      "wrongExplanations": {
+        "1": "Some judges accept this, but it may insert extra spaces formatting; join is explicit and safe.",
+        "2": "Printing the list shows brackets and commas, not the required format."
+      },
+      "hint": "Match the sample output format exactly.",
+      "isCodeBuilding": true,
+      "codeSnippet": "print(' '.join(map(str, order)))",
+      "codeLabel": "Output the result"
+    },
+    {
+      "id": "q23",
+      "phase": "Verifying the Solution",
+      "questionText": "Run the algorithm on the example:\nInput:\n4 2\n2 1\n2 3\nWhat sequence will be printed?",
+      "diagram": "2 -> 1\n2 -> 3\nInitial available: {2,4}",
+      "options": [
+        {
+          "label": "2 1 3 4",
+          "isCode": false
+        },
+        {
+          "label": "2 3 1 4",
+          "isCode": false
+        },
+        {
+          "label": "1 2 3 4",
+          "isCode": false
+        },
+        {
+          "label": "4 2 1 3",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Pick 2 (smallest available), then 1 becomes available: pick 1, then 3, then 4.",
+      "wrongExplanations": {
+        "1": "After 2, 1 and 3 are available; pick 1 before 3 due to smallest index.",
+        "2": "1 cannot be before 2."
+      },
+      "hint": "Follow available set and always choose the smallest.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Verifying the Solution",
+      "questionText": "Consider n=5, edges: 1 4, 2 4, 2 5. Trace the output order.",
+      "diagram": "1 -> 4\n2 -> 4\n2 -> 5\nInitial available: {1,2,3}",
+      "options": [
+        {
+          "label": "1 2 3 4 5",
+          "isCode": false
+        },
+        {
+          "label": "1 3 2 4 5",
+          "isCode": false
+        },
+        {
+          "label": "2 1 3 4 5",
+          "isCode": false
+        },
+        {
+          "label": "1 2 3 5 4",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Pick 1, then 2, then 3. Now 4 and 5 depend on 2; after 2, 5 is available, but 4 waits for 1 and 2. After 1&2, 4 becomes available: choose 4, then 5.",
+      "wrongExplanations": {
+        "1": "Picking 3 before 2 delays 2 unnecessarily; but smallest rule says after 1, pick 2.",
+        "3": "4 needs both 1 and 2; it can't be before 5 unless both are done."
+      },
+      "hint": "At each step, list available courses and choose the smallest.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the time complexity of this approach in terms of n and m?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O((n + m) log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(m log m + n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n + m^2)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each course can be pushed/popped once (log n), and each edge processes once; total O((n+m) log n).",
+      "wrongExplanations": {
+        "1": "We do not have nested loops over all nodes; edges drive updates.",
+        "2": "The log factor relates to heap over n items, not m."
+      },
+      "hint": "Consider heap operations per node and simple work per edge.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the space complexity of the implementation?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n + m)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(m log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Adjacency lists store m edges; arrays and heap store up to n elements.",
+      "wrongExplanations": {
+        "1": "We don't allocate an n x n matrix.",
+        "3": "There is no extra log factor in memory."
+      },
+      "hint": "Account for adjacency, counts, heap, and result.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q27",
+      "phase": "Analyzing Complexity",
+      "questionText": "Which edge cases must be handled correctly?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "- m=0 (no requirements)\n- Many courses initially available (tie-breaking)\n- Long chains of requirements",
+          "isCode": false
+        },
+        {
+          "label": "- Self-loops (a=a) must be allowed and processed",
+          "isCode": false
+        },
+        {
+          "label": "- Duplicate courses in output allowed to fill length n",
+          "isCode": false
+        },
+        {
+          "label": "- Ignoring courses that never appear in input",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We must handle empty constraints, tie-breaking via smallest index, and deep dependency chains.",
+      "wrongExplanations": {
+        "1": "Self-loops would violate the guarantee of a valid schedule.",
+        "2": "Each course appears exactly once in the output."
+      },
+      "hint": "Think about no-edge inputs and multiple initially available courses.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\nfrom heapq import heappush, heappop\ndata = list(map(int, sys.stdin.buffer.read().split()))",
+    "it = iter(data)\nn = next(it); m = next(it)",
+    "adj = [[] for _ in range(n+1)]\nindeg = [0] * (n+1)",
+    "for _ in range(m):\n    a = next(it); b = next(it)\n    adj[a].append(b)\n    indeg[b] += 1",
+    "heap = []\nfor i in range(1, n+1):\n    if indeg[i] == 0:\n        heappush(heap, i)",
+    "order = []",
+    "while heap:\n    u = heappop(heap)\n    order.append(u)\n    for v in adj[u]:\n        indeg[v] -= 1\n        if indeg[v] == 0:\n            heappush(heap, v)",
+    "print(' '.join(map(str, order)))"
+  ],
+  "reasoningChain": [
+    {
+      "question": "What does a line \"a b\" mean for ordering?",
+      "insight": "Treat the input as directed edges a->b, meaning a must come before b."
+    },
+    {
+      "question": "How to ensure \"course 1 earliest, then 2, ...\" among available choices?",
+      "insight": "Always choose the smallest index among currently takeable courses."
+    },
+    {
+      "question": "How to know which courses are takeable now?",
+      "insight": "Maintain for each course the number of unmet prerequisites; those with zero are takeable."
+    },
+    {
+      "question": "How to update after taking a course?",
+      "insight": "For each dependent of the taken course, decrement its unmet count and add it to available when it hits zero."
+    },
+    {
+      "question": "What data structures to use for efficiency?",
+      "insight": "Use adjacency lists for dependents, an array for unmet counts, and a min-heap for the available courses."
+    },
+    {
+      "question": "How to build the order deterministically?",
+      "insight": "Initialize the heap with all zero-count courses, then repeatedly pop the smallest, update, and push new zeros."
+    },
+    {
+      "question": "What complexity will this achieve?",
+      "insight": "Processing each node and edge once with heap operations gives O((n+m) log n) time and O(n+m) space."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1428,
+    "output_tokens": 12227,
+    "input_cost": 0.001785,
+    "output_cost": 0.12227,
+    "total_cost": 0.124055
+  }
+}

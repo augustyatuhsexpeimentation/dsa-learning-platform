@@ -1,0 +1,984 @@
+{
+  "id": "sliding-window-inversions",
+  "title": "Sliding Window Inversions",
+  "difficulty": "intermediate",
+  "tags": [
+    "mixed"
+  ],
+  "estimatedMinutes": 70,
+  "language": "python",
+  "description": "You are given an array of n integers. Your task is to calculate the number of inversions in each window of k elements, from left to right.\n\nAn inversion is a pair of elements where the left element is larger than the right element.\n\nInput:\n- First line: two integers n and k — the number of elements and the size of the window.\n- Second line: n integers x_1, x_2, ..., x_n — the contents of the array.\n\nOutput:\nPrint n-k+1 values: the numbers of inversions in each window.\n\nExample:\nInput:\n8 3\n1 2 3 2 5 2 4 4\nOutput:\n0 1 1 1 2 0",
+  "examples": [
+    {
+      "input": "8 3\n1 2 3 2 5 2 4 4\n",
+      "output": "0 1 1 1 2 0\n",
+      "explanation": "Windows: [1,2,3]->0, [2,3,2]->1, [3,2,5]->1, [2,5,2]->1, [5,2,4]->2, [2,4,4]->0."
+    }
+  ],
+  "constraints": [
+    "1 <= k <= n <= 2 * 10^5",
+    "1 <= x_i <= 10^9",
+    "Time limit: 1.00 s",
+    "Memory limit: 512 MB"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "Given array [3, 1, 2] and k = 2, what are the inversion counts for each window?",
+      "diagram": "Windows:\n[3,1] -> (3>1) => 1\n[1,2] -> (1>2)? no => 0",
+      "options": [
+        {
+          "label": "1 0",
+          "isCode": false
+        },
+        {
+          "label": "0 1",
+          "isCode": false
+        },
+        {
+          "label": "1 1",
+          "isCode": false
+        },
+        {
+          "label": "0 0",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "In [3,1], 3>1 gives 1 inversion. In [1,2], no inversion. So 1 0.",
+      "wrongExplanations": {
+        "1": "Order matters: inversion requires left element > right element.",
+        "2": "Second window has no inversion."
+      },
+      "hint": "List all pairs (i<j) within each window.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "Array [2, 2, 2], k = 2. What are the inversion counts?",
+      "diagram": "Windows: [2,2], [2,2]\nEqual pairs are not inversions.",
+      "options": [
+        {
+          "label": "0 0",
+          "isCode": false
+        },
+        {
+          "label": "1 1",
+          "isCode": false
+        },
+        {
+          "label": "2 2",
+          "isCode": false
+        },
+        {
+          "label": "0 1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Equal elements are not inversions. Both windows have 0.",
+      "wrongExplanations": {
+        "1": "Inversion requires strictly greater, not greater or equal."
+      },
+      "hint": "Check strictness in the definition.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "Array [1, 3, 2, 1], k = 3. What are the inversion counts for the two windows?",
+      "diagram": "Windows:\n[1,3,2] -> pairs: (1,3),(1,2),(3,2). Only (3>2)=1\n[3,2,1] -> (3>2)=1,(3>1)=1,(2>1)=1 total 3",
+      "options": [
+        {
+          "label": "1 3",
+          "isCode": false
+        },
+        {
+          "label": "2 2",
+          "isCode": false
+        },
+        {
+          "label": "0 3",
+          "isCode": false
+        },
+        {
+          "label": "1 2",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "First window has (3,2)=1. Second window has 3 inversions.",
+      "wrongExplanations": {
+        "1": "Carefully list pairs; equal comparisons do not count."
+      },
+      "hint": "List all (i<j) pairs in each window.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "Array [2, 5, 2], k = 3. How many inversions in the single window?",
+      "diagram": "Pairs: (2,5): no, (2,2): no, (5,2): yes -> 1",
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Only (5,2) is an inversion.",
+      "wrongExplanations": {
+        "1": "(2,2) is not an inversion.",
+        "2": "(5,2) must be counted."
+      },
+      "hint": "Check strictness and order.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Exploring Approaches",
+      "questionText": "Naively recomputing inversions in each window with two nested loops per window takes about how much time in worst case?",
+      "diagram": "n up to 2e5, k up to 2e5",
+      "options": [
+        {
+          "label": "O((n-k+1) * k^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(nk)",
+          "isCode": false
+        },
+        {
+          "label": "O(n + k)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Counting inversions with nested loops per window is O(k^2) per window.",
+      "wrongExplanations": {
+        "2": "Two loops over k per window is k^2, not k."
+      },
+      "hint": "Each window compares all pairs within k.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "When sliding the window by one, how does the outgoing leftmost element affect the inversion count?",
+      "diagram": "Window [a0, a1, ..., a{k-1}] -> remove a0",
+      "options": [
+        {
+          "label": "Decrease by the count of elements in the window that are strictly smaller than it",
+          "isCode": false
+        },
+        {
+          "label": "Decrease by the count of elements in the window that are greater than it",
+          "isCode": false
+        },
+        {
+          "label": "Decrease by the count of elements equal to it",
+          "isCode": false
+        },
+        {
+          "label": "No change; positions shift but pairs remain",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Inversions started by the leftmost are with smaller elements to its right; all others are to its right.",
+      "wrongExplanations": {
+        "1": "Greater elements to its right do not form inversions with it.",
+        "3": "Removing a0 removes its pairs."
+      },
+      "hint": "Pairs (a0, aj) with a0 > aj are removed.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "When adding the incoming rightmost element, how does it affect the inversion count?",
+      "diagram": "After removal, window has k-1 elements; add x at right",
+      "options": [
+        {
+          "label": "Increase by the number of existing elements strictly greater than it",
+          "isCode": false
+        },
+        {
+          "label": "Increase by the number of existing elements greater than or equal to it",
+          "isCode": false
+        },
+        {
+          "label": "Increase by the number of existing elements strictly smaller than it",
+          "isCode": false
+        },
+        {
+          "label": "No change; it's at the end",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Pairs (ai, x) with ai > x become new inversions.",
+      "wrongExplanations": {
+        "1": "Equals do not form inversions.",
+        "2": "Smaller elements do not create inversions with x at the end."
+      },
+      "hint": "Inversion is (left > right).",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Exploring Approaches",
+      "questionText": "Values x_i can be up to 1e9. Why is mapping values to ranks (1..M) helpful?",
+      "diagram": "Example: [1000000000, 5, 5, 42] -> ranks [3,1,1,2]",
+      "options": [
+        {
+          "label": "It lets us index a compact frequency array by rank instead of large raw values",
+          "isCode": false
+        },
+        {
+          "label": "It sorts the array and gives inversion counts directly",
+          "isCode": false
+        },
+        {
+          "label": "It reduces time complexity from O(n^2) to O(n)",
+          "isCode": false
+        },
+        {
+          "label": "It avoids duplicates entirely",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need a compact index to track counts; ranks compress large values to [1..M].",
+      "wrongExplanations": {
+        "1": "Ranking alone does not count inversions.",
+        "2": "Ranking doesn't by itself make it linear time."
+      },
+      "hint": "We need to count <= value quickly by indexing.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "We maintain counts of ranks for the current window. Which operations do we minimally need on this count structure to apply our plan?",
+      "diagram": "Operations per step: add/remove an element; query how many <= some rank",
+      "options": [
+        {
+          "label": "Increment/decrement at a rank; query prefix sum up to a rank",
+          "isCode": false
+        },
+        {
+          "label": "Insert at end; delete from front only",
+          "isCode": false
+        },
+        {
+          "label": "Sort the window on each step; binary search",
+          "isCode": false
+        },
+        {
+          "label": "Random access by rank; point read only",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need to update counts at ranks and query how many are <= a rank.",
+      "wrongExplanations": {
+        "2": "Sorting each time is too slow.",
+        "3": "We need cumulative counts, not just point reads."
+      },
+      "hint": "We compute counts of < or > via prefix sums.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "If we can query how many elements are <= rank r in the current window, how do we get the number of elements greater than value with rank r?",
+      "diagram": "Let t = number of elements already present",
+      "options": [
+        {
+          "label": "greater = t - prefix(r)",
+          "isCode": false
+        },
+        {
+          "label": "greater = prefix(r-1)",
+          "isCode": false
+        },
+        {
+          "label": "greater = prefix(r)",
+          "isCode": false
+        },
+        {
+          "label": "greater = t - prefix(r-1)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Elements > r are all elements minus those <= r.",
+      "wrongExplanations": {
+        "1": "prefix(r-1) counts strictly less, not greater.",
+        "2": "prefix(r) counts <= r."
+      },
+      "hint": "Partition: <= r and > r.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "To compute inversions in the first window in one pass left to right, what should we add for each element at position j (0-indexed) with rank r?",
+      "diagram": "We have j elements before; inversions formed by current being right element and left element > current",
+      "options": [
+        {
+          "label": "j - prefix(r)",
+          "isCode": false
+        },
+        {
+          "label": "prefix(r-1)",
+          "isCode": false
+        },
+        {
+          "label": "prefix(r)",
+          "isCode": false
+        },
+        {
+          "label": "k - prefix(r)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Among j previous, those > current are j - (# <= current).",
+      "wrongExplanations": {
+        "1": "Counts smaller elements, not greater.",
+        "3": "k includes elements not yet in window."
+      },
+      "hint": "Current as right element pairs with previous > current.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "Before removing the leftmost value (rank r_out), which query gives the number of smaller elements in the current window?",
+      "diagram": "We need # of elements with rank < r_out",
+      "options": [
+        {
+          "label": "prefix(r_out - 1)",
+          "isCode": false
+        },
+        {
+          "label": "prefix(r_out)",
+          "isCode": false
+        },
+        {
+          "label": "k - prefix(r_out)",
+          "isCode": false
+        },
+        {
+          "label": "k - 1 - prefix(r_out)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "prefix(r_out - 1) counts strictly smaller elements.",
+      "wrongExplanations": {
+        "1": "Includes equals; equals are not smaller.",
+        "2": "This counts strictly greater, not smaller."
+      },
+      "hint": "We need strictly less than r_out.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "After removing the leftmost element, when adding new rank r_in at the right, how many new inversions are created?",
+      "diagram": "Window now has k-1 elements",
+      "options": [
+        {
+          "label": "(k - 1) - prefix(r_in)",
+          "isCode": false
+        },
+        {
+          "label": "k - prefix(r_in)",
+          "isCode": false
+        },
+        {
+          "label": "(k - 1) - prefix(r_in - 1)",
+          "isCode": false
+        },
+        {
+          "label": "prefix(r_in - 1)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Count elements strictly greater than r_in among the k-1 remaining: (k-1) - (# <= r_in).",
+      "wrongExplanations": {
+        "1": "k counts the outgoing element already removed.",
+        "2": "prefix(r_in - 1) counts < r_in, not > r_in."
+      },
+      "hint": "Use t - prefix(r) with t = k-1.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Building the Idea",
+      "questionText": "In the slide step, in what order should we perform operations to get correct counts?",
+      "diagram": "We need less = prefix(r_out-1) using full window; greater uses size k-1",
+      "options": [
+        {
+          "label": "Compute less; remove r_out; compute greater with k-1; add r_in; update result",
+          "isCode": false
+        },
+        {
+          "label": "Remove r_out; compute less; compute greater with k; add r_in",
+          "isCode": false
+        },
+        {
+          "label": "Compute greater first; add r_in; then remove r_out",
+          "isCode": false
+        },
+        {
+          "label": "Remove r_out; add r_in; then compute less and greater",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Compute less while full, then remove so remaining size is k-1 for greater, then add.",
+      "wrongExplanations": {
+        "1": "Using k for greater overcounts by 1.",
+        "2": "Adding before removing breaks the (k-1) assumption."
+      },
+      "hint": "greater must use (k-1) existing elements.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q15",
+      "phase": "Building the Idea",
+      "questionText": "Check the slide formulas on window [2,5,2] (ranks [1,3,1]). Remove left 2 (r=1), add 4 (suppose rank 4). What is delta?",
+      "diagram": "Current counts: ranks {1:2, 3:1}. Removing r_out=1: less = prefix(0)=0 => inv -=0. After remove: {1:1,3:1}. Adding r_in=4: greater = (k-1)-prefix(4) = 2 - 2 = 0",
+      "options": [
+        {
+          "label": "Net change 0",
+          "isCode": false
+        },
+        {
+          "label": "Net change -1",
+          "isCode": false
+        },
+        {
+          "label": "Net change +1",
+          "isCode": false
+        },
+        {
+          "label": "Net change depends on positions, cannot determine from counts",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "No smaller than 2 on its right; and no elements greater than 4 among remaining.",
+      "wrongExplanations": {
+        "1": "There is no smaller-than-2 to subtract.",
+        "2": "No greater-than-4 elements exist."
+      },
+      "hint": "Compute less and greater precisely with counts.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Read all input efficiently and parse n, k, and the array.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\n\ndef main():\n    data = sys.stdin.read().strip().split()\n    if not data:\n        return\n    it = iter(data)\n    n = int(next(it)); k = int(next(it))\n    arr = [int(next(it)) for _ in range(n)]",
+          "isCode": true
+        },
+        {
+          "label": "def main():\n    n, k = map(int, input().split())\n    arr = list(map(int, input().split()))\n    while len(arr) < n:\n        arr += list(map(int, input().split()))",
+          "isCode": true
+        },
+        {
+          "label": "import sys\n\ndef main():\n    tokens = sys.stdin.readline().split()\n    n = int(tokens[0]); k = int(tokens[1])\n    arr = [int(x) for x in sys.stdin.readline().split()]\n    if len(arr) != n:\n        raise ValueError('wrong length')",
+          "isCode": true
+        },
+        {
+          "label": "def main():\n    s = input().strip()\n    parts = s.split()\n    n = int(parts[0]); k = int(parts[1]); arr = []",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Reading all tokens is robust and fast for large input.",
+      "wrongExplanations": {
+        "1": "Multiple input lines may be needed; this can work but is less robust.",
+        "2": "Assumes all numbers on exactly two lines; may fail for large inputs."
+      },
+      "hint": "Use sys.stdin.read() to handle large inputs.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\n\ndef main():\n    data = sys.stdin.read().strip().split()\n    if not data:\n        return\n    it = iter(data)\n    n = int(next(it)); k = int(next(it))\n    arr = [int(next(it)) for _ in range(n)]",
+      "codeLabel": "Input parsing"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Compress values to ranks 1..M.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    vals = sorted(set(arr))\n    m = len(vals)\n    rank_map = {v: i+1 for i, v in enumerate(vals)}\n    ranks = [rank_map[v] for v in arr]",
+          "isCode": true
+        },
+        {
+          "label": "    vals = list(set(arr))\n    m = max(vals)\n    rank_map = {v: v for v in vals}\n    ranks = [rank_map[v] for v in arr]",
+          "isCode": true
+        },
+        {
+          "label": "    vals = sorted(arr)\n    m = len(vals)\n    rank_map = {v: i+1 for i, v in enumerate(vals)}\n    ranks = [rank_map[v] for v in arr]",
+          "isCode": true
+        },
+        {
+          "label": "    vals = arr[:] \n    m = len(vals)\n    rank_map = {v: i+1 for i, v in enumerate(vals)}\n    ranks = [rank_map[v] for v in arr]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Sort unique values and map to 1-based ranks; then map each element.",
+      "wrongExplanations": {
+        "1": "Without sorting, ranks are arbitrary; and m should be count of uniques.",
+        "2": "Using sorted(arr) includes duplicates; mapping duplicates to different ranks is wrong."
+      },
+      "hint": "Use sorted set of values to define ranks.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    vals = sorted(set(arr))\n    m = len(vals)\n    rank_map = {v: i+1 for i, v in enumerate(vals)}\n    ranks = [rank_map[v] for v in arr]",
+      "codeLabel": "Coordinate compression"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Set up a compact cumulative count structure and an update function.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    size = m + 2\n    bit = [0] * (size)\n\n    def add(i, delta):\n        while i < size:\n            bit[i] += delta\n            i += i & -i",
+          "isCode": true
+        },
+        {
+          "label": "    size = m + 2\n    bit = [0] * (size)\n\n    def add(i, delta):\n        bit[i] += delta\n        i += 1",
+          "isCode": true
+        },
+        {
+          "label": "    size = m + 2\n    bit = [0] * (size)\n\n    def add(i, delta):\n        while i > 0:\n            bit[i] += delta\n            i -= i & -i",
+          "isCode": true
+        },
+        {
+          "label": "    size = m + 2\n    bit = [0] * (size)\n\n    def add(i, delta):\n        while i < size:\n            bit[i] = delta\n            i += 1",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need a cumulative structure with O(log M) point updates using i += i & -i.",
+      "wrongExplanations": {
+        "1": "This only updates one cell; cumulative sums won't reflect updates.",
+        "2": "The direction is wrong for point updates; this pattern is for prefix queries."
+      },
+      "hint": "Use a loop advancing by the lowest set bit.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    size = m + 2\n    bit = [0] * (size)\n\n    def add(i, delta):\n        while i < size:\n            bit[i] += delta\n            i += i & -i",
+      "codeLabel": "Count structure and update"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Implement a function to get the count of elements with rank ≤ i in the current window.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    def pref(i):\n        s = 0\n        while i > 0:\n            s += bit[i]\n            i -= i & -i\n        return s",
+          "isCode": true
+        },
+        {
+          "label": "    def pref(i):\n        s = 0\n        while i < size:\n            s += bit[i]\n            i += i & -i\n        return s",
+          "isCode": true
+        },
+        {
+          "label": "    def pref(i):\n        return bit[i]",
+          "isCode": true
+        },
+        {
+          "label": "    def pref(i):\n        return sum(bit[:i+1])",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Traverse downward by lowest set bit to accumulate prefix sum.",
+      "wrongExplanations": {
+        "1": "This accumulates beyond i; it's for updates, not queries.",
+        "2": "We need cumulative sum, not a single cell."
+      },
+      "hint": "Mirror the update logic but move downward.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    def pref(i):\n        s = 0\n        while i > 0:\n            s += bit[i]\n            i -= i & -i\n        return s",
+      "codeLabel": "Prefix query"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Compute inversions in the first window using one pass and the count structure.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    inv = 0\n    for j in range(k):\n        r = ranks[j]\n        greater = j - pref(r)\n        inv += greater\n        add(r, 1)",
+          "isCode": true
+        },
+        {
+          "label": "    inv = 0\n    for j in range(k):\n        r = ranks[j]\n        greater = j - pref(r-1)\n        inv += greater\n        add(r, 1)",
+          "isCode": true
+        },
+        {
+          "label": "    inv = 0\n    for j in range(k):\n        r = ranks[j]\n        greater = pref(r)\n        inv += greater\n        add(r, 1)",
+          "isCode": true
+        },
+        {
+          "label": "    inv = 0\n    for j in range(k):\n        r = ranks[j]\n        greater = k - pref(r)\n        inv += greater\n        add(r, 1)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Among j previous elements, those > current are j - (# <= current).",
+      "wrongExplanations": {
+        "1": "pref(r-1) excludes equals; equals should not count as inversions on the left side, but greater is j - pref(r), not pref(r-1).",
+        "2": "pref(r) counts <= current, not greater."
+      },
+      "hint": "Use j (count so far) minus prefix ≤ r.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    inv = 0\n    for j in range(k):\n        r = ranks[j]\n        greater = j - pref(r)\n        inv += greater\n        add(r, 1)",
+      "codeLabel": "Initial window inversions"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "Initialize the result list with the first window's inversion count.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    res = [inv]",
+          "isCode": true
+        },
+        {
+          "label": "    res = []\n    res.append(0)",
+          "isCode": true
+        },
+        {
+          "label": "    res = [0]\n    res[0] = inv + 1",
+          "isCode": true
+        },
+        {
+          "label": "    res = []",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Start result list with the initial window's inversion count.",
+      "wrongExplanations": {
+        "1": "We should store the computed inversion count, not 0."
+      },
+      "hint": "First window already computed.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    res = [inv]",
+      "codeLabel": "Seed results"
+    },
+    {
+      "id": "q22",
+      "phase": "Writing the Code",
+      "questionText": "Implement the slide: remove leftmost, add rightmost, and update inversion count.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    for i in range(k, n):\n        r_out = ranks[i - k]\n        less = pref(r_out - 1)\n        inv -= less\n        add(r_out, -1)\n        r_in = ranks[i]\n        greater = (k - 1) - pref(r_in)\n        inv += greater\n        add(r_in, 1)\n        res.append(inv)",
+          "isCode": true
+        },
+        {
+          "label": "    for i in range(k, n):\n        r_out = ranks[i - k]\n        add(r_out, -1)\n        less = pref(r_out - 1)\n        inv -= less\n        r_in = ranks[i]\n        greater = k - pref(r_in)\n        inv += greater\n        add(r_in, 1)\n        res.append(inv)",
+          "isCode": true
+        },
+        {
+          "label": "    for i in range(k, n):\n        r_out = ranks[i - k]\n        less = pref(r_out)\n        inv -= less\n        add(r_out, -1)\n        r_in = ranks[i]\n        greater = (k - 1) - pref(r_in - 1)\n        inv += greater\n        add(r_in, 1)\n        res.append(inv)",
+          "isCode": true
+        },
+        {
+          "label": "    for i in range(k, n):\n        r_out = ranks[i - k]\n        less = 0\n        inv -= less\n        add(r_out, -1)\n        r_in = ranks[i]\n        greater = 0\n        inv += greater\n        add(r_in, 1)\n        res.append(inv)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Subtract strictly smaller-than-outgoing before removal (value unaffected), then remove; add incoming with greater = (k-1) - prefix(≤ r_in).",
+      "wrongExplanations": {
+        "1": "Using k for greater overcounts; also computing less after removal is unnecessary but ok; the main issue is using k not k-1.",
+        "2": "prefix(r_out) includes equals; equals should not be subtracted."
+      },
+      "hint": "Use less = prefix(r_out - 1) and greater with (k-1).",
+      "isCodeBuilding": true,
+      "codeSnippet": "    for i in range(k, n):\n        r_out = ranks[i - k]\n        less = pref(r_out - 1)\n        inv -= less\n        add(r_out, -1)\n        r_in = ranks[i]\n        greater = (k - 1) - pref(r_in)\n        inv += greater\n        add(r_in, 1)\n        res.append(inv)",
+      "codeLabel": "Slide and update"
+    },
+    {
+      "id": "q23",
+      "phase": "Writing the Code",
+      "questionText": "Print the results and add the usual Python entry point.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    print(' '.join(map(str, res)))\n\nif __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "    print(*res)\n\nif __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "    print(' '.join(res))\n\nif __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "    sys.stdout.write(res)\n\nif __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Join as strings with spaces and include the entry point.",
+      "wrongExplanations": {
+        "1": "This also works, but the canonical format is join; we'll use join for consistency.",
+        "2": "res elements must be converted to strings before join."
+      },
+      "hint": "Ensure spacing matches the required output.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    print(' '.join(map(str, res)))\n\nif __name__ == \"__main__\":\n    main()",
+      "codeLabel": "Output and entry point"
+    },
+    {
+      "id": "q24",
+      "phase": "Verifying the Solution",
+      "questionText": "On input:\n8 3\n1 2 3 2 5 2 4 4\nWhat does the program output?",
+      "diagram": "Windows:\n[1,2,3]=0, [2,3,2]=1, [3,2,5]=1, [2,5,2]=1, [5,2,4]=2, [2,4,4]=0",
+      "options": [
+        {
+          "label": "0 1 1 1 2 0",
+          "isCode": false
+        },
+        {
+          "label": "0 1 2 1 2 0",
+          "isCode": false
+        },
+        {
+          "label": "0 0 1 1 2 0",
+          "isCode": false
+        },
+        {
+          "label": "1 1 1 1 2 0",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Matches the example: 0 1 1 1 2 0.",
+      "wrongExplanations": {
+        "1": "The third window [3,2,5] has only (3,2)=1.",
+        "2": "Second window [2,3,2] has (3,2)=1, not 0."
+      },
+      "hint": "Re-evaluate each window carefully.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Verifying the Solution",
+      "questionText": "Trace the slide from window [2,3,2] to [3,2,5] in the example. What change in inversions occurs?",
+      "diagram": "In [2,3,2], inversions: (3,2)=1. Remove left 2: subtract #<2 among [3,2] = 0. Add 5: add #>(5) among [3,2]=0. Net 0; [3,2,5] has 1.",
+      "options": [
+        {
+          "label": "Net change 0; count stays 1",
+          "isCode": false
+        },
+        {
+          "label": "Net change -1; count goes to 0",
+          "isCode": false
+        },
+        {
+          "label": "Net change +1; count goes to 2",
+          "isCode": false
+        },
+        {
+          "label": "Net change depends on positions not captured by counts",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Subtract 0 (no <2), add 0 (no >5), so count remains 1.",
+      "wrongExplanations": {
+        "1": "Double-check elements relative to 2 and 5."
+      },
+      "hint": "Compute less and greater against remaining elements.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Analyzing Complexity",
+      "questionText": "Let M be the number of distinct values. What is the time complexity of the solution?",
+      "diagram": "Operations per element are logarithmic in M",
+      "options": [
+        {
+          "label": "O(n log M)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O((n-k+1) * k^2)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each add/query is logarithmic in M; we do O(n) such operations.",
+      "wrongExplanations": {
+        "2": "We use logarithmic queries, not constant-time over raw values."
+      },
+      "hint": "Count updates and prefix queries.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q27",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the additional space usage of the approach (excluding the input array)?",
+      "diagram": "We store ranks and a compact count structure",
+      "options": [
+        {
+          "label": "O(n) for ranks + O(M) for the count structure",
+          "isCode": false
+        },
+        {
+          "label": "O(M^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(1)",
+          "isCode": false
+        },
+        {
+          "label": "O(k^2)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We store the ranks array and a size-M cumulative structure.",
+      "wrongExplanations": {
+        "2": "We store arrays proportional to n and M, not constant space."
+      },
+      "hint": "Consider arrays created after compression.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\n\ndef main():\n    data = sys.stdin.read().strip().split()\n    if not data:\n        return\n    it = iter(data)\n    n = int(next(it)); k = int(next(it))\n    arr = [int(next(it)) for _ in range(n)]",
+    "    vals = sorted(set(arr))\n    m = len(vals)\n    rank_map = {v: i+1 for i, v in enumerate(vals)}\n    ranks = [rank_map[v] for v in arr]",
+    "    size = m + 2\n    bit = [0] * (size)\n\n    def add(i, delta):\n        while i < size:\n            bit[i] += delta\n            i += i & -i",
+    "    def pref(i):\n        s = 0\n        while i > 0:\n            s += bit[i]\n            i -= i & -i\n        return s",
+    "    inv = 0\n    for j in range(k):\n        r = ranks[j]\n        greater = j - pref(r)\n        inv += greater\n        add(r, 1)",
+    "    res = [inv]",
+    "    for i in range(k, n):\n        r_out = ranks[i - k]\n        less = pref(r_out - 1)\n        inv -= less\n        add(r_out, -1)\n        r_in = ranks[i]\n        greater = (k - 1) - pref(r_in)\n        inv += greater\n        add(r_in, 1)\n        res.append(inv)",
+    "    print(' '.join(map(str, res)))\n\nif __name__ == \"__main__\":\n    main()"
+  ],
+  "reasoningChain": [
+    {
+      "question": "What exactly counts as an inversion within a window, and how do duplicates behave?",
+      "insight": "An inversion is a pair (i<j) with a[i] > a[j]; equal values are not inversions."
+    },
+    {
+      "question": "Why is recomputing inversions per window too slow, and how can we update when the window slides by one?",
+      "insight": "Brute force is O(k^2) per window. When sliding, subtract inversions caused by the outgoing left element (# smaller to its right) and add inversions created by the incoming right element (# greater to its left)."
+    },
+    {
+      "question": "How to handle large values efficiently?",
+      "insight": "Map values to ranks 1..M so we can index a compact count array independent of value magnitude."
+    },
+    {
+      "question": "What queries are needed to support updates and counts?",
+      "insight": "We need to increment/decrement counts at ranks and query prefix sums to get counts of ≤ r, enabling counts of < and >."
+    },
+    {
+      "question": "How to compute the first window's inversions in one pass?",
+      "insight": "Process left to right; for each element, add previous_count - prefix(≤ current rank), then insert it into the counts."
+    },
+    {
+      "question": "What are the exact slide formulas and their order?",
+      "insight": "Before removal, less = prefix(r_out-1); inv -= less; remove. Then greater = (k-1) - prefix(r_in); inv += greater; insert."
+    },
+    {
+      "question": "What are the complexity and space implications?",
+      "insight": "Each update/query is logarithmic in M; total time O(n log M), space O(n) for ranks and O(M) for counts."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1380,
+    "output_tokens": 14418,
+    "input_cost": 0.001725,
+    "output_cost": 0.14418,
+    "total_cost": 0.145905
+  }
+}

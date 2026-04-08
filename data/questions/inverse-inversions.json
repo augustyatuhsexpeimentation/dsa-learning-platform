@@ -1,0 +1,913 @@
+{
+  "id": "inverse-inversions",
+  "title": "Inverse Inversions",
+  "difficulty": "intermediate",
+  "tags": [
+    "mixed",
+    "arrays",
+    "constructive"
+  ],
+  "estimatedMinutes": 35,
+  "language": "python",
+  "description": "Given integers n and k, construct any permutation p of [1, 2, ..., n] that has exactly k inversions. An inversion is a pair (a, b) with a < b and p_a > p_b. Print any valid permutation.\n\nInput: n k\nOutput: n space-separated integers forming the permutation.\n\nYou may print any permutation that satisfies the inversion count.",
+  "examples": [
+    {
+      "input": "5 4",
+      "output": "1 5 2 4 3",
+      "explanation": "One valid permutation with exactly 4 inversions."
+    }
+  ],
+  "constraints": [
+    "1 ≤ n ≤ 10^6",
+    "0 ≤ k ≤ n(n-1)/2"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "How many inversions are in the permutation [2, 1, 3]?",
+      "diagram": "Pairs by index: (1,2), (1,3), (2,3)\nValues: p = [2,1,3]",
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Only (1,2) is an inversion: 2>1. Others are not inversions.",
+      "wrongExplanations": {
+        "0": "There is at least one inversion since 2>1 at indices (1,2).",
+        "2": "Check each pair carefully; only (1,2) has p_a>p_b."
+      },
+      "hint": "List all pairs (a,b) with a<b and check p_a>p_b.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "For permutation [3, 2, 1], how many inversions are there?",
+      "diagram": "Pairs: (1,2):3>2, (1,3):3>1, (2,3):2>1",
+      "options": [
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "6",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "All three pairs are inverted, so there are 3 inversions.",
+      "wrongExplanations": {
+        "0": "There are three pairs and all are inverted in descending order.",
+        "2": "With 3 elements there are only 3 pairs total."
+      },
+      "hint": "Count all pairs and see none are increasing.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "Which permutation of n=4 has the maximum number of inversions?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "4 3 2 1",
+          "isCode": false
+        },
+        {
+          "label": "1 2 3 4",
+          "isCode": false
+        },
+        {
+          "label": "2 1 4 3",
+          "isCode": false
+        },
+        {
+          "label": "3 1 4 2",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Descending order maximizes inversions: 4*3/2 = 6 inversions.",
+      "wrongExplanations": {
+        "2": "2 1 4 3 has only two inversions (2>1 and 4>3).",
+        "3": "3 1 4 2 has fewer than 6 inversions; check pairs."
+      },
+      "hint": "Think: every pair reversed gives the maximum.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "In n=5, if you place 5 at position 1 (first), how many inversion pairs (1,b) are guaranteed regardless of the later order of the remaining numbers?",
+      "diagram": "Remaining values {1,2,3,4} are all smaller than 5.",
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "Depends on the later order",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "All four remaining numbers are smaller and will be after it, creating 4 inversions.",
+      "wrongExplanations": {
+        "3": "Since 5 is first, every smaller number after it forms an inversion; that's all 4."
+      },
+      "hint": "Count how many smaller numbers must appear to the right.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Exploring Approaches",
+      "questionText": "Is generating all permutations and checking their inversion counts feasible for n=12 within 1 second?",
+      "diagram": "12! ≈ 479,001,600 permutations",
+      "options": [
+        {
+          "label": "No; there are about 4.79e8 permutations to check.",
+          "isCode": false
+        },
+        {
+          "label": "Yes; 1 second is enough for hundreds of millions of permutations.",
+          "isCode": false
+        },
+        {
+          "label": "Yes, if we only check the first 1e5 permutations.",
+          "isCode": false
+        },
+        {
+          "label": "Yes, with parallel loops on a single core.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Trying ~4.79e8 permutations is far too slow for 1 second.",
+      "wrongExplanations": {
+        "1": "Hundreds of millions of permutations cannot be enumerated in 1s in Python.",
+        "3": "Parallelism isn't available in a single-core environment and overhead is huge."
+      },
+      "hint": "Even iterating 1e8 items takes several seconds in Python.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "Suppose the remaining available numbers are the continuous range [L..R]. If you place R next, how many new inversions does this create immediately?",
+      "diagram": "Current position i gets value R; remaining numbers are L..R-1 and will be placed later.",
+      "options": [
+        {
+          "label": "R - L",
+          "isCode": false
+        },
+        {
+          "label": "R - 1",
+          "isCode": false
+        },
+        {
+          "label": "floor((R - L) / 2)",
+          "isCode": false
+        },
+        {
+          "label": "N - R + 1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Placing R creates inversions with all smaller values L..R-1, totaling R-L.",
+      "wrongExplanations": {
+        "1": "R-1 counts numbers smaller than R in [1..R-1], not in the remaining set [L..R-1].",
+        "2": "There's no halving here; each smaller remaining value is an inversion."
+      },
+      "hint": "Count how many values are smaller than R among the remaining ones.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "If you place L (the smallest remaining number) next when the remaining set is [L..R], how many new inversions does this add immediately?",
+      "diagram": "Current position i gets value L; remaining numbers are L+1..R.",
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "R - L",
+          "isCode": false
+        },
+        {
+          "label": "L - 1",
+          "isCode": false
+        },
+        {
+          "label": "Depends on future placements",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "All remaining numbers are larger, so no p_a>p_b pairs with this position.",
+      "wrongExplanations": {
+        "1": "R-L is the count when placing R, not L.",
+        "3": "This position's inversions are determined now: none."
+      },
+      "hint": "Inversions are p_a>p_b; here p_a is the smallest.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Building the Idea",
+      "questionText": "Start with n=5, k=4, remaining numbers [L..R]=[1..5]. Since k ≥ R−L (=4), what should you place first?",
+      "diagram": "L=1, R=5, diff=R-L=4, k=4",
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 3,
+      "explanation": "Placing 5 uses exactly 4 inversions with all smaller remaining numbers.",
+      "wrongExplanations": {
+        "0": "Placing 1 adds 0 inversions; k would remain 4.",
+        "2": "4 is not the largest remaining number; its inversion contribution is smaller."
+      },
+      "hint": "Use k ≥ R−L to decide.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "Continuing n=5, k becomes 0 after placing 5. Now L=1, R=4, k=0. What do you place next?",
+      "diagram": "L=1, R=4, diff=3, k=0",
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Since k < R−L, place L to avoid adding inversions.",
+      "wrongExplanations": {
+        "1": "Placing 4 would add 3 inversions, overshooting k=0."
+      },
+      "hint": "When k < R−L, choose the smallest.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "At each step with remaining numbers [L..R], which rule ensures we never exceed k while trying to reach exactly k inversions?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "If k ≥ R−L, place R and set k := k − (R−L); otherwise place L.",
+          "isCode": false
+        },
+        {
+          "label": "If k > R−L, place L; otherwise place R.",
+          "isCode": false
+        },
+        {
+          "label": "If k > 0, always place R; otherwise place L.",
+          "isCode": false
+        },
+        {
+          "label": "Place the value closest to k to approximate the target.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Placing R contributes exactly R−L inversions; otherwise placing L adds 0, keeping k nonnegative.",
+      "wrongExplanations": {
+        "2": "Always placing R can overshoot k when k < R−L."
+      },
+      "hint": "Match the exact inversion contribution you can afford at each step.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "Why do we subtract (R−L) from k when we place R?",
+      "diagram": "Remaining numbers L..R-1 (all smaller) will be to the right of R.",
+      "options": [
+        {
+          "label": "Because placing R creates exactly (R−L) inversions with all smaller remaining numbers.",
+          "isCode": false
+        },
+        {
+          "label": "Because we remove (R−L) numbers from the pool.",
+          "isCode": false
+        },
+        {
+          "label": "Because we need to track how many elements are left to place.",
+          "isCode": false
+        },
+        {
+          "label": "Because R itself should be subtracted from k.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "R will be left of all L..R−1, giving (R−L) new inversions, so k decreases by that amount.",
+      "wrongExplanations": {
+        "1": "We only remove one number (R) from the pool.",
+        "3": "k counts inversions, not element values."
+      },
+      "hint": "Inversions are about relative order, not counts of elements removed.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "Will the process (choosing R when k ≥ R−L, else L) always finish with k=0 after placing all n numbers?",
+      "diagram": "diff = R−L decreases by at least 0 or 1 each step; eventually diff=0.",
+      "options": [
+        {
+          "label": "Yes; we never overspend k and diff shrinks to 0, so any remaining k must be 0.",
+          "isCode": false
+        },
+        {
+          "label": "No; we can get stuck with positive k when only L remains.",
+          "isCode": false
+        },
+        {
+          "label": "Yes, but only if k ≤ n.",
+          "isCode": false
+        },
+        {
+          "label": "Yes, but only if k is divisible by n−1.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each R uses exact chunks of diff; when k < diff we place L until diff drops; eventually diff=0 and any remaining k must be 0.",
+      "wrongExplanations": {
+        "1": "When L=R (diff=0), placing it changes k by 0, so k must already be 0."
+      },
+      "hint": "Observe how diff changes when you place L vs R.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "Simulate the first four picks for n=6, k=7 using the rule. What sequence do you get?",
+      "diagram": "Step 1: L=1,R=6,diff=5,k=7 → place 6,k=2\nStep 2: L=1,R=5,diff=4,k=2 → place 1\nStep 3: L=2,R=5,diff=3,k=2 → place 2\nStep 4: L=3,R=5,diff=2,k=2 → place 5,k=0",
+      "options": [
+        {
+          "label": "6, 1, 2, 5",
+          "isCode": false
+        },
+        {
+          "label": "6, 5, 1, 2",
+          "isCode": false
+        },
+        {
+          "label": "5, 1, 2, 6",
+          "isCode": false
+        },
+        {
+          "label": "6, 2, 1, 5",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Applying the rule step-by-step gives 6, 1, 2, 5 as the first four picks.",
+      "wrongExplanations": {
+        "1": "You cannot place 5 at step 2 since k<diff then.",
+        "3": "After placing 6, k=2, so placing 2, not 1 then 2 reversed, would be inconsistent with the rule."
+      },
+      "hint": "Recompute diff and compare to k each step.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Writing the Code",
+      "questionText": "Choose the import needed for fast standard I/O in Python.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys",
+          "isCode": true
+        },
+        {
+          "label": "import os",
+          "isCode": true
+        },
+        {
+          "label": "from sys import stdin as buffer",
+          "isCode": true
+        },
+        {
+          "label": "import math",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We will use sys.stdin.buffer and sys.stdout; so import sys.",
+      "wrongExplanations": {
+        "1": "os is not needed for reading simple input here.",
+        "2": "This aliasing is unnecessary and not used in the final code."
+      },
+      "hint": "We will access sys.stdin.buffer and sys.stdout directly.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys",
+      "codeLabel": "Import sys"
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Read all input quickly as tokens for n and k.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "data = sys.stdin.buffer.read().split()",
+          "isCode": true
+        },
+        {
+          "label": "data = sys.stdin.read().split()",
+          "isCode": true
+        },
+        {
+          "label": "data = input().split()",
+          "isCode": true
+        },
+        {
+          "label": "data = sys.stdin.buffer.readline().split()",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Reading from sys.stdin.buffer and splitting once is fast and robust.",
+      "wrongExplanations": {
+        "1": "This also works but uses text mode; we'll stick to buffer for speed.",
+        "2": "Works for a single line, but buffer.read() is generally faster for large input."
+      },
+      "hint": "Use the buffered binary input stream.",
+      "isCodeBuilding": true,
+      "codeSnippet": "data = sys.stdin.buffer.read().split()",
+      "codeLabel": "Read tokens"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Parse n and k from the tokens.",
+      "diagram": "data holds [b'n', b'k'] as bytes",
+      "options": [
+        {
+          "label": "n = int(data[0]); k = int(data[1])",
+          "isCode": true
+        },
+        {
+          "label": "n = int(data[1]); k = int(data[0])",
+          "isCode": true
+        },
+        {
+          "label": "n, k = map(int, sys.stdin.buffer.read().split())",
+          "isCode": true
+        },
+        {
+          "label": "n = int(data[0]); k = data[1]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Convert the first two tokens to ints in correct order.",
+      "wrongExplanations": {
+        "1": "This swaps n and k; it will misinterpret inputs.",
+        "3": "k remains a bytes/string, not an int."
+      },
+      "hint": "Use the tokens you already read; don't read again.",
+      "isCodeBuilding": true,
+      "codeSnippet": "n = int(data[0]); k = int(data[1])",
+      "codeLabel": "Parse n,k"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Initialize the current smallest and largest available values.",
+      "diagram": "We will choose from [low..high] each step.",
+      "options": [
+        {
+          "label": "low, high = 1, n",
+          "isCode": true
+        },
+        {
+          "label": "low, high = 0, n-1",
+          "isCode": true
+        },
+        {
+          "label": "low, high = 1, n-1",
+          "isCode": true
+        },
+        {
+          "label": "low = 1; high = n; k = high - low",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We start with the full range [1..n].",
+      "wrongExplanations": {
+        "1": "This would shift values and break the intended range.",
+        "3": "Do not modify k here; k tracks remaining inversions."
+      },
+      "hint": "We want to choose between the smallest and largest in [1..n].",
+      "isCodeBuilding": true,
+      "codeSnippet": "low, high = 1, n",
+      "codeLabel": "Init bounds"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Create the container for the permutation we will build.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "ans = []",
+          "isCode": true
+        },
+        {
+          "label": "ans = [0]*n",
+          "isCode": true
+        },
+        {
+          "label": "ans = ()",
+          "isCode": true
+        },
+        {
+          "label": "ans = list(range(1, n+1))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We will append chosen numbers in order; start with an empty list.",
+      "wrongExplanations": {
+        "1": "Pre-filling with zeros complicates logic and prints zeros unless overwritten.",
+        "3": "This pre-fills in increasing order, ignoring k."
+      },
+      "hint": "We'll grow it as we choose each number.",
+      "isCodeBuilding": true,
+      "codeSnippet": "ans = []",
+      "codeLabel": "Init answer list"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Fill the permutation by repeatedly placing R if k ≥ R−L, else L.",
+      "diagram": "Loop until low>high. Update k, low, high carefully.",
+      "options": [
+        {
+          "label": "while low <= high:\n    diff = high - low\n    if k >= diff:\n        ans.append(high)\n        k -= diff\n        high -= 1\n    else:\n        ans.append(low)\n        low += 1",
+          "isCode": true
+        },
+        {
+          "label": "while low <= high:\n    diff = high - low + 1\n    if k >= diff:\n        ans.append(high)\n        k -= diff\n        high -= 1\n    else:\n        ans.append(low)\n        low += 1",
+          "isCode": true
+        },
+        {
+          "label": "while low <= high:\n    diff = high - low\n    if k > diff:\n        ans.append(high)\n        k -= diff\n        high -= 1\n    else:\n        ans.append(low)\n        low += 1",
+          "isCode": true
+        },
+        {
+          "label": "while low <= high:\n    diff = high - low\n    if k >= diff:\n        ans.append(high)\n        k -= high\n        high -= 1\n    else:\n        ans.append(low)\n        low -= 1",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "diff=high-low counts new inversions when placing high; compare with ≥ and subtract diff; otherwise place low.",
+      "wrongExplanations": {
+        "1": "Adding 1 to diff overshoots by one inversion.",
+        "2": "Using '>' misses cases where k==diff; you must place high then.",
+        "3": "Subtracting high and decrementing low are incorrect updates."
+      },
+      "hint": "Be precise: exactly R−L inversions when choosing R.",
+      "isCodeBuilding": true,
+      "codeSnippet": "while low <= high:\n    diff = high - low\n    if k >= diff:\n        ans.append(high)\n        k -= diff\n        high -= 1\n    else:\n        ans.append(low)\n        low += 1",
+      "codeLabel": "Build permutation"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Output the permutation efficiently as a single line.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "sys.stdout.write(' '.join(map(str, ans)))",
+          "isCode": true
+        },
+        {
+          "label": "print(' '.join(ans))",
+          "isCode": true
+        },
+        {
+          "label": "sys.stdout.write(ans)",
+          "isCode": true
+        },
+        {
+          "label": "print(*ans, sep=' ')",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Join into one string and write once for speed; convert numbers to strings.",
+      "wrongExplanations": {
+        "1": "Missing str conversion; ans contains ints.",
+        "3": "Works but can be slower due to many arguments and flushing behavior."
+      },
+      "hint": "Avoid printing many small pieces when n is large.",
+      "isCodeBuilding": true,
+      "codeSnippet": "sys.stdout.write(' '.join(map(str, ans)))",
+      "codeLabel": "Print result"
+    },
+    {
+      "id": "q21",
+      "phase": "Verifying the Solution",
+      "questionText": "Run the algorithm for n=5, k=4. Which permutation does it produce?",
+      "diagram": "Steps: place 5 (k=0), then 1,2,3,4.",
+      "options": [
+        {
+          "label": "5 1 2 3 4",
+          "isCode": false
+        },
+        {
+          "label": "1 5 2 4 3",
+          "isCode": false
+        },
+        {
+          "label": "1 2 3 4 5",
+          "isCode": false
+        },
+        {
+          "label": "4 1 2 3 5",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Placing 5 first uses all 4 inversions; the rest are increasing.",
+      "wrongExplanations": {
+        "1": "Also valid but not what this specific method outputs.",
+        "2": "This has 0 inversions, not 4."
+      },
+      "hint": "After using k on the first step, place the smallest each time.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q22",
+      "phase": "Verifying the Solution",
+      "questionText": "Run the algorithm for n=6, k=7. What is the final permutation?",
+      "diagram": "Picks: 6(k=2), 1, 2, 5(k=0), 3, 4",
+      "options": [
+        {
+          "label": "6 1 2 5 3 4",
+          "isCode": false
+        },
+        {
+          "label": "6 2 1 5 3 4",
+          "isCode": false
+        },
+        {
+          "label": "5 1 2 6 3 4",
+          "isCode": false
+        },
+        {
+          "label": "6 1 2 4 3 5",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Following the rule step-by-step yields 6 1 2 5 3 4.",
+      "wrongExplanations": {
+        "1": "After 6, k=2 so you place 1 then 2 (not 2 then 1)."
+      },
+      "hint": "Recompute diff and k at each step until low>high.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q23",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the time complexity of constructing the permutation with this method?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(k)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We perform one constant-time decision and append per element.",
+      "wrongExplanations": {
+        "2": "No nested loops over elements.",
+        "3": "We do not loop k times; we loop n times."
+      },
+      "hint": "How many iterations do we run in the main loop?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the space complexity of this implementation?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(1)",
+          "isCode": false
+        },
+        {
+          "label": "O(k)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We store the n-length permutation in memory.",
+      "wrongExplanations": {
+        "1": "We keep the whole permutation list, not constant space."
+      },
+      "hint": "Consider the size of the output structure we're building.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Analyzing Complexity",
+      "questionText": "What permutations does the algorithm produce for extreme k values?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "k=0 → 1..n; k=n(n−1)/2 → n..1",
+          "isCode": false
+        },
+        {
+          "label": "k=0 → n..1; k=n(n−1)/2 → 1..n",
+          "isCode": false
+        },
+        {
+          "label": "k=0 → any order; k=max → any order",
+          "isCode": false
+        },
+        {
+          "label": "k=0 → 1..n; k=n(n−1)/2 → 1..n",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "With k=0 we always place L: increasing. With k at max we always place R: decreasing.",
+      "wrongExplanations": {
+        "1": "This reverses the behavior.",
+        "2": "Edges force unique structures for this method."
+      },
+      "hint": "At k=0 you never place R while diff>0.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys",
+    "data = sys.stdin.buffer.read().split()",
+    "n = int(data[0]); k = int(data[1])",
+    "low, high = 1, n",
+    "ans = []",
+    "while low <= high:\n    diff = high - low\n    if k >= diff:\n        ans.append(high)\n        k -= diff\n        high -= 1\n    else:\n        ans.append(low)\n        low += 1",
+    "sys.stdout.write(' '.join(map(str, ans)))"
+  ],
+  "reasoningChain": [
+    {
+      "question": "What is an inversion and how do we count them in small permutations?",
+      "insight": "Understanding inversions as pairs (a,b) with a<b and p_a>p_b lets us reason about contributions of placements."
+    },
+    {
+      "question": "How many inversions does placing the largest remaining value create?",
+      "insight": "Placing the current largest at the next position adds exactly (R−L) inversions with all smaller remaining values."
+    },
+    {
+      "question": "What happens if we place the smallest remaining value?",
+      "insight": "Placing the smallest adds zero inversions immediately, preserving k for later steps."
+    },
+    {
+      "question": "How do we decide between placing largest or smallest at each step?",
+      "insight": "Compare k with (R−L): if k ≥ (R−L), place R and reduce k by that amount; otherwise place L."
+    },
+    {
+      "question": "Why does this process always finish with k=0?",
+      "insight": "We never overspend k, and (R−L) decreases over time to 0; remaining k must be consumed exactly by chosen R placements."
+    },
+    {
+      "question": "How do we implement this efficiently for large n?",
+      "insight": "Use two pointers (low, high), a single loop of n iterations, and fast I/O to build and print the permutation in O(n) time and O(n) space."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1333,
+    "output_tokens": 15640,
+    "input_cost": 0.001666,
+    "output_cost": 0.1564,
+    "total_cost": 0.158066
+  }
+}

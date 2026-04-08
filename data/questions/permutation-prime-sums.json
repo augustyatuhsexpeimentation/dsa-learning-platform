@@ -1,0 +1,886 @@
+{
+  "id": "permutation-prime-sums",
+  "title": "Permutation Prime Sums",
+  "difficulty": "intermediate",
+  "tags": [
+    "mixed"
+  ],
+  "estimatedMinutes": 60,
+  "language": "python",
+  "description": "Given n, create two permutations a and b of size n such that a_i + b_i is prime for i=1,2,\\dots,n.\n\nInput: A single integer n.\n\nOutput: Print two permutations. You can print any valid solution. If there are no solutions, print IMPOSSIBLE.\n\nIf multiple answers exist, print any of them.",
+  "examples": [
+    {
+      "input": "5",
+      "output": "2 1 3 5 4\n5 1 4 2 3",
+      "explanation": "One valid answer: For each i, a_i + b_i is prime (7, 2, 7, 7, 7)."
+    }
+  ],
+  "constraints": [
+    "1 \\le n \\le 10^5",
+    "Time Limit: 1.00 s",
+    "Memory Limit: 512 MB"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "For n = 1, can we choose a = [1] and b = [1] so that a_1 + b_1 is prime?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, because 1 + 1 = 2 is prime.",
+          "isCode": false
+        },
+        {
+          "label": "No, because 1 + 1 = 2 is not allowed.",
+          "isCode": false
+        },
+        {
+          "label": "No, because 1 is not a prime.",
+          "isCode": false
+        },
+        {
+          "label": "Yes, because any sum with 1 works.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "1 + 1 = 2, which is prime. Both a and b are valid permutations of size 1.",
+      "wrongExplanations": {
+        "1": "2 is a prime; there is no restriction banning 2.",
+        "2": "We are checking the sum 1 + 1 = 2; primality of 1 itself is irrelevant."
+      },
+      "hint": "Check the sum 1 + 1.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "For n = 2, if we fix a = [1, 2], which b makes a_i + b_i prime for both positions?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "[1, 2]",
+          "isCode": false
+        },
+        {
+          "label": "[2, 1]",
+          "isCode": false
+        },
+        {
+          "label": "[2, 2]",
+          "isCode": false
+        },
+        {
+          "label": "[1, 1]",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "b = [2, 1] gives sums 1+2=3 and 2+1=3, both prime. The others either are not permutations or yield a non-prime sum.",
+      "wrongExplanations": {
+        "0": "1+1=2 is prime, but 2+2=4 is not; also b must be a permutation.",
+        "2": "b must be a permutation of [1,2]; [2,2] repeats 2.",
+        "3": "b must be a permutation; [1,1] repeats 1."
+      },
+      "hint": "Try swapping the two elements.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "Consider parity. For i > 1, if a_i and b_i have the same parity, can a_i + b_i be prime?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, always.",
+          "isCode": false
+        },
+        {
+          "label": "No, except when a_i = b_i = 1 (sum = 2).",
+          "isCode": false
+        },
+        {
+          "label": "Yes, but only if both are even.",
+          "isCode": false
+        },
+        {
+          "label": "No, never.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "All primes > 2 are odd. Odd+odd and even+even are even; only 1+1=2 works as an even prime.",
+      "wrongExplanations": {
+        "2": "Even+even gives an even sum > 2, which is not prime."
+      },
+      "hint": "Think about whether prime sums are odd or even.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "Is it sufficient to set a as [1, 2, ..., n] and find a permutation b such that i + b_i is prime for all i?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, fixing a to identity does not restrict generality.",
+          "isCode": false
+        },
+        {
+          "label": "No, both a and b must be arbitrary to succeed.",
+          "isCode": false
+        },
+        {
+          "label": "Only if n is even.",
+          "isCode": false
+        },
+        {
+          "label": "Only if n is prime.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Any valid pair (a,b) can be seen as a permutation b matched to indices. Fixing a to identity just relabels positions.",
+      "wrongExplanations": {
+        "1": "We can permute positions without changing feasibility.",
+        "2": "Feasibility does not depend solely on parity of n."
+      },
+      "hint": "You can reorder the positions without changing sums' primality.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Exploring Approaches",
+      "questionText": "Why is trying all permutations of b infeasible for n = 12?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Because there are 12! ≈ 479 million permutations to check.",
+          "isCode": false
+        },
+        {
+          "label": "Because checking primality is too slow for small n.",
+          "isCode": false
+        },
+        {
+          "label": "Because there are only 2 primes up to 24.",
+          "isCode": false
+        },
+        {
+          "label": "Because any b will work for n = 12.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "12! is enormous; trying all permutations is impractical. We need a constructive method.",
+      "wrongExplanations": {
+        "1": "Primality checks are fast; the search space is the real issue.",
+        "3": "Not any b works; constraints are tight."
+      },
+      "hint": "Estimate the number of permutations.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "Suppose we try b_i = P - i for a fixed prime P. When is b a permutation of [1..n]?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Exactly when P = n + 1.",
+          "isCode": false
+        },
+        {
+          "label": "Whenever P is any prime > n.",
+          "isCode": false
+        },
+        {
+          "label": "Whenever P ≥ 2n.",
+          "isCode": false
+        },
+        {
+          "label": "Never, because values can repeat.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The image set is {P-1, ..., P-n}. For it to equal {1..n}, we need P-1=n and P-n=1, i.e., P = n+1.",
+      "wrongExplanations": {
+        "1": "For P>n but ≠ n+1, values fall outside [1..n].",
+        "2": "P≥2n maps many values below 1."
+      },
+      "hint": "Match the set {P-1, ..., P-n} with {1, ..., n}.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "Let p be the smallest prime > n. For which indices i does j = p - i lie in [1..n]?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "All i with i ≥ p - n.",
+          "isCode": false
+        },
+        {
+          "label": "All i with i ≤ p - n.",
+          "isCode": false
+        },
+        {
+          "label": "All i with i ≥ n - p.",
+          "isCode": false
+        },
+        {
+          "label": "Only i = p - n and i = n.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need 1 ≤ p - i ≤ n ⇔ p - n ≤ i ≤ p - 1; within [1..n], that’s i ≥ p - n.",
+      "wrongExplanations": {
+        "1": "i ≤ p-n gives j ≥ n+1, out of range.",
+        "2": "n - p is negative; the bound is p - n."
+      },
+      "hint": "Solve 1 ≤ p - i ≤ n for i.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Building the Idea",
+      "questionText": "Example n=7: p is the smallest prime > 7, which is 11. Which set of indices i are paired by j = p - i staying in [1..7]?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "{1, 2, 3}",
+          "isCode": false
+        },
+        {
+          "label": "{4, 5, 6, 7}",
+          "isCode": false
+        },
+        {
+          "label": "{5, 6, 7, 8}",
+          "isCode": false
+        },
+        {
+          "label": "{3, 4, 5}",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "p - n = 11 - 7 = 4, so i ∈ {4,5,6,7}. They pair as (4↔7) and (5↔6).",
+      "wrongExplanations": {
+        "0": "These are the leftover, not the paired ones.",
+        "2": "8 is outside [1..7]."
+      },
+      "hint": "Use i ≥ p - n.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "Continuing n=7 with p=11, after pairing i in {4,5,6,7} with p - i, which indices remain unpaired?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "[1, 2, 3]",
+          "isCode": false
+        },
+        {
+          "label": "[5, 6, 7]",
+          "isCode": false
+        },
+        {
+          "label": "[1, 2, 3, 4]",
+          "isCode": false
+        },
+        {
+          "label": "None remain",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Pairs cover {4,5,6,7}, leaving [1..3] for further handling.",
+      "wrongExplanations": {
+        "1": "Those were just paired.",
+        "2": "4 is paired with 7."
+      },
+      "hint": "Subtract the paired set from [1..7].",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "Now handle leftover size m=3. The smallest prime > m is 5. For which i in [1..3] is j=5-i within [1..3]?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "i ∈ {2, 3}",
+          "isCode": false
+        },
+        {
+          "label": "i ∈ {1, 2, 3}",
+          "isCode": false
+        },
+        {
+          "label": "i ∈ {1}",
+          "isCode": false
+        },
+        {
+          "label": "i ∈ {3}",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "p - m = 5 - 3 = 2 ⇒ i ≥ 2, so i = 2,3 pair as (2↔3).",
+      "wrongExplanations": {
+        "1": "i=1 gives 5-1=4, which is outside [1..3]."
+      },
+      "hint": "Use i ≥ p - m with p=5, m=3.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "After that, only index 1 remains. How can we finalize it so the sum stays prime?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Set b_1 = 1 so 1 + 1 = 2.",
+          "isCode": false
+        },
+        {
+          "label": "Set b_1 = 2 so 1 + 2 = 3.",
+          "isCode": false
+        },
+        {
+          "label": "Leave it unmatched and print IMPOSSIBLE.",
+          "isCode": false
+        },
+        {
+          "label": "Set b_1 = 3 so 1 + 3 = 4.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "b_1=1 makes the sum 2, which is prime, and uses 1 exactly once in b.",
+      "wrongExplanations": {
+        "1": "Then 2 would be used twice in b or violate permutation constraints.",
+        "3": "1+3=4 is not prime."
+      },
+      "hint": "Remember the special even prime.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "Why does the repeat-and-reduce process always terminate?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Each step reduces the unpaired segment size to at most r-1, where r = p - m ≥ 1.",
+          "isCode": false
+        },
+        {
+          "label": "Because sums eventually stop being prime.",
+          "isCode": false
+        },
+        {
+          "label": "It might cycle but usually stops.",
+          "isCode": false
+        },
+        {
+          "label": "Only when n is even.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "At each step, the new leftover size is (p - m - 1), strictly smaller than m; it hits 0 or 1.",
+      "wrongExplanations": {
+        "2": "There is a strict decrease in leftover size, so no cycles."
+      },
+      "hint": "Track the leftover size after one step.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Writing the Code",
+      "questionText": "Read n and set a sieve limit sufficient for primes > current size. Choose the correct initialization.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\nn = int(sys.stdin.read().strip())\nlimit = 2 * n + 5",
+          "isCode": true
+        },
+        {
+          "label": "n = int(input())\nlimit = n + 5",
+          "isCode": true
+        },
+        {
+          "label": "import sys\nn = int(sys.stdin.read().strip())\nlimit = n // 2 + 5",
+          "isCode": true
+        },
+        {
+          "label": "n = int(input())\nlimit = 3 * n",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need primes up to at least 2n; limit = 2*n+5 is safe. Reading uses sys.stdin as problem has one integer.",
+      "wrongExplanations": {
+        "1": "n+5 may miss primes > n for smaller leftover segments not covered.",
+        "3": "3n is overkill but acceptable; however reading method must be consistent with later code."
+      },
+      "hint": "We will need primes up to about 2*n.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\nn = int(sys.stdin.read().strip())\nlimit = 2 * n + 5",
+      "codeLabel": "Read input and set sieve limit"
+    },
+    {
+      "id": "q14",
+      "phase": "Writing the Code",
+      "questionText": "Initialize the primality array for the sieve correctly.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "is_prime = [True] * limit\nis_prime[0] = is_prime[1] = False",
+          "isCode": true
+        },
+        {
+          "label": "is_prime = [False] * (limit + 1)\nis_prime[2] = True",
+          "isCode": true
+        },
+        {
+          "label": "is_prime = [True] * (limit + 1)\n# 0 and 1 are implicitly prime",
+          "isCode": true
+        },
+        {
+          "label": "is_prime = [False] * limit\nfor i in range(2, limit): is_prime[i] = True",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Start with all True up to 'limit-1' and mark 0,1 as non-prime. We'll mark composites later.",
+      "wrongExplanations": {
+        "1": "Only setting 2 as True leaves others uninitialized; also array size off by one.",
+        "3": "Setting then flipping is roundabout and error-prone; simpler to start with True."
+      },
+      "hint": "Indices are 0..limit-1; 0 and 1 are not prime.",
+      "isCodeBuilding": true,
+      "codeSnippet": "is_prime = [True] * limit\nis_prime[0] = is_prime[1] = False",
+      "codeLabel": "Initialize primality list"
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Fill in the sieve loops to mark composites correctly.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "for i in range(2, int(limit ** 0.5) + 1):\n    if is_prime[i]:\n        for j in range(i * i, limit, i):\n            is_prime[j] = False",
+          "isCode": true
+        },
+        {
+          "label": "for i in range(2, limit):\n    if is_prime[i]:\n        for j in range(i + i, limit, i):\n            is_prime[j] = False",
+          "isCode": true
+        },
+        {
+          "label": "for i in range(2, int(limit ** 0.5)):\n    for j in range(i * i, limit + 1, i):\n        is_prime[j] = False",
+          "isCode": true
+        },
+        {
+          "label": "for i in range(2, limit):\n    for j in range(i, limit, i):\n        is_prime[j] = False",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Start from i*i and stop at sqrt(limit) for i; this avoids extra work and stays in bounds.",
+      "wrongExplanations": {
+        "1": "Works but is less efficient and acceptable; however we aim to start from i*i to avoid re-marking.",
+        "2": "The outer range should include sqrt(limit); inner loop bounds off by one."
+      },
+      "hint": "Start marking at i*i.",
+      "isCodeBuilding": true,
+      "codeSnippet": "for i in range(2, int(limit ** 0.5) + 1):\n    if is_prime[i]:\n        for j in range(i * i, limit, i):\n            is_prime[j] = False",
+      "codeLabel": "Sieve marking"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Write a helper to get the smallest prime ≥ x using the sieve.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def next_prime(x):\n    while x < limit and not is_prime[x]:\n        x += 1\n    return x",
+          "isCode": true
+        },
+        {
+          "label": "def next_prime(x):\n    while not is_prime[x]:\n        x -= 1\n    return x",
+          "isCode": true
+        },
+        {
+          "label": "def next_prime(x):\n    while is_prime[x]:\n        x += 1\n    return x - 1",
+          "isCode": true
+        },
+        {
+          "label": "def next_prime(x):\n    return x if is_prime[x] else x + 1",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need to scan upward from x until a prime is found; limit bounds ensure safety.",
+      "wrongExplanations": {
+        "1": "Scanning downward can miss the needed prime ≥ x.",
+        "3": "This may return a composite if x and x+1 are not prime."
+      },
+      "hint": "We want the first prime not less than x.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def next_prime(x):\n    while x < limit and not is_prime[x]:\n        x += 1\n    return x",
+      "codeLabel": "Helper: next prime ≥ x"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Initialize the array b (1-indexed) to store the permutation mapping for b_i.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "b = [0] * (n + 1)",
+          "isCode": true
+        },
+        {
+          "label": "b = [0] * n",
+          "isCode": true
+        },
+        {
+          "label": "b = [None] * (n + 1)",
+          "isCode": true
+        },
+        {
+          "label": "b = list(range(n))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We will index b from 1..n; zero indicates unassigned.",
+      "wrongExplanations": {
+        "1": "This makes b[n-1] the last index; we need space up to n.",
+        "3": "We want all entries initially unassigned, not preset values."
+      },
+      "hint": "Allocate n+1 slots and fill with zeros.",
+      "isCodeBuilding": true,
+      "codeSnippet": "b = [0] * (n + 1)",
+      "codeLabel": "Initialize b"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Fill the main pairing loop using p = next prime > rem and pair i with p - i for all valid i.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "rem = n\nwhile rem > 1:\n    p = next_prime(rem + 1)\n    r = p - rem\n    for i in range(r, rem + 1):\n        if b[i] == 0:\n            j = p - i\n            b[i] = j\n            b[j] = i\n    rem = r - 1",
+          "isCode": true
+        },
+        {
+          "label": "rem = n\nwhile rem >= 1:\n    p = next_prime(rem)\n    r = p - rem\n    for i in range(1, r):\n        j = p - i\n        b[i] = j\n        b[j] = i\n    rem = r",
+          "isCode": true
+        },
+        {
+          "label": "rem = n\nwhile rem > 1:\n    p = next_prime(rem + 1)\n    r = p - rem\n    for i in range(1, rem + 1):\n        j = p - i\n        b[i] = j\n        b[j] = i\n    rem -= 1",
+          "isCode": true
+        },
+        {
+          "label": "rem = n\nwhile rem > 1:\n    p = next_prime(rem + 1)\n    r = p - rem\n    for i in range(r, rem + 1):\n        j = p - i\n        if 1 <= j <= rem:\n            b[i] = j\n            b[j] = i\n    rem = rem // 2",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We pair indices i in [r..rem], assigning both i and p-i if unassigned, then reduce rem to r-1.",
+      "wrongExplanations": {
+        "1": "Bounds are off: starting i from 1..r-1 pairs the wrong range; rem update is also wrong.",
+        "2": "This pairs i outside the valid in-range interval and may overwrite previously set values."
+      },
+      "hint": "Only i ≥ r = p - rem have partners within [1..rem].",
+      "isCodeBuilding": true,
+      "codeSnippet": "rem = n\nwhile rem > 1:\n    p = next_prime(rem + 1)\n    r = p - rem\n    for i in range(r, rem + 1):\n        if b[i] == 0:\n            j = p - i\n            b[i] = j\n            b[j] = i\n    rem = r - 1",
+      "codeLabel": "Main pairing loop"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Handle the base case when only index 1 remains unpaired.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "if rem == 1:\n    b[1] = 1",
+          "isCode": true
+        },
+        {
+          "label": "if rem == 1:\n    b[1] = 2",
+          "isCode": true
+        },
+        {
+          "label": "if rem == 1:\n    pass",
+          "isCode": true
+        },
+        {
+          "label": "if rem == 1:\n    b[1] = 0",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Set b[1]=1 to make sum 2. Other values either break primality or leave it unset.",
+      "wrongExplanations": {
+        "1": "1+2=3 is prime but would reuse 2 incorrectly unless n=1; we handle pairing consistently.",
+        "2": "We must assign b[1] for a complete permutation."
+      },
+      "hint": "Use the special even prime if needed.",
+      "isCodeBuilding": true,
+      "codeSnippet": "if rem == 1:\n    b[1] = 1",
+      "codeLabel": "Base case for rem == 1"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Construct a and print both permutations space-separated.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "a = list(range(1, n + 1))\nprint(' '.join(map(str, a)))\nprint(' '.join(map(str, b[1:])))",
+          "isCode": true
+        },
+        {
+          "label": "a = list(range(n))\nprint(a)\nprint(b)",
+          "isCode": true
+        },
+        {
+          "label": "a = list(range(1, n))\nprint(' '.join(map(str, a)))\nprint(' '.join(map(str, b)))",
+          "isCode": true
+        },
+        {
+          "label": "a = [i for i in range(1, n + 1)][::-1]\nprint(' '.join(map(str, b[1:])))\nprint(' '.join(map(str, a)))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "a should be 1..n. b is stored 1-indexed in b[1:]. Print as space-separated lines.",
+      "wrongExplanations": {
+        "1": "range(n) gives 0..n-1; printing raw lists mismatches the format.",
+        "3": "Swapping the order of lines breaks the expected output order."
+      },
+      "hint": "Remember 1-based for both permutations and output format.",
+      "isCodeBuilding": true,
+      "codeSnippet": "a = list(range(1, n + 1))\nprint(' '.join(map(str, a)))\nprint(' '.join(map(str, b[1:])))",
+      "codeLabel": "Finalize and print"
+    },
+    {
+      "id": "q21",
+      "phase": "Verifying the Solution",
+      "questionText": "Run the algorithm for n=5. The smallest prime >5 is 7: pair i=2..5 with 7-i, then rem=1 → b[1]=1. What b is produced (1-indexed b[1..5])?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "[1, 5, 4, 3, 2]",
+          "isCode": false
+        },
+        {
+          "label": "[1, 4, 5, 2, 3]",
+          "isCode": false
+        },
+        {
+          "label": "[2, 1, 3, 5, 4]",
+          "isCode": false
+        },
+        {
+          "label": "[5, 1, 4, 2, 3]",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Pairs: (2↔5),(3↔4) and b[1]=1 ⇒ b = [1,5,4,3,2].",
+      "wrongExplanations": {
+        "2": "That's a (valid) a in the sample, not b here.",
+        "3": "This is the sample's b for a different a."
+      },
+      "hint": "Compute 7-i for i=2..5, and set b[1]=1.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q22",
+      "phase": "Verifying the Solution",
+      "questionText": "With a = [1,2,3,4,5] and b = [1,5,4,3,2], which sums do we get for i=1..5?",
+      "diagram": "i:  1  2  3  4  5\na:  1  2  3  4  5\nb:  1  5  4  3  2\ns:  ?  ?  ?  ?  ?",
+      "options": [
+        {
+          "label": "[2, 7, 7, 7, 7] (all prime)",
+          "isCode": false
+        },
+        {
+          "label": "[2, 7, 5, 7, 7] (all prime)",
+          "isCode": false
+        },
+        {
+          "label": "[2, 6, 7, 7, 7] (one composite)",
+          "isCode": false
+        },
+        {
+          "label": "[3, 7, 7, 7, 7] (all prime)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Sums are 1+1=2, 2+5=7, 3+4=7, 4+3=7, 5+2=7: all prime.",
+      "wrongExplanations": {
+        "2": "2+5=7, not 6.",
+        "3": "1+1=2, not 3."
+      },
+      "hint": "Add each pair a_i + b_i.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q23",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the overall time complexity of the solution?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n log log n) for sieve + O(n) for pairing ⇒ O(n log log n).",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2) due to nested loops pairing.",
+          "isCode": false
+        },
+        {
+          "label": "O(n!) due to permutation enumeration.",
+          "isCode": false
+        },
+        {
+          "label": "O(log n) because primes are sparse.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Sieve up to ~2n is O(n log log n). The pairing loop touches each index a constant number of times.",
+      "wrongExplanations": {
+        "1": "The pairing loop is linear, not quadratic.",
+        "3": "We still build a sieve; cost is not logarithmic."
+      },
+      "hint": "Count work for sieve and for the rem loop.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the extra space usage of the implementation (excluding input/output)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n) for the sieve and arrays.",
+          "isCode": false
+        },
+        {
+          "label": "O(1) constant space.",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2) due to storing all pairs.",
+          "isCode": false
+        },
+        {
+          "label": "O(log n).",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We allocate is_prime up to ~2n and b, both linear in n.",
+      "wrongExplanations": {
+        "2": "We don’t store pairs in a matrix; only arrays.",
+        "1": "Sieve and permutation arrays scale with n."
+      },
+      "hint": "Consider sizes of is_prime and b.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\nn = int(sys.stdin.read().strip())\nlimit = 2 * n + 5",
+    "is_prime = [True] * limit\nis_prime[0] = is_prime[1] = False",
+    "for i in range(2, int(limit ** 0.5) + 1):\n    if is_prime[i]:\n        for j in range(i * i, limit, i):\n            is_prime[j] = False",
+    "def next_prime(x):\n    while x < limit and not is_prime[x]:\n        x += 1\n    return x",
+    "b = [0] * (n + 1)",
+    "rem = n\nwhile rem > 1:\n    p = next_prime(rem + 1)\n    r = p - rem\n    for i in range(r, rem + 1):\n        if b[i] == 0:\n            j = p - i\n            b[i] = j\n            b[j] = i\n    rem = r - 1",
+    "if rem == 1:\n    b[1] = 1",
+    "a = list(range(1, n + 1))\nprint(' '.join(map(str, a)))\nprint(' '.join(map(str, b[1:])))"
+  ],
+  "reasoningChain": [
+    {
+      "question": "q4",
+      "insight": "We can fix a as [1..n], reducing the task to finding a permutation b where i + b_i is prime."
+    },
+    {
+      "question": "q3",
+      "insight": "Except for 1+1=2, prime sums are odd; thus i and b_i typically have opposite parity."
+    },
+    {
+      "question": "q6",
+      "insight": "Constant-sum idea b_i = P - i only works when P = n + 1; we need a more general plan."
+    },
+    {
+      "question": "q7",
+      "insight": "Using the smallest prime p > current size, i in [p - m .. m] can be paired with p - i within bounds."
+    },
+    {
+      "question": "q8",
+      "insight": "Applying this pairing covers a suffix of indices and leaves a strictly smaller prefix as leftover."
+    },
+    {
+      "question": "q11",
+      "insight": "Base case: if a single index 1 remains, set b_1 = 1 to make sum 2."
+    },
+    {
+      "question": "q15",
+      "insight": "Precompute primes up to ~2n with a sieve to quickly find the next prime during construction."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1309,
+    "output_tokens": 17638,
+    "input_cost": 0.001636,
+    "output_cost": 0.17638,
+    "total_cost": 0.178016
+  }
+}

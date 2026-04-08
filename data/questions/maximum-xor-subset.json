@@ -1,0 +1,881 @@
+{
+  "id": "maximum-xor-subset",
+  "title": "Maximum Xor Subset",
+  "difficulty": "intermediate",
+  "tags": [
+    "mixed",
+    "bitwise",
+    "xor"
+  ],
+  "estimatedMinutes": 60,
+  "language": "python",
+  "description": "Given an array of n integers, find the maximum xor sum of any subset.\n\nInput:\n- First line: integer n\n- Second line: n integers x_1, x_2, ..., x_n\n\nOutput:\n- One integer: the maximum xor sum of a subset\n\nNote: You may choose an empty subset (xor = 0).",
+  "examples": [
+    {
+      "input": "4\n1 6 12 6",
+      "output": "13",
+      "explanation": "The subset {1, 12} gives 1 ^ 12 = 13, which is maximal. Using both 6's cancels them (6 ^ 6 = 0)."
+    }
+  ],
+  "constraints": [
+    "1 ≤ n ≤ 2 * 10^5",
+    "0 ≤ x_i ≤ 10^9",
+    "Time Limit: 1.00 s",
+    "Memory Limit: 512 MB"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "For the array [1, 6], what is the maximum xor sum of a subset?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "7",
+          "isCode": false
+        },
+        {
+          "label": "6",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Possible xors: 0 (empty), 1, 6, 1^6=7. Max is 7.",
+      "wrongExplanations": {
+        "1": "6 is a subset xor, but 1^6=7 is larger.",
+        "3": "Empty subset gives 0, but non-empty subsets can give larger values."
+      },
+      "hint": "List all subset xors.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "For the array [6, 6], what is the maximum xor sum of a subset?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "12",
+          "isCode": false
+        },
+        {
+          "label": "6",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Subsets: {}, {6}, {6}, {6,6}. Xors: 0, 6, 6, 0. Max is 6.",
+      "wrongExplanations": {
+        "0": "Xor is not addition; 6^6=0, not 12.",
+        "2": "Both 6's together cancel to 0, but a single 6 gives 6."
+      },
+      "hint": "Remember x ^ x = 0.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "For the array [8, 4, 12], what is the maximum xor sum of a subset?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "12",
+          "isCode": false
+        },
+        {
+          "label": "8",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Xors include 8,4,12, 8^4=12, 8^12=4, 4^12=8, and 8^4^12=0. Max is 12.",
+      "wrongExplanations": {
+        "1": "8 is achievable, but 12 is larger.",
+        "3": "Non-empty subsets produce higher xors here."
+      },
+      "hint": "Try all pairs and the triple briefly.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "Which statement about xor is always true?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "x ^ x = 0 for any integer x",
+          "isCode": false
+        },
+        {
+          "label": "x ^ 0 = 0 for any integer x",
+          "isCode": false
+        },
+        {
+          "label": "(x ^ y) ^ y = 0 for any integers x, y",
+          "isCode": false
+        },
+        {
+          "label": "x ^ y ≥ max(x, y) for any nonnegative x, y",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "x ^ x = 0 is always true. x ^ 0 = x, and (x ^ y) ^ y = x, not 0 (unless x=0).",
+      "wrongExplanations": {
+        "1": "x ^ 0 equals x, not 0 (unless x=0).",
+        "2": "(x ^ y) ^ y simplifies to x, not 0, unless x=0."
+      },
+      "hint": "Think about cancellation with the same value.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Exploring Approaches",
+      "questionText": "Is it feasible to try all subsets for n up to 2⋅10^5?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "No: 2^n subsets is far too large",
+          "isCode": false
+        },
+        {
+          "label": "Yes, because xor is O(1) per subset",
+          "isCode": false
+        },
+        {
+          "label": "Yes, with early stopping after ~10^6 subsets",
+          "isCode": false
+        },
+        {
+          "label": "Yes, if we pre-sort the array",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "2^200000 is astronomically large; enumeration is impossible within limits.",
+      "wrongExplanations": {
+        "1": "Even O(1) per subset doesn't help when there are 2^n subsets.",
+        "2": "Early stopping doesn't guarantee the maximum."
+      },
+      "hint": "Estimate 2^20 vs 2^200000.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "To maximize a nonnegative integer value, which bits should we try to set in the result first?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "The highest (most significant) bits first",
+          "isCode": false
+        },
+        {
+          "label": "The lowest (least significant) bits first",
+          "isCode": false
+        },
+        {
+          "label": "Bits with majority 1s among the array",
+          "isCode": false
+        },
+        {
+          "label": "Any order works the same",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Setting higher bits yields larger increases in the numeric value than lower bits.",
+      "wrongExplanations": {
+        "1": "Lower bits contribute less to the value than higher bits.",
+        "3": "Order matters because higher bits dominate the value."
+      },
+      "hint": "Which bit contributes more: bit 30 or bit 0?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "When you xor two numbers that both have bit k set, what happens to bit k in their xor?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Bit k becomes 0 (it cancels)",
+          "isCode": false
+        },
+        {
+          "label": "Bit k becomes 1 and carries to the next bit",
+          "isCode": false
+        },
+        {
+          "label": "Bit k stays 1 if both are 1",
+          "isCode": false
+        },
+        {
+          "label": "Bit k becomes 1 only if one is 1 and the other is 0",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Xor: 1 ^ 1 = 0, so the same set bit cancels in the result.",
+      "wrongExplanations": {
+        "2": "That's addition logic; xor of 1 and 1 is 0.",
+        "3": "This is true in general, but the question is about both bits being 1."
+      },
+      "hint": "Compute 1 ^ 1 at a single bit.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Building the Idea",
+      "questionText": "Consider x = 12 (binary 1100). What is the index (0-based) of its highest set bit?",
+      "diagram": "12 = 0b1100\nbit indices: 3 2 1 0\n                 1 1 0 0",
+      "options": [
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "1100 has highest 1 at position 3 (8's place).",
+      "wrongExplanations": {
+        "1": "Bit 2 is set, but bit 3 is higher.",
+        "3": "Bit 4 is not set for 12."
+      },
+      "hint": "Write 12 in binary and find the leftmost 1.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "We keep an array where position b can store one number whose highest set bit is b. When inserting a number x and its highest set bit is b, and position b is empty, what should we do?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Store x at position b and stop processing x",
+          "isCode": false
+        },
+        {
+          "label": "Store x at position b and continue to lower bits",
+          "isCode": false
+        },
+        {
+          "label": "Xor x with position b even if it's empty",
+          "isCode": false
+        },
+        {
+          "label": "Shift x right by b and continue",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "If slot b is empty, store x there; it fills that highest-bit representative.",
+      "wrongExplanations": {
+        "1": "Once stored, x is handled; continuing is unnecessary.",
+        "2": "Xoring with 0 does nothing and complicates the flow."
+      },
+      "hint": "We aim for one representative per highest bit.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "If position b is already filled with some y and x also has highest bit b, what's the right next step to try to insert x?",
+      "diagram": "We want to eliminate the highest set bit b from x using y.",
+      "options": [
+        {
+          "label": "Set x = x ^ y to clear bit b, then continue with lower bits",
+          "isCode": false
+        },
+        {
+          "label": "Replace y with min(x, y) to keep the smallest",
+          "isCode": false
+        },
+        {
+          "label": "Discard x because its highest bit is already covered",
+          "isCode": false
+        },
+        {
+          "label": "Add x to a secondary list for later",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Xoring with y clears bit b in x (since both have bit b set), then we try to place the reduced x.",
+      "wrongExplanations": {
+        "2": "Discarding x can lose combinations that set other bits.",
+        "1": "Keeping the smaller doesn't ensure the ability to clear bits later."
+      },
+      "hint": "Use the fact that 1 ^ 1 = 0 at bit b.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "Why should we process bits from high to low when inserting numbers and when assembling the final answer?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Deciding higher bits first maximizes the number; lower bits are decided after",
+          "isCode": false
+        },
+        {
+          "label": "Lower bits are irrelevant to the final value",
+          "isCode": false
+        },
+        {
+          "label": "To avoid infinite loops in the process",
+          "isCode": false
+        },
+        {
+          "label": "Language loops are faster in descending order",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Higher bits dominate value; handling them first ensures we maximize the result bit-by-bit.",
+      "wrongExplanations": {
+        "1": "Lower bits matter, but less than higher ones.",
+        "3": "Performance is not the reason; correctness is."
+      },
+      "hint": "Think lexicographic choice on bits by significance.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "After building the set of representatives (one per highest bit), how do we assemble the maximum xor value?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Start res=0; for b from high to low: if (res ^ rep[b]) > res, set res ^= rep[b]",
+          "isCode": false
+        },
+        {
+          "label": "Start res=0; for b from low to high: if (res ^ rep[b]) < res, set res ^= rep[b]",
+          "isCode": false
+        },
+        {
+          "label": "Start res=max(rep); answer is res",
+          "isCode": false
+        },
+        {
+          "label": "Start res=0; xor all representatives",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Try to improve res by toggling each high bit if possible; only xor when it increases res.",
+      "wrongExplanations": {
+        "1": "Processing low to high can miss setting higher bits optimally.",
+        "3": "Xoring all may cancel and is not guaranteed to be maximal."
+      },
+      "hint": "Greedily improve res by checking each representative.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "For the array [1, 6, 12, 6], what is the maximum xor sum of a subset?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "13",
+          "isCode": false
+        },
+        {
+          "label": "12",
+          "isCode": false
+        },
+        {
+          "label": "14",
+          "isCode": false
+        },
+        {
+          "label": "7",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "1 ^ 12 = 13 is achievable. 6 ^ 6 cancels to 0. 14 is not achievable with these numbers.",
+      "wrongExplanations": {
+        "1": "12 is possible but 13 is larger.",
+        "2": "14 would require setting bits that these numbers cannot combine to produce."
+      },
+      "hint": "Try combining 1 with 12 and consider duplicate 6s.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Writing the Code",
+      "questionText": "Read all integers from stdin robustly and handle empty input by printing 0. Choose the best snippet.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\ndata = list(map(int, sys.stdin.buffer.read().split()))\nif not data:\n    print(0)\n    sys.exit()",
+          "isCode": true
+        },
+        {
+          "label": "data = list(map(int, input().split()))\nif not data:\n    print(0)\n    exit()",
+          "isCode": true
+        },
+        {
+          "label": "import sys\nn = int(sys.stdin.readline())\n# read nothing else here",
+          "isCode": true
+        },
+        {
+          "label": "import sys\ndata = sys.stdin.read().split()\nif not data:\n    print(0)\n    sys.exit()",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Reading all tokens as ints handles any spacing/newlines. Early exit on empty input is safe.",
+      "wrongExplanations": {
+        "1": "Reading a single line may miss numbers on later lines.",
+        "3": "Without converting to int now, later arithmetic will fail or require extra conversions."
+      },
+      "hint": "Use sys.stdin.buffer.read().split() for speed and robustness.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\ndata = list(map(int, sys.stdin.buffer.read().split()))\nif not data:\n    print(0)\n    sys.exit()",
+      "codeLabel": "Read input"
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Extract n and the array from the token list.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "n = data[0]\narr = data[1:1+n]",
+          "isCode": true
+        },
+        {
+          "label": "n = data[1]\narr = data[2:2+n]",
+          "isCode": true
+        },
+        {
+          "label": "n = len(data) - 1\narr = data[1:n]",
+          "isCode": true
+        },
+        {
+          "label": "n = data[0]\narr = data[1:]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The first token is n; the next n tokens are the array.",
+      "wrongExplanations": {
+        "2": "Slice data[1:n] misses the last element and depends on the total length.",
+        "3": "data[1:] ignores n and may read too many if extra tokens exist."
+      },
+      "hint": "Use slice start at 1 and length n.",
+      "isCodeBuilding": true,
+      "codeSnippet": "n = data[0]\narr = data[1:1+n]",
+      "codeLabel": "Parse n and arr"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Initialize a container to hold one representative per bit position.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "MAX_BIT = 60\nbasis = [0] * (MAX_BIT + 1)",
+          "isCode": true
+        },
+        {
+          "label": "MAX_BIT = 30\nbasis = [0] * MAX_BIT",
+          "isCode": true
+        },
+        {
+          "label": "MAX_BIT = max(arr).bit_length()\nbasis = [0] * MAX_BIT",
+          "isCode": true
+        },
+        {
+          "label": "MAX_BIT = 31\nbasis = {}",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Using up to 60 bits is safe; allocate MAX_BIT+1 to index 0..MAX_BIT.",
+      "wrongExplanations": {
+        "1": "Size should be MAX_BIT+1; also 30 may be tight if you miscount.",
+        "2": "bit_length for 0 is 0 and the range becomes empty; also allocate +1 for inclusive indexing."
+      },
+      "hint": "We will iterate from MAX_BIT down to 0 inclusive.",
+      "isCodeBuilding": true,
+      "codeSnippet": "MAX_BIT = 60\nbasis = [0] * (MAX_BIT + 1)",
+      "codeLabel": "Init basis"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Insert each array value by clearing its current highest set bit using existing representatives.",
+      "diagram": "For each x:\n- v = x\n- for b from MAX_BIT down to 0:\n  - if bit b of v is 0: continue\n  - if basis[b] == 0: basis[b] = v; break\n  - else: v ^= basis[b] and continue",
+      "options": [
+        {
+          "label": "for x in arr:\n    v = x\n    for b in range(MAX_BIT, -1, -1):\n        if ((v >> b) & 1) == 0:\n            continue\n        if basis[b] == 0:\n            basis[b] = v\n            break\n        v ^= basis[b]",
+          "isCode": true
+        },
+        {
+          "label": "for x in arr:\n    v = x\n    for b in range(0, MAX_BIT + 1):\n        if ((v >> b) & 1) == 0:\n            continue\n        if basis[b] != 0:\n            basis[b] ^= v\n            break\n        v ^= basis[b]",
+          "isCode": true
+        },
+        {
+          "label": "for x in arr:\n    v = x\n    for b in range(MAX_BIT, -1, -1):\n        if ((v >> b) & 1) == 0:\n            continue\n        basis[b] = v\n        break",
+          "isCode": true
+        },
+        {
+          "label": "for x in arr:\n    v = x\n    for b in range(MAX_BIT, -1, -1):\n        if (v & (1 << b)) == 0:\n            continue\n        if basis[b] == 0:\n            basis[b] = v\n        v ^= basis[b]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Clear the current highest bit of v using existing representatives; store v when its slot is empty.",
+      "wrongExplanations": {
+        "1": "Ascending order and mutating basis with ^= v corrupts existing representatives.",
+        "2": "Overwrites basis without clearing v's bit; loses information.",
+        "3": "Missing break on store; will immediately xor with the just-stored value and clear it."
+      },
+      "hint": "Process from high to low and only store once per insert.",
+      "isCodeBuilding": true,
+      "codeSnippet": "for x in arr:\n    v = x\n    for b in range(MAX_BIT, -1, -1):\n        if ((v >> b) & 1) == 0:\n            continue\n        if basis[b] == 0:\n            basis[b] = v\n            break\n        v ^= basis[b]",
+      "codeLabel": "Build representatives"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Assemble the maximum xor value from the representatives.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "res = 0\nfor b in range(MAX_BIT, -1, -1):\n    if (res ^ basis[b]) > res:\n        res ^= basis[b]\nprint(res)",
+          "isCode": true
+        },
+        {
+          "label": "res = 0\nfor b in range(0, MAX_BIT + 1):\n    if (res ^ basis[b]) > res:\n        res ^= basis[b]\nprint(res)",
+          "isCode": true
+        },
+        {
+          "label": "res = 0\nfor b in range(MAX_BIT, -1, -1):\n    if (res | basis[b]) > res:\n        res |= basis[b]\nprint(res)",
+          "isCode": true
+        },
+        {
+          "label": "res = 0\nfor b in range(MAX_BIT, -1, -1):\n    res = max(res, res ^ basis[b])\nprint(0)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Try to improve res with each representative from high to low. Only xor when it increases res.",
+      "wrongExplanations": {
+        "1": "Low-to-high order can miss setting high bits optimally.",
+        "2": "Bitwise OR builds a different value than xor combinations."
+      },
+      "hint": "Mirror the high-to-low logic used during insertion.",
+      "isCodeBuilding": true,
+      "codeSnippet": "res = 0\nfor b in range(MAX_BIT, -1, -1):\n    if (res ^ basis[b]) > res:\n        res ^= basis[b]\nprint(res)",
+      "codeLabel": "Build and print result"
+    },
+    {
+      "id": "q19",
+      "phase": "Verifying the Solution",
+      "questionText": "What does your program print for the input:\n4\n1 6 12 6",
+      "diagram": null,
+      "options": [
+        {
+          "label": "13",
+          "isCode": false
+        },
+        {
+          "label": "12",
+          "isCode": false
+        },
+        {
+          "label": "7",
+          "isCode": false
+        },
+        {
+          "label": "6",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "As reasoned earlier, the maximum xor is 13 (1 ^ 12).",
+      "wrongExplanations": {
+        "1": "12 is achievable, but 13 is larger.",
+        "3": "6 arises from a single element, but better combinations exist."
+      },
+      "hint": "Duplicates can cancel each other.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q20",
+      "phase": "Verifying the Solution",
+      "questionText": "Consider the input:\n3\n10 5 3\nWhat output should the program produce?",
+      "diagram": "10(1010), 5(0101), 3(0011)\nTry pairs and triples.",
+      "options": [
+        {
+          "label": "15",
+          "isCode": false
+        },
+        {
+          "label": "12",
+          "isCode": false
+        },
+        {
+          "label": "10",
+          "isCode": false
+        },
+        {
+          "label": "9",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "10 ^ 5 = 15 is achievable and is the maximum.",
+      "wrongExplanations": {
+        "1": "12 is 10^5^3, but 15 from 10^5 is larger.",
+        "3": "9 is 10^3, but 15 is larger."
+      },
+      "hint": "Check 10^5 first.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q21",
+      "phase": "Verifying the Solution",
+      "questionText": "For the input:\n5\n0 0 0 0 0\nWhat is the correct output?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "-1",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        },
+        {
+          "label": "Undefined behavior / error",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "All xors are 0; the program should print 0.",
+      "wrongExplanations": {
+        "1": "There is no reason to print negative values.",
+        "3": "The logic handles zeros gracefully."
+      },
+      "hint": "Empty subset xor is 0; any combination of zeros is 0.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q22",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the time complexity in terms of n and the number of bits B we consider?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n * B)",
+          "isCode": false
+        },
+        {
+          "label": "O(2^n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each number is processed across at most B bit positions; building the result is another O(B).",
+      "wrongExplanations": {
+        "1": "We never enumerate subsets.",
+        "3": "We don't compare each pair of elements."
+      },
+      "hint": "Count inner loop iterations per element.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q23",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the additional space complexity beyond storing the input array?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(B)",
+          "isCode": false
+        },
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(1)",
+          "isCode": false
+        },
+        {
+          "label": "O(n * B)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We store at most one representative per bit, i.e., O(B).",
+      "wrongExplanations": {
+        "1": "We don't store all subsets or extra arrays proportional to n.",
+        "2": "We do store an array of size B."
+      },
+      "hint": "How many representatives can exist at once?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Analyzing Complexity",
+      "questionText": "Which edge case must be handled correctly by the implementation?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "All input numbers are zero",
+          "isCode": false
+        },
+        {
+          "label": "All numbers are negative",
+          "isCode": false
+        },
+        {
+          "label": "n = 0 (no numbers)",
+          "isCode": false
+        },
+        {
+          "label": "The array is already sorted",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "All zeros should yield 0; the process should not fail on this case.",
+      "wrongExplanations": {
+        "1": "Constraints specify nonnegative numbers.",
+        "2": "Constraints specify n ≥ 1."
+      },
+      "hint": "Think about what the basis will contain if every x is 0.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\ndata = list(map(int, sys.stdin.buffer.read().split()))\nif not data:\n    print(0)\n    sys.exit()",
+    "n = data[0]\narr = data[1:1+n]",
+    "MAX_BIT = 60\nbasis = [0] * (MAX_BIT + 1)",
+    "for x in arr:\n    v = x\n    for b in range(MAX_BIT, -1, -1):\n        if ((v >> b) & 1) == 0:\n            continue\n        if basis[b] == 0:\n            basis[b] = v\n            break\n        v ^= basis[b]",
+    "res = 0\nfor b in range(MAX_BIT, -1, -1):\n    if (res ^ basis[b]) > res:\n        res ^= basis[b]\nprint(res)"
+  ],
+  "reasoningChain": [
+    {
+      "question": "What does xor over subsets do on tiny examples and with duplicates?",
+      "insight": "Understand xor properties (x^x=0, x^0=x) and that the maximum may come from combining elements, not just the largest element."
+    },
+    {
+      "question": "Is exhaustive search feasible and how should we prioritize bits?",
+      "insight": "Brute force is impossible; to maximize the number, decide higher bits first."
+    },
+    {
+      "question": "How can we systematically use numbers to control high bits?",
+      "insight": "Maintain one representative per highest set bit and reduce new numbers by xoring with existing representatives to clear their highest set bit."
+    },
+    {
+      "question": "How do we assemble the final maximum value from the representatives?",
+      "insight": "Start from 0 and try to improve the result by xoring representatives from high to low when it increases the value."
+    },
+    {
+      "question": "How do we implement this efficiently and verify correctness?",
+      "insight": "Translate the process into loops over bits and inputs, ensure robust input parsing, test on examples, and analyze O(n*B) time and O(B) extra space."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1321,
+    "output_tokens": 14212,
+    "input_cost": 0.001651,
+    "output_cost": 0.14212,
+    "total_cost": 0.143771
+  }
+}

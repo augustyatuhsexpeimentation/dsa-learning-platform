@@ -1,0 +1,979 @@
+{
+  "id": "colored-chairs",
+  "title": "Colored Chairs",
+  "difficulty": "intermediate",
+  "tags": [
+    "mixed",
+    "arrays",
+    "parity",
+    "circle",
+    "implementation"
+  ],
+  "estimatedMinutes": 35,
+  "language": "python",
+  "description": "There are n chairs arranged in a circle. Each chair is either red (R) or blue (B). Chairs are numbered 1..n and chair n is next to chair 1. Your task is to find two adjacent chairs that have the same color.\n\nInteractive version (original): You can query the color of a chair and finally report an index i such that chairs i and i+1 share the same color. n is odd and at most 2e5, and you can ask at most 20 queries.\n\nFor this learning exercise, we will solve the offline equivalent: the full coloring is provided as a string of length n over {R,B}. Output any index i (1 ≤ i ≤ n) such that chair i and chair i+1 (with wrap-around for n) have the same color.\n\nIf multiple answers exist, print any one of them.",
+  "examples": [
+    {
+      "input": "5\nRBRBR",
+      "output": "5",
+      "explanation": "Adjacency pairs: (1,2)=R,B; (2,3)=B,R; (3,4)=R,B; (4,5)=B,R; (5,1)=R,R. The pair (5,1) matches."
+    },
+    {
+      "input": "7\nBRRBRBB",
+      "output": "2",
+      "explanation": "Pairs: (1,2)=B,R; (2,3)=R,R -> match at i=2; earliest valid index is 2."
+    }
+  ],
+  "constraints": [
+    "3 ≤ n ≤ 2·10^5",
+    "n is odd",
+    "Colors string consists only of 'R' and 'B'",
+    "Output any i such that colors[i] == colors[(i % n) + 1]"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "With n=5 and colors RBRBR placed around a circle, which adjacent pair has the same color?",
+      "diagram": "1:R 2:B 3:R 4:B 5:R (and 5 is adjacent to 1)",
+      "options": [
+        {
+          "label": "(1,2)",
+          "isCode": false
+        },
+        {
+          "label": "(2,3)",
+          "isCode": false
+        },
+        {
+          "label": "(5,1)",
+          "isCode": false
+        },
+        {
+          "label": "(3,4)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "In a circle, 5 and 1 are adjacent. Both are R here, so (5,1) matches. Others are alternating.",
+      "wrongExplanations": {
+        "0": "1 is R and 2 is B, so they differ.",
+        "1": "2 is B and 3 is R, so they differ."
+      },
+      "hint": "Remember the wrap-around: chair 5 is next to chair 1.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "If n is odd, can all adjacent pairs in the circle be different (i.e., strict alternation all the way around)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, strict alternation is always possible.",
+          "isCode": false
+        },
+        {
+          "label": "No, strict alternation around an odd cycle forces a same-color neighbor.",
+          "isCode": false
+        },
+        {
+          "label": "Only if there are more reds than blues.",
+          "isCode": false
+        },
+        {
+          "label": "Only if there are more blues than reds.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Alternation flips colors each step; after an odd number of steps you return to the starting color, making the last and first equal.",
+      "wrongExplanations": {
+        "0": "Alternation around a cycle of odd length contradicts the wrap-around.",
+        "2": "Counts don't affect this parity argument."
+      },
+      "hint": "Think about toggling color n times and comparing positions n and 1.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "For n=4 and colors RBRB in a circle, do any adjacent pairs have the same color?",
+      "diagram": "1:R 2:B 3:R 4:B (and 4 adjacent to 1)",
+      "options": [
+        {
+          "label": "Yes, (4,1) are both R.",
+          "isCode": false
+        },
+        {
+          "label": "Yes, (2,3) are both B.",
+          "isCode": false
+        },
+        {
+          "label": "No; with even n, strict alternation is possible.",
+          "isCode": false
+        },
+        {
+          "label": "Yes, (1,2) are both R.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Even length allows full alternation: all adjacent pairs differ here.",
+      "wrongExplanations": {
+        "0": "4 is B and 1 is R; they differ.",
+        "1": "2 is B and 3 is R; they differ."
+      },
+      "hint": "Check each pair including (4,1).",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "Given n=6 and colors RRB RBB (indices 1..6), which minimal index i is valid to output (1-based) such that i and i+1 are the same color?",
+      "diagram": "1:R 2:R 3:B 4:R 5:B 6:B (6 adjacent to 1)",
+      "options": [
+        {
+          "label": "i = 1",
+          "isCode": false
+        },
+        {
+          "label": "i = 2",
+          "isCode": false
+        },
+        {
+          "label": "i = 3",
+          "isCode": false
+        },
+        {
+          "label": "i = 5",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "(1,2) are both R, so i=1 works and is the smallest.",
+      "wrongExplanations": {
+        "1": "(2,3) are R and B, not equal.",
+        "3": "(5,6) are B and B which works, but 1 is smaller."
+      },
+      "hint": "Scan from i=1 upward and stop at the first match.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Understanding the Problem",
+      "questionText": "Do we need to inspect all chairs to find a valid answer?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, to guarantee correctness we must check all pairs.",
+          "isCode": false
+        },
+        {
+          "label": "No, we can stop as soon as we find any adjacent equal pair.",
+          "isCode": false
+        },
+        {
+          "label": "Only if the first half has no matches.",
+          "isCode": false
+        },
+        {
+          "label": "Only if the last two are the same.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "We can stop at the first valid index since any valid index is acceptable.",
+      "wrongExplanations": {
+        "0": "We don't need all pairs; any one valid pair suffices."
+      },
+      "hint": "The task asks for any valid i, not the count of all such i.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "Given the full colors string, what straightforward approach will always find a valid i if it exists?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Check each adjacent pair in order (including wrap-around) and stop at the first match.",
+          "isCode": false
+        },
+        {
+          "label": "Randomly pick indices until a match occurs.",
+          "isCode": false
+        },
+        {
+          "label": "Sort the chairs by color and choose two consecutive in the sorted order.",
+          "isCode": false
+        },
+        {
+          "label": "Build a frequency map of R and B and pick the majority color index.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "A single pass checking neighbors finds a valid pair; sorting or randomness are unnecessary.",
+      "wrongExplanations": {
+        "2": "Sorting destroys adjacency information from the circle.",
+        "3": "Counts don't tell where equal neighbors occur."
+      },
+      "hint": "Think of scanning with i and i+1, noting the circle wrap-around at the end.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "What is the time complexity of scanning all adjacent pairs once (including the wrap-around)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(1)",
+          "isCode": false
+        },
+        {
+          "label": "O(log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "We examine each index a constant number of times: total work proportional to n.",
+      "wrongExplanations": {
+        "1": "No dividing the search range; we visit all indices."
+      },
+      "hint": "You look at each i once and do O(1) work per step.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Exploring Approaches",
+      "questionText": "Why does a valid i always exist when n is odd?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Because there are more chairs to the left than to the right.",
+          "isCode": false
+        },
+        {
+          "label": "Because strict alternation around an odd cycle is impossible, forcing a same-color neighbor.",
+          "isCode": false
+        },
+        {
+          "label": "Because there must be more of one color.",
+          "isCode": false
+        },
+        {
+          "label": "Because index 1 always matches index 2.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Alternation flips color each step; after an odd number of steps you return to the start color, creating a match.",
+      "wrongExplanations": {
+        "2": "Counts are irrelevant; parity of the cycle matters."
+      },
+      "hint": "Follow the color flips around the circle n times.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "When scanning, which condition should trigger output?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "When colors[i] != colors[i+1]",
+          "isCode": false
+        },
+        {
+          "label": "When colors[i] == colors[i+1]",
+          "isCode": false
+        },
+        {
+          "label": "When colors[i] == colors[i+2]",
+          "isCode": false
+        },
+        {
+          "label": "When colors[i] != colors[i-1]",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "We need a pair of neighbors with the same color, so equality of consecutive positions is the trigger.",
+      "wrongExplanations": {
+        "0": "Inequality finds alternating pairs, not what we need."
+      },
+      "hint": "The task is to find two adjacent chairs with the same color.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "How do we correctly handle the neighbor of the last chair (index n) during the scan?",
+      "diagram": "Indices: 1 2 ... n-1 n -> neighbor of n is 1",
+      "options": [
+        {
+          "label": "Compare index n with index n-1.",
+          "isCode": false
+        },
+        {
+          "label": "Use j = (i+1) % n to wrap to 0-based, but adjust indices when printing.",
+          "isCode": false
+        },
+        {
+          "label": "Stop at n-1 to avoid out-of-range access.",
+          "isCode": false
+        },
+        {
+          "label": "Treat the last chair as having no neighbor.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Using modulo n gives 0 for i=n-1 in 0-based terms; adapt printing to 1-based index.",
+      "wrongExplanations": {
+        "2": "We must also check the pair (n,1); skipping misses valid answers.",
+        "3": "In a circle, n is adjacent to 1."
+      },
+      "hint": "Modulo arithmetic is a clean way to wrap around.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "If multiple valid pairs exist, which index should we output?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Any valid i; the smallest one is a simple choice.",
+          "isCode": false
+        },
+        {
+          "label": "The largest i to maximize the index.",
+          "isCode": false
+        },
+        {
+          "label": "Exactly i = n.",
+          "isCode": false
+        },
+        {
+          "label": "No output unless there is a unique i.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The problem allows any valid i. Returning the first found keeps the implementation simple.",
+      "wrongExplanations": {
+        "3": "Uniqueness is not required."
+      },
+      "hint": "No tie-breaking rules are specified; pick a consistent strategy like the first found.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "For n=3 and colors RRB, which i is valid to output?",
+      "diagram": "1:R 2:R 3:B",
+      "options": [
+        {
+          "label": "i = 1",
+          "isCode": false
+        },
+        {
+          "label": "i = 2",
+          "isCode": false
+        },
+        {
+          "label": "i = 3",
+          "isCode": false
+        },
+        {
+          "label": "No valid i exists.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "(1,2)=R,R is valid. (2,3)=R,B not; (3,1)=B,R not.",
+      "wrongExplanations": {
+        "2": "(3,1) are B and R, which differ."
+      },
+      "hint": "Check each of the three pairs in a circle of length 3.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "If colors[1..n-1] alternate strictly, what must be true about colors[n] and colors[1] when n is odd?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "They must be the same.",
+          "isCode": false
+        },
+        {
+          "label": "They must be different.",
+          "isCode": false
+        },
+        {
+          "label": "It depends on the counts of R and B.",
+          "isCode": false
+        },
+        {
+          "label": "No conclusion can be drawn.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "An odd number of flips returns to the starting color, forcing the last to equal the first.",
+      "wrongExplanations": {
+        "1": "This would imply an even number of flips, contradicting n odd."
+      },
+      "hint": "Track the color after n−1 flips and then one more step to reach 1 from n.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Writing the Code",
+      "questionText": "Start by importing what you need for fast input.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys",
+          "isCode": true
+        },
+        {
+          "label": "from collections import deque",
+          "isCode": true
+        },
+        {
+          "label": "import math",
+          "isCode": true
+        },
+        {
+          "label": "import random",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We will read all input via sys.stdin for simplicity and speed.",
+      "wrongExplanations": {
+        "1": "Deque is unnecessary here.",
+        "2": "No math operations are needed."
+      },
+      "hint": "We plan to read tokens via stdin directly.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys",
+      "codeLabel": "Import"
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Define the program entry function.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def main():",
+          "isCode": true
+        },
+        {
+          "label": "def solve(n, s):",
+          "isCode": true
+        },
+        {
+          "label": "def start():",
+          "isCode": true
+        },
+        {
+          "label": "def run(args):",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We'll use a standard main() to encapsulate logic and call it under the __name__ guard.",
+      "wrongExplanations": {
+        "1": "We don't need parameters; we'll read from stdin."
+      },
+      "hint": "A no-argument function is common for script entry.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def main():",
+      "codeLabel": "Define main"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Read and tokenize the input efficiently.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    data = sys.stdin.read().split()",
+          "isCode": true
+        },
+        {
+          "label": "    data = input().split()",
+          "isCode": true
+        },
+        {
+          "label": "    data = sys.stdin.readline()",
+          "isCode": true
+        },
+        {
+          "label": "    data = list(sys.stdin)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Reading all and splitting gives us n and the color string tokens robustly.",
+      "wrongExplanations": {
+        "1": "Multiple input() calls can be slower and trickier for empty lines.",
+        "2": "Single readline doesn't split into tokens for both n and the string."
+      },
+      "hint": "We want both n and the string as separate tokens easily.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    data = sys.stdin.read().split()",
+      "codeLabel": "Read input"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Parse n and the colors string from tokens.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    n = int(data[0]); s = data[1].strip()",
+          "isCode": true
+        },
+        {
+          "label": "    n = data[0]; s = data[1]",
+          "isCode": true
+        },
+        {
+          "label": "    n = int(data[1]); s = data[0]",
+          "isCode": true
+        },
+        {
+          "label": "    n = len(data[1]); s = data[0]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "n is the first token, then the string; stripping is safe for newline handling.",
+      "wrongExplanations": {
+        "1": "n must be converted to int.",
+        "2": "The order of tokens is reversed here."
+      },
+      "hint": "Assume the first token is the integer n, second is the colors string.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    n = int(data[0]); s = data[1].strip()",
+      "codeLabel": "Parse tokens"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Guard against accidental extra characters in s (e.g., trailing spaces) by truncating to n if necessary.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    if len(s) > n:\n        s = s[:n]",
+          "isCode": true
+        },
+        {
+          "label": "    if len(s) < n:\n        s += 'R'*(n-len(s))",
+          "isCode": true
+        },
+        {
+          "label": "    s = s.strip('RB')",
+          "isCode": true
+        },
+        {
+          "label": "    s = s[:]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Truncating to n ensures we only consider the provided n chairs.",
+      "wrongExplanations": {
+        "1": "Padding invents colors not in input.",
+        "2": "Stripping removes valid characters from ends."
+      },
+      "hint": "Be conservative: do not add or delete intended characters beyond trimming length.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    if len(s) > n:\n        s = s[:n]",
+      "codeLabel": "Normalize length"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Set up the scan over all positions (including wrap-around). Which loop and neighbor index are correct?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    for i in range(n):\n        j = (i + 1) % n",
+          "isCode": true
+        },
+        {
+          "label": "    for i in range(n-1):\n        j = i + 1",
+          "isCode": true
+        },
+        {
+          "label": "    for i in range(1, n+1):\n        j = i + 1",
+          "isCode": true
+        },
+        {
+          "label": "    for i in range(n):\n        j = (i + 1) % (n-1)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Iterate all i and wrap the neighbor with modulo n so that i=n-1 pairs with 0.",
+      "wrongExplanations": {
+        "1": "This skips the wrap-around pair (n,1).",
+        "3": "Modulo n-1 fails to map n-1 to 0 correctly."
+      },
+      "hint": "We need to compare i with i+1 for all i, wrapping last to 0.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    for i in range(n):\n        j = (i + 1) % n",
+      "codeLabel": "Loop and neighbor"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Write the condition and output when a matching adjacent pair is found. Remember to print a 1-based index and terminate.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "        if s[i] == s[j]:\n            print(i + 1)\n            return",
+          "isCode": true
+        },
+        {
+          "label": "        if s[i] != s[j]:\n            print(i)\n            return",
+          "isCode": true
+        },
+        {
+          "label": "        if s[i] == s[j]:\n            print(i)\n            return",
+          "isCode": true
+        },
+        {
+          "label": "        if s[i] == s[j]:\n            print(j + 1)\n            return",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Equality is required; i is 0-based so print i+1. Return to avoid extra output.",
+      "wrongExplanations": {
+        "2": "This prints 0-based index; the problem expects 1-based.",
+        "3": "Printing j+1 points to the second chair; the task asks for i."
+      },
+      "hint": "Adjust for 1-based indexing in the print.",
+      "isCodeBuilding": true,
+      "codeSnippet": "        if s[i] == s[j]:\n            print(i + 1)\n            return",
+      "codeLabel": "Check and print"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "If no adjacent equal pair is found during the loop (which shouldn't happen for odd n), what should we print as a fallback?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    print(-1)",
+          "isCode": true
+        },
+        {
+          "label": "    print(0)",
+          "isCode": true
+        },
+        {
+          "label": "    print(n)",
+          "isCode": true
+        },
+        {
+          "label": "    print('No')",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "-1 is a conventional sentinel indicating no solution found.",
+      "wrongExplanations": {
+        "2": "n could be valid but we shouldn't assume it without a match."
+      },
+      "hint": "Use a clear sentinel value for impossible cases.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    print(-1)",
+      "codeLabel": "Fallback"
+    },
+    {
+      "id": "q22",
+      "phase": "Writing the Code",
+      "questionText": "Finally, call main only when the script is executed directly.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "if __name__ == \"__main__\": main()",
+          "isCode": true
+        },
+        {
+          "label": "main()",
+          "isCode": true
+        },
+        {
+          "label": "if __name__ == \"__init__\": main()",
+          "isCode": true
+        },
+        {
+          "label": "if __name__ == \"main\": main()",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The standard entry-point guard ensures main is called appropriately.",
+      "wrongExplanations": {
+        "1": "This would run on import too, which is not ideal."
+      },
+      "hint": "Use the conventional dunder-name check.",
+      "isCodeBuilding": true,
+      "codeSnippet": "if __name__ == \"__main__\": main()",
+      "codeLabel": "Entry point"
+    },
+    {
+      "id": "q23",
+      "phase": "Verifying the Solution",
+      "questionText": "Trace the program for n=5, s=RBRBR. Which index is printed?",
+      "diagram": "Pairs checked in order: (1,2), (2,3), (3,4), (4,5), (5,1)",
+      "options": [
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        },
+        {
+          "label": "No output",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "Only (5,1) matches (R,R), so the loop prints 5 and returns.",
+      "wrongExplanations": {
+        "0": "(1,2) is R,B not equal."
+      },
+      "hint": "Check equality for each pair until a match.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Verifying the Solution",
+      "questionText": "Trace the program for n=7, s=BRRBRBB. Which index is printed?",
+      "diagram": "1:B 2:R 3:R 4:B 5:R 6:B 7:B",
+      "options": [
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "6",
+          "isCode": false
+        },
+        {
+          "label": "7",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "(2,3)=R,R is the first match; the program prints 2.",
+      "wrongExplanations": {
+        "1": "(6,7)=B,B also matches but appears later.",
+        "3": "(1,2)=B,R is not a match."
+      },
+      "hint": "The program stops at the first match in increasing i.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the time complexity of the implemented solution with respect to n?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(1)",
+          "isCode": false
+        },
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "We perform a single pass over n indices with constant work per index.",
+      "wrongExplanations": {
+        "0": "It grows with n due to the scan."
+      },
+      "hint": "Count how many comparisons are made as n increases.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the additional space complexity (beyond storing the input string)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(1)",
+          "isCode": false
+        },
+        {
+          "label": "O(log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We only use a few variables (indices and temporary).",
+      "wrongExplanations": {
+        "2": "We don't allocate structures proportional to n besides the input."
+      },
+      "hint": "Think about variables used at any time.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q27",
+      "phase": "Analyzing Complexity",
+      "questionText": "Which edge cases are correctly handled by the code?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "All chairs same color (e.g., RRR...): prints 1.",
+          "isCode": false
+        },
+        {
+          "label": "Strict alternation for first n-1 with n odd: prints n.",
+          "isCode": false
+        },
+        {
+          "label": "Input with extra whitespace/newline after the string.",
+          "isCode": false
+        },
+        {
+          "label": "All of the above.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 3,
+      "explanation": "The scan detects first equal pair (1 for all-same, n for wrap pair), and input parsing is robust.",
+      "wrongExplanations": {
+        "0": "True, but not the only handled case."
+      },
+      "hint": "Consider parsing and both simple and parity-driven arrangements.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys",
+    "def main():",
+    "    data = sys.stdin.read().split()",
+    "    n = int(data[0]); s = data[1].strip()",
+    "    if len(s) > n:\n        s = s[:n]",
+    "    for i in range(n):\n        j = (i + 1) % n",
+    "        if s[i] == s[j]:\n            print(i + 1)\n            return",
+    "    print(-1)",
+    "if __name__ == \"__main__\": main()"
+  ],
+  "reasoningChain": [
+    {
+      "question": "Why must there be at least one pair of adjacent chairs with the same color when n is odd?",
+      "insight": "Strict alternation cannot wrap around an odd cycle; after n flips you return to the starting color, forcing a match."
+    },
+    {
+      "question": "What simple strategy can always find such a pair given the full string?",
+      "insight": "Scan all adjacent pairs (with wrap-around) and stop at the first equality."
+    },
+    {
+      "question": "How do we handle the circular nature when checking neighbors?",
+      "insight": "Use j = (i+1) % n to wrap the neighbor of the last index back to the first."
+    },
+    {
+      "question": "What index should we print upon finding a match?",
+      "insight": "Print the 1-based index i, so convert from 0-based i to i+1."
+    },
+    {
+      "question": "How do we ensure robust input handling and clear termination?",
+      "insight": "Read tokens via sys.stdin, normalize the string length to n, print and return immediately upon finding a match, otherwise print -1."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1464,
+    "output_tokens": 19520,
+    "input_cost": 0.00183,
+    "output_cost": 0.1952,
+    "total_cost": 0.19703
+  }
+}

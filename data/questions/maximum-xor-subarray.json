@@ -1,0 +1,1021 @@
+{
+  "id": "maximum-xor-subarray",
+  "title": "Maximum Xor Subarray",
+  "difficulty": "intermediate",
+  "tags": [
+    "bitwise",
+    "prefix-xor",
+    "arrays"
+  ],
+  "estimatedMinutes": 55,
+  "language": "python",
+  "description": "Given an array of n nonnegative integers, find the maximum xor sum of any subarray.\n\nInput:\n- First line: integer n, the size of the array.\n- Second line: n integers x_1, x_2, ..., x_n.\n\nOutput:\n- Print one integer: the maximum xor sum in a subarray.\n\nNotes:\n- A subarray is a contiguous part of the array.\n- 0 ≤ x_i ≤ 10^9, 1 ≤ n ≤ 2·10^5.",
+  "examples": [
+    {
+      "input": "4\n5 1 5 9\n",
+      "output": "13\n",
+      "explanation": "The subarray [2..4] = {1,5,9} has xor 1 ^ 5 ^ 9 = 13, which is maximal."
+    }
+  ],
+  "constraints": [
+    "1 ≤ n ≤ 2·10^5",
+    "0 ≤ x_i ≤ 10^9"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "For array [5, 1, 5, 9] (1-based indexing), what is the xor sum of subarray [2..3]?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "6",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        },
+        {
+          "label": "5",
+          "isCode": false
+        },
+        {
+          "label": "13",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "1 ^ 5 = 4. xor is bitwise; it's not sum. 6 is 1+5.",
+      "wrongExplanations": {
+        "0": "That's the sum, not xor.",
+        "2": "5 is one of the elements, not their xor."
+      },
+      "hint": "Compute 1 XOR 5 in binary: 0001 ^ 0101.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "For [5, 1, 5, 9], which subarray achieves the maximum xor (which is 13)? Use 1-based indices.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "[1..4]",
+          "isCode": false
+        },
+        {
+          "label": "[2..4]",
+          "isCode": false
+        },
+        {
+          "label": "[3..4]",
+          "isCode": false
+        },
+        {
+          "label": "[4..4]",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "[2..4]: 1 ^ 5 ^ 9 = 13. [1..4]=8, [3..4]=12, [4..4]=9.",
+      "wrongExplanations": {
+        "0": "5 ^ 1 ^ 5 ^ 9 = 8, not 13.",
+        "2": "5 ^ 9 = 12."
+      },
+      "hint": "Try xor cumulatively from different starts.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "Are empty subarrays allowed in this problem?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "No, subarray must have at least one element.",
+          "isCode": false
+        },
+        {
+          "label": "Yes, empty subarray is allowed and has xor 0.",
+          "isCode": false
+        },
+        {
+          "label": "Only if all elements are zero.",
+          "isCode": false
+        },
+        {
+          "label": "Only when n is even.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "A subarray is a contiguous non-empty segment by standard definition here.",
+      "wrongExplanations": {
+        "1": "The problem statement doesn't allow empty subarray.",
+        "2": "No such special rule exists."
+      },
+      "hint": "Check the wording: find xor sum of a subarray.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "Which statement is always true for xor of a subarray?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "A length-1 subarray's xor equals that element.",
+          "isCode": false
+        },
+        {
+          "label": "Extending a subarray always increases its xor.",
+          "isCode": false
+        },
+        {
+          "label": "Subarray xor equals sum modulo 2 of elements.",
+          "isCode": false
+        },
+        {
+          "label": "Subarray xor equals bitwise OR of elements.",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Single element xor is itself. The other statements are generally false.",
+      "wrongExplanations": {
+        "1": "Xor can increase or decrease when extending.",
+        "3": "OR and XOR are different operations."
+      },
+      "hint": "Try small arrays like [2,2] or [1,2].",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Exploring Approaches",
+      "questionText": "Brute force idea: try all (l, r) and recompute xor of A[l..r] from scratch each time. What's the time complexity?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n^3)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "There are O(n^2) pairs and each xor over length ~O(n) in the worst case, giving O(n^3).",
+      "wrongExplanations": {
+        "1": "That's if you could get each subarray xor in O(1), not when recomputing each time.",
+        "2": "No logarithmic factor arises here."
+      },
+      "hint": "Count subarrays and cost to recompute each.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "Let P[k] = A[1] ^ A[2] ^ ... ^ A[k] and P[0] = 0. What is xor of subarray A[l..r] (1 ≤ l ≤ r) in terms of P?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "P[r] ^ P[l-1]",
+          "isCode": false
+        },
+        {
+          "label": "P[r] - P[l-1]",
+          "isCode": false
+        },
+        {
+          "label": "P[r] ^ P[l]",
+          "isCode": false
+        },
+        {
+          "label": "P[r]",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Xor cancels: P[r] ^ P[l-1] drops A[1..l-1], leaving A[l..r].",
+      "wrongExplanations": {
+        "1": "Subtraction is for sums, not xor.",
+        "2": "That leaves an extra A[l]."
+      },
+      "hint": "Expand P[r] and P[l-1] and cancel equal terms.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "Using P[0..n], the problem becomes selecting two values to maximize what?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "P[i] ^ P[j] for i < j",
+          "isCode": false
+        },
+        {
+          "label": "P[i] + P[j] for i < j",
+          "isCode": false
+        },
+        {
+          "label": "min(P[i], P[j]) for i < j",
+          "isCode": false
+        },
+        {
+          "label": "Pairs where P[i] = P[j]",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "A[l..r] xor = P[r] ^ P[l-1], i.e., xor of two prefix values with increasing indices.",
+      "wrongExplanations": {
+        "1": "We're maximizing xor, not sum.",
+        "3": "Equal prefixes indicate zero xor subarray, but we want maximum."
+      },
+      "hint": "Map l..r to (l-1, r) on P array.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Building the Idea",
+      "questionText": "To maximize the value of p ^ q, which bits should we prioritize when deciding matches?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Higher (more significant) bits first",
+          "isCode": false
+        },
+        {
+          "label": "Lower (least significant) bits first",
+          "isCode": false
+        },
+        {
+          "label": "Any order; result is the same",
+          "isCode": false
+        },
+        {
+          "label": "Bits where p has 0 only",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Higher bits contribute more to the numeric value, so setting them to 1 first is best.",
+      "wrongExplanations": {
+        "2": "Order matters because earlier bits dominate the value.",
+        "3": "We sometimes want to flip 1s to 0s and 0s to 1s depending on q."
+      },
+      "hint": "Compare numbers by binary: most significant differing bit decides.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "At bit position b, when does (p ^ q) have a 1 at that bit?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "When p_b != q_b",
+          "isCode": false
+        },
+        {
+          "label": "When p_b = q_b = 1",
+          "isCode": false
+        },
+        {
+          "label": "When p_b = q_b = 0",
+          "isCode": false
+        },
+        {
+          "label": "When at least one of p_b or q_b is 1",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Xor at a bit is 1 iff the bits differ.",
+      "wrongExplanations": {
+        "1": "Both 1 would give 0 at that bit.",
+        "3": "That's the rule for OR, not XOR."
+      },
+      "hint": "Truth table of XOR: 0^0=0, 1^1=0, 0^1=1, 1^0=1.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "We need fast checks for previous prefixes to pick an opposite bit at each step while scanning bits. Which structure suits this?",
+      "diagram": "Think of a root, and for each bit you follow edge 0 or 1 to represent a number.\n\nroot\n |--0--> ...\n |--1--> ...",
+      "options": [
+        {
+          "label": "A binary tree keyed by bits (each edge 0/1) to store seen prefixes",
+          "isCode": false
+        },
+        {
+          "label": "Sort prefixes and binary search by bit pattern",
+          "isCode": false
+        },
+        {
+          "label": "A hash map from full value to last index",
+          "isCode": false
+        },
+        {
+          "label": "A stack of prefixes",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "A bitwise branching tree lets us step through bits and prefer opposite branches efficiently.",
+      "wrongExplanations": {
+        "1": "Sorting doesn’t help choose bit-by-bit paths.",
+        "2": "We need per-bit navigation, not exact-value lookup."
+      },
+      "hint": "We want to walk down 31 decisions: 0 or 1 at each level.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "Why traverse bits from the most significant (e.g., 30) down to 0 when querying the structure?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Because higher bits dominate the final numeric value",
+          "isCode": false
+        },
+        {
+          "label": "Descending loops are faster in Python",
+          "isCode": false
+        },
+        {
+          "label": "Xor only works when processed from MSB to LSB",
+          "isCode": false
+        },
+        {
+          "label": "Input is provided in MSB-first order",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Choosing high bits first maximizes the number lexicographically by binary value.",
+      "wrongExplanations": {
+        "1": "Loop order does not change Python speed meaningfully here.",
+        "2": "Xor is defined bitwise independently; the order is our choice."
+      },
+      "hint": "Compare 100000... vs 011111..., which is larger?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "Before processing any array element, should we add the value 0 to the bit-structure of seen prefixes?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Yes, to allow subarrays that start at index 1",
+          "isCode": false
+        },
+        {
+          "label": "No, it will double-count the first element",
+          "isCode": false
+        },
+        {
+          "label": "No, 0 never affects xor results",
+          "isCode": false
+        },
+        {
+          "label": "Yes, to avoid runtime errors when tree is empty (but no semantic effect)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Including P[0]=0 lets P[r]^P[0]=P[r], enabling subarrays starting at the first element.",
+      "wrongExplanations": {
+        "1": "It does not double-count; it enables correct handling of starting-at-1 subarrays.",
+        "3": "It has a semantic effect: enables those subarrays."
+      },
+      "hint": "Subarray [1..r] xor equals P[r] ^ 0.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "For 0 ≤ x_i ≤ 10^9, how many bit positions should we scan to be safe?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "31 positions: bits 30 down to 0",
+          "isCode": false
+        },
+        {
+          "label": "30 positions: bits 29 down to 0; bit 30 is never set",
+          "isCode": false
+        },
+        {
+          "label": "32 positions: bits 31 down to 0",
+          "isCode": false
+        },
+        {
+          "label": "29 positions: bits 28 down to 0",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "2^30 > 10^9; scanning 30..0 (31 bits) is safe and simple.",
+      "wrongExplanations": {
+        "1": "While 29 is the highest set bit index for 10^9, using 30..0 simplifies code and is safe.",
+        "3": "This would miss values ≥ 2^29."
+      },
+      "hint": "2^29 ≈ 536M, 2^30 ≈ 1.07B.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Building the Idea",
+      "questionText": "If the structure currently contains only the prefix value 0, what is the best xor value when querying with x = 5?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "5",
+          "isCode": false
+        },
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "Depends on the tree shape",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Only 0 is available; best is 5 ^ 0 = 5.",
+      "wrongExplanations": {
+        "1": "5 ^ 0 is 5, not 0.",
+        "3": "With one number, the result is determined."
+      },
+      "hint": "X ^ 0 = X.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Read input robustly and return n and the array.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys\ndef read():\n    data = list(map(int, sys.stdin.buffer.read().split()))\n    if not data:\n        return 0, []\n    n = data[0]\n    arr = data[1:1+n]\n    return n, arr",
+          "isCode": true
+        },
+        {
+          "label": "def read():\n    n = int(input())\n    arr = list(map(int, input().split()))\n    return n, arr[:n]",
+          "isCode": true
+        },
+        {
+          "label": "import sys\ndef read():\n    tokens = sys.stdin.read().split()\n    n = int(tokens[1])\n    arr = list(map(int, tokens[:n]))\n    return n, arr",
+          "isCode": true
+        },
+        {
+          "label": "def read():\n    return 0, []  # we'll hardcode tests later",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Reading all tokens handles flexible whitespace and matches the format. It slices exactly n integers.",
+      "wrongExplanations": {
+        "1": "This fails if the second line wraps or has extra spaces; it's okay but less robust.",
+        "2": "It misreads positions: n is at tokens[0], not tokens[1]."
+      },
+      "hint": "Consider inputs where integers may wrap lines.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys\ndef read():\n    data = list(map(int, sys.stdin.buffer.read().split()))\n    if not data:\n        return 0, []\n    n = data[0]\n    arr = data[1:1+n]\n    return n, arr",
+      "codeLabel": "Input reader"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Choose the bit range upper bound constant.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "MAXB = 30",
+          "isCode": true
+        },
+        {
+          "label": "MAXB = 29",
+          "isCode": true
+        },
+        {
+          "label": "MAXB = 31",
+          "isCode": true
+        },
+        {
+          "label": "MAXB = 63",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Scanning bits from 30 down to 0 covers up to 10^9 safely.",
+      "wrongExplanations": {
+        "1": "29..0 may be enough, but 30..0 is safer and standard.",
+        "2": "Bit 31 is not needed for ≤10^9 and adds unnecessary steps."
+      },
+      "hint": "2^30 ≈ 1.07e9.",
+      "isCodeBuilding": true,
+      "codeSnippet": "MAXB = 30  # highest bit index to consider (scan 30..0)",
+      "codeLabel": "Bit limit"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Initialize the bitwise tree node storage.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "children = [[-1, -1]]",
+          "isCode": true
+        },
+        {
+          "label": "children = [-1, -1]",
+          "isCode": true
+        },
+        {
+          "label": "children = [[0, 0]]",
+          "isCode": true
+        },
+        {
+          "label": "children = []",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Start with a single root node with no children: each is -1 meaning absent.",
+      "wrongExplanations": {
+        "1": "We need a list of nodes, each with two child indices.",
+        "2": "0 would imply existing children at index 0, which is wrong initially."
+      },
+      "hint": "Each node has two child indices, initially none.",
+      "isCodeBuilding": true,
+      "codeSnippet": "children = [[-1, -1]]  # root node with two absent children",
+      "codeLabel": "Node storage"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Implement insertion of a number into the bitwise structure.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def add_number(x):\n    node = 0\n    for b in range(MAXB, -1, -1):\n        bit = (x >> b) & 1\n        nxt = children[node][bit]\n        if nxt == -1:\n            children.append([-1, -1])\n            nxt = len(children) - 1\n            children[node][bit] = nxt\n        node = nxt",
+          "isCode": true
+        },
+        {
+          "label": "def add_number(x):\n    node = 0\n    for b in range(0, MAXB+1):\n        bit = (x >> b) & 1\n        if children[node][bit] == -1:\n            children[node][bit] = 0\n        node = children[node][bit]",
+          "isCode": true
+        },
+        {
+          "label": "def add_number(x):\n    for b in range(MAXB, -1, -1):\n        if (x & (1 << b)) == 0:\n            children.append([-1, -1])",
+          "isCode": true
+        },
+        {
+          "label": "def add_number(x):\n    node = 0\n    for b in range(MAXB, -1, -1):\n        bit = (x >> b) & 1\n        node = children[node][bit]",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We walk bits MSB→LSB, creating child nodes as needed and moving down.",
+      "wrongExplanations": {
+        "1": "It never creates new nodes properly; setting to 0 reuses root incorrectly.",
+        "3": "It doesn't create nodes, so it will hit -1 and fail."
+      },
+      "hint": "Create a new node when the desired child is absent.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def add_number(x):\n    node = 0\n    for b in range(MAXB, -1, -1):\n        bit = (x >> b) & 1\n        nxt = children[node][bit]\n        if nxt == -1:\n            children.append([-1, -1])\n            nxt = len(children) - 1\n            children[node][bit] = nxt\n        node = nxt",
+      "codeLabel": "Insertion"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Implement querying the best xor value with x using the structure.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def best_xor(x):\n    node = 0\n    val = 0\n    for b in range(MAXB, -1, -1):\n        bit = (x >> b) & 1\n        want = 1 - bit\n        if children[node][want] != -1:\n            val |= (1 << b)\n            node = children[node][want]\n        else:\n            node = children[node][bit]\n    return val",
+          "isCode": true
+        },
+        {
+          "label": "def best_xor(x):\n    node = 0\n    val = 0\n    for b in range(MAXB, -1, -1):\n        bit = (x >> b) & 1\n        if children[node][bit] != -1:\n            val |= (1 << b)\n            node = children[node][bit]\n        else:\n            node = node\n    return val",
+          "isCode": true
+        },
+        {
+          "label": "def best_xor(x):\n    node = 0\n    val = 0\n    for b in range(MAXB, -1, -1):\n        if (x & (1 << b)):\n            node = children[node][1]\n        else:\n            node = children[node][0]\n    return val",
+          "isCode": true
+        },
+        {
+          "label": "def best_xor(x):\n    node = 0\n    for b in range(MAXB, -1, -1):\n        bit = (x >> b) & 1\n        want = 1 - bit\n        if children[node][want] != -1:\n            node = children[node][want]\n        else:\n            node = children[node][bit]\n    return node",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Prefer the opposite bit to set the current bit of the xor; accumulate the value accordingly.",
+      "wrongExplanations": {
+        "1": "It sets val when matching the same bit, which doesn’t reflect xor maximization.",
+        "3": "It returns the node index, not the xor value."
+      },
+      "hint": "Try to choose opposite bit when possible to set the current bit of the result.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def best_xor(x):\n    node = 0\n    val = 0\n    for b in range(MAXB, -1, -1):\n        bit = (x >> b) & 1\n        want = 1 - bit\n        if children[node][want] != -1:\n            val |= (1 << b)\n            node = children[node][want]\n        else:\n            node = children[node][bit]\n    return val",
+      "codeLabel": "Query"
+    },
+    {
+      "id": "q20",
+      "phase": "Writing the Code",
+      "questionText": "Set up main: read input, initialize prefix and answer, and insert 0.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def main():\n    n, arr = read()\n    pref = 0\n    ans = 0\n    add_number(0)",
+          "isCode": true
+        },
+        {
+          "label": "def main():\n    n, arr = read()\n    pref = 0\n    ans = -10**18\n    # no initial insertion",
+          "isCode": true
+        },
+        {
+          "label": "def main():\n    arr, n = read()\n    pref = 0\n    ans = 0\n    # no initial insertion",
+          "isCode": true
+        },
+        {
+          "label": "def main():\n    n, arr = read()\n    pref = 1\n    ans = 0\n    add_number(1)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need P[0]=0 present to allow subarrays starting at index 1.",
+      "wrongExplanations": {
+        "1": "Without inserting 0, subarrays starting at the first element are missed.",
+        "3": "Initial prefix should be 0, not 1."
+      },
+      "hint": "Remember to include the empty prefix.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def main():\n    n, arr = read()\n    pref = 0\n    ans = 0\n    add_number(0)",
+      "codeLabel": "Main init"
+    },
+    {
+      "id": "q21",
+      "phase": "Writing the Code",
+      "questionText": "Fill the main loop to update prefix, query best, update answer, and insert the prefix.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    for v in arr:\n        pref ^= v\n        curr = best_xor(pref)\n        if curr > ans:\n            ans = curr\n        add_number(pref)",
+          "isCode": true
+        },
+        {
+          "label": "    for v in arr:\n        curr = best_xor(v)\n        if curr > ans:\n            ans = curr\n        add_number(v)",
+          "isCode": true
+        },
+        {
+          "label": "    for v in arr:\n        pref ^= v\n        curr = best_xor(ans)\n        ans = max(ans, curr)\n        add_number(ans)",
+          "isCode": true
+        },
+        {
+          "label": "    for v in arr:\n        pref = v\n        curr = best_xor(pref)\n        ans = curr\n        add_number(pref)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We query with the current prefix xor and insert it for future comparisons.",
+      "wrongExplanations": {
+        "1": "We need prefixes, not raw elements.",
+        "2": "Querying with ans and inserting ans is incorrect; the structure holds prefixes."
+      },
+      "hint": "Each subarray xor is between two prefixes.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    for v in arr:\n        pref ^= v\n        curr = best_xor(pref)\n        if curr > ans:\n            ans = curr\n        add_number(pref)",
+      "codeLabel": "Main loop"
+    },
+    {
+      "id": "q22",
+      "phase": "Writing the Code",
+      "questionText": "Finish main and add the usual Python entry point.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "    print(ans)\n\nif __name__ == \"__main__\":\n    main()",
+          "isCode": true
+        },
+        {
+          "label": "    return ans\n\nif __name__ == \"__main__\":\n    print(main())",
+          "isCode": true
+        },
+        {
+          "label": "print(ans)\nmain()",
+          "isCode": true
+        },
+        {
+          "label": "    print(ans)\n\nif __name__ == \"__main__\":\n    pass",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Print inside main and call main under the guard.",
+      "wrongExplanations": {
+        "1": "main returns nothing; mixing patterns adds confusion.",
+        "2": "Printing outside any function may run before variables are defined."
+      },
+      "hint": "Standard Python program template.",
+      "isCodeBuilding": true,
+      "codeSnippet": "    print(ans)\n\nif __name__ == \"__main__\":\n    main()",
+      "codeLabel": "Output + entry"
+    },
+    {
+      "id": "q23",
+      "phase": "Verifying the Solution",
+      "questionText": "Run the code mentally on input:\n4\n5 1 5 9\nWhat is the printed output?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "9",
+          "isCode": false
+        },
+        {
+          "label": "12",
+          "isCode": false
+        },
+        {
+          "label": "13",
+          "isCode": false
+        },
+        {
+          "label": "8",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 2,
+      "explanation": "As worked out: [2..4] gives 13, which is maximal.",
+      "wrongExplanations": {
+        "0": "9 is A[4] alone; 13 is larger.",
+        "1": "12 is 5^9 from [3..4]; not maximal."
+      },
+      "hint": "Consider prefixes and pairwise xor.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Verifying the Solution",
+      "questionText": "Input:\n3\n0 0 0\nWhat does the program print?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "0",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "Depends on tree shape",
+          "isCode": false
+        },
+        {
+          "label": "Undefined",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "All subarray xors are 0 when all elements are 0.",
+      "wrongExplanations": {
+        "2": "The structure is deterministic; 0 is the only result.",
+        "3": "The code deterministically computes xor."
+      },
+      "hint": "0 xor 0 xor ... is 0.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q25",
+      "phase": "Verifying the Solution",
+      "questionText": "Input:\n4\n8 1 2 12\nWhat is the maximum subarray xor?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "15",
+          "isCode": false
+        },
+        {
+          "label": "8",
+          "isCode": false
+        },
+        {
+          "label": "13",
+          "isCode": false
+        },
+        {
+          "label": "12",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "[2..4] = 1 ^ 2 ^ 12 = 15, which is maximal.",
+      "wrongExplanations": {
+        "1": "8 is just A[1]; not maximal.",
+        "3": "12 = A[4]; 15 is larger."
+      },
+      "hint": "Try subarray [2..4].",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q26",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the time complexity of the solution?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n * 31) ≈ O(n)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n)",
+          "isCode": false
+        },
+        {
+          "label": "O(31^n)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each element is inserted and queried across ~31 bits, so linear in n.",
+      "wrongExplanations": {
+        "1": "We never check all pairs explicitly.",
+        "2": "No sorting or balanced trees here."
+      },
+      "hint": "Consider per-element work in bits.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q27",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the space usage of the data structure in the worst case?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n * 31) nodes (i.e., O(n))",
+          "isCode": false
+        },
+        {
+          "label": "O(1)",
+          "isCode": false
+        },
+        {
+          "label": "O(n^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(31)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Each inserted number may create up to 31 new nodes.",
+      "wrongExplanations": {
+        "1": "We store structure proportional to inserted prefixes.",
+        "3": "We create new nodes for different bit paths."
+      },
+      "hint": "Think per number how many new nodes can be added.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q28",
+      "phase": "Analyzing Complexity",
+      "questionText": "Which edge case is handled by inserting 0 before processing the array?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Subarrays starting at index 1 (i.e., P[r] ^ P[0])",
+          "isCode": false
+        },
+        {
+          "label": "Allowing empty subarray as a candidate",
+          "isCode": false
+        },
+        {
+          "label": "Handling negative numbers in input",
+          "isCode": false
+        },
+        {
+          "label": "Removing duplicate elements automatically",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "It enables considering xor of [1..r] as P[r] ^ 0.",
+      "wrongExplanations": {
+        "1": "We do not consider empty subarrays.",
+        "2": "Input numbers are nonnegative by constraints."
+      },
+      "hint": "Which subarray uses P[0]?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys\ndef read():\n    data = list(map(int, sys.stdin.buffer.read().split()))\n    if not data:\n        return 0, []\n    n = data[0]\n    arr = data[1:1+n]\n    return n, arr",
+    "MAXB = 30  # highest bit index to consider (scan 30..0)",
+    "children = [[-1, -1]]  # root node with two absent children",
+    "def add_number(x):\n    node = 0\n    for b in range(MAXB, -1, -1):\n        bit = (x >> b) & 1\n        nxt = children[node][bit]\n        if nxt == -1:\n            children.append([-1, -1])\n            nxt = len(children) - 1\n            children[node][bit] = nxt\n        node = nxt",
+    "def best_xor(x):\n    node = 0\n    val = 0\n    for b in range(MAXB, -1, -1):\n        bit = (x >> b) & 1\n        want = 1 - bit\n        if children[node][want] != -1:\n            val |= (1 << b)\n            node = children[node][want]\n        else:\n            node = children[node][bit]\n    return val",
+    "def main():\n    n, arr = read()\n    pref = 0\n    ans = 0\n    add_number(0)",
+    "    for v in arr:\n        pref ^= v\n        curr = best_xor(pref)\n        if curr > ans:\n            ans = curr\n        add_number(pref)",
+    "    print(ans)\n\nif __name__ == \"__main__\":\n    main()"
+  ],
+  "reasoningChain": [
+    {
+      "question": "How do we express the xor of any subarray using prefix xors?",
+      "insight": "Subarray A[l..r] xor equals P[r] ^ P[l-1] with P[0]=0."
+    },
+    {
+      "question": "What does maximizing a subarray xor reduce to on P[0..n]?",
+      "insight": "Pick two prefixes P[i], P[j] (i<j) maximizing P[i] ^ P[j]."
+    },
+    {
+      "question": "How to maximize xor between two numbers?",
+      "insight": "Decide bits from the most significant to least, preferring opposite bits to set 1s early."
+    },
+    {
+      "question": "What structure supports fast per-bit decisions against all previous prefixes?",
+      "insight": "A binary branching structure keyed by bits to walk 0/1 edges for each prefix."
+    },
+    {
+      "question": "What initialization ensures subarrays starting at index 1 are considered?",
+      "insight": "Insert 0 before processing so P[r]^0 is allowed."
+    },
+    {
+      "question": "What are the performance characteristics?",
+      "insight": "Each insert/query uses ~31 steps, so time O(n) and space O(n) in the number of nodes."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1323,
+    "output_tokens": 18564,
+    "input_cost": 0.001654,
+    "output_cost": 0.18564,
+    "total_cost": 0.187294
+  }
+}

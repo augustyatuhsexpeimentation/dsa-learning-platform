@@ -1,0 +1,880 @@
+{
+  "id": "signal-processing-convolution-reversed-mask",
+  "title": "Signal Processing",
+  "difficulty": "hard",
+  "tags": [
+    "advanced"
+  ],
+  "estimatedMinutes": 75,
+  "language": "python",
+  "description": "You are given two integer sequences: a signal and a mask. Move the mask through the signal from left to right. At each mask position, compute the sum of products of aligned values over the overlapping part.\n\nInput:\n- First line: two integers n and m (lengths of signal and mask)\n- Second line: n integers a_1..a_n (signal)\n- Third line: m integers b_1..b_m (mask)\n\nOutput:\nPrint n+m-1 integers: the sum of products at each mask position from left to right.\n\nExample:\nInput:\n5 3\n1 3 2 1 4\n1 2 3\nOutput:\n3 11 13 10 16 9 4",
+  "examples": [
+    {
+      "input": "5 3\n1 3 2 1 4\n1 2 3\n",
+      "output": "3 11 13 10 16 9 4",
+      "explanation": "As the mask slides, at each position sum aligned products. This equals convolution of the signal with the reversed mask."
+    }
+  ],
+  "constraints": [
+    "1 ≤ n, m ≤ 2·10^5",
+    "1 ≤ a_i, b_i ≤ 100"
+  ],
+  "mcqChain": [
+    {
+      "id": "q1",
+      "phase": "Understanding the Problem",
+      "questionText": "For signal [2] and mask [5], what is the output sequence?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "[10]",
+          "isCode": false
+        },
+        {
+          "label": "[7]",
+          "isCode": false
+        },
+        {
+          "label": "[5]",
+          "isCode": false
+        },
+        {
+          "label": "[2]",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "With a single element overlap, it's just 2×5=10. Only one position exists.",
+      "wrongExplanations": {
+        "2": "This would be the mask value alone, but we need product with the signal.",
+        "3": "This is the signal value alone; we need the product."
+      },
+      "hint": "At the only position, multiply the two numbers.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q2",
+      "phase": "Understanding the Problem",
+      "questionText": "Signal a = [1, 2, 3], mask b = [4, 5]. As the mask slides left to right, what are the first and last outputs?",
+      "diagram": "Positions:\n1) [  4 5]\n    [1 2 3]\n2) [4 5  ]\n    [1 2 3]\n3) [4 5]\n      [1 2 3]",
+      "options": [
+        {
+          "label": "First=5, Last=12",
+          "isCode": false
+        },
+        {
+          "label": "First=4, Last=15",
+          "isCode": false
+        },
+        {
+          "label": "First=9, Last=15",
+          "isCode": false
+        },
+        {
+          "label": "First=4, Last=12",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "First overlap: 1×5=5. Last overlap: 3×4=12. Middle sums combine two products.",
+      "wrongExplanations": {
+        "1": "This assumes first is 1×4 and last is 3×5; ordering is reversed at edges.",
+        "3": "This double-counts or swaps edge multipliers."
+      },
+      "hint": "At the very first position, only the rightmost mask element overlaps the first signal element.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q3",
+      "phase": "Understanding the Problem",
+      "questionText": "Using the example: a = [1,3,2,1,4], b = [1,2,3]. What is the 3rd output number (1-indexed)?",
+      "diagram": "Outputs: [?, ?, ?, ?, ?, ?, ?]\nCompute the 3rd as the overlap when the mask covers positions a[1..3].",
+      "options": [
+        {
+          "label": "11",
+          "isCode": false
+        },
+        {
+          "label": "13",
+          "isCode": false
+        },
+        {
+          "label": "10",
+          "isCode": false
+        },
+        {
+          "label": "9",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "At the 3rd position: 1×1 + 3×2 + 2×3 = 1 + 6 + 6 = 13.",
+      "wrongExplanations": {
+        "0": "11 is the 2nd output for this example.",
+        "2": "10 is the 4th output."
+      },
+      "hint": "Include three products at the center: (1,1), (3,2), (2,3).",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q4",
+      "phase": "Understanding the Problem",
+      "questionText": "For the same example (a=[1,3,2,1,4], b=[1,2,3]), what would the first output be if we didn’t reverse any order when aligning?",
+      "diagram": "First contact: only a[0] and one end of b overlap.",
+      "options": [
+        {
+          "label": "3",
+          "isCode": false
+        },
+        {
+          "label": "1",
+          "isCode": false
+        },
+        {
+          "label": "2",
+          "isCode": false
+        },
+        {
+          "label": "4",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "Without reversing alignment, first contact multiplies a[0] with b[0]: 1×1 = 1.",
+      "wrongExplanations": {
+        "0": "3 is when the rightmost mask element aligns with a[0].",
+        "2": "2 is the middle mask value; it doesn't overlap at first contact."
+      },
+      "hint": "Which end of the mask overlaps a[0] at first contact if you keep b in the given order?",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q5",
+      "phase": "Exploring Approaches",
+      "questionText": "What is the time complexity of the straightforward double loop that sums products for each mask position?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(n + m)",
+          "isCode": false
+        },
+        {
+          "label": "O(nm)",
+          "isCode": false
+        },
+        {
+          "label": "O(n log n)",
+          "isCode": false
+        },
+        {
+          "label": "O((n + m) log(n + m))",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 1,
+      "explanation": "There are about n+m positions, and each can involve up to min(n,m) multiplications ⇒ O(nm).",
+      "wrongExplanations": {
+        "0": "You still multiply many pairs at each position.",
+        "2": "No logarithmic factor arises in the naive double loop."
+      },
+      "hint": "Consider how many pair-multiplications you do across all positions.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q6",
+      "phase": "Exploring Approaches",
+      "questionText": "Let k be the output index (0-based). Which formula correctly captures the k-th output in terms of a and b, respecting the left-to-right sliding?",
+      "diagram": "Think of b's rightmost end touching a[0] at k=0.",
+      "options": [
+        {
+          "label": "r[k] = sum over i with 0 ≤ i < n and 0 ≤ k−i < m of a[i] * b[m−1 − (k−i)]",
+          "isCode": false
+        },
+        {
+          "label": "r[k] = sum over i of a[i] * b[k−i]",
+          "isCode": false
+        },
+        {
+          "label": "r[k] = sum over i with 0 ≤ i < n and 0 ≤ i−k < m of a[i] * b[i−k]",
+          "isCode": false
+        },
+        {
+          "label": "r[k] = sum over i of a[k−i] * b[i]",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "At k, the overlapping b index is j = k−i; the right end of b aligns first, so use b[m−1−j].",
+      "wrongExplanations": {
+        "1": "This aligns b’s left end with a[0] at k=0, which doesn’t match the sliding definition.",
+        "2": "Index direction is flipped and misses the correct boundary conditions."
+      },
+      "hint": "At k=0, the product must be a[0] * b[m−1].",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q7",
+      "phase": "Exploring Approaches",
+      "questionText": "If A(x) = sum_{i=0..n−1} a[i] x^i and C(x) = sum_{j=0..m−1} b[m−1−j] x^j, what does the coefficient of x^k in A(x)·C(x) equal?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Exactly the k-th required output value r[k]",
+          "isCode": false
+        },
+        {
+          "label": "The sum r[k] but shifted by (m−1) positions",
+          "isCode": false
+        },
+        {
+          "label": "The (n+m−2−k)-th required output value",
+          "isCode": false
+        },
+        {
+          "label": "Half of r[k] due to overlapping counted twice",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Multiplying A and reversed C aligns indices to match the sliding sum; coefficient x^k is r[k].",
+      "wrongExplanations": {
+        "1": "No extra shift is introduced after reversing b before multiplication.",
+        "2": "No reversal after multiplication is needed; x^k maps directly."
+      },
+      "hint": "Check the index mapping in the sum of products that defines polynomial multiplication.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q8",
+      "phase": "Building the Idea",
+      "questionText": "We will multiply the two sequences efficiently by padding them. What length L should we pad to?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "The smallest power of two ≥ (n + m − 1)",
+          "isCode": false
+        },
+        {
+          "label": "Exactly n + m − 1",
+          "isCode": false
+        },
+        {
+          "label": "The next multiple of max(n, m)",
+          "isCode": false
+        },
+        {
+          "label": "The smallest square ≥ (n + m − 1)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Padding to a power of two works well for the iterative transform and covers needed length.",
+      "wrongExplanations": {
+        "1": "Length must be convenient for the transform stages; not all lengths are supported efficiently.",
+        "2": "Multiples of max(n,m) are unrelated to transform stages."
+      },
+      "hint": "Consider lengths that repeatedly halve in the transform stages.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q9",
+      "phase": "Building the Idea",
+      "questionText": "Why does zero-padding not change the first (n+m−1) coefficients of the product?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Zeros contribute nothing to sums within the needed coefficient range",
+          "isCode": false
+        },
+        {
+          "label": "Zeros cancel non-zero terms beyond the boundary",
+          "isCode": false
+        },
+        {
+          "label": "Padding modifies only the highest-degree coefficients",
+          "isCode": false
+        },
+        {
+          "label": "Padding prevents index wrap-around that would change low coefficients",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Within the required range, any extra terms from padding are zero, so sums remain unchanged.",
+      "wrongExplanations": {
+        "1": "There is no cancellation; zero terms simply add nothing.",
+        "3": "Wrap-around does not occur in the polynomial view with zero-padding."
+      },
+      "hint": "Adding zeros beyond the ends doesn’t create new cross terms within the needed indices.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q10",
+      "phase": "Building the Idea",
+      "questionText": "After transforming, multiplying pointwise, and transforming back, results are complex with tiny imaginary parts due to rounding. What should we output?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Round the real parts to the nearest integer for the first (n+m−1) values",
+          "isCode": false
+        },
+        {
+          "label": "Take the floor of the real parts",
+          "isCode": false
+        },
+        {
+          "label": "Use absolute value of the complex numbers",
+          "isCode": false
+        },
+        {
+          "label": "Use only the imaginary parts",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Small numerical errors can make near-integers slightly off; rounding restores exact integers.",
+      "wrongExplanations": {
+        "1": "Flooring can bias results downward when errors are positive.",
+        "2": "Magnitude discards sign and mixes error into values."
+      },
+      "hint": "The true values are integers; numerical noise just perturbs them slightly.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q11",
+      "phase": "Building the Idea",
+      "questionText": "Which slice of the product sequence should we print?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Indices 0 to (n + m − 2), inclusive",
+          "isCode": false
+        },
+        {
+          "label": "Indices (m − 1) to (n − 1)",
+          "isCode": false
+        },
+        {
+          "label": "Indices 1 to (n + m − 1)",
+          "isCode": false
+        },
+        {
+          "label": "All indices up to the next power-of-two length",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The required outputs are exactly the first (n+m−1) coefficients: indices 0..n+m−2.",
+      "wrongExplanations": {
+        "1": "That range selects only the middle and misses edges.",
+        "3": "Padding adds extra zeros; they are not part of the required output."
+      },
+      "hint": "Length of the output is fixed: n+m−1.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q12",
+      "phase": "Building the Idea",
+      "questionText": "Since we reversed the mask before multiplication, do we need to reverse the final result sequence?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "No, the coefficients 0..n+m−2 already match the required order",
+          "isCode": false
+        },
+        {
+          "label": "Yes, reverse the entire sequence",
+          "isCode": false
+        },
+        {
+          "label": "Yes, reverse only the middle part",
+          "isCode": false
+        },
+        {
+          "label": "Reverse only if n ≠ m",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Reversing b maps outputs directly to coefficients in order; no final reversal is needed.",
+      "wrongExplanations": {
+        "1": "This would invert the order and produce incorrect outputs.",
+        "3": "The need to reverse does not depend on n and m being equal."
+      },
+      "hint": "Check mapping in the earlier polynomial coefficient question.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q13",
+      "phase": "Building the Idea",
+      "questionText": "What is a safe upper bound for any output value given 1 ≤ a_i, b_i ≤ 100 and n, m ≤ 2·10^5?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "About 2·10^9 (since up to 2·10^5 terms of size ~10^4)",
+          "isCode": false
+        },
+        {
+          "label": "About 10^12",
+          "isCode": false
+        },
+        {
+          "label": "About 10^5",
+          "isCode": false
+        },
+        {
+          "label": "About 10^7",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Max overlap length ≤ 2·10^5 and each product ≤ 10^4 ⇒ sum ≤ 2·10^9.",
+      "wrongExplanations": {
+        "1": "This overestimates by an extra factor of ~500.",
+        "2": "This underestimates by orders of magnitude."
+      },
+      "hint": "Peak overlap occurs near the center; count how many terms there and their max size.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q14",
+      "phase": "Writing the Code",
+      "questionText": "Read input efficiently and parse n, m, a, b. Choose the correct snippet.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "import sys, math\n\ndef read_input():\n    data = list(map(int, sys.stdin.buffer.read().split()))\n    n, m = data[0], data[1]\n    a = data[2:2+n]\n    b = data[2+n:2+n+m]\n    return n, m, a, b\n\nn, m, a, b = read_input()",
+          "isCode": true
+        },
+        {
+          "label": "import sys, math\n\ndef read_input():\n    n, m = map(int, sys.stdin.readline().split())\n    a = list(map(int, sys.stdin.readline().split()))\n    b = list(map(int, sys.stdin.readline().split()))\n    return n, m, a, b\n\nn, m, a, b = read_input()\n# assumes exactly 1 line per sequence; can break with buffered input",
+          "isCode": true
+        },
+        {
+          "label": "import sys, math\n\ndef read_input():\n    data = sys.stdin.read().split()\n    n, m = int(data[0]), int(data[2])\n    a = list(map(int, data[1:1+n]))\n    b = list(map(int, data[1+n:1+n+m]))\n    return n, m, a, b\n\nn, m, a, b = read_input()",
+          "isCode": true
+        },
+        {
+          "label": "import sys, math\n\ndef read_input():\n    n = int(sys.stdin.readline())\n    m = int(sys.stdin.readline())\n    a = [int(x) for x in sys.stdin.readline()]\n    b = [int(x) for x in sys.stdin.readline()]\n    return n, m, a, b\n\nn, m, a, b = read_input()",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Reading all integers and slicing by counts is robust and fast. It handles any spacing/newlines.",
+      "wrongExplanations": {
+        "1": "Line-based reads can fail if there are extra spaces/newlines or large input; still okay but less robust.",
+        "2": "It misindexes m and slices; n,m positions are wrong."
+      },
+      "hint": "Using a single read and slicing by known counts avoids line parsing pitfalls.",
+      "isCodeBuilding": true,
+      "codeSnippet": "import sys, math\n\ndef read_input():\n    data = list(map(int, sys.stdin.buffer.read().split()))\n    n, m = data[0], data[1]\n    a = data[2:2+n]\n    b = data[2+n:2+n+m]\n    return n, m, a, b\n\nn, m, a, b = read_input()",
+      "codeLabel": "Read and parse input"
+    },
+    {
+      "id": "q15",
+      "phase": "Writing the Code",
+      "questionText": "Prepare the mask for alignment. What line should we add next?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "b_rev = b[::-1]",
+          "isCode": true
+        },
+        {
+          "label": "b_rev = b",
+          "isCode": true
+        },
+        {
+          "label": "b_rev = list(reversed(a))",
+          "isCode": true
+        },
+        {
+          "label": "b_rev = b.sort()",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need the reversed mask to align with the sliding definition.",
+      "wrongExplanations": {
+        "1": "Not reversing will misalign the ends at edges.",
+        "3": "Sorting is unrelated and also mutates in-place to None."
+      },
+      "hint": "The first output multiplies a[0] with the last element of b.",
+      "isCodeBuilding": true,
+      "codeSnippet": "b_rev = b[::-1]",
+      "codeLabel": "Reverse the mask"
+    },
+    {
+      "id": "q16",
+      "phase": "Writing the Code",
+      "questionText": "Implement the in-place iterative complex transform used for fast multiplication. Pick the correct function.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def transform(a, invert):\n    n = len(a)\n    j = 0\n    for i in range(1, n):\n        bit = n >> 1\n        while j & bit:\n            j ^= bit\n            bit >>= 1\n        j ^= bit\n        if i < j:\n            a[i], a[j] = a[j], a[i]\n    len_ = 2\n    while len_ <= n:\n        ang = 2 * math.pi / len_ * (-1 if invert else 1)\n        wlen = complex(math.cos(ang), math.sin(ang))\n        for i in range(0, n, len_):\n            w = 1 + 0j\n            for j in range(i, i + len_ // 2):\n                u = a[j]\n                v = a[j + len_ // 2] * w\n                a[j] = u + v\n                a[j + len_ // 2] = u - v\n                w *= wlen\n        len_ <<= 1\n    if invert:\n        for i in range(n):\n            a[i] /= n",
+          "isCode": true
+        },
+        {
+          "label": "def transform(a, invert):\n    n = len(a)\n    # no bit-reversal; operate linearly\n    len_ = 2\n    while len_ <= n:\n        ang = 2 * math.pi / len_ * (1 if invert else -1)\n        wlen = complex(math.cos(ang), math.sin(ang))\n        for i in range(0, n, len_):\n            w = 1 + 0j\n            for j in range(i, i + len_ // 2):\n                u = a[j]\n                v = a[j + len_ // 2] * w\n                a[j] = u + v\n                a[j + len_ // 2] = u - v\n                w *= wlen\n        len_ <<= 1",
+          "isCode": true
+        },
+        {
+          "label": "def transform(a, invert):\n    n = len(a)\n    j = 0\n    for i in range(1, n):\n        bit = n >> 1\n        while j & bit:\n            j ^= bit\n            bit >>= 1\n        j ^= bit\n        if i < j:\n            a[i], a[j] = a[j], a[i]\n    len_ = 2\n    while len_ <= n:\n        ang = 2 * math.pi / len_ * (1 if invert else -1)\n        wlen = complex(math.cos(ang), math.sin(ang))\n        for i in range(0, n, len_):\n            w = 1 + 0j\n            for j in range(i, i + len_ // 2):\n                u = a[j]\n                v = a[j + len_ // 2] * w\n                a[j] = u + v\n                a[j + len_ // 2] = u - v\n                w *= wlen\n        len_ <<= 1\n    # missing normalization\n",
+          "isCode": true
+        },
+        {
+          "label": "def transform(a, invert):\n    n = len(a)\n    j = 0\n    for i in range(1, n):\n        bit = n >> 1\n        while j & bit:\n            j ^= bit\n            bit >>= 1\n        j ^= bit\n        if i < j:\n            a[i], a[j] = a[j], a[i]\n    len_ = 2\n    while len_ <= n:\n        ang = -2 * math.pi / len_ * (-1 if invert else 1)\n        wlen = complex(math.cos(ang), math.sin(ang))\n        for i in range(0, n, len_):\n            w = 1 + 0j\n            for j in range(i, i + len_ // 2):\n                u = a[j]\n                v = a[j + len_ // 2] * w\n                a[j] = u + v\n                a[j + len_ // 2] = u - v\n                w *= wlen\n        len_ <<= 1\n    if invert:\n        for i in range(n):\n            a[i] *= n",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Correct bit-reversal, stage loops, angle sign, and normalization by n only on inversion.",
+      "wrongExplanations": {
+        "1": "Missing bit-reversal and wrong angle sign cause incorrect transforms.",
+        "2": "Angle sign is flipped and normalization is missing, breaking inversion."
+      },
+      "hint": "Check angle sign for forward vs inverse and that inverse divides by n.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def transform(a, invert):\n    n = len(a)\n    j = 0\n    for i in range(1, n):\n        bit = n >> 1\n        while j & bit:\n            j ^= bit\n            bit >>= 1\n        j ^= bit\n        if i < j:\n            a[i], a[j] = a[j], a[i]\n    len_ = 2\n    while len_ <= n:\n        ang = 2 * math.pi / len_ * (-1 if invert else 1)\n        wlen = complex(math.cos(ang), math.sin(ang))\n        for i in range(0, n, len_):\n            w = 1 + 0j\n            for j in range(i, i + len_ // 2):\n                u = a[j]\n                v = a[j + len_ // 2] * w\n                a[j] = u + v\n                a[j + len_ // 2] = u - v\n                w *= wlen\n        len_ <<= 1\n    if invert:\n        for i in range(n):\n            a[i] /= n",
+      "codeLabel": "Iterative transform"
+    },
+    {
+      "id": "q17",
+      "phase": "Writing the Code",
+      "questionText": "Define a function to multiply two real sequences using the transform, handling padding and rounding. Choose the correct version.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "def convolve(x, y):\n    n1, n2 = len(x), len(y)\n    L = 1\n    while L < n1 + n2 - 1:\n        L <<= 1\n    fa = [complex(val, 0.0) for val in x] + [0j] * (L - n1)\n    fb = [complex(val, 0.0) for val in y] + [0j] * (L - n2)\n    transform(fa, False)\n    transform(fb, False)\n    for i in range(L):\n        fa[i] *= fb[i]\n    transform(fa, True)\n    res = [int(round(fa[i].real)) for i in range(n1 + n2 - 1)]\n    return res",
+          "isCode": true
+        },
+        {
+          "label": "def convolve(x, y):\n    n1, n2 = len(x), len(y)\n    L = n1 + n2 - 1\n    fa = [complex(val, 0.0) for val in x]\n    fb = [complex(val, 0.0) for val in y]\n    transform(fa, False)\n    transform(fb, False)\n    for i in range(L):\n        fa[i] *= fb[i]\n    transform(fa, True)\n    return [int(fa[i].real) for i in range(L)]",
+          "isCode": true
+        },
+        {
+          "label": "def convolve(x, y):\n    n1, n2 = len(x), len(y)\n    L = 1\n    while L < n1 + n2 - 1:\n        L <<= 1\n    fa = [complex(val, 0.0) for val in x] + [0j] * (L - n1)\n    fb = [complex(val, 0.0) for val in y] + [0j] * (L - n2)\n    transform(fa, True)\n    transform(fb, True)\n    for i in range(L):\n        fa[i] *= fb[i]\n    transform(fa, False)\n    res = [int(fa[i].real) for i in range(n1 + n2 - 1)]\n    return res",
+          "isCode": true
+        },
+        {
+          "label": "def convolve(x, y):\n    n1, n2 = len(x), len(y)\n    L = 1\n    while L < n1 + n2 - 1:\n        L <<= 1\n    fa = [complex(val, 0.0) for val in x] + [0j] * (L - n1)\n    fb = [complex(val, 0.0) for val in y] + [0j] * (L - n2)\n    transform(fa, False)\n    transform(fb, False)\n    for i in range(L):\n        fa[i] += fb[i]\n    transform(fa, True)\n    res = [int(round(fa[i].real)) for i in range(n1 + n2 - 1)]\n    return res",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Pad to L, forward transform both, multiply pointwise, inverse, round real parts, and return first n1+n2−1.",
+      "wrongExplanations": {
+        "1": "Missing padding to a supported length; also risks index errors and precision issues.",
+        "2": "Transforms are inverted at the wrong steps."
+      },
+      "hint": "Forward, multiply, inverse, then round and crop.",
+      "isCodeBuilding": true,
+      "codeSnippet": "def convolve(x, y):\n    n1, n2 = len(x), len(y)\n    L = 1\n    while L < n1 + n2 - 1:\n        L <<= 1\n    fa = [complex(val, 0.0) for val in x] + [0j] * (L - n1)\n    fb = [complex(val, 0.0) for val in y] + [0j] * (L - n2)\n    transform(fa, False)\n    transform(fb, False)\n    for i in range(L):\n        fa[i] *= fb[i]\n    transform(fa, True)\n    res = [int(round(fa[i].real)) for i in range(n1 + n2 - 1)]\n    return res",
+      "codeLabel": "Convolution via transform"
+    },
+    {
+      "id": "q18",
+      "phase": "Writing the Code",
+      "questionText": "Call the multiplication on the signal and reversed mask. Choose the correct line.",
+      "diagram": null,
+      "options": [
+        {
+          "label": "res = convolve(a, b_rev)",
+          "isCode": true
+        },
+        {
+          "label": "res = convolve(a, b)",
+          "isCode": true
+        },
+        {
+          "label": "res = convolve(b_rev, a)",
+          "isCode": true
+        },
+        {
+          "label": "res = convolve(sorted(a), b_rev)",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We need convolution of a with the reversed mask to match the sliding outputs.",
+      "wrongExplanations": {
+        "1": "Using b directly misaligns edge contributions.",
+        "2": "Order doesn’t matter for multiplication commutativity, but we already prepared b_rev to match mapping."
+      },
+      "hint": "Use the reversed mask you prepared earlier.",
+      "isCodeBuilding": true,
+      "codeSnippet": "res = convolve(a, b_rev)",
+      "codeLabel": "Compute result sequence"
+    },
+    {
+      "id": "q19",
+      "phase": "Writing the Code",
+      "questionText": "Print the result sequence correctly. Which line should we use?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "print(\" \".join(map(str, res)))",
+          "isCode": true
+        },
+        {
+          "label": "print(*res)",
+          "isCode": true
+        },
+        {
+          "label": "print(res)",
+          "isCode": true
+        },
+        {
+          "label": "sys.stdout.write(str(res))",
+          "isCode": true
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "The output should be space-separated integers on a single line.",
+      "wrongExplanations": {
+        "2": "This prints brackets and commas, not the required format.",
+        "3": "Same issue: not space-separated plain integers."
+      },
+      "hint": "Match the sample output format exactly.",
+      "isCodeBuilding": true,
+      "codeSnippet": "print(\" \".join(map(str, res)))",
+      "codeLabel": "Output results"
+    },
+    {
+      "id": "q20",
+      "phase": "Verifying the Solution",
+      "questionText": "Quick check: a = [1, 1, 1, 1], b = [1, 1, 1]. What should the output be?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "[1, 2, 3, 3, 2, 1]",
+          "isCode": false
+        },
+        {
+          "label": "[1, 2, 3, 2, 1]",
+          "isCode": false
+        },
+        {
+          "label": "[1, 1, 1, 1, 1, 1]",
+          "isCode": false
+        },
+        {
+          "label": "[3, 3, 3, 3, 3, 3]",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Convolution with [1,1,1] (reversed is same) gives the classic ramp up then down.",
+      "wrongExplanations": {
+        "1": "Length should be n+m−1=6, not 5.",
+        "2": "This ignores overlapping sums."
+      },
+      "hint": "Compute overlaps: lengths 1,2,3,3,2,1.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q21",
+      "phase": "Verifying the Solution",
+      "questionText": "Check a = [2, 4, 6], b = [1, 3]. What is the full output?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "[6, 14, 22, 6]",
+          "isCode": false
+        },
+        {
+          "label": "[8, 20, 14, 3]",
+          "isCode": false
+        },
+        {
+          "label": "[2, 10, 18, 6]",
+          "isCode": false
+        },
+        {
+          "label": "[3, 11, 19, 7]",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Reverse b to [3,1]: [2×3, 2×1+4×3, 4×1+6×3, 6×1] = [6,14,22,6].",
+      "wrongExplanations": {
+        "2": "These ignore the reversal and/or miscompute sums."
+      },
+      "hint": "At the ends, multiply by 3 first and by 1 last.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q22",
+      "phase": "Verifying the Solution",
+      "questionText": "Our code rounds real parts after inversion. Why is this necessary?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "Floating computations introduce tiny errors; rounding restores exact integer sums",
+          "isCode": false
+        },
+        {
+          "label": "It speeds up the code significantly",
+          "isCode": false
+        },
+        {
+          "label": "It reduces memory usage",
+          "isCode": false
+        },
+        {
+          "label": "It avoids negative numbers",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Small numerical noise can leave values like 12.0000003 or 11.9999997; rounding fixes them.",
+      "wrongExplanations": {
+        "1": "Rounding doesn’t affect speed significantly here.",
+        "2": "Rounding doesn’t change memory footprint."
+      },
+      "hint": "Think about representing large sums using floating-point arithmetic.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q23",
+      "phase": "Analyzing Complexity",
+      "questionText": "Let L be the padded length. What is the time complexity of the implemented approach?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(L log L)",
+          "isCode": false
+        },
+        {
+          "label": "O(L^2)",
+          "isCode": false
+        },
+        {
+          "label": "O(n + m)",
+          "isCode": false
+        },
+        {
+          "label": "O(nm)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "Transform steps across length L take proportional to L log L, dominating overall work.",
+      "wrongExplanations": {
+        "1": "Quadratic work corresponds to naive multiplication.",
+        "2": "Linear time would ignore the cost of combining many stages."
+      },
+      "hint": "Each stage halves/doubles segment sizes over all elements across log L stages.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    },
+    {
+      "id": "q24",
+      "phase": "Analyzing Complexity",
+      "questionText": "What is the additional space complexity of the approach (excluding input/output arrays)?",
+      "diagram": null,
+      "options": [
+        {
+          "label": "O(L)",
+          "isCode": false
+        },
+        {
+          "label": "O(1)",
+          "isCode": false
+        },
+        {
+          "label": "O(n + m)",
+          "isCode": false
+        },
+        {
+          "label": "O(L log L)",
+          "isCode": false
+        }
+      ],
+      "correctIndex": 0,
+      "explanation": "We allocate arrays of size about L for intermediate computations.",
+      "wrongExplanations": {
+        "1": "We need arrays proportional to the padded length.",
+        "2": "n+m is less precise than L but asymptotically similar; we specifically allocate to L."
+      },
+      "hint": "Consider the sizes of the transformed arrays.",
+      "isCodeBuilding": false,
+      "codeSnippet": null,
+      "codeLabel": null
+    }
+  ],
+  "finalCodeSnippets": [
+    "import sys, math\n\ndef read_input():\n    data = list(map(int, sys.stdin.buffer.read().split()))\n    n, m = data[0], data[1]\n    a = data[2:2+n]\n    b = data[2+n:2+n+m]\n    return n, m, a, b\n\nn, m, a, b = read_input()",
+    "b_rev = b[::-1]",
+    "def transform(a, invert):\n    n = len(a)\n    j = 0\n    for i in range(1, n):\n        bit = n >> 1\n        while j & bit:\n            j ^= bit\n            bit >>= 1\n        j ^= bit\n        if i < j:\n            a[i], a[j] = a[j], a[i]\n    len_ = 2\n    while len_ <= n:\n        ang = 2 * math.pi / len_ * (-1 if invert else 1)\n        wlen = complex(math.cos(ang), math.sin(ang))\n        for i in range(0, n, len_):\n            w = 1 + 0j\n            for j in range(i, i + len_ // 2):\n                u = a[j]\n                v = a[j + len_ // 2] * w\n                a[j] = u + v\n                a[j + len_ // 2] = u - v\n                w *= wlen\n        len_ <<= 1\n    if invert:\n        for i in range(n):\n            a[i] /= n",
+    "def convolve(x, y):\n    n1, n2 = len(x), len(y)\n    L = 1\n    while L < n1 + n2 - 1:\n        L <<= 1\n    fa = [complex(val, 0.0) for val in x] + [0j] * (L - n1)\n    fb = [complex(val, 0.0) for val in y] + [0j] * (L - n2)\n    transform(fa, False)\n    transform(fb, False)\n    for i in range(L):\n        fa[i] *= fb[i]\n    transform(fa, True)\n    res = [int(round(fa[i].real)) for i in range(n1 + n2 - 1)]\n    return res",
+    "res = convolve(a, b_rev)",
+    "print(\" \".join(map(str, res)))"
+  ],
+  "reasoningChain": [
+    {
+      "question": "How do outputs at the edges align (which mask end touches the signal first)?",
+      "insight": "The first output multiplies the first signal element with the last mask element; this implies reversing the mask for a direct convolution view."
+    },
+    {
+      "question": "Is the naive double loop feasible for n,m up to 2·10^5?",
+      "insight": "No; O(nm) is too slow (≈4e10 ops). We need an approach that computes all sums together efficiently."
+    },
+    {
+      "question": "How to express outputs compactly?",
+      "insight": "The outputs equal coefficients of the product of the signal polynomial and the reversed-mask polynomial."
+    },
+    {
+      "question": "How to compute this product efficiently in practice?",
+      "insight": "Pad both sequences to a convenient length and use a fast transform to convert convolution into pointwise multiplication, then transform back."
+    },
+    {
+      "question": "What technical details ensure correctness?",
+      "insight": "Zero-padding to length ≥ n+m−1, rounding real parts after inversion, and taking the first n+m−1 coefficients."
+    },
+    {
+      "question": "What complexity will this achieve?",
+      "insight": "O(L log L) time and O(L) space for L being the padded length (power of two ≥ n+m−1)."
+    }
+  ],
+  "_meta": {
+    "input_tokens": 1421,
+    "output_tokens": 16016,
+    "input_cost": 0.001776,
+    "output_cost": 0.16016,
+    "total_cost": 0.161936
+  }
+}
