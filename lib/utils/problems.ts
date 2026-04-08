@@ -277,7 +277,7 @@ import oneBitPositions from "@/data/questions/one-bit-positions.json";
 import parcelDelivery from "@/data/questions/parcel-delivery.json";
 import permutedBinaryStrings from "@/data/questions/permuted-binary-strings.json";
 import permutationPrimeSums from "@/data/questions/permutation-prime-sums.json";
-import pruferCode from "@/data/questions/prufer-code.json";
+import prferCode from "@/data/questions/prfer-code.json";
 import signalProcessing from "@/data/questions/signal-processing.json";
 import slidingWindowAdvertisement from "@/data/questions/sliding-window-advertisement.json";
 import slidingWindowCost from "@/data/questions/sliding-window-cost.json";
@@ -577,7 +577,7 @@ const problems: Problem[] = [
   parcelDelivery as unknown as Problem,
   permutedBinaryStrings as unknown as Problem,
   permutationPrimeSums as unknown as Problem,
-  pruferCode as unknown as Problem,
+  prferCode as unknown as Problem,
   signalProcessing as unknown as Problem,
   slidingWindowAdvertisement as unknown as Problem,
   slidingWindowCost as unknown as Problem,
