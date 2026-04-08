@@ -249,6 +249,55 @@ import twoSum from "@/data/questions/two-sum.json";
 import visibleBuildingsQueries from "@/data/questions/visible-buildings-queries.json";
 import weirdAlgorithm from "@/data/questions/weird-algorithm.json";
 import wordCombinations from "@/data/questions/word-combinations.json";
+import acyclicGraphEdges from "@/data/questions/acyclic-graph-edges.json";
+import allSubarrayXors from "@/data/questions/all-subarray-xors.json";
+import andSubsetCount from "@/data/questions/and-subset-count.json";
+import applesAndBananas from "@/data/questions/apples-and-bananas.json";
+import chessTournament from "@/data/questions/chess-tournament.json";
+import coloredChairs from "@/data/questions/colored-chairs.json";
+import countingBits from "@/data/questions/counting-bits.json";
+import courseScheduleII from "@/data/questions/course-schedule-ii.json";
+import distinctRoutesII from "@/data/questions/distinct-routes-ii.json";
+import distinctSumsGrid from "@/data/questions/distinct-sums-grid.json";
+import dynamicConnectivity from "@/data/questions/dynamic-connectivity.json";
+import fillingTrominos from "@/data/questions/filling-trominos.json";
+import gridPathConstruction from "@/data/questions/grid-path-construction.json";
+import hiddenInteger from "@/data/questions/hidden-integer.json";
+import hiddenPermutation from "@/data/questions/hidden-permutation.json";
+import inversionSorting from "@/data/questions/inversion-sorting.json";
+import inverseInversions from "@/data/questions/inverse-inversions.json";
+import kThHighestScore from "@/data/questions/k-th-highest-score.json";
+import maximumXorSubset from "@/data/questions/maximum-xor-subset.json";
+import maximumXorSubarray from "@/data/questions/maximum-xor-subarray.json";
+import monotoneSubsequences from "@/data/questions/monotone-subsequences.json";
+import nearestShops from "@/data/questions/nearest-shops.json";
+import newRoadsQueries from "@/data/questions/new-roads-queries.json";
+import numberOfSubsetXors from "@/data/questions/number-of-subset-xors.json";
+import oneBitPositions from "@/data/questions/one-bit-positions.json";
+import parcelDelivery from "@/data/questions/parcel-delivery.json";
+import permutedBinaryStrings from "@/data/questions/permuted-binary-strings.json";
+import permutationPrimeSums from "@/data/questions/permutation-prime-sums.json";
+import pruferCode from "@/data/questions/prufer-code.json";
+import signalProcessing from "@/data/questions/signal-processing.json";
+import slidingWindowAdvertisement from "@/data/questions/sliding-window-advertisement.json";
+import slidingWindowCost from "@/data/questions/sliding-window-cost.json";
+import slidingWindowDistinctValues from "@/data/questions/sliding-window-distinct-values.json";
+import slidingWindowInversions from "@/data/questions/sliding-window-inversions.json";
+import slidingWindowMedian from "@/data/questions/sliding-window-median.json";
+import slidingWindowMinimum from "@/data/questions/sliding-window-minimum.json";
+import slidingWindowMode from "@/data/questions/sliding-window-mode.json";
+import slidingWindowMex from "@/data/questions/sliding-window-mex.json";
+import slidingWindowOr from "@/data/questions/sliding-window-or.json";
+import slidingWindowSum from "@/data/questions/sliding-window-sum.json";
+import slidingWindowXor from "@/data/questions/sliding-window-xor.json";
+import stronglyConnectedEdges from "@/data/questions/strongly-connected-edges.json";
+import sosBitProblem from "@/data/questions/sos-bit-problem.json";
+import taskAssignment from "@/data/questions/task-assignment.json";
+import thirdPermutation from "@/data/questions/third-permutation.json";
+import treeTraversals from "@/data/questions/tree-traversals.json";
+import xorPyramidDiagonal from "@/data/questions/xor-pyramid-diagonal.json";
+import xorPyramidPeak from "@/data/questions/xor-pyramid-peak.json";
+import xorPyramidRow from "@/data/questions/xor-pyramid-row.json";
 
 const problems: Problem[] = [
   allManhattanDistances as unknown as Problem,
@@ -500,6 +549,55 @@ const problems: Problem[] = [
   visibleBuildingsQueries as unknown as Problem,
   weirdAlgorithm as unknown as Problem,
   wordCombinations as unknown as Problem,
+    acyclicGraphEdges as unknown as Problem,
+  allSubarrayXors as unknown as Problem,
+  andSubsetCount as unknown as Problem,
+  applesAndBananas as unknown as Problem,
+  chessTournament as unknown as Problem,
+  coloredChairs as unknown as Problem,
+  countingBits as unknown as Problem,
+  courseScheduleII as unknown as Problem,
+  distinctRoutesII as unknown as Problem,
+  distinctSumsGrid as unknown as Problem,
+  dynamicConnectivity as unknown as Problem,
+  fillingTrominos as unknown as Problem,
+  gridPathConstruction as unknown as Problem,
+  hiddenInteger as unknown as Problem,
+  hiddenPermutation as unknown as Problem,
+  inversionSorting as unknown as Problem,
+  inverseInversions as unknown as Problem,
+  kThHighestScore as unknown as Problem,
+  maximumXorSubarray as unknown as Problem,
+  maximumXorSubset as unknown as Problem,
+  monotoneSubsequences as unknown as Problem,
+  nearestShops as unknown as Problem,
+  newRoadsQueries as unknown as Problem,
+  numberOfSubsetXors as unknown as Problem,
+  oneBitPositions as unknown as Problem,
+  parcelDelivery as unknown as Problem,
+  permutedBinaryStrings as unknown as Problem,
+  permutationPrimeSums as unknown as Problem,
+  pruferCode as unknown as Problem,
+  signalProcessing as unknown as Problem,
+  slidingWindowAdvertisement as unknown as Problem,
+  slidingWindowCost as unknown as Problem,
+  slidingWindowDistinctValues as unknown as Problem,
+  slidingWindowInversions as unknown as Problem,
+  slidingWindowMedian as unknown as Problem,
+  slidingWindowMex as unknown as Problem,
+  slidingWindowMinimum as unknown as Problem,
+  slidingWindowMode as unknown as Problem,
+  slidingWindowOr as unknown as Problem,
+  slidingWindowSum as unknown as Problem,
+  slidingWindowXor as unknown as Problem,
+  stronglyConnectedEdges as unknown as Problem,
+  sosBitProblem as unknown as Problem,
+  taskAssignment as unknown as Problem,
+  thirdPermutation as unknown as Problem,
+  treeTraversals as unknown as Problem,
+  xorPyramidDiagonal as unknown as Problem,
+  xorPyramidPeak as unknown as Problem,
+  xorPyramidRow as unknown as Problem,
 ];
 
 export function getAllProblems(): Problem[] {
