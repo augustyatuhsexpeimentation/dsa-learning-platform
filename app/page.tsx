@@ -22,8 +22,12 @@ export default function HomePage() {
 
   const allTags = useMemo(() => {
     const s = new Set<string>();
-    problems.forEach((p) => p.tags.forEach((t) => s.add(t)));
-    return Array.from(s).sort();
+    for (const p of problems) {
+      for (const t of p.tags ?? []) {
+        s.add(t);
+      }
+    }
+  return Array.from(s).sort();
   }, [problems]);
 
   const diffOrder = { beginner: 0, intermediate: 1, hard: 2 };
